@@ -1,0 +1,7 @@
+{
+  "name": "nemo",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}
