@@ -1,5 +1,6 @@
 import { Component, OnInit } from "@angular/core";
-import { FakeDataService } from "../fake-data.service";
+
+import { FakeDataService } from "../services/fake-data.service";
 import { Profile } from "../profile.model";
 
 @Component({
@@ -8,10 +9,8 @@ import { Profile } from "../profile.model";
   styleUrls: ["home.page.scss"],
 })
 export class HomePage implements OnInit {
-  private faker = require("faker");
-
   testProfiles: Profile[];
-  private textSample: string;
+  textSample: string;
 
   constructor(private fakeData: FakeDataService) {}
 
