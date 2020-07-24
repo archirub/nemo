@@ -1,0 +1,21 @@
+<ion-content>
+  <ion-searchbar
+    placeholder="Find Match"
+    inputmode="decimal"
+    type="search"
+    [animated]="true"
+    (ionInput)="onSearchChange($event)"
+    showCancelButton="focus"
+  ></ion-searchbar>
+  <ion-list>
+    <ion-item *ngFor="let profile of displayedProfiles">
+      <ion-avatar slot="start">
+        <img [src]="profile.mainPictureUrl" />
+      </ion-avatar>
+      <div class="text-container">
+        <ion-label class="name"> {{ profile.firstName }}</ion-label>
+        <ion-label class="conversation">alskdjfalsdhf laskdfla sjdbf</ion-label>
+      </div>
+    </ion-item>
+  </ion-list>
+</ion-content>

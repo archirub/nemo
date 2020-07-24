@@ -1,14 +1,13 @@
 import { Component, OnInit } from "@angular/core";
-
-import { FakeDataService } from "../services/fake-data.service";
-import { Profile } from "../profile.model";
+import { Profile } from "src/app/profile.model";
+import { FakeDataService } from "src/app/services/fake-data.service";
 
 @Component({
-  selector: "app-home",
-  templateUrl: "home.page.html",
-  styleUrls: ["home.page.scss"],
+  selector: "app-chats",
+  templateUrl: "./chats.page.html",
+  styleUrls: ["./chats.page.scss"],
 })
-export class HomePage implements OnInit {
+export class ChatsPage implements OnInit {
   testProfiles: Profile[];
   textSample: string;
 
@@ -17,6 +16,5 @@ export class HomePage implements OnInit {
   ngOnInit() {
     this.textSample = this.fakeData.generateSentence();
     this.testProfiles = this.fakeData.generateProfiles(10);
-    console.log(this.testProfiles);
   }
 }

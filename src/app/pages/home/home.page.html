@@ -1,12 +1,13 @@
 <ion-content>
+  <app-swipe-card [profiles]="testProfiles"></app-swipe-card>
   <div>
     <p>{{ textSample }}</p>
   </div>
-  <div *ngFor="let profile of testProfiles">
+  <!-- <div *ngFor="let profile of testProfiles">
     <p>Name is {{ profile.firstName }} {{ profile.lastName }}</p>
     <p>Birthdate is {{ profile.birthDate | date }}</p>
     <p>Age is {{ profile.age() }}</p>
     <p>Email is {{ profile.email }}</p>
     <ion-img [src]="profile.mainPictureUrl"></ion-img>
-  </div>
+  </div> -->
 </ion-content>

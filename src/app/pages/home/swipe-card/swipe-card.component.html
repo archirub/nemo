@@ -1,0 +1,11 @@
+<ion-content>
+  <div class="swipe-cards">
+    <ion-card
+      class="swipe-card"
+      *ngFor="let profile of profiles; index as i"
+      [ngStyle]="{ zIndex: profiles.length - i }"
+    >
+      <ion-img [src]="profile.mainPictureUrl"></ion-img>
+    </ion-card>
+  </div>
+</ion-content>

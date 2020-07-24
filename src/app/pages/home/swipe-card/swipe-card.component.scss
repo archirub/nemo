@@ -1,0 +1,18 @@
+$swipe-height: 700px;
+$swipe-width: 330px;
+
+.swipe-card {
+  position: absolute;
+  height: $swipe-height;
+  width: $swipe-width;
+
+  ion-img {
+    height: 450px;
+    min-width: 100%;
+    max-width: none;
+  }
+}
+
+.swipe-cards {
+  position: fixed;
+}
