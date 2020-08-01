@@ -1,0 +1,8 @@
+$tab-height: 20vh;
+
+ion-tab-bar {
+  height: $tab-height;
+
+  backdrop-filter: saturate(210%) blur(20px) !important;
+  --color: mediumslateblue;
+}

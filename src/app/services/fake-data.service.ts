@@ -29,4 +29,10 @@ export class FakeDataService {
   generateSentence(): string {
     return this.faker.lorem.paragraph();
   }
+
+  generateSentences(amount: number): string[] {
+    return Array.from({ length: amount }, () => {
+      return this.generateSentence();
+    });
+  }
 }

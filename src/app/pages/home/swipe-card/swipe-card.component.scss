@@ -1,10 +1,15 @@
-$swipe-height: 700px;
-$swipe-width: 330px;
+$swipe-height: 100vh;
+$swipe-width: 100vw;
+
+// Should be equal to the actual height of the tab,
+// Assuming the tab
+$tab-height: 20vh;
 
 .swipe-card {
   position: absolute;
-  height: $swipe-height;
+  height: $swipe-height - $tab-height;
   width: $swipe-width;
+  margin: 0px;
 
   ion-img {
     height: 450px;

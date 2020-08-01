@@ -1,6 +1,7 @@
 import { Component, OnInit, Input } from "@angular/core";
 
 import { Profile } from "src/app/profile.model";
+import { FakeDataService } from "src/app/services/fake-data.service";
 
 @Component({
   selector: "app-chat-board",
@@ -10,11 +11,13 @@ import { Profile } from "src/app/profile.model";
 export class ChatBoardComponent implements OnInit {
   @Input() profiles: Profile[];
   displayedProfiles: Profile[];
+  displayedText: string[];
 
-  constructor() {}
+  constructor(private fakeData: FakeDataService) {}
 
   ngOnInit() {
     this.displayedProfiles = this.profiles;
+    this.displayedText = this.fakeData.generateSentences(this.profiles.length);
   }
 
   onSearchChange($event) {

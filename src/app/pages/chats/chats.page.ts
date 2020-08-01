@@ -9,12 +9,10 @@ import { FakeDataService } from "src/app/services/fake-data.service";
 })
 export class ChatsPage implements OnInit {
   testProfiles: Profile[];
-  textSample: string;
 
   constructor(private fakeData: FakeDataService) {}
 
   ngOnInit() {
-    this.textSample = this.fakeData.generateSentence();
-    this.testProfiles = this.fakeData.generateProfiles(10);
+    this.testProfiles = this.fakeData.generateProfiles(20);
   }
 }
