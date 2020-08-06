@@ -1,0 +1,9 @@
+<ion-grid>
+  <ion-row>
+    <ion-col size="3" offset="1" *ngFor="let tab of tabs">
+      <ion-button (click)="onClickedPage(tab.name)">
+        <ion-icon slot="icon-only" name="tab.icon"></ion-icon>
+      </ion-button>
+    </ion-col>
+  </ion-row>
+</ion-grid>

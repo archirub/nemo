@@ -9,13 +9,15 @@ import { StatusBar } from "@ionic-native/status-bar/ngx";
 
 import { AppComponent } from "./app.component";
 import { AppRoutingModule } from "./app-routing.module";
+import { TabMenuComponent } from "./tab-menu/tab-menu.component";
+import { pageTransition } from "./animations/page-transition.animation";
 
 @NgModule({
-  declarations: [AppComponent],
+  declarations: [AppComponent, TabMenuComponent],
   entryComponents: [],
   imports: [
     BrowserModule,
-    IonicModule.forRoot(),
+    IonicModule.forRoot({ navAnimation: pageTransition }),
     AppRoutingModule,
     HttpClientModule,
   ],
