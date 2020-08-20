@@ -1,8 +1,12 @@
 <ion-grid>
-  <ion-row>
-    <ion-col size="3" offset="1" *ngFor="let tab of tabs">
-      <ion-button (click)="onClickedPage(tab.name)">
-        <ion-icon slot="icon-only" name="tab.icon"></ion-icon>
+  <ion-row color="secondary">
+    <ion-col
+      offset="{{ isFirst ? 1 : 0 }}"
+      *ngFor="let tab of tabs; first as isFirst"
+      class="ion-justify-content-between ion-align-self-center"
+    >
+      <ion-button (click)="onClickedPage(tab.name)" color="secondary">
+        <ion-icon slot="icon-only" name="{{ tab.icon }}"></ion-icon>
       </ion-button>
     </ion-col>
   </ion-row>

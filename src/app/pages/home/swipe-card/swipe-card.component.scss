@@ -1,9 +1,10 @@
 $swipe-height: 100vh;
 $swipe-width: 100vw;
 
-// Should be equal to the actual height of the tab,
-// Assuming the tab
-$tab-height: 8vh;
+// Should be equal to the actual height of the tab.
+// That's if we want the swipe card to stop right above the
+// tab-menu, if the latter touches the bottom of the screen
+$tab-height: 0vh;
 
 .swipe-card {
   position: absolute;

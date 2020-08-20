@@ -1,0 +1,31 @@
+$button-height: 50px;
+$button-width: 60px;
+$button-spacing: 0.7;
+$background-color: var(--ion-color-primary);
+$button-color: var(--ion-color-secondary);
+
+ion-grid {
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+
+  ion-row {
+    background-color: $background-color;
+    position: relative;
+    top: 85vh;
+    height: (1 + 1.5 * $button-spacing) * $button-height;
+    width: (3 + 4 * $button-spacing) * $button-width;
+    border-radius: 5px 5px 20px 20px;
+
+    ion-col {
+      background-color: $background-color;
+
+      ion-button {
+        height: $button-height;
+        width: $button-width;
+        background-color: $button-color;
+        border-radius: 50%;
+      }
+    }
+  }
+}
