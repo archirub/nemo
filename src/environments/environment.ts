@@ -3,7 +3,17 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false
+  production: false,
+  firebase: {
+    apiKey: "AIzaSyD4rixaoqq7rCxfzp5Hv9o5ZgoeCN7gAoA",
+    authDomain: "nemo-dev-1b0bc.firebaseapp.com",
+    databaseURL: "https://nemo-dev-1b0bc.firebaseio.com",
+    projectId: "nemo-dev-1b0bc",
+    storageBucket: "nemo-dev-1b0bc.appspot.com",
+    messagingSenderId: "583834078920",
+    appId: "1:583834078920:web:841fc727407a261d2c5ffd",
+    measurementId: "G-RPK6H2GNK8",
+  },
 };
 
 /*

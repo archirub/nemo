@@ -9,8 +9,13 @@ import { StatusBar } from "@ionic-native/status-bar/ngx";
 
 import { AppComponent } from "./app.component";
 import { AppRoutingModule } from "./app-routing.module";
+
+import { AngularFireModule } from "@angular/fire";
+import { AngularFirestoreModule } from "@angular/fire/firestore";
+import { environment } from "src/environments/environment";
+
 import { TabMenuComponent } from "./tab-menu/tab-menu.component";
-import { pageTransition } from "./animations/page-transition.animation";
+import { pageTransition } from "./animations/page-transition.component";
 
 @NgModule({
   declarations: [AppComponent, TabMenuComponent],
@@ -20,6 +25,8 @@ import { pageTransition } from "./animations/page-transition.animation";
     IonicModule.forRoot({ navAnimation: pageTransition }),
     AppRoutingModule,
     HttpClientModule,
+    AngularFireModule.initializeApp(environment.firebase),
+    AngularFirestoreModule,
   ],
   providers: [
     StatusBar,
