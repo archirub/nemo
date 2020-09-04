@@ -3,21 +3,9 @@ import { PreloadAllModules, RouterModule, Routes } from "@angular/router";
 
 const routes: Routes = [
   {
-    path: "home",
+    path: "tabs",
     loadChildren: () =>
-      import("./pages/home/home.module").then((m) => m.HomePageModule),
-  },
-  {
-    path: "chats",
-    loadChildren: () =>
-      import("./pages/chats/chats.module").then((m) => m.ChatsPageModule),
-  },
-  {
-    path: "own-profile",
-    loadChildren: () =>
-      import("./pages/own-profile/own-profile.module").then(
-        (m) => m.OwnProfilePageModule
-      ),
+      import("./tab-menu/tab-menu.module").then((m) => m.TabMenuPageModule),
   },
   {
     path: "settings",
@@ -26,14 +14,9 @@ const routes: Routes = [
         (m) => m.SettingsPageModule
       ),
   },
-  // {
-  //   path: "",
-  //   redirectTo: "/home",
-  //   pathMatch: "full",
-  // },
   {
     path: "**",
-    redirectTo: "/home",
+    redirectTo: "/tabs/home",
   },
 ];
 
