@@ -1,7 +1,7 @@
-import { Component, OnInit, Input } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 
-import { FakeDataService } from "../../shared/services/fake-data.service";
-import { Profile } from "../../shared/interfaces/profile.model";
+import { FakeDataService } from "@services/index";
+import { Profile } from "@interfaces/profile";
 import { Router } from "@angular/router";
 
 @Component({

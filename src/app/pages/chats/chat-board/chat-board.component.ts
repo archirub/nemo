@@ -1,7 +1,7 @@
 import { Component, OnInit, Input } from "@angular/core";
 
-import { Profile } from "../../../shared/interfaces/profile.model";
-import { FakeDataService } from "../../../shared/services/fake-data.service";
+import { Profile } from "@interfaces/";
+import { FakeDataService } from "@services/";
 
 @Component({
   selector: "app-chat-board",
