@@ -3,17 +3,18 @@ ion-item {
   --border-style: none;
   border-radius: 40px;
   --inner-border-width: 0px;
-  margin-top: 10px;
+  margin-top: 5px;
   margin-left: 5px;
   margin-right: 5px;
-  --background: rgba(226, 226, 226, 0.781);
+  --background: rgb(255, 255, 255);
   // height: 80px;
   --min-height: 75px;
 
   ion-avatar {
-    margin-left: -8px;
+    margin-left: -12px; //so the avatar aligns with the item border
     height: 60px;
     width: 60px;
+    margin-right: 10px;
   }
 
   .text-container {
@@ -22,12 +23,10 @@ ion-item {
   }
 
   .name {
-    font-size: large;
-    font-weight: 400;
+    font-size: 20px;
   }
 
   .conversation {
     font-size: medium;
-    font-weight: 300;
   }
 }
