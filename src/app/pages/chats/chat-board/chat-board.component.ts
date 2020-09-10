@@ -1,8 +1,8 @@
 import { Component, OnInit, Input } from "@angular/core";
 import { ActivatedRoute, Router } from '@angular/router';
 
-import { Profile } from "../../../shared/interfaces/profile.model";
-import { FakeDataService } from "../../../shared/services/fake-data.service";
+import { Profile } from "../../../shared/interfaces/profile/profile.class"
+import { FakeDataService } from "../../../shared/services/fake-data/fake-data.service";
 import { relative } from 'path';
 
 @Component({

@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild, Renderer2 } from "@angular/core";
-import { Profile } from "src/app/shared/interfaces/profile.model";
-import { FakeDataService } from "../../shared/services/fake-data.service";
+import { Profile } from "../../shared/interfaces/profile/profile.class";
+import { FakeDataService } from "../../shared/services/fake-data/fake-data.service";
 
 import { IonContent } from '@ionic/angular';
 
