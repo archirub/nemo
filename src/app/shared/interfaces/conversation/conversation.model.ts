@@ -10,3 +10,5 @@ interface conversationExtraFields {
 }
 
 export type conversation = userProfileSnipets | conversationExtraFields;
+
+export type conversationID = string;

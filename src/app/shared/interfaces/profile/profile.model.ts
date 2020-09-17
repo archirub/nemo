@@ -15,12 +15,6 @@ export interface socialFeatures {
   societies: societies;
 }
 
-export interface physicalFeatures {
-  height: string;
-  hairColor: string;
-  skinTone: string;
-}
-
 export interface societies {
   [society: string]: true;
 }

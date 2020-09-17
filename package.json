@@ -11,6 +11,9 @@
     "lint": "ng lint",
     "e2e": "ng e2e"
   },
+  "_moduleAliases": {
+    "@services/*": "dist/shared/services/*"
+  },
   "private": true,
   "dependencies": {
     "@angular/common": "^10.0.10",
@@ -26,6 +29,9 @@
     "@ionic-native/status-bar": "^5.28.0",
     "@ionic/angular": "^5.3.1",
     "firebase": "^7.18.0",
+    "firebase-admin": "^9.1.1",
+    "firebase-functions": "^3.11.0",
+    "module-alias": "^2.2.2",
     "rxjs": "~6.6.2",
     "serialize-javascript": "^4.0.0",
     "tslib": "^2.0.1",
