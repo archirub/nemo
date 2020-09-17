@@ -1,5 +1,5 @@
 import { Component, OnInit, Input } from "@angular/core";
-import { Profile } from "@interfaces/";
+import { Profile } from "@interfaces/profile";
 
 @Component({
   selector: "app-swipe-card",

@@ -1,7 +1,9 @@
 import { Component, OnInit, Input } from "@angular/core";
+import { ActivatedRoute, Router } from '@angular/router';
 
-import { Profile } from "@interfaces/";
-import { FakeDataService } from "@services/";
+import { Profile } from "@interfaces/profile";
+import { FakeDataService } from "@services/fake-data/fake-data.service";
+import { relative } from 'path';
 
 @Component({
   selector: "app-chat-board",
@@ -12,23 +14,31 @@ export class ChatBoardComponent implements OnInit {
   @Input() profiles: Profile[];
   displayedProfiles: Profile[];
   displayedText: string[];
+  profileId: string;
 
-  constructor(private fakeData: FakeDataService) {}
+  constructor(private fakeData: FakeDataService, private router: Router) {}
 
   ngOnInit() {
+    //this.router.paramMap.subscribe();
     this.displayedProfiles = this.profiles;
     this.displayedText = this.fakeData.generateSentences(this.profiles.length);
   }
 
-  onSearchChange($event) {
-    const searchTerm = $event.srcElement.value;
-
-    this.displayedProfiles = this.profiles.filter((currentProfiles) => {
-      return (
-        currentProfiles.firstName
-          .toLowerCase()
-          .indexOf(searchTerm.toLowerCase()) != -1
-      );
-    });
+  displayText(sentence:string) {
+    if(sentence.length > 25) {
+      let shortenedSentence = sentence.slice(0,25);
+      if (shortenedSentence.endsWith(" " || ".")) {
+        shortenedSentence = sentence.slice(0,24);
+      }
+      return shortenedSentence + "...";
+    }
+  }
+  
+  goToMessenger(profileId: String) {
+    //this.profileId = profile.id;
+    console.log(profileId);
+    //this.router.navigate(['messenger/' + profileId]);
+    this.router.navigate(['./'+ profileId]);
+    //this.router.navigate(['./messenger', 33, 'user', 11], {relativeTo: route});
   }
 }
