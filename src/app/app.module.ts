@@ -12,6 +12,8 @@ import { AppRoutingModule } from "./app-routing.module";
 
 import { AngularFireModule } from "@angular/fire";
 import { AngularFirestoreModule } from "@angular/fire/firestore";
+import { AngularFireFunctionsModule, REGION } from "@angular/fire/functions";
+
 import { environment } from "src/environments/environment";
 
 import { pageTransition } from "./shared/animations/page-transition.component";
@@ -26,11 +28,18 @@ import { pageTransition } from "./shared/animations/page-transition.component";
     HttpClientModule,
     AngularFireModule.initializeApp(environment.firebase),
     AngularFirestoreModule,
+    AngularFireFunctionsModule,
   ],
   providers: [
     StatusBar,
     SplashScreen,
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
+
+    // Necessary to specify the region in which the Firebase cloud functions exist
+    // (see https://github.com/angular/angularfire/blob/master/docs/functions/functions.md)
+    { provide: REGION, useValue: "europe-west2" },
+    // Necessary to point the cloud function to the firebase emulator
+    // { provide: ORIGIN, useValue: "http://localhost:8100" },
   ],
   bootstrap: [AppComponent],
 })

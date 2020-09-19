@@ -5,7 +5,7 @@
       *ngFor="let profile of profiles; index as i; first as isFirst"
       [ngStyle]="{ zIndex: profiles.length - i }"
     >
-      <ion-img [src]="profile.mainPictureUrl"></ion-img>
+      <ion-img [src]="profile.data().pictures[0]"></ion-img>
     </ion-card>
   </div>
 </ion-content>

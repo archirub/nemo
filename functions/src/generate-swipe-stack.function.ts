@@ -1,13 +1,20 @@
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 
-// const serviceAccount = require("../../nemo-dev-1b0bc-firebase-adminsdk-d8ozt-9d1157ecfc.json");
-// admin.initializeApp({
-//   credential: admin.credential.cert(serviceAccount),
-//   databaseURL: "https://nemo-dev-1b0bc.firebaseio.com",
-// });
+// to test function locally:
+// 1. convert functions to javascript using "npm run build" in the "functions" folder
+// 2. run "firebase experimental:functions:shell" to go into test mode
+// 3. run the function in the same terminal
 
-admin.initializeApp();
+// For local testing, uncomment the 5 lines below, and comment out "admin.initializeApp();"
+
+const serviceAccount = require("../nemo-dev-1b0bc-firebase-adminsdk-d8ozt-60b942febb.json");
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: "https://nemo-dev-1b0bc.firebaseio.com",
+});
+
+// admin.initializeApp();
 
 // LEFT TO DO FOR THIS ALGORITHM:
 // - SANITIZE INCOMING DATA
@@ -15,16 +22,22 @@ admin.initializeApp();
 // (That amount is different from the number of profiles per wave as
 // we need to pick randomly from each group & maybe some other reason that I forgot about)
 
+interface requestData {
+  ID: string;
+  searchCriteria: searchCriteria;
+}
 interface searchCriteria {
   [criterion: string]: string;
 }
 
 export const generateSwipeStack = functions
   .region("europe-west2")
-  .https.onRequest(async (request, response) => {
+  .https.onCall(async (data: requestData, context) => {
+    // .https.onRequest(async (request, response) => {
+
     // DATA FROM REQUEST
-    const targetID: string = request.body.ID;
-    const searchCriteria: searchCriteria = request.body.searchCriteria;
+    const targetID: string = data.ID;
+    const searchCriteria: searchCriteria = data.searchCriteria;
 
     // INDEPENDENT PARAMETERS
     const maxPI: number = 1;
@@ -119,7 +132,8 @@ export const generateSwipeStack = functions
     );
 
     // SENDING RESPONSE
-    response.send({ IDs: pickedIDs });
+    // response.send({ IDs: pickedIDs });
+    return { IDs: pickedIDs };
   });
 
 /**
