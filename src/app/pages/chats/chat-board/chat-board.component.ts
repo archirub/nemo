@@ -35,10 +35,7 @@ export class ChatBoardComponent implements OnInit {
   }
   
   goToMessenger(profileId: String) {
-    //this.profileId = profile.id;
     console.log(profileId);
-    //this.router.navigate(['messenger/' + profileId]);
-    this.router.navigate(['./'+ profileId]);
-    //this.router.navigate(['./messenger', 33, 'user', 11], {relativeTo: route});
+    this.router.navigate(['/tabs/chats/messenger/'+ profileId]);
   }
 }

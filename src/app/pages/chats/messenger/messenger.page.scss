@@ -1,0 +1,38 @@
+ion-button {
+    margin-left: -20px;
+    margin-top: 0px
+}
+
+ion-grid{
+    margin-bottom: -10px;
+    margin-top: -10px;
+  }
+
+ion-avatar {
+    height: 35px;
+    width: 35px;
+    margin-top: 5px;
+}
+
+.messanger-header {
+    text-align: center;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.messege {
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 4px;
+    white-space: pre-wrap;
+}
+
+.own {
+    background: var(--ion-color-secondary);
+    color: #fff;
+}
+
+.other {
+    background: var(--ion-color-primary);
+    color: #fff;
+}

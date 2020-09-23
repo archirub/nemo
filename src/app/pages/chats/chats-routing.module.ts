@@ -8,10 +8,6 @@ const routes: Routes = [
   {
     path: '',
     component: ChatsPage
-  },
-  {
-    path: ':profileId',
-    component: MessengerPage
   }
 ];
 

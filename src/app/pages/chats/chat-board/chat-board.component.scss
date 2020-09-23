@@ -9,24 +9,28 @@ ion-item {
   --background: rgb(255, 255, 255);
   // height: 80px;
   --min-height: 75px;
+}
 
-  ion-avatar {
-    margin-left: -12px; //so the avatar aligns with the item border
-    height: 60px;
-    width: 60px;
-    margin-right: 10px;
-  }
+ion-avatar {
+  margin-left: -12px; //so the avatar aligns with the item border
+  height: 60px;
+  width: 60px;
+  margin-right: 10px;
+}
 
-  .text-container {
-    display: flex;
-    flex-direction: column;
-  }
+#notifications-badge {
+  position: absolute;
+}
 
-  .name {
-    font-size: 20px;
-  }
+.text-container {
+  display: flex;
+  flex-direction: column;
+}
 
-  .conversation {
-    font-size: medium;
-  }
+.name {
+  font-size: 20px;
+}
+
+.conversation {
+  font-size: medium;
 }

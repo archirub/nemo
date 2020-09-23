@@ -9,6 +9,7 @@ import { IonContent } from '@ionic/angular';
   templateUrl: "./chats.page.html",
   styleUrls: ["./chats.page.scss"],
 })
+
 export class ChatsPage implements OnInit {
   @ViewChild(IonContent) ionContent: IonContent;
   allProfiles: Profile[];

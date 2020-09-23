@@ -1,9 +1,44 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>messenger</ion-title>
-  </ion-toolbar>
-</ion-header>
+  <ion-header collapse="condense">
+    <ion-toolbar>
 
-<ion-content>
+      <ion-grid>
+        <ion-row>
 
-</ion-content>
+          <ion-col size="2">
+            <ion-button fill="clear" navPop>
+              <ion-icon name="chevron-back-outline"></ion-icon>
+              16
+            </ion-button>
+          </ion-col>
+
+          <ion-col size="8">
+            <ion-text color="dark">
+              <h3 class="messanger-header"> Kaan Turan </h3>
+            </ion-text>
+          </ion-col>
+          
+          <ion-col size="2">
+            <ion-avatar>
+              <img>
+            </ion-avatar>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-toolbar>
+  </ion-header>
+
+  <ion-content>
+    <ion-grid>
+      <ion-row *ngFor = "let message of messages">
+        <ion-col *ngIf="expression" size="9">
+          <b>USER</b>
+          <br>
+          <span>MESSAGE</span>
+          <div class="time" text-right>
+            <br>
+            TIME
+          </div>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ion-content>

@@ -1,5 +1,7 @@
 import { NgModule } from "@angular/core";
 import { BrowserModule } from "@angular/platform-browser";
+import { CommonModule } from "@angular/common";
+
 import { RouteReuseStrategy } from "@angular/router";
 import { HttpClientModule } from "@angular/common/http";
 
@@ -21,6 +23,7 @@ import { pageTransition } from "./shared/animations/page-transition.component";
   entryComponents: [],
   imports: [
     BrowserModule,
+    CommonModule,
     IonicModule.forRoot({ navAnimation: pageTransition }),
     AppRoutingModule,
     HttpClientModule,
