@@ -1,8 +1,12 @@
 import { Component, OnInit } from "@angular/core";
+import { AngularFireFunctions } from "@angular/fire/functions";
 
+import { SwipeStackStoreService } from "@services/stores/swipe-stack-store/swipe-stack-store.service";
 import { FakeDataService } from "@services/index";
-import { Profile } from "@interfaces/profile";
-import { Router } from "@angular/router";
+
+import { Observable } from "rxjs";
+
+import { profileSnapshot } from "@interfaces/profile";
 
 @Component({
   selector: "app-home",
@@ -10,13 +14,15 @@ import { Router } from "@angular/router";
   styleUrls: ["home.page.scss"],
 })
 export class HomePage implements OnInit {
-  testProfiles: Profile[];
-  textSample: string;
+  swipeProfiles: Observable<profileSnapshot[]>;
 
-  constructor(private fakeData: FakeDataService, private router: Router) {
-    this.textSample = this.fakeData.generateSentence();
-    this.testProfiles = this.fakeData.generateProfiles(10);
+  constructor(
+    private fakeData: FakeDataService,
+    private swipeStackStore: SwipeStackStoreService,
+    private cloudFunctions: AngularFireFunctions
+  ) {}
+
+  ngOnInit() {
+    this.swipeProfiles = this.swipeStackStore.profiles;
   }
-
-  ngOnInit() {}
 }

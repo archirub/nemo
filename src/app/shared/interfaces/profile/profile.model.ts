@@ -15,12 +15,6 @@ export interface socialFeatures {
   societies: societies;
 }
 
-export interface physicalFeatures {
-  height: string;
-  hairColor: string;
-  skinTone: string;
-}
-
 export interface societies {
   [society: string]: true;
 }
@@ -39,7 +33,9 @@ export interface userPictures {
 
 export interface profileObject {
   ID: string;
-  profileSnapshot: firebase.firestore.QueryDocumentSnapshot<
-    firebase.firestore.DocumentData
-  >;
+  profileSnapshot: profileSnapshot;
 }
+
+export type profileSnapshot = firebase.firestore.QueryDocumentSnapshot<
+  firebase.firestore.DocumentData
+>;

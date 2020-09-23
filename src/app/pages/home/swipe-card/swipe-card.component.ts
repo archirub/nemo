@@ -1,5 +1,5 @@
 import { Component, OnInit, Input } from "@angular/core";
-import { Profile } from "@interfaces/profile";
+import { profileSnapshot } from "@interfaces/profile";
 
 @Component({
   selector: "app-swipe-card",
@@ -7,7 +7,7 @@ import { Profile } from "@interfaces/profile";
   styleUrls: ["./swipe-card.component.scss"],
 })
 export class SwipeCardComponent implements OnInit {
-  @Input() profiles: Profile[];
+  @Input() profiles: profileSnapshot[];
 
   constructor() {}
 
