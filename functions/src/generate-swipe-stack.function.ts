@@ -8,11 +8,11 @@ import * as admin from "firebase-admin";
 
 // For local testing, uncomment the 5 lines below, and comment out "admin.initializeApp();"
 
-const serviceAccount = require("../nemo-dev-1b0bc-firebase-adminsdk-d8ozt-60b942febb.json");
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://nemo-dev-1b0bc.firebaseio.com",
-});
+// const serviceAccount = require("../nemo-dev-1b0bc-firebase-adminsdk-d8ozt-60b942febb.json");
+// admin.initializeApp({
+//   credential: admin.credential.cert(serviceAccount),
+//   databaseURL: "https://nemo-dev-1b0bc.firebaseio.com",
+// });
 
 // admin.initializeApp();
 
@@ -74,23 +74,20 @@ export const generateSwipeStack = functions
     const matchDataCollection = admin.firestore().collection("matchData");
 
     // FETCHING DATA FROM TARGETED USER
-    const targetMatchDataSnapshot = await matchDataCollection
-      .where("userID", "==", targetID)
-      .limit(1)
-      .get();
+    const targetData = await matchDataCollection.doc(targetID).get();
 
     // ASSIGNING DEFAULT VALUES
     let targetPI: number = averagePI;
     let bannedUsers: string[] = [];
 
     // ASSIGNING REAL VALUES
-    if (targetMatchDataSnapshot.docs[0]) {
-      const targetData = targetMatchDataSnapshot.docs[0].data();
-      targetPI = targetData.PI;
+    if (targetData.exists) {
+      const data = targetData.data() as FirebaseFirestore.DocumentData;
+      targetPI = data.PI;
       bannedUsers = [
         ...new Set(
-          ...(targetData.bannedUsers as string[]),
-          ...(targetData.matches as string[])
+          ...(data.bannedUsers as string[]),
+          ...(data.matches as string[])
         ),
       ]; // In case all matchedUsers aren't in banned users array
     }
@@ -269,7 +266,7 @@ function matchDataToIDs(
   const IDarray: string[] = [];
 
   matchDataDocs.forEach((doc) => {
-    IDarray.push(doc.data().userID);
+    IDarray.push(doc.id);
   });
 
   return IDarray;

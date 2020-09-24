@@ -5,8 +5,7 @@ import {
   message,
   conversationID,
 } from "@interfaces/conversation";
-import { IDmap } from "@interfaces/profile";
-import { AuthService } from "@services/index";
+import { AuthService } from "@services/auth/auth.service";
 
 @Injectable({
   providedIn: "root",
@@ -34,8 +33,8 @@ export class ChatStoreService {
     this._chats.next(val);
   }
 
-  public getChat(userID: string): conversation {
-    const myID: string = this.auth.getUserID();
+  public async getChat(userID: string): Promise<conversation> {
+    const myID: string = await this.auth.fetchUserID();
     const hisID = userID;
     return this.chats.filter((chat) => {
       const containsIDs: Boolean =

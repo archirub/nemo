@@ -27,9 +27,18 @@ export class SwipeStackStoreService {
     private cloudFunctions: AngularFireFunctions,
     private auth: AuthService
   ) {
-    this.fetchUserProfiles().then((newProfiles) => {
-      this.addToProfiles(newProfiles);
-    });
+    this.updateSwipeStack();
+  }
+
+  public async updateSwipeStack() {
+    const newProfiles = await this.fetchUserProfiles();
+    this.addToProfiles(newProfiles);
+  }
+
+  public removeProfile(profile: profileSnapshot) {
+    this._profiles.next(
+      this._profiles.getValue().filter((profile_) => profile_ !== profile)
+    );
   }
 
   private addToProfiles(newProfiles: profileSnapshot[]) {
@@ -39,12 +48,13 @@ export class SwipeStackStoreService {
   private async fetchUserIDs(): Promise<string[]> {
     let fetchedIDs: string[];
     // const userID: string = this.auth.getUserID()
-    // random user ID used for now
+    // RANDOM USER ID USER FOR NOW
     const IDsnapshot: QuerySnapshot<DocumentData> = await this.firestore.firestore
       .collection("profiles")
       .limit(1)
       .get();
     const userID: string = IDsnapshot.docs[0].id;
+    console.log("userID used:", userID);
     const generateSwipeStack = this.cloudFunctions.httpsCallable(
       "generateSwipeStack"
     );
@@ -55,7 +65,6 @@ export class SwipeStackStoreService {
       .toPromise()
       .then((result) => {
         fetchedIDs = result.IDs;
-        console.log("User IDs for swipe stack successfuly fetched.");
       });
     return fetchedIDs;
   }
