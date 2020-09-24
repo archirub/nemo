@@ -3,11 +3,10 @@
   "compilerOptions": {
     "baseUrl": "./",
     "paths": {
-      "@shared/*": ["src/app/shared/*"],
       "@interfaces/*": ["src/app/shared/interfaces/*"],
       "@animations/*": ["src/app/shared/animations/*"],
       "@services/*": ["src/app/shared/services/*"],
-      "@storage/*": ["src/app/shared/services/storage/*"]
+      "@stores/*": ["src/app/shared/stores/*"]
     },
     "outDir": "./dist/out-tsc",
     "sourceMap": true,

@@ -1,14 +1,14 @@
-import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
+import { NgModule } from "@angular/core";
+import { Routes, RouterModule } from "@angular/router";
 
-import { ChatsPage } from './chats.page';
-import { MessengerPage } from './messenger/messenger.page';
+import { ChatsPage } from "./chats.page";
+import { MessengerPage } from "./messenger/messenger.page";
 
 const routes: Routes = [
   {
-    path: '',
-    component: ChatsPage
-  }
+    path: "",
+    component: ChatsPage,
+  },
 ];
 
 @NgModule({
