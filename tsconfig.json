@@ -6,7 +6,8 @@
       "@interfaces/*": ["src/app/shared/interfaces/*"],
       "@animations/*": ["src/app/shared/animations/*"],
       "@services/*": ["src/app/shared/services/*"],
-      "@stores/*": ["src/app/shared/stores/*"]
+      "@stores/*": ["src/app/shared/stores/*"],
+      "@classes/*": ["src/app/shared/classes/*"]
     },
     "outDir": "./dist/out-tsc",
     "sourceMap": true,

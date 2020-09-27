@@ -1,26 +1,58 @@
-import { Injectable } from "@angular/core";
+import { Injectable, OnDestroy } from "@angular/core";
 import { AngularFireAuth } from "@angular/fire/auth";
 import { AngularFirestore } from "@angular/fire/firestore";
-import { Observable } from "rxjs";
+import { BehaviorSubject, Observable, Subscription } from "rxjs";
 
 @Injectable({
   providedIn: "root",
 })
-export class AuthService {
-  public signedIn: Observable<Boolean>;
+export class AuthService implements OnDestroy {
+  private _userID: string;
+  private _isAuthenticated = new BehaviorSubject<Boolean>(null);
 
-  constructor(private fs: AngularFirestore, private auth: AngularFireAuth) {
-    // this.signedIn = new Observable((subscriber) => {
-    //   this.auth.onAuthStateChanged(subscriber);
-    // });
+  private isAuthenticated$: Subscription;
+
+  public isAuthenticated: Observable<
+    Boolean
+  > = this._isAuthenticated.asObservable();
+
+  public get userID(): string {
+    return this._userID;
+  }
+
+  public set userID(v: string) {
+    this._userID = v;
+  }
+
+  constructor(private fs: AngularFirestore, private afAuth: AngularFireAuth) {
+    // this._signedIn.next()
     // BELOW IS FOR FOR DEVELOPMENT, UNCOMMENT THE ABOVE FOR NORMAL AUTH
-    this.signedIn = new Observable((subscriber) => subscriber.next(true));
+    this.afAuth
+      .signInWithEmailAndPassword(
+        "archibald.ruban@gmail.com",
+        "1q2w3e4r5t6y7u8i9o0p"
+      )
+      .then(() => {
+        this.afAuth.currentUser.then((user) => {
+          console.log("ID of logged in user:", user.uid);
+          this.userID = user.uid;
+        });
+      });
+
+    this.isAuthenticated$ = this.afAuth.authState.subscribe((user) => {
+      if (user) {
+        this._isAuthenticated.next(true);
+      } else {
+        this._isAuthenticated.next(false);
+      }
+    });
   }
 
   async signIn(email: string, password: string) {
     if (!email || !password) return;
     try {
-      await this.auth.signInWithEmailAndPassword(email, password);
+      await this.afAuth.signInWithEmailAndPassword(email, password);
+
       return true;
     } catch (error) {
       console.log("Sign in failed", error);
@@ -30,7 +62,7 @@ export class AuthService {
 
   async signOut() {
     try {
-      await this.auth.signOut();
+      await this.afAuth.signOut();
       return true;
     } catch (error) {
       console.log("Sign out failed", error);
@@ -38,9 +70,13 @@ export class AuthService {
     }
   }
 
-  getUserID(): string | null {
-    let userID = null;
-    this.auth.currentUser.then((value) => (userID = value));
-    return userID;
+  async fetchUserID(): Promise<string> {
+    const user: firebase.User = await this.afAuth.currentUser;
+    this.userID = user.uid;
+    return user.uid;
+  }
+
+  ngOnDestroy() {
+    this.isAuthenticated$.unsubscribe();
   }
 }

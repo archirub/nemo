@@ -1,15 +1,14 @@
 import { Component, OnInit, ViewChild, Renderer2 } from "@angular/core";
-import { Profile } from "@interfaces/profile";
+import { Profile } from "@classes/index";
 import { FakeDataService } from "@services/fake-data/fake-data.service";
 
-import { IonContent } from '@ionic/angular';
+import { IonContent } from "@ionic/angular";
 
 @Component({
   selector: "app-chats",
   templateUrl: "./chats.page.html",
   styleUrls: ["./chats.page.scss"],
 })
-
 export class ChatsPage implements OnInit {
   @ViewChild(IonContent) ionContent: IonContent;
   allProfiles: Profile[];
@@ -17,10 +16,10 @@ export class ChatsPage implements OnInit {
   searchResults: Profile[];
   displayedProfiles: Profile[];
 
-  profileCount: number; 
+  profileCount: number;
   scrollTopSpeed: number;
   searching: boolean;
-  filtered: boolean; 
+  filtered: boolean;
 
   constructor(private fakeData: FakeDataService) {}
 
@@ -35,21 +34,23 @@ export class ChatsPage implements OnInit {
   }
 
   filterProfiles(event) {
-    if(this.filtered == true) {
+    if (this.filtered == true) {
       this.filtered = false;
     } else {
-      this.filtered = true
+      this.filtered = true;
     }
     console.log("filter status " + this.filtered);
   }
 
   onSearch(event) {
-    if(this.searching != true) {
+    if (this.searching != true) {
       this.searching = true;
     }
     let searchInput: string = event.target.value;
-    this.searchResults = this.allProfiles.filter(profile => {
-      return (profile.firstName.toLowerCase().startsWith(searchInput.toLowerCase()))
+    this.searchResults = this.allProfiles.filter((profile) => {
+      return profile.firstName
+        .toLowerCase()
+        .startsWith(searchInput.toLowerCase());
     });
     console.log(this.searchResults);
     this.displayedProfiles = this.searchResults;
@@ -62,8 +63,7 @@ export class ChatsPage implements OnInit {
     this.displayedProfiles = this.allProfiles;
   }
 
-  onScrollDown() {
-  }
+  onScrollDown() {}
 
   scrollToTop() {
     this.ionContent.scrollToTop(this.scrollTopSpeed);

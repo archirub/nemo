@@ -2,7 +2,12 @@
   <ion-grid class="ion-no-padding">
     <ion-row>
       <ion-col class="ion-no-padding">
-        <app-swipe-card [profiles]="swipeProfiles | async"></app-swipe-card>
+        <ion-button (click)="presentSearchCriteria()">
+          <ion-icon slot="icon-only" name="add"></ion-icon>
+        </ion-button>
+        <app-swipe-card
+          [profiles]="this.swipeProfiles | async"
+        ></app-swipe-card>
       </ion-col>
     </ion-row>
   </ion-grid>

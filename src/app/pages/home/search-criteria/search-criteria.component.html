@@ -1,0 +1,56 @@
+<ion-content>
+  <div class="HAHA">HAHAHAHAHAA</div>
+  <ion-grid>
+    <ion-row>
+      <ion-col offset="3"><h2>Search Criteria</h2></ion-col>
+    </ion-row>
+    <div class="criteria-container">
+      <ion-row>
+        <ion-col><ion-toggle></ion-toggle> </ion-col>
+        <ion-col class="ion-text-center"><h3>University</h3></ion-col>
+        <ion-col>
+          <ion-select cancelText="Nah" okText="Okay!">
+            <ion-select-option
+              *ngFor="let option of this.searchCriteriaOptions.university"
+              value="{{ option }}"
+            >
+              {{ option }}</ion-select-option
+            >
+          </ion-select>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col><ion-toggle></ion-toggle> </ion-col>
+        <ion-col size="4"><h3>Location</h3></ion-col>
+        <ion-col></ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col><ion-toggle></ion-toggle> </ion-col>
+        <ion-col size="4"><h3>Age Range</h3></ion-col>
+        <ion-col></ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col><ion-toggle></ion-toggle> </ion-col>
+        <ion-col><h3>Area of Study</h3></ion-col>
+        <ion-col></ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col><ion-toggle></ion-toggle> </ion-col>
+        <ion-col><h3>Society</h3></ion-col>
+        <ion-col></ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col><ion-toggle></ion-toggle> </ion-col>
+        <ion-col><h3>Interest</h3></ion-col>
+        <ion-col></ion-col>
+      </ion-row>
+    </div>
+    <ion-row>
+      <ion-col offset="5" size="2">
+        <ion-button (click)="dismissModal()">
+          <ion-icon slot="icon-only" name="add"></ion-icon>
+        </ion-button>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>

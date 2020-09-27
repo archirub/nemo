@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { Profile } from "@interfaces/profile";
+import { Profile } from "@classes/index";
 
 @Injectable({
   providedIn: "root",
@@ -18,6 +18,19 @@ export class FakeDataService {
       new Date(this.faker.date.between("1995-01-01", "2002-12-31")),
       this.faker.image.avatar()
     );
+    // const biography: string = this.generateSentence();
+    // return {
+    //   firstName: this.faker.name.firstName(),
+    //   lastName: this.faker.name.lastName(),
+    //   dateOfBirth: new Date(
+    //     this.faker.date.between("1995-01-01", "2002-12-31")
+    //   ),
+    //   pictures: { 0: this.faker.image.avatar() },
+    //   biography: biography,
+    //   socialFeatures: { university: "UCL", course: null, societies: null },
+    //   matches: [],
+    //   hasMatchDocument: null,
+    // };
   }
 
   generateProfiles(amount: number): Profile[] {
