@@ -1,24 +1,46 @@
-import { Component, OnInit } from "@angular/core";
-import { AngularFireFunctions } from "@angular/fire/functions";
+import { Component, OnDestroy, OnInit } from "@angular/core";
+import { ModalController } from "@ionic/angular";
 
-import { SwipeStackStoreService } from "@stores/swipe-stack-store/swipe-stack-store.service";
-import { FakeDataService } from "@services/index";
+import { Observable, Subscription } from "rxjs";
 
-import { Observable } from "rxjs";
+import { SearchCriteriaComponent } from "./search-criteria/search-criteria.component";
 
-import { profileSnapshot } from "@interfaces/profile";
+import { SearchCriteriaStore, SwipeStackStore } from "@stores/index";
+import { profileSnapshot, SCriteria } from "@interfaces/index";
 
 @Component({
   selector: "app-home",
   templateUrl: "home.page.html",
   styleUrls: ["home.page.scss"],
 })
-export class HomePage implements OnInit {
+export class HomePage implements OnInit, OnDestroy {
+  swipeProfiles: Observable<profileSnapshot[]>;
+
+  private searchCriteria: SCriteria = {};
+  private searchCriteria$: Subscription;
+
   constructor(
-    private fakeData: FakeDataService,
-    private swipeStackStore: SwipeStackStoreService,
-    private cloudFunctions: AngularFireFunctions
+    private swipeStackStore: SwipeStackStore,
+    private SCstore: SearchCriteriaStore,
+    private modalCtrl: ModalController
   ) {}
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.searchCriteria$ = this.SCstore.searchCriteria.subscribe((SC) => {
+      this.searchCriteria = SC;
+    });
+    // this.swipeStackStore.updateSwipeStack(this.searchCriteria);
+    this.swipeProfiles = this.swipeStackStore.profiles;
+  }
+
+  async presentSearchCriteria(): Promise<void> {
+    const modal = await this.modalCtrl.create({
+      component: SearchCriteriaComponent,
+    });
+    return await modal.present();
+  }
+
+  ngOnDestroy() {
+    this.searchCriteria$.unsubscribe();
+  }
 }

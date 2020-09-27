@@ -301,7 +301,12 @@ function separateBasedOnSearchCriteria(
     FirebaseFirestore.DocumentData
   >[] = [];
 
-  const loopableSearchCriteria = Object.entries(searchCriteria);
+  let loopableSearchCriteria = Object.entries(searchCriteria);
+
+  // removing null criteria
+  loopableSearchCriteria = loopableSearchCriteria.filter(
+    ([criterion, value]) => value
+  );
 
   for (const profile of profiles) {
     let didMatchCounter = 0;

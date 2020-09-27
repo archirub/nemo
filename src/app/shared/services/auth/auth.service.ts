@@ -1,4 +1,3 @@
-import { ThrowStmt } from "@angular/compiler";
 import { Injectable, OnDestroy } from "@angular/core";
 import { AngularFireAuth } from "@angular/fire/auth";
 import { AngularFirestore } from "@angular/fire/firestore";
@@ -8,15 +7,22 @@ import { BehaviorSubject, Observable, Subscription } from "rxjs";
   providedIn: "root",
 })
 export class AuthService implements OnDestroy {
-  private _userID = new BehaviorSubject<string>(null);
+  private _userID: string;
   private _isAuthenticated = new BehaviorSubject<Boolean>(null);
 
-  private isAuthenticated$ = new Subscription();
+  private isAuthenticated$: Subscription;
 
-  public userID: Observable<string> = this._userID.asObservable();
   public isAuthenticated: Observable<
     Boolean
   > = this._isAuthenticated.asObservable();
+
+  public get userID(): string {
+    return this._userID;
+  }
+
+  public set userID(v: string) {
+    this._userID = v;
+  }
 
   constructor(private fs: AngularFirestore, private afAuth: AngularFireAuth) {
     // this._signedIn.next()
@@ -29,7 +35,7 @@ export class AuthService implements OnDestroy {
       .then(() => {
         this.afAuth.currentUser.then((user) => {
           console.log("ID of logged in user:", user.uid);
-          // this._userID.next(user.uid);
+          this.userID = user.uid;
         });
       });
 
@@ -66,8 +72,7 @@ export class AuthService implements OnDestroy {
 
   async fetchUserID(): Promise<string> {
     const user: firebase.User = await this.afAuth.currentUser;
-    const userID: string = user.uid;
-    this._userID.next(userID);
+    this.userID = user.uid;
     return user.uid;
   }
 

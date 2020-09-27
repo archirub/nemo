@@ -1,4 +1,4 @@
-import { Injectable, OnDestroy } from "@angular/core";
+import { Injectable } from "@angular/core";
 import { AngularFirestore } from "@angular/fire/firestore";
 
 import { Subscription } from "rxjs";
@@ -9,9 +9,7 @@ import { NameService } from "@services/name/name.service";
 @Injectable({
   providedIn: "root",
 })
-export class DatabaseService implements OnDestroy {
-  userID$: Subscription;
-
+export class DatabaseService {
   constructor(
     private firestore: AngularFirestore,
     private name: NameService,
@@ -24,12 +22,10 @@ export class DatabaseService implements OnDestroy {
       return;
     }
     let myID: string = "";
-    this.userID$ = this.auth.userID.subscribe({
-      next: (ID) => (myID = ID),
-    });
+
     const snapshot = await this.firestore
       .collection(this.name.matchCollection)
-      .doc(userID)
+      .doc(this.auth.userID)
       .get()
       .toPromise();
     if (!snapshot.exists) return false;
@@ -38,9 +34,5 @@ export class DatabaseService implements OnDestroy {
       return true;
     }
     return false;
-  }
-
-  ngOnDestroy() {
-    this.userID$.unsubscribe();
   }
 }

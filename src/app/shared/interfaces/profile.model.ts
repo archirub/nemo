@@ -1,3 +1,5 @@
+import { IDarray } from "./shared.model";
+
 export interface profile {
   firstName: string;
   lastName: string;
@@ -17,12 +19,6 @@ export interface socialFeatures {
 
 export interface societies {
   [society: string]: true;
-}
-
-export type IDarray = string[];
-
-export interface IDmap {
-  [userID: string]: true;
 }
 
 // users must have between 1 and 5 pictures

@@ -1,14 +1,11 @@
-import { Component, OnInit, Input, OnDestroy } from "@angular/core";
+import { Component, OnInit, OnDestroy, Input } from "@angular/core";
 import { AngularFirestore } from "@angular/fire/firestore";
 
 import { Subscription } from "rxjs";
 
 import { DatabaseService } from "@services/database/database.service";
-import {
-  SwipeOutcomeStoreService,
-  SwipeStackStoreService,
-} from "@stores/index";
-import { profileSnapshot } from "@interfaces/profile";
+import { SwipeOutcomeStore, SwipeStackStore } from "@stores/index";
+import { profileSnapshot } from "@interfaces/index";
 
 @Component({
   selector: "app-swipe-card",
@@ -16,27 +13,20 @@ import { profileSnapshot } from "@interfaces/profile";
   styleUrls: ["./swipe-card.component.scss"],
 })
 export class SwipeCardComponent implements OnInit, OnDestroy {
-  swipeProfiles$: Subscription;
-  swipeProfiles: profileSnapshot[];
+  @Input() profiles: profileSnapshot[];
 
   latestOutcome$: Subscription;
   dislikedProfiles$: Subscription;
   likedProfiles$: Subscription;
 
   constructor(
-    private swipeOutcomeStore: SwipeOutcomeStoreService,
-    private swipeStackStore: SwipeStackStoreService,
+    private swipeOutcomeStore: SwipeOutcomeStore,
+    private swipeStackStore: SwipeStackStore,
     private firestore: AngularFirestore,
     private db: DatabaseService
   ) {}
 
   ngOnInit() {
-    this.swipeProfiles$ = this.swipeStackStore.profiles.subscribe({
-      next: async (profiles) => {
-        this.swipeProfiles = profiles;
-      },
-    });
-
     this.latestOutcome$ = this.swipeOutcomeStore.latestOutcome.subscribe({
       next: (outcome) => console.log("outcome:", outcome),
     });
@@ -76,7 +66,6 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.swipeProfiles$.unsubscribe();
     this.latestOutcome$.unsubscribe();
     this.likedProfiles$.unsubscribe();
     this.dislikedProfiles$.unsubscribe();

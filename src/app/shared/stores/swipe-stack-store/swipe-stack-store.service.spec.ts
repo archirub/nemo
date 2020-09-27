@@ -1,16 +1,16 @@
-import { TestBed } from '@angular/core/testing';
+import { TestBed } from "@angular/core/testing";
 
-import { SwipeStackStoreService } from './swipe-stack-store.service';
+import { SwipeStackStore } from "./swipe-stack-store.service";
 
-describe('SwipeStackStoreService', () => {
-  let service: SwipeStackStoreService;
+describe("SwipeStackStore", () => {
+  let service: SwipeStackStore;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(SwipeStackStoreService);
+    service = TestBed.inject(SwipeStackStore);
   });
 
-  it('should be created', () => {
+  it("should be created", () => {
     expect(service).toBeTruthy();
   });
 });

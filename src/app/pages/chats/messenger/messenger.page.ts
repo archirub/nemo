@@ -1,5 +1,5 @@
 import { Component, OnInit } from "@angular/core";
-import { Profile } from "@interfaces/profile";
+import { Profile } from "@classes/index";
 import { Keyboard } from "@ionic-native/keyboard/ngx";
 // import { AutosizeModule } from "ngx-autosize";
 

@@ -1,16 +1,16 @@
-import { TestBed } from '@angular/core/testing';
+import { TestBed } from "@angular/core/testing";
 
-import { UserProfileStoreService } from './user-profile-store.service';
+import { UserProfileStore } from "./user-profile-store.service";
 
-describe('UserProfileStoreService', () => {
-  let service: UserProfileStoreService;
+describe("UserProfileStore", () => {
+  let service: UserProfileStore;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(UserProfileStoreService);
+    service = TestBed.inject(UserProfileStore);
   });
 
-  it('should be created', () => {
+  it("should be created", () => {
     expect(service).toBeTruthy();
   });
 });

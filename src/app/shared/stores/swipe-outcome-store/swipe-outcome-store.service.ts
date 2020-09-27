@@ -2,7 +2,7 @@ import { Injectable } from "@angular/core";
 
 import { BehaviorSubject, Observable } from "rxjs";
 
-import { profileSnapshot } from "@interfaces/profile";
+import { profileSnapshot } from "@interfaces/index";
 
 interface swipeOutcome {
   outcome: "yes" | "no" | "super";
@@ -11,7 +11,7 @@ interface swipeOutcome {
 @Injectable({
   providedIn: "root",
 })
-export class SwipeOutcomeStoreService {
+export class SwipeOutcomeStore {
   private _latestOutcome: BehaviorSubject<swipeOutcome> = new BehaviorSubject<
     swipeOutcome
   >(null);

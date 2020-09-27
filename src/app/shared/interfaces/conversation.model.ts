@@ -1,4 +1,4 @@
-import { IDmap } from "../profile/profile.model";
+import { IDmap } from "./shared.model";
 
 interface userProfileSnipets {
   [userID: string]: { name: string; picture: string };

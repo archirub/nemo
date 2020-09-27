@@ -1,10 +1,10 @@
-import { socialFeatures, IDarray } from "../profile";
+import { IDarray } from "./shared.model";
 
 export interface matchObject {
   userID: string;
   PI: number;
-  socialFeatures: socialFeatures;
-  physicalFeatures: physicalFeatures;
+  // socialFeatures: socialFeatures;
+  // physicalFeatures: physicalFeatures;
   bannedUsers: IDarray;
   likedUsers: IDarray;
 }

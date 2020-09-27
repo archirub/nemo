@@ -1,16 +1,12 @@
 import { Injectable } from "@angular/core";
 import { BehaviorSubject } from "rxjs";
-import {
-  conversation,
-  message,
-  conversationID,
-} from "@interfaces/conversation";
+import { conversation, message, conversationID } from "@interfaces/index";
 import { AuthService } from "@services/auth/auth.service";
 
 @Injectable({
   providedIn: "root",
 })
-export class ChatStoreService {
+export class ChatStore {
   constructor(private auth: AuthService) {}
 
   // - Nobody outside the Store should have access to the BehaviorSubject

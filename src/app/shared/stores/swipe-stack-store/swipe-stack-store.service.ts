@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, OnDestroy } from "@angular/core";
 import {
   AngularFirestore,
   DocumentData,
@@ -6,17 +6,18 @@ import {
 } from "@angular/fire/firestore";
 import { AngularFireFunctions } from "@angular/fire/functions";
 
-import { BehaviorSubject, Observable } from "rxjs";
+import { BehaviorSubject, Observable, Subscription } from "rxjs";
 
 import { NameService, AuthService } from "@services/index";
-import { profileSnapshot } from "@interfaces/profile";
+import { SearchCriteriaStore } from "@stores/index";
+import { profileSnapshot } from "@interfaces/index";
+import { SCriteria } from "@interfaces/search-criteria.model";
 
 @Injectable({
   providedIn: "root",
 })
-export class SwipeStackStoreService {
+export class SwipeStackStore {
   private _profiles = new BehaviorSubject<profileSnapshot[]>([]);
-
   public readonly profiles: Observable<
     profileSnapshot[]
   > = this._profiles.asObservable();
@@ -26,12 +27,11 @@ export class SwipeStackStoreService {
     private name: NameService,
     private cloudFunctions: AngularFireFunctions,
     private auth: AuthService
-  ) {
-    this.updateSwipeStack();
-  }
+  ) {}
 
-  public async updateSwipeStack() {
-    const newProfiles = await this.fetchUserProfiles();
+  public async updateSwipeStack(searchCriteria: SCriteria) {
+    const newProfiles = await this.fetchUserProfiles(searchCriteria);
+    // const newProfiles = this.fake.generateProfiles(10)
     this.addToProfiles(newProfiles);
   }
 
@@ -45,7 +45,7 @@ export class SwipeStackStoreService {
     this._profiles.next(this._profiles.getValue().concat(newProfiles));
   }
 
-  private async fetchUserIDs(): Promise<string[]> {
+  private async fetchUserIDs(searchCriteria: SCriteria): Promise<string[]> {
     let fetchedIDs: string[];
     // const userID: string = this.auth.getUserID()
     // RANDOM USER ID USER FOR NOW
@@ -60,7 +60,7 @@ export class SwipeStackStoreService {
     );
     await generateSwipeStack({
       ID: userID,
-      searchCriteria: { university: "UCL" },
+      searchCriteria: searchCriteria ?? {},
     })
       .toPromise()
       .then((result) => {
@@ -69,8 +69,10 @@ export class SwipeStackStoreService {
     return fetchedIDs;
   }
 
-  private async fetchUserProfiles(): Promise<profileSnapshot[]> {
-    const userIDs = await this.fetchUserIDs();
+  private async fetchUserProfiles(
+    searchCriteria: SCriteria
+  ): Promise<profileSnapshot[]> {
+    const userIDs = await this.fetchUserIDs(searchCriteria);
     const userProfiles: profileSnapshot[] = await Promise.all(
       userIDs.map(async (userID) => {
         const snapshot = await this.firestore
