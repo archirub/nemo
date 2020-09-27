@@ -3,10 +3,14 @@ ion-button {
     margin-top: 0px
 }
 
-ion-grid{
+#header-grid{
     margin-bottom: -10px;
     margin-top: -10px;
   }
+
+#message-col {
+    padding: 0px;
+}
 
 ion-avatar {
     height: 35px;
@@ -14,25 +18,32 @@ ion-avatar {
     margin-top: 5px;
 }
 
-.messanger-header {
+.messenger-header {
     text-align: center;
     margin-top: 10px;
     margin-bottom: 10px;
 }
 
-.messege {
+.message {
+    margin-left: 3px;
+    margin-top: 2px;
+    margin-bottom: 2px;
     padding: 10px;
-    border-radius: 10px;
-    margin-bottom: 4px;
+    border-radius: 17px;
+    width: fit-content;
     white-space: pre-wrap;
+    display: flex;
 }
 
 .own {
-    background: var(--ion-color-secondary);
+    background: var(--ion-color-light);
     color: #fff;
+    text-align: right;
+    align-items: right;
 }
 
 .other {
-    background: var(--ion-color-primary);
+    background: var(--ion-color-secondary);
     color: #fff;
+    text-align: left;
 }

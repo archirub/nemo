@@ -27,7 +27,7 @@ export class SwipeStackStoreService {
     private cloudFunctions: AngularFireFunctions,
     private auth: AuthService
   ) {
-    this.fetchUserProfiles().then((newProfiles) => {
+      this.fetchUserProfiles().then((newProfiles) => {
       this.addToProfiles(newProfiles);
     });
   }

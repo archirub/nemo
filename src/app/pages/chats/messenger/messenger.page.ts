@@ -11,10 +11,17 @@ import { Keyboard } from "@ionic-native/keyboard/ngx";
 })
 export class MessengerPage implements OnInit {
   private profile: Profile;
-  messages: String[];
+  kaan_msg: String[];
+  kaan_expr: boolean;
+  arch_msg: String[];
+  arch_expr: boolean;
 
   constructor(private keyboard: Keyboard) {
-    this.messages = ["bitch", "hoe", "dickass", "bitchass"];
+    this.kaan_msg = ["bitch", "hoe", "dickass", "bitchass"];
+    this.kaan_expr = true;
+    this.arch_msg = ["lik", "wowdi", "eyo", "beasta"];
+    this.arch_expr = true;
+
   }
 
   ngOnInit() {

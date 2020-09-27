@@ -6,6 +6,13 @@ export interface message {
   status: messageStatus;
 }
 
+export interface messageStatus {
+  sent: Boolean;
+  received: Boolean;
+  seen: Boolean;
+}
+
+
 export type messageReaction =
   | "love"
   | "angry"
@@ -22,9 +29,3 @@ export const MessageReaction: messageReaction[] = [
   "thumbUp",
   "thumbDown",
 ];
-
-export interface messageStatus {
-  sent: Boolean;
-  received: Boolean;
-  seen: Boolean;
-}

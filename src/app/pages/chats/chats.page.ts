@@ -13,6 +13,7 @@ import { IonContent } from '@ionic/angular';
 export class ChatsPage implements OnInit {
   @ViewChild(IonContent) ionContent: IonContent;
   allProfiles: Profile[];
+  chips: Profile[];
   searchResults: Profile[];
   displayedProfiles: Profile[];
 
@@ -25,6 +26,7 @@ export class ChatsPage implements OnInit {
 
   ngOnInit() {
     this.allProfiles = this.fakeData.generateProfiles(20);
+    this.chips = this.allProfiles.slice(15,20);
     this.displayedProfiles = this.allProfiles;
     this.profileCount = this.allProfiles.length;
     this.scrollTopSpeed = this.profileCount * 45; //so the relative speed is always the same

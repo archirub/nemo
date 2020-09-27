@@ -8,3 +8,28 @@
   //   align-items: center;
   //   justify-content: center;
   // }
+
+  .horizontal-scroll {
+    white-space: nowrap;
+    margin-top: 10px;
+    margin-left: 5px;
+}
+
+#large-chip {
+  height: 50px;
+  border-radius: 25px;
+  // background-color: white;
+  // border-color: var(--ion-color-primary);
+}
+
+#chip-avatar {
+  height: 45px;
+  width: 45px;
+}
+
+#catches-header {
+  padding: none;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  margin-left: 10px;
+}

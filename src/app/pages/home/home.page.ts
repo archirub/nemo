@@ -22,7 +22,7 @@ export class HomePage implements OnInit {
     private cloudFunctions: AngularFireFunctions
   ) {}
 
-  ngOnInit() {
+  ngOnInit() {    
     this.swipeProfiles = this.swipeStackStore.profiles;
   }
 }
