@@ -1,14 +1,22 @@
-import { IDmap } from "./shared.model";
+import { message } from "./message.model";
+import { Message } from "@classes/index";
 
-interface userProfileSnipets {
-  [userID: string]: { name: string; picture: string };
+export interface userSnippet {
+  uid: string;
+  name: string;
+  picture: string;
+}
+export interface conversationFromDatabase {
+  uids: string[];
+  userSnippets: userSnippet[];
+  messages: message[];
+  batchVolume: number;
+  lastInteracted: Date;
 }
 
-interface conversationExtraFields {
-  userIDs: IDmap;
-  lastMessage: string;
+export interface conversation {
+  recipient: userSnippet;
+  messages: Message[];
+  batchVolume: number;
+  lastInteracted: Date;
 }
-
-export type conversation = userProfileSnipets | conversationExtraFields;
-
-export type conversationID = string;

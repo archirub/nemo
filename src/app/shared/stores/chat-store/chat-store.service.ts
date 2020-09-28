@@ -1,44 +1,109 @@
 import { Injectable } from "@angular/core";
+import { AngularFirestore } from "@angular/fire/firestore";
+
 import { BehaviorSubject } from "rxjs";
-import { conversation, message, conversationID } from "@interfaces/index";
+
+import { conversation, message, userSnippet } from "@interfaces/index";
+import { Conversation, Message } from "@classes/index";
 import { AuthService } from "@services/auth/auth.service";
 
 @Injectable({
   providedIn: "root",
 })
 export class ChatStore {
-  constructor(private auth: AuthService) {}
+  private _conversations = new BehaviorSubject<Conversation[]>([]);
+  public readonly conversations = this._conversations.asObservable();
 
-  // - Nobody outside the Store should have access to the BehaviorSubject
-  //   because it has the write rights
-  // - Writing to state should be handled by specialized Store methods (ex: addchat, removechat, etc)
-  // - Create one BehaviorSubject per store entity, for example if you have chatGroups
-  private readonly _chats = new BehaviorSubject<conversation[]>([]);
+  private _lastConversation = new BehaviorSubject<
+    firebase.firestore.QueryDocumentSnapshot<firebase.firestore.DocumentData>
+  >(null);
+  public readonly lastConversation = this._lastConversation.asObservable();
 
-  // Expose the observable$ part of the _chats subject (read only stream)
-  readonly chats$ = this._chats.asObservable();
+  constructor(private auth: AuthService, private fs: AngularFirestore) {}
 
-  // the getter will return the last value emitted in _chats subject
-  private get chats(): conversation[] {
-    return this._chats.getValue();
-  }
-
-  // assigning a value to this.chats will push it onto the observable
-  // and down to all of its subsribers (ex: this.chats = [])
-  private set chats(val: conversation[]) {
-    this._chats.next(val);
-  }
-
-  public async getChat(userID: string): Promise<conversation> {
+  public async getConversation(userID: string): Promise<conversation> {
     const myID: string = await this.auth.fetchUserID();
     const hisID = userID;
-    return this.chats.filter((chat) => {
-      const containsIDs: Boolean =
-        chat.userIDs[myID] === true && chat.userIDs[hisID] === true;
-      return containsIDs;
+
+    return this._conversations.getValue().filter((conv) => {
+      conv.recipient.uid === userID;
     })[0];
   }
 
-  private readonly _loadedMessages = new BehaviorSubject<message[]>([]);
-  readonly loadedMessages$ = this._loadedMessages.asObservable();
+  private async fetchConversations(amount: number): Promise<Conversation[]> {
+    amount = amount ? +amount : 10;
+
+    let query = this.fs.firestore
+      .collection("conversations")
+      .where("uids", "array-contains", this.auth.userID)
+      .orderBy("lastInteracted", "desc")
+      .limit(amount);
+
+    const lastConvo = this._lastConversation.getValue();
+
+    if (lastConvo) {
+      query = query.startAfter(this._lastConversation.getValue());
+    }
+
+    const snapshot = await query.get();
+    const documents = snapshot.docs;
+
+    this._lastConversation.next(documents[documents.length - 1]);
+
+    const conversations: Conversation[] = documents.map((doc) => {
+      return this.conversationToClass(doc);
+    });
+
+    this._conversations.next(
+      this._conversations.getValue().concat(conversations)
+    );
+    return conversations;
+  }
+
+  private conversationToClass(
+    snapshot: firebase.firestore.QueryDocumentSnapshot<
+      firebase.firestore.DocumentData
+    >
+  ): Conversation {
+    if (!snapshot.exists) return;
+
+    const batchVolume: number = snapshot.data().batchVolume;
+    const lastInteracted: Date = snapshot.data().lastInteracted;
+
+    const userSnippets: userSnippet[] = snapshot.data().userSnippets;
+    const recipient: userSnippet = userSnippets.filter(
+      (snippet) => snippet.uid !== this.auth.userID
+    )[0];
+
+    const dbMessages: message[] = snapshot.data().messages;
+    const messages: Message[] = this.messagesToClass(dbMessages);
+
+    return new Conversation(recipient, messages, batchVolume, lastInteracted);
+  }
+
+  private messagesToClass(messages: message[]): Message[] {
+    if (!messages) return;
+
+    return messages.map((msg) => {
+      const content = msg.content;
+      const reaction = msg.reaction;
+      const senderID = msg.senderID;
+      const time = msg.time;
+
+      return new Message(senderID, time, content, reaction);
+    });
+  }
+
+  public getConversationID(uid1: string, uid2: string): string {
+    if (uid1 < uid2) {
+      return uid1.concat(uid2);
+    } else {
+      return uid2.concat(uid1);
+    }
+  }
+
+  //create function to set lastInteracted property to null for previous batchVolumes
+  // when creating a new batchVolume, that way, they have no chances of being fetched
+  // when we fetch the last-talked-to conversations (which we would do by doing
+  // .collection().orderBy('lastInteracted','desc').limit(10).get())
 }

@@ -6,7 +6,7 @@ import { BehaviorSubject } from "rxjs";
 import { NameService } from "@services/name/name.service";
 import { AuthService } from "@services/auth/auth.service";
 import { SCriteria, Criterion } from "@interfaces/search-criteria.model";
-import { SearchCriteria } from "@classes/index";
+import { SearchCriteria, copyClassInstance } from "@classes/index";
 
 @Injectable({
   providedIn: "root",
@@ -25,24 +25,23 @@ export class SearchCriteriaStore {
   ) {}
 
   public addCriteria(newCriteria: SearchCriteria): void {
-    // let currentCriteria: SearchCriteria = new SearchCriteria({
-    //   ...this._searchCriteria.getValue(),
-    // });
-    // let currentCriteria: SearchCriteria = Object.assign(Object.create(Object.getPrototypeOf(this._searchCriteria.getValue()),this._searchCriteria.getValue()))
-    // for (const [criterion, value] of Object.entries(newCriteria)) {
-    //   currentCriteria[criterion] = value;
-    // }
-    // this._searchCriteria.next(currentCriteria);
+    let currentCriteria: SearchCriteria = copyClassInstance<SearchCriteria>(
+      this._searchCriteria.getValue()
+    );
+    for (const [criterion, value] of Object.entries(newCriteria)) {
+      currentCriteria[criterion] = value;
+    }
+    this._searchCriteria.next(currentCriteria);
   }
 
   public removeCriteria(criteria: Criterion[]) {
-    // let currentCriteria: SCriteria = {
-    //   ...this._searchCriteria.getValue(),
-    // };
-    // criteria.forEach((criterion) => {
-    //   delete currentCriteria[criterion];
-    // });
-    // this._searchCriteria.next(currentCriteria);
+    let currentCriteria: SearchCriteria = copyClassInstance<SearchCriteria>(
+      this._searchCriteria.getValue()
+    );
+    criteria.forEach((criterion) => {
+      delete currentCriteria[criterion];
+    });
+    this._searchCriteria.next(currentCriteria);
   }
 
   public async fetchCriteria() {

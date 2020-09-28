@@ -8,7 +8,7 @@ import {
   SCriteria,
 } from "@interfaces/index";
 
-export class SearchCriteria {
+export class SearchCriteria implements SCriteria {
   _university: University;
   _areaOfStudy: AreaOfStudy;
   _ageRange: AgeRange;

@@ -25,43 +25,43 @@ export class ChatsPage implements OnInit {
 
   ngOnInit() {
     this.allProfiles = this.fakeData.generateProfiles(20);
-    this.chips = this.allProfiles.slice(15,20);
+    this.chips = this.allProfiles.slice(15, 20);
     this.displayedProfiles = this.allProfiles;
     this.profileCount = this.allProfiles.length;
     this.scrollTopSpeed = this.profileCount * 45; //so the relative speed is always the same
-    this.searching = false;
-    this.filtered = false;
+    // this.searching = false;
+    // this.filtered = false;
   }
 
-  filterProfiles(event) {
-    if (this.filtered == true) {
-      this.filtered = false;
-    } else {
-      this.filtered = true;
-    }
-    console.log("filter status " + this.filtered);
-  }
+  // filterProfiles(event) {
+  //   if (this.filtered == true) {
+  //     this.filtered = false;
+  //   } else {
+  //     this.filtered = true;
+  //   }
+  //   console.log("filter status " + this.filtered);
+  // }
 
-  onSearch(event) {
-    if (this.searching != true) {
-      this.searching = true;
-    }
-    let searchInput: string = event.target.value;
-    this.searchResults = this.allProfiles.filter((profile) => {
-      return profile.firstName
-        .toLowerCase()
-        .startsWith(searchInput.toLowerCase());
-    });
-    console.log(this.searchResults);
-    this.displayedProfiles = this.searchResults;
-  }
+  // onSearch(event) {
+  //   if (this.searching != true) {
+  //     this.searching = true;
+  //   }
+  //   let searchInput: string = event.target.value;
+  //   this.searchResults = this.allProfiles.filter((profile) => {
+  //     return profile.firstName
+  //       .toLowerCase()
+  //       .startsWith(searchInput.toLowerCase());
+  //   });
+  //   console.log(this.searchResults);
+  //   this.displayedProfiles = this.searchResults;
+  // }
 
-  toggleSearching(event) {
-    this.searching = false;
-    console.log(this.searching);
-    this.searchResults = [];
-    this.displayedProfiles = this.allProfiles;
-  }
+  // toggleSearching(event) {
+  //   this.searching = false;
+  //   console.log(this.searching);
+  //   this.searchResults = [];
+  //   this.displayedProfiles = this.allProfiles;
+  // }
 
   onScrollDown() {}
 
