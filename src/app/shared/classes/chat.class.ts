@@ -1,22 +1,32 @@
-import { conversation, userSnippet } from "@interfaces/index";
+import { chat, userSnippet } from "@interfaces/index";
 import { Message } from "@classes/index";
 
-export class Conversation implements conversation {
+export class Chat implements chat {
+  private _id: string;
   private _recipient: userSnippet;
   private _messages: Message[];
   private _batchVolume: number;
   private _lastInteracted: Date;
 
   constructor(
+    id: string,
     recipient: userSnippet,
     messages: Message[],
     batchVolume: number,
     lastInteracted: Date
   ) {
+    this.id = id;
     this.recipient = recipient;
     this.messages = messages;
     this.batchVolume = batchVolume;
     this.lastInteracted = lastInteracted;
+  }
+
+  public get id(): string {
+    return this._id;
+  }
+  public set id(value: string) {
+    this._id = value;
   }
 
   public get recipient(): userSnippet {

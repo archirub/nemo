@@ -1,13 +1,19 @@
-
-  <ion-list>
-      <ion-item detail = 'true' button (click)="goToMessenger(profile.id)" *ngFor="let profile of displayedProfiles; index as i">
-        <ion-avatar slot="start">
-          <img [src]="profile.mainPictureUrl">
-        </ion-avatar>
-        <div class="text-container">
-          <ion-label color = 'primary' class = "name"> {{ profile.firstName }}</ion-label>
-          <!-- <ion-badge id="notifications-badge" color="danger">5</ion-badge> -->
-          <ion-label color='dark'>You: {{ displayText(displayedText[i]) }}</ion-label>
-        </div>
-      </ion-item>
-  </ion-list >
+<ion-list>
+  <ion-item
+    detail="true"
+    button
+    (click)="goToMessenger(profile.userSnippets[1].uid)"
+    *ngFor="let profile of profiles; index as i"
+  >
+    <ion-avatar slot="start">
+      <img [src]="profile.userSnippets[1].picture" />
+    </ion-avatar>
+    <div class="text-container">
+      <ion-label color="primary" class="name">
+        {{ profile.userSnippets[1].name }}</ion-label
+      >
+      <!-- <ion-badge id="notifications-badge" color="danger">5</ion-badge> -->
+      <ion-label color="dark"></ion-label>
+    </div>
+  </ion-item>
+</ion-list>

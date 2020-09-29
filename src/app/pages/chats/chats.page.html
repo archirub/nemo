@@ -1,21 +1,17 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>
-      Chats
-    </ion-title>
+    <ion-title> Chats </ion-title>
   </ion-toolbar>
 </ion-header>
 
+<ion-content [scrollEvents]="true" (ionScroll)="onScrollDown($event)">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">Chats</ion-title>
+    </ion-toolbar>
+  </ion-header>
 
-  <ion-content [scrollEvents]="true" (ionScroll)="onScrollDown($event)">
-
-    <ion-header collapse="condense">
-      <ion-toolbar>
-        <ion-title size="large">Chats</ion-title>
-      </ion-toolbar>
-    </ion-header>
-
-    <!-- <ion-grid>
+  <!-- <ion-grid>
       <ion-row>
         <ion-col size = '7'>
           <ion-searchbar 
@@ -39,22 +35,27 @@
       </ion-row>
     </ion-grid> -->
 
-    <div class="horizontal-scroll">
-      <ion-text color="dark">
-        <!-- <h3 id="catches-header">New Catches</h3> -->
-      </ion-text>
-        <ion-chip *ngFor="let profile of chips" id="large-chip">
-          <ion-avatar id="chip-avatar">
-            <img [src]="profile.mainPictureUrl">
-          </ion-avatar>
-          <ion-label>{{profile.firstName}}</ion-label>
-        </ion-chip>
-    </div>
+  <div class="horizontal-scroll">
+    <ion-text color="dark">
+      <!-- <h3 id="catches-header">New Catches</h3> -->
+    </ion-text>
+    <ion-chip *ngFor="let profile of chips" id="large-chip">
+      <ion-avatar id="chip-avatar">
+        <img [src]="profile.mainPictureUrl" />
+      </ion-avatar>
+      <ion-label>{{profile.firstName}}</ion-label>
+    </ion-chip>
+  </div>
 
-  <app-chat-board [profiles]="displayedProfiles"></app-chat-board>
+  <app-chat-board [profiles]="messageListener | async"></app-chat-board>
 
-  <ion-button icon-only expand="block" color="medium"  fill ="clear" (click) = "scrollToTop()">
-        <ion-icon name="arrow-up-outline" size="medium" color = "black"></ion-icon>
+  <ion-button
+    icon-only
+    expand="block"
+    color="medium"
+    fill="clear"
+    (click)="scrollToTop()"
+  >
+    <ion-icon name="arrow-up-outline" size="medium" color="black"></ion-icon>
   </ion-button>
-
 </ion-content>

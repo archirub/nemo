@@ -5,17 +5,20 @@ export class Message implements message {
   private _time: Date;
   private _content: string;
   private _reaction: messageReaction;
+  private _seen: boolean;
 
   constructor(
     senderID: string,
     time: Date,
     content: string,
-    reaction: messageReaction
+    reaction: messageReaction,
+    seen: boolean
   ) {
     (this.senderID = senderID),
       (this.time = time),
       (this.content = content),
-      (this.reaction = reaction);
+      (this.reaction = reaction),
+      (this.seen = seen);
   }
 
   public get senderID(): string {
@@ -44,5 +47,12 @@ export class Message implements message {
   }
   public set reaction(value: messageReaction) {
     this._reaction = value;
+  }
+
+  public get seen(): boolean {
+    return this._seen;
+  }
+  public set seen(value: boolean) {
+    this._seen = value;
   }
 }

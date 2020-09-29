@@ -1,34 +1,65 @@
-import { Component, OnInit, ViewChild, Renderer2 } from "@angular/core";
-import { Profile } from "@classes/index";
-import { FakeDataService } from "@services/fake-data/fake-data.service";
-
+import { Component, OnInit, ViewChild, OnDestroy } from "@angular/core";
 import { IonContent } from "@ionic/angular";
+import {
+  AngularFirestore,
+  DocumentChangeAction,
+} from "@angular/fire/firestore";
+
+import { Observable, Subscription } from "rxjs";
+import { map, take } from "rxjs/operators";
+
+import { ChatStore } from "@stores/index";
+import { Chat, Profile } from "@classes/index";
+import { AuthService } from "@services/index";
+import { chatFromDatabase } from "@interfaces/index";
 
 @Component({
   selector: "app-chats",
   templateUrl: "./chats.page.html",
   styleUrls: ["./chats.page.scss"],
 })
-export class ChatsPage implements OnInit {
+export class ChatsPage implements OnInit, OnDestroy {
   @ViewChild(IonContent) ionContent: IonContent;
-  allProfiles: Profile[];
-  chips: Profile[];
-  searchResults: Profile[];
-  displayedProfiles: Profile[];
 
+  private allChats$: Subscription;
+  private messageListener$: Subscription;
+
+  public allChats: Chat[];
+  public allDbChats: chatFromDatabase[];
   profileCount: number;
   scrollTopSpeed: number;
   searching: boolean;
   filtered: boolean;
 
-  constructor(private fakeData: FakeDataService) {}
+  private messageListener: Observable<chatFromDatabase[]> = this.fs
+    .collection("chats", (ref) =>
+      ref.where("uids", "array-contains", this.auth.userID)
+    )
+    .valueChanges()
+    .pipe(
+      map((snapshot: chatFromDatabase[]) => {
+        console.log(snapshot);
+        // this.allDbChats = snapshot;
+        return snapshot;
+      })
+    );
+
+  constructor(
+    private ChatStore: ChatStore,
+    private auth: AuthService,
+    private fs: AngularFirestore
+  ) {}
 
   ngOnInit() {
-    this.allProfiles = this.fakeData.generateProfiles(20);
-    this.chips = this.allProfiles.slice(15, 20);
-    this.displayedProfiles = this.allProfiles;
-    this.profileCount = this.allProfiles.length;
+    this.allChats$ = this.ChatStore.chats.subscribe({
+      next: (chats) => {
+        this.allChats = chats;
+      },
+    }); //subscribes to the chats observable; on each call of next(), updates the istance variable "allChats"
+    this.messageListener$ = this.messageListener.subscribe();
     this.scrollTopSpeed = this.profileCount * 45; //so the relative speed is always the same
+
+    //this.messageListener$ = this.messageListener.subscribe();
     // this.searching = false;
     // this.filtered = false;
   }
@@ -42,30 +73,14 @@ export class ChatsPage implements OnInit {
   //   console.log("filter status " + this.filtered);
   // }
 
-  // onSearch(event) {
-  //   if (this.searching != true) {
-  //     this.searching = true;
-  //   }
-  //   let searchInput: string = event.target.value;
-  //   this.searchResults = this.allProfiles.filter((profile) => {
-  //     return profile.firstName
-  //       .toLowerCase()
-  //       .startsWith(searchInput.toLowerCase());
-  //   });
-  //   console.log(this.searchResults);
-  //   this.displayedProfiles = this.searchResults;
-  // }
-
-  // toggleSearching(event) {
-  //   this.searching = false;
-  //   console.log(this.searching);
-  //   this.searchResults = [];
-  //   this.displayedProfiles = this.allProfiles;
-  // }
-
   onScrollDown() {}
 
   scrollToTop() {
     this.ionContent.scrollToTop(this.scrollTopSpeed);
+  }
+
+  ngOnDestroy() {
+    this.allChats$.unsubscribe();
+    this.messageListener$.unsubscribe();
   }
 }

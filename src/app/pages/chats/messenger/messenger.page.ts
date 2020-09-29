@@ -27,4 +27,6 @@ export class MessengerPage implements OnInit {
   ngOnInit() {
     this.keyboard.show();
   }
+
+  
 }

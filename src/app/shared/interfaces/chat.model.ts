@@ -6,7 +6,7 @@ export interface userSnippet {
   name: string;
   picture: string;
 }
-export interface conversationFromDatabase {
+export interface chatFromDatabase {
   uids: string[];
   userSnippets: userSnippet[];
   messages: message[];
@@ -14,7 +14,8 @@ export interface conversationFromDatabase {
   lastInteracted: Date;
 }
 
-export interface conversation {
+export interface chat {
+  id: string;
   recipient: userSnippet;
   messages: Message[];
   batchVolume: number;

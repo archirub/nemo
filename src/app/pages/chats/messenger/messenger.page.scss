@@ -3,6 +3,10 @@ ion-button {
     margin-top: 0px
 }
 
+#chat-toolbar {
+    padding-top: 0px;
+}
+
 #header-grid{
     margin-bottom: -10px;
     margin-top: -10px;
@@ -13,12 +17,13 @@ ion-button {
 }
 
 ion-avatar {
-    height: 35px;
-    width: 35px;
+    height: 40px;
+    width: 40px;
     margin-top: 5px;
 }
 
 .messenger-header {
+    padding-top: 10px;
     text-align: center;
     margin-top: 10px;
     margin-bottom: 10px;

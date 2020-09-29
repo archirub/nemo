@@ -3,6 +3,7 @@ export interface message {
   time: Date;
   content: string;
   reaction: messageReaction;
+  seen: boolean;
 }
 
 export type messageReaction =

@@ -7,7 +7,7 @@ import { BehaviorSubject, Observable, Subscription } from "rxjs";
   providedIn: "root",
 })
 export class AuthService implements OnDestroy {
-  private _userID: string;
+  private _userID: string = "oY6HiUHmUvcKbFQQnb88t3U4Zew1";
   private _isAuthenticated = new BehaviorSubject<Boolean>(null);
 
   private isAuthenticated$: Subscription;

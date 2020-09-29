@@ -12,27 +12,29 @@ import { relative } from "path";
 })
 export class ChatBoardComponent implements OnInit {
   @Input() profiles: Profile[];
-  displayedProfiles: Profile[];
   displayedText: string[];
   profileId: string;
 
-  constructor(private fakeData: FakeDataService, private router: Router) {}
+  constructor(
+    private fakeData: FakeDataService,
+    private ActivatedRoute: ActivatedRoute,
+    private router: Router
+  ) {}
 
   ngOnInit() {
-    //this.router.paramMap.subscribe();
-    this.displayedProfiles = this.profiles;
-    this.displayedText = this.fakeData.generateSentences(this.profiles.length);
+    //this.ActivatedRoute.paramMap.subscribe();
+    //this.displayedText = this.fakeData.generateSentences(this.profiles.length);
   }
 
-  displayText(sentence: string) {
-    if (sentence.length > 25) {
-      let shortenedSentence = sentence.slice(0, 25);
-      if (shortenedSentence.endsWith(" " || ".")) {
-        shortenedSentence = sentence.slice(0, 24);
-      }
-      return shortenedSentence + "...";
-    }
-  }
+  // displayText(sentence: string) {
+  //   if (sentence.length > 25) {
+  //     let shortenedSentence = sentence.slice(0, 25);
+  //     if (shortenedSentence.endsWith(" " || ".")) {
+  //       shortenedSentence = sentence.slice(0, 24);
+  //     }
+  //     return shortenedSentence + "...";
+  //   }
+  // }
 
   goToMessenger(profileId: String) {
     console.log(profileId);
