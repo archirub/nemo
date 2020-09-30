@@ -1,7 +1,14 @@
-import { Component, OnInit } from "@angular/core";
-import { Profile } from "@classes/index";
+import { Component, OnDestroy, OnInit } from "@angular/core";
+import { NavController } from "@ionic/angular";
+import { ActivatedRoute } from "@angular/router";
 import { Keyboard } from "@ionic-native/keyboard/ngx";
+
+import { BehaviorSubject, Subscription } from "rxjs";
+import { map } from "rxjs/operators";
 // import { AutosizeModule } from "ngx-autosize";
+
+import { Chat } from "@classes/index";
+import { ChatStore } from "@stores/chat-store/chat-store.service";
 
 @Component({
   selector: "app-messenger",
@@ -9,24 +16,42 @@ import { Keyboard } from "@ionic-native/keyboard/ngx";
   styleUrls: ["./messenger.page.scss"],
   providers: [Keyboard],
 })
-export class MessengerPage implements OnInit {
-  private profile: Profile;
-  kaan_msg: String[];
-  kaan_expr: boolean;
-  arch_msg: String[];
-  arch_expr: boolean;
+export class MessengerPage implements OnInit, OnDestroy {
+  private chats$: Subscription;
+  private chatID: string;
 
-  constructor(private keyboard: Keyboard) {
-    this.kaan_msg = ["bitch", "hoe", "dickass", "bitchass"];
-    this.kaan_expr = true;
-    this.arch_msg = ["lik", "wowdi", "eyo", "beasta"];
-    this.arch_expr = true;
+  public chat = new BehaviorSubject<Chat>(null);
 
-  }
+  constructor(
+    private keyboard: Keyboard,
+    private route: ActivatedRoute,
+    private navCtrl: NavController,
+    private chatStore: ChatStore
+  ) {}
 
   ngOnInit() {
-    this.keyboard.show();
+    this.route.paramMap.subscribe((parameter) => {
+      if (!parameter.has("chatID")) {
+        this.navCtrl.navigateBack("/tabs/chats");
+        return;
+      }
+      this.chatID = parameter.get("chatID");
+
+      this.chats$ = this.chatStore.chats
+        .pipe(
+          map((chats) => {
+            chats.forEach((chat) => {
+              if (chat.id === this.chatID) {
+                this.chat.next(chat);
+              }
+            });
+          })
+        )
+        .subscribe();
+    });
   }
 
-  
+  ngOnDestroy() {
+    this.chats$.unsubscribe();
+  }
 }

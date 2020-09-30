@@ -2,15 +2,15 @@
   <ion-item
     detail="true"
     button
-    (click)="goToMessenger(profile.userSnippets[1].uid)"
-    *ngFor="let profile of profiles; index as i"
+    (click)="goToMessenger(chat.id)"
+    *ngFor="let chat of chats; index as i"
   >
     <ion-avatar slot="start">
-      <img [src]="profile.userSnippets[1].picture" />
+      <img [src]="chat.recipient.picture" />
     </ion-avatar>
     <div class="text-container">
       <ion-label color="primary" class="name">
-        {{ profile.userSnippets[1].name }}</ion-label
+        {{ chat.recipient.name }}</ion-label
       >
       <!-- <ion-badge id="notifications-badge" color="danger">5</ion-badge> -->
       <ion-label color="dark"></ion-label>

@@ -8,6 +8,16 @@ export interface profile {
   biography: string;
   socialFeatures: socialFeatures;
   matches: IDarray;
+}
+
+export interface profileFromDatabase {
+  firstName: string;
+  lastName: string;
+  dateOfBirth: Date;
+  pictures: userPictures;
+  biography: string;
+  socialFeatures: socialFeatures;
+  matches: IDarray;
   hasMatchDocument: boolean; // Helps in match-generator to find profiles with no match document
 }
 

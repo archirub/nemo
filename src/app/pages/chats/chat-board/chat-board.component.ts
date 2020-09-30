@@ -1,7 +1,7 @@
 import { Component, OnInit, Input } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 
-import { Profile } from "@classes/index";
+import { Chat } from "@classes/index";
 import { FakeDataService } from "@services/fake-data/fake-data.service";
 import { relative } from "path";
 
@@ -11,9 +11,9 @@ import { relative } from "path";
   styleUrls: ["./chat-board.component.scss"],
 })
 export class ChatBoardComponent implements OnInit {
-  @Input() profiles: Profile[];
+  @Input() chats: Chat[];
   displayedText: string[];
-  profileId: string;
+  chatID: string;
 
   constructor(
     private fakeData: FakeDataService,
@@ -36,8 +36,7 @@ export class ChatBoardComponent implements OnInit {
   //   }
   // }
 
-  goToMessenger(profileId: String) {
-    console.log(profileId);
-    this.router.navigate(["/messenger/" + profileId]);
+  goToMessenger(chatID: String) {
+    this.router.navigate(["/messenger/" + chatID]);
   }
 }

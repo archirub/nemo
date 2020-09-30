@@ -8,7 +8,7 @@ const routes: Routes = [
       import("./tab-menu/tab-menu.module").then((m) => m.TabMenuPageModule),
   },
   {
-    path: "messenger/:profileId", // this is specified outside tabs so that they aren't visible on the chats page
+    path: "messenger/:chatID", // this is specified outside tabs so that they aren't visible on the chats page
     loadChildren: () =>
       import("./pages/chats/messenger/messenger.module").then(
         (m) => m.MessengerPageModule

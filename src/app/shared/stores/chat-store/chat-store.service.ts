@@ -1,14 +1,23 @@
 import { Injectable } from "@angular/core";
 import {
+  Action,
   AngularFirestore,
   DocumentChangeAction,
   DocumentData,
+  DocumentSnapshot,
   QueryDocumentSnapshot,
 } from "@angular/fire/firestore";
 
-import { BehaviorSubject, Observable, Subscription } from "rxjs";
+import { BehaviorSubject, Observable, merge, of } from "rxjs";
+import { map, switchMap } from "rxjs/operators";
 
-import { chat, message, userSnippet } from "@interfaces/index";
+import {
+  chat,
+  chatFromDatabase,
+  message,
+  profile,
+  userSnippet,
+} from "@interfaces/index";
 import { Chat, Message } from "@classes/index";
 import { AuthService } from "@services/auth/auth.service";
 
@@ -24,16 +33,82 @@ export class ChatStore {
   );
   public readonly lastChat = this._lastChat.asObservable();
 
+  private _mergedDatabaseListeners = new BehaviorSubject<
+    Observable<Action<DocumentSnapshot<chat>>>
+  >(null);
+  public readonly mergedDatabaseListeners = this._mergedDatabaseListeners.asObservable();
+
   constructor(private auth: AuthService, private fs: AngularFirestore) {}
 
-  // public async getChat(userID: string): Promise<chat> {
-  //   const myID: string = await this.auth.fetchUserID();
-  //   const hisID = userID;
+  initializeMergedListeners(): void {
+    // Get all chat IDs from the chats Behaviour Subject
+    const chatIDs: string[] = this._chats.getValue().map((chat) => chat.id);
 
-  //   return this._chats.getValue().filter((chat) => {
-  //     chat.recipient.uid === userID;
-  //   })[0];
-  // }
+    let listenerArray: Observable<Action<DocumentSnapshot<chat>>>[] = [];
+
+    // Pushes one listener/Observable per chat document to an array (listenerArray)
+    chatIDs.forEach((id) => {
+      const listener = this.fs
+        .collection("chats")
+        .doc(id)
+        .snapshotChanges() as Observable<Action<DocumentSnapshot<chat>>>;
+      listenerArray.push(listener);
+    });
+
+    // Merges the chat doc Observables
+    const mergedObservable: Observable<Action<DocumentSnapshot<chat>>> = merge(
+      ...listenerArray
+    );
+
+    // Feeds the observable (which is a merge of mutlitple observables) to a Behaviour Subject
+    this._mergedDatabaseListeners.next(mergedObservable);
+  }
+
+  addToMergedListeners(chatDocumentID: string): void {
+    if (!chatDocumentID) return console.error();
+
+    // Create new listener for new chat doc
+    const newListener = this.fs
+      .collection("chats")
+      .doc(chatDocumentID)
+      .snapshotChanges() as Observable<Action<DocumentSnapshot<chat>>>;
+
+    const currentMergedListeners = this._mergedDatabaseListeners.getValue();
+
+    // Merge current merged listeners with new listener
+    const newMergedListeners = merge(currentMergedListeners, newListener);
+
+    // Pass it on to
+    this._mergedDatabaseListeners.next(newMergedListeners);
+  }
+
+  async databaseChatCreationListener() {
+    const uid: string = await this.auth.fetchUserID();
+    return this.fs
+      .collection("chats", (ref) =>
+        ref.where("uids", "array-contains", this.auth.userID)
+      )
+      .snapshotChanges()
+      .pipe(
+        switchMap((documents: DocumentChangeAction<chat>[]) => {
+          let addedDocument: DocumentChangeAction<chat>;
+          for (const doc of documents) {
+            console.log("Doc type", doc.type);
+            if (doc.type === "added") {
+              addedDocument = doc;
+              break;
+            }
+          }
+          return of(addedDocument.payload.doc);
+        }),
+        map((doc) => {
+          const newChat: Chat = this.dbFormatToClass_chat(doc);
+          this._chats.next(this._chats.getValue().concat(newChat));
+          this.addToMergedListeners(newChat.id);
+          return newChat;
+        })
+      );
+  }
 
   /** fetches all the chats for the authenticated user */
   public async fetchChats(amount: number): Promise<Chat[]> {

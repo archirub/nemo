@@ -24,25 +24,25 @@ export class ChatsPage implements OnInit, OnDestroy {
   private allChats$: Subscription;
   private messageListener$: Subscription;
 
-  public allChats: Chat[];
+  public allChats: Observable<Chat[]>;
   public allDbChats: chatFromDatabase[];
   profileCount: number;
   scrollTopSpeed: number;
   searching: boolean;
   filtered: boolean;
 
-  private messageListener: Observable<chatFromDatabase[]> = this.fs
-    .collection("chats", (ref) =>
-      ref.where("uids", "array-contains", this.auth.userID)
-    )
-    .valueChanges()
-    .pipe(
-      map((snapshot: chatFromDatabase[]) => {
-        console.log(snapshot);
-        // this.allDbChats = snapshot;
-        return snapshot;
-      })
-    );
+  // private messageListener: Observable<chatFromDatabase[]> = this.fs
+  //   .collection("chats", (ref) =>
+  //     ref.where("uids", "array-contains", this.auth.userID)
+  //   )
+  //   .valueChanges()
+  //   .pipe(
+  //     map((snapshot: chatFromDatabase[]) => {
+  //       console.log(snapshot);
+  //       // this.allDbChats = snapshot;
+  //       return snapshot;
+  //     })
+  //   );
 
   constructor(
     private ChatStore: ChatStore,
@@ -51,12 +51,10 @@ export class ChatsPage implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    this.allChats$ = this.ChatStore.chats.subscribe({
-      next: (chats) => {
-        this.allChats = chats;
-      },
-    }); //subscribes to the chats observable; on each call of next(), updates the istance variable "allChats"
-    this.messageListener$ = this.messageListener.subscribe();
+    this.allChats = this.ChatStore.chats;
+
+    this.ChatStore.fetchChats(10);
+
     this.scrollTopSpeed = this.profileCount * 45; //so the relative speed is always the same
 
     //this.messageListener$ = this.messageListener.subscribe();
