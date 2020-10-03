@@ -35,9 +35,9 @@
       </ion-row>
     </ion-grid> -->
 
-  <div class="horizontal-scroll">
+  <!-- <div class="horizontal-scroll">
     <ion-text color="dark">
-      <!-- <h3 id="catches-header">New Catches</h3> -->
+      <h3 id="catches-header">New Catches</h3>
     </ion-text>
     <ion-chip *ngFor="let profile of chips" id="large-chip">
       <ion-avatar id="chip-avatar">
@@ -45,7 +45,7 @@
       </ion-avatar>
       <ion-label>{{profile.firstName}}</ion-label>
     </ion-chip>
-  </div>
+  </div> -->
 
   <app-chat-board [chats]="allChats | async"></app-chat-board>
 

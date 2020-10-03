@@ -1,5 +1,6 @@
-import { Component, OnDestroy, OnInit } from "@angular/core";
-import { NavController } from "@ionic/angular";
+import { Component, OnDestroy, OnInit, ViewChild } from "@angular/core";
+
+import { NavController, IonContent } from "@ionic/angular";
 import { ActivatedRoute } from "@angular/router";
 import { Keyboard } from "@ionic-native/keyboard/ngx";
 
@@ -9,6 +10,7 @@ import { map } from "rxjs/operators";
 
 import { Chat } from "@classes/index";
 import { ChatStore } from "@stores/chat-store/chat-store.service";
+import { Message } from "@angular/compiler/src/i18n/i18n_ast";
 
 @Component({
   selector: "app-messenger",
@@ -17,10 +19,15 @@ import { ChatStore } from "@stores/chat-store/chat-store.service";
   providers: [Keyboard],
 })
 export class MessengerPage implements OnInit, OnDestroy {
+  @ViewChild(IonContent) ionContent: IonContent;
+
+  private scrollSpeed: number;
+  public nextMessageSender: string;
+
   private chats$: Subscription;
   private chatID: string;
-
-  public chat = new BehaviorSubject<Chat>(null);
+  public currentChat = new BehaviorSubject<Chat>(null);
+  searching: any;
 
   constructor(
     private keyboard: Keyboard,
@@ -42,7 +49,9 @@ export class MessengerPage implements OnInit, OnDestroy {
           map((chats) => {
             chats.forEach((chat) => {
               if (chat.id === this.chatID) {
-                this.chat.next(chat);
+                this.currentChat.next(chat);
+                this.scrollSpeed = chat.messages.length;
+                //this.currentChat.getValue().messages[0].
               }
             });
           })
@@ -51,7 +60,24 @@ export class MessengerPage implements OnInit, OnDestroy {
     });
   }
 
+  ionViewWillEnter() {
+    this.ionContent.scrollToBottom(100);
+  }
+
+  ionViewDidEnter() {
+    this.keyboard.show();
+  }
+
   ngOnDestroy() {
+    console.log(this.nextMessageSender);
     this.chats$.unsubscribe();
+  }
+
+  closeKeyboard(event) {
+    this.keyboard.hide();
+  }
+
+  onSend(event) {
+    console.log(event);
   }
 }
