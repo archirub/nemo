@@ -1,56 +1,117 @@
 <ion-content>
-  <div class="HAHA">HAHAHAHAHAA</div>
-  <ion-grid>
-    <ion-row>
-      <ion-col offset="3"><h2>Search Criteria</h2></ion-col>
-    </ion-row>
-    <div class="criteria-container">
+  <form class="criteria-container" [formGroup]="searchCriteriaForm">
+    <ion-grid>
       <ion-row>
-        <ion-col><ion-toggle></ion-toggle> </ion-col>
-        <ion-col class="ion-text-center"><h3>University</h3></ion-col>
-        <ion-col>
-          <ion-select cancelText="Nah" okText="Okay!">
-            <ion-select-option
-              *ngFor="let option of this.searchCriteriaOptions.university"
-              value="{{ option }}"
+        <ion-col
+          ><ion-item class="criterion"
+            ><ion-toggle></ion-toggle>
+            <h3>Location</h3>
+
+            <ion-select
+              formControlName="location"
+              placeHolder="Select an option"
+              cancelText="Nah"
+              okText="Okay!"
             >
-              {{ option }}</ion-select-option
-            >
-          </ion-select>
+              <ion-select-option
+                *ngFor="let option of this.scOptions.location"
+                value="{{ option }}"
+              >
+                {{ option }}</ion-select-option
+              >
+            </ion-select></ion-item
+          >
         </ion-col>
       </ion-row>
       <ion-row>
-        <ion-col><ion-toggle></ion-toggle> </ion-col>
-        <ion-col size="4"><h3>Location</h3></ion-col>
-        <ion-col></ion-col>
+        <ion-col
+          ><ion-item class="criterion"
+            ><ion-toggle></ion-toggle>
+            <h3>Age Range</h3>
+            <ion-select
+              cancelText="Nah"
+              okText="Okay!"
+              formControlName="ageRange"
+            >
+              <ion-select-option
+                *ngFor="let option of this.scOptions.ageRange"
+                value="{{ option }}"
+              >
+                {{ option }}</ion-select-option
+              >
+            </ion-select></ion-item
+          >
+        </ion-col>
       </ion-row>
       <ion-row>
-        <ion-col><ion-toggle></ion-toggle> </ion-col>
-        <ion-col size="4"><h3>Age Range</h3></ion-col>
-        <ion-col></ion-col>
+        <ion-col>
+          <ion-item class="criterion"
+            ><ion-toggle></ion-toggle>
+            <h3>Area of Study</h3>
+            <ion-select
+              formControlName="areaOfStudy"
+              cancelText="Nah"
+              okText="Okay!"
+              [value]="'haha'"
+            >
+              <ion-select-option
+                *ngFor="let option of this.scOptions.areaOfStudy"
+                value="{{ option }}"
+              >
+                {{ option }}</ion-select-option
+              >
+            </ion-select></ion-item
+          >
+        </ion-col>
       </ion-row>
       <ion-row>
-        <ion-col><ion-toggle></ion-toggle> </ion-col>
-        <ion-col><h3>Area of Study</h3></ion-col>
-        <ion-col></ion-col>
+        <ion-col
+          ><ion-item class="criterion"
+            ><ion-toggle></ion-toggle>
+            <h3>Society</h3>
+            <ion-select
+              formControlName="society"
+              cancelText="Nah"
+              okText="Okay!"
+            >
+              <ion-select-option
+                *ngFor="let option of this.scOptions.societyCategory"
+                value="{{ option }}"
+              >
+                {{ option }}</ion-select-option
+              >
+            </ion-select></ion-item
+          >
+        </ion-col>
       </ion-row>
       <ion-row>
-        <ion-col><ion-toggle></ion-toggle> </ion-col>
-        <ion-col><h3>Society</h3></ion-col>
-        <ion-col></ion-col>
+        <ion-col
+          ><ion-item class="criterion"
+            ><ion-toggle></ion-toggle>
+            <h3>Interest</h3>
+            <ion-select
+              formControlName="interest"
+              cancelText="Nah"
+              okText="Okay!"
+            >
+              <ion-select-option
+                *ngFor="let option of this.scOptions.interest"
+                value="{{ option }}"
+              >
+                {{ option }}</ion-select-option
+              >
+            </ion-select></ion-item
+          >
+        </ion-col>
       </ion-row>
+
       <ion-row>
-        <ion-col><ion-toggle></ion-toggle> </ion-col>
-        <ion-col><h3>Interest</h3></ion-col>
-        <ion-col></ion-col>
+        <ion-col offset="5" size="2">
+          <ion-button (click)="closeAndConfirmChoices()">
+            <ion-icon slot="icon-only" name="add"></ion-icon>
+          </ion-button>
+        </ion-col>
       </ion-row>
-    </div>
-    <ion-row>
-      <ion-col offset="5" size="2">
-        <ion-button (click)="dismissModal()">
-          <ion-icon slot="icon-only" name="add"></ion-icon>
-        </ion-button>
-      </ion-col>
-    </ion-row>
-  </ion-grid>
+    </ion-grid>
+  </form>
 </ion-content>

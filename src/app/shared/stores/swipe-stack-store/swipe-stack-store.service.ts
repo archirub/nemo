@@ -31,7 +31,6 @@ export class SwipeStackStore {
 
   public async updateSwipeStack(searchCriteria: SCriteria) {
     const newProfiles = await this.fetchUserProfiles(searchCriteria);
-    // const newProfiles = this.fake.generateProfiles(10)
     this.addToProfiles(newProfiles);
   }
 
@@ -47,7 +46,7 @@ export class SwipeStackStore {
 
   private async fetchUserIDs(searchCriteria: SCriteria): Promise<string[]> {
     let fetchedIDs: string[];
-    // const userID: string = this.auth.getUserID()
+    // const userID: string = await this.auth.fetchUserID();
     // RANDOM USER ID USER FOR NOW
     const IDsnapshot: QuerySnapshot<DocumentData> = await this.firestore.firestore
       .collection("profiles")

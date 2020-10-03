@@ -2,47 +2,46 @@ import {
   Location,
   AgeRange,
   AreaOfStudy,
-  Interest,
   SocietyCategory,
-  University,
+  Interest,
   SCriteria,
+  searchCriteriaOptions,
 } from "@interfaces/index";
 
 export class SearchCriteria implements SCriteria {
-  _university: University;
+  // _university: University;
   _areaOfStudy: AreaOfStudy;
   _ageRange: AgeRange;
   _societyCategory: SocietyCategory;
   _interest: Interest;
   _location: Location;
 
-  options = {
-    university: ["UCL"],
-    areaOfStudy: [],
-    ageRange: ["1821", "2225", "26plus"],
-    societyCategory: [],
-    interest: [],
-    location: ["onCampus", "offCampus"],
-  };
+  options = searchCriteriaOptions;
 
-  constructor(properties: SCriteria) {
-    for (const key in properties) {
-      if (this.hasOwnProperty(key)) {
-        this[key] = properties[key];
-      }
-    }
+  constructor(
+    areaOfStudy?: AreaOfStudy,
+    ageRange?: AgeRange,
+    societyCategory?: SocietyCategory,
+    interest?: Interest,
+    location?: Location
+  ) {
+    this.areaOfStudy = areaOfStudy;
+    this.ageRange = ageRange;
+    this.societyCategory = societyCategory;
+    this.interest = interest;
+    this.location = location;
   }
 
-  public set university(v: University) {
-    if (this.options.university.includes(v)) {
-      this._university = v;
-    } else {
-      console.error();
-    }
-  }
-  public get university(): University {
-    return this._university;
-  }
+  // public set university(v: University) {
+  //   if (this.options.university.includes(v)) {
+  //     this._university = v;
+  //   } else {
+  //     console.error();
+  //   }
+  // }
+  // public get university(): University {
+  //   return this._university;
+  // }
 
   public set areaOfStudy(v: AreaOfStudy) {
     if (this.options.areaOfStudy.includes(v)) {

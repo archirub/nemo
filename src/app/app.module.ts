@@ -3,7 +3,6 @@ import { BrowserModule } from "@angular/platform-browser";
 import { CommonModule } from "@angular/common";
 
 import { RouteReuseStrategy } from "@angular/router";
-import { HttpClientModule } from "@angular/common/http";
 
 import { IonicModule, IonicRouteStrategy } from "@ionic/angular";
 import { SplashScreen } from "@ionic-native/splash-screen/ngx";
@@ -28,7 +27,6 @@ import { pageTransition } from "./shared/animations/page-transition.component";
     CommonModule,
     IonicModule.forRoot({ navAnimation: pageTransition }),
     AppRoutingModule,
-    HttpClientModule,
     AngularFireModule.initializeApp(environment.firebase),
     AngularFirestoreModule,
     AngularFireFunctionsModule,
@@ -41,8 +39,6 @@ import { pageTransition } from "./shared/animations/page-transition.component";
     // Necessary to specify the region in which the Firebase cloud functions exist
     // (see https://github.com/angular/angularfire/blob/master/docs/functions/functions.md)
     { provide: REGION, useValue: "europe-west2" },
-    // Necessary to point the cloud function to the firebase emulator
-    // { provide: ORIGIN, useValue: "http://localhost:8100" },
   ],
   bootstrap: [AppComponent],
 })

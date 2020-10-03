@@ -13,9 +13,9 @@
 # UserInterfaceState.xcuserstate
 # $RECYCLE.BIN/
 
-# *.log
-# log.txt
-# npm-debug.log*
+*.log
+log.txt
+npm-debug.log*
 
 # /.idea
 # /.ionic
@@ -29,4 +29,5 @@
 # /platforms
 # /plugins
 /www
+/ios
 
