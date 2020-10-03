@@ -74,7 +74,7 @@ export class ChatsPage implements OnInit, OnDestroy {
   onScrollDown() {}
 
   scrollToTop() {
-    this.ionContent.scrollToTop(this.scrollTopSpeed);
+    this.ionContent.scrollToTop(500);
   }
 
   ngOnDestroy() {

@@ -3,21 +3,23 @@
     <ion-grid id="header-grid">
       <ion-row>
         <ion-col size="2">
-          <ion-button fill="clear">
-            <ion-icon name="chevron-back-outline"></ion-icon>
-            16
-          </ion-button>
+          <ion-buttons>
+            <ion-back-button defaultHref="tabs/chats" [text]="16">
+            </ion-back-button>
+          </ion-buttons>
         </ion-col>
 
         <ion-col size="8">
           <ion-text color="dark">
-            <h3 class="messenger-header">{{(chat | async).recipient.name}}</h3>
+            <h3 class="messenger-header">
+              {{(currentChat | async).recipient.name}}
+            </h3>
           </ion-text>
         </ion-col>
 
         <ion-col size="2">
           <ion-avatar>
-            <img />
+            <img [src]="(currentChat | async).recipient.picture" />
           </ion-avatar>
         </ion-col>
       </ion-row>
@@ -26,13 +28,48 @@
 </ion-header>
 
 <ion-content>
-  <ion-row *ngFor="let message of chat">
-    <ion-col size="6" *ngIf="kaan_expr" id="message-col">
-      <div class="message other">{{message}}</div>
+  <ion-row *ngFor="let message of ((currentChat | async).messages); index as i">
+    <ion-col
+      size="8"
+      *ngIf="message.senderID == (currentChat | async).recipient.uid"
+      class="message-col col-recieved"
+    >
+      <div class="message recievedMessage">{{message.content}}</div>
+      <!-- <div
+        *ngIf="message.senderID !== ((currentChat | async).messages)[i+1].senderID"
+        class="message recievedMessage"
+      >
+        {{bubble}}
+      </div> -->
     </ion-col>
 
-    <!-- <ion-col size = "6" offset = "6" *ngIf="arch_expr" id="message-col">
-          <div class="message own">{{message}}</div>
-        </ion-col> -->
+    <ion-col
+      size="8"
+      offset="4"
+      *ngIf="message.senderID !== (currentChat | async).recipient.uid"
+      class="message-col col-sent"
+    >
+      <div class="message sentMessage">{{message.content}}</div>
+      <!-- <div
+        *ngIf="message.senderID !== chat[i+1].senderID"
+        class="message sentMessage"
+      >
+        {{bubble}}
+      </div> -->
+    </ion-col>
   </ion-row>
+
+  <div id="input-grid">
+    <ion-searchbar
+      animated
+      showCancelButton="never"
+      searchIcon="none"
+      placeholder=""
+      type="text"
+      id="textInput"
+    >
+      <ion-button icon-only fill="clear" id="send-button">
+        <ion-icon name="send"></ion-icon> </ion-button
+    ></ion-searchbar>
+  </div>
 </ion-content>
