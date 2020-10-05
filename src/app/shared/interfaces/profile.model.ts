@@ -1,5 +1,3 @@
-import { IDarray } from "./shared.model";
-
 export interface profile {
   firstName: string;
   lastName: string;
@@ -7,7 +5,7 @@ export interface profile {
   pictures: userPictures;
   biography: string;
   socialFeatures: socialFeatures;
-  matches: IDarray;
+  matches: string[];
 }
 
 export interface profileFromDatabase {
@@ -17,7 +15,7 @@ export interface profileFromDatabase {
   pictures: userPictures;
   biography: string;
   socialFeatures: socialFeatures;
-  matches: IDarray;
+  matches: string[];
   hasMatchDocument: boolean; // Helps in match-generator to find profiles with no match document
 }
 

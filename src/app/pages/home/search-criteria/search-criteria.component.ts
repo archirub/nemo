@@ -1,10 +1,13 @@
+import { SCriteria } from "@interfaces/index";
 import { Component, OnInit, OnDestroy } from "@angular/core";
 import { ModalController } from "@ionic/angular";
+import { FormControl, FormGroup } from "@angular/forms";
 
 import { Subscription } from "rxjs";
 
 import { SearchCriteriaStore } from "@stores/search-criteria-store/search-criteria-store.service";
-import { SCriteria } from "@interfaces/search-criteria.model";
+import { searchCriteriaOptions } from "@interfaces/search-criteria.model";
+import { SearchCriteria } from "@classes/index";
 
 @Component({
   selector: "app-search-criteria",
@@ -13,11 +16,17 @@ import { SCriteria } from "@interfaces/search-criteria.model";
 })
 export class SearchCriteriaComponent implements OnInit, OnDestroy {
   searchCriteria$: Subscription;
-  searchCriteria: SCriteria;
+  searchCriteria: SearchCriteria;
+  scOptions = searchCriteriaOptions;
 
-  searchCriteriaOptions = {
-    university: ["UCL", "LSE", "HAHA"],
-  };
+  searchCriteriaForm = new FormGroup({
+    // university: new FormControl(" "),
+    location: new FormControl(null),
+    ageRange: new FormControl(null),
+    areaOfStudy: new FormControl(null),
+    society: new FormControl(null),
+    interest: new FormControl(null),
+  });
 
   constructor(
     private SCstore: SearchCriteriaStore,
@@ -25,11 +34,15 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    // instead, subscribe in the home component, and then transfer the data to this component
     this.searchCriteria$ = this.SCstore.searchCriteria.subscribe({
-      next: (SC) => {
-        this.searchCriteria = SC;
-        console.log(this.searchCriteria);
+      next: (sc) => {
+        this.searchCriteriaForm.patchValue({
+          location: sc.location,
+          ageRange: sc.ageRange,
+          areaOfStudy: sc.areaOfStudy,
+          society: sc.societyCategory,
+          interest: sc.interest,
+        });
       },
     });
   }
@@ -38,7 +51,8 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
     this.searchCriteria$.unsubscribe();
   }
 
-  async dismissModal() {
+  async closeAndConfirmChoices() {
+    this.SCstore.addCriteria(this.searchCriteriaForm.value);
     return await this.modalCtrl.dismiss();
   }
 }
