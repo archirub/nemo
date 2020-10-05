@@ -1,0 +1,69 @@
+ion-card {
+  height: 95%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  overflow-y: auto;
+  ::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+ion-list {
+  overflow: hidden;
+  overflow-y: auto;
+  ::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Container holding the image and the text */
+.container {
+  position: relative;
+  text-align: center;
+  color: white;
+}
+
+/* Bottom left text */
+.bottom-left {
+  position: absolute;
+  bottom: 8px;
+  left: 16px;
+}
+
+.mutuals {
+  display: flex;
+  position: absolute;
+  padding: 15px;
+}
+
+.mutuals-avatar {
+  height: 40px;
+  width: 40px;
+  margin-right: -10px;
+  border-radius: 50% !important;
+  border: 2px solid white !important;
+}
+
+.trait-chips {
+  display: inline-block;
+  float: none;
+  padding: 0px 15px 0px;
+}
+
+.swipe-card {
+  border-radius: 30px;
+}
+
+.card-header {
+  padding: 15px 20px 15px;
+}
+
+.bio {
+  padding: 5px 20px 20px;
+}
+
+#department {
+  font-size: larger;
+  margin-top: 5px;
+}
