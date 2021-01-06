@@ -1,14 +1,14 @@
-<ion-list>
+<ion-list *ngIf="chats_">
   <ion-item
     detail="true"
     button
     (click)="goToMessenger(chat.id)"
-    *ngFor="let chat of chats; index as i"
+    *ngFor="let chat of chats_; index as i"
   >
-    <ion-avatar slot="start">
-      <img [src]="chat.recipient.picture" />
+    <ion-avatar slot="start" *ngIf="chat">
+      <ion-img [src]="chat.recipient.picture"></ion-img>
     </ion-avatar>
-    <div class="text-container">
+    <div class="text-container" *ngIf="chat">
       <ion-label color="primary" class="text-container name">
         {{ chat.recipient.name }}</ion-label
       >

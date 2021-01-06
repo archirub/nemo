@@ -45,17 +45,13 @@ export class ChatsPage implements OnInit, OnDestroy {
   //   );
 
   constructor(
-    private ChatStore: ChatStore,
+    private chatStore: ChatStore,
     private auth: AuthService,
     private fs: AngularFirestore
   ) {}
 
   ngOnInit() {
-    this.allChats = this.ChatStore.chats;
-
-    this.ChatStore.fetchChats(10);
-
-    this.scrollTopSpeed = this.profileCount * 45; //so the relative speed is always the same
+    this.allChats = this.chatStore.chats;
 
     //this.messageListener$ = this.messageListener.subscribe();
     // this.searching = false;
@@ -74,6 +70,7 @@ export class ChatsPage implements OnInit, OnDestroy {
   onScrollDown() {}
 
   scrollToTop() {
+    this.scrollTopSpeed = this.profileCount * 45; //so the relative speed is always the same
     this.ionContent.scrollToTop(500);
   }
 

@@ -1,27 +1,34 @@
-import { Component, OnInit, Input } from "@angular/core";
+import { Component, OnInit, Input, OnDestroy } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 
 import { Chat } from "@classes/index";
 import { FakeDataService } from "@services/fake-data/fake-data.service";
-import { relative } from "path";
+import { ChatStore } from "@stores/index";
+import { Subscription } from "rxjs";
 
 @Component({
   selector: "app-chat-board",
   templateUrl: "./chat-board.component.html",
   styleUrls: ["./chat-board.component.scss"],
 })
-export class ChatBoardComponent implements OnInit {
+export class ChatBoardComponent implements OnInit, OnDestroy {
   @Input() chats: Chat[];
-  displayedText: string[];
-  chatID: string;
+  chats$: Subscription;
+  chats_: Chat[];
 
   constructor(
     private fakeData: FakeDataService,
     private ActivatedRoute: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private chatStore: ChatStore
   ) {}
 
   ngOnInit() {
+    this.chats$ = this.chatStore.chats.subscribe((chats) => {
+      this.chats_ = chats;
+      console.log(chats.map((chat) => chat.recipient));
+    });
+
     //this.ActivatedRoute.paramMap.subscribe();
     //this.displayedText = this.fakeData.generateSentences(this.profiles.length);
   }
@@ -38,5 +45,9 @@ export class ChatBoardComponent implements OnInit {
 
   goToMessenger(chatID: String) {
     this.router.navigate(["/messenger/" + chatID]);
+  }
+
+  ngOnDestroy() {
+    this.chats$.unsubscribe();
   }
 }
