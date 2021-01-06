@@ -1,11 +1,81 @@
 <ion-content>
-  <ion-slides pager="true" #slides>
-    <ion-slide> </ion-slide>
-    <ion-slide>
-      <h1>Slide 2</h1>
-    </ion-slide>
-    <ion-slide>
-      <h1>Slide 3</h1>
-    </ion-slide>
-  </ion-slides>
+  <form [formGroup]="signupForm">
+    <ion-slides pager="true" #slides>
+      <ion-slide>
+        <ion-item lines="none">
+          <ion-label class="question" position="stacked">
+            What is your university email?
+          </ion-label>
+          <p class="tip">Only UCL emails are supported at the moment.</p>
+
+          <div class="input">
+            <ion-input></ion-input>
+          </div>
+        </ion-item>
+      </ion-slide>
+
+      <ion-slide> verification code </ion-slide>
+      <ion-slide>
+        <ion-item lines="none">
+          <ion-label class="question" position="stacked">
+            Choose a password...
+          </ion-label>
+          <p class="tip">Your password must be at least 10 characters long.</p>
+
+          <div class="input">
+            <ion-input></ion-input>
+          </div>
+        </ion-item>
+      </ion-slide>
+      <ion-slide>
+        <ion-item lines="none">
+          <ion-label class="question" position="stacked">
+            What is your name?
+          </ion-label>
+          <div class="input">
+            <ion-input placeholder="First name"></ion-input>
+          </div>
+          <div class="input">
+            <ion-input placeholder="Last name"></ion-input>
+          </div>
+        </ion-item>
+      </ion-slide>
+      <ion-slide>
+        <ion-item lines="none">
+          <ion-label class="question" position="stacked">
+            When were you born?
+          </ion-label>
+
+          <div class="input">
+            <ion-datetime displayFormat="DD MM YY"></ion-datetime>
+          </div>
+        </ion-item>
+      </ion-slide>
+      <ion-slide>
+        <ion-item lines="none">
+          <ion-label class="question" position="stacked">
+            Add some pictures to your profile
+          </ion-label>
+          <p class="tip">You may choose 1 to 5 pictures.</p>
+
+          <div>pictures chosen displayed</div>
+          <ion-button
+            (click)="onPickPicture()"
+            expand="block"
+            fill="clear"
+            shape="round"
+          >
+            Get me to my photo gallery
+          </ion-button>
+        </ion-item>
+      </ion-slide>
+      <ion-slide> set-up preferences </ion-slide>
+      <ion-slide> set university details </ion-slide>
+      <ion-slide> where are you from </ion-slide>
+      <ion-slide> answer some question </ion-slide>
+      <ion-slide> describe yourself </ion-slide>
+      <ion-slide> add a bio </ion-slide>
+      <ion-slide> add a social media </ion-slide>
+    </ion-slides>
+  </form>
 </ion-content>
