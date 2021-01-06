@@ -1,13 +1,35 @@
 {
   "compilerOptions": {
     "module": "commonjs",
+
+    // Added these shortened paths here too so that I can use the interfaces in functions
+    // That sadly required me to add a baseUrl (or I get error TS5060: Option 'paths' cannot be used without specifying '--baseUrl' option.)
+    // set to the root of the folder, not functions/., so some path errors may be caused by that
+    "baseUrl": "../",
+    "paths": {
+      "@interfaces/*": ["src/app/shared/interfaces/*"],
+      "@animations/*": ["src/app/shared/animations/*"],
+      "@services/*": ["src/app/shared/services/*"],
+      "@stores/*": ["src/app/shared/stores/*"],
+      "@classes/*": ["src/app/shared/classes/*"]
+    },
+
+
     "noImplicitReturns": true,
-    "noUnusedLocals": true,
+    "noUnusedLocals": false,
     "outDir": "lib",
     "sourceMap": true,
     "strict": true,
-    "target": "es2017"
+    "target": "es2017",
+    "strictPropertyInitialization": false,
+    "noImplicitThis": false,
+    "resolveJsonModule": true
   },
   "compileOnSave": true,
-  "include": ["src"]
+  "include": [
+    "src"
+  ],
+  "types": [
+    "firebase"
+    ]
 }
