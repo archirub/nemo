@@ -24,7 +24,7 @@ export const getUIDs = functions
       .listUsers(userToFetchCount);
     const usersFetched: admin.auth.UserRecord[] = usersFetchedQuery.users;
 
-    let UIDsToSend: string[] = [];
+    const UIDsToSend: string[] = [];
     await Promise.all(
       usersFetched.map(async (user) => {
         const userProfile = await admin
