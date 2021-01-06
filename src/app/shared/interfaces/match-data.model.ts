@@ -1,16 +1,24 @@
-import { IDarray } from "./shared.model";
+import { SearchFeatures } from "./search-criteria.model";
 
-export interface matchObject {
-  userID: string;
+export interface matchObjectFromDatabase {
+  // userID: string;
   PI: number;
-  // socialFeatures: socialFeatures;
-  // physicalFeatures: physicalFeatures;
-  bannedUsers: IDarray;
-  likedUsers: IDarray;
+
+  unmatchableUsers: string[];
+  likedUsers: string[];
+  matches: string[];
+
+  gender: Gender;
+  sexualPreference: SexualPreference;
+  swipeMode: SwipeMode;
+  searchFeatures: SearchFeatures;
+
+  showProfile: Boolean;
 }
 
-export interface physicalFeatures {
-  height: string;
-  hairColor: string;
-  skinTone: string;
-}
+export const genderOptions = ["male", "female", "non-binary"] as const;
+export type Gender = typeof genderOptions[number];
+export type SexualPreference = Gender[];
+
+export const swipeModeOptions = ["friend", "dating", "both"] as const;
+export type SwipeMode = typeof swipeModeOptions[number];

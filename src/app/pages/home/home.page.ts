@@ -29,7 +29,14 @@ export class HomePage implements OnInit, OnDestroy {
   swipeProfiles: Observable<profileSnapshot[]>;
   private swipeStackRefill$: Subscription;
 
-  private searchCriteria: SearchCriteria = new SearchCriteria();
+  private searchCriteria: SearchCriteria = new SearchCriteria(
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+  );
   private searchCriteria$: Subscription;
 
   // PROPERTIES FOR MODAL ANIMATION
@@ -53,10 +60,18 @@ export class HomePage implements OnInit, OnDestroy {
     this.onResize();
   }
 
+  tempSub: Subscription;
+
   ngOnInit() {
     this.swipeProfiles = this.swipeStackStore.profiles;
     this.searchCriteria$ = this.SCstore.searchCriteria.subscribe((SC) => {
       this.searchCriteria = SC;
+    });
+    this.tempSub = this.swipeProfiles.subscribe((profiles) => {
+      console.log(
+        "new swipe profiles:",
+        profiles.map((profiles) => profiles.data())
+      );
     });
 
     // Makes sure swipe stack is only filled when its length is smaller or equal to a given
@@ -77,11 +92,11 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   private SCclassToMap(SC: SearchCriteria): SCriteria {
-    let map: SCriteria = {};
+    const map = {};
     for (const option in SC.options) {
       map[option] = SC[option];
     }
-    return map;
+    return map as SCriteria;
   }
 
   async presentSCmodal(): Promise<void> {
@@ -111,5 +126,6 @@ export class HomePage implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.searchCriteria$.unsubscribe();
     this.swipeStackRefill$.unsubscribe();
+    this.tempSub.unsubscribe();
   }
 }

@@ -1,49 +1,67 @@
 import {
-  IDarray,
   profile,
-  socialFeatures,
-  userPictures,
+  profilePictureUrls,
+  SocialMediaLinks,
+  QuestionAndAnswer,
+  Interest,
+  University,
+  Location,
 } from "@interfaces/index";
 
 export class Profile implements profile {
-  private _firstName: string;
-  private _lastName: string;
+  private _uid: string;
+  private _displayName: string;
   private _dateOfBirth: Date;
-  private _pictures: userPictures;
+  private _pictures: profilePictureUrls;
   private _biography: string;
-  private _socialFeatures: socialFeatures;
-  private _matches: IDarray;
+  private _university: University;
+  private _course: string;
+  private _society: string;
+  private _interests: Interest[];
+  private _questions: QuestionAndAnswer[];
+  private _location: Location;
+  private _socialMediaLinks: SocialMediaLinks;
 
   constructor(
-    firstName: string,
-    lastName: string,
+    uid: string,
+    displayName: string,
     dateOfBirth: Date,
-    pictures: userPictures,
+    pictures: profilePictureUrls,
     biography: string,
-    socialFeatures: socialFeatures,
-    matches: IDarray
+    university: University,
+    course: string,
+    society: string,
+    interests: Interest[],
+    questions: QuestionAndAnswer[],
+    location: Location,
+    socialMediaLinks: SocialMediaLinks
   ) {
-    this.firstName = firstName;
-    this.lastName = lastName;
+    this.uid = uid;
+    this.displayName = displayName;
     this.dateOfBirth = dateOfBirth;
     this.pictures = pictures;
-    this._biography = biography;
-    this.socialFeatures = socialFeatures;
-    this.matches = matches;
+    this.biography = biography;
+    this.university = university;
+    this.course = course;
+    this.society = society;
+    this.interests = interests;
+    this.questions = questions;
+    this.location = location;
+    this.socialMediaLinks = socialMediaLinks;
   }
 
-  public get firstName(): string {
-    return this._firstName;
+  public get uid(): string {
+    return this._uid;
   }
-  public set firstName(value: string) {
-    this._firstName = value;
+  public set uid(value: string) {
+    this._uid = value;
   }
 
-  public get lastName(): string {
-    return this._lastName;
+  public get displayName(): string {
+    return this._displayName;
   }
-  public set lastName(value: string) {
-    this._lastName = value;
+  public set displayName(value: string) {
+    this._displayName = value;
   }
 
   public get dateOfBirth(): Date {
@@ -53,10 +71,10 @@ export class Profile implements profile {
     this._dateOfBirth = value;
   }
 
-  public get pictures(): userPictures {
+  public get pictures(): profilePictureUrls {
     return this._pictures;
   }
-  public set pictures(value: userPictures) {
+  public set pictures(value: profilePictureUrls) {
     this._pictures = value;
   }
 
@@ -67,18 +85,53 @@ export class Profile implements profile {
     this._biography = value;
   }
 
-  public get socialFeatures(): socialFeatures {
-    return this._socialFeatures;
+  public get university(): University {
+    return this._university;
   }
-  public set socialFeatures(value: socialFeatures) {
-    this._socialFeatures = value;
+  public set university(value: University) {
+    this._university = value;
   }
 
-  public get matches(): IDarray {
-    return this._matches;
+  public get course(): string {
+    return this._course;
   }
-  public set matches(value: IDarray) {
-    this._matches = value;
+  public set course(value: string) {
+    this._course = value;
+  }
+
+  public get society(): string {
+    return this._society;
+  }
+  public set society(value: string) {
+    this._society = value;
+  }
+
+  public get interests(): Interest[] {
+    return this._interests;
+  }
+  public set interests(value: Interest[]) {
+    this._interests = value;
+  }
+
+  public get questions(): QuestionAndAnswer[] {
+    return this._questions;
+  }
+  public set questions(value: QuestionAndAnswer[]) {
+    this._questions = value;
+  }
+
+  public get location(): Location {
+    return this._location;
+  }
+  public set location(value: Location) {
+    this._location = value;
+  }
+
+  public get socialMediaLinks(): SocialMediaLinks {
+    return this._socialMediaLinks;
+  }
+  public set socialMediaLinks(value: SocialMediaLinks) {
+    this._socialMediaLinks = value;
   }
 
   age() {

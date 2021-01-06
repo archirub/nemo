@@ -8,9 +8,8 @@ import { BehaviorSubject, Subscription } from "rxjs";
 import { map } from "rxjs/operators";
 // import { AutosizeModule } from "ngx-autosize";
 
-import { Chat } from "@classes/index";
+import { Chat, Message } from "@classes/index";
 import { ChatStore } from "@stores/chat-store/chat-store.service";
-import { Message } from "@angular/compiler/src/i18n/i18n_ast";
 
 @Component({
   selector: "app-messenger",
@@ -21,13 +20,14 @@ import { Message } from "@angular/compiler/src/i18n/i18n_ast";
 export class MessengerPage implements OnInit, OnDestroy {
   @ViewChild(IonContent) ionContent: IonContent;
 
-  private scrollSpeed: number;
+  //NOT IN USE YET, what are their point? (Archi)
   public nextMessageSender: string;
+  searching: any;
+  private scrollSpeed: number;
 
   private chats$: Subscription;
   private chatID: string;
   public currentChat = new BehaviorSubject<Chat>(null);
-  searching: any;
 
   constructor(
     private keyboard: Keyboard,
@@ -65,11 +65,12 @@ export class MessengerPage implements OnInit, OnDestroy {
   }
 
   ionViewDidEnter() {
+    // I don't think the keyboard should show up on entering the chat (Archi)
     this.keyboard.show();
   }
 
   ngOnDestroy() {
-    console.log(this.nextMessageSender);
+    console.log("ngondestroy", this.nextMessageSender);
     this.chats$.unsubscribe();
   }
 
@@ -78,6 +79,6 @@ export class MessengerPage implements OnInit, OnDestroy {
   }
 
   onSend(event) {
-    console.log(event);
+    console.log("onSend:", event);
   }
 }

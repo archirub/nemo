@@ -14,11 +14,11 @@ export class Message implements message {
     reaction: messageReaction,
     seen: boolean
   ) {
-    (this.senderID = senderID),
-      (this.time = time),
-      (this.content = content),
-      (this.reaction = reaction),
-      (this.seen = seen);
+    this.senderID = senderID;
+    this.time = time;
+    this.content = content;
+    this.reaction = reaction;
+    this.seen = seen;
   }
 
   public get senderID(): string {

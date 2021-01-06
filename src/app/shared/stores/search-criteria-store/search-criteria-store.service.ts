@@ -13,7 +13,7 @@ import { SearchCriteria, copyClassInstance } from "@classes/index";
 })
 export class SearchCriteriaStore {
   private _searchCriteria = new BehaviorSubject<SearchCriteria>(
-    new SearchCriteria()
+    new SearchCriteria(null, null, null, null, null, null)
   );
 
   public readonly searchCriteria = this._searchCriteria.asObservable();
