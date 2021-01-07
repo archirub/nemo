@@ -9,7 +9,12 @@ import { BehaviorSubject, Observable, Subscription } from "rxjs";
 
 import { AuthService } from "@services/auth/auth.service";
 import { Chat, Message } from "@classes/index";
-import { chatFromDatabase, message, userSnippet } from "@interfaces/index";
+import {
+  chatFromDatabase,
+  message,
+  messageState,
+  userSnippet,
+} from "@interfaces/index";
 
 @Injectable({
   providedIn: "root",
@@ -33,12 +38,12 @@ export class ChatStore {
 
   public async initializeStore(): Promise<void> {
     await this.fetchChats();
-    this.startDatabaseObservers();
+    this.startChatDocObservers();
     await this.startDocumentCreationDeletionObserver();
   }
 
   /** fetches all the chats for the authenticated user */
-  private async fetchChats(): Promise<Chat[]> {
+  public async fetchChats(): Promise<Chat[]> {
     const user = await this.afAuth.currentUser;
     if (user) {
       let query = this.fs.firestore
@@ -61,7 +66,7 @@ export class ChatStore {
   }
 
   /** Initialises listening in on updates from the user's chats */
-  private startDatabaseObservers(): void {
+  private startChatDocObservers(): void {
     this._chats
       .getValue()
       .map((chat) => chat.id)
@@ -71,7 +76,7 @@ export class ChatStore {
           this.chatSubscriptionsHandler[id]
         )
           return;
-        this.newDatabaseObserver(id);
+        this.newChatDocObserver(id);
       });
   }
 
@@ -91,7 +96,7 @@ export class ChatStore {
           .forEach((ref) => {
             if (ref.payload.doc.exists) {
               if (ref.type === "added") {
-                this.newDatabaseObserver(ref.payload.doc.id);
+                this.newChatDocObserver(ref.payload.doc.id);
               } else if (ref.type === "removed") {
                 this.removeDatabaseObserver(ref.payload.doc.id);
               } else {
@@ -112,20 +117,18 @@ export class ChatStore {
     }
   }
 
-  /** Updates the chat document on the database */
-  private async databaseMessageUpdate(
-    message: Message,
-    chat: Chat
-  ): Promise<void> {
-    if (!message || !chat) return;
+  /** Updates the chat document on the database with the content
+   * of what is stored in the Chats observable
+   * DISADVANTAGE OF CURRENT FORMAT: have to update the whole message array, doesn't change just one message
+   * That's bad if the message array stored locally is corrupted in some way, or if the user only wants to send
+   * one message that didn't send, not all of them.
+   */
+  public async databaseUpdateMessages(chat: Chat): Promise<void> {
+    if (!chat) return;
 
     const currentMessages: message[] = this.classToDbFormat_messages(
       chat.messages
     );
-    const newMessage: message = this.classToDbFormat_message(message);
-
-    currentMessages.push(newMessage);
-
     const snapshot = await this.fs.collection("chats").doc(chat.id).update({
       messages: currentMessages,
     });
@@ -135,13 +138,13 @@ export class ChatStore {
    * the database regardless since we are listening to it. We must update locally to
    * make the app seem responsive regardless of the server's latency.
    */
-  private localMessageAddition(newMessage: Message, chat: Chat): void {
-    if (!newMessage || !chat) return;
+  public localMessageAddition(newMessage: Message, chatID: string): void {
+    if (!newMessage || !chatID) return;
 
     let chats: Chat[] = this._chats.getValue();
 
     // Finding index of chat to update
-    const chatIndex: number = chats.map((_chat) => _chat.id).indexOf(chat.id);
+    const chatIndex: number = chats.map((_chat) => _chat.id).indexOf(chatID);
 
     if (chatIndex !== -1) {
       let targetChat: Chat = chats[chatIndex];
@@ -157,13 +160,13 @@ export class ChatStore {
   }
 
   /** Removes message from chat */
-  private localMessageRemoval(message: Message, chat: Chat): void {
-    if (!message || !chat) return;
+  private localMessageRemoval(message: Message, chatID: string): void {
+    if (!message || !chatID) return;
 
     let chats: Chat[] = this._chats.getValue();
 
     // Finding index of chat to update
-    const chatIndex: number = chats.map((_chat) => _chat.id).indexOf(chat.id);
+    const chatIndex: number = chats.map((_chat) => _chat.id).indexOf(chatID);
 
     if (chatIndex !== -1) {
       let targetChat: Chat = chats[chatIndex];
@@ -180,7 +183,7 @@ export class ChatStore {
   }
 
   /** Adds a new listener for updates/deletions to the chat doc with id chatID*/
-  private newDatabaseObserver(chatID: string): void {
+  private newChatDocObserver(chatID: string): void {
     const listener = this.fs
       .collection("chats")
       .doc(chatID)
@@ -189,7 +192,8 @@ export class ChatStore {
     >;
     const subscription: Subscription = listener.subscribe((ref) => {
       if (ref.payload.exists) {
-        this.updateChat(ref.payload);
+        const chat: Chat = this.dbFormatToClass_chat(ref.payload);
+        this.updateChat(chat);
       } else {
         console.error("Data of chat ref was empty:", ref);
       }
@@ -215,12 +219,8 @@ export class ChatStore {
   /** Updates the chat corresponding to the provided chatSnapshot in the chats observable
    * If the latter doesn't exist, the chat is added to the chats observable.
    */
-  private updateChat(
-    chatSnapshot: firebase.firestore.QueryDocumentSnapshot<firebase.firestore.DocumentData>
-  ): void {
-    if (!chatSnapshot.exists) return;
-
-    const newChat: Chat = this.dbFormatToClass_chat(chatSnapshot);
+  private updateChat(newChat: Chat): void {
+    if (!newChat) return;
 
     const chatsObject: Chat[] = this._chats.getValue();
 
@@ -233,27 +233,86 @@ export class ChatStore {
     } else {
       chatsObject.push(newChat);
     }
+
     this._chats.next(chatsObject);
+  }
+
+  public updateMessageState(
+    targetChat: Chat,
+    targetMessage: Message,
+    newState: messageState
+  ) {
+    if (!targetChat || !targetMessage || !newState) return;
+    const chats: Chat[] = this._chats.getValue();
+
+    // Assuming no two messages have the same content, same time and same sender
+    const messageIndex: number = targetChat.messages.findIndex(
+      (_message) =>
+        _message.content === targetMessage.content &&
+        _message.senderID === targetMessage.senderID &&
+        _message.time === targetMessage.time
+    );
+
+    if (messageIndex !== -1) {
+      targetMessage.state = newState;
+      targetChat[messageIndex] = targetMessage;
+
+      const chatIndex: number = chats
+        .map((chat) => chat.id)
+        .indexOf(targetChat.id);
+
+      if (chatIndex !== -1) {
+        chats[chatIndex] = targetChat;
+        this._chats.next(chats);
+      } else {
+        console.error("Chat not found");
+      }
+    } else {
+      console.error("Message not found");
+    }
+  }
+
+  public updateLatestChatInput(targetChat: Chat, newInput: string) {
+    if (!targetChat || !newInput) return;
+
+    const chats: Chat[] = this._chats.getValue();
+
+    const chatIndex: number = chats
+      .map((chat) => chat.id)
+      .indexOf(targetChat.id);
+    if (chatIndex !== -1) {
+      chats[chatIndex].latestChatInput = newInput;
+      this._chats.next(chats);
+    } else {
+      console.error("Chat not found");
+    }
   }
 
   private dbFormatToClass_chat(
     snapshot: firebase.firestore.QueryDocumentSnapshot<firebase.firestore.DocumentData>
   ): Chat {
     if (!snapshot.exists) return;
+    const data = snapshot.data() as chatFromDatabase;
     const id: string = snapshot.id;
-    const batchVolume: number = snapshot.data().batchVolume;
-    const lastInteracted: Date = snapshot.data().lastInteracted;
+    const batchVolume: number = data.batchVolume;
+    const lastInteracted: Date = data.lastInteracted;
 
-    const userSnippets: userSnippet[] = snapshot.data().userSnippets;
+    const userSnippets: userSnippet[] = data.userSnippets;
 
     const recipient: userSnippet = userSnippets.filter(
       (snippet) => snippet.uid !== this.auth.userID
     )[0];
 
-    const dbMessages: message[] = snapshot.data().messages;
+    const dbMessages: message[] = data.messages.map((message) => {
+      const _message = message as message;
+      // state "sent" is given here because we assume all chats in database format
+      // come from the database, and if they come from the database then they must have been sent
+      _message.state = "sent";
+      return _message;
+    });
     const messages: Message[] = this.dbFormatToClass_messages(dbMessages);
 
-    return new Chat(id, recipient, messages, batchVolume, lastInteracted);
+    return new Chat(id, recipient, messages, batchVolume, lastInteracted, null);
   }
 
   private dbFormatToClass_messages(messages: message[]): Message[] {
@@ -265,8 +324,9 @@ export class ChatStore {
       const senderID = msg.senderID;
       const time = msg.time;
       const seen = msg.seen;
+      const state = msg.state;
 
-      return new Message(senderID, time, content, reaction, seen);
+      return new Message(senderID, time, content, reaction, seen, state);
     });
   }
 
@@ -277,8 +337,9 @@ export class ChatStore {
     const senderID = msg.senderID;
     const time = msg.time;
     const seen = msg.seen;
+    const state = msg.state;
 
-    return new Message(senderID, time, content, reaction, seen);
+    return { senderID, time, content, reaction, seen, state };
   }
 
   private classToDbFormat_messages(messages: Message[]): message[] {
