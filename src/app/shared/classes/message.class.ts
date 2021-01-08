@@ -1,4 +1,4 @@
-import { message, messageReaction } from "@interfaces/index";
+import { message, messageReaction, messageState } from "@interfaces/index";
 
 export class Message implements message {
   private _senderID: string;
@@ -6,19 +6,22 @@ export class Message implements message {
   private _content: string;
   private _reaction: messageReaction;
   private _seen: boolean;
+  private _state: messageState;
 
   constructor(
     senderID: string,
     time: Date,
     content: string,
     reaction: messageReaction,
-    seen: boolean
+    seen: boolean,
+    state: messageState
   ) {
     this.senderID = senderID;
     this.time = time;
     this.content = content;
     this.reaction = reaction;
     this.seen = seen;
+    this.state = state;
   }
 
   public get senderID(): string {
@@ -54,5 +57,12 @@ export class Message implements message {
   }
   public set seen(value: boolean) {
     this._seen = value;
+  }
+
+  public get state(): messageState {
+    return this._state;
+  }
+  public set state(value: messageState) {
+    this._state = value;
   }
 }

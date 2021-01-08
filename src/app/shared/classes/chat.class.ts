@@ -7,19 +7,22 @@ export class Chat implements chat {
   private _messages: Message[];
   private _batchVolume: number;
   private _lastInteracted: Date;
+  private _latestChatInput: string;
 
   constructor(
     id: string,
     recipient: userSnippet,
     messages: Message[],
     batchVolume: number,
-    lastInteracted: Date
+    lastInteracted: Date,
+    latestChatInput: string
   ) {
     this.id = id;
     this.recipient = recipient;
     this.messages = messages;
     this.batchVolume = batchVolume;
     this.lastInteracted = lastInteracted;
+    this.latestChatInput = latestChatInput;
   }
 
   public get id(): string {
@@ -55,5 +58,11 @@ export class Chat implements chat {
   }
   public set lastInteracted(value: Date) {
     this._lastInteracted = value;
+  }
+  public get latestChatInput(): string {
+    return this._latestChatInput;
+  }
+  public set latestChatInput(value: string) {
+    this._latestChatInput = value;
   }
 }
