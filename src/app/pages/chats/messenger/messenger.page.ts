@@ -150,6 +150,7 @@ export class MessengerPage implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    console.log("latest:", this.latestChatInput);
     this.chatStore.updateLatestChatInput(
       this.currentChat.getValue(),
       this.latestChatInput
