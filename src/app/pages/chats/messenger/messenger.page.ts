@@ -46,36 +46,8 @@ export class MessengerPage implements OnInit, OnDestroy {
     this.scroll$ = this.currentChat.subscribe((c) => this.scrollHandler(c));
   }
 
-  /** Handles scrolling to bottom of messenger when there a new message is sent (on either side).
-   * We assume a change in the time of the newest message means a new message appeared.
-   */
-  private scrollHandler(chat: Chat) {
-    if (!chat?.messages) return;
-
-    if (this.lastInteracted() > this.timeOfNewestMsg) {
-      this.timeOfNewestMsg = this.lastInteracted();
-      setTimeout(() => this.ionContent.scrollToBottom(this.SCROLL_SPEED), 100);
-    }
-  }
-
-  /** Called in html, teleports to bottom of page when content is rendered */
-  fastScroll() {
-    this.ionContent?.scrollToBottom(0);
-  }
-
-  /** Returns the time of the newest message */
-  private lastInteracted(): Date {
-    const chat = this.currentChat.getValue();
-    if (!chat) return;
-    return new Date(
-      Math.max.apply(
-        null,
-        chat.messages.map((msg) => msg.time)
-      )
-    );
-  }
-
-  /** Subscribes to chatStore to get chat information & scroll speed */
+  /** Subscribes to chatStore's Chats osbervable using chatID
+   * from paramMap */
   private messengerInitHandler(parameter: ParamMap) {
     if (!parameter.has("chatID"))
       return this.navCtrl.navigateBack("/tabs/chats");
@@ -149,13 +121,40 @@ export class MessengerPage implements OnInit, OnDestroy {
     }
   }
 
+  /** Handles scrolling to bottom of messenger when there a new message is sent (on either side).
+   * We assume a change in the time of the newest message means a new message appeared.
+   */
+  private scrollHandler(chat: Chat) {
+    if (!chat?.messages) return;
+
+    if (this.lastInteracted() > this.timeOfNewestMsg) {
+      this.timeOfNewestMsg = this.lastInteracted();
+      setTimeout(() => this.ionContent.scrollToBottom(this.SCROLL_SPEED), 100);
+    }
+  }
+
+  /** Called in html, teleports to bottom of page when content is rendered */
+  fastScroll() {
+    this.ionContent?.scrollToBottom(0);
+  }
+
+  /** Returns the time of the newest message */
+  private lastInteracted(): Date {
+    const chat = this.currentChat.getValue();
+    if (!chat) return;
+    return new Date(
+      Math.max.apply(
+        null,
+        chat.messages.map((msg) => msg.time)
+      )
+    );
+  }
+
   ngOnDestroy() {
-    console.log("latest:", this.latestChatInput);
     this.chatStore.updateLatestChatInput(
       this.currentChat.getValue(),
       this.latestChatInput
     );
-
     this.chats$.unsubscribe();
     this.scroll$.unsubscribe();
   }

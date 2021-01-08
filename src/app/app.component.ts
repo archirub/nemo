@@ -29,7 +29,7 @@ export class AppComponent {
       this.statusBar.styleDefault();
       this.splashScreen.hide();
 
-      this.auth.logIn().then(() => this.chatStore.initializeStore());
+      this.auth.logIn().then((uid) => this.chatStore.initializeStore(uid));
 
       //                      CLOUD FUNCTION CALL "INTERNAL ERROR" PROBLEM.
       // WHEN EXACTLY THE BELOW IS CALLED IN MOCK-DATA-MANAGEMENT (so just another angular app
