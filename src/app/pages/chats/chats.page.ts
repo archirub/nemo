@@ -21,61 +21,22 @@ import { chatFromDatabase } from "@interfaces/index";
 export class ChatsPage implements OnInit, OnDestroy {
   @ViewChild(IonContent) ionContent: IonContent;
 
-  private allChats$: Subscription;
-  private messageListener$: Subscription;
+  TOP_SCROLL_SPEED = 100;
 
-  public allChats: Observable<Chat[]>;
-  public allDbChats: chatFromDatabase[];
-  profileCount: number;
-  scrollTopSpeed: number;
-  searching: boolean;
-  filtered: boolean;
+  private chats$: Subscription;
+  public chats: Observable<Chat[]>;
 
-  // private messageListener: Observable<chatFromDatabase[]> = this.fs
-  //   .collection("chats", (ref) =>
-  //     ref.where("uids", "array-contains", this.auth.userID)
-  //   )
-  //   .valueChanges()
-  //   .pipe(
-  //     map((snapshot: chatFromDatabase[]) => {
-  //       console.log(snapshot);
-  //       // this.allDbChats = snapshot;
-  //       return snapshot;
-  //     })
-  //   );
-
-  constructor(
-    private chatStore: ChatStore,
-    private auth: AuthService,
-    private fs: AngularFirestore
-  ) {}
+  constructor(private chatStore: ChatStore) {}
 
   ngOnInit() {
-    this.allChats = this.chatStore.chats;
-
-    //this.messageListener$ = this.messageListener.subscribe();
-    // this.searching = false;
-    // this.filtered = false;
+    this.chats = this.chatStore.chats;
   }
 
-  // filterProfiles(event) {
-  //   if (this.filtered == true) {
-  //     this.filtered = false;
-  //   } else {
-  //     this.filtered = true;
-  //   }
-  //   console.log("filter status " + this.filtered);
-  // }
-
-  onScrollDown() {}
-
   scrollToTop() {
-    this.scrollTopSpeed = this.profileCount * 45; //so the relative speed is always the same
-    this.ionContent.scrollToTop(500);
+    this.ionContent.scrollToTop(this.TOP_SCROLL_SPEED);
   }
 
   ngOnDestroy() {
-    this.allChats$.unsubscribe();
-    this.messageListener$.unsubscribe();
+    this.chats$.unsubscribe();
   }
 }

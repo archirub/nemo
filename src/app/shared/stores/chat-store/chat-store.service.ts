@@ -7,7 +7,6 @@ import {
 import { AngularFireAuth } from "@angular/fire/auth";
 import { BehaviorSubject, Observable, Subscription } from "rxjs";
 
-import { AuthService } from "@services/auth/auth.service";
 import { Chat, Message } from "@classes/index";
 import {
   chatFromDatabase,
@@ -15,6 +14,7 @@ import {
   messageState,
   userSnippet,
 } from "@interfaces/index";
+import { FormatService } from "@services/index";
 
 @Injectable({
   providedIn: "root",
@@ -26,9 +26,9 @@ export class ChatStore {
   public readonly chats: Observable<Chat[]>;
 
   constructor(
-    private auth: AuthService,
     private fs: AngularFirestore,
-    private afAuth: AngularFireAuth
+    private afAuth: AngularFireAuth,
+    private format: FormatService
   ) {
     this.allChatsSubscription = new Subscription();
     this.chatSubscriptionsHandler = {};
@@ -38,8 +38,10 @@ export class ChatStore {
 
   public async initializeStore(): Promise<void> {
     await this.fetchChats();
-    this.startChatDocObservers();
-    await this.startDocumentCreationDeletionObserver();
+    await Promise.all([
+      this.startChatDocObservers(),
+      this.startDocumentCreationDeletionObserver(),
+    ]);
   }
 
   /** fetches all the chats for the authenticated user */
@@ -55,7 +57,11 @@ export class ChatStore {
       const chats: Chat[] = documents
         .map((doc) => {
           if (!doc.exists) return;
-          return this.dbFormatToClass_chat(doc);
+          return this.format.chatDatabaseToClass(
+            user.uid,
+            doc.id,
+            doc.data() as chatFromDatabase
+          );
         })
         .filter((chat) => chat);
       this._chats.next(chats);
@@ -66,18 +72,21 @@ export class ChatStore {
   }
 
   /** Initialises listening in on updates from the user's chats */
-  private startChatDocObservers(): void {
-    this._chats
-      .getValue()
-      .map((chat) => chat.id)
-      .forEach((id) => {
-        if (
-          this.chatSubscriptionsHandler.hasOwnProperty(id) &&
-          this.chatSubscriptionsHandler[id]
-        )
-          return;
-        this.newChatDocObserver(id);
-      });
+  private async startChatDocObservers(): Promise<void> {
+    const user = await this.afAuth.currentUser;
+    if (user) {
+      this._chats
+        .getValue()
+        .map((chat) => chat.id)
+        .forEach((chatID) => {
+          if (
+            this.chatSubscriptionsHandler.hasOwnProperty(chatID) &&
+            this.chatSubscriptionsHandler[chatID]
+          )
+            return;
+          this.newChatDocObserver(chatID, user.uid);
+        });
+    }
   }
 
   /** Subscribes to the user's chat documents and listens in on the
@@ -96,7 +105,7 @@ export class ChatStore {
           .forEach((ref) => {
             if (ref.payload.doc.exists) {
               if (ref.type === "added") {
-                this.newChatDocObserver(ref.payload.doc.id);
+                this.newChatDocObserver(ref.payload.doc.id, user.uid);
               } else if (ref.type === "removed") {
                 this.removeDatabaseObserver(ref.payload.doc.id);
               } else {
@@ -126,7 +135,7 @@ export class ChatStore {
   public async databaseUpdateMessages(chat: Chat): Promise<void> {
     if (!chat) return;
 
-    const currentMessages: message[] = this.classToDbFormat_messages(
+    const currentMessages: message[] = this.format.messagesClassToDatabase(
       chat.messages
     );
     const snapshot = await this.fs.collection("chats").doc(chat.id).update({
@@ -183,7 +192,8 @@ export class ChatStore {
   }
 
   /** Adds a new listener for updates/deletions to the chat doc with id chatID*/
-  private newChatDocObserver(chatID: string): void {
+  private newChatDocObserver(chatID: string, currentUserID: string): void {
+    if (!chatID || !currentUserID) return;
     const listener = this.fs
       .collection("chats")
       .doc(chatID)
@@ -192,7 +202,11 @@ export class ChatStore {
     >;
     const subscription: Subscription = listener.subscribe((ref) => {
       if (ref.payload.exists) {
-        const chat: Chat = this.dbFormatToClass_chat(ref.payload);
+        const chat: Chat = this.format.chatDatabaseToClass(
+          currentUserID,
+          chatID,
+          ref.payload.data()
+        );
         this.updateChat(chat);
       } else {
         console.error("Data of chat ref was empty:", ref);
@@ -286,68 +300,6 @@ export class ChatStore {
     } else {
       console.error("Chat not found");
     }
-  }
-
-  private dbFormatToClass_chat(
-    snapshot: firebase.firestore.QueryDocumentSnapshot<firebase.firestore.DocumentData>
-  ): Chat {
-    if (!snapshot.exists) return;
-    const data = snapshot.data() as chatFromDatabase;
-    const id: string = snapshot.id;
-    const batchVolume: number = data.batchVolume;
-    const lastInteracted: Date = data.lastInteracted;
-
-    const userSnippets: userSnippet[] = data.userSnippets;
-
-    const recipient: userSnippet = userSnippets.filter(
-      (snippet) => snippet.uid !== this.auth.userID
-    )[0];
-
-    const dbMessages: message[] = data.messages.map((message) => {
-      const _message = message as message;
-      // state "sent" is given here because we assume all chats in database format
-      // come from the database, and if they come from the database then they must have been sent
-      _message.state = "sent";
-      return _message;
-    });
-    const messages: Message[] = this.dbFormatToClass_messages(dbMessages);
-
-    return new Chat(id, recipient, messages, batchVolume, lastInteracted, null);
-  }
-
-  private dbFormatToClass_messages(messages: message[]): Message[] {
-    if (!messages) return;
-
-    return messages.map((msg) => {
-      const content = msg.content;
-      const reaction = msg.reaction;
-      const senderID = msg.senderID;
-      const time = msg.time;
-      const seen = msg.seen;
-      const state = msg.state;
-
-      return new Message(senderID, time, content, reaction, seen, state);
-    });
-  }
-
-  private classToDbFormat_message(msg: Message): message {
-    if (!msg) return;
-    const content = msg.content;
-    const reaction = msg.reaction;
-    const senderID = msg.senderID;
-    const time = msg.time;
-    const seen = msg.seen;
-    const state = msg.state;
-
-    return { senderID, time, content, reaction, seen, state };
-  }
-
-  private classToDbFormat_messages(messages: Message[]): message[] {
-    if (!messages) return;
-
-    return messages.map((msg) => {
-      return this.classToDbFormat_message(msg);
-    });
   }
 
   //create function to set lastInteracted property to null for previous batchVolumes
