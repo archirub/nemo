@@ -74,7 +74,7 @@ ion-toolbar {
   margin-left: 6px;
 }
 
-#textInput {
+#messageInput {
   order: 1;
   flex: 9;
   padding: 0px;
@@ -84,14 +84,20 @@ ion-toolbar {
   margin-right: 0px;
 }
 
-#send-button {
+#sendButton {
   order: 2;
   flex: 2;
   margin-left: -10px;
 }
 
-#input-grid {
-  padding: none;
-  margin: none;
+#boxBelowInput {
   display: flex;
+  height: 52px;
+  width: 367px;
+}
+
+#messageInputContainer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
 }

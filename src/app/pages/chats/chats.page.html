@@ -1,53 +1,17 @@
-<ion-header>
+<!-- <ion-header>
   <ion-toolbar>
-    <ion-title> Chats </ion-title>
+    <ion-title> chats </ion-title>
   </ion-toolbar>
-</ion-header>
+</ion-header> -->
 
-<ion-content [scrollEvents]="true" (ionScroll)="onScrollDown($event)">
+<ion-content>
   <ion-header collapse="condense">
     <ion-toolbar>
       <ion-title size="large">Chats</ion-title>
     </ion-toolbar>
   </ion-header>
 
-  <!-- <ion-grid>
-      <ion-row>
-        <ion-col size = '7'>
-          <ion-searchbar 
-          inputmode="decimal"
-          type="search"
-          animated
-          (ionInput)="onSearch($event)"
-          (ionBlur)="toggleSearching()"
-          ></ion-searchbar>
-        </ion-col>
-        <ion-col size = '8' offset='2'>
-          <ion-segment (ionChange)="filterProfiles($event)" color="primary" value="matches">
-            <ion-segment-button value="matches">
-              <ion-label>Matches</ion-label>
-            </ion-segment-button>
-            <ion-segment-button value="chats">
-              <ion-label>Chats</ion-label>
-            </ion-segment-button>
-          </ion-segment>
-        </ion-col>
-      </ion-row>
-    </ion-grid> -->
-
-  <!-- <div class="horizontal-scroll">
-    <ion-text color="dark">
-      <h3 id="catches-header">New Catches</h3>
-    </ion-text>
-    <ion-chip *ngFor="let profile of chips" id="large-chip">
-      <ion-avatar id="chip-avatar">
-        <img [src]="profile.mainPictureUrl" />
-      </ion-avatar>
-      <ion-label>{{profile.firstName}}</ion-label>
-    </ion-chip>
-  </div> -->
-
-  <app-chat-board [chats]="allChats | async"></app-chat-board>
+  <app-chat-board [chats]="chats | async"></app-chat-board>
 
   <ion-button
     icon-only

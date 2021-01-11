@@ -5,6 +5,7 @@ import { Subscription } from "rxjs";
 
 import { AuthService } from "@services/auth/auth.service";
 import { NameService } from "@services/name/name.service";
+import { AngularFireAuth } from "@angular/fire/auth";
 
 @Injectable({
   providedIn: "root",
@@ -13,7 +14,8 @@ export class DatabaseService {
   constructor(
     private firestore: AngularFirestore,
     private name: NameService,
-    private auth: AuthService
+    private auth: AuthService,
+    private afAuth: AngularFireAuth
   ) {}
 
   async isLikedBy(userID: string): Promise<Boolean> {
@@ -21,18 +23,20 @@ export class DatabaseService {
       console.error("No user ID provided.");
       return;
     }
-    let myID: string = "";
+    const user = await this.afAuth.currentUser;
 
-    const snapshot = await this.firestore
-      .collection(this.name.matchCollection)
-      .doc(this.auth.userID)
-      .get()
-      .toPromise();
-    if (!snapshot.exists) return false;
-    const likedUsers: string[] = snapshot.data().likedUsers;
-    if (likedUsers.includes(myID)) {
-      return true;
+    if (user) {
+      const snapshot = await this.firestore
+        .collection(this.name.matchCollection)
+        .doc(user.uid)
+        .get()
+        .toPromise();
+      if (!snapshot.exists) return false;
+      const likedUsers: string[] = snapshot.data().likedUsers;
+      if (likedUsers.includes(user.uid)) {
+        return true;
+      }
+      return false;
     }
-    return false;
   }
 }

@@ -24,7 +24,7 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
     location: new FormControl(null),
     ageRange: new FormControl(null),
     areaOfStudy: new FormControl(null),
-    society: new FormControl(null),
+    societyCategory: new FormControl(null),
     interest: new FormControl(null),
   });
 
@@ -40,7 +40,7 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
           location: sc.location,
           ageRange: sc.ageRange,
           areaOfStudy: sc.areaOfStudy,
-          society: sc.societyCategory,
+          societyCategory: sc.societyCategory,
           interest: sc.interest,
         });
       },
@@ -52,6 +52,7 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
   }
 
   async closeAndConfirmChoices() {
+    console.log("eyo2", this.searchCriteriaForm.value);
     this.SCstore.addCriteria(this.searchCriteriaForm.value);
     return await this.modalCtrl.dismiss();
   }

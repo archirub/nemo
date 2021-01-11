@@ -6,16 +6,15 @@
     *ngFor="let chat of chats; index as i"
   >
     <ion-avatar slot="start">
-      <img [src]="chat.recipient.picture" />
+      <ion-img [src]="chat?.recipient?.picture"></ion-img>
     </ion-avatar>
     <div class="text-container">
       <ion-label color="primary" class="text-container name">
-        {{ chat.recipient.name }}</ion-label
+        {{ chat?.recipient?.name }}</ion-label
       >
       <ion-label color="black" class="text-container chat">
-        {{ chat.messages[chat.messages.length - 1].content }}</ion-label
+        {{ chat?.messages[chat.messages.length - 1]?.content }}</ion-label
       >
-      <!-- <ion-badge id="notifications-badge" color="danger">5</ion-badge> -->
       <ion-label color="dark"></ion-label>
     </div>
   </ion-item>

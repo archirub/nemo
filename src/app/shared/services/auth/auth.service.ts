@@ -12,32 +12,18 @@ export class AuthService implements OnDestroy {
 
   private isAuthenticated$: Subscription;
 
-  public isAuthenticated: Observable<
-    Boolean
-  > = this._isAuthenticated.asObservable();
+  public isAuthenticated: Observable<Boolean> = this._isAuthenticated.asObservable();
 
-  public get userID(): string {
-    return this._userID;
-  }
+  // public get userID(): string {
+  //   return this._userID;
+  // }
 
-  public set userID(v: string) {
-    this._userID = v;
-  }
+  // public set userID(v: string) {
+  //   this._userID = v;
+  // }
 
   constructor(private fs: AngularFirestore, private afAuth: AngularFireAuth) {
     // this._signedIn.next()
-    // BELOW IS FOR FOR DEVELOPMENT, UNCOMMENT THE ABOVE FOR NORMAL AUTH
-    this.afAuth
-      .signInWithEmailAndPassword(
-        "archibald.ruban@gmail.com",
-        "1q2w3e4r5t6y7u8i9o0p"
-      )
-      .then(() => {
-        this.afAuth.currentUser.then((user) => {
-          console.log("ID of logged in user:", user.uid);
-          this.userID = user.uid;
-        });
-      });
 
     this.isAuthenticated$ = this.afAuth.authState.subscribe((user) => {
       if (user) {
@@ -46,6 +32,17 @@ export class AuthService implements OnDestroy {
         this._isAuthenticated.next(false);
       }
     });
+  }
+
+  /** FOR DEVELOPMENT -
+   * Logs in and returns logged user ID */
+  async logIn(): Promise<string> {
+    await this.afAuth.signInWithEmailAndPassword(
+      "archibald.ruban@gmail.com",
+      "1q2w3e4r5t6y7u8i9o0p"
+    );
+    const user = await this.afAuth.currentUser;
+    return user.uid;
   }
 
   async signIn(email: string, password: string) {
@@ -72,7 +69,6 @@ export class AuthService implements OnDestroy {
 
   async fetchUserID(): Promise<string> {
     const user: firebase.User = await this.afAuth.currentUser;
-    this.userID = user.uid;
     return user.uid;
   }
 

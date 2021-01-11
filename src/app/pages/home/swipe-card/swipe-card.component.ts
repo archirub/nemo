@@ -22,7 +22,6 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
   constructor(
     private swipeOutcomeStore: SwipeOutcomeStore,
     private swipeStackStore: SwipeStackStore,
-    private firestore: AngularFirestore,
     private db: DatabaseService
   ) {}
 

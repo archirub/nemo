@@ -1,4 +1,4 @@
-import { message } from "./message.model";
+import { messageFromDatabase } from "./message.model";
 import { Message } from "@classes/index";
 
 export interface userSnippet {
@@ -9,7 +9,7 @@ export interface userSnippet {
 export interface chatFromDatabase {
   uids: string[];
   userSnippets: userSnippet[];
-  messages: message[];
+  messages: messageFromDatabase[];
   batchVolume: number;
   lastInteracted: Date;
 }

@@ -6,10 +6,11 @@ import {
   Interest,
   SCriteria,
   searchCriteriaOptions,
+  University,
 } from "@interfaces/index";
 
 export class SearchCriteria implements SCriteria {
-  // _university: University;
+  _university: University;
   _areaOfStudy: AreaOfStudy;
   _ageRange: AgeRange;
   _societyCategory: SocietyCategory;
@@ -19,12 +20,14 @@ export class SearchCriteria implements SCriteria {
   options = searchCriteriaOptions;
 
   constructor(
-    areaOfStudy?: AreaOfStudy,
-    ageRange?: AgeRange,
-    societyCategory?: SocietyCategory,
-    interest?: Interest,
-    location?: Location
+    university: University,
+    areaOfStudy: AreaOfStudy,
+    ageRange: AgeRange,
+    societyCategory: SocietyCategory,
+    interest: Interest,
+    location: Location
   ) {
+    this.university = university;
     this.areaOfStudy = areaOfStudy;
     this.ageRange = ageRange;
     this.societyCategory = societyCategory;
@@ -32,16 +35,16 @@ export class SearchCriteria implements SCriteria {
     this.location = location;
   }
 
-  // public set university(v: University) {
-  //   if (this.options.university.includes(v)) {
-  //     this._university = v;
-  //   } else {
-  //     console.error();
-  //   }
-  // }
-  // public get university(): University {
-  //   return this._university;
-  // }
+  public set university(v: University) {
+    if (this.options.university.includes(v)) {
+      this._university = v;
+    } else {
+      console.error();
+    }
+  }
+  public get university(): University {
+    return this._university;
+  }
 
   public set areaOfStudy(v: AreaOfStudy) {
     if (this.options.areaOfStudy.includes(v)) {
