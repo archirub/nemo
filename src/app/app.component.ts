@@ -45,5 +45,4 @@ export class AppComponent {
         .then((r) => console.log(r))
         .catch((e) => console.error("The error is:", e));
     });
-  }
-}
+  }}
