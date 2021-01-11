@@ -6,7 +6,7 @@ import {
   ViewChild,
   HostListener,
 } from "@angular/core";
-import { AnimationController, ModalController } from "@ionic/angular";
+import { ModalController } from "@ionic/angular";
 
 import { Observable, Subscription } from "rxjs";
 import { throttle, filter } from "rxjs/operators";
@@ -18,7 +18,6 @@ import { SearchCriteriaStore, SwipeStackStore } from "@stores/index";
 import { profileSnapshot, SCriteria } from "@interfaces/index";
 import { SCenterAnimation, SCleaveAnimation } from "@animations/index";
 import { TabElementRefService } from "src/app/tab-menu/tab-element-ref.service";
-// import { enterAnimation, leaveAnimation } from "@animations/index";
 
 @Component({
   selector: "app-home",
@@ -54,15 +53,17 @@ export class HomePage implements OnInit, OnDestroy {
     private swipeStackStore: SwipeStackStore,
     private SCstore: SearchCriteriaStore,
     private modalCtrl: ModalController,
-    private animationCtrl: AnimationController,
     private tabElementRef: TabElementRefService
   ) {
     this.onResize();
   }
 
   tempSub: Subscription;
+  modal: HTMLIonModalElement;
+  SCenterAnimation;
+  SCleaveAnimation;
 
-  ngOnInit() {
+  async ngOnInit() {
     this.swipeProfiles = this.swipeStackStore.profiles;
     this.searchCriteria$ = this.SCstore.searchCriteria.subscribe((SC) => {
       this.searchCriteria = SC;
@@ -91,6 +92,34 @@ export class HomePage implements OnInit, OnDestroy {
       .subscribe();
   }
 
+  ionViewDidEnter() {
+    this.SCenterAnimation = SCenterAnimation(
+      this.searchButton,
+      this.tabElementRef.tabRef,
+      this.homeContainer,
+      this.screenWidth,
+      this.screenHeight
+    );
+    this.SCleaveAnimation = SCleaveAnimation(
+      this.searchButton,
+      this.tabElementRef.tabRef,
+      this.homeContainer,
+      this.screenWidth,
+      this.screenHeight
+    );
+
+    this.modalCtrl
+      .create({
+        component: SearchCriteriaComponent,
+        enterAnimation: this.SCenterAnimation,
+        leaveAnimation: this.SCleaveAnimation,
+      })
+      .then((m) => {
+        this.modal = m;
+        this.onModalDismiss(this.modal);
+      });
+  }
+
   private SCclassToMap(SC: SearchCriteria): SCriteria {
     const map = {};
     for (const option in SC.options) {
@@ -100,27 +129,25 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   async presentSCmodal(): Promise<void> {
-    const enter = SCenterAnimation(
-      this.searchButton,
-      this.tabElementRef.tabRef,
-      this.homeContainer,
-      this.screenWidth,
-      this.screenHeight
-    );
-    const leave = SCleaveAnimation(
-      this.searchButton,
-      this.tabElementRef.tabRef,
-      this.homeContainer,
-      this.screenWidth,
-      this.screenHeight
-    );
+    return await this.modal.present();
+  }
 
-    const modal = await this.modalCtrl.create({
-      component: SearchCriteriaComponent,
-      enterAnimation: enter,
-      leaveAnimation: leave,
+  // Used to preload modal as soon as the previous SC window was dismissed
+  onModalDismiss(modal: HTMLIonModalElement) {
+    if (!modal) return;
+    modal.onDidDismiss().then(() => {
+      this.modalCtrl
+        .create({
+          component: SearchCriteriaComponent,
+          enterAnimation: this.SCenterAnimation,
+          leaveAnimation: this.SCleaveAnimation,
+        })
+        .then((m) => {
+          this.modal = m;
+          return this.modal;
+        })
+        .then((m) => this.onModalDismiss(m));
     });
-    return await modal.present();
   }
 
   ngOnDestroy() {
