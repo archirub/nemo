@@ -1,24 +1,53 @@
 import { Injectable } from "@angular/core";
 import { AngularFireAuth } from "@angular/fire/auth";
 
-import { Chat, Message } from "@classes/index";
+import { Chat, Message, Profile } from "@classes/index";
 import {
   chatFromDatabase,
   message,
   messageFromDatabase,
+  profileFromDatabase,
   userSnippet,
 } from "@interfaces/index";
-
-interface Formatter {
-  databaseToClass: Function;
-  classToDatabase: Function;
-}
 
 @Injectable({
   providedIn: "root",
 })
 export class FormatService {
   constructor(private afAuth: AngularFireAuth) {}
+
+  public profileDatabaseToClass(
+    uid: string,
+    profileData: profileFromDatabase
+  ): Profile {
+    if (!uid || !profileData) return;
+    const displayName = profileData.displayName;
+    const dateOfBirth = profileData.dateOfBirth;
+    const pictures = profileData.pictures;
+    const biography = profileData.biography;
+    const university = profileData.university;
+    const course = profileData.course;
+    const society = profileData.society;
+    const interests = profileData.interests;
+    const questions = profileData.questions;
+    const location = profileData.location;
+    const socialMediaLinks = profileData.socialMediaLinks;
+
+    return new Profile(
+      uid,
+      displayName,
+      dateOfBirth,
+      pictures,
+      biography,
+      university,
+      course,
+      society,
+      interests,
+      questions,
+      location,
+      socialMediaLinks
+    );
+  }
 
   public chatDatabaseToClass(
     currentUserID: string,

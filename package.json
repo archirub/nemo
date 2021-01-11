@@ -33,8 +33,6 @@
     "@ionic/lab": "^3.2.7",
     "cordova-plugin-ionic-keyboard": "^2.2.0",
     "firebase": "^7.22.0",
-    "firebase-admin": "^9.4.2",
-    "firebase-functions": "^3.13.0",
     "module-alias": "^2.2.2",
     "ngx-autosize": "^1.8.0",
     "rxjs": "~6.6.2",

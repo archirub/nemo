@@ -1,20 +1,21 @@
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { NgModule } from "@angular/core";
+import { CommonModule } from "@angular/common";
+import { FormsModule } from "@angular/forms";
 
-import { IonicModule } from '@ionic/angular';
+import { IonicModule } from "@ionic/angular";
 
-import { OwnProfilePageRoutingModule } from './own-profile-routing.module';
+import { OwnProfilePageRoutingModule } from "./own-profile-routing.module";
 
-import { OwnProfilePage } from './own-profile.page';
+import { OwnProfilePage } from "./own-profile.page";
+import { ProfileCardComponent } from "@components/profile-card/profile-card.component";
 
 @NgModule({
   imports: [
     CommonModule,
     FormsModule,
     IonicModule,
-    OwnProfilePageRoutingModule
+    OwnProfilePageRoutingModule,
   ],
-  declarations: [OwnProfilePage]
+  declarations: [OwnProfilePage, ProfileCardComponent],
 })
 export class OwnProfilePageModule {}

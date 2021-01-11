@@ -17,5 +17,7 @@ import { SearchCriteriaComponent } from "./search-criteria/search-criteria.compo
     HomePageRoutingModule,
   ],
   declarations: [HomePage, SwipeCardComponent, SearchCriteriaComponent],
+  // Seems to make sure the search criteria modal opening is much faster on the first try
+  bootstrap: [SearchCriteriaComponent],
 })
 export class HomePageModule {}

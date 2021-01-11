@@ -4,7 +4,6 @@ import {
   AngularFirestore,
   DocumentSnapshot,
 } from "@angular/fire/firestore";
-import { AngularFireAuth } from "@angular/fire/auth";
 
 import { BehaviorSubject, Observable, Subscription } from "rxjs";
 
@@ -25,11 +24,7 @@ export class ChatStore {
   private _chats: BehaviorSubject<Chat[]>;
   public readonly chats: Observable<Chat[]>;
 
-  constructor(
-    private fs: AngularFirestore,
-    private afAuth: AngularFireAuth,
-    private format: FormatService
-  ) {
+  constructor(private fs: AngularFirestore, private format: FormatService) {
     this.allChatsSubscription = new Subscription();
     this.chatSubscriptionsHandler = {};
     this._chats = new BehaviorSubject<Chat[]>([]);
@@ -52,7 +47,7 @@ export class ChatStore {
       return;
     }
 
-    let query = this.fs.firestore
+    const query = this.fs.firestore
       .collection("chats")
       .where("uids", "array-contains", uid)
       .orderBy("lastInteracted", "desc");
