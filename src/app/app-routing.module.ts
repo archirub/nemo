@@ -40,10 +40,10 @@ const routes: Routes = [
     path: "**",
     redirectTo: "tabs/home",
   },
-  {
-    path: 'profile-card',
-    loadChildren: () => import('./pages/profile-card/profile-card.module').then( m => m.ProfileCardPageModule)
-  },
+  // {
+  //   path: 'profile-card',
+  //   loadChildren: () => import('./pages/profile-card/profile-card.module').then( m => m.ProfileCardPageModule)
+  // },
 ];
 
 @NgModule({
