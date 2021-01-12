@@ -4,12 +4,12 @@ import {
   AreaOfStudy,
   SocietyCategory,
   Interest,
-  SCriteria,
+  searchCriteriaFromDatabase,
   searchCriteriaOptions,
   University,
 } from "@interfaces/index";
 
-export class SearchCriteria implements SCriteria {
+export class SearchCriteria implements searchCriteriaFromDatabase {
   _university: University;
   _areaOfStudy: AreaOfStudy;
   _ageRange: AgeRange;

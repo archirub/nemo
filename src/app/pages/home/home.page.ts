@@ -13,10 +13,10 @@ import { throttle, filter } from "rxjs/operators";
 
 import { SearchCriteriaComponent } from "./search-criteria/search-criteria.component";
 
-import { SearchCriteria } from "@classes/index";
+import { Profile, SearchCriteria } from "@classes/index";
 import { SearchCriteriaStore, SwipeStackStore } from "@stores/index";
-import { profileSnapshot, SCriteria } from "@interfaces/index";
 import { SCenterAnimation, SCleaveAnimation } from "@animations/index";
+import { FormatService } from "@services/index";
 import { TabElementRefService } from "src/app/tab-menu/tab-element-ref.service";
 
 @Component({
@@ -25,7 +25,7 @@ import { TabElementRefService } from "src/app/tab-menu/tab-element-ref.service";
   styleUrls: ["home.page.scss"],
 })
 export class HomePage implements OnInit, OnDestroy {
-  swipeProfiles: Observable<profileSnapshot[]>;
+  swipeProfiles: Observable<Profile[]>;
   private swipeStackRefill$: Subscription;
 
   private searchCriteria: SearchCriteria = new SearchCriteria(
@@ -44,7 +44,7 @@ export class HomePage implements OnInit, OnDestroy {
   screenHeight: number;
   screenWidth: number;
   @HostListener("window:resize", ["$event"])
-  onResize(event?) {
+  onResize() {
     this.screenHeight = window.innerHeight;
     this.screenWidth = window.innerWidth;
   }
@@ -53,12 +53,12 @@ export class HomePage implements OnInit, OnDestroy {
     private swipeStackStore: SwipeStackStore,
     private SCstore: SearchCriteriaStore,
     private modalCtrl: ModalController,
-    private tabElementRef: TabElementRefService
+    private tabElementRef: TabElementRefService,
+    private format: FormatService
   ) {
     this.onResize();
   }
 
-  tempSub: Subscription;
   modal: HTMLIonModalElement;
   SCenterAnimation;
   SCleaveAnimation;
@@ -68,13 +68,6 @@ export class HomePage implements OnInit, OnDestroy {
     this.searchCriteria$ = this.SCstore.searchCriteria.subscribe((SC) => {
       this.searchCriteria = SC;
     });
-    this.tempSub = this.swipeProfiles.subscribe((profiles) => {
-      console.log(
-        "new swipe profiles:",
-        profiles.map((profiles) => profiles.data())
-      );
-    });
-
     // Makes sure swipe stack is only filled when its length is smaller or equal to a given
     // length, and that no new query to refill the swipe stack is made while a query
     // is already being processed.
@@ -83,12 +76,9 @@ export class HomePage implements OnInit, OnDestroy {
         filter((profiles) => profiles.length <= 4),
         throttle(
           async () =>
-            await this.swipeStackStore.updateSwipeStack(
-              this.SCclassToMap(this.searchCriteria)
-            )
+            await this.swipeStackStore.addToSwipeStackQueue(this.searchCriteria)
         )
       )
-
       .subscribe();
   }
 
@@ -120,14 +110,6 @@ export class HomePage implements OnInit, OnDestroy {
       });
   }
 
-  private SCclassToMap(SC: SearchCriteria): SCriteria {
-    const map = {};
-    for (const option in SC.options) {
-      map[option] = SC[option];
-    }
-    return map as SCriteria;
-  }
-
   async presentSCmodal(): Promise<void> {
     return await this.modal.present();
   }
@@ -153,6 +135,5 @@ export class HomePage implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.searchCriteria$.unsubscribe();
     this.swipeStackRefill$.unsubscribe();
-    this.tempSub.unsubscribe();
   }
 }

@@ -1,16 +1,16 @@
-import { TestBed } from '@angular/core/testing';
+import { TestBed } from "@angular/core/testing";
 
-import { CurrentUserStoreService } from './current-user-store.service';
+import { CurrentUserStore } from "./current-user-store.service";
 
-describe('CurrentUserStoreService', () => {
-  let service: CurrentUserStoreService;
+describe("CurrentUserStoreService", () => {
+  let service: CurrentUserStore;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(CurrentUserStoreService);
+    service = TestBed.inject(CurrentUserStore);
   });
 
-  it('should be created', () => {
+  it("should be created", () => {
     expect(service).toBeTruthy();
   });
 });

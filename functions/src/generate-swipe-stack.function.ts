@@ -1,14 +1,15 @@
 import {
-  matchObjectFromDatabase,
+  matchDataFromDatabase,
   generateSwipeStackRequest,
-  SCriteria,
+  searchCriteriaFromDatabase,
   University,
   AreaOfStudy,
   AgeRange,
   SocietyCategory,
   Interest,
   Location,
-} from "./../../src/app/shared/interfaces/index";
+  generateSwipeStackResponse,
+} from "../../src/app/shared/interfaces/index";
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 
@@ -35,12 +36,21 @@ import * as admin from "firebase-admin";
 // - ADD GENDER AND SEXUAL PREFERENCE LOGIC A.K.A. picking only people that match the gender of your
 // sexual preference and whose sexual preference is your own gender.
 
-export const generateSwipeStack = functions
-  .region("europe-west2")
-  .https.onCall(async (data: generateSwipeStackRequest, context) => {
+export const generateSwipeStack = functions.region("europe-west2").https.onCall(
+  async (
+    data: generateSwipeStackRequest,
+    context
+  ): Promise<generateSwipeStackResponse> => {
+    if (!context.auth)
+      throw new functions.https.HttpsError(
+        "unauthenticated",
+        "User no autenticated."
+      );
+
     // DATA FROM REQUEST
-    const targetID: string = data.ID;
-    const searchCriteria: SCriteria = data.searchCriteria || {};
+    const targetID: string = context.auth.uid;
+    const searchCriteria: searchCriteriaFromDatabase =
+      data.searchCriteria || {};
 
     // DATA FOR TESTING <-> UNCOMMENT BELOW AND COMMENT ABOVE
     // const targetID: string = "oY6HiUHmUvcKbFQQnb88t3U4Zew1";
@@ -97,7 +107,7 @@ export const generateSwipeStack = functions
 
       // ASSIGNING REAL VALUES
       if (targetMatchDoc.exists) {
-        const targetMatchData = targetMatchDoc.data() as matchObjectFromDatabase;
+        const targetMatchData = targetMatchDoc.data() as matchDataFromDatabase;
         targetPI = targetMatchData.PI;
         unmatchableUsers = [
           ...new Set(
@@ -148,11 +158,12 @@ export const generateSwipeStack = functions
 
       // SENDING RESPONSE
       // response.send({ IDs: pickedIDs });
-      return { IDs: pickedIDs };
+      return { uids: pickedIDs } as generateSwipeStackResponse;
     } catch (e) {
       throw new functions.https.HttpsError("unknown", e);
     }
-  });
+  }
+);
 
 /**
  * Returns a random sampler for the discrete probability distribution
@@ -300,7 +311,7 @@ function matchDataToIDs(
  */
 function separateBasedOnSearchCriteria(
   profiles: FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData>[],
-  searchCriteria: SCriteria
+  searchCriteria: searchCriteriaFromDatabase
 ): {
   [
     degreeOfMatch: string
@@ -362,36 +373,40 @@ function separateBasedOnSearchCriteria(
   const SCCheckHandler: {
     [key: string]: (criteria: any, feature: any) => Boolean;
   } = {};
-  (Object.keys(searchCriteria) as (keyof SCriteria)[]).forEach((SC) => {
-    switch (SC) {
-      case "university":
-        SCCheckHandler[SC] = universityMatchCheck;
-        break;
-      case "areaOfStudy":
-        SCCheckHandler[SC] = areaOfStudyMatchCheck;
-        break;
-      case "ageRange":
-        SCCheckHandler[SC] = ageRangeMatchCheck;
-        break;
-      case "societyCategory":
-        SCCheckHandler[SC] = societyCategoryMatchCheck;
-        break;
-      case "interest":
-        SCCheckHandler[SC] = interestMatchCheck;
-        break;
-      case "location":
-        SCCheckHandler[SC] = locationMatchCheck;
-        break;
+  (Object.keys(searchCriteria) as (keyof searchCriteriaFromDatabase)[]).forEach(
+    (SC) => {
+      switch (SC) {
+        case "university":
+          SCCheckHandler[SC] = universityMatchCheck;
+          break;
+        case "areaOfStudy":
+          SCCheckHandler[SC] = areaOfStudyMatchCheck;
+          break;
+        case "ageRange":
+          SCCheckHandler[SC] = ageRangeMatchCheck;
+          break;
+        case "societyCategory":
+          SCCheckHandler[SC] = societyCategoryMatchCheck;
+          break;
+        case "interest":
+          SCCheckHandler[SC] = interestMatchCheck;
+          break;
+        case "location":
+          SCCheckHandler[SC] = locationMatchCheck;
+          break;
+      }
     }
-  });
+  );
 
   for (const profile of profiles) {
     let didMatchCounter = 0;
 
-    const profileData = profile.data() as matchObjectFromDatabase;
+    const profileData = profile.data() as matchDataFromDatabase;
 
     if (profileData) {
-      for (const SC of Object.keys(searchCriteria) as (keyof SCriteria)[]) {
+      for (const SC of Object.keys(
+        searchCriteria
+      ) as (keyof searchCriteriaFromDatabase)[]) {
         if (
           SCCheckHandler[SC](searchCriteria[SC], profileData.searchFeatures[SC])
         ) {

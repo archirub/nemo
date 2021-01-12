@@ -1,4 +1,3 @@
-import { SCriteria } from "@interfaces/index";
 import { Component, OnInit, OnDestroy } from "@angular/core";
 import { ModalController } from "@ionic/angular";
 import { FormControl, FormGroup } from "@angular/forms";
@@ -52,7 +51,6 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
   }
 
   async closeAndConfirmChoices() {
-    console.log("eyo2", this.searchCriteriaForm.value);
     this.SCstore.addCriteria(this.searchCriteriaForm.value);
     return await this.modalCtrl.dismiss();
   }

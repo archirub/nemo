@@ -3,7 +3,10 @@ import {
   SocietyCategory,
   Location,
   University,
+  searchCriteriaFromDatabase,
 } from "./search-criteria.model";
+
+// For cloud function deployed, otherwise it doesn't recognize the type declaration below
 import * as firebase from "firebase";
 
 export interface profile {
@@ -51,8 +54,8 @@ export interface profileFromDatabase {
 export interface privateProfileFromDatabase {
   firstName: string;
   lastName: string;
-  // showProfile: Boolean;
   settings: Setting[];
+  latestSearchCriteria: searchCriteriaFromDatabase;
 }
 
 // TO DEFINE

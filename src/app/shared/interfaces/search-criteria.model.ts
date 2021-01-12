@@ -1,4 +1,4 @@
-export interface SCriteria {
+export interface searchCriteriaFromDatabase {
   university: University | null; // select
   areaOfStudy: AreaOfStudy | null; // select
   ageRange: AgeRange | null; // slider
@@ -43,4 +43,4 @@ export type SocietyCategory = typeof searchCriteriaOptions.societyCategory[numbe
 export type Interest = typeof searchCriteriaOptions.interest[number];
 export type Location = typeof searchCriteriaOptions.location[number];
 
-export type Criterion = keyof SCriteria;
+export type Criterion = keyof searchCriteriaFromDatabase;

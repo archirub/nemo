@@ -1,12 +1,13 @@
 import { Injectable } from "@angular/core";
 import { AngularFireAuth } from "@angular/fire/auth";
 
-import { Chat, Message, Profile } from "@classes/index";
+import { Chat, Message, Profile, SearchCriteria } from "@classes/index";
 import {
   chatFromDatabase,
   message,
   messageFromDatabase,
   profileFromDatabase,
+  searchCriteriaFromDatabase,
   userSnippet,
 } from "@interfaces/index";
 
@@ -15,6 +16,48 @@ import {
 })
 export class FormatService {
   constructor(private afAuth: AngularFireAuth) {}
+
+  public searchCriteriaDatabaseToClass(
+    searchCriteria: searchCriteriaFromDatabase
+  ): SearchCriteria {
+    if (!searchCriteria) return;
+    const university = searchCriteria.university;
+    const areaOfStudy = searchCriteria.areaOfStudy;
+    const ageRange = searchCriteria.ageRange;
+    const societyCategory = searchCriteria.societyCategory;
+    const interest = searchCriteria.interest;
+    const location = searchCriteria.location;
+
+    return new SearchCriteria(
+      university,
+      areaOfStudy,
+      ageRange,
+      societyCategory,
+      interest,
+      location
+    );
+  }
+
+  public searchCriteriaClassToDatabase(
+    searchCriteria: SearchCriteria
+  ): searchCriteriaFromDatabase {
+    if (!searchCriteria) return;
+    const university = searchCriteria.university;
+    const areaOfStudy = searchCriteria.areaOfStudy;
+    const ageRange = searchCriteria.ageRange;
+    const societyCategory = searchCriteria.societyCategory;
+    const interest = searchCriteria.interest;
+    const location = searchCriteria.location;
+
+    return {
+      university,
+      areaOfStudy,
+      ageRange,
+      societyCategory,
+      interest,
+      location,
+    };
+  }
 
   public profileDatabaseToClass(
     uid: string,

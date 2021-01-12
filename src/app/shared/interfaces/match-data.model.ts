@@ -1,7 +1,6 @@
 import { SearchFeatures } from "./search-criteria.model";
 
-export interface matchObjectFromDatabase {
-  // userID: string;
+export interface matchDataFromDatabase {
   PI: number;
 
   unmatchableUsers: string[];
@@ -13,6 +12,13 @@ export interface matchObjectFromDatabase {
   swipeMode: SwipeMode;
   searchFeatures: SearchFeatures;
 
+  showProfile: Boolean;
+}
+
+export interface userInfoFromMatchData {
+  gender: Gender;
+  sexualPreference: SexualPreference;
+  swipeMode: SwipeMode;
   showProfile: Boolean;
 }
 

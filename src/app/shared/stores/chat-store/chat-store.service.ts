@@ -31,13 +31,22 @@ export class ChatStore {
     this.chats = this._chats.asObservable();
   }
 
-  public async initializeStore(uid: string): Promise<void> {
-    if (!uid) return console.error("No uid provided: chatStore init failed");
+  /** Initialisse the store
+   * returns uid so that store initializations can be chained
+   */
+  public async initializeStore(uid: string): Promise<string> {
+    if (!uid) {
+      console.error("No uid provided: chatStore init failed");
+      return;
+    }
     await this.fetchChats(uid);
     await Promise.all([
       this.startChatDocObservers(uid),
       this.startDocumentCreationDeletionObserver(uid),
     ]);
+
+    console.log("ChatStore initialized.");
+    return uid;
   }
 
   /** fetches all the chats for the authenticated user */
