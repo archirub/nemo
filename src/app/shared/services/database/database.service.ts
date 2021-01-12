@@ -6,6 +6,7 @@ import { Subscription } from "rxjs";
 import { AuthService } from "@services/auth/auth.service";
 import { NameService } from "@services/name/name.service";
 import { AngularFireAuth } from "@angular/fire/auth";
+import { matchObjectFromDatabase } from "@interfaces/index";
 
 @Injectable({
   providedIn: "root",
@@ -32,7 +33,8 @@ export class DatabaseService {
         .get()
         .toPromise();
       if (!snapshot.exists) return false;
-      const likedUsers: string[] = snapshot.data().likedUsers;
+      const data = snapshot.data() as matchObjectFromDatabase;
+      const likedUsers: string[] = data.likedUsers;
       if (likedUsers.includes(user.uid)) {
         return true;
       }
