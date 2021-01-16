@@ -1,9 +1,9 @@
 export interface messageFromDatabase {
   senderID: string;
-  time: Date;
+  time: firebase.firestore.Timestamp;
   content: string;
   reaction: messageReaction;
-  seen: boolean;
+  seen: Boolean;
 }
 
 export interface message {
@@ -11,17 +11,20 @@ export interface message {
   time: Date;
   content: string;
   reaction: messageReaction;
-  seen: boolean;
   state: messageState;
+  seen: Boolean;
 }
 
-export type messageReaction =
-  | "null"
-  | "love"
-  | "angry"
-  | "laugh"
-  | "cry"
-  | "thumbUp"
-  | "thumbDown";
+export const messageReactionOptions = [
+  "null",
+  "love",
+  "angry",
+  "laugh",
+  "cry",
+  "thumbUp",
+  "thumbDown",
+] as const;
+export type messageReaction = typeof messageReactionOptions[number];
 
-export type messageState = "sent" | "sending" | "failed";
+export const messageStateOptions = ["sent", "sending", "failed"] as const;
+export type messageState = typeof messageStateOptions[number];

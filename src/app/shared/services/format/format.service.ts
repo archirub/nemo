@@ -4,12 +4,12 @@ import { AngularFireAuth } from "@angular/fire/auth";
 import { Chat, Message, Profile, SearchCriteria } from "@classes/index";
 import {
   chatFromDatabase,
-  message,
   messageFromDatabase,
   profileFromDatabase,
   searchCriteriaFromDatabase,
   userSnippet,
 } from "@interfaces/index";
+import firebase from "firebase";
 
 @Injectable({
   providedIn: "root",
@@ -100,17 +100,13 @@ export class FormatService {
     if (!currentUserID || !chatID || !chatData) return;
 
     const batchVolume: number = chatData.batchVolume;
-    const lastInteracted: Date = chatData.lastInteracted;
+    const lastInteracted: Date = chatData.lastInteracted.toDate();
     const userSnippets: userSnippet[] = chatData.userSnippets;
     const recipient: userSnippet = userSnippets.filter(
       (snippet) => snippet.uid !== currentUserID
     )[0];
-    const dbMessages: message[] = chatData.messages.map((message) => {
-      const _message = message as message;
-      _message.state = "sent";
-      return _message;
-    });
-    const messages: Message[] = this.messagesDatabaseToClass(dbMessages);
+
+    const messages: Message[] = this.messagesDatabaseToClass(chatData.messages);
 
     return new Chat(
       chatID,
@@ -129,10 +125,10 @@ export class FormatService {
       const content = msg.content;
       const reaction = msg.reaction;
       const senderID = msg.senderID;
-      const time = msg.time;
+      const time = msg.time.toDate();
       const seen = msg.seen;
 
-      return new Message(senderID, time, content, reaction, seen, "sent");
+      return new Message(senderID, time, content, reaction, "sent", seen);
     });
   }
 
@@ -149,9 +145,9 @@ export class FormatService {
     const content = msg.content;
     const reaction = msg.reaction;
     const senderID = msg.senderID;
-    const time = msg.time;
+    const time = firebase.firestore.Timestamp.fromDate(msg.time);
     const seen = msg.seen;
 
-    return { senderID, time, content, reaction, seen };
+    return { senderID, seen, time, content, reaction };
   }
 }

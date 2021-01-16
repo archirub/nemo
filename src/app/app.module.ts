@@ -35,9 +35,6 @@ import { pageTransition } from "./shared/animations/page-transition.component";
     StatusBar,
     SplashScreen,
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
-
-    // Necessary to specify the region in which the Firebase cloud functions exist
-    // (see https://github.com/angular/angularfire/blob/master/docs/functions/functions.md)
     { provide: REGION, useValue: "europe-west2" },
   ],
   bootstrap: [AppComponent],

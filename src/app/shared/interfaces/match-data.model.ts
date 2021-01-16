@@ -1,11 +1,13 @@
+import { Profile } from "@classes/profile.class";
 import { SearchFeatures } from "./search-criteria.model";
 
 export interface matchDataFromDatabase {
   PI: number;
 
-  unmatchableUsers: string[];
+  matchedUsers: string[];
   likedUsers: string[];
-  matches: string[];
+  dislikedUsers: string[];
+  reportedUsers: string[];
 
   gender: Gender;
   sexualPreference: SexualPreference;
@@ -28,3 +30,10 @@ export type SexualPreference = Gender[];
 
 export const swipeModeOptions = ["friend", "dating", "both"] as const;
 export type SwipeMode = typeof swipeModeOptions[number];
+
+export const swipeOutcomeOptions = ["yes", "no", "super"] as const;
+export type swipeOutcome = typeof swipeOutcomeOptions[number];
+export interface swipeOutcomeObject {
+  outcome: swipeOutcome;
+  profile: Profile;
+}

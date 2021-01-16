@@ -19,7 +19,7 @@ export class AppComponent {
     private statusBar: StatusBar,
     private auth: AuthService,
     private chatStore: ChatStore,
-    private currenUserStore: CurrentUserStore,
+    private currentUserStore: CurrentUserStore,
     private swipeStackStore: SwipeStackStore
   ) {
     this.initializeApp();
@@ -32,7 +32,7 @@ export class AppComponent {
 
       this.auth
         .logIn()
-        .then((uid) => this.currenUserStore.initializeStore(uid))
+        .then((uid) => this.currentUserStore.initializeStore(uid))
         .then((uid) => this.swipeStackStore.initializeStore(uid))
         .then((uid) => this.chatStore.initializeStore(uid));
     });
