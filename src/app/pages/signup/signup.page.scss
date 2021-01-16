@@ -2,13 +2,96 @@ ion-slides {
   height: 100vh;
 }
 
+ion-item {
+  height: 80vh;
+}
+
+ion-input:valid {
+  border-bottom: solid 1px var(--ion-color-dark);
+}
+
+p {
+  margin: 0;
+}
+
+.flexcolumn {
+  height: 20vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  width: 90%;
+}
+
+.flexrow {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+}
+
 .question {
-  font-size: 40px;
+  height: 15vh;
+  font-size: 5vh;
   overflow-wrap: break-word;
   white-space: normal;
 }
 
 .input {
-  border-bottom: solid 1px black;
-  background-color: antiquewhite;
+  width: 100%;
+  border-bottom: solid 1px var(--ion-color-medium-shade);
+  font-weight: bold;
+  font-size: 3vh;
+  margin-bottom: 1vh;
+}
+
+
+.verification_input {
+  color: var(--ion-color-primary);
+  text-align: center; 
+  width: 10%;
+  margin-right: 5vw;
+  border-bottom: solid 1px var(--ion-color-dark-tint);
+  font-weight: bold;
+  font-size: 3vh;
+  margin-bottom: 1vh;
+}
+
+.tip {
+  font-size: 2vh;
+  color: var(--ion-color-medium-shade);
+  margin-bottom: 3vh;
+}
+
+.no_verification {
+  font-size: 2vh;
+  color: var(--ion-color-primary-tint);
+}
+
+.preferences {
+  color: var(--ion-color-medium-shade);
+  display: flex;
+  width: 100%;
+  font-size: 3vh;
+
+  select {
+    color: var(--ion-color-dark);
+    border: 0;
+    margin-bottom: 4px;
+    padding-right: auto;
+
+    &:valid {
+      transition-duration: 0.4s;
+    };
+
+    /* This lets it slide across after selection, transition-duration currently useless, 
+    simple method to start can improve later*/
+    &:invalid {
+      margin-left: auto;
+      transition-duration: 0.4s;     
+    };
+
+    &:visited, &:active {
+      border: 0;
+    };
+  };
+
 }

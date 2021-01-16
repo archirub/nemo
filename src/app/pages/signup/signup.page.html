@@ -11,72 +11,170 @@
       <ion-slide>
         <ion-item lines="none">
           <ion-label class="question" position="stacked">
-            What is your university email?
+            What's your uni email address?
           </ion-label>
-          <p class="tip">Only UCL emails are supported at the moment.</p>
 
-          <div class="input">
-            <ion-input></ion-input>
+          <div class="flexcolumn">
+            <div class="input">
+              <ion-input placeholder="email@ucl.ac.uk"></ion-input>
+            </div>
+          </div>
+          <p class="tip">Only UCL email addresses will allow for verification.</p>
+        </ion-item>
+      </ion-slide>
+
+      <ion-slide>
+        <ion-item lines="none">
+          <ion-label class="question" position="stacked">
+            Enter your verification code
+          </ion-label>
+
+          <div class="flexcolumn">
+            <p class="tip">
+              We just sent an email to
+              <br>
+              "email@ucl.ac.uk". <!--BACKEND - Fill with email input on previous slide-->
+            </p>
+
+            <div class="flexrow">
+              <div class="verification_input">
+                <ion-input size="1" maxlength="1" min="0" max="9" pattern="[0-9]{1}"></ion-input>
+              </div>
+              <div class="verification_input">
+                <ion-input size="1" maxlength="1" min="0" max="9" pattern="[0-9]{1}"></ion-input>
+              </div>
+              <div class="verification_input">
+                <ion-input size="1" maxlength="1" min="0" max="9" pattern="[0-9]{1}"></ion-input>
+              </div>
+              <div class="verification_input">
+                <ion-input size="1" maxlength="1" min="0" max="9" pattern="[0-9]{1}"></ion-input>
+              </div>
+            </div>
+          </div>
+          <p class="no_verification">Didn't get a code?</p>
+        </ion-item>
+      </ion-slide>
+
+      <ion-slide>
+        <ion-item lines="none">
+          <ion-label class="question" position="stacked">
+            What's your name?
+          </ion-label>
+
+          <div class="flexcolumn">
+            <div class="input">
+              <ion-input placeholder="First name"></ion-input>
+            </div>
+            <div class="input">
+              <ion-input placeholder="Last name"></ion-input>
+            </div>
           </div>
         </ion-item>
       </ion-slide>
 
-      <ion-slide> verification code </ion-slide>
       <ion-slide>
         <ion-item lines="none">
           <ion-label class="question" position="stacked">
-            Choose a password...
+            Choose a password NAME <!-- BACKEND - possible to fill in name here from previous slide's input?-->
           </ion-label>
+
+          <div class="flexcolumn">
+            <div class="input">
+              <ion-input></ion-input>
+            </div>
+          </div>
           <p class="tip">Your password must be at least 10 characters long.</p>
-
-          <div class="input">
-            <ion-input></ion-input>
-          </div>
         </ion-item>
       </ion-slide>
+    
       <ion-slide>
         <ion-item lines="none">
           <ion-label class="question" position="stacked">
-            What is your name?
+            What's your date of birth?
           </ion-label>
-          <div class="input">
-            <ion-input placeholder="First name"></ion-input>
+
+          <div class="flexcolumn">
+            <div class="input">
+              <ion-datetime displayFormat="DD MM YYYY"></ion-datetime>
+            </div>
           </div>
-          <div class="input">
-            <ion-input placeholder="Last name"></ion-input>
-          </div>
+          <p>Sorted Later</p>
         </ion-item>
       </ion-slide>
+
       <ion-slide>
         <ion-item lines="none">
           <ion-label class="question" position="stacked">
-            When were you born?
+            Choose your photos
           </ion-label>
 
-          <div class="input">
-            <ion-datetime displayFormat="DD MM YY"></ion-datetime>
+          <div class="flexcolumn">
+            <div>pictures chosen displayed</div>
+
+            <ion-button
+              (click)="onPickPicture()"
+              expand="block"
+              fill="clear"
+              shape="round"
+            >
+              Get me to my photo gallery
+            </ion-button>
           </div>
+          <p class="tip">You must have at least one photo on your profile.</p>
         </ion-item>
       </ion-slide>
+
       <ion-slide>
         <ion-item lines="none">
           <ion-label class="question" position="stacked">
-            Add some pictures to your profile
+            Set your preferences
           </ion-label>
-          <p class="tip">You may choose 1 to 5 pictures.</p>
 
-          <div>pictures chosen displayed</div>
-          <ion-button
-            (click)="onPickPicture()"
-            expand="block"
-            fill="clear"
-            shape="round"
-          >
-            Get me to my photo gallery
-          </ion-button>
-        </ion-item>
+          <div class="flexcolumn">
+            <div class="preferences">
+              I am looking for 
+              <select required>
+                <option value="" disable selected hidden></option>
+                <option value="friends">friends</option>
+                <option value="dating">dating</option>
+              </select>
+            </div>
+
+            <div class="preferences">
+              I am interested in
+              <select required>
+                <option value="" disable selected hidden></option>
+                <option value="girls">guys</option>
+                <option value="girls">girls</option>
+                <option value="all genders">all genders</option>
+                <option value="non-binary">non-binary</option>
+              </select>
+            </div>
+
+            <div class="preferences">
+              I identify as
+              <select required>
+                <option value="" disable selected hidden></option>
+                <option value="female">female</option>
+                <option value="male">male</option>
+                <option value="non-binary">non-binary</option>
+                <option value="gender fluid">gender fluid</option>
+              </select>
+            </div>
+
+            <div class="preferences">
+              I live in
+              <select required>
+                <option value="" disable selected hidden></option>
+                <option value="London">London</option>
+                <option value="Paris">Paris</option>
+                <option value="Germany">Germany</option>
+              </select>
+            </div>
+          </div>
+        </ion-item> 
       </ion-slide>
-      <ion-slide> set-up preferences </ion-slide>
+
       <ion-slide> set university details </ion-slide>
       <ion-slide> where are you from </ion-slide>
       <ion-slide> answer some question </ion-slide>
