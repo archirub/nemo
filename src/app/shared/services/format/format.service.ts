@@ -100,7 +100,7 @@ export class FormatService {
     if (!currentUserID || !chatID || !chatData) return;
 
     const batchVolume: number = chatData.batchVolume;
-    const lastInteracted: Date = chatData.lastInteracted;
+    const lastInteracted: Date = chatData.lastInteracted.toDate();
     const userSnippets: userSnippet[] = chatData.userSnippets;
     const recipient: userSnippet = userSnippets.filter(
       (snippet) => snippet.uid !== currentUserID
@@ -130,9 +130,8 @@ export class FormatService {
       const reaction = msg.reaction;
       const senderID = msg.senderID;
       const time = msg.time;
-      const seen = msg.seen;
 
-      return new Message(senderID, time, content, reaction, seen, "sent");
+      return new Message(senderID, time, content, reaction, "sent");
     });
   }
 
@@ -150,8 +149,7 @@ export class FormatService {
     const reaction = msg.reaction;
     const senderID = msg.senderID;
     const time = msg.time;
-    const seen = msg.seen;
 
-    return { senderID, time, content, reaction, seen };
+    return { senderID, time, content, reaction };
   }
 }

@@ -111,8 +111,10 @@ export const generateSwipeStack = functions.region("europe-west2").https.onCall(
         targetPI = targetMatchData.PI;
         unmatchableUsers = [
           ...new Set(
-            ...targetMatchData.unmatchableUsers,
-            ...targetMatchData.matches
+            ...targetMatchData.matchedUsers,
+            ...targetMatchData.likedUsers,
+            ...targetMatchData.dislikedUsers,
+            ...targetMatchData.reportedUsers
           ),
         ]; // In case all matchedUsers aren't in banned users array
       }

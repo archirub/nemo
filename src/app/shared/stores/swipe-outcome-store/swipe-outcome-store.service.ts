@@ -3,16 +3,13 @@ import { Injectable } from "@angular/core";
 import { BehaviorSubject } from "rxjs";
 
 import { Profile } from "@classes/index";
+import { swipeOutcomeObject } from "@interfaces/index";
 
-interface swipeOutcome {
-  outcome: "yes" | "no" | "super";
-  profile: Profile;
-}
 @Injectable({
   providedIn: "root",
 })
 export class SwipeOutcomeStore {
-  private _latestOutcome: BehaviorSubject<swipeOutcome> = new BehaviorSubject<swipeOutcome>(
+  private _latestOutcome: BehaviorSubject<swipeOutcomeObject> = new BehaviorSubject<swipeOutcomeObject>(
     null
   );
   private _yesProfiles: BehaviorSubject<Profile[]> = new BehaviorSubject<

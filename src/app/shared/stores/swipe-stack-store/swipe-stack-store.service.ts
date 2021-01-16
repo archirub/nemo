@@ -6,7 +6,7 @@ import { AngularFireFunctions } from "@angular/fire/functions";
 import { BehaviorSubject, Observable } from "rxjs";
 
 import { NameService, FormatService } from "@services/index";
-import { SearchCriteriaStore } from "@stores/index";
+import { SearchCriteriaStore } from "../search-criteria-store/search-criteria-store.service";
 import {
   generateSwipeStackRequest,
   profileFromDatabase,

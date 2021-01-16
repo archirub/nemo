@@ -82,28 +82,27 @@ export class MessengerPage implements OnInit, OnDestroy {
     const user = await this.afauth.currentUser;
     if (!user) return console.error("User isn't logged in.");
 
-    // Setting message state to "sending"
+    const time: Date = new Date();
+
     const newMessage: Message = new Message(
       user.uid,
-      new Date(),
+      time,
       messageContent,
       null,
-      false,
       "sending"
     );
 
-    this.chatStore.localMessageAddition(newMessage, chat.id);
     this.latestChatInput = "";
+    this.chatStore.localMessageAddition(newMessage, chat);
+    this.chatStore.updateLastInteracted(chat, time);
 
     try {
       await this.chatStore.databaseUpdateMessages(chat);
+      this.chatStore.updateMessageState(chat, newMessage, "sent");
     } catch (e) {
       console.error(`Message to ${chat.recipient.name} failed to send: ${e}`);
-      // Setting message state to "failed"
       this.chatStore.updateMessageState(chat, newMessage, "failed");
     }
-    // Setting message state to "sent"
-    this.chatStore.updateMessageState(chat, newMessage, "sent");
   }
 
   /** Makes an attempt to change db version of chat's messages from local version */
@@ -148,6 +147,29 @@ export class MessengerPage implements OnInit, OnDestroy {
         chat.messages.map((msg) => msg.time)
       )
     );
+  }
+
+  hasFailed(message: Message): Boolean {
+    if (!message) return;
+    if (message.state === "failed") return true;
+    if (message.state === "sent" || message.state === "sending") return false;
+    console.error("unknow message state");
+    return;
+  }
+
+  isSending(message: Message): Boolean {
+    if (!message) return;
+    if (message.state === "sending") return true;
+    if (message.state === "sent" || message.state === "failed") return false;
+    console.error("unknow message state");
+    return;
+  }
+
+  isOwnMessage(message: Message): Boolean {
+    if (!message) return;
+    const chat: Chat = this.currentChat.getValue();
+    if (message.senderID === chat.recipient.uid) return false;
+    return true;
   }
 
   ngOnDestroy() {

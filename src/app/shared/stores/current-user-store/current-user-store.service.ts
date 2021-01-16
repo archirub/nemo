@@ -13,7 +13,7 @@ import {
   userInfoFromMatchData,
 } from "@interfaces/index";
 import { FormatService } from "@services/index";
-import { SearchCriteriaStore } from "@stores/index";
+import { SearchCriteriaStore } from "../search-criteria-store/search-criteria-store.service";
 
 @Injectable({
   providedIn: "root",
