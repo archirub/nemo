@@ -1,11 +1,10 @@
 import { Injectable } from "@angular/core";
 import { AngularFirestore } from "@angular/fire/firestore";
 
-import { Subscription } from "rxjs";
-
 import { AuthService } from "@services/auth/auth.service";
 import { NameService } from "@services/name/name.service";
 import { AngularFireAuth } from "@angular/fire/auth";
+import { matchDataFromDatabase } from "@interfaces/index";
 
 @Injectable({
   providedIn: "root",
@@ -32,7 +31,8 @@ export class DatabaseService {
         .get()
         .toPromise();
       if (!snapshot.exists) return false;
-      const likedUsers: string[] = snapshot.data().likedUsers;
+      const data = snapshot.data() as matchDataFromDatabase;
+      const likedUsers: string[] = data.likedUsers;
       if (likedUsers.includes(user.uid)) {
         return true;
       }

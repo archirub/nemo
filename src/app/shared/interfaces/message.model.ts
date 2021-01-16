@@ -3,7 +3,6 @@ export interface messageFromDatabase {
   time: Date;
   content: string;
   reaction: messageReaction;
-  seen: boolean;
 }
 
 export interface message {
@@ -11,17 +10,19 @@ export interface message {
   time: Date;
   content: string;
   reaction: messageReaction;
-  seen: boolean;
   state: messageState;
 }
 
-export type messageReaction =
-  | "null"
-  | "love"
-  | "angry"
-  | "laugh"
-  | "cry"
-  | "thumbUp"
-  | "thumbDown";
+export const messageReactionOptions = [
+  "null",
+  "love",
+  "angry",
+  "laugh",
+  "cry",
+  "thumbUp",
+  "thumbDown",
+] as const;
+export type messageReaction = typeof messageReactionOptions[number];
 
-export type messageState = "sent" | "sending" | "failed";
+export const messageStateOptions = ["sent", "sending", "failed"] as const;
+export type messageState = typeof messageStateOptions[number];

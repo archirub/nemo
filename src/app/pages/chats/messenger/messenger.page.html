@@ -34,16 +34,15 @@
     {{last ? fastScroll() : ""}}
     <ion-col
       size="8"
-      *ngIf="message?.senderID == (currentChat | async)?.recipient?.uid"
+      *ngIf="message?.senderID === (currentChat | async)?.recipient?.uid"
       class="message-col col-recieved"
     >
-      <div class="message recievedMessage">{{message.content}}</div>
-      <!-- <div
-        *ngIf="message.senderID !== ((currentChat | async).messages)[i+1].senderID"
-        class="message recievedMessage"
+      <div
+        class="message notOwnMessage"
+        [ngClass]="{'failedToSend': hasFailed(message), 'isSending': isSending(message) }"
       >
-        {{bubble}}
-      </div> -->
+        {{message.content}}
+      </div>
     </ion-col>
 
     <ion-col
@@ -52,13 +51,12 @@
       *ngIf="message?.senderID !== (currentChat | async)?.recipient?.uid"
       class="message-col col-sent"
     >
-      <div class="message sentMessage">{{message?.content}}</div>
-      <!-- <div
-        *ngIf="message.senderID !== chat[i+1].senderID"
-        class="message sentMessage"
+      <div
+        class="message ownMessage"
+        [ngClass]="{'failedToSend': hasFailed(message), 'isSending': isSending(message) }"
       >
-        {{bubble}}
-      </div> -->
+        {{message?.content}}
+      </div>
     </ion-col>
   </ion-row>
 
@@ -75,8 +73,6 @@
         type="text"
         id="messageInput"
       >
-        <!-- (ionInput)="onChangeLatestChatInput($event)" -->
-
         <ion-button
           icon-only
           fill="clear"

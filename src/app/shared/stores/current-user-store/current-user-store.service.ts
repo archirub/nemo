@@ -1,4 +1,5 @@
-import { Injectable, OnInit } from "@angular/core";
+import { AngularFireFunctions } from "@angular/fire/functions";
+import { Injectable } from "@angular/core";
 import { AngularFireAuth } from "@angular/fire/auth";
 import { AngularFirestore } from "@angular/fire/firestore";
 
@@ -6,53 +7,42 @@ import { BehaviorSubject, Observable } from "rxjs";
 
 import { Profile, User } from "@classes/index";
 import {
-  Gender,
-  matchObjectFromDatabase,
+  getMatchDataUserInfoResponse,
   privateProfileFromDatabase,
   profileFromDatabase,
-  SexualPreference,
-  SwipeMode,
+  userInfoFromMatchData,
 } from "@interfaces/index";
 import { FormatService } from "@services/index";
-
-interface userInfoFromMatchData {
-  gender: Gender;
-  sexualPreference: SexualPreference;
-  swipeMode: SwipeMode;
-  showProfile: Boolean;
-}
+import { SearchCriteriaStore } from "../search-criteria-store/search-criteria-store.service";
 
 @Injectable({
   providedIn: "root",
 })
-export class CurrentUserStoreService implements OnInit {
+export class CurrentUserStore {
   private _user: BehaviorSubject<User>;
   public readonly user: Observable<User>;
 
   constructor(
     private fs: AngularFirestore,
+    private afFunctions: AngularFireFunctions,
     private format: FormatService,
-    private afAuth: AngularFireAuth
+    private SCstore: SearchCriteriaStore
   ) {
     this._user = new BehaviorSubject<User>(null);
     this.user = this._user.asObservable();
   }
 
-  ngOnInit() {
-    this.afAuth.currentUser
-      .then((user) => {
-        if (user) {
-          return this.updateUser(user.uid).then(() =>
-            console.log("Current user object successfully initialized.")
-          );
-        }
-        console.error("User not logged in");
-      })
-      .catch((e) => {
-        console.error(
-          `The current user's User object couldn't be updated - ${e}`
-        );
-      });
+  /** Initialises the store
+   * returns uid so that store initializations can be chained
+   */
+  public async initializeStore(uid: string): Promise<string> {
+    if (!uid) {
+      console.error("No uid provided");
+      return;
+    }
+    await this.updateUser(uid);
+    console.log("currentUserStore initialized.");
+    return uid;
   }
 
   /** From the user's id, returns a Profile object containing info from
@@ -94,25 +84,27 @@ export class CurrentUserStoreService implements OnInit {
     }
   }
 
-  /** THIS IS TEMPORARY - since there is currently error internal for cloud functions calls.
-   * We can't fetch data directly from matchData doc (for security reasons), a cloud function
-   * to fetch the info needed from it here is therefore required. So once internal error is resolved,
-   * create that function and make a call to it in the function below.
+  /**
+   * Fetches data relevant to user object creation in matchData document
    */
-  private async fetchMatchDataEl(uid: string): Promise<userInfoFromMatchData> {
+  private async fetchMatchDataInfo(
+    uid: string
+  ): Promise<userInfoFromMatchData> {
     if (!uid) {
       console.error("No uid provided");
       return;
     }
     const query = this.fs.firestore.collection("matchData").doc(uid);
 
-    const snapshot = await query.get();
-    if (snapshot.exists) {
-      const data = snapshot.data() as matchObjectFromDatabase;
-      const gender = data.gender;
-      const sexualPreference = data.sexualPreference;
-      const swipeMode = data.swipeMode;
-      const showProfile = data.showProfile;
+    const responseData = (await this.afFunctions
+      .httpsCallable("getMatchDataUserInfo")({})
+      .toPromise()) as getMatchDataUserInfoResponse;
+
+    if (responseData) {
+      const gender = responseData.gender;
+      const sexualPreference = responseData.sexualPreference;
+      const swipeMode = responseData.swipeMode;
+      const showProfile = responseData.showProfile;
       return { gender, sexualPreference, swipeMode, showProfile };
     }
   }
@@ -126,11 +118,16 @@ export class CurrentUserStoreService implements OnInit {
     const profileParts = await Promise.all([
       this.fetchProfile(uid),
       this.fetchPrivateProfile(uid),
-      this.fetchMatchDataEl(uid),
+      this.fetchMatchDataInfo(uid),
     ]);
     const profile: Profile = profileParts[0];
     const privateProfile: privateProfileFromDatabase = profileParts[1];
     const infoFromMatchData: userInfoFromMatchData = profileParts[2];
+
+    const latestSearchCriteria = this.format.searchCriteriaDatabaseToClass(
+      privateProfile.latestSearchCriteria
+    );
+    this.SCstore.initalizeThroughCurrentUserStore(latestSearchCriteria);
 
     const user: User = new User(
       profile.uid,
@@ -148,6 +145,7 @@ export class CurrentUserStoreService implements OnInit {
       privateProfile.firstName,
       privateProfile.lastName,
       privateProfile.settings,
+      latestSearchCriteria,
       infoFromMatchData.gender,
       infoFromMatchData.sexualPreference,
       infoFromMatchData.swipeMode,

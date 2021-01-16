@@ -1,11 +1,10 @@
 import { Component, OnInit, OnDestroy, Input } from "@angular/core";
-import { AngularFirestore } from "@angular/fire/firestore";
 
 import { Subscription } from "rxjs";
 
 import { DatabaseService } from "@services/database/database.service";
 import { SwipeOutcomeStore, SwipeStackStore } from "@stores/index";
-import { profileSnapshot } from "@interfaces/index";
+import { Profile } from "@classes/index";
 
 @Component({
   selector: "app-swipe-card",
@@ -13,7 +12,7 @@ import { profileSnapshot } from "@interfaces/index";
   styleUrls: ["./swipe-card.component.scss"],
 })
 export class SwipeCardComponent implements OnInit, OnDestroy {
-  @Input() profiles: profileSnapshot[];
+  @Input() profiles: Profile[];
 
   latestOutcome$: Subscription;
   dislikedProfiles$: Subscription;
@@ -39,11 +38,11 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
     });
   }
 
-  async onYesSwipe(profile: profileSnapshot) {
+  async onYesSwipe(profile: Profile) {
     if (profile) {
       this.swipeStackStore.removeProfile(profile);
       // check in database if other user liked too, if yes, match them
-      const YesIsMutual: Boolean = await this.db.isLikedBy(profile.id); // temporary
+      const YesIsMutual: Boolean = await this.db.isLikedBy(profile.uid); // temporary
       if (YesIsMutual) {
         console.log("MATCH");
 
@@ -57,7 +56,7 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
     }
   }
 
-  onNoSwipe(profile: profileSnapshot) {
+  onNoSwipe(profile: Profile) {
     if (profile) {
       this.swipeStackStore.removeProfile(profile);
       this.swipeOutcomeStore.noSwipe(profile);

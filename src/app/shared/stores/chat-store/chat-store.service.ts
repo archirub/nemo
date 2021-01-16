@@ -12,6 +12,7 @@ import {
   chatFromDatabase,
   messageFromDatabase,
   messageState,
+  messageStateOptions,
 } from "@interfaces/index";
 import { FormatService } from "@services/index";
 
@@ -31,13 +32,22 @@ export class ChatStore {
     this.chats = this._chats.asObservable();
   }
 
-  public async initializeStore(uid: string): Promise<void> {
-    if (!uid) return console.error("No uid provided: chatStore init failed");
+  /** Initialisse the store
+   * returns uid so that store initializations can be chained
+   */
+  public async initializeStore(uid: string): Promise<string> {
+    if (!uid) {
+      console.error("No uid provided: chatStore init failed");
+      return;
+    }
     await this.fetchChats(uid);
     await Promise.all([
       this.startChatDocObservers(uid),
       this.startDocumentCreationDeletionObserver(uid),
     ]);
+
+    console.log("ChatStore initialized.");
+    return uid;
   }
 
   /** fetches all the chats for the authenticated user */
@@ -63,7 +73,7 @@ export class ChatStore {
         );
       })
       .filter((chat) => chat);
-    this._chats.next(chats);
+    this.updateObservable(chats);
     return chats;
   }
 
@@ -121,11 +131,16 @@ export class ChatStore {
   public async databaseUpdateMessages(chat: Chat): Promise<void> {
     if (!chat) return;
 
-    const currentMessages: messageFromDatabase[] = this.format.messagesClassToDatabase(
-      chat.messages
+    const chats: Chat[] = this._chats.getValue();
+    const chatIndex: number = this.getChatIndex(chats, chat);
+    const messages: messageFromDatabase[] = this.format.messagesClassToDatabase(
+      chats[chatIndex].messages
     );
+    const lastInteracted = chats[chatIndex].lastInteracted;
+
     const snapshot = await this.fs.collection("chats").doc(chat.id).update({
-      messages: currentMessages,
+      messages,
+      lastInteracted,
     });
   }
 
@@ -133,48 +148,39 @@ export class ChatStore {
    * the database regardless since we are listening to it. We must update locally to
    * make the app seem responsive regardless of the server's latency.
    */
-  public localMessageAddition(newMessage: Message, chatID: string): void {
-    if (!newMessage || !chatID) return;
+  public localMessageAddition(message: Message, chat: Chat): void {
+    if (!message || !chat) return;
 
-    let chats: Chat[] = this._chats.getValue();
-
-    // Finding index of chat to update
-    const chatIndex: number = chats.map((_chat) => _chat.id).indexOf(chatID);
+    const chats: Chat[] = this._chats.getValue();
+    const chatIndex: number = this.getChatIndex(chats, chat);
 
     if (chatIndex !== -1) {
-      let targetChat: Chat = chats[chatIndex];
-
-      // Updating message array
-      targetChat.messages.push(newMessage);
-
-      // Replacing old chat object with new chat object
-      chats.splice(chatIndex, 1, targetChat);
-
-      this._chats.next(chats);
+      chats[chatIndex].messages.push(message);
+      this.updateObservable(chats);
     }
   }
 
   /** Removes message from chat */
-  private localMessageRemoval(message: Message, chatID: string): void {
-    if (!message || !chatID) return;
+  private localMessageRemoval(message: Message, chat: Chat): void {
+    if (!message || !chat) return;
 
-    let chats: Chat[] = this._chats.getValue();
+    const chats: Chat[] = this._chats.getValue();
+    const chatIndex: number = this.getChatIndex(chats, chat);
+    const messageIndex: number = this.getMessageIndex(chat, message);
 
-    // Finding index of chat to update
-    const chatIndex: number = chats.map((_chat) => _chat.id).indexOf(chatID);
+    chats[chatIndex].messages.splice(messageIndex, 1);
 
-    if (chatIndex !== -1) {
-      let targetChat: Chat = chats[chatIndex];
-      // Finding index of message to remove
-      const messageIndex: number = targetChat.messages.indexOf(message);
+    this.updateObservable(chats);
+  }
 
-      if (messageIndex !== -1) {
-        // removing message
-        targetChat.messages.splice(messageIndex, 1);
-        chats.splice(chatIndex, 1, targetChat);
-        this._chats.next(chats);
-      }
-    }
+  /** Passes a new value to the chats observable.
+   * Processes that need to occur every time this is done and every time happen here
+   * a.k.a. refreshing the chat ordering according to lastInteracted property
+   */
+  private updateObservable(chats: Chat[]) {
+    if (!chats) return;
+    this.refreshChatOrder(chats);
+    this._chats.next(chats);
   }
 
   /** Adds a new listener for updates/deletions to the chat doc with id chatID*/
@@ -219,73 +225,99 @@ export class ChatStore {
   /** Updates the chat corresponding to the provided chatSnapshot in the chats observable
    * If the latter doesn't exist, the chat is added to the chats observable.
    */
-  private updateChat(newChat: Chat): void {
-    if (!newChat) return;
+  private updateChat(chat: Chat): void {
+    if (!chat) return;
 
-    const chatsObject: Chat[] = this._chats.getValue();
-
-    const newChatIndex: number = chatsObject
-      .map((chat) => chat.id)
-      .indexOf(newChat.id);
+    const chats: Chat[] = this._chats.getValue();
+    const newChatIndex: number = this.getChatIndex(chats, chat);
 
     if (newChatIndex !== -1) {
-      chatsObject[newChatIndex] = newChat;
+      chats[newChatIndex] = chat;
     } else {
-      chatsObject.push(newChat);
+      chats.push(chat);
     }
 
-    this._chats.next(chatsObject);
+    this.updateObservable(chats);
   }
 
-  public updateMessageState(
-    targetChat: Chat,
-    targetMessage: Message,
-    newState: messageState
-  ) {
-    if (!targetChat || !targetMessage || !newState) return;
+  /** Updates the state of the message provided from chat provided */
+  public updateMessageState(chat: Chat, message: Message, state: messageState) {
+    if (!chat || !message) return console.error("Missing parameter(s)");
+    if (!messageStateOptions.includes(state))
+      return console.error("Unknown msg state:", state);
+
     const chats: Chat[] = this._chats.getValue();
+    const chatIndex = this.getChatIndex(chats, chat);
+    const messageIndex = this.getMessageIndex(chat, message);
 
-    // Assuming no two messages have the same content, same time and same sender
-    const messageIndex: number = targetChat.messages.findIndex(
-      (_message) =>
-        _message.content === targetMessage.content &&
-        _message.senderID === targetMessage.senderID &&
-        _message.time === targetMessage.time
-    );
+    message.state = state;
+    chat[messageIndex] = message;
+    chats[chatIndex] = chat;
 
-    if (messageIndex !== -1) {
-      targetMessage.state = newState;
-      targetChat[messageIndex] = targetMessage;
-
-      const chatIndex: number = chats
-        .map((chat) => chat.id)
-        .indexOf(targetChat.id);
-
-      if (chatIndex !== -1) {
-        chats[chatIndex] = targetChat;
-        this._chats.next(chats);
-      } else {
-        console.error("Chat not found");
-      }
-    } else {
-      console.error("Message not found");
-    }
+    this.updateObservable(chats);
   }
 
-  public updateLatestChatInput(targetChat: Chat, newInput: string) {
-    if (!targetChat || !newInput) return;
+  /** Updates the lastInteracted property of the chat provided. */
+  public updateLastInteracted(chat: Chat, lastInteracted: Date) {
+    if (!chat || !lastInteracted) return;
 
     const chats: Chat[] = this._chats.getValue();
+    const chatIndex = this.getChatIndex(chats, chat);
 
-    const chatIndex: number = chats
-      .map((chat) => chat.id)
-      .indexOf(targetChat.id);
+    chats[chatIndex].lastInteracted = new Date(lastInteracted.getTime());
+
+    this.updateObservable(chats);
+  }
+
+  /** Updates the property latestChatInput of the chat provided */
+  public updateLatestChatInput(chat: Chat, input: string) {
+    if (!chat || !input) return;
+
+    const chats: Chat[] = this._chats.getValue();
+    const chatIndex: number = this.getChatIndex(chats, chat);
+
     if (chatIndex !== -1) {
-      chats[chatIndex].latestChatInput = newInput;
-      this._chats.next(chats);
+      chats[chatIndex].latestChatInput = input;
+      this.updateObservable(chats);
     } else {
       console.error("Chat not found");
     }
+  }
+
+  /** Sorts the chats so that lastly interacted chats are at the top of the array */
+  private refreshChatOrder(chats: Chat[]): Chat[] {
+    if (!chats) return;
+    chats.sort(
+      (chat1, chat2) =>
+        chat2.lastInteracted.getTime() - chat1.lastInteracted.getTime()
+    );
+    return chats;
+  }
+
+  /** Returns the index of the message provided within its chat
+   * Finds message by assuming no two messages have the same content, same time and same sender
+   */
+  private getMessageIndex(chat: Chat, message: Message): number {
+    if (!chat || !message) return;
+    const index: number = chat.messages.findIndex(
+      (_message) =>
+        _message.content === message.content &&
+        _message.senderID === message.senderID &&
+        _message.time === message.time
+    );
+    if (index === -1) console.error("msg not found:", message, chat);
+    return index;
+  }
+
+  /** Returns the index of the chat provided within chats observable */
+  private getChatIndex(chats: Chat[], chat: Chat): number {
+    if (!chats || !chat) return;
+
+    const index: number = chats.findIndex(
+      (c) => c.id === chat.id && c.batchVolume === chat.batchVolume
+    );
+    if (index === -1) console.error("chat not found:", chat);
+    return index;
   }
 
   //create function to set lastInteracted property to null for previous batchVolumes

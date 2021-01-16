@@ -9,3 +9,4 @@ admin.initializeApp();
 
 export * from "./generate-swipe-stack.function";
 export * from "./get-uids";
+export * from "./get-match-data-user-info.function";

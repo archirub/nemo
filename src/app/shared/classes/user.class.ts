@@ -14,11 +14,13 @@ import {
   user,
   Setting,
 } from "@interfaces/index";
+import { SearchCriteria } from "./search-criteria.class";
 
 export class User extends Profile implements user {
   private _firstName: string;
   private _lastName: string;
   private _settings: Setting[];
+  private _latestSearchCriteria: SearchCriteria;
   private _gender: Gender;
   private _sexualPreference: SexualPreference;
   private _swipeMode: SwipeMode;
@@ -40,6 +42,7 @@ export class User extends Profile implements user {
     firstName: string,
     lastName: string,
     settings: Setting[],
+    latestSearchCriteria: SearchCriteria,
     gender: Gender,
     sexualPreference: SexualPreference,
     swipeMode: SwipeMode,
@@ -62,6 +65,7 @@ export class User extends Profile implements user {
     this.firstName = firstName;
     this.lastName = lastName;
     this.settings = settings;
+    this.latestSearchCriteria = latestSearchCriteria;
     this.gender = gender;
     this.sexualPreference = sexualPreference;
     this.swipeMode = swipeMode;
@@ -80,6 +84,13 @@ export class User extends Profile implements user {
   }
   public set lastName(value: string) {
     this._lastName = value;
+  }
+
+  public get latestSearchCriteria(): SearchCriteria {
+    return this._latestSearchCriteria;
+  }
+  public set latestSearchCriteria(value: SearchCriteria) {
+    this._latestSearchCriteria = value;
   }
 
   public get settings(): Setting[] {

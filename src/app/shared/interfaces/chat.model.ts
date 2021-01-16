@@ -11,7 +11,7 @@ export interface chatFromDatabase {
   userSnippets: userSnippet[];
   messages: messageFromDatabase[];
   batchVolume: number;
-  lastInteracted: Date;
+  lastInteracted: firebase.firestore.Timestamp;
 }
 
 export interface chat {

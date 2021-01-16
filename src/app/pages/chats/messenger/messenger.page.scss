@@ -56,8 +56,9 @@ ion-toolbar {
   display: flex;
 }
 
-.sentMessage {
-  background: var(--ion-color-medium);
+.ownMessage {
+  background: var(--ion-color-primary);
+
   color: #fff;
   text-align: left;
   align-items: right;
@@ -66,12 +67,21 @@ ion-toolbar {
   margin-right: 6px;
 }
 
-.recievedMessage {
-  background: var(--ion-color-tertiary);
+.notOwnMessage {
+    background: var(--ion-color-medium);
+
   color: #fff;
   text-align: left;
   margin-right: 0px;
   margin-left: 6px;
+}
+
+.failedToSend {
+  background: var(--ion-color-medium-shade)
+}
+
+.isSending {
+  background: red;
 }
 
 #messageInput {

@@ -1,12 +1,13 @@
 import { Injectable } from "@angular/core";
 import { AngularFireAuth } from "@angular/fire/auth";
 
-import { Chat, Message, Profile } from "@classes/index";
+import { Chat, Message, Profile, SearchCriteria } from "@classes/index";
 import {
   chatFromDatabase,
   message,
   messageFromDatabase,
   profileFromDatabase,
+  searchCriteriaFromDatabase,
   userSnippet,
 } from "@interfaces/index";
 
@@ -15,6 +16,48 @@ import {
 })
 export class FormatService {
   constructor(private afAuth: AngularFireAuth) {}
+
+  public searchCriteriaDatabaseToClass(
+    searchCriteria: searchCriteriaFromDatabase
+  ): SearchCriteria {
+    if (!searchCriteria) return;
+    const university = searchCriteria.university;
+    const areaOfStudy = searchCriteria.areaOfStudy;
+    const ageRange = searchCriteria.ageRange;
+    const societyCategory = searchCriteria.societyCategory;
+    const interest = searchCriteria.interest;
+    const location = searchCriteria.location;
+
+    return new SearchCriteria(
+      university,
+      areaOfStudy,
+      ageRange,
+      societyCategory,
+      interest,
+      location
+    );
+  }
+
+  public searchCriteriaClassToDatabase(
+    searchCriteria: SearchCriteria
+  ): searchCriteriaFromDatabase {
+    if (!searchCriteria) return;
+    const university = searchCriteria.university;
+    const areaOfStudy = searchCriteria.areaOfStudy;
+    const ageRange = searchCriteria.ageRange;
+    const societyCategory = searchCriteria.societyCategory;
+    const interest = searchCriteria.interest;
+    const location = searchCriteria.location;
+
+    return {
+      university,
+      areaOfStudy,
+      ageRange,
+      societyCategory,
+      interest,
+      location,
+    };
+  }
 
   public profileDatabaseToClass(
     uid: string,
@@ -57,7 +100,7 @@ export class FormatService {
     if (!currentUserID || !chatID || !chatData) return;
 
     const batchVolume: number = chatData.batchVolume;
-    const lastInteracted: Date = chatData.lastInteracted;
+    const lastInteracted: Date = chatData.lastInteracted.toDate();
     const userSnippets: userSnippet[] = chatData.userSnippets;
     const recipient: userSnippet = userSnippets.filter(
       (snippet) => snippet.uid !== currentUserID
@@ -87,9 +130,8 @@ export class FormatService {
       const reaction = msg.reaction;
       const senderID = msg.senderID;
       const time = msg.time;
-      const seen = msg.seen;
 
-      return new Message(senderID, time, content, reaction, seen, "sent");
+      return new Message(senderID, time, content, reaction, "sent");
     });
   }
 
@@ -107,8 +149,7 @@ export class FormatService {
     const reaction = msg.reaction;
     const senderID = msg.senderID;
     const time = msg.time;
-    const seen = msg.seen;
 
-    return { senderID, time, content, reaction, seen };
+    return { senderID, time, content, reaction };
   }
 }

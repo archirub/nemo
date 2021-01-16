@@ -1,13 +1,8 @@
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 
-// For local testing, uncomment the 5 lines below, and comment out "admin.initializeApp();"
-
-// const serviceAccount = require("../nemo-dev-1b0bc-firebase-adminsdk-d8ozt-60b942febb.json");
-// admin.initializeApp({
-//   credential: admin.credential.cert(serviceAccount),
-//   databaseURL: "https://nemo-dev-1b0bc.firebaseio.com",
-// });
+// FOR DEVELOPMENT PURPOSES ONLY - necessary in mock-data-management to get the uids of authenticated
+// users, which is only possible with the admin SDK for security purposes.
 
 interface requestData {
   amount: number;
