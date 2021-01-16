@@ -13,7 +13,39 @@ export class ChatBoardComponent {
 
   constructor(private router: Router) {}
 
-  goToMessenger(chatID: string) {
+  ngOnInit() {
+    //this.ActivatedRoute.paramMap.subscribe();
+    //this.displayedText = this.fakeData.generateSentences(this.profiles.length);
+    // this.chats[0].messages[6].
+  }
+
+  shorten(sentence: string) {
+    if (sentence.length > 25) {
+      let shortenedSentence = sentence.slice(0, 25);
+      if (shortenedSentence.endsWith(" " || ".")) {
+        shortenedSentence = sentence.slice(0, 24);
+      }
+      return shortenedSentence + "...";
+    }
+  }
+
+  getDate(date: Date) {
+    let month = date.getMonth();
+    let day = date.getDay();
+    return day.toString() + "/" + month.toString;
+  }
+
+  calcUnread(chat: Chat) {
+    let counter = 0;
+    for (let msg of chat.messages) {
+      if (msg.senderID == chat.recipient.uid && msg.seen !== true) {
+        counter++;
+      }
+    }
+    return counter;
+  }
+
+  goToMessenger(chatID: String) {
     this.router.navigate(["/messenger/" + chatID]);
   }
 }

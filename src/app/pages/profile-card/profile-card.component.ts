@@ -1,14 +1,24 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit, ViewChild } from "@angular/core";
+import { Chat } from "@classes/index";
+import { IonContent } from "@ionic/angular";
 
 @Component({
-  selector: 'app-profile-card',
-  templateUrl: './profile-card.component.html',
-  styleUrls: ['./profile-card.component.scss'],
+  selector: "app-profile-card",
+  templateUrl: "./profile-card.component.html",
+  styleUrls: ["./profile-card.component.scss"],
 })
 export class ProfileCardComponent implements OnInit {
+  @Input() moreInfo: boolean;
+  @ViewChild(IonContent) ionContent: IonContent;
+  constructor() {}
 
-  constructor() { }
+  ngOnInit() {
+    this.moreInfo = false;
+  }
 
-  ngOnInit() {}
-
+  expandProfile(event) {
+    console.log("the button works");
+    if (this.moreInfo == true) this.moreInfo = false;
+    else this.moreInfo = true;
+  }
 }

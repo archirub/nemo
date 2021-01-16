@@ -36,5 +36,4 @@ export class AppComponent {
         .then((uid) => this.swipeStackStore.initializeStore(uid))
         .then((uid) => this.chatStore.initializeStore(uid));
     });
-  }
-}
+  }}

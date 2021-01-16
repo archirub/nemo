@@ -1,6 +1,7 @@
 ion-item {
   --border-width: 0px;
-  --border-style: none;
+  border-color: #666666;
+  --border-style: solid;
   border-radius: 40px;
   --inner-border-width: 0px;
   margin-top: 5px;
@@ -19,7 +20,8 @@ ion-avatar {
 }
 
 #notifications-badge {
-  position: absolute;
+  position: fixed;
+  flex-direction: row;
 }
 
 .text-container {
@@ -29,10 +31,13 @@ ion-avatar {
 
 .name {
   font-size: 20px;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .chat {
   font-size: medium;
   padding: 4px 0px 0px;
+}
+
+#unread-badge {
 }

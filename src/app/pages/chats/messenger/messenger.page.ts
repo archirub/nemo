@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, ViewChild } from "@angular/core";
+import { Component, Input, OnDestroy, OnInit, ViewChild } from "@angular/core";
 
 import { NavController, IonContent } from "@ionic/angular";
 import { AngularFireAuth } from "@angular/fire/auth";
