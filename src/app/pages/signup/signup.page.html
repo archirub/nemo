@@ -7,19 +7,29 @@
 </ion-header>
 <ion-content>
   <form [formGroup]="signupForm">
-    <ion-slides pager="true" #slides>
+    <ion-slides pager="true" #slide>
+
       <ion-slide>
         <ion-item lines="none">
           <ion-label class="question" position="stacked">
             What's your uni email address?
           </ion-label>
 
-          <div class="flexcolumn">
-            <div class="input">
+          <div class="input flexend-col">
+            <div>
               <ion-input placeholder="email@ucl.ac.uk"></ion-input>
             </div>
           </div>
-          <p class="tip">Only UCL email addresses will allow for verification.</p>
+           
+          <div class="tip flexstart-col">
+            <p>Only UCL email addresses will allow for verification.</p>
+          </div>
+
+          <div class="scroll flexend-row">
+            <ion-button class="next-slide" (click)="slide.slideNext()">
+              <ion-icon name="chevron-forward-outline"></ion-icon>
+            </ion-button>
+          </div>
         </ion-item>
       </ion-slide>
 
@@ -29,14 +39,16 @@
             Enter your verification code
           </ion-label>
 
-          <div class="flexcolumn">
-            <p class="tip">
-              We just sent an email to
-              <br>
-              "email@ucl.ac.uk". <!--BACKEND - Fill with email input on previous slide-->
-            </p>
+          <div class="input flexend-col">
+            <div class="tip flexend-col">
+              <p>
+                We just sent an email to
+                <br>
+                "email@ucl.ac.uk". <!--BACKEND - Fill with email input on previous slide-->
+              </p>
+            </div>
 
-            <div class="flexrow">
+            <div class="flexstart-row">
               <div class="verification_input">
                 <ion-input size="1" maxlength="1" min="0" max="9" pattern="[0-9]{1}"></ion-input>
               </div>
@@ -51,7 +63,16 @@
               </div>
             </div>
           </div>
-          <p class="no_verification">Didn't get a code?</p>
+
+          <div class="tip flexstart-col">
+            <p class="no_verification">Didn't get a code?</p>
+          </div>
+
+          <div class="scroll flexend-row">
+            <ion-button class="next-slide" (click)="slide.slideNext()">
+              <ion-icon name="chevron-forward-outline"></ion-icon>
+            </ion-button>
+          </div>
         </ion-item>
       </ion-slide>
 
@@ -61,13 +82,24 @@
             What's your name?
           </ion-label>
 
-          <div class="flexcolumn">
-            <div class="input">
-              <ion-input placeholder="First name"></ion-input>
+          <div class="input flexend-col">
+            <div>
+              <ion-input placeholder="First Name"></ion-input>
             </div>
-            <div class="input">
-              <ion-input placeholder="Last name"></ion-input>
+
+            <div>
+              <ion-input placeholder="Last Name"></ion-input>
             </div>
+          </div>
+
+          <div class="tip flexstart-col">
+            <!-- Sort of a lazy fix - will rectify later - empty div with set height to keep button in same place -->
+          </div>
+
+          <div class="scroll flexend-row">
+            <ion-button class="next-slide" (click)="slide.slideNext()">
+              <ion-icon name="chevron-forward-outline"></ion-icon>
+            </ion-button>
           </div>
         </ion-item>
       </ion-slide>
@@ -78,12 +110,21 @@
             Choose a password NAME <!-- BACKEND - possible to fill in name here from previous slide's input?-->
           </ion-label>
 
-          <div class="flexcolumn">
-            <div class="input">
+          <div class="input flexend-col">
+            <div>
               <ion-input></ion-input>
             </div>
           </div>
-          <p class="tip">Your password must be at least 10 characters long.</p>
+
+          <div class="tip flexstart-col">
+            <p>Your password must be at least 10 characters long.</p>
+          </div>
+
+          <div class="scroll flexend-row">
+            <ion-button class="next-slide" (click)="slide.slideNext()">
+              <ion-icon name="chevron-forward-outline"></ion-icon>
+            </ion-button>
+          </div>
         </ion-item>
       </ion-slide>
     
@@ -93,23 +134,31 @@
             What's your date of birth?
           </ion-label>
 
-          <div class="flexcolumn">
-            <div class="input">
+          <div class="input flexend-col">
+            <div>
               <ion-datetime displayFormat="DD MM YYYY"></ion-datetime>
             </div>
           </div>
-          <p>Sorted Later</p>
+
+          <div class="tip flexstart-col">
+            <!-- Lazy fix -->
+          </div>
+
+          <div class="scroll flexend-row">
+            <ion-button class="next-slide" (click)="slide.slideNext()">
+              <ion-icon name="chevron-forward-outline"></ion-icon>
+            </ion-button>
+          </div>
         </ion-item>
       </ion-slide>
 
       <ion-slide>
         <ion-item lines="none">
           <ion-label class="question" position="stacked">
-            Choose your photos
+            Choose your photos NAME
           </ion-label>
 
-          <div class="flexcolumn">
-            <div>pictures chosen displayed</div>
+          <div class="input flexend-col">
 
             <ion-button
               (click)="onPickPicture()"
@@ -120,17 +169,27 @@
               Get me to my photo gallery
             </ion-button>
           </div>
-          <p class="tip">You must have at least one photo on your profile.</p>
+
+          <div class="tip flexstart-col">
+            <p>You must have at least one photo on your profile.</p>
+          </div>
+
+          <div class="scroll flexend-row">
+            <ion-button class="next-slide" (click)="slide.slideNext()">
+              <ion-icon name="chevron-forward-outline"></ion-icon>
+            </ion-button>
+          </div>
         </ion-item>
       </ion-slide>
 
       <ion-slide>
         <ion-item lines="none">
           <ion-label class="question" position="stacked">
-            Set your preferences
+            What are your preferences?
           </ion-label>
+          <br>
 
-          <div class="flexcolumn">
+          <div class="flexstart-col">
             <div class="preferences">
               I am looking for 
               <select required>
