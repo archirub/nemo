@@ -1,14 +1,124 @@
+$button-width: 6.25vh;
+$button-font:  2 * $button-width;
+
 ion-slides {
   height: 100vh;
 }
 
+ion-item {
+  height: 80vh;
+}
+
+p {
+  margin: 0;
+}
+
+.scroll {
+  width: 90%;
+
+  ion-button {
+    --border-radius: 100%;
+    padding: 0;
+    color: var(--ion-color-secondary);
+    height: $button-width;
+    width: $button-width;
+  };
+}
+
+.flexend-col {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.flexstart-col {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.flexend-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+}
+
+.flexstart-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+}
+
 .question {
-  font-size: 40px;
+  height: 15vh;
+  font-size: 5vh;
   overflow-wrap: break-word;
   white-space: normal;
 }
 
 .input {
-  border-bottom: solid 1px black;
-  background-color: antiquewhite;
+  height: 20vh;
+  width: 90%;
+
+  ion-input, ion-datetime {
+    height: 5vh;
+    width: 100%;
+    border-bottom: solid 1px var(--ion-color-medium-shade);
+    font-weight: bold;
+    font-size: 3vh;
+    margin-bottom: 1vh;
+  };
+
+  .verification_input {
+    color: var(--ion-color-primary);
+    text-align: center; 
+    width: 10%;
+    margin-right: 5vw;
+  };
+}
+
+.tip {
+  height: 20vh;
+
+  p {
+    font-size: 2vh;
+    color: var(--ion-color-medium-shade);
+    margin-bottom: 3vh;
+  };
+
+  .no_verification {
+    color: var(--ion-color-primary-tint);
+  };
+}
+
+.preferences {
+  color: var(--ion-color-medium-shade);
+  display: flex;
+  width: 100%;
+  font-size: 3vh;
+
+  .flexstart-col & {
+    margin-top: 3vh;
+  }
+
+  select {
+    color: var(--ion-color-dark);
+    border: 0;
+
+    &:valid {
+      transition-duration: 0.4s;
+    };
+
+    /* This lets it slide across after selection, transition-duration currently useless, 
+    simple method to start can improve later*/
+    &:invalid {
+      margin-left: auto;
+      transition-duration: 0.4s;     
+    };
+
+    &:visited, &:active {
+      border: 0;
+    };
+  };
+
 }
