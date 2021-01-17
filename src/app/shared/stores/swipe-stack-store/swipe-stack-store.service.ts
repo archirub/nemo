@@ -80,9 +80,9 @@ export class SwipeStackStore {
     const requestData: generateSwipeStackRequest = { searchCriteria };
     const responseData = (await this.afFunctions
       .httpsCallable("generateSwipeStack")(requestData)
-      .toPromise()) as generateSwipeStackResponse;
-
-    return responseData?.uids || [];
+      .toPromise());
+      console.log(responseData)
+    return responseData?.users.map(user=>user.uid) || [];
   }
 
   /** Gets data from profile docs from an array of uids */

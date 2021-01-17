@@ -10,7 +10,6 @@ import { map, take } from "rxjs/operators";
 
 import { ChatStore } from "@stores/index";
 import { Chat, Profile } from "@classes/index";
-import { AuthService } from "@services/index";
 import { chatFromDatabase } from "@interfaces/index";
 
 @Component({

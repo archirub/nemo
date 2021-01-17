@@ -7,8 +7,7 @@ import { IonicModule } from "@ionic/angular";
 import { OwnProfilePageRoutingModule } from "./own-profile-routing.module";
 
 import { OwnProfilePage } from "./own-profile.page";
-import { SwipeCardComponent } from "../home/swipe-card/swipe-card.component";
-import { ProfileCardComponent } from "../profile-card/profile-card.component";
+import { ProfileCardComponent } from "@components/index";
 
 @NgModule({
   imports: [

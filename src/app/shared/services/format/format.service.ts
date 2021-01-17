@@ -65,7 +65,7 @@ export class FormatService {
   ): Profile {
     if (!uid || !profileData) return;
     const displayName = profileData.displayName;
-    const dateOfBirth = profileData.dateOfBirth;
+    const dateOfBirth = profileData.dateOfBirth.toDate();
     const pictures = profileData.pictures;
     const biography = profileData.biography;
     const university = profileData.university;

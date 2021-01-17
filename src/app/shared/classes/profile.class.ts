@@ -1,7 +1,7 @@
 import {
   profile,
   profilePictureUrls,
-  SocialMediaLinks,
+  SocialMediaLink,
   QuestionAndAnswer,
   Interest,
   University,
@@ -20,7 +20,7 @@ export class Profile implements profile {
   private _interests: Interest[];
   private _questions: QuestionAndAnswer[];
   private _location: Location;
-  private _socialMediaLinks: SocialMediaLinks;
+  private _socialMediaLinks: SocialMediaLink[];
 
   constructor(
     uid: string,
@@ -34,7 +34,7 @@ export class Profile implements profile {
     interests: Interest[],
     questions: QuestionAndAnswer[],
     location: Location,
-    socialMediaLinks: SocialMediaLinks
+    socialMediaLinks: SocialMediaLink[]
   ) {
     this.uid = uid;
     this.displayName = displayName;
@@ -127,10 +127,10 @@ export class Profile implements profile {
     this._location = value;
   }
 
-  public get socialMediaLinks(): SocialMediaLinks {
+  public get socialMediaLinks(): SocialMediaLink[] {
     return this._socialMediaLinks;
   }
-  public set socialMediaLinks(value: SocialMediaLinks) {
+  public set socialMediaLinks(value: SocialMediaLink[]) {
     this._socialMediaLinks = value;
   }
 
