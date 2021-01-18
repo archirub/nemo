@@ -1,8 +1,9 @@
 $button-width: 6.25vh;
-$button-font:  2 * $button-width;
+$slide-height: 100vh;
+$slide-width: 100vw;
 
 ion-slides {
-  height: 100vh;
+  height: $slide-height;
 }
 
 ion-item {
@@ -13,16 +14,33 @@ p {
   margin: 0;
 }
 
+.set-height {
+  height: 20vh;
+}
+
 .scroll {
   width: 90%;
 
   ion-button {
     --border-radius: 100%;
-    padding: 0;
+    --padding-start: 0;
+    --padding-end: 0;
     color: var(--ion-color-secondary);
+    --background: var(--ion-color-primary);
     height: $button-width;
     width: $button-width;
   };
+
+  ion-icon[name="close-outline"] {
+    font-size: 3vh;
+  }
+}
+
+.full-page {
+  height: $slide-height;
+  width: $slide-width;
+  z-index: 1;
+  position: absolute;
 }
 
 .flexend-col {
@@ -57,7 +75,6 @@ p {
 }
 
 .input {
-  height: 20vh;
   width: 90%;
 
   ion-input, ion-datetime {
@@ -78,7 +95,6 @@ p {
 }
 
 .tip {
-  height: 20vh;
 
   p {
     font-size: 2vh;
@@ -89,6 +105,49 @@ p {
   .no_verification {
     color: var(--ion-color-primary-tint);
   };
+}
+
+.skip {
+  margin: 0 auto;
+  text-align: center;
+
+  ion-button {
+    font-size: 3vh;
+    color: var(--ion-color-light-contrast);
+    --background: transparent;
+    --box-shadow: none;
+    text-transform: none;
+  }
+}
+
+.slide-container {
+  height: $slide-height;
+  width: $slide-width;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--ion-color-primary-shade),var(--ion-color-secondary-shade));
+}
+
+.waves {
+  height: $slide-height;
+  max-width: 150vw;
+}
+
+.blow-up {
+  color: var(--ion-color-primary-contrast);
+  z-index: 1;
+  position: absolute;
+  text-align: left;
+  font-weight: bold;
+  font-size: 6vh;
+  padding: 10vh 5vw;
+
+  &.top-pos {
+    top: 20vh;
+  };
+
+  &.bot-pos {
+    bottom: 20vh;
+  }
 }
 
 .preferences {
@@ -120,5 +179,15 @@ p {
       border: 0;
     };
   };
+}
 
+.uni {
+  width: 90%;
+
+  select {
+    border-radius: 1vw;
+    border: 1px solid var(--ion-color-medium-shade);
+    width: 100%;
+    margin-top: 5vh;
+  };
 }

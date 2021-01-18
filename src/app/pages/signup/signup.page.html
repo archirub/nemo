@@ -15,18 +15,18 @@
             What's your uni email address?
           </ion-label>
 
-          <div class="input flexend-col">
+          <div class="input set-height flexend-col">
             <div>
               <ion-input placeholder="email@ucl.ac.uk"></ion-input>
             </div>
           </div>
            
-          <div class="tip flexstart-col">
+          <div class="tip set-height flexstart-col">
             <p>Only UCL email addresses will allow for verification.</p>
           </div>
 
           <div class="scroll flexend-row">
-            <ion-button class="next-slide" (click)="slide.slideNext()">
+            <ion-button (click)="slide.slideNext()">
               <ion-icon name="chevron-forward-outline"></ion-icon>
             </ion-button>
           </div>
@@ -39,8 +39,8 @@
             Enter your verification code
           </ion-label>
 
-          <div class="input flexend-col">
-            <div class="tip flexend-col">
+          <div class="input set-height flexend-col">
+            <div class="tip set-height flexend-col">
               <p>
                 We just sent an email to
                 <br>
@@ -64,12 +64,12 @@
             </div>
           </div>
 
-          <div class="tip flexstart-col">
+          <div class="tip set-height flexstart-col">
             <p class="no_verification">Didn't get a code?</p>
           </div>
 
           <div class="scroll flexend-row">
-            <ion-button class="next-slide" (click)="slide.slideNext()">
+            <ion-button (click)="slide.slideNext()">
               <ion-icon name="chevron-forward-outline"></ion-icon>
             </ion-button>
           </div>
@@ -82,7 +82,7 @@
             What's your name?
           </ion-label>
 
-          <div class="input flexend-col">
+          <div class="input set-height flexend-col">
             <div>
               <ion-input placeholder="First Name"></ion-input>
             </div>
@@ -92,12 +92,12 @@
             </div>
           </div>
 
-          <div class="tip flexstart-col">
+          <div class="tip set-height flexstart-col">
             <!-- Sort of a lazy fix - will rectify later - empty div with set height to keep button in same place -->
           </div>
 
           <div class="scroll flexend-row">
-            <ion-button class="next-slide" (click)="slide.slideNext()">
+            <ion-button (click)="slide.slideNext()">
               <ion-icon name="chevron-forward-outline"></ion-icon>
             </ion-button>
           </div>
@@ -110,18 +110,18 @@
             Choose a password NAME <!-- BACKEND - possible to fill in name here from previous slide's input?-->
           </ion-label>
 
-          <div class="input flexend-col">
+          <div class="input set-height flexend-col">
             <div>
               <ion-input></ion-input>
             </div>
           </div>
 
-          <div class="tip flexstart-col">
+          <div class="tip set-height flexstart-col">
             <p>Your password must be at least 10 characters long.</p>
           </div>
 
           <div class="scroll flexend-row">
-            <ion-button class="next-slide" (click)="slide.slideNext()">
+            <ion-button (click)="slide.slideNext()">
               <ion-icon name="chevron-forward-outline"></ion-icon>
             </ion-button>
           </div>
@@ -134,18 +134,18 @@
             What's your date of birth?
           </ion-label>
 
-          <div class="input flexend-col">
+          <div class="input set-height flexend-col">
             <div>
               <ion-datetime displayFormat="DD MM YYYY"></ion-datetime>
             </div>
           </div>
 
-          <div class="tip flexstart-col">
+          <div class="tip set-height flexstart-col">
             <!-- Lazy fix -->
           </div>
 
           <div class="scroll flexend-row">
-            <ion-button class="next-slide" (click)="slide.slideNext()">
+            <ion-button (click)="slide.slideNext()">
               <ion-icon name="chevron-forward-outline"></ion-icon>
             </ion-button>
           </div>
@@ -158,7 +158,7 @@
             Choose your photos NAME
           </ion-label>
 
-          <div class="input flexend-col">
+          <div class="input set-height flexend-col">
 
             <ion-button
               (click)="onPickPicture()"
@@ -170,12 +170,12 @@
             </ion-button>
           </div>
 
-          <div class="tip flexstart-col">
+          <div class="tip set-height flexstart-col">
             <p>You must have at least one photo on your profile.</p>
           </div>
 
           <div class="scroll flexend-row">
-            <ion-button class="next-slide" (click)="slide.slideNext()">
+            <ion-button (click)="slide.slideNext()">
               <ion-icon name="chevron-forward-outline"></ion-icon>
             </ion-button>
           </div>
@@ -203,7 +203,7 @@
               I am interested in
               <select required>
                 <option value="" disable selected hidden></option>
-                <option value="girls">guys</option>
+                <option value="guys">guys</option>
                 <option value="girls">girls</option>
                 <option value="all genders">all genders</option>
                 <option value="non-binary">non-binary</option>
@@ -231,10 +231,104 @@
               </select>
             </div>
           </div>
+
+          <div class="scroll flexend-row">
+            <ion-button (click)="slide.slideNext()">
+              <ion-icon name="chevron-forward-outline"></ion-icon>
+            </ion-button>
+          </div>
         </ion-item> 
       </ion-slide>
 
-      <ion-slide> set university details </ion-slide>
+      <ion-slide (click)="slide.slideNext()"> <!-- Still figuring out this animation -->
+        <div class="slide-container">
+          <img class="waves" src="../../../assets/signup/waves.png" alt="Waves">
+        </div>
+
+        <div class="flexstart-col full-page">
+          <div class="scroll flexend-row">
+            <ion-button (click)="slide.slideNext()">
+              <ion-icon name="close-outline"></ion-icon>
+            </ion-button>
+          </div>
+          <h1 class="blow-up">Adding basic info leads to better matches.</h1>
+        </div>
+      </ion-slide>
+
+      <ion-slide>
+        <div class="slide-container">
+          <img class="waves" src="../../../assets/signup/waves_2.png" alt="Waves">
+        </div>
+
+        <div class="flexend-col full-page">
+          <!--div class="scroll flexend-row">
+            <ion-button (click)="slide.slideNext()">
+              <ion-icon name="close-outline"></ion-icon>
+            </ion-button>
+          </div-->
+
+           <h1 class="blow-up">So you can find a catch, or be caught yourself.</h1>
+        </div>
+      </ion-slide>
+
+      <ion-slide> 
+        <ion-item lines="none">
+          <ion-label class="question" position="stacked">
+            Set your uni details
+          </ion-label>
+
+          <div class="uni flexstart-col">
+            <div>
+              <select required>
+                <option value="Area of study" selected hidden></option>
+                <option value="physics">Physics</option>
+                <option value="politics">Politics</option>
+                <option value="maths">Maths</option>
+                <option value="compsci">Computer Science</option>
+              </select>
+            </div>
+
+            <div class="input">
+              <div>
+                <ion-input type="text" maxlength="20" placeholder="Enter your degree"></ion-input>
+              </div>
+            </div>
+
+            <div class="tip">
+              <p>Maximum 20 characters</p>
+            </div>
+
+            <div>
+              <select required>
+                <option value="Are you in any societies?" selected hidden></option>
+                <option value="physics">Lacrosse</option>
+                <option value="politics">Kickboxing</option>
+                <option value="maths">Chess</option>
+                <option value="compsci">Poker</option>
+              </select>
+            </div>
+
+            <div class="input">
+              <div>
+                <ion-input type="text" maxlength="15" placeholder="Enter your society"></ion-input>
+              </div>
+            </div>
+
+            <div class="tip">
+              <p>Maximum 15 characters</p>
+            </div>
+
+            <div class="tip">
+              <p>These details are optional and can be changed later.</p>
+            </div>
+
+            <div class="skip">
+              <ion-button (click)="slide.slideNext()">Skip</ion-button>
+            </div>
+          </div>
+        </ion-item>
+      </ion-slide>
+
       <ion-slide> where are you from </ion-slide>
       <ion-slide> answer some question </ion-slide>
       <ion-slide> describe yourself </ion-slide>
