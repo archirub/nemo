@@ -6,7 +6,7 @@ import {
 import { Profile } from "./profile.class";
 import {
   profilePictureUrls,
-  SocialMediaLinks,
+  SocialMediaLink,
   QuestionAndAnswer,
   Interest,
   University,
@@ -38,7 +38,7 @@ export class User extends Profile implements user {
     interests: Interest[],
     questions: QuestionAndAnswer[],
     location: Location,
-    socialMediaLinks: SocialMediaLinks,
+    socialMediaLinks: SocialMediaLink[],
     firstName: string,
     lastName: string,
     settings: Setting[],

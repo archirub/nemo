@@ -62,4 +62,8 @@ export class SignupPage implements OnInit {
       allowEditing: true,
     }).then((image) => console.log(image));
   }
+
+  item = {
+    checked: false,
+  }
 }

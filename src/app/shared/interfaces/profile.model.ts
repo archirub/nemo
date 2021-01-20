@@ -21,7 +21,7 @@ export interface profile {
   interests: Interest[];
   questions: QuestionAndAnswer[];
   location: Location;
-  socialMediaLinks: SocialMediaLinks;
+  socialMediaLinks: SocialMediaLink[];
 }
 
 export interface user extends profile {
@@ -33,7 +33,7 @@ export interface user extends profile {
 
 export interface profileFromDatabase {
   displayName: string;
-  dateOfBirth: Date;
+  dateOfBirth: firebase.firestore.Timestamp;
   pictures: profilePictureUrls;
   biography: string;
 
@@ -47,7 +47,7 @@ export interface profileFromDatabase {
   questions: QuestionAndAnswer[];
   location: Location;
 
-  socialMediaLinks: SocialMediaLinks;
+  socialMediaLinks: SocialMediaLink[];
 
   hasMatchDocument: boolean; // TEMPORARY Helps in match-generator to find profiles with no match document
 }
@@ -75,7 +75,7 @@ export type QuestionAndAnswer = { question: Question; answer: string };
 
 const socialMediaOptions = ["facebook", "instagram"] as const;
 export type socialMedia = typeof socialMediaOptions[number];
-export type SocialMediaLinks = { socialMedia: socialMedia; link: string }[];
+export type SocialMediaLink = { socialMedia: socialMedia; link: string };
 
 export interface socialFeatures {
   university: string;

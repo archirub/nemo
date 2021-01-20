@@ -1,8 +1,9 @@
 $button-width: 6.25vh;
-$button-font:  2 * $button-width;
+$slide-height: 100vh;
+$slide-width: 100vw;
 
 ion-slides {
-  height: 100vh;
+  height: $slide-height;
 }
 
 ion-item {
@@ -14,15 +15,22 @@ p {
 }
 
 .scroll {
-  width: 90%;
+  width: 100%;
+  height: 20vh;
 
   ion-button {
     --border-radius: 100%;
-    padding: 0;
+    --padding-start: 0;
+    --padding-end: 0;
     color: var(--ion-color-secondary);
+    --background: var(--ion-color-primary);
     height: $button-width;
     width: $button-width;
   };
+
+  ion-icon[name="close-outline"] {
+    font-size: 3vh;
+  }
 }
 
 .flexend-col {
@@ -49,16 +57,51 @@ p {
   justify-content: flex-start;
 }
 
+.flexeven {
+  display: flex;
+  justify-content: space-evenly;
+  
+  &-col {
+    flex-direction: column;
+  };
+}
+
+.wave-background {
+  height: $slide-height;
+  width: $slide-width;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--ion-color-primary-shade),var(--ion-color-secondary-shade));
+  position: relative;
+  z-index: 0;
+}
+
+.container {
+  height: 80vh;
+  width: 90vw;
+
+  &-wave {
+    height: 80vh;
+    width: 90vw;
+    z-index: 1;
+    position: absolute;
+  };
+}
+
 .question {
-  height: 15vh;
+  flex: 1;
+  padding-top: 8vh;
   font-size: 5vh;
-  overflow-wrap: break-word;
-  white-space: normal;
+
+  ion-label {
+    overflow-wrap: break-word;
+    white-space: normal;
+    height: 12vh;
+  };
 }
 
 .input {
-  height: 20vh;
   width: 90%;
+  height: 20vh;
 
   ion-input, ion-datetime {
     height: 5vh;
@@ -69,6 +112,15 @@ p {
     margin-bottom: 1vh;
   };
 
+  ion-textarea {
+    width: 100%;
+    border-bottom: solid 1px var(--ion-color-medium-shade);
+    border-top: solid 1px var(--ion-color-medium-shade);
+    font-weight: bold;
+    font-size: 3vh;
+    margin-bottom: 1vh;
+  }
+
   .verification_input {
     color: var(--ion-color-primary);
     text-align: center; 
@@ -77,18 +129,75 @@ p {
   };
 }
 
-.tip {
-  height: 20vh;
+p {
+  font-size: 2vh;
+  margin-bottom: 3vh;
 
-  p {
-    font-size: 2vh;
+  &.tip {
     color: var(--ion-color-medium-shade);
-    margin-bottom: 3vh;
+
+    &-center {
+      color: var(--ion-color-medium-shade);
+      text-align: center;
+      margin: 1vh 0 0 0;
+    }
   };
 
-  .no_verification {
+  &.no_verification {
     color: var(--ion-color-primary-tint);
   };
+}
+
+/* ADD PHOTOS SLIDE SPECIFICS */
+
+/*Photo square div alignment*/
+.pictures {
+  text-align: center;
+  margin: 0 auto;
+}
+
+/*Photo square styling*/
+.photo {
+  width: 10vh;
+  height: 10vh;
+  margin: 4vh;
+  border-radius: 1vh;
+  font-weight: bold;
+  font-size: 3vh;
+  text-align: center;
+  padding-top: 3vh;
+  background-color: var(--ion-color-medium-tint);
+  color: var(--ion-color-dark-tint);
+}
+
+.skip {
+  margin: 0 auto;
+  text-align: center;
+
+  ion-button {
+    font-size: 3vh;
+    color: var(--ion-color-light-contrast);
+    --background: transparent;
+    --box-shadow: none;
+    text-transform: none;
+  }
+}
+
+.waves {
+  height: $slide-height;
+  max-width: 150vw;
+}
+
+.blow-up {
+  color: var(--ion-color-primary-contrast);
+  text-align: left;
+  height: 60vh;
+
+  h1 {
+    padding: 0 5vw;
+    font-weight: bold;
+    font-size: 6vh;
+  }
 }
 
 .preferences {
@@ -120,5 +229,51 @@ p {
       border: 0;
     };
   };
+}
 
+.optionals {
+  width: 90%;
+
+  /*Stop input divs from overflowing flexboxes on further info pages*/
+  & .input {
+    height: auto;
+  }
+
+  select {
+    font-size: 3vh; 
+    font-weight: bold;
+    border-radius: 1vw;
+    border: 1px solid var(--ion-color-medium-shade);
+    width: 100%;
+    margin: 5vh 0 2vh 0;
+  };
+}
+
+ion-content {
+  flex: 2;
+}
+
+.hobbies {
+
+  ion-item {
+    height: auto;
+    border-radius: 10px;
+    margin: 1vh;
+    --padding: 0;
+    --inner-border-width: none;
+    --border-color: transparent;
+
+    ion-checkbox {
+      --border-radius: 100%;
+      --border-color: var(--ion-color-light-shade);
+      --background: var(--ion-color-primary-contrast);
+      --background-checked: var(--ion-color-primary-contrast);
+      --checkmark-color: var(--ion-color-primary);
+      margin: 0;
+    };
+  };
+}
+
+.bio {
+  height: 40vh;
 }

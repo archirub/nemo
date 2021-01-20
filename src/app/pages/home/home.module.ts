@@ -7,6 +7,7 @@ import { HomePage } from "./home.page";
 import { HomePageRoutingModule } from "./home-routing.module";
 import { SwipeCardComponent } from "./swipe-card/swipe-card.component";
 import { SearchCriteriaComponent } from "./search-criteria/search-criteria.component";
+import { ProfileCardComponent } from "@components/index";
 
 @NgModule({
   imports: [
@@ -16,7 +17,7 @@ import { SearchCriteriaComponent } from "./search-criteria/search-criteria.compo
     IonicModule,
     HomePageRoutingModule,
   ],
-  declarations: [HomePage, SwipeCardComponent, SearchCriteriaComponent],
+  declarations: [HomePage, SwipeCardComponent, SearchCriteriaComponent, ProfileCardComponent],
   // Seems to make sure the search criteria modal opening is much faster on the first try
   bootstrap: [SearchCriteriaComponent],
 })
