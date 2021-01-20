@@ -1,10 +1,17 @@
+import { ModalController } from "@ionic/angular";
 import { Component, OnInit, OnDestroy, Input } from "@angular/core";
 
 import { Subscription } from "rxjs";
 
-import { DatabaseService } from "@services/database/database.service";
-import { SwipeOutcomeStore, SwipeStackStore } from "@stores/index";
-import { Profile } from "@classes/index";
+import {
+  ChatStore,
+  CurrentUserStore,
+  SwipeOutcomeStore,
+  SwipeStackStore,
+} from "@stores/index";
+import { Profile, User } from "@classes/index";
+import { MatchModalComponent } from "@components/index";
+import { swipeChoice } from "@interfaces/index";
 
 @Component({
   selector: "app-swipe-card",
@@ -14,58 +21,77 @@ import { Profile } from "@classes/index";
 export class SwipeCardComponent implements OnInit, OnDestroy {
   @Input() profiles: Profile[];
 
-  latestOutcome$: Subscription;
-  dislikedProfiles$: Subscription;
-  likedProfiles$: Subscription;
+  currentUser$: Subscription;
+  currentUser: User;
 
   constructor(
     private swipeOutcomeStore: SwipeOutcomeStore,
     private swipeStackStore: SwipeStackStore,
-    private db: DatabaseService
+    private modalCtrl: ModalController,
+    private chatStore: ChatStore,
+    private currentUserStore: CurrentUserStore
   ) {}
 
   ngOnInit() {
-    this.latestOutcome$ = this.swipeOutcomeStore.latestOutcome.subscribe({
-      next: (outcome) => console.log("outcome:", outcome),
-    });
-
-    this.dislikedProfiles$ = this.swipeOutcomeStore.noProfiles.subscribe({
-      next: (profiles) => console.log("disliked Profiles:", profiles),
-    });
-
-    this.likedProfiles$ = this.swipeOutcomeStore.yesProfiles.subscribe({
-      next: (profiles) => console.log("liked Profiles:", profiles),
-    });
+    // Subscription for chat doc creation in case of match
+    this.currentUser$ = this.currentUserStore.user.subscribe(
+      (profile) => (this.currentUser = profile)
+    );
   }
 
+  /**
+   * - Removes profile from the swipe stack,
+   * - registers swipe choice in swipeOutcomeStore,
+   * - Checks whether other user likes as well, triggers onMatch method if match
+   */
   async onYesSwipe(profile: Profile) {
-    if (profile) {
-      this.swipeStackStore.removeProfile(profile);
-      // check in database if other user liked too, if yes, match them
-      const YesIsMutual: Boolean = await this.db.isLikedBy(profile.uid); // temporary
-      if (YesIsMutual) {
-        console.log("MATCH");
+    if (!profile) return;
 
-        //(create function called
-        // smtgh like onMatch(profile), that handles everything that is implied when 2 people match
-        // i.e. match animation, add to matches array of both users on db, add to "matches never chatted
-        // with" in chat page or wtv))
-      } else {
-        this.swipeOutcomeStore.yesSwipe(profile);
-      }
+    this.swipeStackStore.removeProfile(profile);
+    this.swipeOutcomeStore.yesSwipe(profile);
+
+    const userChoice: swipeChoice = this.swipeOutcomeStore.getChoiceOf(profile.uid);
+    if (userChoice === "yes" || userChoice === "super") {
+      await this.onMatch(profile);
     }
   }
 
+  /**
+   * - Removes profile from the swipe stack,
+   * - registers swipe choice in swipeOutcomeStore
+   * */
   onNoSwipe(profile: Profile) {
-    if (profile) {
-      this.swipeStackStore.removeProfile(profile);
-      this.swipeOutcomeStore.noSwipe(profile);
+    if (!profile) return;
+    this.swipeStackStore.removeProfile(profile);
+    this.swipeOutcomeStore.noSwipe(profile);
+  }
+
+  /**
+   * - Shows the match animation / modal,
+   * - triggers "registerSwipeChoices" from swipeOutcomeStore, which removes swipeOutcome list and
+   * saves them on the database
+   * - Creates a new chat document
+   */
+  private async onMatch(profile: Profile) {
+    try {
+      await Promise.all([
+        this.presentMatchModal(),
+        this.swipeOutcomeStore.registerSwipeChoices(),
+      ]);
+    } catch (e) {
+      throw new Error(`onMatch operation wasn't successful - ${e.message}`);
     }
+  }
+
+  /** Displays the modal that shows the match animation */
+  private async presentMatchModal() {
+    const matchModal = await this.modalCtrl.create({
+      component: MatchModalComponent,
+    });
+    await matchModal.present();
   }
 
   ngOnDestroy() {
-    this.latestOutcome$.unsubscribe();
-    this.likedProfiles$.unsubscribe();
-    this.dislikedProfiles$.unsubscribe();
+    this.currentUser$.unsubscribe();
   }
 }

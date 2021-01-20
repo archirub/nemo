@@ -1,4 +1,3 @@
-import { generateSwipeStackResponse } from "./../../interfaces/cloud-functions.model";
 import { Injectable } from "@angular/core";
 import { AngularFirestore } from "@angular/fire/firestore";
 import { AngularFireFunctions } from "@angular/fire/functions";
@@ -6,12 +5,14 @@ import { AngularFireFunctions } from "@angular/fire/functions";
 import { BehaviorSubject, Observable } from "rxjs";
 
 import { NameService, FormatService } from "@services/index";
-import { SearchCriteriaStore } from "../search-criteria-store/search-criteria-store.service";
+import { Profile, SearchCriteria } from "@classes/index";
+import { SearchCriteriaStore } from "@stores/search-criteria-store/search-criteria-store.service";
+import { SwipeOutcomeStore } from "@stores/swipe-outcome-store/swipe-outcome-store.service";
 import {
+  generateSwipeStackResponse,
   generateSwipeStackRequest,
   profileFromDatabase,
 } from "@interfaces/index";
-import { Profile, SearchCriteria } from "@classes/index";
 
 @Injectable({
   providedIn: "root",
@@ -25,7 +26,8 @@ export class SwipeStackStore {
     private name: NameService,
     private afFunctions: AngularFireFunctions,
     private format: FormatService,
-    private SCstore: SearchCriteriaStore
+    private SCstore: SearchCriteriaStore,
+    private swipeOutcomeStore: SwipeOutcomeStore
   ) {
     this._profiles = new BehaviorSubject<Profile[]>([]);
     this.profiles = this._profiles.asObservable();
@@ -36,9 +38,7 @@ export class SwipeStackStore {
    */
   public async initializeStore(uid: string): Promise<string> {
     let searchCriteria: SearchCriteria;
-    this.SCstore.searchCriteria
-      .subscribe((SC) => (searchCriteria = SC))
-      .unsubscribe();
+    this.SCstore.searchCriteria.subscribe((SC) => (searchCriteria = SC)).unsubscribe();
     await this.addToSwipeStackQueue(searchCriteria);
 
     console.log("SwipeStackStore initialized.");
@@ -59,9 +59,7 @@ export class SwipeStackStore {
   /** Removes a specific profile from the stack*/
   public removeProfile(profile: Profile) {
     this._profiles.next(
-      this._profiles
-        .getValue()
-        .filter((profile_) => profile_.uid !== profile.uid)
+      this._profiles.getValue().filter((profile_) => profile_.uid !== profile.uid)
     );
   }
 
@@ -82,7 +80,10 @@ export class SwipeStackStore {
       .httpsCallable("generateSwipeStack")(requestData)
       .toPromise()) as generateSwipeStackResponse;
 
-    return responseData?.uids || [];
+    console.log(responseData);
+    this.swipeOutcomeStore.addToSwipeAnswers(responseData.users);
+
+    return responseData.users.map((user) => user.uid);
   }
 
   /** Gets data from profile docs from an array of uids */

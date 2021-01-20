@@ -96,16 +96,22 @@ export class CurrentUserStore {
     }
     const query = this.fs.firestore.collection("matchData").doc(uid);
 
-    const responseData = (await this.afFunctions
-      .httpsCallable("getMatchDataUserInfo")({})
-      .toPromise()) as getMatchDataUserInfoResponse;
+    try {
+      const responseData = (await this.afFunctions
+        .httpsCallable("getMatchDataUserInfo")({})
+        .toPromise()) as getMatchDataUserInfoResponse;
 
-    if (responseData) {
-      const gender = responseData.gender;
-      const sexualPreference = responseData.sexualPreference;
-      const swipeMode = responseData.swipeMode;
-      const showProfile = responseData.showProfile;
-      return { gender, sexualPreference, swipeMode, showProfile };
+      if (responseData) {
+        const gender = responseData.gender;
+        const sexualPreference = responseData.sexualPreference;
+        const swipeMode = responseData.swipeMode;
+        const showProfile = responseData.showProfile;
+        return { gender, sexualPreference, swipeMode, showProfile };
+      }
+    } catch (e) {
+      throw new Error(
+        `Call to cloud function getMatchDataUserInfo failed: ${e}`
+      );
     }
   }
 

@@ -1,19 +1,18 @@
-import { swipeOutcome, userInfoFromMatchData } from "./match-data.model";
+import { userInfoFromMatchData } from "./match-data.model";
 import { searchCriteriaFromDatabase } from "./search-criteria.model";
+import { swipeChoice, uidChoiceMap } from "./swipe-choice.model";
 
 export interface generateSwipeStackRequest {
   searchCriteria: searchCriteriaFromDatabase;
 }
 export interface generateSwipeStackResponse {
-  uids: string[];
+  users: uidChoiceMap[];
 }
 
 export interface getMatchDataUserInfoRequest {}
-
 export type getMatchDataUserInfoResponse = userInfoFromMatchData;
 
-export type swipeChoiceObjectDatabase = { uid: string; choice: swipeOutcome };
 export interface registerSwipeChoicesRequest {
-  choices: swipeChoiceObjectDatabase[];
+  choices: uidChoiceMap[];
 }
 export interface registerSwipeChoicesResponse {}

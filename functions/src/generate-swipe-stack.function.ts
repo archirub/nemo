@@ -9,6 +9,7 @@ import {
   Interest,
   Location,
   generateSwipeStackResponse,
+  uidChoiceMap,
 } from "../../src/app/shared/interfaces/index";
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
@@ -42,15 +43,11 @@ export const generateSwipeStack = functions.region("europe-west2").https.onCall(
     context
   ): Promise<generateSwipeStackResponse> => {
     if (!context.auth)
-      throw new functions.https.HttpsError(
-        "unauthenticated",
-        "User no autenticated."
-      );
+      throw new functions.https.HttpsError("unauthenticated", "User no autenticated.");
 
     // DATA FROM REQUEST
-    const targetID: string = context.auth.uid;
-    const searchCriteria: searchCriteriaFromDatabase =
-      data.searchCriteria || {};
+    const targetuid: string = context.auth.uid;
+    const searchCriteria: searchCriteriaFromDatabase = data.searchCriteria || {};
 
     // DATA FOR TESTING <-> UNCOMMENT BELOW AND COMMENT ABOVE
     // const targetID: string = "oY6HiUHmUvcKbFQQnb88t3U4Zew1";
@@ -99,7 +96,7 @@ export const generateSwipeStack = functions.region("europe-west2").https.onCall(
 
     try {
       // FETCHING DATA FROM TARGETED USER
-      const targetMatchDoc = await matchDataCollection.doc(targetID).get();
+      const targetMatchDoc = await matchDataCollection.doc(targetuid).get();
 
       // ASSIGNING DEFAULT VALUES
       let targetPI: number = averagePI;
@@ -125,7 +122,7 @@ export const generateSwipeStack = functions.region("europe-west2").https.onCall(
         averagePI,
         PIprofilesToFetch
       );
-      let likeGroup_matchData = await fetchLikeGroup(targetID);
+      let likeGroup_matchData = await fetchLikeGroup(targetuid);
 
       // REMOVING BANNED USERS
       PiGroup_matchData = PiGroup_matchData.filter(
@@ -144,28 +141,52 @@ export const generateSwipeStack = functions.region("europe-west2").https.onCall(
       const partialMatches = separatedProfiles.partialMatches;
       const noMatches = separatedProfiles.noMatches;
 
-      // CONVERTING PROFILE ARRAYS TO ID ARRAYS
-      const perfectMatchIDs = matchDataToIDs(perfectMatches);
-      const partialMatchIDs = matchDataToIDs(partialMatches);
-      const noMatchIDs = matchDataToIDs(noMatches);
-      const likeGroupIDs = matchDataToIDs(likeGroup_matchData);
+      // CONVERTING PROFILE ARRAYS TO "UID" "ANSWER" MAP
+      const perfectMatchUsers = matchDataToMap(targetuid, perfectMatches);
+      let partialMatchUsers = matchDataToMap(targetuid, partialMatches);
+      let noMatchUsers = matchDataToMap(targetuid, noMatches);
+      let likeGroupUsers = matchDataToMap(targetuid, likeGroup_matchData);
+
+      // REMOVES DUPLICATES
+      // This is done in order s.t. elements in perfect have legitimacy over partial, which
+      // has over like group, which has over no match
+      partialMatchUsers = removeElementInFrom(partialMatchUsers, perfectMatchUsers);
+      likeGroupUsers = removeElementInFrom(
+        likeGroupUsers,
+        partialMatchUsers.concat(perfectMatchUsers)
+      );
+      noMatchUsers = removeElementInFrom(
+        noMatchUsers,
+        likeGroupUsers.concat(partialMatchUsers, perfectMatchUsers)
+      );
 
       // PICKING
-      const pickedIDs: string[] =
-        getRandomPicks<string>(
-          [perfectMatchIDs, partialMatchIDs, noMatchIDs, likeGroupIDs],
+      const pickedUsers: uidChoiceMap[] =
+        getRandomPicks(
+          [perfectMatchUsers, partialMatchUsers, noMatchUsers, likeGroupUsers],
           [perfectMatchCount, partialMatchCount, noMatchCount, likeGroupCount],
           profilesPerWave
         ) || [];
 
       // SENDING RESPONSE
       // response.send({ IDs: pickedIDs });
-      return { uids: pickedIDs } as generateSwipeStackResponse;
+      return { users: pickedUsers } as generateSwipeStackResponse;
     } catch (e) {
       throw new functions.https.HttpsError("unknown", e);
     }
   }
 );
+
+export function removeElementInFrom(
+  array: uidChoiceMap[],
+  toRemove: uidChoiceMap[]
+): uidChoiceMap[] {
+  if (!toRemove) return array ? array : [];
+
+  const toRemoveUIDs = toRemove.map((map) => map.uid);
+
+  return array.filter((map) => !toRemoveUIDs.includes(map.uid));
+}
 
 /**
  * Returns a random sampler for the discrete probability distribution
@@ -256,15 +277,15 @@ export function aliasSampler(inputProbabilities: number[]) {
   // };
 }
 
-function getRandomPicks<T>(
-  groups: T[][] | undefined,
+function getRandomPicks(
+  groups: uidChoiceMap[][] | undefined,
   weightings: number[] | undefined,
   pickCount: number | undefined
-): Array<T> | undefined {
+): Array<uidChoiceMap> | undefined {
   if (!groups || !weightings || !pickCount) return;
   if (groups.length !== weightings.length) return;
 
-  const itemsPicked: T[] = [];
+  const itemsPicked: uidChoiceMap[] = [];
   const itemCount: number = groups
     .map((group) => group.length)
     .reduce((a, b) => a + b, 0);
@@ -275,8 +296,9 @@ function getRandomPicks<T>(
   const desiredLength: number = Math.min(itemCount, pickCount);
   while (itemsPicked.length < desiredLength) {
     const indexPicked: number = aliasSampler(weightings);
-    const groupPicked: T[] = groups[indexPicked];
-    const pick: T = groupPicked[Math.floor(Math.random() * groupPicked.length)];
+    const groupPicked: uidChoiceMap[] = groups[indexPicked];
+    const pick: uidChoiceMap =
+      groupPicked[Math.floor(Math.random() * groupPicked.length)];
 
     // appends to array if not yet in array and pick isn't null
     if (pick) {
@@ -290,18 +312,24 @@ function getRandomPicks<T>(
   return itemsPicked;
 }
 
-function matchDataToIDs(
+function matchDataToMap(
+  targetuid: string,
   matchDataDocs: FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData>[]
-): string[] {
-  if (!matchDataDocs) return [];
+): uidChoiceMap[] {
+  if (!matchDataDocs || !targetuid) return [];
+  return matchDataDocs.map((doc) => {
+    const data = doc.data() as matchDataFromDatabase;
+    const choice = data.superLikedUsers.includes(targetuid)
+      ? "super"
+      : data.likedUsers.includes(targetuid)
+      ? "yes"
+      : "no";
 
-  const IDarray: string[] = [];
-
-  matchDataDocs.forEach((doc) => {
-    IDarray.push(doc.id);
+    return {
+      uid: doc.id,
+      choice,
+    };
   });
-
-  return IDarray;
 }
 
 /**
@@ -325,23 +353,16 @@ function separateBasedOnSearchCriteria(
 
   // removing null criteria
   Object.keys(searchCriteria).forEach(
-    (k) =>
-      (searchCriteria as any)[k] === null && delete (searchCriteria as any)[k]
+    (k) => (searchCriteria as any)[k] === null && delete (searchCriteria as any)[k]
   );
 
   const numberOfSC = Object.keys(searchCriteria).length;
 
-  function universityMatchCheck(
-    criteria: University,
-    feature: University
-  ): Boolean {
+  function universityMatchCheck(criteria: University, feature: University): Boolean {
     if (!criteria || !feature) return false;
     return criteria === feature;
   }
-  function areaOfStudyMatchCheck(
-    criteria: AreaOfStudy,
-    feature: AreaOfStudy
-  ): Boolean {
+  function areaOfStudyMatchCheck(criteria: AreaOfStudy, feature: AreaOfStudy): Boolean {
     if (!criteria || !feature) return false;
     return criteria === feature;
   }
@@ -356,10 +377,7 @@ function separateBasedOnSearchCriteria(
     if (!criteria || !feature) return false;
     return criteria === feature;
   }
-  function interestMatchCheck(
-    criteria: Interest,
-    feature: Interest[]
-  ): Boolean {
+  function interestMatchCheck(criteria: Interest, feature: Interest[]): Boolean {
     if (!criteria || !feature) return false;
     for (const f of feature) {
       if (criteria === f) return true;
@@ -375,30 +393,28 @@ function separateBasedOnSearchCriteria(
   const SCCheckHandler: {
     [key: string]: (criteria: any, feature: any) => Boolean;
   } = {};
-  (Object.keys(searchCriteria) as (keyof searchCriteriaFromDatabase)[]).forEach(
-    (SC) => {
-      switch (SC) {
-        case "university":
-          SCCheckHandler[SC] = universityMatchCheck;
-          break;
-        case "areaOfStudy":
-          SCCheckHandler[SC] = areaOfStudyMatchCheck;
-          break;
-        case "ageRange":
-          SCCheckHandler[SC] = ageRangeMatchCheck;
-          break;
-        case "societyCategory":
-          SCCheckHandler[SC] = societyCategoryMatchCheck;
-          break;
-        case "interest":
-          SCCheckHandler[SC] = interestMatchCheck;
-          break;
-        case "location":
-          SCCheckHandler[SC] = locationMatchCheck;
-          break;
-      }
+  (Object.keys(searchCriteria) as (keyof searchCriteriaFromDatabase)[]).forEach((SC) => {
+    switch (SC) {
+      case "university":
+        SCCheckHandler[SC] = universityMatchCheck;
+        break;
+      case "areaOfStudy":
+        SCCheckHandler[SC] = areaOfStudyMatchCheck;
+        break;
+      case "ageRange":
+        SCCheckHandler[SC] = ageRangeMatchCheck;
+        break;
+      case "societyCategory":
+        SCCheckHandler[SC] = societyCategoryMatchCheck;
+        break;
+      case "interest":
+        SCCheckHandler[SC] = interestMatchCheck;
+        break;
+      case "location":
+        SCCheckHandler[SC] = locationMatchCheck;
+        break;
     }
-  );
+  });
 
   for (const profile of profiles) {
     let didMatchCounter = 0;
@@ -409,9 +425,7 @@ function separateBasedOnSearchCriteria(
       for (const SC of Object.keys(
         searchCriteria
       ) as (keyof searchCriteriaFromDatabase)[]) {
-        if (
-          SCCheckHandler[SC](searchCriteria[SC], profileData.searchFeatures[SC])
-        ) {
+        if (SCCheckHandler[SC](searchCriteria[SC], profileData.searchFeatures[SC])) {
           didMatchCounter++;
         }
       }
@@ -435,9 +449,7 @@ function separateBasedOnSearchCriteria(
 
 async function fetchLikeGroup(
   targetID: string
-): Promise<
-  FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData>[]
-> {
+): Promise<FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData>[]> {
   const matchDataCollection = admin.firestore().collection("matchData");
 
   const likeGroupSnapshot = await matchDataCollection
@@ -451,9 +463,7 @@ async function fetchPIGroup(
   targetPI: number,
   averagePI: number,
   userCount: number
-): Promise<
-  FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData>[]
-> {
+): Promise<FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData>[]> {
   const matchDataCollection = admin.firestore().collection("matchData");
   const halfUserCount = Math.floor(userCount / 2);
   function largerThanAverage(PI: number) {

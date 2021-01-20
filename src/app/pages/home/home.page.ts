@@ -73,11 +73,11 @@ export class HomePage implements OnInit, OnDestroy {
     // is already being processed.
     this.swipeStackRefill$ = this.swipeProfiles
       .pipe(
-        filter((profiles) => profiles.length <= 4),
-        throttle(
-          async () =>
-            await this.swipeStackStore.addToSwipeStackQueue(this.searchCriteria)
-        )
+        filter((profiles) => profiles && profiles.length !== 0 && profiles.length <= 4),
+        throttle(async () => {
+          console.log("Refilling swipe stack");
+          await this.swipeStackStore.addToSwipeStackQueue(this.searchCriteria);
+        })
       )
       .subscribe();
   }

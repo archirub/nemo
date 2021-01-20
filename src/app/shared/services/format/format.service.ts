@@ -1,5 +1,4 @@
 import { Injectable } from "@angular/core";
-import { AngularFireAuth } from "@angular/fire/auth";
 
 import { Chat, Message, Profile, SearchCriteria } from "@classes/index";
 import {
@@ -15,7 +14,20 @@ import firebase from "firebase";
   providedIn: "root",
 })
 export class FormatService {
-  constructor(private afAuth: AngularFireAuth) {}
+  constructor() {}
+
+  /** Sorts the chats so that lastly interacted chats are at the top of the array */
+  public sortChats(chats: Chat[]): Chat[] {
+    if (!chats) return;
+    chats.sort(
+      (chat1, chat2) => chat2.lastInteracted.getTime() - chat1.lastInteracted.getTime()
+    );
+    return chats;
+  }
+
+  public sortUIDs(uids: string[]): string[] {
+    return uids.sort((a, b) => ("" + a).localeCompare(b));
+  }
 
   public searchCriteriaDatabaseToClass(
     searchCriteria: searchCriteriaFromDatabase
@@ -59,10 +71,7 @@ export class FormatService {
     };
   }
 
-  public profileDatabaseToClass(
-    uid: string,
-    profileData: profileFromDatabase
-  ): Profile {
+  public profileDatabaseToClass(uid: string, profileData: profileFromDatabase): Profile {
     if (!uid || !profileData) return;
     const displayName = profileData.displayName;
     const dateOfBirth = profileData.dateOfBirth;
@@ -108,14 +117,7 @@ export class FormatService {
 
     const messages: Message[] = this.messagesDatabaseToClass(chatData.messages);
 
-    return new Chat(
-      chatID,
-      recipient,
-      messages,
-      batchVolume,
-      lastInteracted,
-      null
-    );
+    return new Chat(chatID, recipient, messages, batchVolume, lastInteracted, null);
   }
 
   public messagesDatabaseToClass(messages: messageFromDatabase[]): Message[] {

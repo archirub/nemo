@@ -28,6 +28,7 @@ export interface user extends profile {
   firstName: string;
   lastName: string;
   settings: Setting[];
+  latestSearchCriteria: searchCriteriaFromDatabase;
 }
 
 export interface profileFromDatabase {

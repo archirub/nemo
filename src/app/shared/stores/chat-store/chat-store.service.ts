@@ -1,18 +1,18 @@
 import { Injectable } from "@angular/core";
-import {
-  Action,
-  AngularFirestore,
-  DocumentSnapshot,
-} from "@angular/fire/firestore";
+import { Action, AngularFirestore, DocumentSnapshot } from "@angular/fire/firestore";
 
 import { BehaviorSubject, Observable, Subscription } from "rxjs";
+import { filter } from "rxjs/operators";
 
-import { Chat, Message } from "@classes/index";
+import firebase from "firebase";
+
+import { Chat, Message, Profile, User } from "@classes/index";
 import {
   chatFromDatabase,
   messageFromDatabase,
   messageState,
   messageStateOptions,
+  userSnippet,
 } from "@interfaces/index";
 import { FormatService } from "@services/index";
 
@@ -96,28 +96,43 @@ export class ChatStore {
 
   /** Subscribes to the user's chat documents and listens in on the
    * creation of new document to start listening to them. */
-  private async startDocumentCreationDeletionObserver(
-    uid: string
-  ): Promise<void> {
+  private async startDocumentCreationDeletionObserver(uid: string): Promise<void> {
     if (!uid) return console.error("No uid provided");
     const listener = this.fs
       .collection("chats", (ref) => ref.where("uids", "array-contains", uid))
       .snapshotChanges();
-    const subscription: Subscription = listener.subscribe((refs) => {
-      refs
-        .filter((ref) => ref.type !== "modified")
-        .forEach((ref) => {
-          if (ref.payload.doc.exists) {
-            if (ref.type === "added") {
-              this.newChatDocObserver(ref.payload.doc.id, uid);
-            } else if (ref.type === "removed") {
-              this.removeDatabaseObserver(ref.payload.doc.id);
-            } else {
-              console.error("Unhandled DocumentChangeAction type: ", ref.type);
+    const subscription: Subscription = listener
+      .pipe(
+        filter((refs) => {
+          let bool = true;
+          refs.forEach((ref) => {
+            if (ref.payload.doc.metadata.fromCache) bool = false;
+          });
+          return bool;
+        })
+      )
+      .subscribe((refs) => {
+        refs
+          .filter((ref) => ref.type !== "modified")
+          // .filter((ref) => ref.payload.doc.metadata.fromCache)
+          .forEach((ref) => {
+            if (ref.payload.doc.exists) {
+              console.log(ref.payload.doc.metadata.fromCache);
+              if (ref.payload.type === "added") {
+                this.newChatDocObserver(ref.payload.doc.id, uid);
+                console.log("New chat observed from database:", ref.payload.doc.id);
+              } else if (ref.payload.type === "removed") {
+                this.removeDatabaseObserver(ref.payload.doc.id);
+                console.log(
+                  "Removed chat observer after chat deletion",
+                  ref.payload.doc.id
+                );
+              } else {
+                console.error("Unhandled DocumentChangeAction type: ", ref.type);
+              }
             }
-          }
-        });
-    });
+          });
+      });
     this.chatSubscriptionsHandler["chatCreation"] = subscription;
     this.allChatsSubscription.add(subscription);
   }
@@ -133,6 +148,8 @@ export class ChatStore {
 
     const chats: Chat[] = this._chats.getValue();
     const chatIndex: number = this.getChatIndex(chats, chat);
+    if (chatIndex === -1) return;
+
     const messages: messageFromDatabase[] = this.format.messagesClassToDatabase(
       chats[chatIndex].messages
     );
@@ -153,11 +170,10 @@ export class ChatStore {
 
     const chats: Chat[] = this._chats.getValue();
     const chatIndex: number = this.getChatIndex(chats, chat);
+    if (chatIndex === -1) return;
 
-    if (chatIndex !== -1) {
-      chats[chatIndex].messages.push(message);
-      this.updateObservable(chats);
-    }
+    chats[chatIndex].messages.push(message);
+    this.updateObservable(chats);
   }
 
   /** Removes message from chat */
@@ -167,6 +183,7 @@ export class ChatStore {
     const chats: Chat[] = this._chats.getValue();
     const chatIndex: number = this.getChatIndex(chats, chat);
     const messageIndex: number = this.getMessageIndex(chat, message);
+    if (chatIndex === -1 || messageIndex === -1) return;
 
     chats[chatIndex].messages.splice(messageIndex, 1);
 
@@ -179,7 +196,8 @@ export class ChatStore {
    */
   private updateObservable(chats: Chat[]) {
     if (!chats) return;
-    this.refreshChatOrder(chats);
+    this.format.sortChats(chats);
+    console.log("chats", chats);
     this._chats.next(chats);
   }
 
@@ -189,9 +207,7 @@ export class ChatStore {
     const listener = this.fs
       .collection("chats")
       .doc(chatID)
-      .snapshotChanges() as Observable<
-      Action<DocumentSnapshot<chatFromDatabase>>
-    >;
+      .snapshotChanges() as Observable<Action<DocumentSnapshot<chatFromDatabase>>>;
     const subscription: Subscription = listener.subscribe((ref) => {
       if (ref.payload.exists) {
         const chat: Chat = this.format.chatDatabaseToClass(
@@ -249,6 +265,12 @@ export class ChatStore {
     const chats: Chat[] = this._chats.getValue();
     const chatIndex = this.getChatIndex(chats, chat);
     const messageIndex = this.getMessageIndex(chat, message);
+    if (chatIndex === -1 || messageIndex === -1)
+      return console.error(
+        "Chat not found in chats or message not found in messages",
+        chat,
+        message
+      );
 
     message.state = state;
     chat[messageIndex] = message;
@@ -263,6 +285,7 @@ export class ChatStore {
 
     const chats: Chat[] = this._chats.getValue();
     const chatIndex = this.getChatIndex(chats, chat);
+    if (chatIndex === -1) return;
 
     chats[chatIndex].lastInteracted = new Date(lastInteracted.getTime());
 
@@ -275,23 +298,10 @@ export class ChatStore {
 
     const chats: Chat[] = this._chats.getValue();
     const chatIndex: number = this.getChatIndex(chats, chat);
+    if (chatIndex === -1) return;
 
-    if (chatIndex !== -1) {
-      chats[chatIndex].latestChatInput = input;
-      this.updateObservable(chats);
-    } else {
-      console.error("Chat not found");
-    }
-  }
-
-  /** Sorts the chats so that lastly interacted chats are at the top of the array */
-  private refreshChatOrder(chats: Chat[]): Chat[] {
-    if (!chats) return;
-    chats.sort(
-      (chat1, chat2) =>
-        chat2.lastInteracted.getTime() - chat1.lastInteracted.getTime()
-    );
-    return chats;
+    chats[chatIndex].latestChatInput = input;
+    this.updateObservable(chats);
   }
 
   /** Returns the index of the message provided within its chat
@@ -313,10 +323,10 @@ export class ChatStore {
   private getChatIndex(chats: Chat[], chat: Chat): number {
     if (!chats || !chat) return;
 
-    const index: number = chats.findIndex(
-      (c) => c.id === chat.id && c.batchVolume === chat.batchVolume
-    );
-    if (index === -1) console.error("chat not found:", chat);
+    const index: number = chats.findIndex((c) => {
+      return c.id === chat.id;
+    });
+    if (index === -1) console.warn("chat not in chats:", chat);
     return index;
   }
 
@@ -324,4 +334,8 @@ export class ChatStore {
   // when creating a new batchVolume, that way, they have no chances of being fetched
   // when we fetch the last-talked-to chatns (which we would do by doing
   // .collection().orderBy('lastInteracted','desc').limit(10).get())
+  // ACTUALLY CREATE A FUNCTION THAT CALLS A CLOUD FUNCTION IF THE NUMBER OF MESSAGES OF THE CURRENT CHAT IS TOO HIGH
+  // THAT CREATES A NEW CHAT DOCUMENT AND
+  // MAKES THE LAST INTERACTED PROPERTY OF THE PREVIOUS (IF THERE ARE MULTIPLE AS WELL FOR ALL OF THEM)
+  // EQUAL TO NULL
 }
