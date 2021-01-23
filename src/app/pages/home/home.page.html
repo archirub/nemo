@@ -1,8 +1,33 @@
 <ion-content #homeContainer>
-  <ion-button #searchButton id="searchButton" (click)="presentSCmodal()">
-    <ion-icon slot="icon-only" name="add"></ion-icon>
-  </ion-button>
-  <app-swipe-card
-    [profiles]="this.swipeProfiles | async"
-  ></app-swipe-card>
+  <div class="search">
+    <ion-button #searchButton id="searchButton" (click)="presentSCmodal()">
+      <ion-icon slot="icon-only" name="add"></ion-icon>
+    </ion-button>
+  </div>
+  <div class="swipe-stack">
+    <app-swipe-card
+      [profiles]="this.swipeProfiles | async"
+    ></app-swipe-card>
+    <app-swipe-card
+      [profiles]="this.swipeProfiles | async"
+    ></app-swipe-card>
+    <app-swipe-card
+      [profiles]="this.swipeProfiles | async"
+    ></app-swipe-card>
+    <app-swipe-card
+      [profiles]="this.swipeProfiles | async"
+    ></app-swipe-card>
+    <app-swipe-card
+      [profiles]="this.swipeProfiles | async"
+    ></app-swipe-card>
+    <app-swipe-card
+      [profiles]="this.swipeProfiles | async"
+    ></app-swipe-card>
+    <app-swipe-card
+      [profiles]="this.swipeProfiles | async"
+    ></app-swipe-card>
+    <app-swipe-card
+      [profiles]="this.swipeProfiles | async"
+    ></app-swipe-card>
+  </div>
 </ion-content>

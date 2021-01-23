@@ -6,7 +6,7 @@ $swipe-width: 100vw;
 // tab-menu, if the latter touches the bottom of the screen
 $tab-height: 0vh;
 
-.swipe-card {
+//.swipe-card {
   // position: absolute;
   // height: $swipe-height;
   // width: $swipe-width;
@@ -17,10 +17,14 @@ $tab-height: 0vh;
   //   min-width: 100%;
   //   max-width: none;
   // }
-}
+//}
 
 .swipe-cards {
   position: fixed;
+  left: 0;
+  height: 90%;
+  top: 10%;
+  overflow: hidden;
 }
 
 .background {
@@ -33,5 +37,14 @@ $tab-height: 0vh;
   height: 75vh;
   display: inline-block;
   overflow-y: hidden;
-  box-shadow: 0px 4px 34px -13px rgba(0, 0, 0, 0.75);
+}
+
+ion-col {
+  top: -10.5vh;
+  display: flex;
+  justify-content: space-evenly;
+
+  ion-button {
+    margin: 0 auto;
+  };
 }

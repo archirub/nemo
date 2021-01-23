@@ -24,6 +24,11 @@ ion-card-subtitle {
   box-shadow: 0px 4px 34px -13px rgba(0, 0, 0, 0.75);
 }
 
+.img-container {
+  height: 70vh;
+  overflow: hidden;
+}
+
 #pictures {
   width: 100vh;
   border-top-left-radius: 30px;
@@ -35,7 +40,7 @@ ion-card-subtitle {
   position: absolute;
   max-height: 12vh;
   height: 12vh;
-  bottom: 2vh;
+  bottom: 0vh;
   left: 20px;
   right: 20px;
   box-shadow: 0px 4px 34px -13px rgba(0, 0, 0, 0.75);
