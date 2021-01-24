@@ -17,7 +17,12 @@ import { ProfileCardComponent } from "@components/index";
     IonicModule,
     HomePageRoutingModule,
   ],
-  declarations: [HomePage, SwipeCardComponent, SearchCriteriaComponent, ProfileCardComponent],
+  declarations: [
+    HomePage,
+    SwipeCardComponent,
+    SearchCriteriaComponent,
+    ProfileCardComponent,
+  ],
   // Seems to make sure the search criteria modal opening is much faster on the first try
   bootstrap: [SearchCriteriaComponent],
 })

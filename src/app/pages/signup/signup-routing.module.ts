@@ -8,6 +8,18 @@ const routes: Routes = [
     path: "",
     component: SignupPage,
   },
+  {
+    path: 'signupauth',
+    loadChildren: () => import('./signupauth/signupauth.module').then( m => m.SignupauthPageModule)
+  },
+  {
+    path: 'signuprequired',
+    loadChildren: () => import('./signuprequired/signuprequired.module').then( m => m.SignuprequiredPageModule)
+  },
+  {
+    path: 'signupoptional',
+    loadChildren: () => import('./signupoptional/signupoptional.module').then( m => m.SignupoptionalPageModule)
+  },
 ];
 
 @NgModule({

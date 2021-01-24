@@ -8,19 +8,16 @@
 <ion-content>
   <form [formGroup]="signupForm">
     <ion-slides pager="true" #slide>
-
       <ion-slide>
         <ion-item lines="none">
           <div class="flexend-col container">
             <div class="question">
-              <ion-label position="stacked">
-                What's your uni email address?
-              </ion-label>
+              <ion-label position="stacked"> What's your uni email address? </ion-label>
             </div>
 
             <div class="input flexstart-col">
               <div>
-                <ion-input placeholder="email@ucl.ac.uk"></ion-input>
+                <ion-input placeholder="email@ucl.ac.uk" type="email"></ion-input>
               </div>
 
               <p class="tip">Only UCL email addresses will allow for verification.</p>
@@ -41,35 +38,57 @@
         <ion-item lines="none">
           <div class="container flexend-col">
             <div class="question">
-              <ion-label position="stacked">
-                Enter your verification code
-              </ion-label>
+              <ion-label position="stacked"> Enter your verification code </ion-label>
             </div>
 
             <div class="flexstart-row">
               <p class="tip">
                 We just sent an email to
-                <br>
-                "email@ucl.ac.uk". <!--BACKEND - Fill with email input on previous slide-->
+                <br />
+                "email@ucl.ac.uk".
+                <!--BACKEND - Fill with email input on previous slide-->
               </p>
             </div>
 
             <div class="input flexstart-col">
               <div class="flexstart-row">
                 <div class="verification_input">
-                  <ion-input size="1" maxlength="1" min="0" max="9" pattern="[0-9]{1}"></ion-input>
+                  <ion-input
+                    size="1"
+                    maxlength="1"
+                    min="0"
+                    max="9"
+                    pattern="[0-9]{1}"
+                  ></ion-input>
                 </div>
                 <div class="verification_input">
-                  <ion-input size="1" maxlength="1" min="0" max="9" pattern="[0-9]{1}"></ion-input>
+                  <ion-input
+                    size="1"
+                    maxlength="1"
+                    min="0"
+                    max="9"
+                    pattern="[0-9]{1}"
+                  ></ion-input>
                 </div>
                 <div class="verification_input">
-                  <ion-input size="1" maxlength="1" min="0" max="9" pattern="[0-9]{1}"></ion-input>
+                  <ion-input
+                    size="1"
+                    maxlength="1"
+                    min="0"
+                    max="9"
+                    pattern="[0-9]{1}"
+                  ></ion-input>
                 </div>
                 <div class="verification_input">
-                  <ion-input size="1" maxlength="1" min="0" max="9" pattern="[0-9]{1}"></ion-input>
+                  <ion-input
+                    size="1"
+                    maxlength="1"
+                    min="0"
+                    max="9"
+                    pattern="[0-9]{1}"
+                  ></ion-input>
                 </div>
               </div>
-
 
               <p class="no_verification">Didn't get a code?</p>
             </div>
@@ -89,9 +108,7 @@
         <ion-item lines="none">
           <div class="flexend-col container">
             <div class="question">
-              <ion-label position="stacked">
-                What's your name?
-              </ion-label>
+              <ion-label position="stacked"> What's your name? </ion-label>
             </div>
 
             <div class="input flexstart-col">
@@ -103,7 +120,9 @@
                 <ion-input placeholder="Last Name"></ion-input>
               </div>
 
-              <p class="tip">Last name is optional, and will only be shared with matches.</p>
+              <p class="tip">
+                Last name is optional, and will only be shared with matches.
+              </p>
             </div>
 
             <div class="scroll flexstart-col">
@@ -121,9 +140,7 @@
         <ion-item lines="none">
           <div class="flexend-col container">
             <div class="question">
-              <ion-label position="stacked">
-                Choose a password NAME
-              </ion-label>
+              <ion-label position="stacked"> Choose a password NAME </ion-label>
             </div>
 
             <div class="input flexstart-col">
@@ -144,19 +161,21 @@
           </div>
         </ion-item>
       </ion-slide>
-    
+
       <ion-slide>
         <ion-item lines="none">
           <div class="flexend-col container">
             <div class="question">
-              <ion-label position="stacked">
-                When's your date of birth?
-              </ion-label>
+              <ion-label position="stacked"> When's your date of birth? </ion-label>
             </div>
 
             <div class="input flexstart-col">
               <div>
-                <ion-datetime displayFormat="DD/MM/YYYY" min="1910-01-01" max="2002-12-31"></ion-datetime>
+                <ion-datetime
+                  displayFormat="DD/MM/YYYY"
+                  min="1910-01-01"
+                  max="2002-12-31"
+                ></ion-datetime>
               </div>
             </div>
 
@@ -175,9 +194,7 @@
         <ion-item lines="none">
           <div class="container flexend-col">
             <div class="question">
-              <ion-label position="stacked">
-                Choose your photos NAME
-              </ion-label>
+              <ion-label position="stacked"> Choose your photos NAME </ion-label>
             </div>
 
             <div class="flexeven">
@@ -220,14 +237,12 @@
         <ion-item lines="none">
           <div class="container flexend-col">
             <div class="question">
-              <ion-label position="stacked">
-                What are your preferences?
-              </ion-label>
+              <ion-label position="stacked"> What are your preferences? </ion-label>
             </div>
 
             <div class="flexstart-col">
               <div class="preferences">
-                I am looking for 
+                I am looking for
                 <select required>
                   <option value="" disable selected hidden></option>
                   <option value="friends">friends</option>
@@ -276,12 +291,13 @@
               </div>
             </div>
           </div>
-        </ion-item> 
+        </ion-item>
       </ion-slide>
 
-      <ion-slide (click)="slide.slideNext()"> <!-- Still figuring out this animation -->
+      <ion-slide (click)="slide.slideNext()">
+        <!-- Still figuring out this animation -->
         <div class="wave-background">
-          <img class="waves" src="../../../assets/signup/waves.png" alt="Waves">
+          <img class="waves" src="../../../assets/signup/waves.png" alt="Waves" />
         </div>
 
         <div class="container-wave flexstart-col">
@@ -290,22 +306,20 @@
               <ion-icon name="close-outline"></ion-icon>
             </ion-button>
           </div>
-          
+
           <div class="flexstart-col blow-up">
             <h1>Adding basic info leads to better matches.</h1>
           </div>
 
           <div class="flexend-col">
-            <ion-button (click)="slide.slideTo(8)">
-              Enter Basic Information
-            </ion-button>
+            <ion-button (click)="slide.slideTo(8)"> Enter Basic Information </ion-button>
           </div>
         </div>
       </ion-slide>
 
       <ion-slide (click)="slide.slideNext()">
         <div class="wave-background">
-          <img class="waves" src="../../../assets/signup/waves_2.png" alt="Waves">
+          <img class="waves" src="../../../assets/signup/waves_2.png" alt="Waves" />
         </div>
 
         <div class="container-wave flexend-col">
@@ -318,20 +332,16 @@
           <div class="flexend-col blow-up">
             <h1>So you can find a catch, or be caught yourself.</h1>
 
-            <ion-button (click)="slide.slideTo(8)">
-              Enter Basic Information
-            </ion-button>
+            <ion-button (click)="slide.slideTo(8)"> Enter Basic Information </ion-button>
           </div>
         </div>
       </ion-slide>
 
-      <ion-slide> 
+      <ion-slide>
         <ion-item lines="none">
           <div class="container flexstart-col">
             <div class="question">
-              <ion-label position="stacked">
-                Set your uni details
-              </ion-label>
+              <ion-label position="stacked"> Set your uni details </ion-label>
             </div>
 
             <div class="optionals flexstart-col">
@@ -345,7 +355,11 @@
                 </select>
 
                 <div>
-                  <ion-input type="text" maxlength="20" placeholder="Enter your degree"></ion-input>
+                  <ion-input
+                    type="text"
+                    maxlength="20"
+                    placeholder="Enter your degree"
+                  ></ion-input>
                 </div>
 
                 <p class="tip">Maximum 20 characters</p>
@@ -361,7 +375,11 @@
                 </select>
 
                 <div>
-                  <ion-input type="text" maxlength="15" placeholder="Enter your society"></ion-input>
+                  <ion-input
+                    type="text"
+                    maxlength="15"
+                    placeholder="Enter your society"
+                  ></ion-input>
                 </div>
 
                 <p class="tip">Maximum 15 characters</p>
@@ -377,13 +395,11 @@
         </ion-item>
       </ion-slide>
 
-      <ion-slide> 
+      <ion-slide>
         <ion-item lines="none">
           <div class="container flexstart-col">
             <div class="question">
-              <ion-label position="stacked">
-                Answer some questions about you
-              </ion-label>
+              <ion-label position="stacked"> Answer some questions about you </ion-label>
             </div>
 
             <div class="optionals flexstart-col">
@@ -416,7 +432,9 @@
 
             <div>
               <p class="tip-center">Max 30 characters per answer</p>
-              <p class="tip-center">These details are optional and can be changed later.</p>
+              <p class="tip-center">
+                These details are optional and can be changed later.
+              </p>
 
               <div class="skip">
                 <ion-button (click)="slide.slideNext()">Skip</ion-button>
@@ -426,128 +444,137 @@
         </ion-item>
       </ion-slide>
 
-      <ion-slide> 
-        where are you from 
-        <br>
+      <ion-slide>
+        where are you from
+        <br />
         is this still being added?
       </ion-slide>
 
-      <ion-slide> 
+      <ion-slide>
         <ion-item lines="none">
           <div class="container flexstart-col">
             <div class="question">
-              <ion-label position="stacked">
-                What are your interests?
-              </ion-label>
+              <ion-label position="stacked"> What are your interests? </ion-label>
             </div>
 
-            <ion-content class="hobbies"
-            [scrollEvents]="true">
-
+            <ion-content class="hobbies" [scrollEvents]="true">
               <!-- These currently all change together as the items have not been separated in TS -->
               <ion-list>
-                <ion-item 
-                [style.--background]="item.checked ? 'var(--ion-color-primary)' : 'var(--ion-color-light-shade)'"
-                [style.color]="item.checked ? 'var(--ion-color-primary-contrast)' : 'var(--ion-color-light-contrast)'"
-                >
-                  <ion-label >Workaholic</ion-label>
-                  <ion-checkbox [(ngModel)]="item.checked" [ngModelOptions]="{standalone: true}" name="workaholic"></ion-checkbox>
-                </ion-item>
-
-                <ion-item 
-                [style.--background]="item.checked ? 'var(--ion-color-primary)' : 'var(--ion-color-light-shade)'"
-                [style.color]="item.checked ? 'var(--ion-color-primary-contrast)' : 'var(--ion-color-light-contrast)'"
-                >
-                  <ion-label>Party Animal</ion-label>
-                  <ion-checkbox [(ngModel)]="item.checked" [ngModelOptions]="{standalone: true}" name="party"></ion-checkbox>
-                </ion-item>
-
-                <ion-item 
-                [style.--background]="item.checked ? 'var(--ion-color-primary)' : 'var(--ion-color-light-shade)'"
-                [style.color]="item.checked ? 'var(--ion-color-primary-contrast)' : 'var(--ion-color-light-contrast)'"
-                >
-                  <ion-label>Netflix & Chill</ion-label>
-                  <ion-checkbox [(ngModel)]="item.checked" [ngModelOptions]="{standalone: true}" name="netflix"></ion-checkbox>
-                </ion-item>
-
-                <ion-item 
-                [style.--background]="item.checked ? 'var(--ion-color-primary)' : 'var(--ion-color-light-shade)'"
-                [style.color]="item.checked ? 'var(--ion-color-primary-contrast)' : 'var(--ion-color-light-contrast)'"
-                >
-                  <ion-label>In love with the sesh</ion-label>
-                  <ion-checkbox [(ngModel)]="item.checked" [ngModelOptions]="{standalone: true}" name="sesh"></ion-checkbox>
-                </ion-item>
-
-                <ion-item 
-                [style.--background]="item.checked ? 'var(--ion-color-primary)' : 'var(--ion-color-light-shade)'"
-                [style.color]="item.checked ? 'var(--ion-color-primary-contrast)' : 'var(--ion-color-light-contrast)'"
-                >
-                  <ion-label>Sports Maniac</ion-label>
-                  <ion-checkbox [(ngModel)]="item.checked" [ngModelOptions]="{standalone: true}" name="sports"></ion-checkbox>
-                </ion-item>
-
-                <ion-item 
-                [style.--background]="item.checked ? 'var(--ion-color-primary)' : 'var(--ion-color-light-shade)'"
-                [style.color]="item.checked ? 'var(--ion-color-primary-contrast)' : 'var(--ion-color-light-contrast)'"
-                >
-                  <ion-label>An intellectual</ion-label>
-                  <ion-checkbox [(ngModel)]="item.checked" [ngModelOptions]="{standalone: true}" name="intellectual"></ion-checkbox>
-                </ion-item>
-
-                <ion-item 
-                [style.--background]="item.checked ? 'var(--ion-color-primary)' : 'var(--ion-color-light-shade)'"
-                [style.color]="item.checked ? 'var(--ion-color-primary-contrast)' : 'var(--ion-color-light-contrast)'"
-                >
-                  <ion-label>UCLove addict</ion-label>
-                  <ion-checkbox [(ngModel)]="item.checked" [ngModelOptions]="{standalone: true}" name="uclove"></ion-checkbox>
-                </ion-item>
-
-                <ion-item 
-                [style.--background]="item.checked ? 'var(--ion-color-primary)' : 'var(--ion-color-light-shade)'"
-                [style.color]="item.checked ? 'var(--ion-color-primary-contrast)' : 'var(--ion-color-light-contrast)'"
-                >
-                  <ion-label>Life is balance</ion-label>
-                  <ion-checkbox [(ngModel)]="item.checked" [ngModelOptions]="{standalone: true}" name="balance"></ion-checkbox>
-                </ion-item>
-
-                <ion-item 
-                [style.--background]="item.checked ? 'var(--ion-color-primary)' : 'var(--ion-color-light-shade)'"
-                [style.color]="item.checked ? 'var(--ion-color-primary-contrast)' : 'var(--ion-color-light-contrast)'"
+                <ion-item
+                  [style.--background]="item.checked ? 'var(--ion-color-primary)' : 'var(--ion-color-light-shade)'"
+                  [style.color]="item.checked ? 'var(--ion-color-primary-contrast)' : 'var(--ion-color-light-contrast)'"
                 >
                   <ion-label>Workaholic</ion-label>
-                  <ion-checkbox [(ngModel)]="item.checked" [ngModelOptions]="{standalone: true}" name="spiritual"></ion-checkbox>
+                  <ion-checkbox
+                    [(ngModel)]="item.checked"
+                    [ngModelOptions]="{standalone: true}"
+                    name="workaholic"
+                  ></ion-checkbox>
+                </ion-item>
+
+                <ion-item
+                  [style.--background]="item.checked ? 'var(--ion-color-primary)' : 'var(--ion-color-light-shade)'"
+                  [style.color]="item.checked ? 'var(--ion-color-primary-contrast)' : 'var(--ion-color-light-contrast)'"
+                >
+                  <ion-label>Party Animal</ion-label>
+                  <ion-checkbox
+                    [(ngModel)]="item.checked"
+                    [ngModelOptions]="{standalone: true}"
+                    name="party"
+                  ></ion-checkbox>
+                </ion-item>
+
+                <ion-item
+                  [style.--background]="item.checked ? 'var(--ion-color-primary)' : 'var(--ion-color-light-shade)'"
+                  [style.color]="item.checked ? 'var(--ion-color-primary-contrast)' : 'var(--ion-color-light-contrast)'"
+                >
+                  <ion-label>Netflix & Chill</ion-label>
+                  <ion-checkbox
+                    [(ngModel)]="item.checked"
+                    [ngModelOptions]="{standalone: true}"
+                    name="netflix"
+                  ></ion-checkbox>
+                </ion-item>
+
+                <ion-item
+                  [style.--background]="item.checked ? 'var(--ion-color-primary)' : 'var(--ion-color-light-shade)'"
+                  [style.color]="item.checked ? 'var(--ion-color-primary-contrast)' : 'var(--ion-color-light-contrast)'"
+                >
+                  <ion-label>In love with the sesh</ion-label>
+                  <ion-checkbox
+                    [(ngModel)]="item.checked"
+                    [ngModelOptions]="{standalone: true}"
+                    name="sesh"
+                  ></ion-checkbox>
+                </ion-item>
+
+                <ion-item
+                  [style.--background]="item.checked ? 'var(--ion-color-primary)' : 'var(--ion-color-light-shade)'"
+                  [style.color]="item.checked ? 'var(--ion-color-primary-contrast)' : 'var(--ion-color-light-contrast)'"
+                >
+                  <ion-label>Sports Maniac</ion-label>
+                  <ion-checkbox
+                    [(ngModel)]="item.checked"
+                    [ngModelOptions]="{standalone: true}"
+                    name="sports"
+                  ></ion-checkbox>
+                </ion-item>
+
+                <ion-item
+                  [style.--background]="item.checked ? 'var(--ion-color-primary)' : 'var(--ion-color-light-shade)'"
+                  [style.color]="item.checked ? 'var(--ion-color-primary-contrast)' : 'var(--ion-color-light-contrast)'"
+                >
+                  <ion-label>An intellectual</ion-label>
+                  <ion-checkbox
+                    [(ngModel)]="item.checked"
+                    [ngModelOptions]="{standalone: true}"
+                    name="intellectual"
+                  ></ion-checkbox>
+                </ion-item>
+
+                <ion-item
+                  [style.--background]="item.checked ? 'var(--ion-color-primary)' : 'var(--ion-color-light-shade)'"
+                  [style.color]="item.checked ? 'var(--ion-color-primary-contrast)' : 'var(--ion-color-light-contrast)'"
+                >
+                  <ion-label>UCLove addict</ion-label>
+                  <ion-checkbox
+                    [(ngModel)]="item.checked"
+                    [ngModelOptions]="{standalone: true}"
+                    name="uclove"
+                  ></ion-checkbox>
+                </ion-item>
+
+                <ion-item
+                  [style.--background]="item.checked ? 'var(--ion-color-primary)' : 'var(--ion-color-light-shade)'"
+                  [style.color]="item.checked ? 'var(--ion-color-primary-contrast)' : 'var(--ion-color-light-contrast)'"
+                >
+                  <ion-label>Life is balance</ion-label>
+                  <ion-checkbox
+                    [(ngModel)]="item.checked"
+                    [ngModelOptions]="{standalone: true}"
+                    name="balance"
+                  ></ion-checkbox>
+                </ion-item>
+
+                <ion-item
+                  [style.--background]="item.checked ? 'var(--ion-color-primary)' : 'var(--ion-color-light-shade)'"
+                  [style.color]="item.checked ? 'var(--ion-color-primary-contrast)' : 'var(--ion-color-light-contrast)'"
+                >
+                  <ion-label>Workaholic</ion-label>
+                  <ion-checkbox
+                    [(ngModel)]="item.checked"
+                    [ngModelOptions]="{standalone: true}"
+                    name="spiritual"
+                  ></ion-checkbox>
                 </ion-item>
               </ion-list>
             </ion-content>
 
             <div>
               <p class="tip-center">You can choose a maximum of three interests.</p>
-              <p class="tip-center">These details are optional and can be changed later.</p>
-
-              <div class="skip">
-                <ion-button (click)="slide.slideNext()">Skip</ion-button>
-              </div>
-            </div>
-          </div>
-        </ion-item>
-      </ion-slide>
-
-      <ion-slide> 
-        <ion-item>
-          <div class="flexend-col container">
-            <div class="question">
-              <ion-label position="stacked">
-                Add a bio
-              </ion-label>
-            </div>
-
-            <div class="bio optionals input">
-              <ion-textarea maxlength="30"></ion-textarea>
-            </div>
-
-            <div>
-              <p class="tip-center">Maximum 30 characters.</p>
-              <p class="tip-center">These details are optional and can be changed later.</p>
+              <p class="tip-center">
+                These details are optional and can be changed later.
+              </p>
 
               <div class="skip">
                 <ion-button (click)="slide.slideNext()">Skip</ion-button>
@@ -561,15 +588,45 @@
         <ion-item>
           <div class="flexend-col container">
             <div class="question">
-              <ion-label position="stacked">
-                Link your social media
-              </ion-label>
+              <ion-label position="stacked"> Add a bio </ion-label>
+            </div>
+
+            <div class="bio optionals input">
+              <ion-textarea maxlength="30"></ion-textarea>
             </div>
 
             <div>
-              <p class="tip-center">Other users will be able to click on the link to your social media account.</p>
-              <p class="tip-center">You can only link one social media account to your Nemo profile.</p>
-              <p class="tip-center">The linked social media account can be changed later.</p>
+              <p class="tip-center">Maximum 30 characters.</p>
+              <p class="tip-center">
+                These details are optional and can be changed later.
+              </p>
+
+              <div class="skip">
+                <ion-button (click)="slide.slideNext()">Skip</ion-button>
+              </div>
+            </div>
+          </div>
+        </ion-item>
+      </ion-slide>
+
+      <ion-slide>
+        <ion-item>
+          <div class="flexend-col container">
+            <div class="question">
+              <ion-label position="stacked"> Link your social media </ion-label>
+            </div>
+
+            <div>
+              <p class="tip-center">
+                Other users will be able to click on the link to your social media
+                account.
+              </p>
+              <p class="tip-center">
+                You can only link one social media account to your Nemo profile.
+              </p>
+              <p class="tip-center">
+                The linked social media account can be changed later.
+              </p>
 
               <div class="skip">
                 <ion-button (click)="slide.slideNext()">Skip</ion-button>

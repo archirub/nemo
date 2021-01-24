@@ -5,3 +5,4 @@ export * from "./profile.model";
 export * from "./search-criteria.model";
 export * from "./cloud-functions.model";
 export * from "./swipe-choice.model";
+export * from "./signup.model";

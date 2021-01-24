@@ -1,13 +1,10 @@
 import { FormControl, FormGroup } from "@angular/forms";
 import { Component, OnInit, ViewChild } from "@angular/core";
 import { IonSlides } from "@ionic/angular";
-import {
-  CameraResultType,
-  CameraSource,
-  Capacitor,
-  Plugins,
-} from "@capacitor/core";
-import { profileFromDatabase } from "@interfaces/index";
+import { CameraResultType, CameraSource, Capacitor, Plugins } from "@capacitor/core";
+import { profileFromDatabase, SignupMap } from "@interfaces/index";
+
+type signupFor = FormGroup & { value: SignupMap };
 
 @Component({
   selector: "app-signup",
@@ -17,11 +14,10 @@ import { profileFromDatabase } from "@interfaces/index";
 export class SignupPage implements OnInit {
   @ViewChild("slides") slides: IonSlides;
 
-  // signupFormControl: {[P in keyof profileFromDatabase]: AbstractControl} = {}
-  signupForm = new FormGroup({
+  signupForm: signupFor = new FormGroup({
     email: new FormControl(null),
     password: new FormControl(null),
-    firstName: new FormControl(null),
+    firstNamee: new FormControl(null),
     lastName: new FormControl(null),
     dateOfBirth: new FormControl(null),
     pictures: new FormControl(null),
@@ -65,5 +61,5 @@ export class SignupPage implements OnInit {
 
   item = {
     checked: false,
-  }
+  };
 }
