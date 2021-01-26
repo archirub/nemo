@@ -5,5 +5,186 @@
 </ion-header>
 
 <ion-content>
+  <form [formGroup]="requiredForm">
+    <ion-slides pager="true" #slide>
+      <ion-slide>
+        <ion-item lines="none">
+          <div class="flexend-col container">
+            <div class="question">
+              <ion-label position="stacked"> What's your name? </ion-label>
+            </div>
 
+            <div class="input flexstart-col">
+              <div>
+                <ion-input placeholder="First Name"></ion-input>
+              </div>
+
+              <div>
+                <ion-input placeholder="Last Name"></ion-input>
+              </div>
+
+              <p class="tip">
+                Last name is optional, and will only be shared with matches.
+              </p>
+            </div>
+
+            <div class="scroll flexstart-col">
+              <div class="flexend-row">
+                <ion-button (click)="slide.slideNext()">
+                  <ion-icon name="chevron-forward-outline"></ion-icon>
+                </ion-button>
+              </div>
+            </div>
+          </div>
+        </ion-item>
+      </ion-slide>
+
+      <ion-slide>
+        <ion-item lines="none">
+          <div class="flexend-col container">
+            <div class="question">
+              <ion-label position="stacked"> Choose a password NAME </ion-label>
+            </div>
+
+            <div class="input flexstart-col">
+              <div>
+                <ion-input></ion-input>
+              </div>
+
+              <p class="tip">Your password must be at least 10 characters long.</p>
+            </div>
+
+            <div class="scroll flexstart-col">
+              <div class="flexend-row">
+                <ion-button (click)="slide.slideNext()">
+                  <ion-icon name="chevron-forward-outline"></ion-icon>
+                </ion-button>
+              </div>
+            </div>
+          </div>
+        </ion-item>
+      </ion-slide>
+
+      <ion-slide>
+        <ion-item lines="none">
+          <div class="flexend-col container">
+            <div class="question">
+              <ion-label position="stacked"> When's your date of birth? </ion-label>
+            </div>
+
+            <div class="input flexstart-col">
+              <div>
+                <ion-datetime
+                  displayFormat="DD/MM/YYYY"
+                  min="1910-01-01"
+                  max="2002-12-31"
+                ></ion-datetime>
+              </div>
+            </div>
+
+            <div class="scroll flexstart-col">
+              <div class="flexend-row">
+                <ion-button (click)="slide.slideNext()">
+                  <ion-icon name="chevron-forward-outline"></ion-icon>
+                </ion-button>
+              </div>
+            </div>
+          </div>
+        </ion-item>
+      </ion-slide>
+
+      <ion-slide>
+        <ion-item lines="none">
+          <div class="container flexend-col">
+            <div class="question">
+              <ion-label position="stacked"> Choose your photos NAME </ion-label>
+            </div>
+
+            <div class="flexeven">
+              <div class="flexstart-col">
+                <div class="photo">+</div>
+                <div class="photo">+</div>
+              </div>
+
+              <div class="flexstart-col">
+                <div class="photo">+</div>
+                <div class="photo">+</div>
+              </div>
+            </div>
+
+            <div class="flexend-col pictures">
+              <ion-button
+                (click)="onPickPicture()"
+                expand="block"
+                fill="clear"
+                shape="round"
+              >
+                Get me to my photo gallery
+              </ion-button>
+
+              <p class="tip">You must have at least one photo on your profile.</p>
+            </div>
+
+            <div class="scroll flexstart-col">
+              <div class="flexend-row">
+                <ion-button (click)="slide.slideNext()">
+                  <ion-icon name="chevron-forward-outline"></ion-icon>
+                </ion-button>
+              </div>
+            </div>
+          </div>
+        </ion-item>
+      </ion-slide>
+      <ion-slide>
+        <ion-item lines="none">
+          <div class="container flexend-col">
+            <div class="question">
+              <ion-label position="stacked"> What are your preferences? </ion-label>
+            </div>
+
+            <div class="flexstart-col">
+              <div class="preferences">
+                I am looking for
+                <select required>
+                  <option value="" disable selected hidden></option>
+                  <option value="friends">friends</option>
+                  <option value="dating">dating</option>
+                </select>
+              </div>
+
+              <div class="preferences">
+                I am interested in
+                <select required>
+                  <option value="" disable selected hidden></option>
+                  <option value="guys">guys</option>
+                  <option value="girls">girls</option>
+                  <option value="all genders">all genders</option>
+                  <option value="non-binary">non-binary</option>
+                </select>
+              </div>
+
+              <div class="preferences">
+                I identify as
+                <select required>
+                  <option value="" disable selected hidden></option>
+                  <option value="female">female</option>
+                  <option value="male">male</option>
+                  <option value="non-binary">non-binary</option>
+                  <option value="gender fluid">gender fluid</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="scroll flexstart-col">
+              <div class="flexend-row">
+                <ion-button (click)="slide.slideNext()">
+                  <ion-icon name="chevron-forward-outline"></ion-icon>
+                </ion-button>
+              </div>
+            </div>
+          </div>
+        </ion-item>
+      </ion-slide>
+    </ion-slides>
+  </form>
 </ion-content>

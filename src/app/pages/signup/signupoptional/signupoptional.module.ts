@@ -15,6 +15,6 @@ import { SignupoptionalPage } from './signupoptional.page';
     IonicModule,
     SignupoptionalPageRoutingModule
   ],
-  declarations: [SignupoptionalPage]
+  declarations: []
 })
 export class SignupoptionalPageModule {}
