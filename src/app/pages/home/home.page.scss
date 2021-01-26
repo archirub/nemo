@@ -5,9 +5,14 @@
   #searchButton {
     position: absolute;
     z-index: 100;
+    --background: var(--ion-color-light-shade);
+    --border-radius: 100%;
+    height: 15vw;
+    width: 15vw;
 
-    //   ion-icon {
-    //     display: none;
+    //ion-icon {
+    //  font-size: 6vh;
+    //};
   };
 }
 
@@ -27,12 +32,14 @@ ion-content {
     position: absolute;
     width: 100%;
     height: 100%;
+    overscroll-behavior: none !important;
+    overflow: hidden !important;
   };
 }
 
-@for $i from 1 through 8 {
-  .swipe-stack app-swipe-card:nth-of-type(#{$i}) {
-    transform: rotate(random(10)-5 + deg);
-    z-index: $i;
-  }
-}
+//@for $i from 1 through 8 {
+ // .swipe-stack app-swipe-card:nth-of-type(#{$i}) {
+ //   transform: rotate(random(10)-5 + deg);
+ //   z-index: $i;
+ // }
+//}

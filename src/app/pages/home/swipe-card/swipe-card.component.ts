@@ -94,4 +94,8 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.currentUser$.unsubscribe();
   }
+
+  rotation() {
+    return (Math.random() * 10) - 5
+  };
 }
