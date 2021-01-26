@@ -1,3 +1,4 @@
+import { Gender, SexualPreference, SwipeMode } from "./match-data.model";
 import { profilePictureUrls, QuestionAndAnswer } from "./profile.model";
 import {
   AreaOfStudy,
@@ -17,6 +18,9 @@ export interface SignupRequired {
   dateOfBirth: Date;
   pictures: profilePictureUrls;
   university: string;
+  gender: Gender;
+  sexualPreference: SexualPreference;
+  swipeMode: SwipeMode;
 }
 
 export interface SignupOptional {

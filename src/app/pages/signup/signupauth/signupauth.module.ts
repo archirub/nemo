@@ -15,6 +15,6 @@ import { SignupauthPage } from './signupauth.page';
     IonicModule,
     SignupauthPageRoutingModule
   ],
-  declarations: [SignupauthPage]
+  declarations: []
 })
 export class SignupauthPageModule {}

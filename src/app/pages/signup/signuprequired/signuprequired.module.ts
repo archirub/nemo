@@ -15,6 +15,6 @@ import { SignuprequiredPage } from './signuprequired.page';
     IonicModule,
     SignuprequiredPageRoutingModule
   ],
-  declarations: [SignuprequiredPage]
+  declarations: []
 })
 export class SignuprequiredPageModule {}
