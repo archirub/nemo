@@ -1,5 +1,5 @@
 import { ModalController } from "@ionic/angular";
-import { Component, OnInit, OnDestroy, Input } from "@angular/core";
+import { Component, OnInit, OnDestroy, Input, Output, ViewChild } from "@angular/core";
 
 import { Subscription } from "rxjs";
 
@@ -10,16 +10,18 @@ import {
   SwipeStackStore,
 } from "@stores/index";
 import { Profile, User } from "@classes/index";
-import { MatchModalComponent } from "@components/index";
+import { MatchModalComponent, ProfileCardComponent } from "@components/index";
 import { swipeChoice } from "@interfaces/index";
+import { EventEmitter } from "events";
 
 @Component({
   selector: "app-swipe-card",
   templateUrl: "./swipe-card.component.html",
   styleUrls: ["./swipe-card.component.scss"],
 })
-export class SwipeCardComponent implements OnInit, OnDestroy {
+export class SwipeCardComponent extends EventEmitter implements OnInit, OnDestroy {
   @Input() profiles: Profile[];
+  @Output() refillEmitter = new EventEmitter();
 
   currentUser$: Subscription;
   currentUser: User;
@@ -30,7 +32,9 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
     private modalCtrl: ModalController,
     private chatStore: ChatStore,
     private currentUserStore: CurrentUserStore
-  ) {}
+  ) {
+    super();
+  }
 
   ngOnInit() {
     // Subscription for chat doc creation in case of match
@@ -91,11 +95,16 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
     await matchModal.present();
   }
 
+  /* Math rotation function for swipe card stack */
+  refillRotate() {
+    var cards:any = document.getElementsByClassName('swipe-cards');
+    for (let i = 0; i < cards.length; i++) {
+        let element = cards[i];
+        element.style.transform = `rotate(${(Math.random() * 10) - 5}deg)`;
+    };
+  }
+
   ngOnDestroy() {
     this.currentUser$.unsubscribe();
   }
-
-  rotation() {
-    return (Math.random() * 10) - 5
-  };
 }

@@ -23,6 +23,9 @@ export class SignupService {
       interests: null,
       questions: null,
       location: null,
+      gender: null,
+      sexualPreference: null,
+      swipeMode: null
     };
   }
 

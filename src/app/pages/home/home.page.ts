@@ -5,6 +5,7 @@ import {
   OnInit,
   ViewChild,
   HostListener,
+  Output
 } from "@angular/core";
 import { ModalController } from "@ionic/angular";
 
@@ -18,6 +19,8 @@ import { SearchCriteriaStore, SwipeStackStore } from "@stores/index";
 import { SCenterAnimation, SCleaveAnimation } from "@animations/index";
 import { FormatService } from "@services/index";
 import { TabElementRefService } from "src/app/tab-menu/tab-element-ref.service";
+import { EventEmitter} from "events";
+import { SwipeCardComponent } from "./swipe-card/swipe-card.component";
 
 @Component({
   selector: "app-home",
@@ -25,6 +28,8 @@ import { TabElementRefService } from "src/app/tab-menu/tab-element-ref.service";
   styleUrls: ["home.page.scss"],
 })
 export class HomePage implements OnInit, OnDestroy {
+  @Output() refillEmitter = new EventEmitter();
+
   swipeProfiles: Observable<Profile[]>;
   private swipeStackRefill$: Subscription;
 
@@ -54,7 +59,7 @@ export class HomePage implements OnInit, OnDestroy {
     private SCstore: SearchCriteriaStore,
     private modalCtrl: ModalController,
     private tabElementRef: TabElementRefService,
-    private format: FormatService
+    private format: FormatService,
   ) {
     this.onResize();
   }
@@ -68,6 +73,7 @@ export class HomePage implements OnInit, OnDestroy {
     this.searchCriteria$ = this.SCstore.searchCriteria.subscribe((SC) => {
       this.searchCriteria = SC;
     });
+
     // Makes sure swipe stack is only filled when its length is smaller or equal to a given
     // length, and that no new query to refill the swipe stack is made while a query
     // is already being processed.
@@ -77,6 +83,8 @@ export class HomePage implements OnInit, OnDestroy {
         throttle(async () => {
           console.log("Refilling swipe stack");
           await this.swipeStackStore.addToSwipeStackQueue(this.searchCriteria);
+          console.log("Emitting refill event");
+          this.refillEmitter.emit('refill');
         })
       )
       .subscribe();
@@ -131,6 +139,11 @@ export class HomePage implements OnInit, OnDestroy {
         .then((m) => this.onModalDismiss(m));
     });
   }
+
+  @ViewChild(SwipeCardComponent) child: SwipeCardComponent;
+  ngAfterViewInit() {
+    this.refillEmitter.on('refill', this.child.refillRotate);
+  };
 
   ngOnDestroy() {
     this.searchCriteria$.unsubscribe();
