@@ -1,9 +1,35 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>own-profile</ion-title>
-  </ion-toolbar>
-</ion-header>
-
 <ion-content>
-  <!-- <app-profile-card></app-profile-card> -->
+    <app-profile-card [profile] = "this.profile | async">
+    </app-profile-card>
+    <div class="flexend">
+        <div class="labels">
+            <!-- Inline style used because color alternates on toggle change and avoiding IDs is better, saves code on backend -->
+            <ion-label class="view-edit" style="color: var(--ion-color-primary)">view</ion-label>
+            <ion-label class="view-edit">edit</ion-label>
+        </div>
+        <ion-toggle (ionChange)="editSwitch($event)"></ion-toggle>
+    </div>
+
+    <div id="editing" style="display: none">
+        <h1>Name, Age</h1>
+        <div class="slide-button">
+            <p>Go to my settings</p>
+            <ion-icon name="chevron-forward-outline"></ion-icon>
+        </div>
+
+        <h2>My photos</h2>
+        <div class="photos"> <!-- One photos are sorted on the backend we can use some ngFor magic here -->
+            <add-photo></add-photo>
+            <add-photo></add-photo>
+            <add-photo></add-photo>
+            <add-photo></add-photo>
+            <add-photo></add-photo>
+            <add-photo></add-photo>
+        </div>
+
+        <h2>My bio</h2>
+        <div class="bio">
+            <ion-textarea></ion-textarea>
+        </div>
+    </div>
 </ion-content>

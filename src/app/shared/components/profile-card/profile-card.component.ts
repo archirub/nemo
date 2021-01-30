@@ -9,7 +9,7 @@ import { IonContent } from "@ionic/angular";
 })
 export class ProfileCardComponent implements OnInit {
   @Input() moreInfo: boolean;
-  @Input() profile: Profile
+  @Input() profile: Profile[];
   @ViewChild(IonContent) ionContent: IonContent;
   constructor() {}
 

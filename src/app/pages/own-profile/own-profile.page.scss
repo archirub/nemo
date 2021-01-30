@@ -1,3 +1,102 @@
 ion-content {
   --overflow: hidden;
+  position: relative;
+}
+
+.flexend {
+  z-index: 4;
+  display: flex;
+  justify-content: flex-end;
+  position: absolute;
+  top: 4vh;
+  width: 90%;
+  margin: 0 auto;
+}
+
+.labels {
+  width: 30%;
+  height: 5%;
+  pointer-events: none; //stops blocking clicks to toggle at a lower z-index
+  position: absolute;
+  display: flex;
+  justify-content: space-between;
+  top: 25%;
+  padding-right: 5%;
+  z-index: 5;
+}
+
+ion-toggle {
+  position: sticky;
+  height: 5vh;
+  width: 30vw;
+  --handle-height: 5vh;
+  --handle-width: 15vw;
+  --border-radius: 5vw;
+  --handle-border-radius: 5vw;
+  --background: var(--ion-color-light-shade);
+  --background-checked: var(--ion-color-light-shade);
+  --handle-background: var(--ion-color-primary-contrast);
+  --handle-background-checked: var(--ion-color-primary-contrast);
+  --handle-border: solid 1px var(--ion-color-primary);
+}
+
+#editing {
+  padding: 1vh 3vw;
+  width: 90%;
+  height: 97.5%;
+  z-index: 3;
+  background: white;
+  position: absolute;
+  top: 0;
+  margin: 10px 20px 20px;
+  border-radius: 30px;
+  flex-direction: column;
+  justify-content: space-evenly;
+  overflow-y: scroll !important;
+  --overflow-y: scroll !important;
+
+  h2 {
+    color: var(--ion-color-light);
+    font-size: 3vh;
+  }
+}
+
+.slide-button {
+  display: flex;
+  justify-content: space-between;
+  padding: 1.5vh 5vw;
+  background-color: var(--ion-color-light-tint);
+  border-radius: 15px;
+  margin: 3vh 0;
+  font-weight: bold;
+  font-size: 2.75vh;
+
+  ion-icon {
+    margin: 3vh 0;
+  }
+}
+
+.photos {
+  display: flex;
+  justify-content: space-evenly;
+  flex-wrap: wrap;
+
+  add-photo {
+    width: 15vh;
+    height: 15vh;
+    margin-top: 1vh;
+  };
+
+  p {
+    margin: 5px;
+  }
+}
+
+.bio ion-textarea {
+  width: 100%;
+  height: 12vh;
+  --background: var(--ion-color-light-tint);
+  border: 2px solid var(--ion-color-light-shade);
+  padding: 1vh;
+  border-radius: 15px;
 }
