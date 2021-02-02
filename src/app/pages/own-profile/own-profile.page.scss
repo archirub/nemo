@@ -58,6 +58,10 @@ ion-toggle {
   h2 {
     color: var(--ion-color-light);
     font-size: 3vh;
+  };
+
+  .container {
+    height: 97.5%;
   }
 }
 
@@ -100,3 +104,8 @@ ion-toggle {
   padding: 1vh;
   border-radius: 15px;
 }
+
+a {
+  text-decoration: none;
+  color: var(--ion-color-light-contrast);
+};
