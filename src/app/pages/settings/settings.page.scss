@@ -31,6 +31,26 @@ ion-slide {
     justify-content: space-evenly;
 }
 
+.flexstart-col {
+    display: flex;
+    flex-direction: column;
+}
+
+.flexstart-row {
+    display: flex;
+    flex-direction: row;
+
+    p.return {
+        font-size: 2.2vh;
+    }
+}
+
+#back {
+    height: 3vh;
+    width: 3vh;
+    padding: 2vh 0 1vh 0;
+}
+
 .slide-button {
     display: flex;
     justify-content: space-between;

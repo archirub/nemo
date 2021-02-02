@@ -1,5 +1,5 @@
 <ion-content>
-  <ion-slides pager="true" #slide>
+  <ion-slides pager="false" options="{pagination: false, onlyExternal: false}" #slide>
     <ion-slide>
       <ion-item lines="none">
         <div class="container">
@@ -8,7 +8,7 @@
             <a href="/tabs/own-profile"><ion-icon name="close-outline"></ion-icon></a>
           </div>
           <div class="flexeven-col">
-            <div class="slide-button">
+            <div class="slide-button" (click)="selectSlide('prefs')">
               <p>Preferences</p>
               <ion-icon name="chevron-forward-outline"></ion-icon>
             </div>
@@ -25,7 +25,7 @@
             </div>
 
             
-            <div class="slide-button">
+            <div class="slide-button" (click)="selectSlide('legal')">
               <p>Legal</p>
               <ion-icon name="chevron-forward-outline"></ion-icon>
             </div>
@@ -48,9 +48,63 @@
       </ion-item>
     </ion-slide>
 
-    <ion-slide>
+    <!-- Necessary in order to allow swipes to specific slides,
+      one other slide has to have display != none in order for this.slides.slideNext() to work -->
+    <ion-slide id="placeholder"></ion-slide>
+
+    <ion-slide id="legal">
       <ion-item lines="none">
-        <h1>Other settings</h1>
+        <div class="container">
+          <div class="flexbetween-row">
+            <h1>Legal</h1>
+            <a href="/tabs/own-profile"><ion-icon name="close-outline"></ion-icon></a>
+          </div>
+
+          <div class="flexstart-row" (click)="returnToSettings()">
+            <ion-icon id="back" name="chevron-back-outline"></ion-icon>
+            <p class="return">Return to Settings</p>
+          </div>
+
+          <div class="flexstart-col">
+            <div class="slide-button">
+              <p>Privacy Policy</p>
+              <ion-icon name="chevron-forward-outline"></ion-icon>
+            </div>
+
+            <div class="slide-button">
+              <p>Terms & Conditions</p>
+              <ion-icon name="chevron-forward-outline"></ion-icon>
+            </div>
+          </div>
+        </div>
+      </ion-item>
+    </ion-slide>
+
+    <ion-slide id="preferences">
+      <ion-item lines="none">
+        <div class="container">
+          <div class="flexbetween-row">
+            <h1>Your Preferences</h1>
+            <a href="/tabs/own-profile"><ion-icon name="close-outline"></ion-icon></a>
+          </div>
+
+          <div class="flexstart-row" (click)="returnToSettings()">
+            <ion-icon id="back" name="chevron-back-outline"></ion-icon>
+            <p class="return">Return to Settings</p>
+          </div>
+
+          <div class="flexstart-col">
+            <div class="slide-button">
+              <p>PLACEHOLDER</p>
+              <ion-icon name="chevron-forward-outline"></ion-icon>
+            </div>
+
+            <div class="slide-button">
+              <p>PLACEHOLDER</p>
+              <ion-icon name="chevron-forward-outline"></ion-icon>
+            </div>
+          </div>
+        </div>
       </ion-item>
     </ion-slide>
   </ion-slides>
