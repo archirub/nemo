@@ -23,6 +23,7 @@ import { ProfileCardComponent } from "@components/index";
     SearchCriteriaComponent,
     ProfileCardComponent,
   ],
+  providers: [ SwipeCardComponent ],
   // Seems to make sure the search criteria modal opening is much faster on the first try
   bootstrap: [SearchCriteriaComponent],
 })

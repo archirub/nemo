@@ -1,8 +1,7 @@
 <ion-content>
   <div class="background">
     <div class="swipe-cards" *ngFor="let profile of profiles; index as i; first as isFirst; last as isLast"
-    [ngStyle]="{ 'zIndex': profiles.length - i,
-                'transform': 'rotate(' + rotation() + 'deg)' }">
+    [ngStyle]="{ 'zIndex': profiles.length - i }">
         <app-profile-card [profile] = "profile">
         </app-profile-card>
     </div>
