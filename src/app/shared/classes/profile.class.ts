@@ -5,7 +5,8 @@ import {
   QuestionAndAnswer,
   Interest,
   University,
-  Location,
+  OnCampus,
+  Degree,
 } from "@interfaces/index";
 
 export class Profile implements profile {
@@ -19,7 +20,8 @@ export class Profile implements profile {
   private _society: string;
   private _interests: Interest[];
   private _questions: QuestionAndAnswer[];
-  private _location: Location;
+  private _onCampus: OnCampus;
+  private _degree: Degree;
   private _socialMediaLinks: SocialMediaLink[];
 
   constructor(
@@ -33,7 +35,8 @@ export class Profile implements profile {
     society: string,
     interests: Interest[],
     questions: QuestionAndAnswer[],
-    location: Location,
+    onCampus: OnCampus,
+    degree: Degree,
     socialMediaLinks: SocialMediaLink[]
   ) {
     this.uid = uid;
@@ -46,7 +49,8 @@ export class Profile implements profile {
     this.society = society;
     this.interests = interests;
     this.questions = questions;
-    this.location = location;
+    this.onCampus = onCampus;
+    this.degree = degree;
     this.socialMediaLinks = socialMediaLinks;
   }
 
@@ -120,11 +124,18 @@ export class Profile implements profile {
     this._questions = value;
   }
 
-  public get location(): Location {
-    return this._location;
+  public get onCampus(): OnCampus {
+    return this._onCampus;
   }
-  public set location(value: Location) {
-    this._location = value;
+  public set onCampus(value: OnCampus) {
+    this._onCampus = value;
+  }
+
+  public get degree(): Degree {
+    return this._degree;
+  }
+  public set degree(value: Degree) {
+    this._degree = value;
   }
 
   public get socialMediaLinks(): SocialMediaLink[] {
@@ -137,8 +148,7 @@ export class Profile implements profile {
   age() {
     const currentTime = new Date();
     return Math.trunc(
-      (currentTime.getTime() - this.dateOfBirth.getTime()) /
-        (1000 * 3600 * 24 * 365)
+      (currentTime.getTime() - this.dateOfBirth.getTime()) / (1000 * 3600 * 24 * 365)
     );
   }
 }

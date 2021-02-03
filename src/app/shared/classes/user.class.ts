@@ -1,8 +1,4 @@
-import {
-  SexualPreference,
-  Gender,
-  SwipeMode,
-} from "./../interfaces/match-data.model";
+import { SexualPreference, Gender, SwipeMode } from "./../interfaces/match-data.model";
 import { Profile } from "./profile.class";
 import {
   profilePictureUrls,
@@ -10,9 +6,10 @@ import {
   QuestionAndAnswer,
   Interest,
   University,
-  Location,
+  OnCampus,
   user,
   Setting,
+  Degree,
 } from "@interfaces/index";
 import { SearchCriteria } from "./search-criteria.class";
 
@@ -24,7 +21,6 @@ export class User extends Profile implements user {
   private _gender: Gender;
   private _sexualPreference: SexualPreference;
   private _swipeMode: SwipeMode;
-  private _showProfile: Boolean;
 
   constructor(
     uid: string,
@@ -37,7 +33,8 @@ export class User extends Profile implements user {
     society: string,
     interests: Interest[],
     questions: QuestionAndAnswer[],
-    location: Location,
+    onCampus: OnCampus,
+    degree: Degree,
     socialMediaLinks: SocialMediaLink[],
     firstName: string,
     lastName: string,
@@ -45,8 +42,7 @@ export class User extends Profile implements user {
     latestSearchCriteria: SearchCriteria,
     gender: Gender,
     sexualPreference: SexualPreference,
-    swipeMode: SwipeMode,
-    showProfile: Boolean
+    swipeMode: SwipeMode
   ) {
     super(
       uid,
@@ -59,7 +55,8 @@ export class User extends Profile implements user {
       society,
       interests,
       questions,
-      location,
+      onCampus,
+      degree,
       socialMediaLinks
     );
     this.firstName = firstName;
@@ -69,7 +66,6 @@ export class User extends Profile implements user {
     this.gender = gender;
     this.sexualPreference = sexualPreference;
     this.swipeMode = swipeMode;
-    this.showProfile = showProfile;
   }
 
   public get firstName(): string {
@@ -119,12 +115,5 @@ export class User extends Profile implements user {
   }
   public set swipeMode(value: SwipeMode) {
     this._swipeMode = value;
-  }
-
-  public get showProfile(): Boolean {
-    return this._showProfile;
-  }
-  public set showProfile(value: Boolean) {
-    this._showProfile = value;
   }
 }

@@ -20,24 +20,21 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
 
   searchCriteriaForm = new FormGroup({
     // university: new FormControl(" "),
-    location: new FormControl(null),
-    ageRange: new FormControl(null),
+    onCampus: new FormControl(null),
+    degree: new FormControl(null),
     areaOfStudy: new FormControl(null),
     societyCategory: new FormControl(null),
     interest: new FormControl(null),
   });
 
-  constructor(
-    private SCstore: SearchCriteriaStore,
-    private modalCtrl: ModalController
-  ) {}
+  constructor(private SCstore: SearchCriteriaStore, private modalCtrl: ModalController) {}
 
   ngOnInit() {
     this.searchCriteria$ = this.SCstore.searchCriteria.subscribe({
       next: (sc) => {
         this.searchCriteriaForm.patchValue({
-          location: sc.location,
-          ageRange: sc.ageRange,
+          onCampus: sc.onCampus,
+          degree: sc.degree,
           areaOfStudy: sc.areaOfStudy,
           societyCategory: sc.societyCategory,
           interest: sc.interest,

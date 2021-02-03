@@ -1,38 +1,38 @@
 import {
-  Location,
-  AgeRange,
   AreaOfStudy,
   SocietyCategory,
   Interest,
   searchCriteriaFromDatabase,
   searchCriteriaOptions,
   University,
+  OnCampus,
+  Degree,
 } from "@interfaces/index";
 
 export class SearchCriteria implements searchCriteriaFromDatabase {
   _university: University;
   _areaOfStudy: AreaOfStudy;
-  _ageRange: AgeRange;
+  _degree: Degree;
   _societyCategory: SocietyCategory;
   _interest: Interest;
-  _location: Location;
+  _onCampus: OnCampus;
 
   options = searchCriteriaOptions;
 
   constructor(
     university: University,
     areaOfStudy: AreaOfStudy,
-    ageRange: AgeRange,
+    degree: Degree,
     societyCategory: SocietyCategory,
     interest: Interest,
-    location: Location
+    onCampus: OnCampus
   ) {
     this.university = university;
     this.areaOfStudy = areaOfStudy;
-    this.ageRange = ageRange;
+    this.degree = degree;
     this.societyCategory = societyCategory;
     this.interest = interest;
-    this.location = location;
+    this.onCampus = onCampus;
   }
 
   public set university(v: University) {
@@ -55,13 +55,13 @@ export class SearchCriteria implements searchCriteriaFromDatabase {
     return this._areaOfStudy;
   }
 
-  public set ageRange(v: AgeRange) {
-    if (this.options.ageRange.includes(v)) {
-      this._ageRange = v;
+  public set degree(v: Degree) {
+    if (this.options.degree.includes(v)) {
+      this._degree = v;
     }
   }
-  public get ageRange(): AgeRange {
-    return this._ageRange;
+  public get degree(): Degree {
+    return this._degree;
   }
 
   public set societyCategory(v: SocietyCategory) {
@@ -82,12 +82,12 @@ export class SearchCriteria implements searchCriteriaFromDatabase {
     return this._interest;
   }
 
-  public set location(v: Location) {
-    if (this.options.location.includes(v)) {
-      this._location = v;
+  public set onCampus(v: OnCampus) {
+    if (this.options.onCampus.includes(v)) {
+      this._onCampus = v;
     }
   }
-  public get location(): Location {
-    return this._location;
+  public get onCampus(): OnCampus {
+    return this._onCampus;
   }
 }

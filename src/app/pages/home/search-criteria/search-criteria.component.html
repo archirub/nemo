@@ -5,17 +5,17 @@
         <ion-col>
           <ion-item class="criterion">
             <ion-toggle></ion-toggle>
-            <h3>Location</h3>
+            <h3>on campus</h3>
 
             <ion-select
               slot="end"
-              formControlName="location"
+              formControlName="onCampus"
               placeHolder="Select an option"
               cancelText="Nah"
               okText="Okay!"
             >
               <ion-select-option
-                *ngFor="let option of this.scOptions.location"
+                *ngFor="let option of this.scOptions.onCampus"
                 value="{{ option }}"
               >
                 {{ option }}</ion-select-option
@@ -28,15 +28,15 @@
         <ion-col>
           <ion-item class="criterion">
             <ion-toggle></ion-toggle>
-            <h3>Age Range</h3>
+            <h3>Degree</h3>
             <ion-select
               slot="end"
               cancelText="Nah"
               okText="Okay!"
-              formControlName="ageRange"
+              formControlName="degree"
             >
               <ion-select-option
-                *ngFor="let option of this.scOptions.ageRange"
+                *ngFor="let option of this.scOptions.degree"
                 value="{{ option }}"
               >
                 {{ option }}

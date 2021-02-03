@@ -1,13 +1,14 @@
 import {
   Interest,
   SocietyCategory,
-  Location,
   University,
   searchCriteriaFromDatabase,
+  OnCampus,
+  Degree,
 } from "./search-criteria.model";
 
 // For cloud function deployed, otherwise it doesn't recognize the type declaration below
-import * as firebase from "firebase";
+// import * as firebase from "firebase";
 
 export interface profile {
   uid: string;
@@ -16,11 +17,12 @@ export interface profile {
   pictures: profilePictureUrls;
   biography: string;
   university: University;
+  degree: Degree;
   course: string;
   society: string;
   interests: Interest[];
   questions: QuestionAndAnswer[];
-  location: Location;
+  onCampus: OnCampus;
   socialMediaLinks: SocialMediaLink[];
 }
 
@@ -38,6 +40,7 @@ export interface profileFromDatabase {
   biography: string;
 
   university: University;
+  degree: Degree;
   // areaOfStudy: AreaOfStudy;
   course: string;
   society: string; // SOCIETIES???
@@ -45,7 +48,7 @@ export interface profileFromDatabase {
   // societyCategory: SocietyCategory;
   interests: Interest[];
   questions: QuestionAndAnswer[];
-  location: Location;
+  onCampus: OnCampus;
 
   socialMediaLinks: SocialMediaLink[];
 
@@ -59,8 +62,8 @@ export interface privateProfileFromDatabase {
   latestSearchCriteria: searchCriteriaFromDatabase;
 }
 
-// TO DEFINE
-const settingNameOption = ["showProfile?"] as const;
+// TO DEFINE BUT SHOWPROFILE MUST BE IN THERE
+const settingNameOption = ["showProfile"] as const;
 export type settingName = typeof settingNameOption[number];
 export type Setting = { name: settingName; preference: any };
 
