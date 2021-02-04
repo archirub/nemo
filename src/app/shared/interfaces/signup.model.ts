@@ -2,8 +2,9 @@ import { Gender, SexualPreference, SwipeMode } from "./match-data.model";
 import { profilePictureUrls, QuestionAndAnswer } from "./profile.model";
 import {
   AreaOfStudy,
+  Degree,
   Interest,
-  Location,
+  OnCampus,
   SocietyCategory,
 } from "./search-criteria.model";
 
@@ -28,10 +29,11 @@ export interface SignupOptional {
   course: string;
   society: string;
   areaOfStudy: AreaOfStudy;
+  degree: Degree;
   societyCategory: SocietyCategory;
   interests: Interest[];
   questions: QuestionAndAnswer[];
-  location: Location;
+  onCampus: OnCampus;
 }
 
 export type SignupMap = SignupRequired & SignupOptional;

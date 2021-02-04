@@ -65,9 +65,7 @@ export class CurrentUserStore {
   /** From the user's id, returns a Profile object containing info from
    * the private part of their profile doc on database
    */
-  private async fetchPrivateProfile(
-    uid: string
-  ): Promise<privateProfileFromDatabase> {
+  private async fetchPrivateProfile(uid: string): Promise<privateProfileFromDatabase> {
     if (!uid) {
       console.error("No uid provided");
       return;
@@ -87,9 +85,7 @@ export class CurrentUserStore {
   /**
    * Fetches data relevant to user object creation in matchData document
    */
-  private async fetchMatchDataInfo(
-    uid: string
-  ): Promise<userInfoFromMatchData> {
+  private async fetchMatchDataInfo(uid: string): Promise<userInfoFromMatchData> {
     if (!uid) {
       console.error("No uid provided");
       return;
@@ -105,13 +101,10 @@ export class CurrentUserStore {
         const gender = responseData.gender;
         const sexualPreference = responseData.sexualPreference;
         const swipeMode = responseData.swipeMode;
-        const showProfile = responseData.showProfile;
-        return { gender, sexualPreference, swipeMode, showProfile };
+        return { gender, sexualPreference, swipeMode };
       }
     } catch (e) {
-      throw new Error(
-        `Call to cloud function getMatchDataUserInfo failed: ${e}`
-      );
+      throw new Error(`Call to cloud function getMatchDataUserInfo failed: ${e}`);
     }
   }
 
@@ -146,7 +139,8 @@ export class CurrentUserStore {
       profile.society,
       profile.interests,
       profile.questions,
-      profile.location,
+      profile.onCampus,
+      profile.degree,
       profile.socialMediaLinks,
       privateProfile.firstName,
       privateProfile.lastName,
@@ -154,8 +148,7 @@ export class CurrentUserStore {
       latestSearchCriteria,
       infoFromMatchData.gender,
       infoFromMatchData.sexualPreference,
-      infoFromMatchData.swipeMode,
-      infoFromMatchData.showProfile
+      infoFromMatchData.swipeMode
     );
 
     this._user.next(user);

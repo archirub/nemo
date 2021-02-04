@@ -35,18 +35,18 @@ export class FormatService {
     if (!searchCriteria) return;
     const university = searchCriteria.university;
     const areaOfStudy = searchCriteria.areaOfStudy;
-    const ageRange = searchCriteria.ageRange;
+    const degree = searchCriteria.degree;
     const societyCategory = searchCriteria.societyCategory;
     const interest = searchCriteria.interest;
-    const location = searchCriteria.location;
+    const onCampus = searchCriteria.onCampus;
 
     return new SearchCriteria(
       university,
       areaOfStudy,
-      ageRange,
+      degree,
       societyCategory,
       interest,
-      location
+      onCampus
     );
   }
 
@@ -56,18 +56,18 @@ export class FormatService {
     if (!searchCriteria) return;
     const university = searchCriteria.university;
     const areaOfStudy = searchCriteria.areaOfStudy;
-    const ageRange = searchCriteria.ageRange;
+    const degree = searchCriteria.degree;
     const societyCategory = searchCriteria.societyCategory;
     const interest = searchCriteria.interest;
-    const location = searchCriteria.location;
+    const onCampus = searchCriteria.onCampus;
 
     return {
       university,
       areaOfStudy,
-      ageRange,
+      degree,
       societyCategory,
       interest,
-      location,
+      onCampus,
     };
   }
 
@@ -82,7 +82,8 @@ export class FormatService {
     const society = profileData.society;
     const interests = profileData.interests;
     const questions = profileData.questions;
-    const location = profileData.location;
+    const onCampus = profileData.onCampus;
+    const degree = profileData.degree;
     const socialMediaLinks = profileData.socialMediaLinks;
 
     return new Profile(
@@ -96,7 +97,8 @@ export class FormatService {
       society,
       interests,
       questions,
-      location,
+      onCampus,
+      degree,
       socialMediaLinks
     );
   }

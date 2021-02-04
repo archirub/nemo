@@ -1,25 +1,25 @@
 export interface searchCriteriaFromDatabase {
   university: University | null; // select
   areaOfStudy: AreaOfStudy | null; // select
-  ageRange: AgeRange | null; // slider
+  degree: Degree | null; // slider
   societyCategory: SocietyCategory | null; // select
   interest: Interest | null; // select
-  location: Location | null; // radio button
+  onCampus: OnCampus | null;
 }
 
 export interface SearchFeatures {
   university: University;
   areaOfStudy: AreaOfStudy;
-  ageRange: AgeRange;
+  degree: Degree;
   societyCategory: SocietyCategory; // CHANGE TO ARRAY IF ITS POSSIBLE TO SELECT MULTIPLE SOCIETES
-  interest: Interest[];
-  location: Location;
+  interests: Interest[];
+  onCampus: OnCampus;
 }
 
 export const searchCriteriaOptions = {
   university: ["UCL"] as const,
   areaOfStudy: ["politics", "mathematics", "biology"] as const,
-  ageRange: ["1821", "2225", "26plus"] as const,
+  degree: ["undergrad", "postgrad"] as const,
   societyCategory: [
     "Debate Society",
     "Basketball Society",
@@ -27,20 +27,15 @@ export const searchCriteriaOptions = {
     "3D Modelling Society",
     "Anime Society",
   ] as const,
-  interest: [
-    "sports guy",
-    "herb connoisseur",
-    "smart guy",
-    "beastaLegend",
-  ] as const,
-  location: ["onCampus", "offCampus"] as const,
+  interest: ["sports guy", "herb connoisseur", "smart guy", "beastaLegend"] as const,
+  onCampus: [true, false] as const,
 };
 
 export type University = typeof searchCriteriaOptions.university[number];
 export type AreaOfStudy = typeof searchCriteriaOptions.areaOfStudy[number]; //MOCK DATA
-export type AgeRange = typeof searchCriteriaOptions.ageRange[number];
+export type Degree = typeof searchCriteriaOptions.degree[number];
 export type SocietyCategory = typeof searchCriteriaOptions.societyCategory[number];
 export type Interest = typeof searchCriteriaOptions.interest[number];
-export type Location = typeof searchCriteriaOptions.location[number];
+export type OnCampus = typeof searchCriteriaOptions.onCampus[number];
 
 export type Criterion = keyof searchCriteriaFromDatabase;

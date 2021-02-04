@@ -13,6 +13,9 @@ export class SignupService {
       firstName: null,
       lastName: null,
       dateOfBirth: null,
+      gender: null,
+      sexualPreference: null,
+      swipeMode: null,
       pictures: null,
       university: null,
       biography: null,
@@ -22,10 +25,8 @@ export class SignupService {
       societyCategory: null,
       interests: null,
       questions: null,
-      location: null,
-      gender: null,
-      sexualPreference: null,
-      swipeMode: null
+      onCampus: null,
+      degree: null,
     };
   }
 
@@ -49,11 +50,12 @@ export class SignupService {
     this.signupForm.biography = fields.biography;
     this.signupForm.course = fields.course;
     this.signupForm.society = fields.society;
+    this.signupForm.degree = fields.degree;
     this.signupForm.areaOfStudy = fields.areaOfStudy;
     this.signupForm.societyCategory = fields.societyCategory;
     this.signupForm.interests = fields.interests;
     this.signupForm.questions = fields.questions;
-    this.signupForm.location = fields.location;
+    this.signupForm.onCampus = fields.onCampus;
   }
 
   async submitToDatabase() {}
