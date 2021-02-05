@@ -81,6 +81,25 @@ ion-slide {
             margin: 2vh auto;
         };
     }
+
+    &.preferences {
+        font-size: 2.25vh;
+
+        p {
+            color: var(--ion-color-light);
+        };
+
+        select {
+            flex: 1;
+            border: none;
+            background: transparent;
+            color: var(--ion-color-light-contrast);
+
+            &:focus {
+                outline: none;
+            };
+        };
+    }
   
     ion-icon {
       margin: 3vh 0;
@@ -104,6 +123,8 @@ a:focus {
 ion-toggle {
     height: 5vh;
     margin: auto 0;
-    width: 20vw;
-    --handle-width: 10vw;
+    width: 24vw;
+    --handle-width: 12vw;
+    --handle-height: 4.75vh;
+    border-radius: 30px;
 }
