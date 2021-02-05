@@ -12,7 +12,9 @@ export interface SearchFeatures {
   areaOfStudy: AreaOfStudy;
   degree: Degree;
   societyCategory: SocietyCategory; // CHANGE TO ARRAY IF ITS POSSIBLE TO SELECT MULTIPLE SOCIETES
-  interests: Interest[];
+  // though it's incorrect grammatically, keep interest property as "interest" and not as "interests"
+  // as that allows for easy type checking
+  interest: Interest[];
   onCampus: OnCampus;
 }
 

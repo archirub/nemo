@@ -3,10 +3,11 @@ import * as admin from "firebase-admin";
 import {
   registerSwipeChoicesRequest,
   uidChoiceMap,
-  matchDataFromDatabase,
+  mdFromDatabase,
   profileFromDatabase,
   userSnippet,
   chatFromDatabase,
+  mdDatingPickingFromDatabase,
 } from "../../src/app/shared/interfaces/index";
 
 export const registerSwipeChoices = functions
@@ -113,11 +114,17 @@ async function handleYesChoices(
   try {
     await Promise.all(
       alluids.map(async (uid) => {
-        const s = await admin.firestore().collection("matchData").doc(uid).get();
+        const s = await admin
+          .firestore()
+          .collection("matchData")
+          .doc(uid)
+          .collection("pickingData")
+          .doc("dating")
+          .get();
         if (!s.exists)
           return functions.logger.warn("matchData doc doesn't exist for", uid);
 
-        const matchData = s.data() as matchDataFromDatabase;
+        const matchData = s.data() as mdDatingPickingFromDatabase;
 
         // Check whether targetID is in user's liked or superliked array
         let uidIndex: number = matchData.likedUsers.indexOf(targetuid);

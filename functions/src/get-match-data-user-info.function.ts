@@ -29,8 +29,7 @@ export const getMatchDataUserInfo = functions.region("europe-west2").https.onCal
     const gender = data.gender;
     const sexualPreference = data.sexualPreference;
     const swipeMode = data.swipeMode;
-    const showProfile = data.showProfile;
 
-    return { gender, sexualPreference, swipeMode, showProfile };
+    return { gender, sexualPreference, swipeMode };
   }
 );

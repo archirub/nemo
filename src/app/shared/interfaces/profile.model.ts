@@ -7,8 +7,8 @@ import {
   Degree,
 } from "./search-criteria.model";
 
-// For cloud function deployed, otherwise it doesn't recognize the type declaration below
-// import * as firebase from "firebase";
+// FOR CLOUD FUNCTION DEPLOYMENT, otherwise it doesn't recognize the type declaration below
+import * as firebase from "firebase";
 
 export interface profile {
   uid: string;
