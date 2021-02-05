@@ -1,8 +1,79 @@
 .criteria-container {
-  margin-top: 50px;
+  overflow: scroll;
 }
 
 .criterion {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  position: relative;
+  padding: 3vh 3vw;
+  background-color: var(--ion-color-light-tint);
+  border-radius: 30px;
+  margin-top: 2vh;
+}
+
+.labels {
+  display: flex;
+  justify-content: flex-end;
+  pointer-events: none;
+  z-index: 2;
+  position: absolute;
+  width: 93%;
+  margin: 0 auto;
+
+  ion-label {
+    padding-right: 3vw;
+  };
+}
+
+ion-toggle {
+  width: 52vw;
+  --handle-width: 26vw;
+  height: 5vh;
+  --handle-height: 5vh;
+  --background: var(--ion-color-light-shade);
+  --background-checked: var(--ion-color-light-shade);
+}
+
+ion-select {
+  flex: 1;
+  font-size: 22px;
+  font-weight: bold;
+  color: var(--ion-color-primary);
+  --padding-start: none;
+  margin-top: 5px;
+}
+
+.flex {
+  display: flex;
+
+  &between {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+  };
+}
+
+h1 {
+  font-size: 4vh;
+}
+
+.nemo {
+  color: var(--ion-color-primary);
+}
+
+ion-button {
+
+  &.exit {
+    --background: transparent;
+    color: var(--ion-color-light-contrast);
+    --background-activated: transparent;
+    font-size: 3vh;
+  };
+
+  &.clear {
+    margin: 2vh auto;
+    --border-radius: 20px;
+  }
 }

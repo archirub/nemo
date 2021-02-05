@@ -19,8 +19,8 @@ export const SCenterAnimation = (
   const startingVerticalPosition =
     buttonYPosition - screenHeight / 2 + buttonHeight / 2;
 
-  const FINAL_MODAL_HEIGHT = 500;
-  const FINAL_MODAL_WIDTH = 500;
+  const FINAL_MODAL_HEIGHT = 90;
+  const FINAL_MODAL_WIDTH = 90;
   const scalingFactorHeight = FINAL_MODAL_HEIGHT / buttonHeight;
   const scalingFactorWidth = FINAL_MODAL_WIDTH / buttonWidth;
   const inverseSFheight = 1 / scalingFactorHeight;
@@ -38,8 +38,11 @@ export const SCenterAnimation = (
       .create()
       .addElement(baseEl.querySelector(".modal-wrapper")!)
       .beforeStyles({
-        height: `${FINAL_MODAL_HEIGHT}px`,
-        width: `${FINAL_MODAL_WIDTH}px`,
+        height: `${FINAL_MODAL_HEIGHT}vh`,
+        width: `${FINAL_MODAL_WIDTH}vw`,
+        overflow: 'scroll',
+        '--overflow': 'scroll',
+        '--border-radius': '20px',
       })
       // .afterStyles({ height: "20px", width: "20px" })
       .fromTo(

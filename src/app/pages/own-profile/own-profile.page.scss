@@ -96,13 +96,17 @@ ion-toggle {
   }
 }
 
-.bio ion-textarea {
-  width: 100%;
-  height: 12vh;
-  --background: var(--ion-color-light-tint);
-  border: 2px solid var(--ion-color-light-shade);
-  padding: 1vh;
-  border-radius: 15px;
+.bio {
+  padding-bottom: 5vh;
+
+  ion-textarea {
+    width: 100%;
+    height: 12vh;
+    --background: var(--ion-color-light-tint);
+    border: 2px solid var(--ion-color-light-shade);
+    padding: 1vh;
+    border-radius: 15px;
+  };
 }
 
 a {
