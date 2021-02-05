@@ -1,5 +1,5 @@
-import { Component, OnInit, OnDestroy } from "@angular/core";
-import { ModalController } from "@ionic/angular";
+import { Component, OnInit, OnDestroy, ViewChild } from "@angular/core";
+import { IonToggle, ModalController } from "@ionic/angular";
 import { FormControl, FormGroup } from "@angular/forms";
 
 import { Subscription } from "rxjs";
@@ -34,6 +34,8 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
   });
 
   constructor(private SCstore: SearchCriteriaStore, private modalCtrl: ModalController) {}
+
+  @ViewChild("toggler") toggle: IonToggle;
 
   ngOnInit() {
     this.searchCriteria$ = this.SCstore.searchCriteria.subscribe({
@@ -81,8 +83,6 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
     } else {
       console.log("Error in HTML - trying to hide non-existent ID")
     };
-
-    console.log("Running!");
   }
 
   clearSelect() {
@@ -107,8 +107,8 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
     soc.style.display = "block"; };
     if (ints.style.display == "none") {
     ints.style.display = "block"; };
-
-    console.log("Has run.");
+    if (this.toggle.checked == true) {
+    this.toggle.checked = false ; };
   }
 
   ngOnDestroy() {

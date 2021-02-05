@@ -18,10 +18,10 @@
         <ion-col>
           <div class="criterion">
             <h3>Location</h3>
-            <ion-toggle (ionChange)="locationSwitch($event)"></ion-toggle>
+            <ion-toggle #toggler (ionChange)="locationSwitch($event)"></ion-toggle>
             <div class="labels">
-              <ion-label class="on-off" style="color: var(--ion-color-primary)">on campus</ion-label>
-              <ion-label class="on-off">off campus</ion-label>
+              <ion-label class="on-off left" style="color: var(--ion-color-primary)">everyone</ion-label>
+              <ion-label class="on-off">on campus</ion-label>
             </div>
           </div>
         </ion-col>
