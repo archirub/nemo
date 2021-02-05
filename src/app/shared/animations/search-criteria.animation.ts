@@ -1,5 +1,6 @@
 import { ElementRef } from "@angular/core";
 import { AnimationController } from "@ionic/angular";
+// import * as anime from "animejs"
 
 export const SCenterAnimation = (
   searchButton: ElementRef<any>,
@@ -11,13 +12,10 @@ export const SCenterAnimation = (
   const buttonXPosition = searchButton.nativeElement.getBoundingClientRect().x;
   const buttonYPosition = searchButton.nativeElement.getBoundingClientRect().y;
   const buttonWidth = searchButton.nativeElement.getBoundingClientRect().width;
-  const buttonHeight = searchButton.nativeElement.getBoundingClientRect()
-    .height;
+  const buttonHeight = searchButton.nativeElement.getBoundingClientRect().height;
 
-  const startingHorizontalPosition =
-    buttonXPosition - screenWidth / 2 + buttonWidth / 2;
-  const startingVerticalPosition =
-    buttonYPosition - screenHeight / 2 + buttonHeight / 2;
+  const startingHorizontalPosition = buttonXPosition - screenWidth / 2 + buttonWidth / 2;
+  const startingVerticalPosition = buttonYPosition - screenHeight / 2 + buttonHeight / 2;
 
   const FINAL_MODAL_HEIGHT = 500;
   const FINAL_MODAL_WIDTH = 500;
@@ -60,11 +58,7 @@ export const SCenterAnimation = (
       .create()
       .addElement(baseEl.querySelector("ion-backdrop"))
       .fromTo("opacity", "0.01", "var(--backdrop-opacity)")
-      .fromTo(
-        "backdropFilter",
-        "blur(0px) opacity(1)",
-        "blur(100px) opacity(0)"
-      );
+      .fromTo("backdropFilter", "blur(0px) opacity(1)", "blur(100px) opacity(0)");
 
     return new AnimationController()
       .create()

@@ -59,13 +59,13 @@ export interface piStorageUID {
 export type piStorage = { uids: string[] } | { [uid: string]: piStorageUID };
 
 export const genderOptions = ["male", "female", "other"] as const;
-export type Gender = typeof genderOptions[number];
+export type Gender = "male" | "female" | "other";
 export const sexualPreferenceOptions = [
-  ["male"] as const,
-  ["female"] as const,
-  ["male", "female"] as const,
+  ["male"],
+  ["female"],
+  ["male", "female"],
 ] as const;
-export type SexualPreference = typeof sexualPreferenceOptions[number];
+export type SexualPreference = ["male"] | ["female"] | ["male", "female"];
 
 export const swipeModeOptions = ["friend", "dating"] as const;
 export type SwipeMode = typeof swipeModeOptions[number];
