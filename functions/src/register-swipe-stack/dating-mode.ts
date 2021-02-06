@@ -1,102 +1,27 @@
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import {
-  registerSwipeChoicesRequest,
-  uidChoiceMap,
   mdFromDatabase,
   profileFromDatabase,
   userSnippet,
   chatFromDatabase,
   mdDatingPickingFromDatabase,
-} from "../../src/app/shared/interfaces/index";
-
-export const registerSwipeChoices = functions
-  .region("europe-west2")
-  .https.onCall(async (dataRequest: registerSwipeChoicesRequest, context) => {
-    if (!context.auth)
-      throw new functions.https.HttpsError("unauthenticated", "User no autenticated.");
-    const currentUserID: string = context.auth.uid;
-    const choices: uidChoiceMap[] = dataRequest.choices;
-    const targetMatchDataRef = admin
-      .firestore()
-      .collection("matchData")
-      .doc(currentUserID);
-    const batch = admin.firestore().batch();
-
-    const { yes, no, superLike } = separateChoices(choices);
-
-    if (no.length > 0) handleNoChoices(batch, targetMatchDataRef, no);
-
-    try {
-      let matchedUsers: string[] | undefined;
-      if (yes.length > 0 || superLike.length > 0) {
-        matchedUsers = await handleYesChoices(
-          batch,
-          targetMatchDataRef,
-          currentUserID,
-          yes,
-          superLike
-        );
-      }
-
-      await batch.commit();
-
-      if (typeof matchedUsers !== "undefined" && matchedUsers.length > 0)
-        await createChatDocuments(currentUserID, matchedUsers);
-    } catch (e) {
-      throw new functions.https.HttpsError(
-        "aborted",
-        `error occured during handleYesChoices or while trying to commit the batch ${e}`
-      );
-    }
-  });
-
-function separateChoices(
-  choices: uidChoiceMap[]
-): { yes: string[]; no: string[]; superLike: string[] } {
-  if (!choices) return { yes: [], no: [], superLike: [] };
-
-  const yes: string[] = [];
-  const no: string[] = [];
-  const superLike: string[] = [];
-
-  choices.forEach((choice) => {
-    if (choice.choice === "yes") yes.push(choice.uid);
-    else if (choice.choice === "no") no.push(choice.uid);
-    else if (choice.choice === "super") superLike.push(choice.uid);
-    else functions.logger.warn("Swipe choice not recognized:", choice.choice);
-  });
-
-  return { yes, no, superLike };
+} from "../../../src/app/shared/interfaces/index";
+import { sortUIDs } from "./main";
+interface uidDocRefMap {
+  uid: string;
+  mainRef: FirebaseFirestore.DocumentReference<mdFromDatabase>;
+  datingRef: FirebaseFirestore.DocumentReference<mdDatingPickingFromDatabase>;
 }
 
-function handleNoChoices(
+export async function handleDatingYesChoices(
   batch: FirebaseFirestore.WriteBatch,
-  targetMatchDataRef: FirebaseFirestore.DocumentReference<FirebaseFirestore.DocumentData>,
-  uids: string[]
-) {
-  if (!uids || !batch || !targetMatchDataRef)
-    throw new functions.https.HttpsError(
-      "invalid-argument",
-      "handleNoChoices could not be executed due to missing / invalid arguments."
-    );
-
-  if (uids.length > 0) {
-    batch.update(targetMatchDataRef, {
-      dislikedUsers: admin.firestore.FieldValue.arrayUnion(...uids),
-    });
-  }
-}
-
-/** returns an array of the uids of the users who matched */
-async function handleYesChoices(
-  batch: FirebaseFirestore.WriteBatch,
-  targetMatchDataRef: FirebaseFirestore.DocumentReference<FirebaseFirestore.DocumentData>,
-  targetuid: string,
+  targetMatchDataMainRef: FirebaseFirestore.DocumentReference<mdFromDatabase>,
+  currentUserID: string,
   yesuids: string[],
   superuids: string[]
-): Promise<string[]> {
-  if (!targetuid || !yesuids || !superuids || !batch || !targetMatchDataRef)
+) {
+  if (!currentUserID || !yesuids || !superuids || !batch || !targetMatchDataMainRef)
     throw new functions.https.HttpsError(
       "invalid-argument",
       "handleNoChoices could not be executed due to missing / invalid arguments."
@@ -104,36 +29,44 @@ async function handleYesChoices(
 
   const notMatchedYesUsers: string[] = [];
   const notMatchedSuperUsers: string[] = [];
-  const matchedUsers: {
-    uid: string;
-    ref: FirebaseFirestore.DocumentReference<FirebaseFirestore.DocumentData>;
-  }[] = [];
+  const matchedUsers: uidDocRefMap[] = [];
 
   const alluids: string[] = yesuids.concat(superuids);
 
   try {
     await Promise.all(
       alluids.map(async (uid) => {
-        const s = await admin
+        const matchDataDatingDoc = (await admin
           .firestore()
           .collection("matchData")
           .doc(uid)
           .collection("pickingData")
           .doc("dating")
-          .get();
-        if (!s.exists)
+          .get()) as FirebaseFirestore.DocumentSnapshot<mdDatingPickingFromDatabase>;
+        const matchDataMainRef = admin
+          .firestore()
+          .collection("matchData")
+          .doc(uid) as FirebaseFirestore.DocumentReference<mdFromDatabase>;
+        if (!matchDataDatingDoc.exists)
           return functions.logger.warn("matchData doc doesn't exist for", uid);
 
-        const matchData = s.data() as mdDatingPickingFromDatabase;
+        if (!matchDataDatingDoc.exists) return;
+
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        const matchData = matchDataDatingDoc.data() as mdDatingPickingFromDatabase;
 
         // Check whether targetID is in user's liked or superliked array
-        let uidIndex: number = matchData.likedUsers.indexOf(targetuid);
-        uidIndex =
-          uidIndex === -1 ? matchData.superLikedUsers.indexOf(targetuid) : uidIndex;
+        const isLiked =
+          matchData.likedUsers[currentUserID]?.exists ||
+          matchData.superLikedUsers[currentUserID]?.exists;
 
         // If targetID is, then add to match otherwise add to like or super
-        if (uidIndex !== -1) {
-          matchedUsers.push({ uid, ref: s.ref });
+        if (isLiked) {
+          matchedUsers.push({
+            uid,
+            datingRef: matchDataDatingDoc.ref,
+            mainRef: matchDataMainRef,
+          });
         } else {
           // If other's ID was from normal likes, add them there, otherwise add to super
           if (superuids.indexOf(uid) === -1) {
@@ -145,34 +78,29 @@ async function handleYesChoices(
       })
     );
 
-    handleNotMatchUsers(
+    handleDatingNotMatchUsers(
       batch,
-      targetMatchDataRef,
+      targetMatchDataMainRef,
       notMatchedYesUsers,
       notMatchedSuperUsers
     );
 
-    handleMatchUsers(batch, targetMatchDataRef, targetuid, matchedUsers);
+    handleDatingMatchUsers(batch, targetMatchDataMainRef, currentUserID, matchedUsers);
 
     return matchedUsers.map((map) => map.uid);
   } catch (e) {
     throw new functions.https.HttpsError(
       "internal",
-      `Could not handle yes choices of ${targetuid}: ${e}`
+      `Could not handle yes choices of ${currentUserID}: ${e}`
     );
   }
 }
 
-interface uidDocrefMap {
-  uid: string;
-  ref: FirebaseFirestore.DocumentReference<FirebaseFirestore.DocumentData>;
-}
-
-function handleMatchUsers(
+function handleDatingMatchUsers(
   batch: FirebaseFirestore.WriteBatch,
-  targetMatchDataRef: FirebaseFirestore.DocumentReference<FirebaseFirestore.DocumentData>,
+  targetMatchDataRef: FirebaseFirestore.DocumentReference<mdFromDatabase>,
   targetuid: string,
-  uidRefs: uidDocrefMap[]
+  uidRefs: uidDocRefMap[]
 ) {
   if (!batch || !targetMatchDataRef || !targetuid || !uidRefs || uidRefs.length < 1)
     throw new functions.https.HttpsError(
@@ -191,16 +119,16 @@ function handleMatchUsers(
 
   // UPDATING MATCHED USERS AND LIKED USERS ARRAYS OF EACH NEW MATCH
   uidRefs.forEach((obj) => {
-    batch.update(obj.ref, {
+    batch.update(obj.mainRef, {
       matchedUsers: admin.firestore.FieldValue.arrayUnion(targetuid),
     });
-    batch.update(obj.ref, {
+    batch.update(obj.datingRef, {
       likedUsers: admin.firestore.FieldValue.arrayRemove(targetuid),
     });
   });
 }
 
-function handleNotMatchUsers(
+function handleDatingNotMatchUsers(
   batch: FirebaseFirestore.WriteBatch,
   targetMatchDataRef: FirebaseFirestore.DocumentReference<FirebaseFirestore.DocumentData>,
   notMatchedYesUsers: string[],
@@ -227,7 +155,10 @@ function handleNotMatchUsers(
 
 type profileSnapshot = FirebaseFirestore.DocumentSnapshot<profileFromDatabase>;
 
-async function createChatDocuments(targetuid: string, matcheduids: string[]) {
+export async function createDatingChatDocuments(
+  targetuid: string,
+  matcheduids: string[]
+) {
   if (!targetuid || !matcheduids || matcheduids.length < 1)
     functions.logger.warn("Missing parameter in createChatDocuments");
 
@@ -300,8 +231,4 @@ async function createChatDocuments(targetuid: string, matcheduids: string[]) {
       await admin.firestore().collection("chats").add(chat);
     })
   );
-}
-
-function sortUIDs(uids: string[]): string[] {
-  return uids.sort((a, b) => ("" + a).localeCompare(b));
 }

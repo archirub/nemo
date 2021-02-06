@@ -9,10 +9,9 @@ import {
   uidChoiceMap,
   uidDatingStorage,
 } from "../../../src/app/shared/interfaces/index";
-import { randomFromGaussian, randomWeightedPick } from "./picking";
+import { pickFromSCArray, pickIndex, randomWeightedPick } from "./picking";
 import { PickingWeights } from "./main";
 import { searchCriteriaGrouping } from "./search-criteria";
-import { promises } from "dns";
 
 export async function datingMode(
   uid: string,
@@ -24,10 +23,10 @@ export async function datingMode(
   numberOfPicks: number
 ): Promise<uidChoiceMap[]> {
   const numberOfDemographicPicks: number = Math.floor(
-    numberOfPicks * pickingWeights.searchCriteriaGroup * 1.5
+    numberOfPicks * pickingWeights.searchCriteriaGroup * 2
   );
   const numberOfSCPicks: number = Math.floor(numberOfDemographicPicks * 0.5);
-  const numberOfLikePicks: number = Math.floor(numberOfDemographicPicks * 1.2);
+  const numberOfLikePicks: number = Math.floor(numberOfPicks * 1.2);
 
   // Accounts for degree pref being potentially null, if null it means no preference
   // from user, and hence
@@ -35,10 +34,9 @@ export async function datingMode(
     ? [searchCriteria.degree]
     : ["postgrad", "undergrad"];
 
-  const likeGroupUsers: uidChoiceMap[] = (
-    await fetchLikeGroup(uid, numberOfLikePicks)
-  ).map((uid_) => {
-    return { uid: uid_, choice: "yes" };
+  const likeGroupWeirdObject: { [uid: string]: uidChoiceMap } = {};
+  (await fetchLikeGroup(uid, numberOfLikePicks)).forEach((uid_) => {
+    likeGroupWeirdObject[uid_] = { uid: uid_, choice: "yes" };
   });
 
   const {
@@ -93,7 +91,8 @@ export async function datingMode(
     PIPickingVariance,
     numberOfDemographicPicks > numberOfDemographicUids
       ? numberOfDemographicUids
-      : numberOfDemographicPicks
+      : numberOfDemographicPicks,
+    matchDataMain.percentile
   );
 
   // reported users, matched users, disliked users (liked and superliked removed later on)
@@ -106,10 +105,14 @@ export async function datingMode(
 
   // REMOVE UIDS OF PEOPLE THAT CAN'T BE IN SWIPE STACK
   demographicPickedUids = demographicPickedUids.filter(
-    (uid_) =>
-      matchDataMain.reportedUsers.indexOf(uid_) === -1 &&
-      matchDataMain.dislikedUsers.indexOf(uid_) === -1 &&
-      matchDataMain.matchedUsers.indexOf(uid_) === -1
+    (pickedUid) =>
+      !matchDataMain.reportedUsers[pickedUid]?.exists &&
+      !matchDataMain.dislikedUsers[pickedUid]?.exists &&
+      !matchDataMain.matchedUsers[pickedUid]?.exists &&
+      !likeGroupWeirdObject.hasOwnProperty(pickedUid)
+  );
+  const likeGroupUsers: uidChoiceMap[] = removeDuplicates(
+    Object.entries(likeGroupWeirdObject).map((keyValue) => keyValue[1])
   );
 
   // FETCH DATING MATCHDATA DOC OF ALL PEOPLE LEFT
@@ -126,19 +129,27 @@ export async function datingMode(
           .get()) as FirebaseFirestore.DocumentSnapshot<mdDatingPickingFromDatabase>;
       })
     )
-  ).filter((doc) => doc.exists && doc.data()?.reportedUsers.indexOf(uid) === -1);
+  ).filter((doc) => doc.exists && !doc.data()?.reportedUsers[uid]?.exists);
 
   // SORT BASED ON SEARCH CRITERIA
+  // deletes degree property as that would be unnecessary iteration as everyone already
+  // matches the specified degree
+  delete (searchCriteria as any).degree;
   let SCuids = searchCriteriaGrouping(matchDataDatingDocs, searchCriteria);
 
   // PICK ACCORDING TO NORMAL DISTRIBUTION AROUND PERFECT MATCH
   SCuids = pickFromSCArray(
-    SCuids,
+    SCuids as FirebaseFirestore.DocumentSnapshot<mdDatingPickingFromDatabase>[],
     SCPickingVariance,
     numberOfSCPicks > SCuids.length ? SCuids.length : numberOfSCPicks
-  );
+  ) as FirebaseFirestore.DocumentSnapshot<mdDatingPickingFromDatabase>[];
 
-  const SCGroupUsers = datingPickingToMap(uid, SCuids);
+  const SCGroupUsers = removeDuplicates(
+    datingPickingToMap(
+      uid,
+      SCuids as FirebaseFirestore.DocumentSnapshot<mdDatingPickingFromDatabase>[]
+    )
+  );
 
   // RETURN PICK
   const uidsPicked =
@@ -241,8 +252,12 @@ function concatSameDemographics(
 function pickFromDemographicArrays(
   diffDemographicUidArrays: string[][],
   variance: number,
-  numberOfPicks: number
+  numberOfPicks: number,
+  percentile: number
 ): string[] {
+  // eslint-disable-next-line no-param-reassign
+  percentile = percentile ? percentile : 0.5;
+
   // For Calibrating Gaussian
   const lengthsOfUidArrays: number[] = [];
   diffDemographicUidArrays.forEach((uidArray) => {
@@ -274,9 +289,7 @@ function pickFromDemographicArrays(
       Math.random() * lengthsOfUidArrays.length
     );
 
-    // TEMPORARY, UNTIL PROBLEM DESCRIBED ABOVE IS FIXED
-    const mean: number = Math.floor(lengthsOfUidArrays[indexOfArrayPicked] / 2);
-
+    const mean = Math.floor(percentile * (lengthsOfUidArrays[indexOfArrayPicked] - 1));
     const upperBound: number = lengthsOfUidArrays[indexOfArrayPicked] - 1;
     const lowerBound = 0;
 
@@ -309,74 +322,6 @@ function pickFromDemographicArrays(
   return uidsPicked;
 }
 
-/** Created separate function for that instead of leaving in main of pickFromDemographicArrays
- * So that the function can be recalled if the person is already in array
- */
-function pickIndex(
-  indexesAlreadyPicked: { [index: number]: true },
-  mean: number,
-  lowerBound: number,
-  upperBound: number,
-  variance: number
-): number {
-  const indexPicked: number = randomFromGaussian(mean, lowerBound, upperBound, variance);
-
-  // checks if index hasn't already been picked, if randomFromGaussian didn't return an error,
-  // and if number of indexes already picked isn't larger than the number of values available
-  if (
-    indexesAlreadyPicked.hasOwnProperty(indexPicked) &&
-    indexPicked !== -1 &&
-    Object.keys(indexesAlreadyPicked).length < Math.round(upperBound - lowerBound)
-  ) {
-    return pickIndex(indexesAlreadyPicked, mean, lowerBound, upperBound, variance);
-  }
-  return indexPicked;
-}
-
-function pickFromSCArray(
-  uids: FirebaseFirestore.DocumentSnapshot<mdDatingPickingFromDatabase>[],
-  variance: number,
-  numberOfPicks: number
-): FirebaseFirestore.DocumentSnapshot<mdDatingPickingFromDatabase>[] {
-  // For storing indexes picked per demographic. Stored as object rather than array
-  // for most efficiently checking if index has already been picked
-  const indexesPicked: { [index: number]: true } = {};
-
-  // PICK INDEXES
-  Array.from({ length: numberOfPicks }).forEach(() => {
-    // So that mean is at perfect SC match
-    const mean: number = uids.length - 1;
-
-    const upperBound: number = mean;
-    const lowerBound = 0;
-
-    // HAVE TO HANDLE IF RANDOMFROMGAUSSIAN RETURNS -1 (i.e. there was a problem)
-    const indexPicked: number = pickIndex(
-      indexesPicked,
-      mean,
-      lowerBound,
-      upperBound,
-      variance
-    );
-    // temporary fix
-    if (indexPicked !== -1) {
-      // Saves index to object
-      indexesPicked[indexPicked] = true;
-    }
-  });
-
-  // RETURN UIDs CORRESPONDING TO INDEXES PICKED
-  const uidsPicked: FirebaseFirestore.DocumentSnapshot<mdDatingPickingFromDatabase>[] = [];
-  for (const i in indexesPicked) {
-    uidsPicked.push(uids[i]);
-  }
-
-  // to remove duplicates but is it even necessary? I think only people with "other"
-  // as their gender can be in different arrays, so maybe just do that at the very very end
-  // and just once
-  return uidsPicked;
-}
-
 function datingPickingToMap(
   targetuid: string,
   matchDataDocs: FirebaseFirestore.DocumentSnapshot<mdDatingPickingFromDatabase>[]
@@ -385,9 +330,9 @@ function datingPickingToMap(
   return matchDataDocs.map((doc) => {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     const data = doc.data() as mdDatingPickingFromDatabase;
-    const choice = data.superLikedUsers.includes(targetuid)
+    const choice = data.superLikedUsers[targetuid]?.exists
       ? "super"
-      : data.likedUsers.includes(targetuid)
+      : data.likedUsers[targetuid]?.exists
       ? "yes"
       : "no";
 
@@ -410,4 +355,10 @@ async function fetchLikeGroup(uid: string, amount: number): Promise<string[]> {
   return likeGroupSnapshot.docs
     .map((doc) => doc.ref.parent.parent?.id)
     .filter((id) => typeof id === "string") as string[];
+}
+
+function removeDuplicates(maps: uidChoiceMap[]): uidChoiceMap[] {
+  return maps.filter(
+    (map, index, self) => index === self.findIndex((t) => t.uid === map.uid)
+  );
 }

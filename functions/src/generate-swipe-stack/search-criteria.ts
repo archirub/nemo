@@ -1,3 +1,4 @@
+import { mdFriendPickingFromDatabase } from "./../../../src/app/shared/interfaces/match-data.model";
 import {
   mdFromDatabase,
   searchCriteriaFromDatabase,
@@ -11,7 +12,9 @@ import {
   mdDatingPickingFromDatabase,
 } from "../../../src/app/shared/interfaces/index";
 
-type datingPickingSnapshots = FirebaseFirestore.DocumentSnapshot<mdDatingPickingFromDatabase>;
+type datingPickingSnapshots =
+  | FirebaseFirestore.DocumentSnapshot<mdDatingPickingFromDatabase>
+  | FirebaseFirestore.DocumentSnapshot<mdFriendPickingFromDatabase>;
 interface SearchCriteriaChecker {
   [key: string]: (criteria: any, feature: any) => Boolean;
 }
@@ -49,9 +52,9 @@ export function searchCriteriaGrouping(
       case "areaOfStudy":
         SC_Checker[SC] = areaOfStudyMatchCheck;
         break;
-      // case "degree":
-      //   SC_Checker[SC] = degreeMatchCheck;
-      //   break;
+      case "degree":
+        SC_Checker[SC] = degreeMatchCheck;
+        break;
       case "societyCategory":
         SC_Checker[SC] = societyCategoryMatchCheck;
         break;
@@ -123,10 +126,10 @@ function areaOfStudyMatchCheck(criteria: AreaOfStudy, feature: AreaOfStudy): Boo
   if (!criteria || !feature) return false;
   return criteria === feature;
 }
-// function degreeMatchCheck(criteria: Degree, feature: Degree): Boolean {
-//   if (!criteria || !feature) return false;
-//   return criteria === feature;
-// }
+function degreeMatchCheck(criteria: Degree, feature: Degree): Boolean {
+  if (!criteria || !feature) return false;
+  return criteria === feature;
+}
 function societyCategoryMatchCheck(
   criteria: SocietyCategory,
   feature: SocietyCategory

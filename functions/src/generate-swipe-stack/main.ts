@@ -1,14 +1,15 @@
 import {
   generateSwipeStackRequest,
   generateSwipeStackResponse,
-  mdDatingPickingFromDatabase,
   mdFromDatabase,
   searchCriteriaFromDatabase,
+  SwipeMode,
   uidChoiceMap,
 } from "../../../src/app/shared/interfaces/index";
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import { datingMode } from "./dating-mode";
+import { friendMode } from "./friend-mode";
 
 // to test function locally:
 // 1. convert functions to javascript using "npm run build" in the "functions" folder
@@ -62,10 +63,7 @@ export const generateSwipeStack = functions.region("europe-west2").https.onCall(
     // };
 
     // INDEPENDENT PARAMETERS
-    const maxPI: number = 1;
-    const minPI: number = 0;
     const profilesPerWave: number = 20;
-    const PIprofilesToFetch: number = 50;
     const PIPickingVariance: number = 3.5;
     const SCPickingVariance: number = 1.7;
     const pickingWeights: PickingWeights = {
@@ -73,26 +71,41 @@ export const generateSwipeStack = functions.region("europe-west2").https.onCall(
       searchCriteriaGroup: 0.8,
     };
 
-    // DEPENDENT PARAMETERS
-    const averagePI: number = (maxPI + minPI) / 2;
-    const likeGroupCount: number = profilesPerWave * pickingWeights.likeGroup;
     try {
       const matchDataMain = (
         await admin.firestore().collection("matchData").doc(targetuid).get()
       ).data() as mdFromDatabase;
 
-      const pickedUsers = await datingMode(
-        targetuid,
-        matchDataMain,
-        searchCriteria,
-        pickingWeights,
-        PIPickingVariance,
-        SCPickingVariance,
-        profilesPerWave
-      );
+      const swipeMode: SwipeMode = matchDataMain.swipeMode;
+      let pickedUsers: uidChoiceMap[] = [];
+
+      if (swipeMode === "dating") {
+        pickedUsers = await datingMode(
+          targetuid,
+          matchDataMain,
+          searchCriteria,
+          pickingWeights,
+          PIPickingVariance,
+          SCPickingVariance,
+          profilesPerWave
+        );
+      } else if (swipeMode === "friend") {
+        pickedUsers = await friendMode(
+          targetuid,
+          matchDataMain,
+          searchCriteria,
+          pickingWeights,
+          SCPickingVariance,
+          profilesPerWave
+        );
+      } else {
+        throw new functions.https.HttpsError(
+          "aborted",
+          `Unrecognized swipeMode: ${swipeMode}`
+        );
+      }
 
       // SENDING RESPONSE
-      // response.send({ IDs: pickedIDs });
       return { users: pickedUsers } as generateSwipeStackResponse;
     } catch (e) {
       throw new functions.https.HttpsError("unknown", e);
@@ -100,76 +113,13 @@ export const generateSwipeStack = functions.region("europe-west2").https.onCall(
   }
 );
 
-export function removeElementInFrom(
-  array: uidChoiceMap[],
-  toRemove: uidChoiceMap[]
-): uidChoiceMap[] {
-  if (!toRemove) return array ? array : [];
+// function removeElementInFrom(
+//   array: uidChoiceMap[],
+//   toRemove: uidChoiceMap[]
+// ): uidChoiceMap[] {
+//   if (!toRemove) return array ? array : [];
 
-  const toRemoveUIDs = toRemove.map((map) => map.uid);
+//   const toRemoveUIDs = toRemove.map((map) => map.uid);
 
-  return array.filter((map) => !toRemoveUIDs.includes(map.uid));
-}
-
-async function fetchLikeGroup(
-  targetID: string
-): Promise<FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData>[]> {
-  const matchDataCollection = admin.firestore().collection("matchData");
-
-  const likeGroupSnapshot = await matchDataCollection
-    .where("likedUsers", "array-contains", targetID)
-    .get();
-
-  return likeGroupSnapshot.docs;
-}
-
-async function fetchPIGroup(
-  targetPI: number,
-  averagePI: number,
-  userCount: number
-): Promise<FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData>[]> {
-  const matchDataCollection = admin.firestore().collection("matchData");
-  const halfUserCount = Math.floor(userCount / 2);
-  function largerThanAverage(PI: number) {
-    return PI > averagePI;
-  }
-
-  if (largerThanAverage(targetPI)) {
-    // FETCH HIGHER PIs FIRST (in case there aren't enough profiles found (i.e. PI is too high),
-    // then more profiles can be fetched at the lower bound)
-    const upperProfilesSnapshot = await matchDataCollection
-      .orderBy("PI")
-      .where("PI", ">", targetPI)
-      .limit(halfUserCount)
-      .get();
-
-    const upperProfilesLength = upperProfilesSnapshot.docs.length;
-    const remainingProfilesToFetch = userCount - upperProfilesLength;
-
-    const lowerProfilesSnapshot = await matchDataCollection
-      .orderBy("PI")
-      .where("PI", "<", targetPI)
-      .limit(remainingProfilesToFetch)
-      .get();
-
-    return [...lowerProfilesSnapshot.docs, ...upperProfilesSnapshot.docs];
-  } else {
-    // FETCH LOWER PIs FIRST (same reason as above, reversed)
-    const lowerProfilesSnapshot = await matchDataCollection
-      .orderBy("PI")
-      .where("PI", ">", targetPI)
-      .limit(halfUserCount)
-      .get();
-
-    const lowerProfilesLength = lowerProfilesSnapshot.docs.length;
-    const remainingProfilesToFetch = userCount - lowerProfilesLength;
-
-    const upperProfilesSnapshot = await matchDataCollection
-      .orderBy("PI")
-      .where("PI", "<", targetPI)
-      .limit(remainingProfilesToFetch)
-      .get();
-
-    return [...lowerProfilesSnapshot.docs, ...upperProfilesSnapshot.docs];
-  }
-}
+//   return array.filter((map) => !toRemoveUIDs.includes(map.uid));
+// }

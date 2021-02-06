@@ -1,4 +1,8 @@
-import { uidChoiceMap } from "../../../src/app/shared/interfaces/index";
+import {
+  mdDatingPickingFromDatabase,
+  mdFriendPickingFromDatabase,
+  uidChoiceMap,
+} from "../../../src/app/shared/interfaces/index";
 import * as functions from "firebase-functions";
 
 /**
@@ -89,15 +93,15 @@ export function randomWeightedPick(
   if (!groups || !weightings || !countWanted) return;
   if (groups.length !== weightings.length) return;
 
-  const pickedItems: uidChoiceMap[] = [];
+  const pickedItems: { [uid: string]: uidChoiceMap } = {};
   const countAvailable: number = groups
     .map((group) => group.length)
     .reduce((a, b) => a + b, 0);
-
+  console.log(groups, countAvailable);
   // Makes sure loop doesn't run indefinitely
   const countDesired: number = Math.min(countAvailable, countWanted);
 
-  while (pickedItems.length < countDesired) {
+  while (Object.keys(pickedItems).length < countDesired) {
     const indexOfPick: number = aliasSampler(weightings);
 
     const groupOfPick: uidChoiceMap[] = groups[indexOfPick];
@@ -106,14 +110,13 @@ export function randomWeightedPick(
       groupOfPick[Math.floor(Math.random() * groupOfPick.length)];
 
     // appends to array if not yet in array and pick isn't null
-    if (pick)
-      pickedItems.map((i) => i.uid).indexOf(pick.uid) === -1 && pickedItems.push(pick);
+    if (pick && !pickedItems.hasOwnProperty(pick.uid)) pickedItems[pick.uid] = pick;
 
     // removing item from the group to reduce unnecessary loops
     groupOfPick.filter((item) => item !== pick);
   }
 
-  return pickedItems;
+  return Object.entries(pickedItems).map((keyValue) => keyValue[1]);
 }
 
 /**
@@ -202,4 +205,78 @@ function aliasSampler(inputProbabilities: number[]) {
 
   const index = Math.floor(Math.random() * probabilities.length);
   return Math.random() < probabilities[index] ? index : aliases[index];
+}
+
+/** Created separate function for that instead of leaving in main of pickFromDemographicArrays
+ * So that the function can be recalled if the person is already in array
+ */
+export function pickIndex(
+  indexesAlreadyPicked: { [index: number]: true },
+  mean: number,
+  lowerBound: number,
+  upperBound: number,
+  variance: number
+): number {
+  const indexPicked: number = randomFromGaussian(mean, lowerBound, upperBound, variance);
+
+  // checks if index hasn't already been picked, if randomFromGaussian didn't return an error,
+  // and if number of indexes already picked isn't larger than the number of values available
+  if (
+    indexesAlreadyPicked.hasOwnProperty(indexPicked) &&
+    indexPicked !== -1 &&
+    Object.keys(indexesAlreadyPicked).length < Math.round(upperBound - lowerBound)
+  ) {
+    return pickIndex(indexesAlreadyPicked, mean, lowerBound, upperBound, variance);
+  }
+  return indexPicked;
+}
+
+export function pickFromSCArray(
+  uids: FirebaseFirestore.DocumentSnapshot<
+    mdDatingPickingFromDatabase | mdFriendPickingFromDatabase
+  >[],
+  variance: number,
+  numberOfPicks: number
+): FirebaseFirestore.DocumentSnapshot<
+  mdDatingPickingFromDatabase | mdFriendPickingFromDatabase
+>[] {
+  // For storing indexes picked per demographic. Stored as object rather than array
+  // for most efficiently checking if index has already been picked
+  const indexesPicked: { [index: number]: true } = {};
+
+  // PICK INDEXES
+  Array.from({ length: numberOfPicks }).forEach(() => {
+    // So that mean is at perfect SC match
+    const mean: number = uids.length - 1;
+
+    const upperBound: number = mean;
+    const lowerBound = 0;
+
+    // HAVE TO HANDLE IF RANDOMFROMGAUSSIAN RETURNS -1 (i.e. there was a problem)
+    const indexPicked: number = pickIndex(
+      indexesPicked,
+      mean,
+      lowerBound,
+      upperBound,
+      variance
+    );
+    // temporary fix
+    if (indexPicked !== -1) {
+      // Saves index to object
+      indexesPicked[indexPicked] = true;
+    }
+  });
+
+  // RETURN UIDs CORRESPONDING TO INDEXES PICKED
+  const uidsPicked: FirebaseFirestore.DocumentSnapshot<
+    mdDatingPickingFromDatabase | mdFriendPickingFromDatabase
+  >[] = [];
+  for (const i in indexesPicked) {
+    uidsPicked.push(uids[i]);
+  }
+
+  // to remove duplicates but is it even necessary? I think only people with "other"
+  // as their gender can be in different arrays, so maybe just do that at the very very end
+  // and just once
+  return uidsPicked;
 }
