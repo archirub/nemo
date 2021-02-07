@@ -6,10 +6,12 @@ import {
   userSnippet,
   chatFromDatabase,
   mdDatingPickingFromDatabase,
+  dateMap,
 } from "../../../src/app/shared/interfaces/index";
 import { sortUIDs } from "./main";
 interface uidDocRefMap {
   uid: string;
+  dateMap: dateMap;
   mainRef: FirebaseFirestore.DocumentReference<mdFromDatabase>;
   datingRef: FirebaseFirestore.DocumentReference<mdDatingPickingFromDatabase>;
 }
@@ -19,16 +21,23 @@ export async function handleDatingYesChoices(
   targetMatchDataMainRef: FirebaseFirestore.DocumentReference<mdFromDatabase>,
   currentUserID: string,
   yesuids: string[],
-  superuids: string[]
+  superuids: string[],
+  date: admin.firestore.Timestamp
 ) {
   if (!currentUserID || !yesuids || !superuids || !batch || !targetMatchDataMainRef)
     throw new functions.https.HttpsError(
       "invalid-argument",
       "handleNoChoices could not be executed due to missing / invalid arguments."
     );
+  const targetMatchDataDatingRef = admin
+    .firestore()
+    .collection("matchData")
+    .doc(currentUserID)
+    .collection("pickingData")
+    .doc("dating");
 
-  const notMatchedYesUsers: string[] = [];
-  const notMatchedSuperUsers: string[] = [];
+  const notMatchedYesUsers: uidDocRefMap[] = [];
+  const notMatchedSuperUsers: uidDocRefMap[] = [];
   const matchedUsers: uidDocRefMap[] = [];
 
   const alluids: string[] = yesuids.concat(superuids);
@@ -55,6 +64,16 @@ export async function handleDatingYesChoices(
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
         const matchData = matchDataDatingDoc.data() as mdDatingPickingFromDatabase;
 
+        const uidRefMap: uidDocRefMap = {
+          uid,
+          dateMap: {
+            exists: true,
+            date,
+          },
+          datingRef: matchDataDatingDoc.ref,
+          mainRef: matchDataMainRef,
+        };
+
         // Check whether targetID is in user's liked or superliked array
         const isLiked =
           matchData.likedUsers[currentUserID]?.exists ||
@@ -62,17 +81,13 @@ export async function handleDatingYesChoices(
 
         // If targetID is, then add to match otherwise add to like or super
         if (isLiked) {
-          matchedUsers.push({
-            uid,
-            datingRef: matchDataDatingDoc.ref,
-            mainRef: matchDataMainRef,
-          });
+          matchedUsers.push(uidRefMap);
         } else {
           // If other's ID was from normal likes, add them there, otherwise add to super
           if (superuids.indexOf(uid) === -1) {
-            notMatchedYesUsers.push(uid);
+            notMatchedYesUsers.push(uidRefMap);
           } else {
-            notMatchedSuperUsers.push(uid);
+            notMatchedSuperUsers.push(uidRefMap);
           }
         }
       })
@@ -80,7 +95,7 @@ export async function handleDatingYesChoices(
 
     handleDatingNotMatchUsers(
       batch,
-      targetMatchDataMainRef,
+      targetMatchDataDatingRef,
       notMatchedYesUsers,
       notMatchedSuperUsers
     );
@@ -98,57 +113,46 @@ export async function handleDatingYesChoices(
 
 function handleDatingMatchUsers(
   batch: FirebaseFirestore.WriteBatch,
-  targetMatchDataRef: FirebaseFirestore.DocumentReference<mdFromDatabase>,
+  targetMatchDataMainRef: FirebaseFirestore.DocumentReference<mdFromDatabase>,
   targetuid: string,
   uidRefs: uidDocRefMap[]
 ) {
-  if (!batch || !targetMatchDataRef || !targetuid || !uidRefs || uidRefs.length < 1)
-    throw new functions.https.HttpsError(
-      "internal",
-      "Missing parameter in handleMatchUsers"
-    );
-  // In here you need to add id to both users matchedUsers arrays,
-  // You need to remove uid from the non target user's likedUsers
-
-  // UPDATING MATCHED USERS ARRAY OF TARGET USER
-  batch.update(targetMatchDataRef, {
-    matchedUsers: admin.firestore.FieldValue.arrayUnion(
-      ...uidRefs.map((uidref) => uidref.uid)
-    ),
-  });
-
-  // UPDATING MATCHED USERS AND LIKED USERS ARRAYS OF EACH NEW MATCH
-  uidRefs.forEach((obj) => {
-    batch.update(obj.mainRef, {
-      matchedUsers: admin.firestore.FieldValue.arrayUnion(targetuid),
+  uidRefs.forEach((uidref) => {
+    // UPDATING MATCHEDUSERS FIELD OF TARGET USER
+    batch.update(targetMatchDataMainRef, {
+      [`matchedUsers.${uidref.uid}`]: uidref.dateMap,
     });
-    batch.update(obj.datingRef, {
-      likedUsers: admin.firestore.FieldValue.arrayRemove(targetuid),
+
+    // UPDATING MATCHEDUSERS AND LIKEDUSERS FIELDS OF EACH NEW MATCH
+    // Here we use the datemap of the other user but it works just as well
+    batch.update(uidref.mainRef, {
+      [`matchedUsers.${targetuid}`]: uidref.dateMap,
+    });
+    batch.update(uidref.datingRef, {
+      [`likedUsers.${targetuid}`]: FirebaseFirestore.FieldValue.delete(),
     });
   });
 }
 
 function handleDatingNotMatchUsers(
   batch: FirebaseFirestore.WriteBatch,
-  targetMatchDataRef: FirebaseFirestore.DocumentReference<FirebaseFirestore.DocumentData>,
-  notMatchedYesUsers: string[],
-  notMatchedSuperUsers: string[]
+  targetMatchDataDatingRef: FirebaseFirestore.DocumentReference<FirebaseFirestore.DocumentData>,
+  notMatchedYesUsers: uidDocRefMap[],
+  notMatchedSuperUsers: uidDocRefMap[]
 ) {
-  if (!batch || !targetMatchDataRef || !notMatchedYesUsers || !notMatchedSuperUsers)
-    throw new functions.https.HttpsError(
-      "internal",
-      "Missing parameter in handleNoMatchUsers"
-    );
-
-  // UPDATING LIKED USERS ARRAY OF TARGET USER
   if (notMatchedYesUsers.length > 0) {
-    batch.update(targetMatchDataRef, {
-      likedUsers: admin.firestore.FieldValue.arrayUnion(...notMatchedYesUsers),
+    notMatchedYesUsers.forEach((uidref) => {
+      batch.update(targetMatchDataDatingRef, {
+        [`likedUsers.${uidref.uid}`]: uidref.dateMap,
+      });
     });
   }
+
   if (notMatchedSuperUsers.length > 0) {
-    batch.update(targetMatchDataRef, {
-      superLikedUsers: admin.firestore.FieldValue.arrayUnion(...notMatchedSuperUsers),
+    notMatchedSuperUsers.forEach((uidref) => {
+      batch.update(targetMatchDataDatingRef, {
+        [`superLikedUsers.${uidref.uid}`]: uidref.dateMap,
+      });
     });
   }
 }

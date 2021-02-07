@@ -6,10 +6,12 @@ import {
   userSnippet,
   chatFromDatabase,
   mdFriendPickingFromDatabase,
+  dateMap,
 } from "../../../src/app/shared/interfaces/index";
 import { sortUIDs } from "./main";
 interface uidDocRefMap {
   uid: string;
+  dateMap: dateMap;
   mainRef: FirebaseFirestore.DocumentReference<mdFromDatabase>;
   friendRef: FirebaseFirestore.DocumentReference<mdFriendPickingFromDatabase>;
 }
@@ -18,7 +20,8 @@ export async function handleFriendYesChoices(
   batch: FirebaseFirestore.WriteBatch,
   targetMatchDataRef: FirebaseFirestore.DocumentReference<mdFromDatabase>,
   currentUserID: string,
-  yesuids: string[]
+  yesuids: string[],
+  date: admin.firestore.Timestamp
 ) {
   if (!currentUserID || !yesuids || !batch || !targetMatchDataRef)
     throw new functions.https.HttpsError(
@@ -26,7 +29,14 @@ export async function handleFriendYesChoices(
       "handleYesFriendChoices could not be executed due to missing / invalid arguments."
     );
 
-  const notMatchedYesUsers: string[] = [];
+  const targetMatchDataFriendRef = admin
+    .firestore()
+    .collection("matchData")
+    .doc(currentUserID)
+    .collection("pickingData")
+    .doc("friend");
+
+  const notMatchedYesUsers: uidDocRefMap[] = [];
   const matchedUsers: uidDocRefMap[] = [];
 
   try {
@@ -46,25 +56,32 @@ export async function handleFriendYesChoices(
         if (!matchDataFriendDoc.exists)
           return functions.logger.warn("matchData doc doesn't exist for", uid);
 
-        if (!matchDataFriendDoc.exists) return;
+        if (!matchDataFriendDoc.exists)
+          return functions.logger.warn("matchData doc doesn't exist for", uid);
 
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
         const matchData = matchDataFriendDoc.data() as mdFriendPickingFromDatabase;
 
+        const uidRefMap: uidDocRefMap = {
+          uid,
+          dateMap: {
+            exists: true,
+            date,
+          },
+          friendRef: matchDataFriendDoc.ref,
+          mainRef: matchDataMainRef,
+        };
+
         // If targetID is in user's liked, then add to match otherwise add to like
         if (matchData.fLikedUsers[currentUserID]?.exists) {
-          matchedUsers.push({
-            uid,
-            mainRef: matchDataMainRef,
-            friendRef: matchDataFriendDoc.ref,
-          });
+          matchedUsers.push(uidRefMap);
         } else {
-          notMatchedYesUsers.push(uid);
+          notMatchedYesUsers.push(uidRefMap);
         }
       })
     );
 
-    handleFriendNotMatchUsers(batch, targetMatchDataRef, notMatchedYesUsers);
+    handleFriendNotMatchUsers(batch, targetMatchDataFriendRef, notMatchedYesUsers);
 
     handleFriendMatchUsers(batch, targetMatchDataRef, currentUserID, matchedUsers);
 
@@ -79,51 +96,38 @@ export async function handleFriendYesChoices(
 
 function handleFriendMatchUsers(
   batch: FirebaseFirestore.WriteBatch,
-  targetMatchDataRef: FirebaseFirestore.DocumentReference<mdFromDatabase>,
+  targetMatchDataMainRef: FirebaseFirestore.DocumentReference<mdFromDatabase>,
   targetuid: string,
   uidRefs: uidDocRefMap[]
 ) {
-  if (!batch || !targetMatchDataRef || !targetuid || !uidRefs || uidRefs.length < 1)
-    throw new functions.https.HttpsError(
-      "internal",
-      "Missing parameter in handleMatchUsers"
-    );
-  // In here you need to add id to both users matchedUsers arrays,
-  // You need to remove uid from the non target user's likedUsers
-
-  // UPDATING MATCHED USERS ARRAY OF TARGET USER
-  batch.update(targetMatchDataRef, {
-    fmatchedUsers: admin.firestore.FieldValue.arrayUnion(
-      ...uidRefs.map((uidref) => uidref.uid)
-    ),
-  });
-
-  // UPDATING MATCHED USERS AND LIKED USERS ARRAYS OF EACH NEW MATCH
-  uidRefs.forEach((obj) => {
-    batch.update(obj.mainRef, {
-      fmatchedUsers: admin.firestore.FieldValue.arrayUnion(targetuid),
+  uidRefs.forEach((uidref) => {
+    // UPDATING MATCHEDUSERS FIELD OF TARGET USER
+    batch.update(targetMatchDataMainRef, {
+      [`fmatchedUsers.${uidref.uid}`]: uidref.dateMap,
     });
-    batch.update(obj.friendRef, {
-      fLikedUsers: admin.firestore.FieldValue.arrayRemove(targetuid),
+
+    // UPDATING MATCHEDUSERS AND LIKEDUSERS FIELDS OF EACH NEW MATCH
+    // Here we use the datemap of the other user but it works just as well
+    batch.update(uidref.mainRef, {
+      [`fmatchedUsers.${targetuid}`]: uidref.dateMap,
+    });
+    batch.update(uidref.friendRef, {
+      [`fLikedUsers.${targetuid}`]: FirebaseFirestore.FieldValue.delete(),
     });
   });
 }
 
 function handleFriendNotMatchUsers(
   batch: FirebaseFirestore.WriteBatch,
-  targetMatchDataRef: FirebaseFirestore.DocumentReference<FirebaseFirestore.DocumentData>,
-  notMatchedYesUsers: string[]
+  targetMatchDataFriendRef: FirebaseFirestore.DocumentReference<FirebaseFirestore.DocumentData>,
+  notMatchedYesUsers: uidDocRefMap[]
 ) {
-  if (!batch || !targetMatchDataRef || !notMatchedYesUsers)
-    throw new functions.https.HttpsError(
-      "internal",
-      "Missing parameter in handleNoMatchUsers"
-    );
-
   // UPDATING LIKED USERS ARRAY OF TARGET USER
   if (notMatchedYesUsers.length > 0) {
-    batch.update(targetMatchDataRef, {
-      fLikedUsers: admin.firestore.FieldValue.arrayUnion(...notMatchedYesUsers),
+    notMatchedYesUsers.forEach((uidref) => {
+      batch.update(targetMatchDataFriendRef, {
+        [`fLikedUsers.${uidref.uid}`]: uidref.dateMap,
+      });
     });
   }
 }

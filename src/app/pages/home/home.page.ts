@@ -5,7 +5,7 @@ import {
   OnInit,
   ViewChild,
   HostListener,
-  Output
+  Output,
 } from "@angular/core";
 import { ModalController } from "@ionic/angular";
 
@@ -15,11 +15,11 @@ import { throttle, filter } from "rxjs/operators";
 import { SearchCriteriaComponent } from "./search-criteria/search-criteria.component";
 
 import { Profile, SearchCriteria } from "@classes/index";
-import { SearchCriteriaStore, SwipeStackStore } from "@stores/index";
+import { SearchCriteriaStore, SwipeOutcomeStore, SwipeStackStore } from "@stores/index";
 import { SCenterAnimation, SCleaveAnimation } from "@animations/index";
 import { FormatService } from "@services/index";
 import { TabElementRefService } from "src/app/tab-menu/tab-element-ref.service";
-import { EventEmitter} from "events";
+import { EventEmitter } from "events";
 import { SwipeCardComponent } from "./swipe-card/swipe-card.component";
 
 @Component({
@@ -59,7 +59,8 @@ export class HomePage implements OnInit, OnDestroy {
     private SCstore: SearchCriteriaStore,
     private modalCtrl: ModalController,
     private tabElementRef: TabElementRefService,
-    private format: FormatService,
+    private swipeOutcomeStore: SwipeOutcomeStore,
+    private format: FormatService
   ) {
     this.onResize();
   }
@@ -82,9 +83,10 @@ export class HomePage implements OnInit, OnDestroy {
         filter((profiles) => profiles && profiles.length !== 0 && profiles.length <= 4),
         throttle(async () => {
           console.log("Refilling swipe stack");
-          await this.swipeStackStore.addToSwipeStackQueue(this.searchCriteria);
+          await this.swipeOutcomeStore.registerSwipeChoices(),
+            await this.swipeStackStore.addToSwipeStackQueue(this.searchCriteria);
           console.log("Emitting refill event");
-          this.refillEmitter.emit('refill');
+          this.refillEmitter.emit("refill");
         })
       )
       .subscribe();
@@ -142,8 +144,8 @@ export class HomePage implements OnInit, OnDestroy {
 
   @ViewChild(SwipeCardComponent) child: SwipeCardComponent;
   ngAfterViewInit() {
-    this.refillEmitter.on('refill', this.child.refillRotate);
-  };
+    this.refillEmitter.on("refill", this.child.refillRotate);
+  }
 
   ngOnDestroy() {
     this.searchCriteria$.unsubscribe();

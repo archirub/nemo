@@ -5,6 +5,8 @@ import {
   uidChoiceMap,
   mdFromDatabase,
   SwipeMode,
+  piStorage,
+  piStorageUID,
 } from "../../../src/app/shared/interfaces/index";
 import { createDatingChatDocuments, handleDatingYesChoices } from "./dating-mode";
 import { createFriendChatDocuments, handleFriendYesChoices } from "./friend-mode";
@@ -32,12 +34,16 @@ export const registerSwipeChoices = functions
 
     const batch = admin.firestore().batch();
 
+    const date = admin.firestore.Timestamp.fromDate(new Date());
+
     const { yes, no, superLike } = separateChoices(choices);
 
     if (no.length > 0)
-      handleNoChoices(batch, targetMatchData.ref, swipeMode as SwipeMode, no);
+      handleNoChoices(batch, targetMatchData.ref, swipeMode as SwipeMode, no, date);
 
     try {
+      await incrementCounts(batch, [...(superLike || []), ...(yes || [])], no);
+
       // DATING MODE HANDLING
       if (swipeMode === "dating") {
         let matchedUsers: string[] | undefined;
@@ -47,7 +53,8 @@ export const registerSwipeChoices = functions
             targetMatchData.ref,
             currentUserID,
             yes,
-            superLike
+            superLike,
+            date
           );
         }
 
@@ -64,7 +71,8 @@ export const registerSwipeChoices = functions
             batch,
             targetMatchData.ref,
             currentUserID,
-            yes
+            yes,
+            date
           );
         }
 
@@ -102,29 +110,84 @@ function separateChoices(
 
 function handleNoChoices(
   batch: FirebaseFirestore.WriteBatch,
-  targetMatchDataRef: FirebaseFirestore.DocumentReference<mdFromDatabase>,
+  targetMatchDataMainRef: FirebaseFirestore.DocumentReference<mdFromDatabase>,
   swipeMode: SwipeMode,
-  uids: string[]
+  uids: string[],
+  date: admin.firestore.Timestamp
 ) {
   // if (!uids || !batch || !targetMatchDataRef)
   //   throw new functions.https.HttpsError(
   //     "invalid-argument",
   //     "handleNoChoices could not be executed due to missing / invalid arguments."
   //   );
+  const uidDateMaps: {
+    uid: string;
+    dateMap: { exists: true; date: admin.firestore.Timestamp };
+  }[] = uids.map((uid) => {
+    return { uid: uid, dateMap: { exists: true, date } };
+  });
 
   if (uids.length > 0) {
     if (swipeMode === "dating") {
-      batch.update(targetMatchDataRef, {
-        dislikedUsers: admin.firestore.FieldValue.arrayUnion(...uids),
+      uidDateMaps.forEach((uidref) => {
+        batch.update(targetMatchDataMainRef, {
+          [`dislikedUsers.${uidref.uid}`]: uidref.dateMap,
+        });
       });
     } else if (swipeMode === "friend") {
-      batch.update(targetMatchDataRef, {
-        fdislikedUsers: admin.firestore.FieldValue.arrayUnion(...uids),
+      uidDateMaps.forEach((uidref) => {
+        batch.update(targetMatchDataMainRef, {
+          [`fdislikedUsers.${uidref.uid}`]: uidref.dateMap,
+        });
       });
     }
   }
 }
 
+/**  ESSENTIAL FOR SORTING THE UIDS IN THE UIDS ARRAY IN CHAT DOCUMENTS
+TO BE ABLE TO FIND THEM IN THE DATABASE */
 export function sortUIDs(uids: string[]): string[] {
   return uids.sort((a, b) => ("" + a).localeCompare(b));
+}
+
+/** Only used for dating mode (at least for now) since dating mode is the only
+ * thing that uses PI
+ */
+async function incrementCounts(
+  batch: FirebaseFirestore.WriteBatch,
+  yesAndSuper: string[],
+  no: string[]
+) {
+  // Safe guards so that the array contains any condition doesn't return every document
+  // if the arrays are empty
+  if (!Array.isArray(no) || !Array.isArray(yesAndSuper)) return;
+
+  if (yesAndSuper.length < 1 && no.length < 1) return;
+  const piStorageDocs = (await admin
+    .firestore()
+    .collection("piStorage")
+    .where("uids", "array-contains-any", [...(yesAndSuper || []), ...(no || [])])
+    .get()) as FirebaseFirestore.QuerySnapshot<{ [uid: string]: piStorageUID }>;
+
+  if (piStorageDocs.empty) return;
+
+  piStorageDocs.docs.forEach((piStorageDoc) => {
+    const piData = piStorageDoc.data();
+    yesAndSuper.forEach((uid_) => {
+      if (piData.hasOwnProperty(uid_)) {
+        batch.update(piStorageDoc.ref, {
+          [`${uid_}.seenCount`]: admin.firestore.FieldValue.increment(1),
+          [`${uid_}.likeCount`]: admin.firestore.FieldValue.increment(1),
+        });
+      }
+    });
+
+    no.forEach((uid_) => {
+      if (piData.hasOwnProperty(uid_)) {
+        batch.update(piStorageDoc.ref, {
+          [`${uid_}.seenCount`]: admin.firestore.FieldValue.increment(1),
+        });
+      }
+    });
+  });
 }
