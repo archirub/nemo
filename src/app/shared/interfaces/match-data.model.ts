@@ -1,10 +1,12 @@
 import { Degree, SearchFeatures } from "./search-criteria.model";
 
 export interface UidDateMap {
-  [uid: string]: {
-    exists: true;
-    date: firebase.firestore.Timestamp;
-  };
+  [uid: string]: dateMap;
+}
+
+export interface dateMap {
+  exists: true;
+  date: firebase.firestore.Timestamp;
 }
 
 export interface mdFromDatabase {
