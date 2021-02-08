@@ -42,10 +42,11 @@ export const registerSwipeChoices = functions
       handleNoChoices(batch, targetMatchData.ref, swipeMode as SwipeMode, no, date);
 
     try {
-      await incrementCounts(batch, [...(superLike || []), ...(yes || [])], no);
-
       // DATING MODE HANDLING
       if (swipeMode === "dating") {
+        // Only in dating atm
+        await incrementCounts(batch, [...(superLike || []), ...(yes || [])], no);
+
         let matchedUsers: string[] | undefined;
         if (yes.length > 0 || superLike.length > 0) {
           matchedUsers = await handleDatingYesChoices(
