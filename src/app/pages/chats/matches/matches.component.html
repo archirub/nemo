@@ -1,0 +1,16 @@
+<ion-content>
+    <ion-button (click)="closeModal()">
+        <ion-icon name="close-outline"></ion-icon>
+    </ion-button>
+    <ion-row
+    *ngFor="let chat of chats.slice(0,3); index as j" 
+    >
+        <div class="profile">
+            <ion-img [src]="chat?.recipient?.picture"></ion-img>
+            <div class="data">
+                <ion-label>{{ chat?.recipient?.name }}</ion-label>
+                <ion-icon name="chatbubbles-outline"></ion-icon>
+            </div>
+        </div>
+    </ion-row>
+</ion-content>

@@ -8,9 +8,10 @@ import { ChatsPageRoutingModule } from "./chats-routing.module";
 
 import { ChatsPage } from "./chats.page";
 import { ChatBoardComponent } from "./chat-board/chat-board.component";
+import { MatchesComponent } from "./matches/matches.component";
 
 @NgModule({
   imports: [CommonModule, FormsModule, IonicModule, ChatsPageRoutingModule],
-  declarations: [ChatsPage, ChatBoardComponent],
+  declarations: [ChatsPage, ChatBoardComponent, MatchesComponent],
 })
 export class ChatsPageModule {}

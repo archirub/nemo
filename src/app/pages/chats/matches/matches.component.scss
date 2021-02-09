@@ -1,0 +1,46 @@
+ion-content {
+    --background: transparent;
+}
+
+.profile {
+    margin-bottom: 9vh;
+    display: flex;
+    justify-content: flex-end;
+    flex-direction: column;
+    margin-top: -7vh;
+}
+
+.data {
+    display: flex;
+    justify-content: space-between;
+    width: 90%;
+    margin-bottom: 1vh;
+    color: var(--ion-color-dark-contrast);
+    font-weight: bold;
+    font-size: 5vh;
+    position: absolute;
+    z-index: 1;
+}
+
+ion-img {
+    position: relative;
+    z-index: 0;
+}
+
+ion-button {
+    --background: var(--ion-color-dark-contrast);
+    color: var(--ion-color-dark);
+    font-size: 3vh;
+    width: 10vh;
+    height: 10vh;
+    --border-radius: 5vh;
+    --background-activated: var(--ion-color-dark-contrast);
+    --background-focused: var(--ion-color-dark-contrast);
+    --background-hover: var(--ion-color-dark-contrast);
+    z-index: 2;
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0;
+    left: 98%;
+    --padding: none;
+}
