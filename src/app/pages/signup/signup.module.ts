@@ -11,6 +11,8 @@ import { SignupauthPage } from "./signupauth/signupauth.page";
 import { SignupoptionalPage } from "./signupoptional/signupoptional.page";
 import { SignuprequiredPage } from "./signuprequired/signuprequired.page";
 
+import { AddPhotoComponent } from "@components/index";
+
 @NgModule({
   imports: [
     CommonModule,
@@ -19,6 +21,6 @@ import { SignuprequiredPage } from "./signuprequired/signuprequired.page";
     SignupPageRoutingModule,
     ReactiveFormsModule,
   ],
-  declarations: [SignupPage, SignupauthPage, SignupoptionalPage, SignuprequiredPage],
+  declarations: [SignupPage, SignupauthPage, SignupoptionalPage, SignuprequiredPage, AddPhotoComponent],
 })
 export class SignupPageModule {}

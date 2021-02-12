@@ -5,14 +5,39 @@
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
+<!-- ONLY FOR MOVEMENT IN BUILDSTAGE -->
+<ion-button class="unlocker" (click)="slides.lockSwipes(false)">Unlock Swiping</ion-button>
 <ion-content>
   <form [formGroup]="signupForm">
-    <ion-slides pager="true" #slide>
+
+    <!--Self-built pager with TS backend -->
+    <div class="pager">
+      <div class="pager-icon">
+        <ion-icon style="display: none" name="mail-outline"></ion-icon>
+        <ion-icon style="display: none" name="shield-outline"></ion-icon>
+        <ion-icon style="display: none" name="person-outline"></ion-icon>
+        <ion-icon style="display: none" name="ellipsis-horizontal"></ion-icon>
+        <ion-icon style="display: none" name="gift-outline"></ion-icon>
+        <ion-icon style="display: none" name="camera-outline"></ion-icon>
+        <ion-icon style="display: none" name="happy-outline"></ion-icon>
+      </div>
+      <ion-icon class="pager-dot" name="ellipse"></ion-icon>
+      <ion-icon class="pager-dot" name="ellipse"></ion-icon>
+      <ion-icon class="pager-dot" name="ellipse"></ion-icon>
+      <ion-icon class="pager-dot" name="ellipse"></ion-icon>
+      <ion-icon class="pager-dot" name="ellipse"></ion-icon>
+      <ion-icon class="pager-dot" name="ellipse"></ion-icon>
+    </div>
+
+    <ion-slides pager="false" #slides>
+
       <ion-slide>
         <ion-item lines="none">
-          <ion-label class="question" position="stacked">
-            What's your uni email address?
-          </ion-label>
+          <div class="question">
+            <ion-label position="stacked">
+              What's your uni email address?
+            </ion-label>
+          </div>
 
           <div class="input flexend-col">
             <div>
@@ -20,27 +45,27 @@
             </div>
           </div>
            
-          <div class="tip flexstart-col">
-            <p>Only UCL email addresses will allow for verification.</p>
+          <div class="flexstart-col">
+            <p class="tip">Only UCL email addresses will allow for verification.</p>
           </div>
 
-          <div class="scroll flexend-row">
-            <ion-button class="next-slide" (click)="slide.slideNext()">
-              <ion-icon name="chevron-forward-outline"></ion-icon>
-            </ion-button>
-          </div>
+          <ion-button class="next-slide scroll" (click)="unlockAndSwipe('next')">
+            <ion-icon name="chevron-forward-outline"></ion-icon>
+          </ion-button>
         </ion-item>
       </ion-slide>
 
       <ion-slide>
         <ion-item lines="none">
-          <ion-label class="question" position="stacked">
-            Enter your verification code
-          </ion-label>
+          <div class="question">
+            <ion-label position="stacked">
+              Enter your verification code
+            </ion-label>
+          </div>
 
           <div class="input flexend-col">
-            <div class="tip flexend-col">
-              <p>
+            <div class="flexend-col">
+              <p class="tip">
                 We just sent an email to
                 <br>
                 "email@ucl.ac.uk". <!--BACKEND - Fill with email input on previous slide-->
@@ -67,19 +92,19 @@
             <p class="no_verification">Didn't get a code?</p>
           </div>
 
-          <div class="scroll flexend-row">
-            <ion-button class="next-slide" (click)="slide.slideNext()">
-              <ion-icon name="chevron-forward-outline"></ion-icon>
-            </ion-button>
-          </div>
+          <ion-button class="next-slide scroll" (click)="unlockAndSwipe('next')">
+            <ion-icon name="chevron-forward-outline"></ion-icon>
+          </ion-button>
         </ion-item>
       </ion-slide>
 
       <ion-slide>
         <ion-item lines="none">
-          <ion-label class="question" position="stacked">
-            What's your name?
-          </ion-label>
+          <div class="question">
+            <ion-label position="stacked">
+              What's your name?<br><br>
+            </ion-label>
+          </div>
 
           <div class="input flexend-col">
             <div>
@@ -91,23 +116,19 @@
             </div>
           </div>
 
-          <div class="tip flexstart-col">
-            <!-- Sort of a lazy fix - will rectify later - empty div with set height to keep button in same place -->
-          </div>
-
-          <div class="scroll flexend-row">
-            <ion-button class="next-slide" (click)="slide.slideNext()">
-              <ion-icon name="chevron-forward-outline"></ion-icon>
-            </ion-button>
-          </div>
+          <ion-button class="next-slide scroll" (click)="unlockAndSwipe('next')">
+            <ion-icon name="chevron-forward-outline"></ion-icon>
+          </ion-button>
         </ion-item>
       </ion-slide>
 
       <ion-slide>
         <ion-item lines="none">
-          <ion-label class="question" position="stacked">
-            Choose a password NAME <!-- BACKEND - possible to fill in name here from previous slide's input?-->
-          </ion-label>
+          <div class="question">
+            <ion-label position="stacked">
+              Choose a password NAME <!-- BACKEND - possible to fill in name here from previous slide's input?-->
+            </ion-label>
+          </div>
 
           <div class="input flexend-col">
             <div>
@@ -115,23 +136,23 @@
             </div>
           </div>
 
-          <div class="tip flexstart-col">
-            <p>Your password must be at least 10 characters long.</p>
+          <div class="flexstart-col">
+            <p class="tip">Your password must be at least 10 characters long.</p>
           </div>
 
-          <div class="scroll flexend-row">
-            <ion-button class="next-slide" (click)="slide.slideNext()">
-              <ion-icon name="chevron-forward-outline"></ion-icon>
-            </ion-button>
-          </div>
+          <ion-button class="next-slide scroll" (click)="unlockAndSwipe('next')">
+            <ion-icon name="chevron-forward-outline"></ion-icon>
+          </ion-button>
         </ion-item>
       </ion-slide>
     
       <ion-slide>
         <ion-item lines="none">
-          <ion-label class="question" position="stacked">
-            What's your date of birth?
-          </ion-label>
+          <div class="question">
+            <ion-label position="stacked">
+              What's your date of birth?
+            </ion-label>
+          </div>
 
           <div class="input flexend-col">
             <div>
@@ -143,49 +164,52 @@
             <!-- Lazy fix -->
           </div>
 
-          <div class="scroll flexend-row">
-            <ion-button class="next-slide" (click)="slide.slideNext()">
-              <ion-icon name="chevron-forward-outline"></ion-icon>
-            </ion-button>
-          </div>
+          <ion-button class="next-slide scroll" (click)="unlockAndSwipe('next')">
+            <ion-icon name="chevron-forward-outline"></ion-icon>
+          </ion-button>
         </ion-item>
       </ion-slide>
 
       <ion-slide>
         <ion-item lines="none">
-          <ion-label class="question" position="stacked">
-            Choose your photos NAME
-          </ion-label>
+          <div class="question">
+            <ion-label position="stacked">
+              Choose your photos NAME
+            </ion-label>
+          </div>
 
-          <div class="input flexend-col">
-
-            <ion-button
+          <div class="input photos flexeven">
+            <add-photo></add-photo>
+            <add-photo></add-photo>
+            <add-photo></add-photo>
+            <add-photo></add-photo>
+            <!--ion-button
               (click)="onPickPicture()"
               expand="block"
               fill="clear"
               shape="round"
             >
               Get me to my photo gallery
-            </ion-button>
+            </ion-button-->
           </div>
 
-          <div class="tip flexstart-col">
-            <p>You must have at least one photo on your profile.</p>
+          <div class="flexstart-col">
+            <p class="tip-center">You must have at least one photo on your profile.</p>
           </div>
 
-          <div class="scroll flexend-row">
-            <ion-button class="next-slide" (click)="slide.slideNext()">
-              <ion-icon name="chevron-forward-outline"></ion-icon>
-            </ion-button>
-          </div>
+          <ion-button class="next-slide scroll" (click)="unlockAndSwipe('next')">
+            <ion-icon name="chevron-forward-outline"></ion-icon>
+          </ion-button>
         </ion-item>
       </ion-slide>
 
       <ion-slide>
         <ion-item lines="none">
-          <ion-label class="question" position="stacked">
-            What are your preferences?
-          </ion-label>
+          <div class="question">
+            <ion-label position="stacked">
+              What are your preferences?
+            </ion-label>
+          </div>
           <br>
 
           <div class="flexstart-col">

@@ -6,31 +6,62 @@ ion-slides {
   height: $slide-height;
 }
 
+.pager {
+  display: flex;
+  top: 7vh;
+  left: 7vw;
+  z-index: 20;
+  position: absolute;
+
+  &-icon {
+    border: solid 2px var(--ion-color-primary-tint);
+    border-radius: 50%;
+    color: var(--ion-color-primary);
+    font-size: 5vh;
+    padding: 1vh;
+  };
+
+  &-dot {
+    padding: 2.5vh 3vw;
+    font-size: 2vh;
+    color: var(--ion-color-light);
+  }
+}
+
 ion-item {
   height: 80vh;
+  overflow: visible;
+  width: 100vw;
 }
 
 p {
   margin: 0;
 }
 
-.scroll {
-  width: 100%;
-  height: 20vh;
+ion-button.scroll {
+  --border-radius: 100%;
+  --padding-start: 0;
+  --padding-end: 0;
+  color: var(--ion-color-secondary);
+  --background: var(--ion-color-primary);
+  height: $button-width;
+  width: $button-width;
+  z-index: 4;
+  top: 60vh;
+  right: 10vw;
+  position: absolute;
+}
 
-  ion-button {
-    --border-radius: 100%;
-    --padding-start: 0;
-    --padding-end: 0;
-    color: var(--ion-color-secondary);
-    --background: var(--ion-color-primary);
-    height: $button-width;
-    width: $button-width;
-  };
+.scroll ion-icon[name="close-outline"] {
+  font-size: 3vh;
+}
 
-  ion-icon[name="close-outline"] {
-    font-size: 3vh;
-  }
+
+.unlocker {
+  z-index: 2000;
+  top: 0;
+  left: 0;
+  position: absolute;
 }
 
 .flexend-col {
@@ -90,12 +121,12 @@ p {
 .question {
   flex: 1;
   padding-top: 8vh;
-  font-size: 5vh;
+  height: 10vh;
 
   ion-label {
     overflow-wrap: break-word;
     white-space: normal;
-    height: 12vh;
+    font-size: 5vh;
   };
 }
 
@@ -127,6 +158,16 @@ p {
     width: 10%;
     margin-right: 5vw;
   };
+}
+
+add-photo {
+  height: 16vh;
+  width: 16vh;
+}
+
+.photos {
+  flex-wrap: wrap;
+  height: 35vh;
 }
 
 p {

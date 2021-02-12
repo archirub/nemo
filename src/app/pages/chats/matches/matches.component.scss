@@ -3,28 +3,32 @@ ion-content {
 }
 
 .profile {
-    margin-bottom: 9vh;
+    margin: -7vh 2vh 9vh 0;
     display: flex;
     justify-content: flex-end;
     flex-direction: column;
-    margin-top: -7vh;
+    width: 46%;
+    height: 41.5vh;
+    flex-wrap: wrap;
+    border-radius: 30px;
 }
 
 .data {
     display: flex;
     justify-content: space-between;
-    width: 90%;
     margin-bottom: 1vh;
     color: var(--ion-color-dark-contrast);
     font-weight: bold;
-    font-size: 5vh;
+    font-size: 4vh;
     position: absolute;
     z-index: 1;
+    width: 46%;
 }
 
 ion-img {
     position: relative;
     z-index: 0;
+    overflow: hidden;
 }
 
 ion-button {

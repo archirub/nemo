@@ -35,6 +35,50 @@ export class SignupPage implements OnInit {
   constructor() {}
 
   ngOnInit() {}
+
+  ngAfterViewInit() {
+    this.slides.lockSwipes(true);
+    this.pagerUpdate();
+  }
+
+  unlockAndSwipe(direction) {
+    this.slides.lockSwipes(false);
+
+    if (direction=="next") {
+      this.slides.slideNext()
+    } else if (direction=="prev") {
+      this.slides.slidePrev()
+    } else {
+      console.log("Correct direction not provided.");
+    };
+
+    this.slides.lockSwipes(true);
+    this.pagerUpdate();
+  }
+
+  async pagerUpdate() {
+    var logos = [document.getElementsByName("mail-outline")[0],
+                document.getElementsByName("shield-outline")[0],
+                document.getElementsByName("person-outline")[0],
+                document.getElementsByName("ellipsis-horizontal")[0],
+                document.getElementsByName("gift-outline")[0],
+                document.getElementsByName("camera-outline")[0],
+                document.getElementsByName("happy-outline")[0]];
+    var pages:any = document.getElementsByClassName("pager-dot");
+    var current = await this.slides.getActiveIndex();
+    var pagesLeft = 6 - current;
+
+    /* Initially hide all logos */
+    logos.forEach(element => element.style.display = "none");
+    logos[current].style.display = "block";
+
+    for (let i = 0; i < pages.length; i++) {
+      if (i+1 > pagesLeft) {
+        pages[i].style.display = "none";
+      };
+    };
+  }
+
   // Since we are restricted by the two options we have
   // for image picking (i.e. the Capacitor Camera plugin is great
   // but only allows you to choose one photo at a time, and
@@ -61,5 +105,5 @@ export class SignupPage implements OnInit {
 
   item = {
     checked: false,
-  };
+  }
 }

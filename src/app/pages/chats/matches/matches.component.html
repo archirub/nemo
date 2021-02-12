@@ -2,11 +2,11 @@
     <ion-button (click)="closeModal()">
         <ion-icon name="close-outline"></ion-icon>
     </ion-button>
-    <ion-row
-    *ngFor="let chat of chats.slice(0,3); index as j" 
-    >
-        <div class="profile">
-            <ion-img [src]="chat?.recipient?.picture"></ion-img>
+    <ion-row>
+        <div class="profile"
+        *ngFor="let chat of chats; index as j" >
+            <!--ion-img [src]="chat?.recipient?.picture"></ion-img-->
+            <ion-img src="assets/matches/placeholder.png"></ion-img>
             <div class="data">
                 <ion-label>{{ chat?.recipient?.name }}</ion-label>
                 <ion-icon name="chatbubbles-outline"></ion-icon>
