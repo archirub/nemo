@@ -8,23 +8,23 @@ ion-slides {
 
 .pager {
   display: flex;
-  top: 7vh;
-  left: 7vw;
+  top: 8vh;
+  left: 8vw;
   z-index: 20;
   position: absolute;
 
   &-icon {
-    border: solid 2px var(--ion-color-primary-tint);
+    border: solid 2px var(--ion-color-secondary);
     border-radius: 50%;
     color: var(--ion-color-primary);
-    font-size: 5vh;
+    font-size: 4vh;
     padding: 1vh;
   };
 
   &-dot {
-    padding: 2.5vh 3vw;
-    font-size: 2vh;
-    color: var(--ion-color-light);
+    padding: 2.5vh 2.5vw;
+    font-size: 1.5vh;
+    color: var(--ion-color-light-shade);
   }
 }
 
@@ -32,6 +32,8 @@ ion-item {
   height: 80vh;
   overflow: visible;
   width: 100vw;
+  --border-width: 0;
+  --inner-border-width: 0;
 }
 
 p {
@@ -47,7 +49,7 @@ ion-button.scroll {
   height: $button-width;
   width: $button-width;
   z-index: 4;
-  top: 60vh;
+  top: 70vh;
   right: 10vw;
   position: absolute;
 }
@@ -112,10 +114,18 @@ ion-button.scroll {
 
   &-wave {
     height: 80vh;
+    top: 5vh;
     width: 90vw;
     z-index: 1;
     position: absolute;
   };
+}
+
+.exit {
+  --border-radius: 50%;
+  color: var(--ion-color-secondary);
+  --background: var(--ion-color-primary);
+  height: 7.5vh;
 }
 
 .question {
@@ -133,6 +143,8 @@ ion-button.scroll {
 .input {
   width: 90%;
   height: 20vh;
+  background: var(--ion-color-primary-contrast);
+  --background: var(--ion-color-primary-contrast);
 
   ion-input, ion-datetime {
     height: 5vh;
@@ -141,12 +153,14 @@ ion-button.scroll {
     font-weight: bold;
     font-size: 3vh;
     margin-bottom: 1vh;
+    background: var(--ion-color-primary-contrast);
+    --background: var(--ion-color-primary-contrast);
   };
 
   ion-textarea {
     width: 100%;
-    border-bottom: solid 1px var(--ion-color-medium-shade);
-    border-top: solid 1px var(--ion-color-medium-shade);
+    border: solid 1px var(--ion-color-medium-shade);
+    border-radius: 5px;
     font-weight: bold;
     font-size: 3vh;
     margin-bottom: 1vh;
@@ -163,11 +177,13 @@ ion-button.scroll {
 add-photo {
   height: 16vh;
   width: 16vh;
+  font-size: 2.25vh;
 }
 
 .photos {
   flex-wrap: wrap;
   height: 35vh;
+  margin-top: 5vh;
 }
 
 p {
@@ -219,6 +235,7 @@ p {
     font-size: 3vh;
     color: var(--ion-color-light-contrast);
     --background: transparent;
+    --background-activated: transparent;
     --box-shadow: none;
     text-transform: none;
   }
@@ -227,12 +244,33 @@ p {
 .waves {
   height: $slide-height;
   max-width: 150vw;
+
+  &.front {
+    z-index: 2;
+  }
+
+  &.behind {
+    z-index: 1;
+    opacity: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
 }
 
 .blow-up {
   color: var(--ion-color-primary-contrast);
   text-align: left;
-  height: 60vh;
+  flex: 1;
+
+  &.front {
+    z-index: 2;
+  }
+
+  &.behind {
+    z-index: 1;
+    opacity: 0;
+  }
 
   h1 {
     padding: 0 5vw;
@@ -242,29 +280,29 @@ p {
 }
 
 .preferences {
-  color: var(--ion-color-medium-shade);
   display: flex;
-  width: 100%;
+  justify-content: flex-end;
+  width: 90vw;
+
+  h3 {
+  color: var(--ion-color-medium-shade);
   font-size: 3vh;
+  margin: 0;
+  flex: 1;
+  font-weight: normal;
+  };
 
   .flexstart-col & {
     margin-top: 3vh;
-  }
+  };
 
-  select {
-    color: var(--ion-color-dark);
+  ion-select {
+    color: var(--ion-color-light-contrast);
     border: 0;
-
-    &:valid {
-      transition-duration: 0.4s;
-    };
-
-    /* This lets it slide across after selection, transition-duration currently useless, 
-    simple method to start can improve later*/
-    &:invalid {
-      margin-left: auto;
-      transition-duration: 0.4s;     
-    };
+    background: var(--ion-color-primary-contrast);
+    --background: var(--ion-color-primary-contrast);
+    flex: 1;
+    padding: 0 2vw;
 
     &:visited, &:active {
       border: 0;
@@ -278,6 +316,8 @@ p {
   /*Stop input divs from overflowing flexboxes on further info pages*/
   & .input {
     height: auto;
+    background: var(--ion-color-primary-contrast);
+    --background: var(--ion-color-primary-contrast);
   }
 
   select {
@@ -286,7 +326,9 @@ p {
     border-radius: 1vw;
     border: 1px solid var(--ion-color-medium-shade);
     width: 100%;
-    margin: 5vh 0 2vh 0;
+    margin: 4vh 0 2vh 0;
+    background: var(--ion-color-primary-contrast);
+    --background: var(--ion-color-primary-contrast);
   };
 }
 
@@ -294,12 +336,17 @@ ion-content {
   flex: 2;
 }
 
-.hobbies {
+.scrollable {
+  height: 36vh;
+  width: 90vw;
+  margin-top: 4vh;
+  overflow-y: scroll;
 
   ion-item {
     height: auto;
-    border-radius: 10px;
+    --border-radius: 10px;
     margin: 1vh;
+    width: auto;
     --padding: 0;
     --inner-border-width: none;
     --border-color: transparent;
@@ -315,6 +362,41 @@ ion-content {
   };
 }
 
+.add-info {
+  font-size: 3vh;
+  --border-radius: 30px;
+  text-transform: none;
+}
+
 .bio {
-  height: 40vh;
+  margin-top: 5vh;
+}
+
+.skipdiv {
+  position: absolute;
+  top: 59.5vh;
+  width: 95%;
+
+  &-multiple {
+    position: absolute;
+    top: 51.5vh;
+    width: 95%;
+  }
+}
+
+.terms {
+  width: 90vw;
+  margin: 1vh auto;
+  display: flex;
+
+
+  ion-checkbox {
+    width: 4vh;
+    margin: 2.5vh 1vw 0 0;
+  }
+
+  h2 {
+    font-size: 2vh;
+    text-decoration: underline;
+  };
 }
