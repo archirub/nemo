@@ -7,7 +7,7 @@
 </ion-header>
 
 <ion-content>
-  <form [formGroup]="loginForm">
+  <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
     <ion-grid>
       <ion-row>
         <ion-col size="12">
@@ -34,14 +34,16 @@
       </ion-row>
       <ion-row>
         <ion-col size="12">
-          <ion-button
-            (click)="signIn()"
-            expand="block"
-            fill="clear"
-            shape="round"
-          >
-            Enter Nemo
-          </ion-button>
+          <div class="scroll flexstart-col">
+            <div class="flexend-row">
+              <ion-button expand="block"
+              fill="clear"
+              shape="round"
+              [routerLink]="['../../../tabs/home']" 
+              type ="submit" 
+              [disabled]="!loginForm.valid">Enter Nemo</ion-button>
+            </div>
+          </div>
         </ion-col>
       </ion-row>
     </ion-grid>

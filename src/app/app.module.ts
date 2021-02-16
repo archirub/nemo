@@ -14,10 +14,11 @@ import { AppRoutingModule } from "./app-routing.module";
 import { AngularFireModule } from "@angular/fire";
 import { AngularFirestoreModule } from "@angular/fire/firestore";
 import { AngularFireFunctionsModule, REGION } from "@angular/fire/functions";
-
+import { HttpClientModule } from '@angular/common/http';
 import { environment } from "src/environments/environment";
 
 import { pageTransition } from "./shared/animations/page-transition.component";
+import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 
 @NgModule({
   declarations: [AppComponent],
@@ -25,6 +26,7 @@ import { pageTransition } from "./shared/animations/page-transition.component";
   imports: [
     BrowserModule,
     CommonModule,
+    HttpClientModule,
     IonicModule.forRoot({ navAnimation: pageTransition }),
     AppRoutingModule,
     AngularFireModule.initializeApp(environment.firebase),
