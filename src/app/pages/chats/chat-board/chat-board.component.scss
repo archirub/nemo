@@ -19,6 +19,20 @@ ion-avatar {
   margin-right: 10px;
 }
 
+ion-row {
+  width: 97.5%;
+  margin: 0 auto;
+
+  ion-item {
+    width: 97.5%;
+    font-weight: bold;
+    border: solid var(--ion-color-light-shade) 1px;
+    border-radius: 20px;
+    --background: var(--ion-color-light-tint);
+    --color: var(--ion-color-primary-shade);
+  }
+}
+
 #notifications-badge {
   position: fixed;
   flex-direction: row;
@@ -37,7 +51,4 @@ ion-avatar {
 .chat {
   font-size: medium;
   padding: 4px 0px 0px;
-}
-
-#unread-badge {
 }

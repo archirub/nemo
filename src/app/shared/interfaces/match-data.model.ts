@@ -1,31 +1,42 @@
 import { Degree, SearchFeatures } from "./search-criteria.model";
 
+export interface UidDateMap {
+  [uid: string]: dateMap;
+}
+
+export interface dateMap {
+  exists: true;
+  date: firebase.firestore.Timestamp;
+}
+
 export interface mdFromDatabase {
-  matchedUsers: string[];
-  dislikedUsers: string[];
+  matchedUsers: UidDateMap;
+  dislikedUsers: UidDateMap;
 
-  fmatchedUsers: string[];
-  fdislikedUsers: string[];
+  fmatchedUsers: UidDateMap;
+  fdislikedUsers: UidDateMap;
 
-  reportedUsers: string[];
+  reportedUsers: UidDateMap;
 
   gender: Gender;
   sexualPreference: SexualPreference;
 
+  showProfile: Boolean;
+  percentile: number;
   swipeMode: SwipeMode;
 }
 
 export interface mdDatingPickingFromDatabase {
   searchFeatures: SearchFeatures;
-  reportedUsers: string[];
-  superLikedUsers: string[];
-  likedUsers: string[];
+  reportedUsers: UidDateMap;
+  superLikedUsers: UidDateMap;
+  likedUsers: UidDateMap;
 }
 
 export interface mdFriendPickingFromDatabase {
   searchFeatures: SearchFeatures;
-  reportedUsers: string[];
-  fLikedUsers: string[];
+  reportedUsers: UidDateMap;
+  fLikedUsers: UidDateMap;
 }
 
 export interface userInfoFromMatchData {
@@ -59,13 +70,13 @@ export interface piStorageUID {
 export type piStorage = { uids: string[] } | { [uid: string]: piStorageUID };
 
 export const genderOptions = ["male", "female", "other"] as const;
-export type Gender = typeof genderOptions[number];
+export type Gender = "male" | "female" | "other";
 export const sexualPreferenceOptions = [
-  ["male"] as const,
-  ["female"] as const,
-  ["male", "female"] as const,
+  ["male"],
+  ["female"],
+  ["male", "female"],
 ] as const;
-export type SexualPreference = typeof sexualPreferenceOptions[number];
+export type SexualPreference = ["male"] | ["female"] | ["male", "female"];
 
 export const swipeModeOptions = ["friend", "dating"] as const;
 export type SwipeMode = typeof swipeModeOptions[number];
