@@ -1,134 +1,129 @@
 <ion-content>
   <form class="criteria-container" [formGroup]="searchCriteriaForm">
-    <ion-grid>
-      <ion-row>
-        <div class="flexbetween">
-          <div class="flex">
-            <h1 class="nemo">nemo</h1>
-            <h1>search</h1>
-          </div>
+    <ion-slides #slides>
+      <ion-slide>
+        <ion-grid>
+          <ion-row>
+            <div class="flexbetween">
+              <div class="flex">
+                <h1 class="nemo">nemo</h1>
+                <h1>search</h1>
+              </div>
 
-          <ion-button class="exit" (click)="closeAndConfirmChoices()">
-            <ion-icon name="close-outline"></ion-icon>
-          </ion-button>
-        </div>
-      </ion-row>
-
-      <ion-row>
-        <ion-col>
-          <div class="criterion">
-            <h3>Location</h3>
-            <ion-toggle #toggler (ionChange)="locationSwitch($event)"></ion-toggle>
-            <div class="labels">
-              <ion-label class="on-off left" style="color: var(--ion-color-primary)">everyone</ion-label>
-              <ion-label class="on-off">on campus</ion-label>
+              <ion-button class="clear" (click)="clearSelect()">
+                <ion-icon name="refresh-outline"></ion-icon>
+              </ion-button>
             </div>
-          </div>
-        </ion-col>
-      </ion-row>
+          </ion-row>
 
-      <ion-row>
-        <ion-col>
-          <div class="criterion">
-            <h3 id="degree">Degree</h3>
-            <ion-select
-              [(ngModel)] = "degreeSelection"
-              slot="end"
-              cancelText="Nah"
-              okText="Okay!"
-              formControlName="degree"
-              (ionChange)="selectReplace('degree')"
-            >
-              <ion-select-option
-                *ngFor="let option of this.scOptions.degree"
-                value="{{ option }}"
-              >
-                {{ option }}
-              </ion-select-option>
-            </ion-select>
-          </div>
-        </ion-col>
-      </ion-row>
+          <p>This feature allows you to refine which profiles appear in your "catch-stack".</p>
 
-      <ion-row>
-        <ion-col>
-          <div class="criterion">
-            <h3 id="aos">Area of Study</h3>
-            <ion-select
-              [(ngModel)] = "studySelection"
-              slot="end"
-              formControlName="areaOfStudy"
-              cancelText="Nah"
-              okText="Okay!"
-              [value]="'haha'"
-              (ionChange)="selectReplace('aos')"
-            >
-              <ion-select-option
-                *ngFor="let option of this.scOptions.areaOfStudy"
-                value="{{ option }}"
-              >
-                {{ option }}
-              </ion-select-option>
-            </ion-select>
-          </div>
-        </ion-col>
-      </ion-row>
+          <ion-row>
+            <ion-col>
+              <div class="criterion">
+                <h3 id="degree">Age Range</h3>
+                <!--ion-select
+                  [(ngModel)] = "degreeSelection"
+                  slot="end"
+                  cancelText="Nah"
+                  okText="Okay!"
+                  formControlName="degree"
+                  (ionChange)="selectReplace('degree')"
+                >
+                  <ion-select-option
+                    *ngFor="let option of this.scOptions.degree"
+                    value="{{ option }}"
+                  >
+                    {{ option }}
+                  </ion-select-option>
+                </ion-select-->
+                <nemo-toggle #degreeslider [buttonWidth]=17 [fontSize]=3 [selections]="this.scOptions.degree"></nemo-toggle>
+              </div>
+            </ion-col>
+          </ion-row>
 
-      <ion-row>
-        <ion-col>
-          <div class="criterion">
-            <h3 id="society">Society</h3>
-            <ion-select
-              [(ngModel)] = "societySelection"
-              slot="end"
-              formControlName="societyCategory"
-              cancelText="Nah"
-              okText="Okay!"
-              (ionChange)="selectReplace('society')"
-            >
-              <ion-select-option
-                *ngFor="let option of this.scOptions.societyCategory"
-                value="{{ option }}"
-              >
-                {{ option }}
-              </ion-select-option>
-            </ion-select>
-          </div>
-        </ion-col>
-      </ion-row>
+          <ion-row>
+            <ion-col>
+              <div class="criterion">
+                <h3>Location</h3>
+                <nemo-toggle #locationslider [buttonWidth]=17 [fontSize]=3 [selections]="['on campus', 'everyone']"></nemo-toggle>
+              </div>
+            </ion-col>
+          </ion-row>
 
-      <ion-row>
-        <ion-col>
-          <div class="criterion">
-            <h3 id="interests">Interests</h3>
-            <ion-select
-              [(ngModel)] = "interestSelection"
-              slot="end"
-              formControlName="interest"
-              cancelText="Nah"
-              okText="Okay!"
-              (ionChange)="selectReplace('interests')"
-            >
-              <ion-select-option
-                *ngFor="let option of this.scOptions.interest"
-                value="{{ option }}"
-              >
-                {{ option }}
-              </ion-select-option>
-            </ion-select>
-          </div>
-        </ion-col>
-      </ion-row>
+          <ion-row>
+            <ion-col>
+              <div class="criterion">
+                <h3 id="aos">Area of Study</h3>
+                <ion-select
+                  [(ngModel)] = "studySelection"
+                  slot="end"
+                  formControlName="areaOfStudy"
+                  cancelText="Nah"
+                  okText="Okay!"
+                  [value]="'haha'"
+                  (ionChange)="selectReplace('aos')"
+                >
+                  <ion-select-option
+                    *ngFor="let option of this.scOptions.areaOfStudy"
+                    value="{{ option }}"
+                  >
+                    {{ option }}
+                  </ion-select-option>
+                </ion-select>
+              </div>
+            </ion-col>
+          </ion-row>
 
-      <ion-row>
-        <ion-col>
-          <div class="flexbetween">
-            <ion-button class="clear" (click)="clearSelect()">
-              <h4>Clear Selections</h4>
-            </ion-button>
-          </div>
-        </ion-col>
-      </ion-row>
-    </ion-grid>
+          <ion-row>
+            <ion-col>
+              <div class="criterion">
+                <h3 id="society">Societies</h3>
+                <ion-select
+                  [(ngModel)] = "societySelection"
+                  slot="end"
+                  formControlName="societyCategory"
+                  cancelText="Nah"
+                  okText="Okay!"
+                  (ionChange)="selectReplace('society')"
+                >
+                  <ion-select-option
+                    *ngFor="let option of this.scOptions.societyCategory"
+                    value="{{ option }}"
+                  >
+                    {{ option }}
+                  </ion-select-option>
+                </ion-select>
+              </div>
+            </ion-col>
+          </ion-row>
+
+          <ion-row>
+            <ion-col>
+              <div class="criterion">
+                <h3 id="interests">Interests</h3>
+                <ion-select
+                  [(ngModel)] = "interestSelection"
+                  slot="end"
+                  formControlName="interest"
+                  cancelText="Nah"
+                  okText="Okay!"
+                  (ionChange)="selectReplace('interests')"
+                >
+                  <ion-select-option
+                    *ngFor="let option of this.scOptions.interest"
+                    value="{{ option }}"
+                  >
+                    {{ option }}
+                  </ion-select-option>
+                </ion-select>
+              </div>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-slide>
+
+      <ion-slide id="placeholder"></ion-slide>
+    </ion-slides>
   </form>
 </ion-content>

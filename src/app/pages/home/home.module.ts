@@ -7,7 +7,7 @@ import { HomePage } from "./home.page";
 import { HomePageRoutingModule } from "./home-routing.module";
 import { SwipeCardComponent } from "./swipe-card/swipe-card.component";
 import { SearchCriteriaComponent } from "./search-criteria/search-criteria.component";
-import { ProfileCardComponent } from "@components/index";
+import { ProfileCardComponent, AppToggleComponent } from "@components/index";
 
 @NgModule({
   imports: [
@@ -22,6 +22,7 @@ import { ProfileCardComponent } from "@components/index";
     SwipeCardComponent,
     SearchCriteriaComponent,
     ProfileCardComponent,
+    AppToggleComponent,
   ],
   providers: [ SwipeCardComponent ],
   // Seems to make sure the search criteria modal opening is much faster on the first try

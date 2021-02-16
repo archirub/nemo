@@ -1,19 +1,19 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { IonicModule } from '@ionic/angular';
 
-import { MatchModalComponent } from './match-modal.component';
+import { AppToggleComponent } from './nemo-toggle.component';
 
-describe('MatchModalComponent', () => {
-  let component: MatchModalComponent;
-  let fixture: ComponentFixture<MatchModalComponent>;
+describe('AppToggleComponent', () => {
+  let component: AppToggleComponent;
+  let fixture: ComponentFixture<AppToggleComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ MatchModalComponent ],
+      declarations: [ AppToggleComponent ],
       imports: [IonicModule.forRoot()]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(MatchModalComponent);
+    fixture = TestBed.createComponent(AppToggleComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   }));
