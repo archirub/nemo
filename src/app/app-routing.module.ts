@@ -3,14 +3,14 @@ import { PreloadAllModules, RouterModule, Routes } from "@angular/router";
 
 const routes: Routes = [
   {
-    path: "tabs",
-    loadChildren: () =>
-      import("./tab-menu/tab-menu.module").then((m) => m.TabMenuPageModule),
-  },
-  {
     path: "welcome",
     loadChildren: () =>
       import("./pages/welcome/welcome.module").then((m) => m.WelcomePageModule),
+  },
+  {
+    path: "tabs",
+    loadChildren: () =>
+      import("./tab-menu/tab-menu.module").then((m) => m.TabMenuPageModule),
   },
   {
     path: "settings", // ^same goes for this^
@@ -20,25 +20,11 @@ const routes: Routes = [
       ),
   },
   {
-    path: "login",
-    loadChildren: () =>
-      import("./pages/login/login.module").then((m) => m.LoginPageModule),
-  },
-  {
-    path: "signup",
-    loadChildren: () =>
-      import("./pages/signup/signup.module").then((m) => m.SignupPageModule),
-  },
-  {
     path: "messenger/:chatID", // this is specified outside tabs so that they aren't visible on the chats page
     loadChildren: () =>
       import("./pages/chats/messenger/messenger.module").then(
         (m) => m.MessengerPageModule
       ),
-  },
-  {
-    path: "**",
-    redirectTo: "tabs/home",
   },
 ];
 
