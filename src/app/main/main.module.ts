@@ -4,17 +4,17 @@ import { FormsModule } from '@angular/forms';
 
 import { IonicModule } from '@ionic/angular';
 
-import { SignuprequiredPageRoutingModule } from './signuprequired-routing.module';
+import { MainPageRoutingModule } from './main-routing.module';
 
-import { SignuprequiredPage } from './signuprequired.page';
+import { MainPage } from './main.page';
 
 @NgModule({
   imports: [
     CommonModule,
     FormsModule,
     IonicModule,
-    SignuprequiredPageRoutingModule
+    MainPageRoutingModule
   ],
-  declarations: []
+  declarations: [MainPage]
 })
-export class SignuprequiredPageModule {}
+export class MainPageModule {}

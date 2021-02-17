@@ -17,8 +17,6 @@ import { AuthUser, BaselineUser, FullUser } from '@classes/signup.class';
   providedIn: 'root'
 })
 export class AngularAuthService {
-  hasValidEmail: Observable<boolean> = of(false)
-
   constructor(private http: HttpClient, private authFr: AngularFireAuth) {}
 
   isLoggedIn = false;
@@ -37,7 +35,7 @@ export class AngularAuthService {
       else {return null;}}))
   }
 
-  autologin() {
+  autologin() { //put this function in the in root module's constructr
     return from(Plugins.Storage.get({key: 'authData'})).pipe(map(storedData => {
       if (!storedData || !storedData.value) { return null; }
       const parsedData = JSON.parse(storedData.value) as SignupAuth
@@ -55,6 +53,7 @@ export class AngularAuthService {
   }
   
   signup(email: string, password: string) {
+    // make some market that the intermediary process has begun
     return this.http.post<AuthResponseData>(
       `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${environment.firebase.apiKey}`,
       {email: email, password: password, returnSecureToken: true}).pipe(tap(this.setUserAuthData.bind(this)));
@@ -67,6 +66,7 @@ export class AngularAuthService {
   }
 
   private setUserAuthData(userData: AuthResponseData) {
+    
     const expTime = new Date(new Date().getTime() + +userData.expiresIn * 1000); // returns exp time in milliseconds
     this.signupAuthMap = {
       email: userData.email,
@@ -96,22 +96,17 @@ export class AngularAuthService {
     this._user.next(null)
   }
 
-  isValidEmail(email: String): Observable<boolean> {
-    const regex = /[a-zA-Z]*@[a-zA-Z]*\.ac\.uk/g;
-    const found = email.match(regex)
-    if (found.length = 1) {
-      this.hasValidEmail = of(true)
-      return of(true)
-    }
-    this.hasValidEmail = of(false)
-    return of(false)
-  } 
-
-  isValidCode(code: String): Observable<boolean> {
-    // make call to firebase auth storage and get the sent auth code
+  // isValidEmail(email: String): Observable<boolean> {
+  //   const regex = /[a-zA-Z]*@[a-zA-Z]*\.ac\.uk/g;
+  //   const found = email.match(regex)
+  //   if (found.length = 1) {
+  //     this.hasValidEmail = of(true)
+  //     return of(true)
+  //   }
+  //   this.hasValidEmail = of(false)
+  //   return of(false)
+  // } 
   
-    return of(false)
-  }
   // CHECK AUTH CODE // string -> boolean
   // Component: on onsubmit(), get control form value and call injectable function on a string of numbers
   // Service: implement a function that, given a string of numbers, checks whether its the correct auth code  

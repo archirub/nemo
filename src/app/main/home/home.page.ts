@@ -18,7 +18,7 @@ import { Profile, SearchCriteria } from "@classes/index";
 import { SearchCriteriaStore, SwipeOutcomeStore, SwipeStackStore } from "@stores/index";
 import { SCenterAnimation, SCleaveAnimation } from "@animations/index";
 import { FormatService } from "@services/index";
-import { TabElementRefService } from "src/app/tab-menu/tab-element-ref.service";
+import { TabElementRefService } from "src/app/main/tab-menu/tab-element-ref.service";
 import { EventEmitter } from "events";
 import { SwipeCardComponent } from "./swipe-card/swipe-card.component";
 

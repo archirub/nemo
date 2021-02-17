@@ -5,7 +5,7 @@ import { ModalController } from "@ionic/angular";
 import { Chat } from "@classes/index";
 import { MatchesEnterAnimation, MatchesLeaveAnimation } from "@animations/index";
 import { MatchesComponent } from "../matches/matches.component";
-import { TabElementRefService } from "src/app/tab-menu/tab-element-ref.service";
+import { TabElementRefService } from "src/app/main/tab-menu/tab-element-ref.service";
 
 @Component({
   selector: "app-chat-board",
@@ -160,7 +160,7 @@ export class ChatBoardComponent implements OnInit {
   }
 
   goToMessenger(chatID: String) {
-    this.router.navigate(["/messenger/" + chatID]);
+    this.router.navigate(["main/messenger/" + chatID]);
   }
 
   /* Automates left margin of 'number matches' text so that it is never covered by match images */

@@ -1,31 +1,21 @@
 import { NgModule } from "@angular/core";
 import { PreloadAllModules, RouterModule, Routes } from "@angular/router";
+import { WelcomePage } from "./welcome/welcome.page";
 
 const routes: Routes = [
   {
     path: "welcome",
     loadChildren: () =>
-      import("./pages/welcome/welcome.module").then((m) => m.WelcomePageModule),
+      import("./welcome/welcome.module").then((m) => m.WelcomePageModule),
   },
   {
-    path: "tabs",
-    loadChildren: () =>
-      import("./tab-menu/tab-menu.module").then((m) => m.TabMenuPageModule),
+    path: 'main',
+    loadChildren: () => import('./main/main.module').then( m => m.MainPageModule)
   },
   {
-    path: "settings", // ^same goes for this^
-    loadChildren: () =>
-      import("./pages/settings/settings.module").then(
-        (m) => m.SettingsPageModule
-      ),
-  },
-  {
-    path: "messenger/:chatID", // this is specified outside tabs so that they aren't visible on the chats page
-    loadChildren: () =>
-      import("./pages/chats/messenger/messenger.module").then(
-        (m) => m.MessengerPageModule
-      ),
-  },
+    path: '**',
+    component: WelcomePage
+  }
 ];
 
 @NgModule({
