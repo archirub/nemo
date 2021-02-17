@@ -11,3 +11,4 @@ export * from "./generate-swipe-stack/main";
 export * from "./get-uids";
 export * from "./get-match-data-user-info.function";
 export * from "./register-swipe-stack/main";
+export * from "./update-PI-system/main";

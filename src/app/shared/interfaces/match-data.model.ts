@@ -58,16 +58,18 @@ export interface uidFriendStorage {
   uids: string[];
 }
 
-export interface piStorageUID {
+export interface SwipeUserInfo {
   seenCount: number;
   likeCount: number;
-  currentPI: number;
-  gender: "male" | "female";
-  sexualPreference: "male" | "female";
+  percentile: number | null;
+  gender: Gender;
+  sexualPreference: SexualPreference;
   degree: Degree;
+  showProfile: Boolean;
+  swipeMode: SwipeMode;
 }
 
-export type piStorage = { uids: string[] } | { [uid: string]: piStorageUID };
+export type piStorage = { uids: string[] } | { [uid: string]: SwipeUserInfo };
 
 export const genderOptions = ["male", "female", "other"] as const;
 export type Gender = "male" | "female" | "other";

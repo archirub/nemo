@@ -177,12 +177,8 @@ function aliasSampler(inputProbabilities: number[]) {
       aliases[underFull[0]] = overFull[0];
       probabilities[overFull[0]] += probabilities[underFull[0]] - 1;
       underFull.shift();
-      if (probabilities[overFull[0]] > 1)
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-        overFull.push(overFull.shift() as number);
-      else if (probabilities[overFull[0]] < 1)
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-        underFull.push(overFull.shift() as number);
+      if (probabilities[overFull[0]] > 1) overFull.push(overFull.shift() as number);
+      else if (probabilities[overFull[0]] < 1) underFull.push(overFull.shift() as number);
       else overFull.shift();
     } else {
       // Because the average of all the probabilities is 1, mathematically speaking,

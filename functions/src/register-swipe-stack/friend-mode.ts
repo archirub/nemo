@@ -59,7 +59,6 @@ export async function handleFriendYesChoices(
         if (!matchDataFriendDoc.exists)
           return functions.logger.warn("matchData doc doesn't exist for", uid);
 
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
         const matchData = matchDataFriendDoc.data() as mdFriendPickingFromDatabase;
 
         const uidRefMap: uidDocRefMap = {
@@ -177,9 +176,7 @@ export async function createFriendChatDocuments(
       )
         return;
 
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       const targetUserData = targetUserProfile.data() as profileFromDatabase;
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       const matchedUserData = matchedUserProfile.data() as profileFromDatabase;
 
       const uids = sortUIDs([targetUserProfile.id, matchedUserProfile?.id]);

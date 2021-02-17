@@ -61,7 +61,6 @@ export async function handleDatingYesChoices(
 
         if (!matchDataDatingDoc.exists) return;
 
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
         const matchData = matchDataDatingDoc.data() as mdDatingPickingFromDatabase;
 
         const uidRefMap: uidDocRefMap = {
@@ -202,9 +201,7 @@ export async function createDatingChatDocuments(
       )
         return;
 
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       const targetUserData = targetUserProfile.data() as profileFromDatabase;
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       const matchedUserData = matchedUserProfile.data() as profileFromDatabase;
 
       const uids = sortUIDs([targetUserProfile.id, matchedUserProfile?.id]);

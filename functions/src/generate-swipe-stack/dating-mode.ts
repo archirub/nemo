@@ -328,7 +328,6 @@ function datingPickingToMap(
 ): uidChoiceMap[] {
   if (!matchDataDocs || !targetuid) return [];
   return matchDataDocs.map((doc) => {
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     const data = doc.data() as mdDatingPickingFromDatabase;
     const choice = data.superLikedUsers[targetuid]?.exists
       ? "super"
@@ -351,7 +350,6 @@ async function fetchLikeGroup(uid: string, amount: number): Promise<string[]> {
     .limit(amount)
     .get();
 
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
   return likeGroupSnapshot.docs
     .map((doc) => doc.ref.parent.parent?.id)
     .filter((id) => typeof id === "string") as string[];
