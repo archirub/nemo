@@ -8,7 +8,7 @@ import {
   University,
   OnCampus,
   user,
-  Setting,
+  Settings,
   Degree,
 } from "@interfaces/index";
 import { SearchCriteria } from "./search-criteria.class";
@@ -16,7 +16,7 @@ import { SearchCriteria } from "./search-criteria.class";
 export class User extends Profile implements user {
   private _firstName: string;
   private _lastName: string;
-  private _settings: Setting[];
+  private _settings: Settings;
   private _latestSearchCriteria: SearchCriteria;
   private _gender: Gender;
   private _sexualPreference: SexualPreference;
@@ -40,14 +40,13 @@ export class User extends Profile implements user {
     socialMediaLinks: SocialMediaLink[],
     firstName: string,
     lastName: string,
-    settings: Setting[],
+    settings: Settings,
     latestSearchCriteria: SearchCriteria,
     gender: Gender,
     sexualPreference: SexualPreference,
-    swipeMode: SwipeMode,
+    swipeMode: SwipeMode
     // token: string|null,
     // tokenExpirationDate: Date|null,
-     
   ) {
     super(
       uid,
@@ -89,7 +88,7 @@ export class User extends Profile implements user {
   //   }
   //   return this._token;
   // }
-  
+
   // public set token(value: string) {
   //   this._token = value;
   // }
@@ -115,10 +114,10 @@ export class User extends Profile implements user {
     this._latestSearchCriteria = value;
   }
 
-  public get settings(): Setting[] {
+  public get settings(): Settings {
     return this._settings;
   }
-  public set settings(value: Setting[]) {
+  public set settings(value: Settings) {
     this._settings = value;
   }
 

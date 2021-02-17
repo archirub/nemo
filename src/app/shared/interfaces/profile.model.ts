@@ -27,9 +27,9 @@ export interface profile {
 }
 
 export interface user extends profile {
-  firstName: string;
-  lastName: string;
-  settings: Setting[];
+  // firstName: string;
+  // lastName: string;
+  settings: Settings;
   latestSearchCriteria: searchCriteriaFromDatabase;
 }
 
@@ -46,7 +46,7 @@ export interface profileFromDatabase {
   society: string; // SOCIETIES???
 
   // societyCategory: SocietyCategory;
-  interests: Interest[];
+  interest: Interest[];
   questions: QuestionAndAnswer[];
   onCampus: OnCampus;
 
@@ -58,14 +58,14 @@ export interface profileFromDatabase {
 export interface privateProfileFromDatabase {
   firstName: string;
   lastName: string;
-  settings: Setting[];
+  settings: Settings;
   latestSearchCriteria: searchCriteriaFromDatabase;
 }
 
 // TO DEFINE BUT SHOWPROFILE MUST BE IN THERE
 const settingNameOption = ["showProfile"] as const;
 export type settingName = typeof settingNameOption[number];
-export type Setting = { name: settingName; preference: any };
+export type Settings = { [settingName: string]: any };
 
 export const questionsOptions = [
   "Wassup",
@@ -80,11 +80,11 @@ const socialMediaOptions = ["facebook", "instagram"] as const;
 export type socialMedia = typeof socialMediaOptions[number];
 export type SocialMediaLink = { socialMedia: socialMedia; link: string };
 
-export interface socialFeatures {
-  university: string;
-  course: string;
-  societies: SocietyCategory;
-}
+// export interface socialFeatures {
+//   university: string;
+//   course: string;
+//   societies: SocietyCategory;
+// }
 
 // users must have between 1 and 5 pictures
 export type profilePictureUrls = [string?, string?, string?, string?, string?];
