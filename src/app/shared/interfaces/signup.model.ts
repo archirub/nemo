@@ -8,20 +8,21 @@ import {
   SocietyCategory,
 } from "./search-criteria.model";
 
-export interface signupAuth {
-  email: string;
-  password: string;
+export interface SignupAuth {
+  email: string,
+  uid: string;
+  token: string;
+  tokenExpirationDate: string;
 }
 
 export interface SignupRequired {
   firstName: string;
-  lastName: string;
-  dateOfBirth: Date;
-  pictures: profilePictureUrls;
+  dateOfBirth: string;
   university: string;
   gender: Gender;
   sexualPreference: SexualPreference;
   swipeMode: SwipeMode;
+  // pictures: profilePictureUrls;
 }
 
 export interface SignupOptional {
@@ -37,3 +38,6 @@ export interface SignupOptional {
 }
 
 export type SignupMap = SignupRequired & SignupOptional;
+
+export type Baseline = SignupAuth & SignupRequired;
+export type Full = Baseline & SignupOptional;

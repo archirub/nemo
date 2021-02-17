@@ -21,6 +21,8 @@ export class User extends Profile implements user {
   private _gender: Gender;
   private _sexualPreference: SexualPreference;
   private _swipeMode: SwipeMode;
+  private _token: string;
+  private _tokenExpirationDate: Date;
 
   constructor(
     uid: string,
@@ -42,7 +44,10 @@ export class User extends Profile implements user {
     latestSearchCriteria: SearchCriteria,
     gender: Gender,
     sexualPreference: SexualPreference,
-    swipeMode: SwipeMode
+    swipeMode: SwipeMode,
+    // token: string|null,
+    // tokenExpirationDate: Date|null,
+     
   ) {
     super(
       uid,
@@ -66,7 +71,28 @@ export class User extends Profile implements user {
     this.gender = gender;
     this.sexualPreference = sexualPreference;
     this.swipeMode = swipeMode;
+    // this.token = token;
+    // this.tokenExpirationDate = tokenExpirationDate;
   }
+  // public get tokenExpirationDate(): Date {
+  //   return this._tokenExpirationDate;
+  // }
+
+  // public set tokenExpirationDate(value: Date) {
+  //   this._tokenExpirationDate = value;
+  // }
+
+  // public get token(): string {
+  //   // check for an invalid token
+  //   if (!this._tokenExpirationDate || this.tokenExpirationDate <= new Date()) {
+  //     return null
+  //   }
+  //   return this._token;
+  // }
+  
+  // public set token(value: string) {
+  //   this._token = value;
+  // }
 
   public get firstName(): string {
     return this._firstName;
