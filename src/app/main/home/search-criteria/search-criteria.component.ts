@@ -1,5 +1,5 @@
-import { Component, OnInit, OnDestroy, ViewChild } from "@angular/core";
-import { IonToggle, ModalController } from "@ionic/angular";
+import { Component, OnInit, OnDestroy, ViewChild, AfterViewInit } from "@angular/core";
+import { IonSlides, IonToggle, ModalController } from "@ionic/angular";
 import { FormControl, FormGroup } from "@angular/forms";
 
 import { Subscription } from "rxjs";
@@ -7,6 +7,9 @@ import { Subscription } from "rxjs";
 import { SearchCriteriaStore } from "@stores/search-criteria-store/search-criteria-store.service";
 import { searchCriteriaOptions } from "@interfaces/search-criteria.model";
 import { SearchCriteria } from "@classes/index";
+
+import { AppToggleComponent } from "@components/index";
+import { App } from "@capacitor/core";
 
 @Component({
   selector: "app-search-criteria",
@@ -35,7 +38,9 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
 
   constructor(private SCstore: SearchCriteriaStore, private modalCtrl: ModalController) {}
 
-  @ViewChild("toggler") toggle: IonToggle;
+  @ViewChild("locationslider") locationHandle: AppToggleComponent;
+  @ViewChild("degreeslider") degreeHandle: AppToggleComponent;
+  @ViewChild("slides") slides: IonSlides;
 
   ngOnInit() {
     this.searchCriteria$ = this.SCstore.searchCriteria.subscribe({
@@ -51,38 +56,29 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
     });
   }
 
-  /* Toggle button changes */
-  locationSwitch() {
-    // Change colors of on/off campus labels
-    var labels:any = document.getElementsByClassName("on-off")
-    for (let i = 0; i < labels.length; i++) {
-      let toggle = labels[i];
-      if (toggle.style.color == "var(--ion-color-primary)") {
-        toggle.style.color = "var(--ion-color-light-contrast)";
-      } else {
-        toggle.style.color = "var(--ion-color-primary)";
-      };
-    }
+  ngAfterViewInit() {
+    this.degreeHandle.selectOption("both");
+    this.locationHandle.selectOption("everyone");
+    this.slides.lockSwipes(true);
   }
 
+  placeholder = document.getElementById("placeholder");
+
   selectReplace(label) {
-    var deg = document.getElementById("degree");
-    var aos = document.getElementById("aos");
-    var soc = document.getElementById("society");
-    var ints = document.getElementById("interests");
+    var names = ["aos","society","interests"]
+    var sections = [document.getElementById("aos"), document.getElementById("society"), document.getElementById("interests")];
+    var corresponding = [this.studySelection, this.societySelection, this.interestSelection];
 
     // Note, checks if null (broadcast by clearSelect), if null then does not run
-    if (label=="degree" && this.degreeSelection != "null") {
-      deg.style.display = "none";
-    } else if (label=="aos" && this.studySelection != "null") {
-      aos.style.display = "none";
-    } else if (label=="society" && this.societySelection != "null") {
-      soc.style.display = "none";
-    } else if (label=="interests" && this.interestSelection != "null") {
-      ints.style.display = "none";
-    } else {
-      console.log("Error in HTML - trying to hide non-existent ID")
-    };
+    for (let i = 0; i < sections.length; i++) {
+      if (label==names[i] && corresponding[i] != "null") {
+        sections[i].style.marginTop = "0";
+        sections[i].style.fontSize = "2vh";
+        sections[i].style.color = "var(--ion-color-medium-shade)";
+        sections[i].style.top = "2vh";
+        sections[i].style.position = "absolute";
+      };
+    }
   }
 
   clearSelect() {
@@ -92,23 +88,19 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
     this.societySelection = "null";
     this.interestSelection = "null";
 
-    // Get placeholder names
-    var deg = document.getElementById("degree");
-    var aos = document.getElementById("aos");
-    var soc = document.getElementById("society");
-    var ints = document.getElementById("interests");
+    var sections = [document.getElementById("aos"), document.getElementById("society"), document.getElementById("interests")];
 
-    // Display placeholder names
-    if (deg.style.display == "none") {
-    deg.style.display = "block"; };
-    if (aos.style.display == "none") {
-    aos.style.display = "block"; };
-    if (soc.style.display == "none") {
-    soc.style.display = "block"; };
-    if (ints.style.display == "none") {
-    ints.style.display = "block"; };
-    if (this.toggle.checked == true) {
-    this.toggle.checked = false ; };
+    // Reset formatting of placeholders
+    for (let i = 0; i < sections.length; i++) {
+      sections[i].style.marginTop = "1.9vh";
+      sections[i].style.fontSize = "2.7vh";
+      sections[i].style.color = "var(--ion-color-light-contrast)";
+      sections[i].style.top = "0";
+      sections[i].style.position = "initial";
+    };
+
+    this.degreeHandle.selectOption("both");
+    this.locationHandle.selectOption("everyone");
   }
 
   ngOnDestroy() {

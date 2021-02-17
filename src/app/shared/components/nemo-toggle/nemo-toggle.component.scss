@@ -1,0 +1,32 @@
+.container {
+    background-color: transparent;
+    display: flex;
+    z-index: 0;
+    border: solid 2px var(--ion-color-primary-shade);
+    border-radius: 30px;
+}
+
+ion-button {
+    height: 5vh;
+    margin: 0;
+    color: var(--ion-color-light-contrast);
+    --border-radius: 30px;
+    --background: transparent;
+    --background-activated: transparent;
+}
+
+.buttons {
+    z-index: 2;
+    position: absolute;
+    display: flex;
+}
+
+#slider {
+    height: 5vh;
+    z-index: 1;
+    border: solid 2px var(--ion-color-primary);
+    padding: 2px;
+    border-radius: 30px;
+    position: relative;
+    right: 0;
+}
