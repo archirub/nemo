@@ -20,7 +20,7 @@ ion-col {
   justify-content: space-between;
   position: relative;
   padding: 3vh 3vw;
-  border-bottom: solid 1px;
+  border-bottom: solid 1px var(--ion-color-light-shade);
 }
 
 .labels {
@@ -80,7 +80,7 @@ p {
   margin: 0 auto;
   padding-bottom: 3vh;
   font-size: 1.3vh;
-  border-bottom: 1px solid;
+  border-bottom: 1px solid var(--ion-color-light-shade);
   color: var(--ion-color-dark-shade);
 }
 

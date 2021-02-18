@@ -25,15 +25,16 @@
     <div id="content">
       <div id="info-segment">
       
-      <div id="interests-container">
-        <div id="interests-box" *ngFor="let interest of profile.interests">
-          <ion-icon name="leaf" id="interest-icon" style="color: green;"></ion-icon>
-          <br>
-          <ion-label id="interest-label">{{interest}}</ion-label>
+        <div id="interests-container">
+          <div id="interests-box" *ngFor="let interest of profile.interests">
+            <ion-icon name="leaf" id="interest-icon" style="color: green;"></ion-icon>
+            <br>
+            <ion-label id="interest-label">{{interest}}</ion-label>
+          </div>
         </div>
       </div>
 
-      <div id="info-grid">
+      <!--div id="info-grid">
         <div id="info-box">
           <ion-label id="trait-field">Graduates:</ion-label>
           <br>
@@ -52,17 +53,36 @@
       <span id="society-field">Member of: </span> <span id="society-label">{{profile.society}}</span>
       <p>
       </div>
-      </div>
+      </div-->
       
-      <div id="bio">
-        {{profile.biography}} <br/><br/>
-        <span *ngFor="let sm of profile.socialMediaLinks">
-          <!-- dont delete this line, it is a safegaurd for missing links -->
-          <!-- <div *ngIf="sm.link">{{sm.socialMedia | titlecase}}: {{sm.link}}<br/></div> -->
-          <div *ngIf="sm.link">{{sm.socialMedia | titlecase}}: {{sm.link}}<br/></div>
-        </span>
+      <div id="info-segment">
+        <div id="bio">
+          {{profile.biography}} <br/><br/>
+          <span *ngFor="let sm of profile.socialMediaLinks">
+            <!-- dont delete this line, it is a safegaurd for missing links -->
+            <!-- <div *ngIf="sm.link">{{sm.socialMedia | titlecase}}: {{sm.link}}<br/></div> -->
+            <div *ngIf="sm.link">{{sm.socialMedia | titlecase}}: {{sm.link}}<br/></div>
+          </span>
+        </div>
       </div>
-      <div id="bio-bubble"></div>
+
+      <div id="info-segment">
+        <div id="interests-container">
+          <div id="interests-box">
+            <ion-icon name="location" id="interest-icon" style="color: var(--ion-color-primary)"></ion-icon>
+            <br>
+            <ion-label id="interest-label">Moscow</ion-label>
+          </div>
+
+          <div id="interests-box">
+            <ion-icon name="people" id="interest-icon" style="color: var(--ion-color-primary)"></ion-icon>
+            <br>
+            <ion-label id="interest-label">{{profile.society}}</ion-label>
+          </div>
+        </div>
+      </div>
+
+      <!--div id="bio-bubble"></div-->
     </div>
   </div>
   </div>

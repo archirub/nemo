@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ViewChild, AfterViewInit, ElementRef, ViewChildren, QueryList } from "@angular/core";
+import { Component, Input, Output, ViewChild, AfterViewInit, EventEmitter, ViewChildren, QueryList } from "@angular/core";
 import { IonButton } from "@ionic/angular";
 
 @Component({
@@ -7,15 +7,20 @@ import { IonButton } from "@ionic/angular";
     styleUrls: ["./nemo-toggle.component.scss"],
 })
 
-export class AppToggleComponent implements AfterViewInit {
+export class AppToggleComponent extends EventEmitter implements AfterViewInit {
     @Input() selections: Array<string>;
     @Input() buttonWidth: number;
     @Input() fontSize: number;
 
+    // Emits option selected from this child component to be accessed by parents
+    @Output() choice = new EventEmitter();
+
     @ViewChild("handle") handle: any;
     @ViewChildren(IonButton) buttons: QueryList<IonButton>;
 
-    constructor() {}
+    constructor() {
+        super();
+    }
 
     ngAfterViewInit() {}
 
@@ -27,6 +32,10 @@ export class AppToggleComponent implements AfterViewInit {
             }
         };
         console.log(option, "selected");
+        
+        //Emit choice
+        this.choice.emit(option);
+
         //option variable is the selection directly from the interfaces array
     } 
 }

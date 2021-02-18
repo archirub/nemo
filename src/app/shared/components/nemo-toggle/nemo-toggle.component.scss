@@ -2,7 +2,7 @@
     background-color: transparent;
     display: flex;
     z-index: 0;
-    border: solid 2px var(--ion-color-primary-shade);
+    border: solid 2px var(--ion-color-primary-tint);
     border-radius: 30px;
 }
 
@@ -13,6 +13,8 @@ ion-button {
     --border-radius: 30px;
     --background: transparent;
     --background-activated: transparent;
+    --box-shadow: none;
+    text-transform: none;
 }
 
 .buttons {

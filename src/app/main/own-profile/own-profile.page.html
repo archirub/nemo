@@ -1,18 +1,13 @@
 <ion-content>
-    <app-profile-card [profile] = "this.profile | async">
-    </app-profile-card>
+    <!--app-profile-card [profile] = "this.profile | async">
+    </app-profile-card-->
     <div class="flexend">
-        <div class="labels">
-            <!-- Inline style used because color alternates on toggle change and avoiding IDs is better, saves code on backend -->
-            <ion-label class="view-edit" style="color: var(--ion-color-primary)">view</ion-label>
-            <ion-label class="view-edit">edit</ion-label>
-        </div>
-        <ion-toggle (ionChange)="editSwitch($event)"></ion-toggle>
+        <nemo-toggle (choice)="toggleChange($event)" [buttonWidth]=15 [fontSize]=4 [selections]="['edit', 'view']"></nemo-toggle>
     </div>
 
-    <div id="editing" style="display: none">
+    <div id="editing" style="display: flex">
         <div class="container">
-            <h1>Name, Age</h1>
+            <h1>[Name], [Age]</h1>
 
             <div class="slide-button">
                 <a href="/settings"><p>Go to my settings</p></a>
