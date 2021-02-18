@@ -96,7 +96,6 @@ async function fetchLikeGroup(uid: string, amount: number): Promise<string[]> {
     .limit(amount)
     .get();
 
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
   return likeGroupSnapshot.docs
     .map((doc) => doc.ref.parent.parent?.id)
     .filter((id) => typeof id === "string") as string[];
@@ -160,7 +159,6 @@ function friendPickingToMap(
 ): uidChoiceMap[] {
   if (!matchDataDocs || !targetuid) return [];
   return matchDataDocs.map((doc) => {
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     const data = doc.data() as mdFriendPickingFromDatabase;
     const choice = data.fLikedUsers[targetuid]?.exists ? "yes" : "no";
 

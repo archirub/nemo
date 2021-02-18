@@ -45,7 +45,7 @@ export const generateSwipeStack = functions.region("europe-west2").https.onCall(
     context
   ): Promise<generateSwipeStackResponse> => {
     if (!context.auth)
-      throw new functions.https.HttpsError("unauthenticated", "User no autenticated.");
+      throw new functions.https.HttpsError("unauthenticated", "User not autenticated.");
 
     // DATA FROM REQUEST
     const targetuid: string = context.auth.uid;

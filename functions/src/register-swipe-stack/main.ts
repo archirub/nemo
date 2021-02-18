@@ -6,7 +6,7 @@ import {
   mdFromDatabase,
   SwipeMode,
   piStorage,
-  piStorageUID,
+  SwipeUserInfo,
 } from "../../../src/app/shared/interfaces/index";
 import { createDatingChatDocuments, handleDatingYesChoices } from "./dating-mode";
 import { createFriendChatDocuments, handleFriendYesChoices } from "./friend-mode";
@@ -168,7 +168,7 @@ async function incrementCounts(
     .firestore()
     .collection("piStorage")
     .where("uids", "array-contains-any", [...(yesAndSuper || []), ...(no || [])])
-    .get()) as FirebaseFirestore.QuerySnapshot<{ [uid: string]: piStorageUID }>;
+    .get()) as FirebaseFirestore.QuerySnapshot<{ [uid: string]: SwipeUserInfo }>;
 
   if (piStorageDocs.empty) return;
 

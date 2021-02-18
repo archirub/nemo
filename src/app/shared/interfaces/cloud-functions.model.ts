@@ -16,3 +16,10 @@ export interface registerSwipeChoicesRequest {
   choices: uidChoiceMap[];
 }
 export interface registerSwipeChoicesResponse {}
+
+export interface changeShowProfileRequest {
+  showProfile: Boolean;
+}
+export interface changeShowProfileResponse {
+  successful: Boolean;
+}
