@@ -80,7 +80,7 @@ export class FormatService {
     const university = profileData.university;
     const course = profileData.course;
     const society = profileData.society;
-    const interests = profileData.interests;
+    const interests = profileData.interest;
     const questions = profileData.questions;
     const onCampus = profileData.onCampus;
     const degree = profileData.degree;

@@ -21,7 +21,7 @@ export interface SearchFeatures {
 export const searchCriteriaOptions = {
   university: ["UCL"] as const,
   areaOfStudy: ["politics", "mathematics", "biology"] as const,
-  degree: ["undergrad", "postgrad"] as const,
+  degree: ["undergrad", "postgrad", "both"] as const,
   societyCategory: [
     "Debate Society",
     "Basketball Society",
