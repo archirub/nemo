@@ -1,5 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
+import { AngularAuthService } from "@services/login/auth/angular-auth.service";
 
 @Component({
   selector: "app-welcome",

@@ -8,12 +8,11 @@ import { AngularAuthService } from './auth/angular-auth.service';
 @Injectable({
   providedIn: 'root'
 })
-export class SignupAuthGuard implements CanLoad {
+export class SignupAuthGuard implements CanActivate {
 
   // inject auth service into auth gaurd
   constructor(private authService: AngularAuthService, private router: Router) {}
-
-  canLoad(route: Route, segments: UrlSegment[]): boolean | UrlTree | Observable<boolean | UrlTree> | Promise<boolean | UrlTree> {
+  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean | UrlTree | Observable<boolean | UrlTree> | Promise<boolean | UrlTree> {
     return this.authService.userIsAuthenticated.pipe(take(1), 
     switchMap(isAuthenticated => {
       if (!isAuthenticated) {
@@ -26,6 +25,20 @@ export class SignupAuthGuard implements CanLoad {
       if (!isAuthenticated) {return of(false)} 
     }))
   }
+
+  // canLoad(route: Route, segments: UrlSegment[]): boolean | UrlTree | Observable<boolean | UrlTree> | Promise<boolean | UrlTree> {
+  //   return this.authService.userIsAuthenticated.pipe(take(1), 
+  //   switchMap(isAuthenticated => {
+  //     if (!isAuthenticated) {
+  //       return this.authService.autologin();
+  //     } else {
+  //       return of(isAuthenticated)
+  //     }
+  //   }),
+  //   tap(isAuthenticated => {
+  //     if (!isAuthenticated) {return of(false)} 
+  //   }))
+  // }
 
   // canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean | UrlTree | Observable<boolean | UrlTree> | Promise<boolean | UrlTree> {
   //   console.log('SignupAuthGuard#canActivate called');

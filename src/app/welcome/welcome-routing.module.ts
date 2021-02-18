@@ -23,10 +23,10 @@ const routes: Routes = [
     path: 'signupoptional',
     loadChildren: () => import('./signupoptional/signupoptional.module').then( m => m.SignupoptionalPageModule)  
   },
-  {
-    path: '**',
-    component: HomePage
-  }
+  // {
+  //   path: '**',
+  //   component: HomePage
+  // }
 ];
 
 @NgModule({
