@@ -21,7 +21,7 @@ export interface SearchFeatures {
 export const searchCriteriaOptions = {
   university: ["UCL"] as const,
   areaOfStudy: ["politics", "mathematics", "biology"] as const,
-  degree: ["undergrad", "postgrad", "both"] as const,
+  degree: ["undergrad", "postgrad"] as const,
   societyCategory: [
     "Debate Society",
     "Basketball Society",
@@ -32,6 +32,15 @@ export const searchCriteriaOptions = {
   interest: ["sports guy", "herb connoisseur", "smart guy", "beastaLegend"] as const,
   onCampus: [true, false] as const,
 };
+
+export const searchCriteriaNames: (keyof searchCriteriaFromDatabase)[] = [
+  "university",
+  "areaOfStudy",
+  "degree",
+  "societyCategory",
+  "interest",
+  "onCampus",
+];
 
 export type University = typeof searchCriteriaOptions.university[number];
 export type AreaOfStudy = typeof searchCriteriaOptions.areaOfStudy[number]; //MOCK DATA
