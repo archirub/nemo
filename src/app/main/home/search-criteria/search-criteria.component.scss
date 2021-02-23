@@ -3,6 +3,11 @@
 }*/
 
 ion-content {
+  --overflow: scroll;
+}
+
+ion-slide#study, ion-slide#soc, ion-slide#int {
+  overflow: hidden;
   --overflow: hidden;
 }
 

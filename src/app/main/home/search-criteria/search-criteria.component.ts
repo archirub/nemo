@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, ViewChild, AfterViewInit } from "@angular/core";
-import { IonSlides, IonToggle, ModalController } from "@ionic/angular";
+import { IonSlides, IonToggle, IonContent, ModalController } from "@ionic/angular";
 import { FormControl, FormGroup } from "@angular/forms";
 
 import { Subscription } from "rxjs";
@@ -41,6 +41,7 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
   @ViewChild("locationslider") locationHandle: AppToggleComponent;
   @ViewChild("degreeslider") degreeHandle: AppToggleComponent;
   @ViewChild("slides") slides: IonSlides;
+  @ViewChild(IonContent) frame: IonContent;
 
   ngOnInit() {
     this.searchCriteria$ = this.SCstore.searchCriteria.subscribe({
@@ -88,16 +89,14 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
         this.unlockAndSwipe("next");
       }
     }
+
+    this.frame.scrollToTop(100);
   }
 
   returnTo() {
     var placeholder = document.getElementById("placeholder");
     var slides = [document.getElementById("study"), document.getElementById("soc"), document.getElementById("int")];
     var names = ["aos", "society", "interests"];
-
-    /*names.forEach(element => {
-      this.selectReplace(element);
-    });*/
 
     this.unlockAndSwipe("prev");
 

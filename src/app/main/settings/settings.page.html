@@ -2,7 +2,7 @@
   <ion-slides pager="false" options="{pagination: false, onlyExternal: false}" #slide>
     <ion-slide>
       <ion-item lines="none">
-        <div class="container">
+        <div #container class="container">
           <div class="flexbetween-row">
             <h1>My settings</h1>
             <a href="/tabs/own-profile"><ion-icon name="close-outline"></ion-icon></a>
@@ -13,10 +13,10 @@
               <ion-icon name="chevron-forward-outline"></ion-icon>
             </div>
 
-            <div class="slide-button go-under" #goUnder style="background-color: var(--ion-color-light-tint)">
+            <div class="slide-button go-under" #goUnder>
               <div class="flexbetween-row">
                 <p>Go 'under'</p>
-                <ion-toggle (ionChange)="goneUnder($event)"></ion-toggle>
+                <nemo-toggle (choice)="goneUnder($event)" [buttonWidth]=15 [fontSize]=3.5 [selections]="['off','on']"></nemo-toggle>
               </div>
               <h3 #goUnderH3>
                 Going under allows you to chat with existing catches, but your profile will not be shown in
