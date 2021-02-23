@@ -31,25 +31,12 @@ export class OwnProfilePage implements OnInit {
     this.profile = this.swipeStackStore.profiles;
   }
 
-  /* Toggle button changes */
-  editSwitch() {
-
-    // Change colors of view/edit labels
-    var labels:any = document.getElementsByClassName("view-edit")
-    for (let i = 0; i < labels.length; i++) {
-      let toggle = labels[i];
-      if (toggle.style.color == "var(--ion-color-primary)") {
-        toggle.style.color = "var(--ion-color-light-contrast)";
-      } else {
-        toggle.style.color = "var(--ion-color-primary)";
-      };
-    }
-
-    // Display/hide the editing window
-    var editor = document.getElementById("editing")
-    if (editor.style.display == "none") {
+  /* Nemo toggle selection function */
+  toggleChange(option) {
+    var editor = document.getElementById("editing");
+    if (option == "edit") {
       editor.style.display = "flex";
-    } else {
+    } else if (option == "view") {
       editor.style.display = "none";
     };
   }

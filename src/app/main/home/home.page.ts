@@ -7,7 +7,7 @@ import {
   HostListener,
   Output,
 } from "@angular/core";
-import { ModalController } from "@ionic/angular";
+import { IonBackdrop, ModalController } from "@ionic/angular";
 
 import { Observable, Subscription } from "rxjs";
 import { throttle, filter } from "rxjs/operators";
@@ -29,6 +29,8 @@ import { SwipeCardComponent } from "./swipe-card/swipe-card.component";
 })
 export class HomePage implements OnInit, OnDestroy {
   @Output() refillEmitter = new EventEmitter();
+  //@Output() backdropEmitter = new EventEmitter();
+  //@ViewChild(IonBackdrop) backdrop: IonBackdrop;
 
   swipeProfiles: Observable<Profile[]>;
   private swipeStackRefill$: Subscription;

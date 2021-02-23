@@ -55,7 +55,7 @@ ion-card-subtitle {
   z-index: 1;
   border-bottom-left-radius: 30px;
   border-bottom-right-radius: 30px;
-  background-color: rgb(255, 255, 255);
+  background-color: #FBFBFB;
   box-shadow: 0px 10px 10px -12px rgba(0,0,0,0.2);
   position: absolute;
   max-height: 12vh;
@@ -70,7 +70,7 @@ ion-card-subtitle {
   overflow-y: scroll;
   border-bottom-left-radius: 30px;
   border-bottom-right-radius: 30px;
-  background-color: rgb(255, 255, 255);
+  background-color: #FBFBFB;
   position: absolute;
   top: 18%;
   left: 20px;
@@ -94,11 +94,10 @@ ion-card-subtitle {
 }
 
 #info-segment {
-  background-color: #f8f6f6;
-  margin-right: 4vw;
-  margin-left: 4vw;
-  padding-top: 1vh;
-  border-radius: 5%;
+  background-color: var(--ion-color-primary-contrast);
+  margin: 0 4vw 5vw;
+  padding: 1vh;
+  border-radius: 20px;
 }
 
 #info-grid {
@@ -141,21 +140,22 @@ ion-card-subtitle {
   margin-right: 4vw;
   margin-top: 1vh;
   margin-bottom: 2vh;
-  max-height: 10vh;
-  height: 10vh;
 }
 
 #interests-box {
   margin-left: 2vw;
   margin-right: 2vw;
-  max-width: 18vw;
-  width: 18vw;
+  max-width: 30vw;
+  width: 30vw;
 }
 
 #interest-icon {
   color: rgb(102, 102, 102);
   width: 30px;
   height: 30px;
+  border: solid 1px var(--ion-color-primary-tint);
+  border-radius: 50%;
+  padding: 3vw;
 }
 
 #interest-label {
@@ -228,24 +228,25 @@ ion-card-subtitle {
 .sticky {
   position: fixed;
   width: 88.5vw; //this is not okay
-  background-color: white;
+  background-color: #FBFBFB;
   z-index: 100;
 }
 
 #department {
   font-size: larger;
+  text-transform: none;
+  color: var(--ion-color-primary);
   margin-top: 5px;
   margin-bottom: 0px;
 }
 
 #bio {
   border-radius: 10px;
-  background-color: #f8f6f6;
-  margin-left: 4vw;
-  margin-right: 4vw;
-  padding: 12px;
-  font-size: large;
-  color: #4e4e4e;
+  background-color: var(--ion-color-primary-contrast);
+  margin: 5vw 4vw;
+  padding: 5vw;
+  font-size: 4vh;
+  color: var(--ion-color-light-contrast);
   font-weight: 500;
 }
 

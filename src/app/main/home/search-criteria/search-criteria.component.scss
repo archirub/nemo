@@ -3,6 +3,11 @@
 }*/
 
 ion-content {
+  --overflow: scroll;
+}
+
+ion-slide#study, ion-slide#soc, ion-slide#int {
+  overflow: hidden;
   --overflow: hidden;
 }
 
@@ -20,7 +25,7 @@ ion-col {
   justify-content: space-between;
   position: relative;
   padding: 3vh 3vw;
-  border-bottom: solid 1px;
+  border-bottom: solid 1px var(--ion-color-light-shade);
 }
 
 .labels {
@@ -69,6 +74,11 @@ ion-select {
     justify-content: space-between;
     width: 100%;
   };
+
+  &start-col {
+    display: flex;
+    flex-direction: column;
+  }
 }
 
 h1 {
@@ -76,11 +86,16 @@ h1 {
   margin-top: 2vh;
 }
 
+h2 {
+  font-size: 3vh;
+  color: var(--ion-color-primary);
+}
+
 p {
   margin: 0 auto;
   padding-bottom: 3vh;
   font-size: 1.3vh;
-  border-bottom: 1px solid;
+  border-bottom: 1px solid var(--ion-color-light-shade);
   color: var(--ion-color-dark-shade);
 }
 
@@ -102,4 +117,30 @@ ion-button {
     --border-radius: 50%;
     height: 6.5vh;
   }
+}
+
+.return {
+  display: flex;
+  color: var(--ion-color-primary);
+  font-size: 3vh;
+
+  h4 {
+    padding-left: 2vh;
+    font-size: 3vh;
+  };
+
+  ion-icon {
+    margin-top: 2.5vh;
+    
+  }
+}
+
+
+ion-list {
+  width: 100%;
+
+  ion-item {
+    border-bottom: solid 1px var(--ion-color-light-shade);
+    font-size: 3.5vh;
+  };
 }
