@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { AuthResponseData } from '@interfaces/auth-response.model';
 import { AlertController } from '@ionic/angular';
 import { AngularAuthService } from '@services/login/auth/angular-auth.service';
@@ -17,7 +18,7 @@ export class SignupauthPage implements OnInit {
     password: new FormControl('',[Validators.required, Validators.min(8)])})
 
 
-  constructor(private signUpAuthService: AngularAuthService, private alertCtrl: AlertController) { }
+  constructor(private signUpAuthService: AngularAuthService, private alertCtrl: AlertController, private router: Router) { }
 
   ngOnInit() {
   }
@@ -29,19 +30,21 @@ export class SignupauthPage implements OnInit {
       return;
     }
     let authObs: Observable<AuthResponseData>;
-
     const email: string = this.authForm.get('email').value
     const password: string = this.authForm.get('password').value
-    console.log(this.authForm.get('email').value)
-    console.log(this.authForm.get('password').value)
+    // console.log(this.authForm.get('email').value)
+    // console.log(this.authForm.get('password').value)
     authObs = this.signUpAuthService.signup(email, password)
     
     // centralize the subscribe/error handling method so there is an if statement for each potential code
     authObs.subscribe(
-      resData => console.log(resData), 
+      resData => {
+        this.router.navigateByUrl('welcome/signuprequired')
+        console.log(resData)
+      }, 
       errRes => {
         const code = errRes.error.error.message;
-        let message = "Could not sign you up. Please try again later."
+        let message = "Could not sign you up. Please try again."
         if (code === "EMAIL_EXISTS") {
           let message = 'The email address is already in use by another account.'}
         if (code === "TOO_MANY_ATTEMPTS_TRY_LATER") {
