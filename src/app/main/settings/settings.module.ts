@@ -7,15 +7,16 @@ import { IonicModule } from '@ionic/angular';
 import { SettingsPageRoutingModule } from './settings-routing.module';
 
 import { SettingsPage } from './settings.page';
-import { AppToggleComponent } from '@components/index';
+import { AppToggleModule } from '@components/nemo-toggle/nemo-toggle.component.module';
 
 @NgModule({
   imports: [
     CommonModule,
     FormsModule,
     IonicModule,
-    SettingsPageRoutingModule
+    SettingsPageRoutingModule,
+    AppToggleModule
   ],
-  declarations: [SettingsPage, AppToggleComponent]
+  declarations: [SettingsPage]
 })
 export class SettingsPageModule {}
