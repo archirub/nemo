@@ -1,14 +1,14 @@
-import { Component, Input, OnDestroy, OnInit, ViewChild } from "@angular/core";
+import { Component, Input, AfterViewInit, OnDestroy, OnInit, ViewChild } from "@angular/core";
 
-import { NavController, IonContent } from "@ionic/angular";
+import { NavController, IonContent, IonSlides } from "@ionic/angular";
 import { AngularFireAuth } from "@angular/fire/auth";
 import { ActivatedRoute, ParamMap } from "@angular/router";
 
-import { BehaviorSubject, Subscription } from "rxjs";
+import { BehaviorSubject, Subscription, Observable } from "rxjs";
 import { map } from "rxjs/operators";
 
-import { Chat, Message } from "@classes/index";
-import { ChatStore } from "@stores/chat-store/chat-store.service";
+import { Chat, Message, Profile } from "@classes/index";
+import { SwipeStackStore, ChatStore } from "@stores/index";
 
 @Component({
   selector: "app-messenger",
@@ -16,8 +16,13 @@ import { ChatStore } from "@stores/chat-store/chat-store.service";
   styleUrls: ["./messenger.page.scss"],
   providers: [],
 })
-export class MessengerPage implements OnInit, OnDestroy {
+export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild(IonContent) ionContent: IonContent;
+  @ViewChild("slides") slides: IonSlides;
+
+  profiles$: Subscription;
+  chatProfiles: Profile[];
+  chatProfile: Profile;
 
   // Constants
   private SCROLL_SPEED: number = 100;
@@ -37,13 +42,24 @@ export class MessengerPage implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private navCtrl: NavController,
     private chatStore: ChatStore,
-    private afauth: AngularFireAuth
+    private afauth: AngularFireAuth,
+    private swipeStackStore: SwipeStackStore,
   ) {}
 
   ngOnInit() {
     this.route.paramMap.subscribe((param) => this.messengerInitHandler(param));
     this.timeOfNewestMsg = this.lastInteracted();
     this.scroll$ = this.currentChat.subscribe((c) => this.scrollHandler(c));
+
+    //Currently fetch profiles and outputting first one from subscription
+    this.profiles$ = this.swipeStackStore.profiles.subscribe(
+      (profile) => (this.chatProfiles = profile)
+    );
+    this.chatProfile = this.chatProfiles[0];
+  }
+
+  ngAfterViewInit() {
+    this.slides.lockSwipes(true);
   }
 
   /** Subscribes to chatStore's Chats osbervable using chatID
@@ -171,6 +187,18 @@ export class MessengerPage implements OnInit, OnDestroy {
     const chat: Chat = this.currentChat.getValue();
     if (message.senderID === chat.recipient.uid) return false;
     return true;
+  }
+
+  slideTo(page) {
+    this.slides.lockSwipes(false);
+
+    if (page==="profile") {
+      this.slides.slideNext();
+    } else if (page==="messenger") {
+      this.slides.slidePrev();
+    }
+
+    this.slides.lockSwipes(true);
   }
 
   ngOnDestroy() {

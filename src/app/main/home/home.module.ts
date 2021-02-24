@@ -7,7 +7,8 @@ import { HomePage } from "./home.page";
 import { HomePageRoutingModule } from "./home-routing.module";
 import { SwipeCardComponent } from "./swipe-card/swipe-card.component";
 import { SearchCriteriaComponent } from "./search-criteria/search-criteria.component";
-import { ProfileCardComponent, AppToggleComponent } from "@components/index";
+import { AppToggleComponent, ProfileCardComponent } from "@components/index";
+import { ProfileCardModule } from "@components/profile-card/profile-card.component.module";
 
 @NgModule({
   imports: [
@@ -16,12 +17,12 @@ import { ProfileCardComponent, AppToggleComponent } from "@components/index";
     ReactiveFormsModule,
     IonicModule,
     HomePageRoutingModule,
+    ProfileCardModule
   ],
   declarations: [
     HomePage,
     SwipeCardComponent,
     SearchCriteriaComponent,
-    ProfileCardComponent,
     AppToggleComponent,
   ],
   providers: [ SwipeCardComponent ],

@@ -4,14 +4,14 @@
       <ion-row>
         <ion-col size="2">
           <ion-buttons>
-            <ion-back-button defaultHref="tabs/chats" [text]="16">
+            <ion-back-button defaultHref="/main/tabs/chats" [text]="16">
             </ion-back-button>
           </ion-buttons>
         </ion-col>
 
         <ion-col size="8">
           <ion-text color="dark">
-            <h3 class="messenger-header">
+            <h3 class="messenger-header" (click)="slideTo('profile')">
               {{(currentChat | async)?.recipient?.name}}
             </h3>
           </ion-text>
@@ -19,7 +19,7 @@
 
         <ion-col size="2">
           <ion-avatar>
-            <img [src]="(currentChat | async)?.recipient?.picture" />
+            <img (click)="slideTo('profile')" [src]="(currentChat | async)?.recipient?.picture" />
           </ion-avatar>
         </ion-col>
       </ion-row>
@@ -27,59 +27,73 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
-  <ion-row
-    *ngFor="let message of ((currentChat | async)?.messages); index as i; let last='last'"
-  >
-    {{last ? fastScroll() : ""}}
-    <ion-col
-      size="8"
-      *ngIf="message?.senderID === (currentChat | async)?.recipient?.uid"
-      class="message-col col-recieved"
-    >
-      <div
-        class="message notOwnMessage"
-        [ngClass]="{'failedToSend': hasFailed(message), 'isSending': isSending(message) }"
+<ion-slides #slides>
+  <ion-slide>
+    <ion-content>
+      <ion-row
+        *ngFor="let message of ((currentChat | async)?.messages); index as i; let last='last'"
       >
-        {{message.content}}
-      </div>
-    </ion-col>
-
-    <ion-col
-      size="8"
-      offset="4"
-      *ngIf="message?.senderID !== (currentChat | async)?.recipient?.uid"
-      class="message-col col-sent"
-    >
-      <div
-        class="message ownMessage"
-        [ngClass]="{'failedToSend': hasFailed(message), 'isSending': isSending(message) }"
-      >
-        {{message?.content}}
-      </div>
-    </ion-col>
-  </ion-row>
-
-  <div id="boxBelowInput"></div>
-
-  <div id="messageInputContainer">
-    <ion-toolbar>
-      <ion-searchbar
-        [(ngModel)]="latestChatInput"
-        animated
-        showCancelButton="never"
-        searchIcon="none"
-        placeholder=""
-        type="text"
-        id="messageInput"
-      >
-        <ion-button
-          icon-only
-          fill="clear"
-          id="sendButton"
-          (click)="sendMessage()"
+        {{last ? fastScroll() : ""}}
+        <ion-col
+          size="8"
+          *ngIf="message?.senderID === (currentChat | async)?.recipient?.uid"
+          class="message-col col-recieved"
         >
-          <ion-icon name="send"></ion-icon> </ion-button></ion-searchbar
-    ></ion-toolbar>
-  </div>
-</ion-content>
+          <div
+            class="message notOwnMessage"
+            [ngClass]="{'failedToSend': hasFailed(message), 'isSending': isSending(message) }"
+          >
+            {{message.content}}
+          </div>
+        </ion-col>
+
+        <ion-col
+          size="8"
+          offset="4"
+          *ngIf="message?.senderID !== (currentChat | async)?.recipient?.uid"
+          class="message-col col-sent"
+        >
+          <div
+            class="message ownMessage"
+            [ngClass]="{'failedToSend': hasFailed(message), 'isSending': isSending(message) }"
+          >
+            {{message?.content}}
+          </div>
+        </ion-col>
+      </ion-row>
+
+      <div id="boxBelowInput"></div>
+
+      <div id="messageInputContainer">
+        <ion-toolbar>
+          <ion-searchbar
+            [(ngModel)]="latestChatInput"
+            animated
+            showCancelButton="never"
+            searchIcon="none"
+            placeholder=""
+            type="text"
+            id="messageInput"
+          >
+            <ion-button
+              icon-only
+              fill="clear"
+              id="sendButton"
+              (click)="sendMessage()"
+            >
+              <ion-icon name="send"></ion-icon> </ion-button></ion-searchbar
+        ></ion-toolbar>
+      </div>
+    </ion-content>
+  </ion-slide>
+
+  <ion-slide>
+    <div class="flexcolumn">
+      <ion-button class="return" (click)="slideTo('messenger')">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+        Back to chat
+      </ion-button>
+      <app-profile-card [profile] = "this.chatProfile"></app-profile-card>
+    </div>
+  </ion-slide>
+</ion-slides>  

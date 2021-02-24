@@ -5,13 +5,11 @@
 </ion-header> -->
 
 <ion-content>
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Chats</ion-title>
-    </ion-toolbar>
-  </ion-header>
+  <div class="toolbar">
+    <h1>Chats</h1>
+  </div>
 
-  <app-chat-board [chats]="chats | async"></app-chat-board>
+  <app-chat-board #chatboard [chats]="chats | async"></app-chat-board>
 
   <ion-button
     icon-only

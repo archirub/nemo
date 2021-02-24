@@ -11,10 +11,10 @@
         <ion-img 
           *ngFor="let chat of chats.slice(0,3); index as j" 
           [ngStyle]="{ 'zIndex': j, 
-                        'margin-left': 20*j + 'px', 
+                        'margin-left': 3*j + 'vh', 
                         'position': 'absolute', 
-                        'width': 60 + 'px',
-                        'height': 60 + 'px' }"
+                        'width': 9 + 'vh',
+                        'height': 9 + 'vh' }"
           [src]="chat?.recipient?.picture"
           class="match-image">
         </ion-img>
@@ -69,7 +69,11 @@
         >
         <!-- <span> {{ getDate(chat.messages[chat.messages.length - 1].time) }}</span> -->
       </div>
-      <ion-badge color="danger" id="unread-badge">{{ calcUnread(chat) }}</ion-badge>
+      <ion-badge
+      *ngIf="chat?.messages[chat.messages.length-1]?.senderID === chat?.recipient?.uid" 
+      id="unread-badge">
+        Your turn!
+      </ion-badge>
     </ion-item>
   </ion-list>
 </ion-content>

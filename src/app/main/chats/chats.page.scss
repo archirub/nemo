@@ -1,8 +1,43 @@
 .header-collapse-condense ion-toolbar:first-of-type {
-  height: 10vh;
+  height: 15vh;
   width: 90%;
   margin: 0 auto;
-  padding-top: 15px;
+  padding-top: 7vh;
+  --border-width: 0;
+}
+
+div.toolbar {
+  height: 15vh;
+  z-index: 0;
+  margin: 0 auto;
+  width: 90%;
+  padding-top: 7vh;
+  --border-width: 0;
+
+  h1 {
+    font-size: 5vh;
+    margin: 0 3vw;
+  }
+}
+
+ion-row {
+  width: 97.5%;
+  margin: 0 auto;
+  padding-bottom: 2vh;
+  border-bottom: solid 1px var(--ion-color-primary-tint);
+
+  ion-item {
+    width: 97.5%;
+    font-weight: bold;
+    border: solid var(--ion-color-primary-shade) 1px;
+    border-radius: 20px;
+    --background: rgba(243, 161, 136, 0.1);
+    --color: var(--ion-color-primary-shade);
+  }
+}
+
+ion-title {
+  font-size: 5vh;
 }
 
   ion-grid{

@@ -8,9 +8,10 @@ import {
 import { Observable, Subscription } from "rxjs";
 import { map, take } from "rxjs/operators";
 
-import { ChatStore } from "@stores/index";
+import { ChatStore, SwipeStackStore } from "@stores/index";
 import { Chat, Profile } from "@classes/index";
 import { chatFromDatabase } from "@interfaces/index";
+import { ChatBoardComponent } from "./chat-board/chat-board.component";
 
 @Component({
   selector: "app-chats",
@@ -18,21 +19,26 @@ import { chatFromDatabase } from "@interfaces/index";
   styleUrls: ["./chats.page.scss"],
 })
 export class ChatsPage implements OnInit, OnDestroy {
-  @ViewChild(IonContent) ionContent: IonContent;
+  @ViewChild("chatboard") chatboard: ChatBoardComponent;
 
   TOP_SCROLL_SPEED = 100;
 
   private chats$: Subscription;
   public chats: Observable<Chat[]>;
+  public chatProfiles: Observable<Profile[]>;
 
-  constructor(private chatStore: ChatStore) {}
+  constructor(
+    private swipeStackStore: SwipeStackStore,
+    private chatStore: ChatStore
+    ) {}
 
   ngOnInit() {
     this.chats = this.chatStore.chats;
+    this.chatProfiles = this.swipeStackStore.profiles;
   }
 
   scrollToTop() {
-    this.ionContent.scrollToTop(this.TOP_SCROLL_SPEED);
+    this.chatboard.scroll(this.TOP_SCROLL_SPEED);
   }
 
   ngOnDestroy() {

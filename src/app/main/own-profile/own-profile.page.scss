@@ -8,7 +8,7 @@ ion-content {
   display: flex;
   justify-content: flex-end;
   position: absolute;
-  top: 4vh;
+  top: 9.5vh;
   width: 90%;
   margin: 0 auto;
 }
@@ -22,11 +22,11 @@ nemo-toggle {
 #editing {
   padding: 1vh 3vw;
   width: 90%;
-  height: 97.5%;
+  height: 89%;
   z-index: 3;
   background: white;
   position: absolute;
-  top: 0;
+  top: 4.5vh;
   margin: 10px 20px 20px;
   border-radius: 30px;
   flex-direction: column;

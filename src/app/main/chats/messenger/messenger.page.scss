@@ -1,3 +1,13 @@
+ion-slides {
+  height: 100vh;
+  width: 100vw;
+}
+
+ion-slide {
+  width: 100vw !important;
+  text-align: left;
+}
+
 ion-buttons {
   margin-left: -5px;
   margin-top: 10px;
@@ -11,6 +21,16 @@ ion-avatar {
 
 ion-toolbar {
   padding: 0px;
+}
+
+app-profile-card {
+  height: 70vh;
+}
+
+.flexcolumn {
+  display: flex;
+  flex-direction: column;
+  height: 90vh;
 }
 
 .messenger-header {
@@ -113,5 +133,12 @@ ion-toolbar {
 #messageInputContainer {
   position: fixed;
   bottom: 0;
-  width: 100%;
+  width: 100vw;
+}
+
+.return {
+  --background: transparent;
+  --background-activated: transparent;
+  color: var(--ion-color-primary);
+  height: 4vh;
 }
