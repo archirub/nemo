@@ -60,8 +60,15 @@ export class SignuprequiredPage implements OnInit {
       sexualPreference: sexualPreference,
       gender: gender,
     }
-    this.signUpAuthService.createBaselineUser(myData)
+    const successful = this.signUpAuthService.createBaselineUser(myData)
+    if (successful) {
+      this.router.navigateByUrl('/welcome/signupoptional')
+    }
     // this.router.navigateByUrl('welcome/signupoptional')    
+  }
+
+  goHome() {
+    this.router.navigateByUrl('/main/tabs/home')
   }
 
 

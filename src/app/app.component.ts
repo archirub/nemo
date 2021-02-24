@@ -38,22 +38,27 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.authSub = this.signUpAuthService.userIsAuthenticated.subscribe(isAuth => {
-      if (isAuth) { 
-        this.signUpAuthService.userType.subscribe(
-          user_type => {
-            if (user_type == 'BaselineUser' || user_type == 'FullUser') {
-              console.log("going home baby"); 
-              this.router.navigateByUrl('main'); 
-            }
-            else if (user_type == 'AuthenticatedUser') {
-              console.log("going required"); 
-              this.router.navigateByUrl('welcome/signuprequired'); //uncomment to have specialized routing
-              // this.router.navigateByUrl('main'); //this is for development
-            }
-          });}
-      // else { console.log("welcomed"); this.router.navigateByUrl('welcome'); }
-    });
+    this.signUpAuthService.autologin().subscribe(()=> {
+      this.authSub = this.signUpAuthService.userIsAuthenticated.subscribe(isAuth => {
+        console.log("aaa", isAuth)
+        if (isAuth) { 
+          console.log("User is authenticated")
+          this.signUpAuthService.userType.subscribe(
+            user_type => {
+              if (user_type == 'BaselineUser' || user_type == 'FullUser') {
+                console.log("going home baby"); 
+                this.router.navigateByUrl('main/tabs/home'); 
+              }
+              else if (user_type == 'AuthenticatedUser') {
+                console.log("going required"); 
+                this.router.navigateByUrl('welcome/signuprequired'); //uncomment to have specialized routing
+                // this.router.navigateByUrl('main'); //this is for development
+              }
+            });
+          }
+        else { console.log("welcomed"); this.router.navigateByUrl('welcome'); }
+      });
+    })
   }
 
   logOut(): void {
@@ -65,11 +70,11 @@ export class AppComponent implements OnInit, OnDestroy {
       this.statusBar.styleDefault();
       this.splashScreen.hide();
 
-      // this.auth
-      //   .logIn()
-      //   .then((uid) => this.currentUserStore.initializeStore(uid))
-      //   .then((uid) => this.swipeStackStore.initializeStore(uid))
-      //   .then((uid) => this.chatStore.initializeStore(uid));
+      this.auth
+        .logIn()
+        .then((uid) => this.currentUserStore.initializeStore(uid))
+        .then((uid) => this.swipeStackStore.initializeStore(uid))
+        .then((uid) => this.chatStore.initializeStore(uid));
     });
 
   }}

@@ -14,7 +14,7 @@ const routes: Routes = [
   {
     path: 'signuprequired',
     component: SignuprequiredPage,
-    canActivate: [SignupAuthGuard]
+    canLoad: [SignupAuthGuard]
   },
 ];
 
