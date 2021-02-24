@@ -2,7 +2,7 @@ import { NgModule } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { IonicModule } from "@ionic/angular";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
-import { ProfileCardComponent } from "./profile-card.component";
+import { AddPhotoComponent } from "./add-photo.component";
 
 @NgModule({
   imports: [
@@ -12,10 +12,10 @@ import { ProfileCardComponent } from "./profile-card.component";
     IonicModule,
   ],
   declarations: [
-    ProfileCardComponent
+    AddPhotoComponent
   ],
   exports: [
-    ProfileCardComponent
+    AddPhotoComponent
   ],
 })
-export class ProfileCardModule {}
+export class AddPhotoModule {}

@@ -7,8 +7,10 @@ import { IonicModule } from "@ionic/angular";
 import { OwnProfilePageRoutingModule } from "./own-profile-routing.module";
 
 import { OwnProfilePage } from "./own-profile.page";
-import { AddPhotoComponent, AppToggleComponent } from "@components/index";
 import { ProfileCardModule } from "@components/profile-card/profile-card.component.module";
+import { AddPhotoModule } from "@components/add-photo/add-photo.component.module";
+import { AppToggleModule } from "@components/nemo-toggle/nemo-toggle.component.module";
+
 
 @NgModule({
   imports: [
@@ -17,7 +19,10 @@ import { ProfileCardModule } from "@components/profile-card/profile-card.compone
     IonicModule,
     ProfileCardModule,
     OwnProfilePageRoutingModule,
+    ProfileCardModule,
+    AddPhotoModule,
+    AppToggleModule
   ],
-  declarations: [OwnProfilePage, AddPhotoComponent, AppToggleComponent],
+  declarations: [OwnProfilePage],
 })
 export class OwnProfilePageModule {}
