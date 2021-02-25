@@ -27,6 +27,13 @@ const routes: Routes = [
             (m) => m.MessengerPageModule
           ),
       },
+      // {
+      //   path: "messenger/:chatID", // this is specified outside tabs so that they aren't visible on the chats page
+      //   loadChildren: () =>
+      //     import("./chats/messenger/messenger.module").then(
+      //       (m) => m.MessengerPageModule
+      //     ),
+      // },
       {
         path: "**",
         redirectTo: "tabs/home",
