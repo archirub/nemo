@@ -1,7 +1,7 @@
 <div id="swipe-card">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <div class="img-container">
-    <img
+    <img #pic
       id="pictures"
       src="https://staticg.sportskeeda.com/editor/2020/06/a19cc-15923264235917.jpg"
     />
@@ -11,79 +11,79 @@
   </div> -->
   <!-- <div id="photo-shadow"></div> -->
   <div id="info" button (click)="expandProfile($event)">
-    <div id="snippetInfo" *ngIf="!moreInfo">
+    <div #snippet id="snippetInfo" [hidden]="moreInfo">
       <ion-card-header class="name-age">
-        <ion-card-title>{{profile.displayName}}, {{profile.age()}}</ion-card-title>
-        <ion-card-subtitle id="department">{{profile.course}}</ion-card-subtitle>
+        <ion-card-title #name>{{profile.displayName}}, {{profile.age()}}</ion-card-title>
+        <ion-card-subtitle #department id="department">{{profile.course}}</ion-card-subtitle>
       </ion-card-header>
     </div>
-    <div id="completeInfo" *ngIf="moreInfo">
-      <ion-card-header class="name-age sticky">
-        <ion-card-title>{{profile.displayName}}, {{profile.age()}} </ion-card-title>
-        <ion-card-subtitle id="department">{{profile.course}}</ion-card-subtitle>
-      </ion-card-header>
-    <div id="content">
-      <div id="info-segment">
-      
-        <div id="interests-container">
-          <div id="interests-box" *ngFor="let interest of profile.interests">
-            <ion-icon name="leaf" id="interest-icon" style="color: green;"></ion-icon>
-            <br>
-            <ion-label id="interest-label">{{interest}}</ion-label>
+    <div #complete id="completeInfo" [hidden]="!moreInfo">
+        <ion-card-header #header class="name-age sticky">
+          <ion-card-title>{{profile.displayName}}, {{profile.age()}} </ion-card-title>
+          <ion-card-subtitle id="department">{{profile.course}}</ion-card-subtitle>
+        </ion-card-header>
+      <div id="content">
+        <div id="info-segment">
+        
+          <div id="interests-container">
+            <div id="interests-box" *ngFor="let interest of profile.interests">
+              <ion-icon name="leaf" id="interest-icon" style="color: green;"></ion-icon>
+              <br>
+              <ion-label id="interest-label">{{interest}}</ion-label>
+            </div>
           </div>
         </div>
-      </div>
 
-      <!--div id="info-grid">
-        <div id="info-box">
-          <ion-label id="trait-field">Graduates:</ion-label>
-          <br>
-          <ion-label id="trait-label">2021</ion-label>
+        <!--div id="info-grid">
+          <div id="info-box">
+            <ion-label id="trait-field">Graduates:</ion-label>
+            <br>
+            <ion-label id="trait-label">2021</ion-label>
+          </div>
+          <div class="verticalLine" style="height: 6vh;">
+          </div>
+          <div id="info-box">
+            <ion-label id="trait-field">Hometown:</ion-label>
+            <br>
+            <ion-label id="trait-label">Moscow</ion-label>
+          </div>
         </div>
-        <div class="verticalLine" style="height: 6vh;">
-        </div>
-        <div id="info-box">
-          <ion-label id="trait-field">Hometown:</ion-label>
-          <br>
-          <ion-label id="trait-label">Moscow</ion-label>
-        </div>
-      </div>
-      <div id="society-list">
+        <div id="society-list">
+          <p>
+        <span id="society-field">Member of: </span> <span id="society-label">{{profile.society}}</span>
         <p>
-      <span id="society-field">Member of: </span> <span id="society-label">{{profile.society}}</span>
-      <p>
-      </div>
-      </div-->
-      
-      <div id="info-segment">
-        <div id="bio">
-          {{profile.biography}} <br/><br/>
-          <span *ngFor="let sm of profile.socialMediaLinks">
-            <!-- dont delete this line, it is a safegaurd for missing links -->
-            <!-- <div *ngIf="sm.link">{{sm.socialMedia | titlecase}}: {{sm.link}}<br/></div> -->
-            <div *ngIf="sm.link">{{sm.socialMedia | titlecase}}: {{sm.link}}<br/></div>
-          </span>
         </div>
-      </div>
-
-      <div id="info-segment">
-        <div id="interests-container">
-          <div id="interests-box">
-            <ion-icon name="location" id="interest-icon" style="color: var(--ion-color-primary)"></ion-icon>
-            <br>
-            <ion-label id="interest-label">Moscow</ion-label>
-          </div>
-
-          <div id="interests-box">
-            <ion-icon name="people" id="interest-icon" style="color: var(--ion-color-primary)"></ion-icon>
-            <br>
-            <ion-label id="interest-label">{{profile.society}}</ion-label>
+        </div-->
+        
+        <div id="info-segment">
+          <div id="bio">
+            {{profile.biography}} <br/><br/>
+            <span *ngFor="let sm of profile.socialMediaLinks">
+              <!-- dont delete this line, it is a safegaurd for missing links -->
+              <!-- <div *ngIf="sm.link">{{sm.socialMedia | titlecase}}: {{sm.link}}<br/></div> -->
+              <div *ngIf="sm.link">{{sm.socialMedia | titlecase}}: {{sm.link}}<br/></div>
+            </span>
           </div>
         </div>
-      </div>
 
-      <!--div id="bio-bubble"></div-->
+        <div id="info-segment">
+          <div id="interests-container">
+            <div id="interests-box">
+              <ion-icon name="location" id="interest-icon" style="color: var(--ion-color-primary)"></ion-icon>
+              <br>
+              <ion-label id="interest-label">Moscow</ion-label>
+            </div>
+
+            <div id="interests-box">
+              <ion-icon name="people" id="interest-icon" style="color: var(--ion-color-primary)"></ion-icon>
+              <br>
+              <ion-label id="interest-label">{{profile.society}}</ion-label>
+            </div>
+          </div>
+        </div>
+
+        <!--div id="bio-bubble"></div-->
+      </div>
     </div>
-  </div>
   </div>
 </div>

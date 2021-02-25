@@ -1,4 +1,4 @@
-<ion-header>
+<ion-header #header>
   <ion-toolbar id="chat-toolbar">
     <ion-grid id="header-grid">
       <ion-row>
@@ -103,9 +103,9 @@
     </ion-content>
   </ion-slide>
 
-  <ion-slide>
+  <ion-slide #profSlide>
     <div class="flexcolumn prof">
-      <app-profile-card [profile] = "this.chatProfile"></app-profile-card>
+      <app-profile-card #profCard (expanded)="scaleInfo($event)" [profile] = "this.chatProfile"></app-profile-card>
     </div>
   </ion-slide>
 </ion-slides>  

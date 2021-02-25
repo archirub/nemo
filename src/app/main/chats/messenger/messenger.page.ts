@@ -1,6 +1,6 @@
-import { Component, Input, AfterViewInit, OnDestroy, OnInit, ViewChild } from "@angular/core";
+import { Component, Input, AfterViewInit, OnDestroy, OnInit, ViewChild, ElementRef } from "@angular/core";
 
-import { NavController, IonContent, IonSlides, IonSlide } from "@ionic/angular";
+import { NavController, IonContent, IonSlides, IonSlide, IonHeader } from "@ionic/angular";
 import { AngularFireAuth } from "@angular/fire/auth";
 import { ActivatedRoute, ParamMap } from "@angular/router";
 
@@ -9,6 +9,7 @@ import { map } from "rxjs/operators";
 
 import { Chat, Message, Profile } from "@classes/index";
 import { SwipeStackStore, ChatStore } from "@stores/index";
+import { ProfileCardComponent } from "@components/index";
 
 @Component({
   selector: "app-messenger",
@@ -19,6 +20,11 @@ import { SwipeStackStore, ChatStore } from "@stores/index";
 export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild(IonContent) ionContent: IonContent;
   @ViewChild("slides") slides: IonSlides;
+  @ViewChild("profSlide", { read: ElementRef }) profSlide: ElementRef;
+  @ViewChild("header", { read: ElementRef }) header: ElementRef;
+
+  @ViewChild("profCard", { read: ElementRef }) profCard: ElementRef; //for styling
+  @ViewChild("profCard") grandchildren: ProfileCardComponent; //for access to grandchildren
 
   profiles$: Subscription;
   chatProfiles: Profile[];
@@ -195,6 +201,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
 
     if (page==="profile") {
       this.slides.slideNext();
+      this.scaleProfile();
     } else if (page==="messenger") {
       this.slides.slidePrev();
     }
@@ -218,6 +225,58 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
       prof.style.color = "var(--ion-color-primary)";
     }
   }
+
+  scaleProfile() {
+    //get space available on slide for profile
+    const headerHeight = this.header.nativeElement.getBoundingClientRect().height;
+    const profileHeight = Math.floor(this.profSlide.nativeElement.getBoundingClientRect().height - 20);
+    const fullHeight = headerHeight + profileHeight + 20;
+    const slideWidth = this.profSlide.nativeElement.getBoundingClientRect().width;
+    const aspectRatio = 0.583; //iPhone X aspect ratio looks best
+    const textRatio = profileHeight/fullHeight;
+
+    var profileCard = this.profCard.nativeElement;
+    var snippet = this.grandchildren.snippet.nativeElement;
+    var title = this.grandchildren.name.nativeElement;
+    var subtitle = this.grandchildren.department.nativeElement;
+
+    //size card appropriately
+    profileCard.style.height = `${profileHeight}px`;
+    profileCard.style.width = `${aspectRatio * profileHeight}px`;
+
+    //get width of image
+    var image = this.grandchildren.picture.nativeElement;
+    const imageWidth = image.getBoundingClientRect().width;
+
+    //size and position info appropriately
+    snippet.style.width = `${imageWidth}px`;
+    snippet.style.left = `${(slideWidth - imageWidth)/2}px`;
+    snippet.style.maxHeight = 'none';
+    snippet.style.height = 'none';
+
+    //size text
+    title.style.fontSize = `${textRatio * 4}vh`;
+    subtitle.style.fontSize = `${textRatio * 3}vh`;
+  }
+
+  scaleInfo(event) {
+    if (event===true) {
+      const slideWidth = this.profSlide.nativeElement.getBoundingClientRect().width;
+
+      var image = this.grandchildren.picture.nativeElement;
+      const imageWidth = image.getBoundingClientRect().width;
+
+      var complete = this.grandchildren.complete.nativeElement;
+      var header = this.grandchildren.header.nativeElement;
+
+      complete.style.width = `${imageWidth}px`;
+      complete.style.left = `${(slideWidth - imageWidth)/2}px`;
+      header.style.width = `${imageWidth}px`;
+    } else {
+      this.scaleProfile();
+    }
+  }
+
 
   ngOnDestroy() {
     this.chatStore.updateLatestChatInput(
