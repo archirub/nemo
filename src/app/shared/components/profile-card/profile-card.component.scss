@@ -6,6 +6,10 @@ ion-card-subtitle {
   font-size: 22px;
 }
 
+img {
+  object-fit: cover;
+}
+
 #swipe-card {
   margin: 10px 20px 20px;
   max-width: 100vw;
@@ -13,6 +17,7 @@ ion-card-subtitle {
   background-size: cover;
   background-position: center;
   border-radius: 30px;
+  overflow: hidden;
 }
 
 #pictureFrame {

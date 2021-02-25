@@ -1,4 +1,4 @@
-<ion-header collapse="condense">
+<ion-header>
   <ion-toolbar id="chat-toolbar">
     <ion-grid id="header-grid">
       <ion-row>
@@ -11,16 +11,32 @@
 
         <ion-col size="8">
           <ion-text color="dark">
-            <h3 class="messenger-header" (click)="slideTo('profile')">
-              {{(currentChat | async)?.recipient?.name}}
-            </h3>
+            <div class="flexcolumn">
+              <ion-avatar>
+                <img (click)="slideTo('profile')" [src]="(currentChat | async)?.recipient?.picture" />
+              </ion-avatar>
+              <h3 class="messenger-header" (click)="slideTo('profile')">
+                {{(currentChat | async)?.recipient?.name}}
+              </h3>
+            </div>
           </ion-text>
         </ion-col>
 
         <ion-col size="2">
-          <ion-avatar>
-            <img (click)="slideTo('profile')" [src]="(currentChat | async)?.recipient?.picture" />
-          </ion-avatar>
+          <ion-icon name="shield"></ion-icon>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+        <ion-col id="chat-head">
+          <h3 class="messenger-header" (click)="slideTo('messenger')">
+            Chat
+          </h3>
+        </ion-col>
+        <ion-col id="prof-head">
+          <h3 class="messenger-header" (click)="slideTo('profile')">
+            Profile
+          </h3>
         </ion-col>
       </ion-row>
     </ion-grid>
@@ -88,11 +104,7 @@
   </ion-slide>
 
   <ion-slide>
-    <div class="flexcolumn">
-      <ion-button class="return" (click)="slideTo('messenger')">
-        <ion-icon name="arrow-back-outline"></ion-icon>
-        Back to chat
-      </ion-button>
+    <div class="flexcolumn prof">
       <app-profile-card [profile] = "this.chatProfile"></app-profile-card>
     </div>
   </ion-slide>

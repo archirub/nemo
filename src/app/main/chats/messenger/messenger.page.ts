@@ -1,6 +1,6 @@
 import { Component, Input, AfterViewInit, OnDestroy, OnInit, ViewChild } from "@angular/core";
 
-import { NavController, IonContent, IonSlides } from "@ionic/angular";
+import { NavController, IonContent, IonSlides, IonSlide } from "@ionic/angular";
 import { AngularFireAuth } from "@angular/fire/auth";
 import { ActivatedRoute, ParamMap } from "@angular/router";
 
@@ -60,6 +60,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit() {
     this.slides.lockSwipes(true);
+    this.tabColor();
   }
 
   /** Subscribes to chatStore's Chats osbervable using chatID
@@ -189,7 +190,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
     return true;
   }
 
-  slideTo(page) {
+  async slideTo(page) {
     this.slides.lockSwipes(false);
 
     if (page==="profile") {
@@ -199,6 +200,23 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
     }
 
     this.slides.lockSwipes(true);
+
+    await this.tabColor();
+  }
+
+  async tabColor() {
+    var chat = document.getElementById("chat-head");
+    var prof = document.getElementById("prof-head");
+
+    var current = await this.slides.getActiveIndex();
+    
+    if (current == 0) {
+      chat.style.color = "var(--ion-color-primary)";
+      prof.style.color = "var(--ion-color-light-contrast)";
+    } else {
+      chat.style.color = "var(--ion-color-light-contrast)";
+      prof.style.color = "var(--ion-color-primary)";
+    }
   }
 
   ngOnDestroy() {
