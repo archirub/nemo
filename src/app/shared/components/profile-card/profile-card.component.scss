@@ -2,8 +2,12 @@
   --main-bg-color: coral;
 }
 
-ion-card-subtitle {
-  font-size: 22px;
+ion-card-title {
+  font-size: 4vh;
+}
+
+img {
+  object-fit: cover;
 }
 
 #swipe-card {
@@ -13,6 +17,7 @@ ion-card-subtitle {
   background-size: cover;
   background-position: center;
   border-radius: 30px;
+  overflow: hidden;
 }
 
 #pictureFrame {
@@ -233,7 +238,7 @@ ion-card-subtitle {
 }
 
 #department {
-  font-size: larger;
+  font-size: 3vh;
   text-transform: none;
   color: var(--ion-color-primary);
   margin-top: 5px;
