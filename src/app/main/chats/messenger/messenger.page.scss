@@ -32,6 +32,10 @@ ion-header {
   }
 }
 
+app-profile-card {
+  font-family: var(--ion-font-family);
+}
+
 .flexcolumn {
   display: flex;
   flex-direction: column;

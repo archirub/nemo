@@ -241,6 +241,7 @@ img {
   font-size: 3vh;
   text-transform: none;
   color: var(--ion-color-primary);
+  font-family: var(--ion-font-secondary);
   margin-top: 5px;
   margin-bottom: 0px;
 }
@@ -252,6 +253,7 @@ img {
   padding: 5vw;
   font-size: 4vh;
   color: var(--ion-color-light-contrast);
+  font-family: var(--ion-font-secondary);
   font-weight: 500;
 }
 
