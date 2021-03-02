@@ -228,35 +228,61 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
 
   scaleProfile() {
     //get space available on slide for profile
+    const aspectRatio = 0.583;
     const headerHeight = this.header.nativeElement.getBoundingClientRect().height;
     const profileHeight = Math.floor(this.profSlide.nativeElement.getBoundingClientRect().height - 20);
+    const profileWidth = aspectRatio * profileHeight;
     const fullHeight = headerHeight + profileHeight + 20;
     const slideWidth = this.profSlide.nativeElement.getBoundingClientRect().width;
-    const aspectRatio = 0.583; //iPhone X aspect ratio looks best
     const textRatio = profileHeight/fullHeight;
 
-    var profileCard = this.profCard.nativeElement;
-    var snippet = this.grandchildren.snippet.nativeElement;
-    var title = this.grandchildren.name.nativeElement;
-    var subtitle = this.grandchildren.department.nativeElement;
+    var profileCard = this.profCard.nativeElement; //full card element
+    var swipeCard = this.grandchildren.swipe.nativeElement; //full card container element
+    var snippet = this.grandchildren.snippet.nativeElement; //info before expand
+    var title = this.grandchildren.name.nativeElement; //name text
+    var subtitle = this.grandchildren.department.nativeElement; //department text
+    var qcont = this.grandchildren.QandA.nativeElement; //question container
+    var question = this.grandchildren.question.nativeElement; //question text
+    var answer = this.grandchildren.answer.nativeElement; //answer text
 
     //size card appropriately
     profileCard.style.height = `${profileHeight}px`;
-    profileCard.style.width = `${aspectRatio * profileHeight}px`;
+    swipeCard.style.height = `${profileHeight}px`;
+    swipeCard.style.margin = '0';
+    profileCard.style.width = `${profileWidth}px`;
 
     //get width of image
-    var image = this.grandchildren.picture.nativeElement;
-    const imageWidth = image.getBoundingClientRect().width;
+    var imageSlides = this.grandchildren.picture.nativeElement;
+    var images:any = this.grandchildren.pictures;
+    imageSlides.style.width = `${Math.round(profileWidth)}px`;
+    images.forEach((img: ElementRef) => {
+      img.nativeElement.style.width = `${profileWidth}px`;
+    })
 
     //size and position info appropriately
-    snippet.style.width = `${imageWidth}px`;
-    snippet.style.left = `${(slideWidth - imageWidth)/2}px`;
+    snippet.style.width = `${Math.round(profileWidth) + 2}px`;
+    snippet.style.margin = "0 auto";
     snippet.style.maxHeight = 'none';
     snippet.style.height = 'none';
+    snippet.style.left = '0';
+    snippet.style.right = '0';
+
+    //size and position q and a appropriately
+    qcont.style.left = `${((slideWidth-profileWidth)/2) + 10}px`;
+    qcont.style.width = `${profileWidth - 15}px`;
+    qcont.style.bottom = `${headerHeight - 45}px`;
 
     //size text
-    title.style.fontSize = `${textRatio * 4}vh`;
-    subtitle.style.fontSize = `${textRatio * 3}vh`;
+    title.style.fontSize = `${textRatio * 3.25}vh`;
+    subtitle.style.fontSize = `${textRatio * 2.25}vh`;
+    question.style.fontSize = `${textRatio * 2.75}vh`;
+    answer.style.fontSize = `${textRatio * 2.5}vh`;
+
+    //change slide transition to fit width
+    this.grandchildren.slides.options = `{ 'spaceBetween': '${profileWidth}px' }`;
+    this.grandchildren.bullets.forEach((bullet: ElementRef) => {
+      bullet.nativeElement.style.display = 'none';
+    });
   }
 
   scaleInfo(event) {

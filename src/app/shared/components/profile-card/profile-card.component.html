@@ -1,10 +1,21 @@
-<div id="swipe-card">
+<div #fullCard id="swipe-card">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <div class="img-container">
-    <img #pic
-      id="pictures"
-      src="https://staticg.sportskeeda.com/editor/2020/06/a19cc-15923264235917.jpg"
-    />
+    <div class="pager">
+      <ion-icon #bullets name="ellipse" *ngFor="let path of this.picturePaths"></ion-icon>
+    </div>
+    <ion-slides #picSlides 
+    (ionSlideDidChange)="updatePager()"
+    (ionSlideWillChange)="checkSlide()"
+    >
+      <ion-slide #pic *ngFor="let path of this.picturePaths"
+        [ngStyle] = "{ 'background-image': 'url(' + path + ')', 'background-size': 'cover' }">
+      </ion-slide>
+    </ion-slides>
+    <div #QandA class="question" [hidden]="moreInfo">
+      <ion-card-title #question>{{profile.questions[0].question}}</ion-card-title>
+      <ion-card-subtitle #answer>{{profile.questions[0].answer}}</ion-card-subtitle>
+    </div>
   </div>
   <!-- <div id="QandA">
     <ion-chip color="tertiary"><ion-label id="answers">Loop?: "Never! lol i hate it"</ion-label></ion-chip>
@@ -25,11 +36,12 @@
       <div id="content">
         <div id="info-segment">
         
+          <!--INTERESTS IN THE DATABASE DON'T CURRENTLY MATCH LOCAL, THIS IS NOT WIRED UP FOR ICONS -->
           <div id="interests-container">
             <div id="interests-box" *ngFor="let interest of profile.interests">
-              <ion-icon name="leaf" id="interest-icon" style="color: green;"></ion-icon>
+              <img id="interest-icon" src="/assets/interests/pubcrawler.png" alt="icon" />
               <br>
-              <ion-label id="interest-label">{{interest}}</ion-label>
+              <ion-label id="interest-label">{{interest}}</ion-label><!-- would be {{interest.name}} -->
             </div>
           </div>
         </div>
@@ -69,13 +81,13 @@
         <div id="info-segment">
           <div id="interests-container">
             <div id="interests-box">
-              <ion-icon name="location" id="interest-icon" style="color: var(--ion-color-primary)"></ion-icon>
+              <ion-icon name="location" id="bottom-icon" style="color: var(--ion-color-primary)"></ion-icon>
               <br>
               <ion-label id="interest-label">Moscow</ion-label>
             </div>
 
             <div id="interests-box">
-              <ion-icon name="people" id="interest-icon" style="color: var(--ion-color-primary)"></ion-icon>
+              <ion-icon name="people" id="bottom-icon" style="color: var(--ion-color-primary)"></ion-icon>
               <br>
               <ion-label id="interest-label">{{profile.society}}</ion-label>
             </div>
