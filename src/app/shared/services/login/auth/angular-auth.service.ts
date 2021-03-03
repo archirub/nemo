@@ -74,7 +74,6 @@ export class AngularAuthService {
         temp = new FullUser(parsedData)
       }
       const user = temp
-      console.log("a",temp)
       return user;
     }), tap(user => {
           if (user) {

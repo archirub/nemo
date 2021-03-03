@@ -80,6 +80,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
       .pipe(
         map((chats) => {
           chats.forEach((chat) => {
+            // this.chatProfile = db.getuserfromuid(chat.recipient.uid)
             if (chat.id === this.CHAT_ID) {
               this.currentChat.next(chat);
               if (!this.latestChatInput) {
