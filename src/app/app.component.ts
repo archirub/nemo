@@ -9,6 +9,7 @@ import { AuthService } from "@services/index";
 import { AngularAuthService } from "@services/login/auth/angular-auth.service";
 import { Router } from "@angular/router";
 import { Subscription } from "rxjs";
+import { take } from "rxjs/operators";
 
 @Component({
   selector: "app-root",
@@ -40,23 +41,22 @@ export class AppComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.signUpAuthService.autologin().subscribe(()=> {
       this.authSub = this.signUpAuthService.userIsAuthenticated.subscribe(isAuth => {
-        console.log("aaa", isAuth)
         if (isAuth) { 
-          console.log("User is authenticated")
+          console.log("User has been authenticated")
           this.signUpAuthService.userType.subscribe(
             user_type => {
               if (user_type == 'BaselineUser' || user_type == 'FullUser') {
-                console.log("going home baby"); 
+                console.log("ROUTER: HOME"); 
                 this.router.navigateByUrl('main/tabs/home'); 
               }
               else if (user_type == 'AuthenticatedUser') {
-                console.log("going required"); 
+                console.log("ROUTER: REQUIRED"); 
                 this.router.navigateByUrl('welcome/signuprequired'); //uncomment to have specialized routing
                 // this.router.navigateByUrl('main'); //this is for development
               }
             });
           }
-        else { console.log("welcomed"); this.router.navigateByUrl('welcome'); }
+        else { console.log("ROUTER: WELCOME"); this.router.navigateByUrl('welcome'); }
       });
     })
   }
@@ -70,11 +70,24 @@ export class AppComponent implements OnInit, OnDestroy {
       this.statusBar.styleDefault();
       this.splashScreen.hide();
 
-      this.auth
-        .logIn()
-        .then((uid) => this.currentUserStore.initializeStore(uid))
-        .then((uid) => this.swipeStackStore.initializeStore(uid))
-        .then((uid) => this.chatStore.initializeStore(uid));
+
+      this.signUpAuthService.userId.subscribe(uid => {
+        if (uid) {
+          console.log("Recieved uid: ", uid)
+          this.currentUserStore.initializeStore(uid)
+          this.swipeStackStore.initializeStore(uid)
+          this.chatStore.initializeStore(uid)
+        }
+        else {
+          console.log("Waiting for uid")
+        }
+
+      })
+      // this.auth
+      //   .logIn()
+      //   .then((uid) => this.currentUserStore.initializeStore(uid))
+      //   .then((uid) => this.swipeStackStore.initializeStore(uid))
+      //   .then((uid) => this.chatStore.initializeStore(uid));
     });
 
   }}
