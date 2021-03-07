@@ -28,7 +28,6 @@ import { SwipeCardComponent } from "./swipe-card/swipe-card.component";
   styleUrls: ["home.page.scss"],
 })
 export class HomePage implements OnInit, OnDestroy {
-  @Output() refillEmitter = new EventEmitter();
   //@Output() backdropEmitter = new EventEmitter();
   //@ViewChild(IonBackdrop) backdrop: IonBackdrop;
 
@@ -87,8 +86,6 @@ export class HomePage implements OnInit, OnDestroy {
           console.log("Refilling swipe stack");
           await this.swipeOutcomeStore.registerSwipeChoices(),
             await this.swipeStackStore.addToSwipeStackQueue(this.searchCriteria);
-          console.log("Emitting refill event");
-          this.refillEmitter.emit("refill");
         })
       )
       .subscribe();
@@ -145,9 +142,6 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   @ViewChild(SwipeCardComponent) child: SwipeCardComponent;
-  ngAfterViewInit() {
-    this.refillEmitter.on("refill", this.child.refillRotate);
-  }
 
   ngOnDestroy() {
     this.searchCriteria$.unsubscribe();

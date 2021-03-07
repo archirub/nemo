@@ -1,5 +1,12 @@
-import { ModalController } from "@ionic/angular";
-import { Component, OnInit, OnDestroy, Input, Output, ViewChild } from "@angular/core";
+import { ModalController, Animation } from "@ionic/angular";
+import { Component, 
+  OnInit,
+  OnDestroy, 
+  Input, 
+  QueryList, 
+  HostListener, 
+  ViewChildren, 
+  ElementRef } from "@angular/core";
 
 import { Subscription } from "rxjs";
 
@@ -11,6 +18,7 @@ import {
 } from "@stores/index";
 import { Profile, User } from "@classes/index";
 import { MatchModalComponent, ProfileCardComponent } from "@components/index";
+import { SwipeYesAnimation, SwipeNoAnimation } from "@animations/index";
 import { swipeChoice } from "@interfaces/index";
 import { EventEmitter } from "events";
 
@@ -21,10 +29,20 @@ import { EventEmitter } from "events";
 })
 export class SwipeCardComponent extends EventEmitter implements OnInit, OnDestroy {
   @Input() profiles: Profile[];
-  @Output() refillEmitter = new EventEmitter();
+  @ViewChildren('card', { read: ElementRef}) card: QueryList<ElementRef>;
+
+  screenWidth: number;
+  swipeYesAnimation: Animation;
+  swipeNoAnimation: Animation;
+
+  @HostListener("window:resize", ["$event"])
+  onResize() {
+    this.screenWidth = window.innerWidth;
+  }
 
   currentUser$: Subscription;
   currentUser: User;
+  screenTaps: number;
 
   constructor(
     private swipeOutcomeStore: SwipeOutcomeStore,
@@ -41,6 +59,8 @@ export class SwipeCardComponent extends EventEmitter implements OnInit, OnDestro
     this.currentUser$ = this.currentUserStore.user.subscribe(
       (profile) => (this.currentUser = profile)
     );
+    this.screenTaps = 0;
+    this.screenWidth = window.innerWidth;
   }
 
   /**
@@ -66,7 +86,7 @@ export class SwipeCardComponent extends EventEmitter implements OnInit, OnDestro
    * */
   onNoSwipe(profile: Profile) {
     if (!profile) return;
-    this.swipeStackStore.removeProfile(profile);
+    //this.swipeStackStore.removeProfile(profile);
     this.swipeOutcomeStore.noSwipe(profile);
   }
 
@@ -95,12 +115,36 @@ export class SwipeCardComponent extends EventEmitter implements OnInit, OnDestro
     await matchModal.present();
   }
 
-  /* Math rotation function for swipe card stack */
-  refillRotate() {
-    var cards:any = document.getElementsByClassName('swipe-cards');
-    for (let i = 0; i < cards.length; i++) {
-        let element = cards[i];
-        element.style.transform = `rotate(${(Math.random() * 10) - 5}deg)`;
+  async doubleTap(choice) {
+    this.swipeYesAnimation = SwipeYesAnimation(
+      this.card.toArray()[0],
+      this.screenWidth
+    );
+    this.swipeNoAnimation = SwipeNoAnimation(
+      this.card.toArray()[0],
+      this.screenWidth
+    );
+
+    this.screenTaps += 1;
+    setTimeout(() => {
+      this.screenTaps = 0;
+    }, 500);
+    
+    if (this.screenTaps > 1) {
+      console.log("Double tap detected.");
+      this.screenTaps = 0;
+
+      if (choice === "yes") {
+        this.swipeYesAnimation.play();
+        setTimeout(() => {
+          this.onYesSwipe(this.profiles[0]);
+        }, 400);
+      } else if (choice === "no") {
+        this.swipeNoAnimation.play();
+        setTimeout(() => {
+          this.onNoSwipe(this.profiles[0]);
+        }, 400);
+      };
     };
   }
 

@@ -1,11 +1,13 @@
 <ion-content>
   <div class="background">
-    <div class="swipe-cards" *ngFor="let profile of profiles; index as i; first as isFirst; last as isLast"
+    <div #card class="swipe-cards" *ngFor="let profile of profiles; index as i; first as isFirst; last as isLast"
     [ngStyle]="{ 'zIndex': profiles.length - i }">
-        <app-profile-card [profile] = "profile">
+        <app-profile-card (tapped)="doubleTap($event)" [profile] = "profile">
         </app-profile-card>
     </div>
   </div>
+  <!--div #yes draggable=true class="yesSwipe" (click)="doubleTap('yes')" on-drag="dragger()"></div>
+  <div #no class="noSwipe" (click)="doubleTap('no')"></div-->
   <!--ion-grid>
     <ion-row>
       <ion-col [ngStyle]="{ zIndex: 1000 }">
