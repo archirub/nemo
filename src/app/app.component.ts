@@ -1,15 +1,15 @@
 import { Component, OnInit, OnDestroy } from "@angular/core";
 
 import { Platform } from "@ionic/angular";
-import { SplashScreen } from "@ionic-native/splash-screen/ngx";
-import { StatusBar } from "@ionic-native/status-bar/ngx";
 
+import { Plugins } from "@capacitor/core"
 import { ChatStore, CurrentUserStore, SwipeStackStore } from "@stores/index";
 import { AuthService } from "@services/index";
 import { AngularAuthService } from "@services/login/auth/angular-auth.service";
 import { Router } from "@angular/router";
 import { Subscription } from "rxjs";
 import { take } from "rxjs/operators";
+import { Capacitor } from "@capacitor/core";
 
 @Component({
   selector: "app-root",
@@ -21,8 +21,6 @@ export class AppComponent implements OnInit, OnDestroy {
 
   constructor(
     private platform: Platform,
-    private splashScreen: SplashScreen,
-    private statusBar: StatusBar,
     private auth: AuthService,
     private chatStore: ChatStore,
     private currentUserStore: CurrentUserStore,
@@ -67,8 +65,9 @@ export class AppComponent implements OnInit, OnDestroy {
 
   initializeApp() {
     this.platform.ready().then(() => {
-      this.statusBar.styleDefault();
-      this.splashScreen.hide();
+      if (Capacitor.isPluginAvailable('SplashScreen')) {
+        Plugins.SplashScreen.hide()
+      }
 
 
       this.signUpAuthService.userId.subscribe(uid => {
