@@ -1,15 +1,14 @@
-import { AreaOfStudy, Baseline, Degree, Full, Gender, Interest, profilePictureUrls, QuestionAndAnswer, SexualPreference, SignupAuth, SignupOptional, SignupRequired, SocietyCategory, SwipeMode } from "@interfaces/index";
+import { AreaOfStudy, Baseline, Degree, Full, Gender, Interest, profilePictureUrls, QuestionAndAnswer, SexualPreference, Authenticated, SignupOptional, SignupRequired, SocietyCategory, SwipeMode } from "@interfaces/index";
 
 
-export class AuthUser implements SignupAuth {
+export class AuthenticatedUser implements Authenticated {
 
-    constructor(myMap: SignupAuth) {
+    constructor(myMap: Authenticated) {
         this.email = myMap.email;
         this.uid = myMap.uid;
         this.token = myMap.token;
         this.tokenExpirationDate = myMap.tokenExpirationDate
     }
-
     private _email: string;
     private _uid: string;
     private _token: string;
@@ -41,23 +40,20 @@ export class AuthUser implements SignupAuth {
     }
 }
 
-export class BaselineUser extends AuthUser implements SignupRequired {
+export class BaselineUser extends AuthenticatedUser implements SignupRequired {
     constructor(myMap: Baseline) {
         super(myMap);
         this.firstName = myMap.firstName;
         this.dateOfBirth = myMap.dateOfBirth;
-        this.university = myMap.university; 
         this.gender = myMap.gender;
-        this.sexualPreference = myMap.sexualPreference,
-        this.swipeMode = myMap.swipeMode
+        this.sexualPreference = myMap.sexualPreference;
+        // this.swipeMode = myMap.swipeMode
     }
-
     private _firstName: string;
     private _dateOfBirth: string;
-    private _university: string;
     private _gender: Gender;
     private _sexualPreference: SexualPreference;
-    private _pictures: profilePictureUrls; //add in contructer + getter and setter methods
+    // private _pictures: profilePictureUrls; //add in contructer + getter and setter methods
 
     private _swipeMode: SwipeMode;
 
@@ -72,12 +68,6 @@ export class BaselineUser extends AuthUser implements SignupRequired {
     }
     public set dateOfBirth(value: string) {
         this._dateOfBirth = value;
-    }
-    public get university(): string {
-        return this._university;
-    }
-    public set university(value: string) {
-        this._university = value;
     }
     public get gender(): Gender {
         return this._gender;

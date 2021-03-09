@@ -9,7 +9,7 @@ import { IonSlides } from '@ionic/angular';
 export class SettingsPage implements AfterViewInit {
   @ViewChild("slide") slides: IonSlides;
   @ViewChild("goUnder") goUnder: ElementRef;
-  @ViewChild("goUnderH3") goUnderH3: ElementRef;
+
 
   constructor() { 
   }
@@ -25,20 +25,17 @@ export class SettingsPage implements AfterViewInit {
   }
 
   /* Styles gone 'under' tab on toggle */
-  goneUnder() {
+  goneUnder(option) {
     // Fetch gone under tab
     var tab = this.goUnder.nativeElement
-    var subhead = this.goUnderH3.nativeElement
-    if (tab.style.backgroundColor == "var(--ion-color-light-tint)") {
-      // Restyling when gone under selected
-      tab.style.backgroundColor = "var(--ion-color-secondary-shade)";
-      tab.style.color = "var(--ion-color-primary-contrast)";
-      subhead.style.color = "var(--ion-color-primary-contrast)";
-    } else {
-      // Style back to normal when deselected
-      tab.style.backgroundColor = "var(--ion-color-light-tint)";
+
+    if (option==="on") {
+      tab.style.color = "var(--ion-color-primary)";
+      tab.style.fontWeight = "bold";
+      console.log("User has gone under.");
+    } else if (option==="off") {
       tab.style.color = "var(--ion-color-light-contrast)";
-      subhead.style.color = "var(--ion-color-medium-tint)";
+      tab.style.fontWeight = "normal";
     }
   }
 

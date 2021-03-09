@@ -20,16 +20,57 @@ export interface SearchFeatures {
 
 export const searchCriteriaOptions = {
   university: ["UCL"] as const,
-  areaOfStudy: ["politics", "mathematics", "biology"] as const,
   degree: ["undergrad", "postgrad"] as const,
-  societyCategory: [
-    "Debate Society",
-    "Basketball Society",
-    "Football Society",
-    "3D Modelling Society",
-    "Anime Society",
+  areaOfStudy: [
+    "Arts and Humanities",
+    "Bartlett School",
+    "Brain Sciences",
+    "Engineering Sciences",
+    "IOE",
+    "Law",
+    "Life sciences",
+    "Maths and Physical Sciences",
+    "Medical Sciences",
+    "Social Sciences",
   ] as const,
-  interest: ["sports guy", "herb connoisseur", "smart guy", "beastaLegend"] as const,
+  societyCategory: [
+    "Academic",
+    "Altruistic",
+    "Arts",
+    "Common Interests",
+    "Cultural",
+    "Departmental",
+    "Faith and Spirituality",
+    "Finance and Enterprise",
+    "Political",
+    "Student Media",
+    "Science and Technology",
+    "Sports",
+  ] as const,
+  interest: [
+    "Herb Friendly",
+    "Book Worm",
+    "Life Saver",
+    "Cafe Dweller",
+    "Astrologist",
+    "Chef",
+    "Model",
+    "Tik Toker",
+    "Library Fiend",
+    "Pub Crawler",
+  ] as const,
+  path: [
+    "/assets/interests/herbfriendly.png",
+    "/assets/interests/bookworm.png",
+    "/assets/interests/lifesaver.png",
+    "/assets/interests/cafedweller.png",
+    "/assets/interests/astrologist.png",
+    "/assets/interests/chef.png",
+    "/assets/interests/model.png",
+    "/assets/interests/tiktoker.png",
+    "/assets/interests/libraryfiend.png",
+    "/assets/interests/pubcrawler.png",
+  ] as const,
   onCampus: [true, false] as const,
 };
 
@@ -47,6 +88,8 @@ export type AreaOfStudy = typeof searchCriteriaOptions.areaOfStudy[number]; //MO
 export type Degree = typeof searchCriteriaOptions.degree[number];
 export type SocietyCategory = typeof searchCriteriaOptions.societyCategory[number];
 export type Interest = typeof searchCriteriaOptions.interest[number];
+export type Path = typeof searchCriteriaOptions.path[number];
+export type InterestAndPath = { name: Interest; path: Path };
 export type OnCampus = typeof searchCriteriaOptions.onCampus[number];
 
 export type Criterion = keyof searchCriteriaFromDatabase;

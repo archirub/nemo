@@ -52,7 +52,10 @@ export class LoginPage implements OnInit {
     authObs = this.signUpAuthService.login(email, password)
 
     authObs.subscribe(
-      resData => console.log(resData), 
+      resData => {
+        console.log(resData)
+        this.router.navigateByUrl("/main/tabs/home")
+      },
       errRes => {
         const code = errRes.error.error.message;
         let message = "Please check your info and try again"

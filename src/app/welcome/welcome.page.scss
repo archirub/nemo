@@ -408,6 +408,16 @@ ion-content {
   }
 }
 
+.personal-pref {
+  height: auto;
+  --border-radius: 10px;
+  margin: 1vh;
+  width: auto;
+  --padding: 0;
+  --inner-border-width: none;
+  --border-color: transparent;
+}
+
 .add-info {
   font-size: 3vh;
   --border-radius: 30px;

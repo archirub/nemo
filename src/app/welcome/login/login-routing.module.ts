@@ -13,7 +13,7 @@ const routes: Routes = [
   {
     path: '../../../main/tabs/home',
     component: HomePage,
-    canActivate: [SignupAuthGuard]
+    canLoad: [SignupAuthGuard]
   }
 ];
 

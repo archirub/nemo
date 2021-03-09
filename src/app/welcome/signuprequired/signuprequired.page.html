@@ -17,11 +17,8 @@
       
           <div class="input flexend-col">
             <div>
-              <ion-input placeholder="First Name" formControlName="firstName"></ion-input>
-            </div>
-      
-            <div>
-              <ion-input placeholder="Last Name" formControlName="lastName"></ion-input>
+              <ion-input placeholder="First Name" 
+              formControlName="firstName"></ion-input>
             </div>
           </div>
       
@@ -43,7 +40,7 @@
       
           <div class="input flexend-col">
             <div>
-              <ion-datetime displayFormat="DD MM YYYY"></ion-datetime>
+              <ion-datetime displayFormat="DD MM YYYY" formControlName="dateOfBirth"></ion-datetime>
             </div>
           </div>
       
@@ -62,7 +59,7 @@
         <ion-item lines="none">
           <div class="question">
             <ion-label position="stacked">
-              Choose your photos NAME <!-- BACKEND - possible to fill in name here from previous slide's input?-->
+              Choose your photos <!-- BACKEND - possible to fill in name here from previous slide's input?-->
             </ion-label>
           </div>
       
@@ -93,40 +90,38 @@
       </ion-slide>
       
       <ion-slide>
-        <ion-item lines="none">
-          <div class="question">
+        <div class="personal-pref">
+        <!-- <ion-item lines="none"> --> 
+          <!-- <div class="question">
             <ion-label position="stacked">
-              What are your preferences?
+              Tell us a bit about yourself
             </ion-label>
-          </div>
+          </div> -->
           <br>
       
           <div class="flexstart-col">
-            <div class="preferences">
+            <!-- <div class="preferences">
               <h3>I am looking for</h3>
-              <ion-select required>
+              <ion-select required [formControl]="swipeMode">
                 <ion-select-option value="option">option...</ion-select-option>
               </ion-select>
-            </div>
+            </div> -->
       
             <div class="preferences">
               <h3>I am interested in</h3>
-              <ion-select required>
-                <ion-select-option value="option">option...</ion-select-option>
+              <ion-select required formControlName="sexualPreference">
+                <ion-select-option value="men">men</ion-select-option>
+                <ion-select-option value="women">women</ion-select-option>
+                <ion-select-option value="both">both</ion-select-option>
               </ion-select>
             </div>
-      
+          
             <div class="preferences">
               <h3>I identify as</h3>
-              <ion-select required>
-                <ion-select-option value="option">option...</ion-select-option>
-              </ion-select>
-            </div>
-      
-            <div class="preferences">
-              <h3>I live in</h3>
-              <ion-select required>
-                <ion-select-option value="option">option...</ion-select-option>
+              <ion-select required formControlName="gender">
+                <ion-select-option value="man">man</ion-select-option>
+                <ion-select-option value="woman">woman</ion-select-option>
+                <ion-select-option value="other">other</ion-select-option>
               </ion-select>
             </div>
           
@@ -136,11 +131,11 @@
             </div>
       
             <div class="terms">
-              <ion-checkbox name="terms"></ion-checkbox>
+              <!-- <ion-checkbox name="terms"></ion-checkbox> -->
               <h2>I have read and understood the terms and conditions</h2>
             </div>
             <div class="terms">
-              <ion-checkbox name="privacy"></ion-checkbox>
+              <!-- <ion-checkbox name="privacy"></ion-checkbox> -->
               <h2>I consent to the data and privacy policies of this app</h2>
             </div>
           </div>
@@ -149,7 +144,8 @@
             <ion-button class="next-slide scroll" (click)="slides.slideNext()">
             <ion-icon name="chevron-forward-outline"></ion-icon>
           </ion-button>
-        </ion-item> 
+        <!-- </ion-item>  -->
+        </div>
       </ion-slide>
       
       <ion-slide>
@@ -160,7 +156,7 @@
       
         <div class="container-wave flexstart-col">
           <div class="scroll flexend-row">
-            <ion-button class="exit">
+            <ion-button (click)="goHome()" class="exit">
               <ion-icon name="close-outline"></ion-icon>
             </ion-button>
           </div>
@@ -175,7 +171,9 @@
       
           <div class="flexend-col">
             <!-- <ion-button class="add-info" (click)="unlockAndSwipe(7)"> -->
-              <ion-button [routerLink]="['../signupoptional']" routerLinkActive="router-link-active" type ="submit">
+              <!-- <ion-button [routerLink]="['../signupoptional']" routerLinkActive="router-link-active" type ="submit"> -->
+                <ion-button type ="submit">
+
               Enter Basic Information
             </ion-button>
           </div>

@@ -1,8 +1,35 @@
 // Ionic Variables and Theming. For more info, please see:
 // http://ionicframework.com/docs/theming/
 
+/** Font **/
+@font-face {
+  font-family: Cabin;
+  src: url("/assets/fonts/Cabin/Cabin-VariableFont_wdth\,wght.ttf");
+}
+
+@font-face {
+  font-family: NewYork;
+  src: url("/assets/fonts/NY/NewYork.ttf");
+}
+
+@font-face {
+  font-family: SFPro;
+  src: url("/assets/fonts/SFPro/SF-Pro.ttf");
+}
+
 /** Ionic CSS Variables **/
 :root {
+
+  /** iOS font family **/
+  .ios {
+    --ion-font-family: 'SFPro';
+    --ion-font-secondary: 'NewYork';
+  };
+
+  /** Others font family **/
+  --ion-font-family: 'Cabin';
+  --ion-font-secondary: 'Cabin';
+
   /** primary **/
   --ion-color-primary: #F07167;
   --ion-color-primary-rgb: 56, 128, 255;

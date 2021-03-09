@@ -7,15 +7,22 @@ import { IonicModule } from "@ionic/angular";
 import { OwnProfilePageRoutingModule } from "./own-profile-routing.module";
 
 import { OwnProfilePage } from "./own-profile.page";
-import { ProfileCardComponent, AddPhotoComponent, AppToggleComponent } from "@components/index";
+import { ProfileCardModule } from "@components/profile-card/profile-card.component.module";
+import { AddPhotoModule } from "@components/add-photo/add-photo.component.module";
+import { AppToggleModule } from "@components/nemo-toggle/nemo-toggle.component.module";
+
 
 @NgModule({
   imports: [
     CommonModule,
     FormsModule,
     IonicModule,
+    ProfileCardModule,
     OwnProfilePageRoutingModule,
+    ProfileCardModule,
+    AddPhotoModule,
+    AppToggleModule
   ],
-  declarations: [OwnProfilePage, ProfileCardComponent, AddPhotoComponent, AppToggleComponent],
+  declarations: [OwnProfilePage],
 })
 export class OwnProfilePageModule {}

@@ -1,3 +1,4 @@
+import { searchCriteriaOptions } from "@interfaces/index";
 import { Gender, SexualPreference, SwipeMode } from "./match-data.model";
 import { profilePictureUrls, QuestionAndAnswer } from "./profile.model";
 import {
@@ -8,7 +9,7 @@ import {
   SocietyCategory,
 } from "./search-criteria.model";
 
-export interface SignupAuth {
+export interface Authenticated {
   email: string,
   uid: string;
   token: string;
@@ -18,10 +19,10 @@ export interface SignupAuth {
 export interface SignupRequired {
   firstName: string;
   dateOfBirth: string;
-  university: string;
   gender: Gender;
   sexualPreference: SexualPreference;
-  swipeMode: SwipeMode;
+  // university: typeof searchCriteriaOptions.university
+  // swipeMode: SwipeMode;
   // pictures: profilePictureUrls;
 }
 
@@ -30,14 +31,14 @@ export interface SignupOptional {
   course: string;
   society: string;
   areaOfStudy: AreaOfStudy;
+  onCampus: OnCampus;
   degree: Degree;
   societyCategory: SocietyCategory;
   interests: Interest[];
   questions: QuestionAndAnswer[];
-  onCampus: OnCampus;
 }
 
 export type SignupMap = SignupRequired & SignupOptional;
 
-export type Baseline = SignupAuth & SignupRequired;
+export type Baseline = Authenticated & SignupRequired;
 export type Full = Baseline & SignupOptional;

@@ -1,8 +1,8 @@
-import { Component, Input, ViewChild, ElementRef, HostListener, OnInit, AfterViewInit } from "@angular/core";
+import { Component, Input, ViewChild, ElementRef, HostListener, OnInit, AfterViewInit, Output } from "@angular/core";
 import { Router } from "@angular/router";
-import { ModalController } from "@ionic/angular";
+import { IonContent, ModalController } from "@ionic/angular";
 
-import { Chat } from "@classes/index";
+import { Chat, Profile } from "@classes/index";
 import { MatchesEnterAnimation, MatchesLeaveAnimation } from "@animations/index";
 import { MatchesComponent } from "../matches/matches.component";
 import { TabElementRefService } from "src/app/main/tab-menu/tab-element-ref.service";
@@ -14,6 +14,7 @@ import { TabElementRefService } from "src/app/main/tab-menu/tab-element-ref.serv
 })
 export class ChatBoardComponent implements OnInit {
   @Input() chats: Chat[];
+  @ViewChild(IonContent) ionContent: IonContent;
 
   // PROPERTIES FOR MODAL ANIMATION
   @ViewChild("chatContainer", { read: ElementRef }) chatContainer: ElementRef;
@@ -157,6 +158,10 @@ export class ChatBoardComponent implements OnInit {
       }
     }
     return counter;
+  }
+
+  scroll(speed) {
+    this.ionContent.scrollToTop(speed);
   }
 
   goToMessenger(chatID: String) {

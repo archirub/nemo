@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, ViewChild, AfterViewInit } from "@angular/core";
-import { IonSlides, IonToggle, ModalController } from "@ionic/angular";
+import { IonSlides, IonToggle, IonContent, ModalController } from "@ionic/angular";
 import { FormControl, FormGroup } from "@angular/forms";
 
 import { Subscription } from "rxjs";
@@ -41,6 +41,7 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
   @ViewChild("locationslider") locationHandle: AppToggleComponent;
   @ViewChild("degreeslider") degreeHandle: AppToggleComponent;
   @ViewChild("slides") slides: IonSlides;
+  @ViewChild(IonContent) frame: IonContent;
 
   ngOnInit() {
     this.searchCriteria$ = this.SCstore.searchCriteria.subscribe({
@@ -62,16 +63,67 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
     this.slides.lockSwipes(true);
   }
 
-  placeholder = document.getElementById("placeholder");
+  /* Unlocks swipes, slides to next/prev and then locks swipes */
+  unlockAndSwipe(direction) {
+    this.slides.lockSwipes(false);
+  
+    if (direction == "next") {
+      this.slides.slideNext();
+    } else {
+      this.slides.slidePrev();
+    };
+  
+    this.slides.lockSwipes(true);
+  }
 
-  selectReplace(label) {
+  moveTo(name) {
+    var placeholder = document.getElementById("placeholder");
+    placeholder.style.display = "none";
+
+    var slides = [document.getElementById("study"), document.getElementById("soc"), document.getElementById("int")];
+    var names = ["studies", "societies", "interests"];
+
+    for (let i = 0; i < names.length; i++) {
+      if (name === names[i]) {
+        slides[i].style.display = "block";
+        this.unlockAndSwipe("next");
+      }
+    }
+
+    this.frame.scrollToTop(100);
+  }
+
+  returnTo() {
+    var placeholder = document.getElementById("placeholder");
+    var slides = [document.getElementById("study"), document.getElementById("soc"), document.getElementById("int")];
+    var names = ["aos", "society", "interests"];
+
+    this.unlockAndSwipe("prev");
+
+    // Wait 0.2s to replace slides with placeholder so people don't see it disappear in the slide animation
+    setTimeout(() => { 
+      placeholder.style.display = "block";
+      slides.forEach(element => {
+        element.style.display = "none"
+      });
+    }, 200);
+  }
+
+  selectReplace(option, label) {
     var names = ["aos","society","interests"]
     var sections = [document.getElementById("aos"), document.getElementById("society"), document.getElementById("interests")];
-    var corresponding = [this.studySelection, this.societySelection, this.interestSelection];
 
-    // Note, checks if null (broadcast by clearSelect), if null then does not run
+    // Have to manually set here, cannot be done in for loop below
+    if (label==="aos") {
+      this.studySelection = option;
+    } else if (label==="society") {
+      this.societySelection = option;
+    } else if (label==="interests") {
+      this.interestSelection = option;
+    };
+
     for (let i = 0; i < sections.length; i++) {
-      if (label==names[i] && corresponding[i] != "null") {
+      if (label==names[i]) {
         sections[i].style.marginTop = "0";
         sections[i].style.fontSize = "2vh";
         sections[i].style.color = "var(--ion-color-medium-shade)";
@@ -83,10 +135,10 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
 
   clearSelect() {
     // Clear ion-selects
-    this.degreeSelection = "null";
-    this.studySelection = "null";
-    this.societySelection = "null";
-    this.interestSelection = "null";
+    this.degreeSelection = undefined;
+    this.studySelection = undefined;
+    this.societySelection = undefined;
+    this.interestSelection = undefined;
 
     var sections = [document.getElementById("aos"), document.getElementById("society"), document.getElementById("interests")];
 

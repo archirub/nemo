@@ -2,17 +2,25 @@
   --main-bg-color: coral;
 }
 
-ion-card-subtitle {
-  font-size: 22px;
+ion-card-title {
+  font-size: 3.25vh;
+}
+
+img {
+  object-fit: cover;
+  max-width: 110%;
 }
 
 #swipe-card {
-  margin: 10px 20px 20px;
+  margin: 10px 15px;
   max-width: 100vw;
+  height: 85vh;
   display: inline-block;
   background-size: cover;
   background-position: center;
   border-radius: 30px;
+  overflow: hidden;
+  box-shadow: 0px 0px 20px -12px rgb(0 0 0 / 20%)
 }
 
 #pictureFrame {
@@ -31,10 +39,27 @@ ion-card-subtitle {
   overflow: hidden;
 }
 
-#pictures {
-  width: 100vh;
-  border-top-left-radius: 30px;
-  border-top-right-radius: 30px;
+ion-slides {
+  width: 92vw;
+  height: 85vh;
+
+  ion-slide {
+    overflow: hidden;
+    --overflow: hidden;
+  };
+}
+
+.pager {
+  position: absolute;
+  top: 5vh;
+  left: 8vw;
+  z-index: 3;
+
+  ion-icon {
+    width: 12px;
+    height: 12px;
+    padding: 1vw;
+  }
 }
 
 #photo-shadow {
@@ -56,13 +81,13 @@ ion-card-subtitle {
   border-bottom-left-radius: 30px;
   border-bottom-right-radius: 30px;
   background-color: #FBFBFB;
-  box-shadow: 0px 10px 10px -12px rgba(0,0,0,0.2);
+  //box-shadow: 0px 5px 20px -12px rgba(0,0,0,0.2);
   position: absolute;
   max-height: 12vh;
   height: 12vh;
-  bottom: 2vh;
-  left: 20px;
-  right: 20px;
+  bottom: 1.5vh;
+  left: 15px;
+  right: 15px;
 }
 
 #completeInfo {
@@ -73,8 +98,8 @@ ion-card-subtitle {
   background-color: #FBFBFB;
   position: absolute;
   top: 18%;
-  left: 20px;
-  right: 20px;
+  left: 15px;
+  right: 15px;
   max-height: 80%;
   height: 80%;
   // box-shadow: 0px 0px 48px 12px rgba(0, 0, 0, 0.75);
@@ -151,17 +176,25 @@ ion-card-subtitle {
 
 #interest-icon {
   color: rgb(102, 102, 102);
-  width: 30px;
+  height: 60px;
+  border: solid 1px rgba(240,113,103,0.6);
+  border-radius: 50%;
+  padding: 3vw;
+}
+
+#bottom-icon {
   height: 30px;
+  width: 30px;
   border: solid 1px var(--ion-color-primary-tint);
   border-radius: 50%;
   padding: 3vw;
 }
 
+
 #interest-label {
   font-size: medium;
-  font-weight: 700;
-  color: var(--ion-color-primary);
+  font-weight: normal;
+  color: var(--ion-color-light-contrast);
 }
 
 // #interests-collection {
@@ -233,11 +266,13 @@ ion-card-subtitle {
 }
 
 #department {
-  font-size: larger;
+  font-size: 2.25vh;
   text-transform: none;
   color: var(--ion-color-primary);
+  //font-family: var(--ion-font-secondary);
   margin-top: 5px;
   margin-bottom: 0px;
+  letter-spacing: 1px;
 }
 
 #bio {
@@ -247,6 +282,7 @@ ion-card-subtitle {
   padding: 5vw;
   font-size: 4vh;
   color: var(--ion-color-light-contrast);
+  //font-family: var(--ion-font-secondary);
   font-weight: 500;
 }
 
@@ -259,20 +295,97 @@ ion-card-subtitle {
   border-radius: 50%;
 }
 
+.question {
+  position: absolute;
+  bottom: 15vh;
+  width: 85vw;
+  left: 8vw;
+  z-index: 2;
+
+  ion-card-title {
+    color: var(--ion-color-primary-contrast);
+    font-size: 2.75vh;
+    font-weight: bold;
+  }
+
+  ion-card-subtitle {
+    color: var(--ion-color-primary-contrast);
+    font-size: 2.5vh;
+    font-weight: normal;
+    text-transform: none;
+  }
+}
+
+.yesSwipeInfo {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 46vw;
+  overflow: hidden;
+  background: transparent;
+}
+
+.noSwipeInfo {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 46vw;
+  overflow: hidden;
+  background: transparent;
+}
+
+
+.yesSwipe {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 46vw;
+  height: 73vh;
+  background: transparent;
+}
+
+.noSwipe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 46vw;
+  height: 73vh;
+  background: transparent;
+}
+
+@media only screen and (max-device-height: 650px) {
+  .yesSwipe {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 46vw;
+    height: 71vh;
+    background: transparent;
+  }
+  
+  .noSwipe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 46vw;
+    height: 71vh;
+    background: transparent;
+  }
+}
+
 /* Specific query to heighten the snippet info div enough to show the text */
 
-@media only screen and (max-device-height: 580px) {
-  #snippetInfo {
-    z-index: 1;
-    border-bottom-left-radius: 30px;
-    border-bottom-right-radius: 30px;
-    background-color: rgb(255, 255, 255);
-    position: absolute;
-    max-height: 15vh;
-    height: 15vh;
-    bottom: 2vh;
-    left: 20px;
-    right: 20px;
+@media only screen and (max-device-height: 650px) {
+  #swipe-card{
+  margin: 10px 15px;
+  max-width: 100vw;
+  height: 82vh;
+  display: inline-block;
+  background-size: cover;
+  background-position: center;
+  border-radius: 30px;
+  overflow: hidden;
+  box-shadow: 0px 0px 20px -12px rgb(0 0 0 / 20%)
   }
 }
 

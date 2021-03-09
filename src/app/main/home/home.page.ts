@@ -7,7 +7,7 @@ import {
   HostListener,
   Output,
 } from "@angular/core";
-import { ModalController } from "@ionic/angular";
+import { IonBackdrop, ModalController } from "@ionic/angular";
 
 import { Observable, Subscription } from "rxjs";
 import { throttle, filter } from "rxjs/operators";
@@ -28,7 +28,8 @@ import { SwipeCardComponent } from "./swipe-card/swipe-card.component";
   styleUrls: ["home.page.scss"],
 })
 export class HomePage implements OnInit, OnDestroy {
-  @Output() refillEmitter = new EventEmitter();
+  //@Output() backdropEmitter = new EventEmitter();
+  //@ViewChild(IonBackdrop) backdrop: IonBackdrop;
 
   swipeProfiles: Observable<Profile[]>;
   private swipeStackRefill$: Subscription;
@@ -85,8 +86,6 @@ export class HomePage implements OnInit, OnDestroy {
           console.log("Refilling swipe stack");
           await this.swipeOutcomeStore.registerSwipeChoices(),
             await this.swipeStackStore.addToSwipeStackQueue(this.searchCriteria);
-          console.log("Emitting refill event");
-          this.refillEmitter.emit("refill");
         })
       )
       .subscribe();
@@ -143,9 +142,6 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   @ViewChild(SwipeCardComponent) child: SwipeCardComponent;
-  ngAfterViewInit() {
-    this.refillEmitter.on("refill", this.child.refillRotate);
-  }
 
   ngOnDestroy() {
     this.searchCriteria$.unsubscribe();

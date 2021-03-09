@@ -1,23 +1,58 @@
+ion-slides {
+  height: 100vh;
+  width: 100vw;
+}
+
+ion-slide {
+  width: 100vw !important;
+  text-align: left;
+}
+
 ion-buttons {
-  margin-left: -5px;
-  margin-top: 10px;
+  padding: 4vw 2vw;
 }
 
 ion-avatar {
   height: 45px;
   width: 45px;
-  margin-top: 3px;
+  margin: 5px auto 0 auto;
 }
 
 ion-toolbar {
   padding: 0px;
 }
 
+
+ion-header {
+  padding-top: 50px;
+
+  ion-col {
+    padding: 0;
+    margin: 0;
+  }
+}
+
+app-profile-card {
+  font-family: var(--ion-font-family);
+}
+
+.flexcolumn {
+  display: flex;
+  flex-direction: column;
+}
+
 .messenger-header {
   padding-top: 3px;
-  margin-top: 10px;
+  margin-top: 0;
   text-align: center;
   margin-bottom: 10px;
+  font-size: 2.3vh;
+}
+
+ion-icon[name="shield"] {
+  font-size: 4.3vh;
+  color: var(--ion-color-primary);
+  padding: 4vw;
 }
 
 #chat-toolbar {
@@ -113,5 +148,14 @@ ion-toolbar {
 #messageInputContainer {
   position: fixed;
   bottom: 0;
-  width: 100%;
+  width: 100vw;
+}
+
+.return {
+  --background: transparent;
+  --background-activated: transparent;
+  color: var(--ion-color-primary);
+  height: 4vh;
+  --box-shadow: none;
+  text-transform: none;
 }
