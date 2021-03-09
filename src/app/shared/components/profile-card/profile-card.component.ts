@@ -18,11 +18,15 @@ import { IonContent, IonSlides } from "@ionic/angular";
 })
 export class ProfileCardComponent implements OnInit, AfterViewInit {
   @Output() expanded = new EventEmitter();
+  @Output() tapped = new EventEmitter();
   @Input() moreInfo: boolean;
   @Input() profile: Profile[];
   @ViewChild(IonContent) ionContent: IonContent;
   @ViewChild(IonSlides) slides: IonSlides;
   @ViewChildren('bullets', { read: ElementRef }) bullets: QueryList<ElementRef>;
+  @ViewChild('content', { read: ElementRef}) content: ElementRef;
+  @ViewChild('yes', { read: ElementRef }) yesSwipe: ElementRef;
+  @ViewChild('no', { read: ElementRef }) noSwipe: ElementRef;
 
   picturePaths: Array<string>;
 
@@ -46,7 +50,7 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
     this.picturePaths = ["https://staticg.sportskeeda.com/editor/2020/06/a19cc-15923264235917.jpg",
     "/assets/picture2.jpg",
     "/assets/picture3.jpg",
-    "/assets/picture4.jpg"]
+    "/assets/picture6.jpg"]
   }
 
   ngAfterViewInit() {
@@ -61,6 +65,9 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
       this.moreInfo = true;
     };
     this.expanded.emit(this.moreInfo);
+    setTimeout(() => {
+      this.sizeSwipers();
+    }, 100);
   }
 
   async updatePager() {
@@ -74,6 +81,15 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
       };
       index += 1;
     })
+  }
+
+  sizeSwipers() {
+    var h = this.content.nativeElement.getBoundingClientRect().height;
+    
+    this.yesSwipe.nativeElement.style.height = `${h}px`;
+    this.noSwipe.nativeElement.style.height = `${h}px`;
+    this.yesSwipe.nativeElement.style.marginTop = '13vh';
+    this.noSwipe.nativeElement.style.marginTop = '13vh';
   }
 
   async checkSlide() {

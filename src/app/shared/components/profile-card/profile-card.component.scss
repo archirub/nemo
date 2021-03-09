@@ -177,7 +177,7 @@ ion-slides {
 #interest-icon {
   color: rgb(102, 102, 102);
   height: 60px;
-  border: solid 1px var(--ion-color-primary-tint);
+  border: solid 1px rgba(240,113,103,0.6);
   border-radius: 50%;
   padding: 3vw;
 }
@@ -193,8 +193,8 @@ ion-slides {
 
 #interest-label {
   font-size: medium;
-  font-weight: 700;
-  color: var(--ion-color-primary);
+  font-weight: normal;
+  color: var(--ion-color-light-contrast);
 }
 
 // #interests-collection {
@@ -313,6 +313,63 @@ ion-slides {
     font-size: 2.5vh;
     font-weight: normal;
     text-transform: none;
+  }
+}
+
+.yesSwipeInfo {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 46vw;
+  overflow: hidden;
+  background: transparent;
+}
+
+.noSwipeInfo {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 46vw;
+  overflow: hidden;
+  background: transparent;
+}
+
+
+.yesSwipe {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 46vw;
+  height: 73vh;
+  background: transparent;
+}
+
+.noSwipe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 46vw;
+  height: 73vh;
+  background: transparent;
+}
+
+@media only screen and (max-device-height: 650px) {
+  .yesSwipe {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 46vw;
+    height: 71vh;
+    background: transparent;
+  }
+  
+  .noSwipe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 46vw;
+    height: 71vh;
+    background: transparent;
   }
 }
 
