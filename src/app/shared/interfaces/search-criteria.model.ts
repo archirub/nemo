@@ -20,6 +20,7 @@ export interface SearchFeatures {
 
 export const searchCriteriaOptions = {
   university: ["UCL"] as const,
+  degree: ["undergrad", "postgrad"] as const,
   areaOfStudy: [
     "Arts and Humanities",
     "Bartlett School",
@@ -30,9 +31,8 @@ export const searchCriteriaOptions = {
     "Life sciences",
     "Maths and Physical Sciences",
     "Medical Sciences",
-    "Social Sciences"
+    "Social Sciences",
   ] as const,
-  degree: ["Undergrad", "Postgrad", "Both"] as const,
   societyCategory: [
     "Academic",
     "Altruistic",
@@ -45,7 +45,7 @@ export const searchCriteriaOptions = {
     "Political",
     "Student Media",
     "Science and Technology",
-    "Sports"
+    "Sports",
   ] as const,
   interest: [
     "Herb Friendly",
@@ -57,7 +57,8 @@ export const searchCriteriaOptions = {
     "Model",
     "Tik Toker",
     "Library Fiend",
-    "Pub Crawler"] as const,
+    "Pub Crawler",
+  ] as const,
   path: [
     "/assets/interests/herbfriendly.png",
     "/assets/interests/bookworm.png",
@@ -68,9 +69,19 @@ export const searchCriteriaOptions = {
     "/assets/interests/model.png",
     "/assets/interests/tiktoker.png",
     "/assets/interests/libraryfiend.png",
-    "/assets/interests/pubcrawler.png"] as const,
+    "/assets/interests/pubcrawler.png",
+  ] as const,
   onCampus: [true, false] as const,
 };
+
+export const searchCriteriaNames: (keyof searchCriteriaFromDatabase)[] = [
+  "university",
+  "areaOfStudy",
+  "degree",
+  "societyCategory",
+  "interest",
+  "onCampus",
+];
 
 export type University = typeof searchCriteriaOptions.university[number];
 export type AreaOfStudy = typeof searchCriteriaOptions.areaOfStudy[number]; //MOCK DATA

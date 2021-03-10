@@ -2,17 +2,19 @@ import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import {
   changeShowProfileRequest,
-  changeShowProfileResponse,
+  successResponse,
   piStorage,
 } from "../../../src/app/shared/interfaces/index";
 
 export const changeShowProfile = functions.region("europe-west2").https.onCall(
-  async (data: changeShowProfileRequest, context): Promise<changeShowProfileResponse> => {
+  async (data: changeShowProfileRequest, context): Promise<successResponse> => {
     if (!context.auth)
       throw new functions.https.HttpsError("unauthenticated", "User not autenticated.");
 
     const uid: string = context.auth.uid;
     const showProfile: Boolean = data.showProfile;
+
+    // const uid = "oY6HiUHmUvcKbFQQnb88t3U4Zew1";
 
     if (typeof showProfile !== "boolean") {
       return { successful: false };
@@ -23,7 +25,7 @@ export const changeShowProfile = functions.region("europe-west2").https.onCall(
       .where("uids", "array-contains", uid)
       .limit(1)
       .get()) as FirebaseFirestore.QuerySnapshot<piStorage>;
-    const matchDataRef = admin.firestore().collection("matchData").doc(uid);
+    // const matchDataRef = admin.firestore().collection("matchData").doc(uid);
     const privateProfileRef = admin
       .firestore()
       .collection("profiles")
@@ -33,9 +35,9 @@ export const changeShowProfile = functions.region("europe-west2").https.onCall(
 
     const batch = admin.firestore().batch();
 
-    batch.update(matchDataRef, {
-      showProfile: showProfile,
-    });
+    // batch.update(matchDataRef, {
+    //   showProfile: showProfile,
+    // });
 
     batch.update(privateProfileRef, {
       "settings.showProfile": showProfile,
