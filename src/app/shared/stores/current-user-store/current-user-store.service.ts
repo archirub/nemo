@@ -114,11 +114,14 @@ export class CurrentUserStore {
       console.error("No uid provided");
       return;
     }
+
     const profileParts = await Promise.all([
       this.fetchProfile(uid),
       this.fetchPrivateProfile(uid),
       this.fetchMatchDataInfo(uid),
     ]);
+    console.log('ASHDASDJKHASDJASJDHAHJKKHJASKHJASDKH')
+
     const profile: Profile = profileParts[0];
     const privateProfile: privateProfileFromDatabase = profileParts[1];
     const infoFromMatchData: userInfoFromMatchData = profileParts[2];

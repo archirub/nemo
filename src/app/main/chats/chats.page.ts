@@ -23,7 +23,7 @@ export class ChatsPage implements OnInit, OnDestroy {
 
   TOP_SCROLL_SPEED = 100;
 
-  private chats$: Subscription;
+  // private chats$: Subscription;
   public chats: Observable<Chat[]>;
   public chatProfiles: Observable<Profile[]>;
 
@@ -42,6 +42,6 @@ export class ChatsPage implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.chats$.unsubscribe();
+    // this.chats$.unsubscribe();
   }
 }

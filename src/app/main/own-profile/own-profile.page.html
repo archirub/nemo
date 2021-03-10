@@ -7,15 +7,18 @@
 
     <div id="editing" style="display: flex">
         <div class="container">
-            <h1>[Name], [Age]</h1>
+            <h1>{{currentUser?.firstName}}, {{currentUser?.dateOfBirth|age}}</h1>
 
             <div class="slide-button">
-                <a href="/main/settings"><p>Go to my settings</p></a>
+                <a href="/main/settings">
+                    <p>Go to my settings</p>
+                </a>
                 <ion-icon name="chevron-forward-outline"></ion-icon>
             </div>
 
             <h2>My photos</h2>
-            <div class="photos"> <!-- One photos are sorted on the backend we can use some ngFor magic here -->
+            <div class="photos">
+                <!-- One photos are sorted on the backend we can use some ngFor magic here -->
                 <add-photo></add-photo>
                 <add-photo></add-photo>
                 <add-photo></add-photo>
@@ -26,7 +29,7 @@
 
             <h2>My bio</h2>
             <div class="bio">
-                <ion-textarea></ion-textarea>
+                <ion-textarea>{{templateUser?.biography}}</ion-textarea>
             </div>
         </div>
     </div>

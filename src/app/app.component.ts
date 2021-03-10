@@ -70,12 +70,15 @@ export class AppComponent implements OnInit, OnDestroy {
       }
 
 
-      this.signUpAuthService.userId.subscribe(uid => {
+      this.signUpAuthService.userId.subscribe(async uid => {
         if (uid) {
-          console.log("Recieved uid: ", uid)
-          this.currentUserStore.initializeStore(uid)
-          this.swipeStackStore.initializeStore(uid)
-          this.chatStore.initializeStore(uid)
+          console.log("Recieved uid: ", uid);
+          this.currentUserStore.initializeStore(uid) ;
+            
+          this.swipeStackStore.initializeStore(uid);
+  
+          this.chatStore.initializeStore(uid);
+            
         }
         else {
           console.log("Waiting for uid")
