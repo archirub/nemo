@@ -10,11 +10,9 @@ import { OwnProfilePage } from "./own-profile.page";
 import { ProfileCardModule } from "@components/profile-card/profile-card.component.module";
 import { AddPhotoModule } from "@components/add-photo/add-photo.component.module";
 import { AppToggleModule } from "@components/nemo-toggle/nemo-toggle.component.module";
-<<<<<<< HEAD
-import { ProfileAnswerComponent, ProfileCourseComponent } from "@components/index";
-=======
 import { PipesModule } from '../../shared/pipes/pipes.module'
->>>>>>> 6d4899c3dcf4e9cefed7bfb22eaeee9cbe3e81bf
+import { ProfileAnswerComponent } from "./profile-answer/profile-answer.component";
+import { ProfileCourseComponent } from "./profile-course/profile-course.component";
 
 
 @NgModule({
