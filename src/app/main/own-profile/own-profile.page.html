@@ -1,13 +1,18 @@
 <ion-content>
-    <!--app-profile-card [profile] = "this.profile | async">
-    </app-profile-card-->
+    <div id="profile" style="display: flex">
+        <app-profile-card [profile] = "profile"></app-profile-card>
+        <!--div class="container">
+            [User Profile]
+        </div-->
+    </div>
+
     <div class="flexend">
         <nemo-toggle (choice)="toggleChange($event)" [buttonWidth]=15 [fontSize]=4 [selections]="['edit', 'view']"></nemo-toggle>
     </div>
 
     <div id="editing" style="display: flex">
         <div class="container">
-            <h1>[Name], [Age]</h1>
+            <h1>{{profile.name}}, {{profile.age()}}</h1>
 
             <div class="slide-button">
                 <a href="/main/settings"><p>Go to my settings</p></a>
@@ -25,9 +30,25 @@
             </div>
 
             <h2>My bio</h2>
-            <div class="bio">
-                <ion-textarea></ion-textarea>
+            <div>
+                <div #bioClose class="close-button" style="display: none" (click)="clearInput('bio')">
+                    <ion-icon name="close-outline"></ion-icon>
+                </div>
+                <div class="bio">
+                    <ion-textarea #bioInput (ionInput)="displayExit('bio')"></ion-textarea>
+                </div>
             </div>
+
+            <h2>My answers</h2>
+            <profile-answer *ngFor="let questions of profile.questions; let i = index" [questions] = "profile.questions[i]"></profile-answer>
+
+            <h2>My course</h2>
+            <profile-course #depts [departments]="profile.course" [type]="courses"></profile-course>
+
+            <h2>My society</h2>
+            <profile-course #socs [departments]="profile.society" [type]="societies"></profile-course>
+
+            <h2>My interests</h2>
         </div>
     </div>
 </ion-content>

@@ -1,0 +1,9 @@
+<div>
+    <div #answerClose class="close-button" (click)="clearInput()">
+        <ion-icon name="close-outline"></ion-icon>
+    </div>
+    <div class="text">
+        <h2 class="question">{{ questions.question }}</h2>
+        <ion-textarea #answerInput (ionInput)="displayExit()" value={{questions.answer}}></ion-textarea>
+    </div>
+</div>

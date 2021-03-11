@@ -1,0 +1,11 @@
+<div>
+    <ion-select placeholder={{departments}} okText="Ok" cancelText="Cancel">
+        <ion-select-option *ngFor="let selection of this.depts">{{ selection }}</ion-select-option>
+    </ion-select>
+    <div #close class="close-button" style="display: none" (click)="clearInput()">
+        <ion-icon name="close-outline"></ion-icon>
+    </div>
+    <div class="text">
+        <ion-input #input (ionInput)="displayExit()"></ion-input>
+    </div>
+</div>

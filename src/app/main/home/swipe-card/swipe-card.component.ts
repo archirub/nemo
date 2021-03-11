@@ -86,7 +86,7 @@ export class SwipeCardComponent extends EventEmitter implements OnInit, OnDestro
    * */
   onNoSwipe(profile: Profile) {
     if (!profile) return;
-    //this.swipeStackStore.removeProfile(profile);
+    this.swipeStackStore.removeProfile(profile);
     this.swipeOutcomeStore.noSwipe(profile);
   }
 

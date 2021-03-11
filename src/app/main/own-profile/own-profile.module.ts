@@ -10,6 +10,7 @@ import { OwnProfilePage } from "./own-profile.page";
 import { ProfileCardModule } from "@components/profile-card/profile-card.component.module";
 import { AddPhotoModule } from "@components/add-photo/add-photo.component.module";
 import { AppToggleModule } from "@components/nemo-toggle/nemo-toggle.component.module";
+import { ProfileAnswerComponent, ProfileCourseComponent } from "@components/index";
 
 
 @NgModule({
@@ -23,6 +24,6 @@ import { AppToggleModule } from "@components/nemo-toggle/nemo-toggle.component.m
     AddPhotoModule,
     AppToggleModule
   ],
-  declarations: [OwnProfilePage],
+  declarations: [OwnProfilePage, ProfileAnswerComponent, ProfileCourseComponent],
 })
 export class OwnProfilePageModule {}

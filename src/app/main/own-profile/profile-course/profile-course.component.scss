@@ -1,0 +1,42 @@
+.text {
+    padding-bottom: 5vh;
+  
+    ion-input {
+      width: 100%;
+      --background: var(--ion-color-light-tint);
+      border: 2px solid var(--ion-color-light-shade);
+      font-size: 2.6vh;
+      margin: 2vh 0;
+      --padding-start: 1vh;
+      border-radius: 15px;
+    };
+}
+
+ion-select {
+  --placeholder-color: var(--ion-color-light-contrast);
+  --placeholder-opacity: 1;
+  background: var(--ion-color-light-tint);
+  border: 2px solid var(--ion-color-light-shade);
+  padding: 1vh;
+  font-size: 2.6vh;
+}
+
+.question {
+    color: var(--ion-color-light-contrast);
+    font-size: 2.6vh;
+}
+
+.close-button {
+  position: absolute;
+  right: 1.5vw;
+  z-index: 3;
+  background: var(--ion-color-medium);
+  border-radius: 50%;
+  height: 4vh;
+  margin-top: 1vh;
+
+  ion-icon {
+    font-size: 20px;
+    padding: 0.5vh;
+  }
+}

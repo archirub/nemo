@@ -1,9 +1,12 @@
-import { Component, OnInit, ViewChild } from "@angular/core";
+import { Component, ElementRef, OnInit, ViewChild } from "@angular/core";
 
 import { Observable, Subscription } from "rxjs";
 import { User, Profile } from "@classes/index";
 import { SwipeStackStore, CurrentUserStore } from "@stores/index";
 import { AddPhotoComponent } from "@components/index";
+import { ProfileCourseComponent } from "./profile-course/profile-course.component";
+import { ProfileCardModule } from "@components/profile-card/profile-card.component.module";
+import { IonTextarea } from "@ionic/angular";
 
 @Component({
   selector: "app-own-profile",
@@ -12,36 +15,57 @@ import { AddPhotoComponent } from "@components/index";
 })
 export class OwnProfilePage implements OnInit {
   @ViewChild(AddPhotoComponent) photo: AddPhotoComponent;
-  
-  currentUser$: Subscription;
-  currentUser: User;
+  @ViewChild('bioInput') bio: IonTextarea;
+  @ViewChild('bioClose', { read: ElementRef }) bioClose: ElementRef;
+  @ViewChild('depts') depts: ProfileCourseComponent;
+  @ViewChild('socs') socs: ProfileCourseComponent;
 
-  profile: Observable<Profile[]>;
+  profile$: Subscription;
+  profiles: Profile[];
+  profile: Profile;
 
   constructor(
-    private swipeStackStore: SwipeStackStore,
-    private currentUserStore: CurrentUserStore
+    private swipeStackStore: SwipeStackStore
     ) {}
 
   ngOnInit() {
-    this.currentUser$ = this.currentUserStore.user.subscribe(
-      (profile) => (this.currentUser = profile)
-    );
-
-    this.profile = this.swipeStackStore.profiles;
+    this.profile$ = this.swipeStackStore.profiles.subscribe(
+      (profile) => this.profiles = profile);
+    this.profile = this.profiles[0]
   }
+
+  ngAfterViewInit() {
+    this.depts.type = "courses";
+    this.socs.type = "societies";
+  }
+
+  displayExit(section) {
+    if (section === "bio") {
+      this.bioClose.nativeElement.style.display = "block";
+    }
+  };
+
+  clearInput(section) {
+    if (section === "bio") {
+      this.bio.value = "";
+      this.bioClose.nativeElement.style.display = "none";
+    }
+  };
 
   /* Nemo toggle selection function */
   toggleChange(option) {
     var editor = document.getElementById("editing");
+    var profile = document.getElementById("profile");
     if (option == "edit") {
       editor.style.display = "flex";
+      profile.style.display = "none";
     } else if (option == "view") {
       editor.style.display = "none";
+      profile.style.display = "flex";
     };
   }
   
   ngOnDestroy() {
-    this.currentUser$.unsubscribe();
+    this.profile$.unsubscribe();
   }
 }

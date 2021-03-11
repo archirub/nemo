@@ -123,7 +123,7 @@ export class CurrentUserStore {
     const privateProfile: privateProfileFromDatabase = profileParts[1];
     const infoFromMatchData: userInfoFromMatchData = profileParts[2];
 
-    const latestSearchCriteria = this.format.searchCriteriaDatabaseToClass(
+  const latestSearchCriteria = this.format.searchCriteriaDatabaseToClass(
       privateProfile.latestSearchCriteria
     );
     this.SCstore.initalizeThroughCurrentUserStore(latestSearchCriteria);

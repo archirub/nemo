@@ -32,7 +32,7 @@ export const searchCriteriaOptions = {
     "Medical Sciences",
     "Social Sciences"
   ] as const,
-  degree: ["Undergrad", "Postgrad", "Both"] as const,
+  degree: ["undergrad", "postgrad"] as const,
   societyCategory: [
     "Academic",
     "Altruistic",

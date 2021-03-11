@@ -19,6 +19,14 @@ nemo-toggle {
   border-radius: 30px;
 }
 
+#profile {
+  position: fixed;
+  left: 0;
+  height: 94%;
+  top: 4.5vh;
+  overflow: hidden;
+}
+
 #editing {
   padding: 1vh 3vw;
   width: 93%;
@@ -35,15 +43,15 @@ nemo-toggle {
   --overflow-y: scroll !important;
   box-shadow: 0px 0px 20px -12px;
 
-  h2 {
-    color: var(--ion-color-light);
-    font-size: 3vh;
-  };
-
   .container {
     height: 97.5%;
   }
 }
+
+h2 {
+  color: var(--ion-color-light);
+  font-size: 2.6vh;
+};
 
 .slide-button {
   display: flex;
@@ -57,6 +65,21 @@ nemo-toggle {
 
   ion-icon {
     margin: 3vh 0;
+  }
+}
+
+.close-button {
+  position: absolute;
+  right: 1.5vw;
+  z-index: 3;
+  background: var(--ion-color-medium);
+  border-radius: 50%;
+  height: 4vh;
+  margin-top: -1vh;
+
+  ion-icon {
+    font-size: 20px;
+    padding: 0.5vh;
   }
 }
 
