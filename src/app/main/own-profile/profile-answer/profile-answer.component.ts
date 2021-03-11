@@ -10,7 +10,7 @@ styleUrls: ["./profile-answer.component.scss"],
 export class ProfileAnswerComponent implements OnInit {
     @ViewChild('answerInput') answer: IonTextarea;
     @ViewChild('answerClose', { read: ElementRef }) answerClose: ElementRef;
-    @Input() questions: QuestionAndAnswer[];
+    @Input() questions: QuestionAndAnswer;
 
     //for sizing on chats page
 
@@ -20,10 +20,12 @@ export class ProfileAnswerComponent implements OnInit {
 
     displayExit() {
         this.answerClose.nativeElement.style.display = "block";
+        this.questions.answer = this.answer.value;
     };
 
     clearInput() {
         this.answer.value = "";
         this.answerClose.nativeElement.style.display = "none";
+        this.questions.answer = "";
     };
 }

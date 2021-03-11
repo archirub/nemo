@@ -1,5 +1,5 @@
 <div>
-    <ion-select placeholder={{departments}} okText="Ok" cancelText="Cancel">
+    <ion-select #select placeholder={{departments}} okText="Ok" cancelText="Cancel" (ionChange)="updateDept(type)">
         <ion-select-option *ngFor="let selection of this.depts">{{ selection }}</ion-select-option>
     </ion-select>
     <div #close class="close-button" style="display: none" (click)="clearInput()">

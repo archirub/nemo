@@ -13,6 +13,7 @@ import { AppToggleModule } from "@components/nemo-toggle/nemo-toggle.component.m
 import { PipesModule } from '../../shared/pipes/pipes.module'
 import { ProfileAnswerComponent } from "./profile-answer/profile-answer.component";
 import { ProfileCourseComponent } from "./profile-course/profile-course.component";
+import { InterestSlidesComponent } from "@components/index";
 
 
 @NgModule({
@@ -27,6 +28,6 @@ import { ProfileCourseComponent } from "./profile-course/profile-course.componen
     AppToggleModule,
     PipesModule
   ],
-  declarations: [OwnProfilePage, ProfileAnswerComponent, ProfileCourseComponent],
+  declarations: [OwnProfilePage, ProfileAnswerComponent, ProfileCourseComponent, InterestSlidesComponent],
 })
 export class OwnProfilePageModule {}

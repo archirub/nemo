@@ -21,17 +21,15 @@ export class OwnProfilePage implements OnInit {
   @ViewChild('socs') socs: ProfileCourseComponent;
 
   profile$: Subscription;
-  profiles: Profile[];
-  profile: Profile;
+  profile: User;
 
   constructor(
-    private swipeStackStore: SwipeStackStore
+    private currentUserStore: CurrentUserStore
     ) {}
 
   ngOnInit() {
-    this.profile$ = this.swipeStackStore.profiles.subscribe(
-      (profile) => this.profiles = profile);
-    this.profile = this.profiles[0]
+    this.profile$ = this.currentUserStore.user.subscribe(
+      (profile) => this.profile = profile);
   }
 
   ngAfterViewInit() {
@@ -42,6 +40,7 @@ export class OwnProfilePage implements OnInit {
   displayExit(section) {
     if (section === "bio") {
       this.bioClose.nativeElement.style.display = "block";
+      this.profile.biography = this.bio.value;
     }
   };
 
@@ -49,6 +48,7 @@ export class OwnProfilePage implements OnInit {
     if (section === "bio") {
       this.bio.value = "";
       this.bioClose.nativeElement.style.display = "none";
+      this.profile.biography = "";
     }
   };
 

@@ -165,6 +165,8 @@ ion-slides {
   margin-right: 4vw;
   margin-top: 1vh;
   margin-bottom: 2vh;
+  overflow-x: scroll;
+  padding-bottom: 1vh;
 }
 
 #interests-box {
@@ -172,6 +174,7 @@ ion-slides {
   margin-right: 2vw;
   max-width: 30vw;
   width: 30vw;
+  min-width: 25vw;
 }
 
 #interest-icon {

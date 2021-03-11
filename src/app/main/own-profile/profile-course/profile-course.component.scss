@@ -9,6 +9,7 @@
       margin: 2vh 0;
       --padding-start: 1vh;
       border-radius: 15px;
+      text-rendering: optimizeLegibility;
     };
 }
 
@@ -19,6 +20,8 @@ ion-select {
   border: 2px solid var(--ion-color-light-shade);
   padding: 1vh;
   font-size: 2.6vh;
+  border-radius: 15px;
+  text-rendering: optimizeLegibility;
 }
 
 .question {
