@@ -11,7 +11,8 @@
       "@animations/*": ["src/app/shared/animations/*"],
       "@services/*": ["src/app/shared/services/*"],
       "@stores/*": ["src/app/shared/stores/*"],
-      "@classes/*": ["src/app/shared/classes/*"]
+      "@classes/*": ["src/app/shared/classes/*"],
+      "@pipes/*": ["src/app/shared/pipes/*"]
     },
 
 

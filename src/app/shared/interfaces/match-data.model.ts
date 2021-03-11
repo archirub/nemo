@@ -21,7 +21,7 @@ export interface mdFromDatabase {
   gender: Gender;
   sexualPreference: SexualPreference;
 
-  showProfile: Boolean;
+  // showProfile: Boolean;
   percentile: number;
   swipeMode: SwipeMode;
 }

@@ -12,15 +12,22 @@
 
     <div id="editing" style="display: flex">
         <div class="container">
+<<<<<<< HEAD
             <h1>{{profile.name}}, {{profile.age()}}</h1>
+=======
+            <h1>{{currentUser?.firstName}}, {{currentUser?.dateOfBirth|age}}</h1>
+>>>>>>> 6d4899c3dcf4e9cefed7bfb22eaeee9cbe3e81bf
 
             <div class="slide-button">
-                <a href="/main/settings"><p>Go to my settings</p></a>
+                <a href="/main/settings">
+                    <p>Go to my settings</p>
+                </a>
                 <ion-icon name="chevron-forward-outline"></ion-icon>
             </div>
 
             <h2>My photos</h2>
-            <div class="photos"> <!-- One photos are sorted on the backend we can use some ngFor magic here -->
+            <div class="photos">
+                <!-- One photos are sorted on the backend we can use some ngFor magic here -->
                 <add-photo></add-photo>
                 <add-photo></add-photo>
                 <add-photo></add-photo>
@@ -30,6 +37,7 @@
             </div>
 
             <h2>My bio</h2>
+<<<<<<< HEAD
             <div>
                 <div #bioClose class="close-button" style="display: none" (click)="clearInput('bio')">
                     <ion-icon name="close-outline"></ion-icon>
@@ -37,6 +45,10 @@
                 <div class="bio">
                     <ion-textarea #bioInput (ionInput)="displayExit('bio')"></ion-textarea>
                 </div>
+=======
+            <div class="bio">
+                <ion-textarea>{{templateUser?.biography}}</ion-textarea>
+>>>>>>> 6d4899c3dcf4e9cefed7bfb22eaeee9cbe3e81bf
             </div>
 
             <h2>My answers</h2>

@@ -151,4 +151,14 @@ export class Profile implements profile {
       (currentTime.getTime() - this.dateOfBirth.getTime()) / (1000 * 3600 * 24 * 365)
     );
   }
+
+  degrees = {'undergrad': 'UG', 'postgrad': 'PG'}
+
+  shortDegree() {
+    let ret = ''
+    if(this.degree) {
+      ret = this.degrees[this.degree]
+    }
+    return ret
+  }
 }

@@ -20,7 +20,7 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
   @Output() expanded = new EventEmitter();
   @Output() tapped = new EventEmitter();
   @Input() moreInfo: boolean;
-  @Input() profile: Profile[];
+  @Input() profile: Profile;
   @ViewChild(IonContent) ionContent: IonContent;
   @ViewChild(IonSlides) slides: IonSlides;
   @ViewChildren('bullets', { read: ElementRef }) bullets: QueryList<ElementRef>;
@@ -51,6 +51,12 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
     "/assets/picture2.jpg",
     "/assets/picture3.jpg",
     "/assets/picture6.jpg"]
+    console.log("HERE IS THE interests:", this.profile.interests)
+    console.log("HERE IS THE age:", this.profile.age())
+    console.log("HERE IS THE bio:", this.profile.biography)
+    console.log("HERE IS THE degree:", this.profile.degree)
+    console.log("HERE IS THE society:", this.profile.society)
+
   }
 
   ngAfterViewInit() {
