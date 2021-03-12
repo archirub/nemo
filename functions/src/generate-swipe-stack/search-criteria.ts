@@ -1,7 +1,7 @@
 import { mdFriendPickingFromDatabase } from "./../../../src/app/shared/interfaces/match-data.model";
 import {
   mdFromDatabase,
-  searchCriteriaFromDatabase,
+  searchCriteria,
   University,
   AreaOfStudy,
   SocietyCategory,
@@ -30,7 +30,7 @@ interface SearchCriteriaChecker {
  */
 export function searchCriteriaGrouping(
   datingPickingDocs: datingPickingSnapshots[],
-  searchCriteria: searchCriteriaFromDatabase
+  searchCriteria: searchCriteria
 ): datingPickingSnapshots[] {
   // removing null criteria
   Object.keys(searchCriteria).forEach(
@@ -44,7 +44,7 @@ export function searchCriteriaGrouping(
   // part of an array, sometimes just equal to a specific element)
   const SC_Checker: SearchCriteriaChecker = {};
 
-  (Object.keys(searchCriteria) as (keyof searchCriteriaFromDatabase)[]).forEach((SC) => {
+  (Object.keys(searchCriteria) as (keyof searchCriteria)[]).forEach((SC) => {
     switch (SC) {
       case "university":
         SC_Checker[SC] = universityMatchCheck;
@@ -83,12 +83,12 @@ export function searchCriteriaGrouping(
  */
 function orderBySC(
   profiles: datingPickingSnapshots[],
-  searchCriteria: searchCriteriaFromDatabase,
+  searchCriteria: searchCriteria,
   SC_Checker: SearchCriteriaChecker
 ): datingPickingSnapshots[] {
   if (!profiles || !searchCriteria || !SC_Checker) return [];
 
-  const SC_keys = Object.keys(searchCriteria) as (keyof searchCriteriaFromDatabase)[];
+  const SC_keys = Object.keys(searchCriteria) as (keyof searchCriteria)[];
   const numberOfGroups: number = SC_keys.length + 1;
 
   const sortedProfiles: datingPickingSnapshots[][] = Array.from({

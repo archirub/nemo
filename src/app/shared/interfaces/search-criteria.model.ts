@@ -1,25 +1,9 @@
-export interface searchCriteriaFromDatabase {
-  university: University | null; // select
-  areaOfStudy: AreaOfStudy | null; // select
-  degree: Degree | null; // slider
-  societyCategory: SocietyCategory | null; // select
-  interest: Interest | null; // select
-  onCampus: OnCampus | null;
-}
-
-export interface SearchFeatures {
-  university: University;
-  areaOfStudy: AreaOfStudy;
-  degree: Degree;
-  societyCategory: SocietyCategory; // CHANGE TO ARRAY IF ITS POSSIBLE TO SELECT MULTIPLE SOCIETES
-  // though it's incorrect grammatically, keep interest property as "interest" and not as "interests"
-  // as that allows for easy type checking
-  interest: Interest[];
-  onCampus: OnCampus;
-}
-
+// DO NOT ADD ANY FIELDS
 export const searchCriteriaOptions = {
   university: ["UCL"] as const,
+
+  // DO NOT CHANGE
+  degree: ["undergrad", "postgrad"] as const,
   areaOfStudy: [
     "Arts and Humanities",
     "Bartlett School",
@@ -32,7 +16,6 @@ export const searchCriteriaOptions = {
     "Medical Sciences",
     "Social Sciences",
   ] as const,
-  degree: ["undergrad", "postgrad"] as const,
   societyCategory: [
     "Academic",
     "Altruistic",
@@ -59,37 +42,41 @@ export const searchCriteriaOptions = {
     "Library Fiend",
     "Pub Crawler",
   ] as const,
-  path: [
-    "/assets/interests/herbfriendly.png",
-    "/assets/interests/bookworm.png",
-    "/assets/interests/lifesaver.png",
-    "/assets/interests/cafedweller.png",
-    "/assets/interests/astrologist.png",
-    "/assets/interests/chef.png",
-    "/assets/interests/model.png",
-    "/assets/interests/tiktoker.png",
-    "/assets/interests/libraryfiend.png",
-    "/assets/interests/pubcrawler.png",
-  ] as const,
+
   onCampus: [true, false] as const,
 };
 
-export const searchCriteriaNames: (keyof searchCriteriaFromDatabase)[] = [
-  "university",
-  "areaOfStudy",
-  "degree",
-  "societyCategory",
-  "interest",
-  "onCampus",
-];
+// CANNOT BE PLACED IN searchCriteriaOptions
+export const assetsInterestsPath = [
+  "/assets/interests/herbfriendly.png",
+  "/assets/interests/bookworm.png",
+  "/assets/interests/lifesaver.png",
+  "/assets/interests/cafedweller.png",
+  "/assets/interests/astrologist.png",
+  "/assets/interests/chef.png",
+  "/assets/interests/model.png",
+  "/assets/interests/tiktoker.png",
+  "/assets/interests/libraryfiend.png",
+  "/assets/interests/pubcrawler.png",
+] as const;
+
+export type searchCriteria = {
+  [k in keyof typeof searchCriteriaOptions]: typeof searchCriteriaOptions[k][number];
+};
+
+// same as searchCriteria but some SC can be multiple i.e. for interest where
+// we have an array of interest
+export type SearchFeatures = Omit<searchCriteria, "interest"> & {
+  interest: typeof searchCriteriaOptions["interest"][number][];
+};
 
 export type University = typeof searchCriteriaOptions.university[number];
 export type AreaOfStudy = typeof searchCriteriaOptions.areaOfStudy[number]; //MOCK DATA
 export type Degree = typeof searchCriteriaOptions.degree[number];
 export type SocietyCategory = typeof searchCriteriaOptions.societyCategory[number];
 export type Interest = typeof searchCriteriaOptions.interest[number];
-export type Path = typeof searchCriteriaOptions.path[number];
+export type Path = typeof assetsInterestsPath[number];
 export type InterestAndPath = { name: Interest; path: Path };
 export type OnCampus = typeof searchCriteriaOptions.onCampus[number];
 
-export type Criterion = keyof searchCriteriaFromDatabase;
+export type Criterion = keyof typeof searchCriteriaOptions;

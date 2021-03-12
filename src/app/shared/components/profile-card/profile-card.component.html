@@ -5,14 +5,17 @@
             <ion-icon #bullets name="ellipse" *ngFor="let path of this.picturePaths"></ion-icon>
         </div>
         <ion-slides #picSlides (ionSlideDidChange)="updatePager()" (ionSlideWillChange)="checkSlide()">
-            <ion-slide #pic *ngFor="let path of this.picturePaths" [ngStyle]="{ 'background-image': 'url(' + path + ')', 'background-size': 'cover' }">
+            <ion-slide #pic *ngFor="let path of this.picturePaths" [ngStyle]="{
+          'background-image': 'url(' + path + ')',
+          'background-size': 'cover'
+        }">
                 <div class="yesSwipe" (click)="this.tapped.emit('yes')"></div>
                 <div class="noSwipe" (click)="this.tapped.emit('no')"></div>
             </ion-slide>
         </ion-slides>
         <div #QandA class="question" [hidden]="moreInfo">
-            <ion-card-title #question>{{profile.questions[0].question}}</ion-card-title>
-            <ion-card-subtitle #answer>{{profile.questions[0].answer}}</ion-card-subtitle>
+            <ion-card-title #question>{{ profile.questions[0].question }}</ion-card-title>
+            <ion-card-subtitle #answer>{{ profile.questions[0].answer }}</ion-card-subtitle>
         </div>
     </div>
     <!-- <div id="QandA">
@@ -70,11 +73,13 @@
 
                 <div id="info-segment">
                     <div id="bio">
-                        "{{profile.biography}}" <br/><br/>
+                        "{{ profile.biography }}" <br /><br />
                         <span *ngFor="let sm of profile.socialMediaLinks">
               <!-- dont delete this line, it is a safegaurd for missing links -->
               <!-- <div *ngIf="sm.link">{{sm.socialMedia | titlecase}}: {{sm.link}}<br/></div> -->
-              <div *ngIf="sm.link">{{sm.socialMedia | titlecase}}: {{sm.link}}<br/></div>
+              <div *ngIf="sm.link">
+                {{ sm.socialMedia | titlecase }}: {{ sm.link }}<br />
+              </div>
             </span>
                     </div>
                 </div>
@@ -83,14 +88,14 @@
                     <div id="interests-container">
                         <div id="interests-box">
                             <ion-icon name="location" id="bottom-icon" style="color: var(--ion-color-primary)"></ion-icon>
-                            <br>
+                            <br />
                             <ion-label id="interest-label">Moscow</ion-label>
                         </div>
 
                         <div id="interests-box">
                             <ion-icon name="people" id="bottom-icon" style="color: var(--ion-color-primary)"></ion-icon>
-                            <br>
-                            <ion-label id="interest-label">{{profile.society}}</ion-label>
+                            <br />
+                            <ion-label id="interest-label">{{ profile.society }}</ion-label>
                         </div>
                     </div>
                 </div>

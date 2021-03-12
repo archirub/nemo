@@ -2,7 +2,7 @@ import {
   InterestAndPath,
   SocietyCategory,
   University,
-  searchCriteriaFromDatabase,
+  searchCriteria,
   OnCampus,
   Degree,
 } from "./search-criteria.model";
@@ -12,7 +12,7 @@ import * as firebase from "firebase";
 
 export interface profile {
   uid: string;
-  displayName: string;
+  firstName: string;
   dateOfBirth: Date;
   pictures: profilePictureUrls;
   biography: string;
@@ -30,11 +30,11 @@ export interface user extends profile {
   // firstName: string;
   // lastName: string;
   settings: Settings;
-  latestSearchCriteria: searchCriteriaFromDatabase;
+  latestSearchCriteria: searchCriteria;
 }
 
 export interface profileFromDatabase {
-  displayName: string;
+  firstName: string;
   dateOfBirth: firebase.firestore.Timestamp;
   pictures: profilePictureUrls;
   biography: string;
@@ -52,14 +52,14 @@ export interface profileFromDatabase {
 
   socialMediaLinks: SocialMediaLink[];
 
-  hasMatchDocument: boolean; // TEMPORARY Helps in match-generator to find profiles with no match document
+  // hasMatchDocument: boolean; // TEMPORARY Helps in match-generator to find profiles with no match document
 }
 
 export interface privateProfileFromDatabase {
-  firstName: string;
-  lastName: string;
+  // firstName: string;
+  // lastName: string;
   settings: Settings;
-  latestSearchCriteria: searchCriteriaFromDatabase;
+  latestSearchCriteria: searchCriteria;
 }
 
 // TO DEFINE BUT SHOWPROFILE MUST BE IN THERE

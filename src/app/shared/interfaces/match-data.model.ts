@@ -21,9 +21,9 @@ export interface mdFromDatabase {
   gender: Gender;
   sexualPreference: SexualPreference;
 
-  // showProfile: Boolean;
-  percentile: number;
   swipeMode: SwipeMode;
+
+  uidCount: number;
 }
 
 export interface mdDatingPickingFromDatabase {
@@ -31,12 +31,16 @@ export interface mdDatingPickingFromDatabase {
   reportedUsers: UidDateMap;
   superLikedUsers: UidDateMap;
   likedUsers: UidDateMap;
+
+  uidCount: number;
 }
 
 export interface mdFriendPickingFromDatabase {
   searchFeatures: SearchFeatures;
   reportedUsers: UidDateMap;
   fLikedUsers: UidDateMap;
+
+  uidCount: number;
 }
 
 export interface userInfoFromMatchData {
@@ -69,16 +73,23 @@ export interface SwipeUserInfo {
   swipeMode: SwipeMode;
 }
 
-export type piStorage = { uids: string[] } | { [uid: string]: SwipeUserInfo };
+export interface piStorageDefault {
+  uids: string[];
+  uidCount: number;
+}
+export interface piStorageUidMaps {
+  [uid: string]: SwipeUserInfo;
+}
+export type piStorage = piStorageDefault & piStorageUidMaps;
 
-export const genderOptions = ["male", "female", "other"] as const;
-export type Gender = "male" | "female" | "other";
+export const genderOptions = ["male" as const, "female" as const, "other" as const];
+export type Gender = typeof genderOptions[number];
 export const sexualPreferenceOptions = [
-  ["male"],
-  ["female"],
-  ["male", "female"],
-] as const;
-export type SexualPreference = ["male"] | ["female"] | ["male", "female"];
+  ["male" as const] as const,
+  ["female" as const] as const,
+  ["male" as const, "female" as const] as const,
+];
+export type SexualPreference = typeof sexualPreferenceOptions[number];
 
-export const swipeModeOptions = ["friend", "dating"] as const;
+export const swipeModeOptions = ["friend" as const, "dating" as const];
 export type SwipeMode = typeof swipeModeOptions[number];
