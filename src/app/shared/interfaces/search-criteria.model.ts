@@ -47,7 +47,7 @@ export const searchCriteriaOptions = {
 };
 
 // CANNOT BE PLACED IN searchCriteriaOptions
-const assetsInterestsPath = [
+export const assetsInterestsPath = [
   "/assets/interests/herbfriendly.png",
   "/assets/interests/bookworm.png",
   "/assets/interests/lifesaver.png",

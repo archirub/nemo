@@ -10,6 +10,8 @@ import {
   uidDatingStorage,
 } from "../../../src/app/shared/interfaces/index";
 import { pickFromSCArray, pickIndex, randomWeightedPick } from "./picking";
+// eslint-disable-next-line import/no-deprecated
+// eslint-disable-next-line import/namespace
 import { PickingWeights } from "./main";
 import { searchCriteriaGrouping } from "./search-criteria";
 
