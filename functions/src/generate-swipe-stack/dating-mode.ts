@@ -4,7 +4,7 @@ import {
   Gender,
   mdDatingPickingFromDatabase,
   mdFromDatabase,
-  searchCriteriaFromDatabase,
+  searchCriteria,
   SexualPreference,
   uidChoiceMap,
   uidDatingStorage,
@@ -16,29 +16,31 @@ import { searchCriteriaGrouping } from "./search-criteria";
 export async function datingMode(
   uid: string,
   matchDataMain: mdFromDatabase,
-  searchCriteria: searchCriteriaFromDatabase,
+  searchCriteria: searchCriteria,
+  percentile: number | null,
   pickingWeights: PickingWeights,
   PIPickingVariance: number,
   SCPickingVariance: number,
   numberOfPicks: number
 ): Promise<uidChoiceMap[]> {
-  const numberOfDemographicPicks: number = Math.floor(
+  const demographicPicksCount: number = Math.floor(
     numberOfPicks * pickingWeights.searchCriteriaGroup * 2
   );
-  const numberOfSCPicks: number = Math.floor(numberOfDemographicPicks * 0.5);
+  const numberOfSCPicks: number = Math.floor(demographicPicksCount * 0.5);
   const numberOfLikePicks: number = Math.floor(numberOfPicks * 1.2);
 
-  // Accounts for degree pref being potentially null, if null it means no preference
-  // from user, and hence
+  // GET USERS WHO LIKE TARGET
+  const likeGroupChoiceMaps: { [uid: string]: uidChoiceMap } = {};
+  (await fetchLikeGroup(uid, numberOfLikePicks)).forEach((uid_) => {
+    likeGroupChoiceMaps[uid_] = { uid: uid_, choice: "yes" };
+  });
+
+  // FIX DEGREE DEMOGRAPHIC (null === no preference)
   const degreePreference: Degree[] = searchCriteria.degree
     ? [searchCriteria.degree]
     : ["postgrad", "undergrad"];
 
-  const likeGroupWeirdObject: { [uid: string]: uidChoiceMap } = {};
-  (await fetchLikeGroup(uid, numberOfLikePicks)).forEach((uid_) => {
-    likeGroupWeirdObject[uid_] = { uid: uid_, choice: "yes" };
-  });
-
+  // GET DEMOGRAPHICS THAT SHOULD BE FETCHED
   const {
     genderToFetch,
     sexualPreferenceToFetch,
@@ -49,6 +51,7 @@ export async function datingMode(
     degreePreference
   );
 
+  // FETCH DEMOGRAPHICS
   const uidStorageDocumentPromises: Promise<
     FirebaseFirestore.QuerySnapshot<uidDatingStorage>
   >[] = [];
@@ -75,51 +78,43 @@ export async function datingMode(
     )
     .map((doc) => doc?.data());
 
-  const DemographicUidArrays: string[][] = concatSameDemographics(
+  // CONCAT DOCUMENTS OF SAME DEMOGRAPHIC
+  const DemographicArrays: string[][] = concatSameDemographics(
     uidStorageDocuments,
     genderToFetch,
     sexualPreferenceToFetch,
     degreeToFetch
   );
 
-  let numberOfDemographicUids = 0;
-  DemographicUidArrays.forEach((array) =>
-    array.forEach(() => (numberOfDemographicUids += 1))
-  );
-  let demographicPickedUids: string[] = pickFromDemographicArrays(
-    DemographicUidArrays,
-    PIPickingVariance,
-    numberOfDemographicPicks > numberOfDemographicUids
-      ? numberOfDemographicUids
-      : numberOfDemographicPicks,
-    matchDataMain.percentile
-  );
+  // PICK FROM DEMOGRAPHIC ARRAYS
+  let demographicUidsCount = 0;
+  DemographicArrays.forEach((array) => (demographicUidsCount += array.length));
 
-  // reported users, matched users, disliked users (liked and superliked removed later on)
-  // Instead of using array you could simply make one of the two an object to make O(N) not O(N^2)
-  // The longest list will most likely be the "disliked/matched/reported" (in total) so maybe you should
-  // make these maps {[uid: string]: true} (that way you only iterate over the demographicPickedUid array
-  // which is super small. You just have to make sure that doesn't restrain you from doing other operations
-  // (like maybe at some point you actually need to use where("field", "contains", "...") and that won't be
-  // possible with maps? Gotta think about that))
+  let demographicPicks: string[] = pickFromDemographicArrays(
+    DemographicArrays,
+    PIPickingVariance,
+    Math.min(demographicPicksCount, demographicUidsCount),
+    typeof percentile === "number" && percentile > 0 ? percentile : 0.5
+  );
 
   // REMOVE UIDS OF PEOPLE THAT CAN'T BE IN SWIPE STACK
-  demographicPickedUids = demographicPickedUids.filter(
+  demographicPicks = demographicPicks.filter(
     (pickedUid) =>
       !matchDataMain.reportedUsers[pickedUid]?.exists &&
       !matchDataMain.dislikedUsers[pickedUid]?.exists &&
       !matchDataMain.matchedUsers[pickedUid]?.exists &&
-      !likeGroupWeirdObject.hasOwnProperty(pickedUid)
+      !likeGroupChoiceMaps.hasOwnProperty(pickedUid)
   );
+
+  // REMOVE DUPLICATES IN LIKEGROUP
   const likeGroupUsers: uidChoiceMap[] = removeDuplicates(
-    Object.entries(likeGroupWeirdObject).map((keyValue) => keyValue[1])
+    Object.entries(likeGroupChoiceMaps).map((keyValue) => keyValue[1])
   );
 
   // FETCH DATING MATCHDATA DOC OF ALL PEOPLE LEFT
-  // REMOVE THOSE THAT HAVE USER'S UID IN THEIR REPORTED USERS (here again above comment would be super useful)
   const matchDataDatingDocs = (
     await Promise.all(
-      demographicPickedUids.map(async (uid_) => {
+      demographicPicks.map(async (uid_) => {
         return (await admin
           .firestore()
           .collection("matchData")
@@ -129,11 +124,18 @@ export async function datingMode(
           .get()) as FirebaseFirestore.DocumentSnapshot<mdDatingPickingFromDatabase>;
       })
     )
-  ).filter((doc) => doc.exists && !doc.data()?.reportedUsers[uid]?.exists);
+  ).filter((doc) => {
+    // REMOVE IF DOC DOESN'T EXIST
+    if (!doc.exists) return false;
+    // REMOVE USERS WITH TARGET IN THEIR REPORTED
+    if (doc.data()?.reportedUsers[uid]?.exists) return false;
+    // REMOVE IF onCampus only is activated, and user isn't on campus
+    if (searchCriteria.onCampus === true && doc.data()?.searchFeatures.onCampus !== true)
+      return false;
+    return true;
+  });
 
   // SORT BASED ON SEARCH CRITERIA
-  // deletes degree property as that would be unnecessary iteration as everyone already
-  // matches the specified degree
   delete (searchCriteria as any).degree;
   let SCuids = searchCriteriaGrouping(matchDataDatingDocs, searchCriteria);
 
@@ -144,6 +146,7 @@ export async function datingMode(
     numberOfSCPicks > SCuids.length ? SCuids.length : numberOfSCPicks
   ) as FirebaseFirestore.DocumentSnapshot<mdDatingPickingFromDatabase>[];
 
+  // REMOVE DUPLICATE USERS
   const SCGroupUsers = removeDuplicates(
     datingPickingToMap(
       uid,
@@ -151,14 +154,12 @@ export async function datingMode(
     )
   );
 
-  // RETURN PICK
+  // MAKE A RANDOM WEIGHTED PICK
   const uidsPicked =
     randomWeightedPick(
       [SCGroupUsers, likeGroupUsers],
       [pickingWeights.searchCriteriaGroup, pickingWeights.likeGroup],
-      numberOfPicks > SCGroupUsers.length + likeGroupUsers.length
-        ? SCGroupUsers.length + likeGroupUsers.length
-        : numberOfPicks
+      Math.min(SCGroupUsers.length + likeGroupUsers.length, numberOfPicks)
     ) || [];
 
   return uidsPicked;

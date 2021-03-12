@@ -3,15 +3,9 @@ import { AngularFirestore } from "@angular/fire/firestore";
 
 import { BehaviorSubject, Observable } from "rxjs";
 
-import {
-  searchCriteriaFromDatabase,
-  Criterion,
-} from "@interfaces/search-criteria.model";
+import { searchCriteria, Criterion } from "@interfaces/search-criteria.model";
 import { SearchCriteria, copyClassInstance } from "@classes/index";
-import {
-  privateProfileFromDatabase,
-  profileFromDatabase,
-} from "@interfaces/index";
+import { privateProfileFromDatabase, profileFromDatabase } from "@interfaces/index";
 import { FormatService } from "@services/index";
 
 @Injectable({

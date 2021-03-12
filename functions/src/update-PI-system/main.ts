@@ -461,7 +461,7 @@ function addToDemographicArrays(
   let demographicString: keyof demographicMap<distributionParameters>;
 
   // Iterate over sexualPreference (since it's an array and you want to cover all of its options)
-  info.sexualPreference.forEach(async (sexPref) => {
+  info.sexualPreference.forEach((sexPref) => {
     // if person has gender "other", then add that person to both gender demographic
     if (info.gender === "other") {
       demographicString = demographicCombineString(info.degree, "male", sexPref);

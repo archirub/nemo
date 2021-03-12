@@ -2,14 +2,14 @@ import {
   AreaOfStudy,
   SocietyCategory,
   Interest,
-  searchCriteriaFromDatabase,
+  searchCriteria,
   searchCriteriaOptions,
   University,
   OnCampus,
   Degree,
 } from "@interfaces/index";
 
-export class SearchCriteria implements searchCriteriaFromDatabase {
+export class SearchCriteria implements searchCriteria {
   _university: University;
   _areaOfStudy: AreaOfStudy;
   _degree: Degree;

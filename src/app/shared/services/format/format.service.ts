@@ -5,7 +5,7 @@ import {
   chatFromDatabase,
   messageFromDatabase,
   profileFromDatabase,
-  searchCriteriaFromDatabase,
+  searchCriteria,
   userSnippet,
 } from "@interfaces/index";
 import firebase from "firebase";
@@ -29,9 +29,7 @@ export class FormatService {
     return uids.sort((a, b) => ("" + a).localeCompare(b));
   }
 
-  public searchCriteriaDatabaseToClass(
-    searchCriteria: searchCriteriaFromDatabase
-  ): SearchCriteria {
+  public searchCriteriaDatabaseToClass(searchCriteria: searchCriteria): SearchCriteria {
     if (!searchCriteria) return;
     const university = searchCriteria.university;
     const areaOfStudy = searchCriteria.areaOfStudy;
@@ -50,9 +48,7 @@ export class FormatService {
     );
   }
 
-  public searchCriteriaClassToDatabase(
-    searchCriteria: SearchCriteria
-  ): searchCriteriaFromDatabase {
+  public searchCriteriaClassToDatabase(searchCriteria: SearchCriteria): searchCriteria {
     if (!searchCriteria) return;
     const university = searchCriteria.university;
     const areaOfStudy = searchCriteria.areaOfStudy;
@@ -73,7 +69,7 @@ export class FormatService {
 
   public profileDatabaseToClass(uid: string, profileData: profileFromDatabase): Profile {
     if (!uid || !profileData) return;
-    const displayName = profileData.displayName;
+    const firstName = profileData.firstName;
     const dateOfBirth = profileData.dateOfBirth.toDate();
     const pictures = profileData.pictures;
     const biography = profileData.biography;
@@ -88,7 +84,7 @@ export class FormatService {
 
     return new Profile(
       uid,
-      displayName,
+      firstName,
       dateOfBirth,
       pictures,
       biography,

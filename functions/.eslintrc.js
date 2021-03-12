@@ -47,12 +47,12 @@ module.exports = {
     "no-param-reassign": "error",
     "no-redeclare": "error",
     "no-sequences": "error",
-    "no-shadow": [
-      "error",
-      {
-        hoist: "all",
-      },
-    ],
+    // "no-shadow": [
+    //   "error",
+    //   {
+    //     hoist: "all",
+    //   },
+    // ],
     "no-throw-literal": "error",
     "no-unsafe-finally": "error",
     "no-unused-labels": "error",

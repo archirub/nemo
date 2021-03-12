@@ -2,7 +2,7 @@ import * as admin from "firebase-admin";
 import {
   mdFriendPickingFromDatabase,
   mdFromDatabase,
-  searchCriteriaFromDatabase,
+  searchCriteria,
   uidChoiceMap,
   uidFriendStorage,
 } from "../../../src/app/shared/interfaces/index";
@@ -13,7 +13,7 @@ import { searchCriteriaGrouping } from "./search-criteria";
 export async function friendMode(
   uid: string,
   matchDataMain: mdFromDatabase,
-  searchCriteria: searchCriteriaFromDatabase,
+  searchCriteria: searchCriteria,
   pickingWeights: PickingWeights,
   SCPickingVariance: number,
   numberOfPicks: number

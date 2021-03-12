@@ -15,11 +15,20 @@ import { Observable } from "rxjs";
 })
 export class LoginPage implements OnInit {
   loginForm = new FormGroup({
-    email: new FormControl('',[Validators.email, Validators.required, Validators.pattern('[a-zA-Z]*@[a-zA-Z]*\.ac\.uk')]),
-    password: new FormControl('',[Validators.minLength(8), Validators.required]),
+    email: new FormControl("", [
+      Validators.email,
+      Validators.required,
+      // Validators.pattern("[a-zA-Z]*@[a-zA-Z]*.ac.uk"),
+    ]),
+    password: new FormControl("", [Validators.minLength(8), Validators.required]),
   });
 
-  constructor(private auth: AuthService, private signUpAuthService: AngularAuthService, private router: Router, private alertCtrl: AlertController) {}
+  constructor(
+    private auth: AuthService,
+    private signUpAuthService: AngularAuthService,
+    private router: Router,
+    private alertCtrl: AlertController
+  ) {}
 
   ngOnInit() {}
 
@@ -39,9 +48,9 @@ export class LoginPage implements OnInit {
   // }
 
   onSubmit() {
-    console.log("Submitted form")
-    if(!this.loginForm.valid) {
-      console.log("Form is not valid")
+    console.log("Submitted form");
+    if (!this.loginForm.valid) {
+      console.log("Form is not valid");
       return;
     }
     let authObs: Observable<AuthResponseData>;
@@ -49,32 +58,38 @@ export class LoginPage implements OnInit {
     const password: string = this.loginForm.get("password").value;
     console.log(email, password);
 
-    authObs = this.signUpAuthService.login(email, password)
+    authObs = this.signUpAuthService.login(email, password);
 
     authObs.subscribe(
-      resData => {
-        console.log(resData)
-        this.router.navigateByUrl("/main/tabs/home")
+      (resData) => {
+        console.log(resData);
+        this.router.navigateByUrl("/main/tabs/home");
       },
-      errRes => {
+      (errRes) => {
         const code = errRes.error.error.message;
-        let message = "Please check your info and try again"
+        let message = "Please check your info and try again";
         if (code == "EMAIL_NOT_FOUND") {
-          let message = 'There is no user record corresponding to this identifier. The user may have been deleted.'}
+          let message =
+            "There is no user record corresponding to this identifier. The user may have been deleted.";
+        }
         if (code == "INVALID_PASSWORD") {
-          let message = 'The password is invalid or the user does not have a password.'}
+          let message = "The password is invalid or the user does not have a password.";
+        }
         if (code == "USER_DISABLED") {
-          let message = 'The user account has been disabled by an administrator.'}
-        this.showAlert(message)
+          let message = "The user account has been disabled by an administrator.";
+        }
+        this.showAlert(message);
       }
-    )
+    );
   }
 
   private showAlert(message: string) {
-    this.alertCtrl.create({
-      header: 'Signup Failed',
-      message: message,
-      buttons: ['Okay']
-    }).then(alertEl => alertEl.present())
-  } 
+    this.alertCtrl
+      .create({
+        header: "Signup Failed",
+        message: message,
+        buttons: ["Okay"],
+      })
+      .then((alertEl) => alertEl.present());
+  }
 }
