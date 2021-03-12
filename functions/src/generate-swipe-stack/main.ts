@@ -2,6 +2,7 @@ import {
   generateSwipeStackRequest,
   generateSwipeStackResponse,
   mdFromDatabase,
+  piStorage,
   searchCriteriaFromDatabase,
   SwipeMode,
   uidChoiceMap,
@@ -48,7 +49,7 @@ export const generateSwipeStack = functions.region("europe-west2").https.onCall(
       throw new functions.https.HttpsError("unauthenticated", "User not autenticated.");
 
     // DATA FROM REQUEST
-    const targetuid: string = context.auth.uid;
+    const uid: string = context.auth.uid;
     const searchCriteria: searchCriteriaFromDatabase = data.searchCriteria || {};
 
     // DATA FOR TESTING <-> UNCOMMENT BELOW AND COMMENT ABOVE
@@ -58,7 +59,7 @@ export const generateSwipeStack = functions.region("europe-west2").https.onCall(
     //   areaOfStudy: "biology",
     //   degree: null,
     //   societyCategory: null,
-    //   interest: null,
+    //   interests: null,
     //   onCampus: null,
     // };
 
@@ -73,17 +74,27 @@ export const generateSwipeStack = functions.region("europe-west2").https.onCall(
 
     try {
       const matchDataMain = (
-        await admin.firestore().collection("matchData").doc(targetuid).get()
+        await admin.firestore().collection("matchData").doc(uid).get()
       ).data() as mdFromDatabase;
 
       const swipeMode: SwipeMode = matchDataMain.swipeMode;
       let pickedUsers: uidChoiceMap[] = [];
 
       if (swipeMode === "dating") {
+        const percentile = ((
+          await admin
+            .firestore()
+            .collection("piStorage")
+            .where("uids", "array-contains", uid)
+            .limit(1)
+            .get()
+        ).docs[0].data() as piStorage)[uid].percentile;
+
         pickedUsers = await datingMode(
-          targetuid,
+          uid,
           matchDataMain,
           searchCriteria,
+          percentile,
           pickingWeights,
           PIPickingVariance,
           SCPickingVariance,
@@ -91,7 +102,7 @@ export const generateSwipeStack = functions.region("europe-west2").https.onCall(
         );
       } else if (swipeMode === "friend") {
         pickedUsers = await friendMode(
-          targetuid,
+          uid,
           matchDataMain,
           searchCriteria,
           pickingWeights,

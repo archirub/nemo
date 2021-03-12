@@ -25,7 +25,7 @@ export const changeShowProfile = functions.region("europe-west2").https.onCall(
       .where("uids", "array-contains", uid)
       .limit(1)
       .get()) as FirebaseFirestore.QuerySnapshot<piStorage>;
-    // const matchDataRef = admin.firestore().collection("matchData").doc(uid);
+
     const privateProfileRef = admin
       .firestore()
       .collection("profiles")
@@ -34,10 +34,6 @@ export const changeShowProfile = functions.region("europe-west2").https.onCall(
       .doc("private");
 
     const batch = admin.firestore().batch();
-
-    // batch.update(matchDataRef, {
-    //   showProfile: showProfile,
-    // });
 
     batch.update(privateProfileRef, {
       "settings.showProfile": showProfile,

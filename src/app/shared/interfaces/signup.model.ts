@@ -10,7 +10,7 @@ import {
 } from "./search-criteria.model";
 
 export interface Authenticated {
-  email: string,
+  email: string;
   uid: string;
   token: string;
   tokenExpirationDate: string;

@@ -90,7 +90,6 @@ export class CurrentUserStore {
       console.error("No uid provided");
       return;
     }
-    const query = this.fs.firestore.collection("matchData").doc(uid);
 
     try {
       const responseData = (await this.afFunctions
@@ -133,7 +132,7 @@ export class CurrentUserStore {
 
     const user: User = new User(
       profile.uid,
-      profile.displayName,
+      profile.firstName,
       profile.dateOfBirth,
       profile.pictures,
       profile.biography,
@@ -145,8 +144,6 @@ export class CurrentUserStore {
       profile.onCampus,
       profile.degree,
       profile.socialMediaLinks,
-      privateProfile.firstName,
-      privateProfile.lastName,
       privateProfile.settings,
       latestSearchCriteria,
       infoFromMatchData.gender,

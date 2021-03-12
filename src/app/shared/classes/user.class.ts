@@ -14,8 +14,6 @@ import {
 import { SearchCriteria } from "./search-criteria.class";
 
 export class User extends Profile implements user {
-  private _firstName: string;
-  private _lastName: string;
   private _settings: Settings;
   private _latestSearchCriteria: SearchCriteria;
   private _gender: Gender;
@@ -26,7 +24,7 @@ export class User extends Profile implements user {
 
   constructor(
     uid: string,
-    displayName: string,
+    firstName: string,
     dateOfBirth: Date,
     pictures: profilePictureUrls,
     biography: string,
@@ -38,8 +36,6 @@ export class User extends Profile implements user {
     onCampus: OnCampus,
     degree: Degree,
     socialMediaLinks: SocialMediaLink[],
-    firstName: string,
-    lastName: string,
     settings: Settings,
     latestSearchCriteria: SearchCriteria,
     gender: Gender,
@@ -50,7 +46,7 @@ export class User extends Profile implements user {
   ) {
     super(
       uid,
-      displayName,
+      firstName,
       dateOfBirth,
       pictures,
       biography,
@@ -63,8 +59,6 @@ export class User extends Profile implements user {
       degree,
       socialMediaLinks
     );
-    this.firstName = firstName;
-    this.lastName = lastName;
     this.settings = settings;
     this.latestSearchCriteria = latestSearchCriteria;
     this.gender = gender;
@@ -92,20 +86,6 @@ export class User extends Profile implements user {
   // public set token(value: string) {
   //   this._token = value;
   // }
-
-  public get firstName(): string {
-    return this._firstName;
-  }
-  public set firstName(value: string) {
-    this._firstName = value;
-  }
-
-  public get lastName(): string {
-    return this._lastName;
-  }
-  public set lastName(value: string) {
-    this._lastName = value;
-  }
 
   public get latestSearchCriteria(): SearchCriteria {
     return this._latestSearchCriteria;

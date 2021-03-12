@@ -73,7 +73,7 @@ export class FormatService {
 
   public profileDatabaseToClass(uid: string, profileData: profileFromDatabase): Profile {
     if (!uid || !profileData) return;
-    const displayName = profileData.displayName;
+    const firstName = profileData.firstName;
     const dateOfBirth = profileData.dateOfBirth.toDate();
     const pictures = profileData.pictures;
     const biography = profileData.biography;
@@ -88,7 +88,7 @@ export class FormatService {
 
     return new Profile(
       uid,
-      displayName,
+      firstName,
       dateOfBirth,
       pictures,
       biography,

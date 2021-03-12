@@ -208,12 +208,12 @@ export async function createDatingChatDocuments(
       const userSnippets: userSnippet[] = [
         {
           uid: targetUserProfile.id,
-          name: targetUserData.displayName,
+          name: targetUserData.firstName,
           picture: targetUserData.pictures[0] || "",
         },
         {
           uid: matchedUserProfile.id,
-          name: matchedUserData.displayName,
+          name: matchedUserData.firstName,
           picture: matchedUserData.pictures[0] || "",
         },
       ];

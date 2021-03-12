@@ -1,5 +1,6 @@
 import { Gender, SexualPreference, userInfoFromMatchData } from "./match-data.model";
 import { searchCriteriaFromDatabase, SearchFeatures } from "./search-criteria.model";
+import { SignupOptional, SignupRequired } from "./signup.model";
 import { swipeChoice, uidChoiceMap } from "./swipe-choice.model";
 
 export interface generateSwipeStackRequest {
@@ -42,3 +43,5 @@ export interface updateGenderSexPrefRequest {
   name: "gender" | "sexualPreference";
   value: Gender | SexualPreference;
 }
+
+export type accountCreationRequest = SignupRequired & SignupOptional & { uid: string };

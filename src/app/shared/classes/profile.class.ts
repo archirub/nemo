@@ -11,7 +11,7 @@ import {
 
 export class Profile implements profile {
   private _uid: string;
-  private _displayName: string;
+  private _firstName: string;
   private _dateOfBirth: Date;
   private _pictures: profilePictureUrls;
   private _biography: string;
@@ -26,7 +26,7 @@ export class Profile implements profile {
 
   constructor(
     uid: string,
-    displayName: string,
+    firstName: string,
     dateOfBirth: Date,
     pictures: profilePictureUrls,
     biography: string,
@@ -40,7 +40,7 @@ export class Profile implements profile {
     socialMediaLinks: SocialMediaLink[]
   ) {
     this.uid = uid;
-    this.displayName = displayName;
+    this.firstName = firstName;
     this.dateOfBirth = dateOfBirth;
     this.pictures = pictures;
     this.biography = biography;
@@ -61,11 +61,11 @@ export class Profile implements profile {
     this._uid = value;
   }
 
-  public get displayName(): string {
-    return this._displayName;
+  public get firstName(): string {
+    return this._firstName;
   }
-  public set displayName(value: string) {
-    this._displayName = value;
+  public set firstName(value: string) {
+    this._firstName = value;
   }
 
   public get dateOfBirth(): Date {
