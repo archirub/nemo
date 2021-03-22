@@ -18,6 +18,8 @@ export class AppToggleComponent extends EventEmitter implements AfterViewInit {
     @ViewChild("handle") handle: any;
     @ViewChildren(IonButton) buttons: QueryList<IonButton>;
 
+    selection;
+
     constructor() {
         super();
     }
@@ -35,6 +37,7 @@ export class AppToggleComponent extends EventEmitter implements AfterViewInit {
         
         //Emit choice
         this.choice.emit(option);
+        this.selection = option;
 
         //option variable is the selection directly from the interfaces array
     } 

@@ -2,9 +2,9 @@
   overflow: scroll;
 }*/
 
-ion-content {
+/*ion-content {
   --overflow: scroll;
-}
+}*/
 
 ion-slide#study, ion-slide#soc, ion-slide#int {
   overflow: hidden;
@@ -13,10 +13,27 @@ ion-slide#study, ion-slide#soc, ion-slide#int {
 
 ion-slide {
   text-align: left;
+
+  &#placeholder {
+    width: 90%;
+    height: 90%;
+  }
 }
 
 ion-col {
   padding-top: 0;
+}
+
+ion-grid {
+  height: 88vh;
+}
+
+.slide-down {
+  position: absolute;
+  z-index: 3;
+  width: 96%;
+  top: 16.15vh;
+  background-color: var(--ion-color-primary-contrast);
 }
 
 .criterion {
@@ -26,6 +43,30 @@ ion-col {
   position: relative;
   padding: 3vh 3vw;
   border-bottom: solid 1px var(--ion-color-light-shade);
+}
+
+.clear-button {
+  --background: var(--ion-color-primary-contrast);
+  --background-activated: rgba(240,113,103,0.3);
+  --border-radius: 0;
+  --background: var(--ion-color-primary-contrast);
+  color: var(--ion-color-primary);
+  display: flex;
+  align-items: center;
+  position: relative;
+  justify-content: center;
+  border-bottom: solid 1px var(--ion-color-light-shade);
+  margin-top: 1px;
+  height: 7vh;
+
+  h3 {
+    margin: 0;
+  };
+
+  ion-icon {
+    font-size: 3vh;
+    margin-right: 0.5vh;
+  }
 }
 
 .labels {
@@ -103,6 +144,20 @@ p {
   color: var(--ion-color-primary);
 }
 
+.exit {
+  z-index: 3;
+  position: absolute;
+  right: 2vh;
+  top: 2vh;
+  width: 5.2vh;
+  font-size: 3vh;
+  height: 5.2vh;
+  background-color: var(--ion-color-light-shade);
+  border-radius: 50%;
+  text-align: center;
+  padding-top: 1.25vh;
+}
+
 ion-button {
 
   &.exit {
@@ -111,12 +166,6 @@ ion-button {
     --background-activated: transparent;
     font-size: 3vh;
   };
-
-  &.clear {
-    margin: 2vh;
-    --border-radius: 50%;
-    height: 6.5vh;
-  }
 }
 
 .return {

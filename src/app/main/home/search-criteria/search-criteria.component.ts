@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild, AfterViewInit } from "@angular/core";
+import { Component, OnInit, OnDestroy, ViewChild, AfterViewInit, ElementRef } from "@angular/core";
 import { IonSlides, IonToggle, IonContent, ModalController } from "@ionic/angular";
 import { FormControl, FormGroup } from "@angular/forms";
 
@@ -17,6 +17,14 @@ import { App } from "@capacitor/core";
   styleUrls: ["./search-criteria.component.scss"],
 })
 export class SearchCriteriaComponent implements OnInit, OnDestroy {
+  @ViewChild('options', { read: ElementRef }) options: ElementRef;
+  @ViewChild('clear', { read: ElementRef }) clear: ElementRef;
+  @ViewChild('grid', { read: ElementRef }) grid: ElementRef;
+  @ViewChild("locationslider") locationHandle: AppToggleComponent;
+  @ViewChild("degreeslider") degreeHandle: AppToggleComponent;
+  @ViewChild("slides") slides: IonSlides;
+  @ViewChild(IonContent) frame: IonContent;
+
   searchCriteria$: Subscription;
   searchCriteria: SearchCriteria;
   scOptions = searchCriteriaOptions;
@@ -26,6 +34,9 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
   societySelection: string;
   interestSelection: string;
 
+  gridHeight: number;
+  clearButtonHeight: number;
+  optionsOriginalPos: number;
 
   searchCriteriaForm = new FormGroup({
     // university: new FormControl(" "),
@@ -37,11 +48,6 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
   });
 
   constructor(private SCstore: SearchCriteriaStore, private modalCtrl: ModalController) {}
-
-  @ViewChild("locationslider") locationHandle: AppToggleComponent;
-  @ViewChild("degreeslider") degreeHandle: AppToggleComponent;
-  @ViewChild("slides") slides: IonSlides;
-  @ViewChild(IonContent) frame: IonContent;
 
   ngOnInit() {
     this.searchCriteria$ = this.SCstore.searchCriteria.subscribe({
@@ -58,9 +64,40 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
   }
 
   ngAfterViewInit() {
-    this.degreeHandle.selectOption("both");
-    this.locationHandle.selectOption("everyone");
+    this.degreeHandle.selectOption("undergrad");
+    this.locationHandle.selectOption("Everyone");
     this.slides.lockSwipes(true);
+    this.optionsOriginalPos = this.options.nativeElement.getBoundingClientRect().y;
+  }
+
+  ionViewDidEnter() {
+    this.gridHeight = this.grid.nativeElement.getBoundingClientRect().height;
+  }
+
+  slideDown() {
+    this.options.nativeElement.style.transform = `translateY(${this.clearButtonHeight}px)`;
+    this.options.nativeElement.style.transition = "0.4s ease-in-out";
+    this.grid.nativeElement.style.height = `${this.gridHeight + this.clearButtonHeight}px`;
+  }
+
+  slideUp() {
+    this.options.nativeElement.style.transform = `translateY(0px)`;
+    this.options.nativeElement.style.transition = "0.4s ease-in-out";
+    this.grid.nativeElement.style.height = `${this.gridHeight}px`;
+  }
+
+  checkClear() {
+    this.clearButtonHeight = this.clear.nativeElement.getBoundingClientRect().height;
+
+    if (this.options.nativeElement.getBoundingClientRect().y != this.optionsOriginalPos) {
+      if (this.locationHandle.selection != "Everyone") {
+        this.slideDown();
+      } else if (this.degreeHandle.selection != "undergrad") {
+        this.slideDown();
+      } else {
+        this.slideUp();
+      }
+    }
   }
 
   /* Unlocks swipes, slides to next/prev and then locks swipes */
@@ -68,7 +105,8 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
     this.slides.lockSwipes(false);
   
     if (direction == "next") {
-      this.slides.slideNext();
+      try {this.slides.slideNext();}
+      catch {console.log("Problem here");};
     } else {
       this.slides.slidePrev();
     };
@@ -151,8 +189,10 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
       sections[i].style.position = "initial";
     };
 
-    this.degreeHandle.selectOption("both");
-    this.locationHandle.selectOption("everyone");
+    this.degreeHandle.selectOption("undergrad");
+    this.locationHandle.selectOption("Everyone");
+
+    this.slideUp();
   }
 
   ngOnDestroy() {
