@@ -1,6 +1,6 @@
 <ion-content>
     <div id="profile" style="display: flex">
-        <app-profile-card [profile] = "profile"></app-profile-card>
+        <app-profile-card [profile]="profile"></app-profile-card>
         <!--div class="container">
             [User Profile]
         </div-->
@@ -43,7 +43,7 @@
             </div>
 
             <h2>My answers</h2>
-            <profile-answer *ngFor="let questions of profile.questions; let i = index" [questions] = "profile.questions[i]"></profile-answer>
+            <profile-answer *ngFor="let questions of profile.questions; let i = index" [questions]="profile.questions[i]"></profile-answer>
 
             <h2>My course</h2>
             <profile-course #depts [departments]="profile.course" [type]="courses" [profile]="profile"></profile-course>
