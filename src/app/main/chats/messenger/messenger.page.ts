@@ -1,6 +1,20 @@
-import { Component, Input, AfterViewInit, OnDestroy, OnInit, ViewChild, ElementRef } from "@angular/core";
+import {
+  Component,
+  Input,
+  AfterViewInit,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+  ElementRef,
+} from "@angular/core";
 
-import { NavController, IonContent, IonSlides, IonSlide, IonHeader } from "@ionic/angular";
+import {
+  NavController,
+  IonContent,
+  IonSlides,
+  IonSlide,
+  IonHeader,
+} from "@ionic/angular";
 import { AngularFireAuth } from "@angular/fire/auth";
 import { ActivatedRoute, ParamMap } from "@angular/router";
 
@@ -49,7 +63,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
     private navCtrl: NavController,
     private chatStore: ChatStore,
     private afauth: AngularFireAuth,
-    private swipeStackStore: SwipeStackStore,
+    private swipeStackStore: SwipeStackStore
   ) {}
 
   ngOnInit() {
@@ -72,8 +86,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
   /** Subscribes to chatStore's Chats osbervable using chatID
    * from paramMap */
   private messengerInitHandler(parameter: ParamMap) {
-    if (!parameter.has("chatID"))
-      return this.navCtrl.navigateBack("/tabs/chats");
+    if (!parameter.has("chatID")) return this.navCtrl.navigateBack("/tabs/chats");
     this.CHAT_ID = parameter.get("chatID");
 
     this.chats$ = this.chatStore.chats
@@ -174,7 +187,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
     );
   }
 
-  hasFailed(message: Message): Boolean {
+  hasFailed(message: Message): boolean {
     if (!message) return;
     if (message.state === "failed") return true;
     if (message.state === "sent" || message.state === "sending") return false;
@@ -182,7 +195,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
     return;
   }
 
-  isSending(message: Message): Boolean {
+  isSending(message: Message): boolean {
     if (!message) return;
     if (message.state === "sending") return true;
     if (message.state === "sent" || message.state === "failed") return false;
@@ -190,7 +203,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
     return;
   }
 
-  isOwnMessage(message: Message): Boolean {
+  isOwnMessage(message: Message): boolean {
     if (!message) return;
     const chat: Chat = this.currentChat.getValue();
     if (message.senderID === chat.recipient.uid) return false;
@@ -200,10 +213,10 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
   async slideTo(page) {
     this.slides.lockSwipes(false);
 
-    if (page==="profile") {
+    if (page === "profile") {
       this.slides.slideNext();
       this.scaleProfile();
-    } else if (page==="messenger") {
+    } else if (page === "messenger") {
       this.slides.slidePrev();
     }
 
@@ -217,7 +230,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
     var prof = document.getElementById("prof-head");
 
     var current = await this.slides.getActiveIndex();
-    
+
     if (current == 0) {
       chat.style.color = "var(--ion-color-primary)";
       prof.style.color = "var(--ion-color-light-contrast)";
@@ -231,11 +244,13 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
     //get space available on slide for profile
     const aspectRatio = 0.583;
     const headerHeight = this.header.nativeElement.getBoundingClientRect().height;
-    const profileHeight = Math.floor(this.profSlide.nativeElement.getBoundingClientRect().height - 20);
+    const profileHeight = Math.floor(
+      this.profSlide.nativeElement.getBoundingClientRect().height - 20
+    );
     const profileWidth = aspectRatio * profileHeight;
     const fullHeight = headerHeight + profileHeight + 20;
     const slideWidth = this.profSlide.nativeElement.getBoundingClientRect().width;
-    const textRatio = profileHeight/fullHeight;
+    const textRatio = profileHeight / fullHeight;
 
     var profileCard = this.profCard.nativeElement; //full card element
     var swipeCard = this.grandchildren.swipe.nativeElement; //full card container element
@@ -249,27 +264,27 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
     //size card appropriately
     profileCard.style.height = `${profileHeight}px`;
     swipeCard.style.height = `${profileHeight}px`;
-    swipeCard.style.margin = '0';
+    swipeCard.style.margin = "0";
     profileCard.style.width = `${profileWidth}px`;
 
     //get width of image
     var imageSlides = this.grandchildren.picture.nativeElement;
-    var images:any = this.grandchildren.pictures;
+    var images: any = this.grandchildren.pictures;
     imageSlides.style.width = `${Math.round(profileWidth)}px`;
     images.forEach((img: ElementRef) => {
       img.nativeElement.style.width = `${profileWidth}px`;
-    })
+    });
 
     //size and position info appropriately
     snippet.style.width = `${Math.round(profileWidth) + 2}px`;
     snippet.style.margin = "0 auto";
-    snippet.style.maxHeight = 'none';
-    snippet.style.height = 'none';
-    snippet.style.left = '0';
-    snippet.style.right = '0';
+    snippet.style.maxHeight = "none";
+    snippet.style.height = "none";
+    snippet.style.left = "0";
+    snippet.style.right = "0";
 
     //size and position q and a appropriately
-    qcont.style.left = `${((slideWidth-profileWidth)/2) + 10}px`;
+    qcont.style.left = `${(slideWidth - profileWidth) / 2 + 10}px`;
     qcont.style.width = `${profileWidth - 15}px`;
     qcont.style.bottom = `${headerHeight - 45}px`;
 
@@ -282,12 +297,12 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
     //change slide transition to fit width
     this.grandchildren.slides.options = `{ 'spaceBetween': '${profileWidth}px' }`;
     this.grandchildren.bullets.forEach((bullet: ElementRef) => {
-      bullet.nativeElement.style.display = 'none';
+      bullet.nativeElement.style.display = "none";
     });
   }
 
   scaleInfo(event) {
-    if (event===true) {
+    if (event === true) {
       const slideWidth = this.profSlide.nativeElement.getBoundingClientRect().width;
 
       var image = this.grandchildren.picture.nativeElement;
@@ -297,13 +312,12 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
       var header = this.grandchildren.header.nativeElement;
 
       complete.style.width = `${imageWidth}px`;
-      complete.style.left = `${(slideWidth - imageWidth)/2}px`;
+      complete.style.left = `${(slideWidth - imageWidth) / 2}px`;
       header.style.width = `${imageWidth}px`;
     } else {
       this.scaleProfile();
     }
   }
-
 
   ngOnDestroy() {
     this.chatStore.updateLatestChatInput(

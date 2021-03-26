@@ -6,7 +6,7 @@ export class Message implements message {
   private _content: string;
   private _reaction: messageReaction;
   private _state: messageState;
-  private _seen: Boolean;
+  private _seen: boolean;
 
   constructor(
     senderID: string,
@@ -14,7 +14,7 @@ export class Message implements message {
     content: string,
     reaction: messageReaction,
     state: messageState,
-    seen: Boolean
+    seen: boolean
   ) {
     this.senderID = senderID;
     this.time = time;
@@ -59,10 +59,10 @@ export class Message implements message {
     this._state = value;
   }
 
-  public get seen(): Boolean {
+  public get seen(): boolean {
     return this._seen;
   }
-  public set seen(value: Boolean) {
+  public set seen(value: boolean) {
     this._seen = value;
   }
 }

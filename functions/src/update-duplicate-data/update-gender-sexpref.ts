@@ -25,18 +25,14 @@ export const updateGenderSexPref = functions.region("europe-west2").https.onCall
         return { successful: false };
       }
     } else if (propertyName === "sexualPreference") {
-      console.log("ka");
       // Check if corresponding value is an array
       if (!Array.isArray(propertyValue)) {
-        console.log("a");
         return { successful: false };
       }
       // check if property is one of these allowed arrays
       let found = false;
       for (const array of [["male"], ["female"], ["male", "female"]]) {
-        console.log("wassap");
         if (sameArrays(array, propertyValue as string[])) {
-          console.log("asas");
           found = true;
           break;
         }
@@ -76,10 +72,13 @@ export const updateGenderSexPref = functions.region("europe-west2").https.onCall
       functions.logger.error(`Error for ${uid} : ${e}`);
       return { successful: false };
     }
-    // matchdatamain and piStorage
   }
 );
 
-function sameArrays(array1: any[], array2: any[]): Boolean {
+/**
+ * Checks whether the two arrays provided contain the same elements in order
+ * @Returns boolean
+ */
+function sameArrays(array1: any[], array2: any[]): boolean {
   return array1.join(",") === array2.join(",");
 }

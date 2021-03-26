@@ -3,7 +3,7 @@ export interface messageFromDatabase {
   time: firebase.firestore.Timestamp;
   content: string;
   reaction: messageReaction;
-  seen: Boolean;
+  seen: boolean;
 }
 
 export interface message {
@@ -12,7 +12,7 @@ export interface message {
   content: string;
   reaction: messageReaction;
   state: messageState;
-  seen: Boolean;
+  seen: boolean;
 }
 
 export const messageReactionOptions = [

@@ -100,15 +100,15 @@ export const generateSwipeStack = functions.region("europe-west2").https.onCall(
           SCPickingVariance,
           profilesPerWave
         );
-      } else if (swipeMode === "friend") {
-        pickedUsers = await friendMode(
-          uid,
-          matchDataMain,
-          searchCriteria,
-          pickingWeights,
-          SCPickingVariance,
-          profilesPerWave
-        );
+        // } else if (swipeMode === "friend") {
+        //   pickedUsers = await friendMode(
+        //     uid,
+        //     matchDataMain,
+        //     searchCriteria,
+        //     pickingWeights,
+        //     SCPickingVariance,
+        //     profilesPerWave
+        //   );
       } else {
         throw new functions.https.HttpsError(
           "aborted",

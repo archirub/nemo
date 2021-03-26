@@ -12,11 +12,11 @@ export const changeShowProfile = functions.region("europe-west2").https.onCall(
       throw new functions.https.HttpsError("unauthenticated", "User not autenticated.");
 
     const uid: string = context.auth.uid;
-    const showProfile: Boolean = data.showProfile;
+    const showProfile: boolean = data.showProfile;
 
     // const uid = "oY6HiUHmUvcKbFQQnb88t3U4Zew1";
 
-    if (typeof showProfile !== "boolean") {
+    if ([true, false].includes(showProfile)) {
       return { successful: false };
     }
     const pistorage = (await admin

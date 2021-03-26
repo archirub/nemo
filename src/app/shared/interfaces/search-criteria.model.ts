@@ -1,49 +1,49 @@
 // DO NOT ADD ANY FIELDS
 export const searchCriteriaOptions = {
-  university: ["UCL"] as const,
+  university: ["UCL" as const],
 
   // DO NOT CHANGE
-  degree: ["undergrad", "postgrad"] as const,
+  degree: ["undergrad" as const, "postgrad" as const],
   areaOfStudy: [
-    "Arts and Humanities",
-    "Bartlett School",
-    "Brain Sciences",
-    "Engineering Sciences",
-    "IOE",
-    "Law",
-    "Life sciences",
-    "Maths and Physical Sciences",
-    "Medical Sciences",
-    "Social Sciences",
-  ] as const,
+    "Arts and Humanities" as const,
+    "Bartlett School" as const,
+    "Brain Sciences" as const,
+    "Engineering Sciences" as const,
+    "IOE" as const,
+    "Law" as const,
+    "Life sciences" as const,
+    "Maths and Physical Sciences" as const,
+    "Medical Sciences" as const,
+    "Social Sciences" as const,
+  ],
   societyCategory: [
-    "Academic",
-    "Altruistic",
-    "Arts",
-    "Common Interests",
+    "Academic" as const,
+    "Altruistic" as const,
+    "Arts" as const,
+    "Common Interests" as const,
     "Cultural",
-    "Departmental",
-    "Faith and Spirituality",
-    "Finance and Enterprise",
-    "Political",
-    "Student Media",
-    "Science and Technology",
+    "Departmental" as const,
+    "Faith and Spirituality" as const,
+    "Finance and Enterprise" as const,
+    "Political" as const,
+    "Student Media" as const,
+    "Science and Technology" as const,
     "Sports",
-  ] as const,
+  ],
   interest: [
-    "Herb Friendly",
-    "Book Worm",
-    "Life Saver",
-    "Cafe Dweller",
-    "Astrologist",
-    "Chef",
-    "Model",
-    "Tik Toker",
-    "Library Fiend",
-    "Pub Crawler",
-  ] as const,
+    "Herb Friendly" as const,
+    "Book Worm" as const,
+    "Life Saver" as const,
+    "Cafe Dweller" as const,
+    "Astrologist" as const,
+    "Chef" as const,
+    "Model" as const,
+    "Tik Toker" as const,
+    "Library Fiend" as const,
+    "Pub Crawler" as const,
+  ],
 
-  onCampus: [true, false] as const,
+  onCampus: [true as const, false as const],
 };
 
 // CANNOT BE PLACED IN searchCriteriaOptions
@@ -63,6 +63,16 @@ export const assetsInterestsPath = [
 export type searchCriteria = {
   [k in keyof typeof searchCriteriaOptions]: typeof searchCriteriaOptions[k][number];
 };
+
+// Important for backend
+export const searchCriteriaNames: (keyof searchCriteria)[] = [
+  "university",
+  "areaOfStudy",
+  "degree",
+  "societyCategory",
+  "interest",
+  "onCampus",
+];
 
 // same as searchCriteria but some SC can be multiple i.e. for interest where
 // we have an array of interest

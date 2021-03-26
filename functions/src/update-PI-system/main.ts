@@ -70,6 +70,8 @@ export const updatePISystem = functions
       const data = doc.data() as SwipeUserInfoMap;
       delete data.uids;
       for (const uid_ in data) {
+        // if user is in "dating" mode and shows their profile, then they are accounted for in the
+        // mean and variance of the distribution, and left in the object, otherwise they are deleted from the object
         if (data[uid_].swipeMode === "dating" && data[uid_].showProfile === true) {
           updateDistributionParameters(distribParamMaps, data[uid_]);
         } else {
@@ -79,7 +81,7 @@ export const updatePISystem = functions
       return data;
     });
 
-    // CALCULATE SCORES & ADD USERS TO RESPECTIVE DEMOGRAPHIC ARRAYS
+    // CALCULATE SCORES OF USERS & SUBSEQUENTLY ADD USERS TO RESPECTIVE DEMOGRAPHIC ARRAYS
     const newDemographicScoreMaps = initialiseDemographicMap<uid_score[]>([]);
 
     swipeUserInfo.forEach((swipeUserInfoMap) => {

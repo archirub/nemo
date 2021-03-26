@@ -16,7 +16,7 @@ type datingPickingSnapshots =
   | FirebaseFirestore.DocumentSnapshot<mdDatingPickingFromDatabase>
   | FirebaseFirestore.DocumentSnapshot<mdFriendPickingFromDatabase>;
 interface SearchCriteriaChecker {
-  [key: string]: (criteria: any, feature: any) => Boolean;
+  [key: string]: (criteria: any, feature: any) => boolean;
 }
 
 /**
@@ -118,33 +118,33 @@ function orderBySC(
   );
 }
 
-function universityMatchCheck(criteria: University, feature: University): Boolean {
+function universityMatchCheck(criteria: University, feature: University): boolean {
   if (!criteria || !feature) return false;
   return criteria === feature;
 }
-function areaOfStudyMatchCheck(criteria: AreaOfStudy, feature: AreaOfStudy): Boolean {
+function areaOfStudyMatchCheck(criteria: AreaOfStudy, feature: AreaOfStudy): boolean {
   if (!criteria || !feature) return false;
   return criteria === feature;
 }
-function degreeMatchCheck(criteria: Degree, feature: Degree): Boolean {
+function degreeMatchCheck(criteria: Degree, feature: Degree): boolean {
   if (!criteria || !feature) return false;
   return criteria === feature;
 }
 function societyCategoryMatchCheck(
   criteria: SocietyCategory,
   feature: SocietyCategory
-): Boolean {
+): boolean {
   if (!criteria || !feature) return false;
   return criteria === feature;
 }
-function interestMatchCheck(criteria: Interest, feature: Interest[]): Boolean {
+function interestMatchCheck(criteria: Interest, feature: Interest[]): boolean {
   if (!criteria || !feature) return false;
   for (const f of feature) {
     return criteria === f;
   }
   return false;
 }
-function onCampusMatchCheck(criteria: OnCampus, feature: OnCampus): Boolean {
+function onCampusMatchCheck(criteria: OnCampus, feature: OnCampus): boolean {
   if (!criteria || !feature) return false;
   return criteria === feature;
 }

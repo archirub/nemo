@@ -69,7 +69,7 @@ export interface SwipeUserInfo {
   gender: Gender;
   sexualPreference: SexualPreference;
   degree: Degree;
-  showProfile: Boolean;
+  showProfile: boolean;
   swipeMode: SwipeMode;
 }
 
@@ -85,9 +85,9 @@ export type piStorage = piStorageDefault & piStorageUidMaps;
 export const genderOptions = ["male" as const, "female" as const, "other" as const];
 export type Gender = typeof genderOptions[number];
 export const sexualPreferenceOptions = [
-  ["male" as const] as const,
-  ["female" as const] as const,
-  ["male" as const, "female" as const] as const,
+  ["male" as const],
+  ["female" as const],
+  ["male" as const, "female" as const],
 ];
 export type SexualPreference = typeof sexualPreferenceOptions[number];
 
