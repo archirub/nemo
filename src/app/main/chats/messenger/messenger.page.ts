@@ -10,6 +10,7 @@ import { map } from "rxjs/operators";
 import { Chat, Message, Profile } from "@classes/index";
 import { SwipeStackStore, ChatStore } from "@stores/index";
 import { ProfileCardComponent } from "@components/index";
+import { RecentMatchesStore } from "@stores/recent-matches-store/recent-matches-store.service";
 
 @Component({
   selector: "app-messenger",
@@ -29,6 +30,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
   profiles$: Subscription;
   chatProfiles: Profile[];
   chatProfile: Profile;
+  recipientUID: string;
 
   // Constants
   private SCROLL_SPEED: number = 100;
@@ -50,6 +52,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
     private chatStore: ChatStore,
     private afauth: AngularFireAuth,
     private swipeStackStore: SwipeStackStore,
+    private recentMatchesStore: RecentMatchesStore,
   ) {}
 
   ngOnInit() {
@@ -58,10 +61,10 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
     this.scroll$ = this.currentChat.subscribe((c) => this.scrollHandler(c));
 
     //Currently fetch profiles and outputting first one from subscription
-    this.profiles$ = this.swipeStackStore.profiles.subscribe(
-      (profile) => (this.chatProfiles = profile)
-    );
-    this.chatProfile = this.chatProfiles[0];
+    const chat: Chat = this.currentChat.getValue();
+    const recipientUID: string = chat.recipient.uid
+    this.recentMatchesStore.fetchProfile(recipientUID).then((a)=>{this.chatProfile = a
+    })
   }
 
   ngAfterViewInit() {
