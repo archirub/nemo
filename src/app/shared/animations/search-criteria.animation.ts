@@ -38,9 +38,10 @@ export const SCenterAnimation = (
       .beforeStyles({
         height: `${FINAL_MODAL_HEIGHT}vh`,
         width: `${FINAL_MODAL_WIDTH}vw`,
-        overflow: 'scroll',
-        '--overflow': 'scroll',
+        //overflow: 'scroll',
+        //'--overflow': 'scroll',
         '--border-radius': '20px',
+        opacity: '1',
       })
       // .afterStyles({ height: "20px", width: "20px" })
       .fromTo(

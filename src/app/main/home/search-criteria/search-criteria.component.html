@@ -1,149 +1,173 @@
 <ion-content>
   <form class="criteria-container" [formGroup]="searchCriteriaForm">
-    <ion-slides #slides>
+    <div class="exit" (click)="closeAndConfirmChoices()">
+      <ion-icon name="close-outline"></ion-icon>
+    </div>
+
+    <div class="image" *ngIf="!viewEntered">
+      <div class="flex">
+        <h1 class="nemo">nemo</h1>
+        <h1>search</h1>
+      </div>
+      <h4>loading...</h4>
+    </div>
+
+    <ion-slides #modalSlides *ngIf="viewEntered">
       <ion-slide>
-        <ion-grid>
+        <ion-grid #grid>
           <ion-row>
             <div class="flexbetween">
               <div class="flex">
                 <h1 class="nemo">nemo</h1>
                 <h1>search</h1>
               </div>
-
-              <ion-button class="clear" (click)="clearSelect()">
-                <ion-icon name="refresh-outline"></ion-icon>
-              </ion-button>
             </div>
           </ion-row>
 
-          <p>
-            This feature allows you to refine which profiles appear in your "catch-stack".
-          </p>
-
           <ion-row>
+            <p>
+              This feature allows you to refine which profiles appear in your
+              "catch-stack".
+            </p>
+          </ion-row>
+
+          <ion-row #clear>
             <ion-col>
-              <div class="criterion">
-                <h3 id="degree">Degree</h3>
-                <!--ion-select
-                  [(ngModel)] = "degreeSelection"
-                  slot="end"
-                  cancelText="Nah"
-                  okText="Okay!"
-                  formControlName="degree"
-                  (ionChange)="selectReplace('degree')"
-                >
-                  <ion-select-option
-                    *ngFor="let option of this.scOptions.degree"
-                    value="{{ option }}"
+              <ion-button class="clear-button" (click)="clearSelect()">
+                <ion-icon name="refresh-outline"></ion-icon>
+                <h3>Clear selections</h3>
+              </ion-button>
+            </ion-col>
+          </ion-row>
+
+          <div #options class="slide-down">
+            <ion-row>
+              <ion-col>
+                <div class="criterion">
+                  <h3 id="degree">Degree</h3>
+                  <!--ion-select
+                    [(ngModel)] = "degreeSelection"
+                    slot="end"
+                    cancelText="Nah"
+                    okText="Okay!"
+                    formControlName="degree"
+                    (ionChange)="selectReplace('degree')"
                   >
-                    {{ option }}
-                  </ion-select-option>
-                </ion-select-->
-                <nemo-toggle
-                  #degreeslider
-                  [buttonWidth]="17"
-                  [fontSize]="3"
-                  [selections]="this.scOptions.degree"
-                ></nemo-toggle>
-              </div>
-            </ion-col>
-          </ion-row>
+                    <ion-select-option
+                      *ngFor="let option of this.scOptions.degree"
+                      value="{{ option }}"
+                    >
+                      {{ option }}
+                    </ion-select-option>
+                  </ion-select-->
+                  <nemo-toggle
+                    #degreeslider
+                    [buttonWidth]="17"
+                    [fontSize]="3"
+                    [selections]="this.scOptions.degree.reverse()"
+                    (click)="checkClear()"
+                  ></nemo-toggle>
+                </div>
+              </ion-col>
+            </ion-row>
 
-          <ion-row>
-            <ion-col>
-              <div class="criterion">
-                <h3>Location</h3>
-                <nemo-toggle
-                  #locationslider
-                  [buttonWidth]="17"
-                  [fontSize]="3"
-                  [selections]="['On campus', 'Everyone']"
-                ></nemo-toggle>
-              </div>
-            </ion-col>
-          </ion-row>
+            <ion-row>
+              <ion-col>
+                <div class="criterion">
+                  <h3>Location</h3>
+                  <nemo-toggle
+                    #locationslider
+                    [buttonWidth]="17"
+                    [fontSize]="3"
+                    [selections]="['On campus', 'Everyone']"
+                    (click)="checkClear()"
+                  ></nemo-toggle>
+                </div>
+              </ion-col>
+            </ion-row>
 
-          <ion-row>
-            <ion-col>
-              <div (click)="moveTo('studies')" class="criterion">
-                <h3 id="aos">Area of Study</h3>
-                <!--ion-select
-                  [(ngModel)] = "studySelection"
-                  slot="end"
-                  formControlName="areaOfStudy"
-                  cancelText="Nah"
-                  okText="Okay!"
-                  [value]="'haha'"
-                  (ionChange)="selectReplace('aos')"
-                >
-                  <ion-select-option
-                    *ngFor="let option of this.scOptions.areaOfStudy"
-                    value="{{ option }}"
+            <ion-row>
+              <ion-col>
+                <div (click)="moveTo('studies')" class="criterion">
+                  <h3 id="aos">Area of Study</h3>
+                  <!--ion-select
+                    [(ngModel)] = "studySelection"
+                    slot="end"
+                    formControlName="areaOfStudy"
+                    cancelText="Nah"
+                    okText="Okay!"
+                    [value]="'haha'"
+                    (ionChange)="selectReplace('aos')"
                   >
-                    {{ option }}
-                  </ion-select-option>
-                </ion-select-->
-                <h2 *ngIf="this.studySelection">{{ this.studySelection }}</h2>
-                <ion-icon name="chevron-forward-outline"></ion-icon>
-              </div>
-            </ion-col>
-          </ion-row>
+                    <ion-select-option
+                      *ngFor="let option of this.scOptions.areaOfStudy"
+                      value="{{ option }}"
+                    >
+                      {{ option }}
+                    </ion-select-option>
+                  </ion-select-->
+                  <h2 *ngIf="this.studySelection">{{ this.studySelection }}</h2>
+                  <ion-icon name="chevron-forward-outline"></ion-icon>
+                </div>
+              </ion-col>
+            </ion-row>
 
-          <ion-row>
-            <ion-col>
-              <div (click)="moveTo('societies')" class="criterion">
-                <h3 id="society">Societies</h3>
-                <!--ion-select
-                  [(ngModel)] = "societySelection"
-                  slot="end"
-                  formControlName="societyCategory"
-                  cancelText="Nah"
-                  okText="Okay!"
-                  (ionChange)="selectReplace('society')"
-                >
-                  <ion-select-option
-                    *ngFor="let option of this.scOptions.societyCategory"
-                    value="{{ option }}"
+            <ion-row>
+              <ion-col>
+                <div (click)="moveTo('societies')" class="criterion">
+                  <h3 id="society">Societies</h3>
+                  <!--ion-select
+                    [(ngModel)] = "societySelection"
+                    slot="end"
+                    formControlName="societyCategory"
+                    cancelText="Nah"
+                    okText="Okay!"
+                    (ionChange)="selectReplace('society')"
                   >
-                    {{ option }}
-                  </ion-select-option>
-                </ion-select-->
-                <h2 *ngIf="this.societySelection">{{ this.societySelection }}</h2>
-                <ion-icon name="chevron-forward-outline"></ion-icon>
-              </div>
-            </ion-col>
-          </ion-row>
+                    <ion-select-option
+                      *ngFor="let option of this.scOptions.societyCategory"
+                      value="{{ option }}"
+                    >
+                      {{ option }}
+                    </ion-select-option>
+                  </ion-select-->
+                  <h2 *ngIf="this.societySelection">{{ this.societySelection }}</h2>
+                  <ion-icon name="chevron-forward-outline"></ion-icon>
+                </div>
+              </ion-col>
+            </ion-row>
 
-          <ion-row>
-            <ion-col>
-              <div (click)="moveTo('interests')" class="criterion">
-                <h3 id="interests">Interests</h3>
-                <!--ion-select
-                  [(ngModel)] = "interestSelection"
-                  slot="end"
-                  formControlName="interest"
-                  cancelText="Nah"
-                  okText="Okay!"
-                  (ionChange)="selectReplace('interests')"
-                >
-                  <ion-select-option
-                    *ngFor="let option of this.scOptions.interest"
-                    value="{{ option }}"
+            <ion-row>
+              <ion-col>
+                <div (click)="moveTo('interests')" class="criterion">
+                  <h3 id="interests">Interests</h3>
+                  <!--ion-select
+                    [(ngModel)] = "interestSelection"
+                    slot="end"
+                    formControlName="interest"
+                    cancelText="Nah"
+                    okText="Okay!"
+                    (ionChange)="selectReplace('interests')"
                   >
-                    {{ option }}
-                  </ion-select-option>
-                </ion-select-->
-                <h2 *ngIf="this.interestSelection">{{ this.interestSelection }}</h2>
-                <ion-icon name="chevron-forward-outline"></ion-icon>
-              </div>
-            </ion-col>
-          </ion-row>
+                    <ion-select-option
+                      *ngFor="let option of this.scOptions.interest"
+                      value="{{ option }}"
+                    >
+                      {{ option }}
+                    </ion-select-option>
+                  </ion-select-->
+                  <h2 *ngIf="this.interestSelection">{{ this.interestSelection }}</h2>
+                  <ion-icon name="chevron-forward-outline"></ion-icon>
+                </div>
+              </ion-col>
+            </ion-row>
+          </div>
         </ion-grid>
       </ion-slide>
 
-      <ion-slide id="placeholder"></ion-slide>
+      <ion-slide id="placeholder" style="display: block">placeholder</ion-slide>
 
-      <ion-slide style="display: none" id="study">
+      <ion-slide id="study">
         <div class="flexstart-col">
           <div (click)="returnTo()" class="flexstart-row return">
             <ion-icon name="arrow-back-outline"></ion-icon>
@@ -171,7 +195,7 @@
         </div>
       </ion-slide>
 
-      <ion-slide style="display: none" id="soc">
+      <ion-slide id="soc">
         <div class="flexstart-col">
           <div (click)="returnTo()" class="flexstart-row return">
             <ion-icon name="arrow-back-outline"></ion-icon>
@@ -199,7 +223,7 @@
         </div>
       </ion-slide>
 
-      <ion-slide style="display: none" id="int">
+      <ion-slide id="int">
         <div class="flexstart-col">
           <div (click)="returnTo()" class="flexstart-row return">
             <ion-icon name="arrow-back-outline"></ion-icon>
