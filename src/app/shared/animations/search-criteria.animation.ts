@@ -41,6 +41,7 @@ export const SCenterAnimation = (
         //overflow: 'scroll',
         //'--overflow': 'scroll',
         '--border-radius': '20px',
+        opacity: '1',
       })
       // .afterStyles({ height: "20px", width: "20px" })
       .fromTo(

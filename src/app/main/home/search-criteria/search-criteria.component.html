@@ -3,7 +3,16 @@
     <div class="exit" (click)="closeAndConfirmChoices()">
       <ion-icon name="close-outline"></ion-icon>
     </div>
-    <ion-slides #slides>
+
+    <div class="image" *ngIf="!viewEntered">
+      <div class="flex">
+        <h1 class="nemo">nemo</h1>
+        <h1>search</h1>
+      </div>
+      <h4>loading...</h4>
+    </div>
+
+    <ion-slides #modalSlides *ngIf="viewEntered">
       <ion-slide>
         <ion-grid #grid>
           <ion-row>
@@ -149,9 +158,9 @@
         </ion-grid>
       </ion-slide>
 
-      <ion-slide id="placeholder" style="display: block"></ion-slide>
+      <ion-slide id="placeholder" style="display: block">placeholder</ion-slide>
 
-      <ion-slide style="display: none" id="study">
+      <ion-slide id="study">
         <div class="flexstart-col">
           <div (click)="returnTo()" class="flexstart-row return">
             <ion-icon name="arrow-back-outline"></ion-icon>
@@ -171,7 +180,7 @@
         </div>
       </ion-slide>
 
-      <ion-slide style="display: none" id="soc">
+      <ion-slide id="soc">
         <div class="flexstart-col">
           <div (click)="returnTo()" class="flexstart-row return">
             <ion-icon name="arrow-back-outline"></ion-icon>
@@ -191,7 +200,7 @@
         </div>
       </ion-slide>
 
-      <ion-slide style="display: none" id="int">
+      <ion-slide id="int">
         <div class="flexstart-col">
           <div (click)="returnTo()" class="flexstart-row return">
             <ion-icon name="arrow-back-outline"></ion-icon>

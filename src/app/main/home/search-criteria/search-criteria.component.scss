@@ -1,10 +1,16 @@
-/*.criteria-container {
-  overflow: scroll;
-}*/
+.image {
+  height: 90vh;
+  width: 90vw;
+  background-color: var(--ion-color-primary-contrast);
+  padding-top: 38vh;
+  text-align: center;
 
-/*ion-content {
-  --overflow: scroll;
-}*/
+  .flex {
+    font-size: 10vh;
+    display: flex;
+    justify-content: center;
+  }
+}
 
 ion-slide#study, ion-slide#soc, ion-slide#int {
   overflow: hidden;
@@ -15,8 +21,8 @@ ion-slide {
   text-align: left;
 
   &#placeholder {
-    width: 90%;
-    height: 90%;
+    width: 90vh;
+    height: 90vh;
   }
 }
 
@@ -55,9 +61,12 @@ ion-grid {
   align-items: center;
   position: relative;
   justify-content: center;
+  border: 0;
   border-bottom: solid 1px var(--ion-color-light-shade);
   margin-top: 1px;
   height: 7vh;
+  text-transform: none;
+  --box-shadow: none;
 
   h3 {
     margin: 0;
