@@ -48,7 +48,7 @@ module.exports = {
     "no-redeclare": "error",
     "no-sequences": "error",
     "no-shadow": [
-      "error",
+      "warn",
       {
         hoist: "all",
       },

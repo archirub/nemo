@@ -14,7 +14,7 @@ type ka = {
 };
 
 interface salut {
-  bross: Boolean;
+  bross: boolean;
 }
 
 type sasa = ka & salut;

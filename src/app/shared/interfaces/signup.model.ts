@@ -1,6 +1,6 @@
 import { searchCriteriaOptions } from "@interfaces/index";
 import { Gender, SexualPreference, SwipeMode } from "./match-data.model";
-import { profilePictureUrls, QuestionAndAnswer } from "./profile.model";
+import { profilePicturesBase64, QuestionAndAnswer } from "./profile.model";
 import {
   AreaOfStudy,
   Degree,
@@ -21,9 +21,9 @@ export interface SignupRequired {
   dateOfBirth: string;
   gender: Gender;
   sexualPreference: SexualPreference;
-  // university: typeof searchCriteriaOptions.university
+  // university: typeof searchCriteriaOptions.university[number];
+  // pictures: profilePicturesBase64;
   // swipeMode: SwipeMode;
-  // pictures: profilePictureUrls;
 }
 
 export interface SignupOptional {

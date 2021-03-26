@@ -19,11 +19,11 @@ export interface registerSwipeChoicesRequest {
 export interface registerSwipeChoicesResponse {}
 
 export interface successResponse {
-  successful: Boolean;
+  successful: boolean;
 }
 
 export interface changeShowProfileRequest {
-  showProfile: Boolean;
+  showProfile: boolean;
 }
 
 export interface addOrRemoveReportedRequest {

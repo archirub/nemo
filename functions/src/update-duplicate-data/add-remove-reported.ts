@@ -35,6 +35,8 @@ export const addOrRemoveReported = functions.region("europe-west2").https.onCall
       .doc(uid)
       .collection("pickingData")
       .doc("dating");
+
+    // uncomment once friend feature is implemented
     // const mdFriendRef = admin
     //   .firestore()
     //   .collection("matchData")
@@ -58,6 +60,7 @@ export const addOrRemoveReported = functions.region("europe-west2").https.onCall
         [`reportedUsers.${reporteduid}`]: reportedDateMap,
       });
 
+      // uncomment once friend feature is implemented
       // batch.update(mdFriendRef, {
       //   [`reportedUsers.${reporteduid}`]: reportedDateMap,
       // });
@@ -70,6 +73,7 @@ export const addOrRemoveReported = functions.region("europe-west2").https.onCall
         [`reportedUsers.${reporteduid}`]: admin.firestore.FieldValue.delete(),
       });
 
+      // uncomment once friend feature is implemented
       // batch.update(mdFriendRef, {
       //   [`reportedUsers.${reporteduid}`]: admin.firestore.FieldValue.delete(),
       // });

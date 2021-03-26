@@ -11,19 +11,23 @@ import {
 
 export const updateSearchFeature = functions.region("europe-west2").https.onCall(
   async (data: updateSearchFeatureRequest, context): Promise<successResponse> => {
-    // if (!context.auth)
-    //   throw new functions.https.HttpsError("unauthenticated", "User not autenticated.");
+    if (!context.auth)
+      throw new functions.https.HttpsError("unauthenticated", "User not authenticated.");
 
-    // const uid: string = context.auth.uid;
+    const uid: string = context.auth.uid;
 
-    const uid = "oY6HiUHmUvcKbFQQnb88t3U4Zew1";
+    // for testing
+    // const uid = "oY6HiUHmUvcKbFQQnb88t3U4Zew1";
 
     const sfName: keyof SearchFeatures = data.name;
     const sfValue: SearchFeatures[keyof SearchFeatures] = data.value;
 
+    // Veryfing name of search feature
     if (!searchCriteriaNames.includes(sfName)) {
       return { successful: false };
     }
+
+    // veryfing value of search feature
     if (!((searchCriteriaOptions[sfName] as unknown) as any[]).includes(sfValue)) {
       return { successful: false };
     }
@@ -34,12 +38,15 @@ export const updateSearchFeature = functions.region("europe-west2").https.onCall
 
     const batch = admin.firestore().batch();
 
+    // All search features are in matchdata, so add to matchdata regardless
     addToMatchData(batch, uid, sfName, sfValue);
 
+    // only these are in profile
     if (["onCampus", "interest", "university", "degree"].includes(sfName)) {
       addToProfileDocument(batch, uid, sfName, sfValue);
     }
 
+    // Only degree of the search features is in piStorage
     if (["degree"].includes(sfName)) {
       const e = await addToPiStorage(batch, uid, sfName, sfValue);
       if (e === "failed") {

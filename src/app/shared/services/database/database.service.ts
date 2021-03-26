@@ -17,7 +17,7 @@
 //     private afAuth: AngularFireAuth
 //   ) {}
 
-//   async isLikedBy(userID: string): Promise<Boolean> {
+//   async isLikedBy(userID: string): Promise<boolean> {
 //     if (!userID) {
 //       console.error("No user ID provided.");
 //       return;

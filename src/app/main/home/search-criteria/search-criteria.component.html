@@ -25,7 +25,10 @@
           </ion-row>
 
           <ion-row>
-            <p>This feature allows you to refine which profiles appear in your "catch-stack".</p>
+            <p>
+              This feature allows you to refine which profiles appear in your
+              "catch-stack".
+            </p>
           </ion-row>
 
           <ion-row #clear>
@@ -57,11 +60,13 @@
                       {{ option }}
                     </ion-select-option>
                   </ion-select-->
-                  <nemo-toggle #degreeslider 
-                  [buttonWidth]=17 
-                  [fontSize]=3 
-                  [selections]="this.scOptions.degree.reverse()" 
-                  (click)="checkClear()"></nemo-toggle>
+                  <nemo-toggle
+                    #degreeslider
+                    [buttonWidth]="17"
+                    [fontSize]="3"
+                    [selections]="this.scOptions.degree.reverse()"
+                    (click)="checkClear()"
+                  ></nemo-toggle>
                 </div>
               </ion-col>
             </ion-row>
@@ -70,11 +75,13 @@
               <ion-col>
                 <div class="criterion">
                   <h3>Location</h3>
-                  <nemo-toggle #locationslider 
-                  [buttonWidth]=17 
-                  [fontSize]=3 
-                  [selections]="['On campus', 'Everyone']"
-                  (click)="checkClear()"></nemo-toggle>
+                  <nemo-toggle
+                    #locationslider
+                    [buttonWidth]="17"
+                    [fontSize]="3"
+                    [selections]="['On campus', 'Everyone']"
+                    (click)="checkClear()"
+                  ></nemo-toggle>
                 </div>
               </ion-col>
             </ion-row>
@@ -167,12 +174,20 @@
             <h4>Back</h4>
           </div>
           <ion-list>
-            <ion-item 
-            (click)="selectReplace(option, 'aos')" 
-            lines="none" 
-            *ngFor="let option of this.scOptions.areaOfStudy"
-            [style.--background]="this.studySelection === option ? 'var(--ion-color-primary)' : 'var(--ion-color-primary-contrast)'"
-            [style.color]="this.studySelection === option ? 'var(--ion-color-primary-contrast)' : 'var(--ion-color-light-contrast)'"
+            <ion-item
+              (click)="selectReplace(option, 'aos')"
+              lines="none"
+              *ngFor="let option of this.scOptions.areaOfStudy"
+              [style.--background]="
+                this.studySelection === option
+                  ? 'var(--ion-color-primary)'
+                  : 'var(--ion-color-primary-contrast)'
+              "
+              [style.color]="
+                this.studySelection === option
+                  ? 'var(--ion-color-primary-contrast)'
+                  : 'var(--ion-color-light-contrast)'
+              "
             >
               <ion-label>{{ option }}</ion-label>
             </ion-item>
@@ -187,12 +202,20 @@
             <h4>Back</h4>
           </div>
           <ion-list>
-            <ion-item 
-            (click)="selectReplace(option, 'society')" 
-            lines="none" 
-            *ngFor="let option of this.scOptions.societyCategory"
-            [style.--background]="this.societySelection === option ? 'var(--ion-color-primary)' : 'var(--ion-color-primary-contrast)'"
-            [style.color]="this.societySelection === option ? 'var(--ion-color-primary-contrast)' : 'var(--ion-color-light-contrast)'"
+            <ion-item
+              (click)="selectReplace(option, 'society')"
+              lines="none"
+              *ngFor="let option of this.scOptions.societyCategory"
+              [style.--background]="
+                this.societySelection === option
+                  ? 'var(--ion-color-primary)'
+                  : 'var(--ion-color-primary-contrast)'
+              "
+              [style.color]="
+                this.societySelection === option
+                  ? 'var(--ion-color-primary-contrast)'
+                  : 'var(--ion-color-light-contrast)'
+              "
             >
               <ion-label>{{ option }}</ion-label>
             </ion-item>
@@ -207,12 +230,20 @@
             <h4>Back</h4>
           </div>
           <ion-list>
-            <ion-item 
-            (click)="selectReplace(option, 'interests')" 
-            lines="none" 
-            *ngFor="let option of this.scOptions.interest"
-            [style.--background]="this.interestSelection === option ? 'var(--ion-color-primary)' : 'var(--ion-color-primary-contrast)'"
-            [style.color]="this.interestSelection === option ? 'var(--ion-color-primary-contrast)' : 'var(--ion-color-light-contrast)'"
+            <ion-item
+              (click)="selectReplace(option, 'interests')"
+              lines="none"
+              *ngFor="let option of this.scOptions.interest"
+              [style.--background]="
+                this.interestSelection === option
+                  ? 'var(--ion-color-primary)'
+                  : 'var(--ion-color-primary-contrast)'
+              "
+              [style.color]="
+                this.interestSelection === option
+                  ? 'var(--ion-color-primary-contrast)'
+                  : 'var(--ion-color-light-contrast)'
+              "
             >
               <ion-label>{{ option }}</ion-label>
             </ion-item>

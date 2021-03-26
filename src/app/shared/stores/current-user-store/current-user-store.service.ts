@@ -119,13 +119,12 @@ export class CurrentUserStore {
       this.fetchPrivateProfile(uid),
       this.fetchMatchDataInfo(uid),
     ]);
-    console.log('ASHDASDJKHASDJASJDHAHJKKHJASKHJASDKH')
 
     const profile: Profile = profileParts[0];
     const privateProfile: privateProfileFromDatabase = profileParts[1];
     const infoFromMatchData: userInfoFromMatchData = profileParts[2];
 
-  const latestSearchCriteria = this.format.searchCriteriaDatabaseToClass(
+    const latestSearchCriteria = this.format.searchCriteriaDatabaseToClass(
       privateProfile.latestSearchCriteria
     );
     this.SCstore.initalizeThroughCurrentUserStore(latestSearchCriteria);
