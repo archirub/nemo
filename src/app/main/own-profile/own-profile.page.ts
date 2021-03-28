@@ -38,10 +38,13 @@ export class OwnProfilePage implements OnInit {
   }
 
   displayExit(section) {
-    if (section === "bio") {
+    if (section === "bio" && this.bio.value != "") {
       this.bioClose.nativeElement.style.display = "block";
-      this.profile.biography = this.bio.value;
     }
+    else if (this.bio.value === "") {
+      this.bioClose.nativeElement.style.display = "none";
+    };
+    this.profile.biography = this.bio.value;
   };
 
   clearInput(section) {
@@ -50,7 +53,7 @@ export class OwnProfilePage implements OnInit {
       this.bioClose.nativeElement.style.display = "none";
       this.profile.biography = "";
     }
-  };
+  }
 
   /* Nemo toggle selection function */
   toggleChange(option) {

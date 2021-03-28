@@ -5,7 +5,8 @@ import { Component,
   Input, 
   QueryList, 
   HostListener, 
-  ViewChildren, 
+  ViewChildren,
+  ViewChild, 
   ElementRef } from "@angular/core";
 
 import { Subscription } from "rxjs";
@@ -18,7 +19,7 @@ import {
 } from "@stores/index";
 import { Profile, User } from "@classes/index";
 import { MatchModalComponent, ProfileCardComponent } from "@components/index";
-import { SwipeYesAnimation, SwipeNoAnimation } from "@animations/index";
+import { SwipeYesAnimation, SwipeNoAnimation, YesBubbleAnimation, NoBubbleAnimation } from "@animations/index";
 import { swipeChoice } from "@interfaces/index";
 import { EventEmitter } from "events";
 
@@ -29,11 +30,16 @@ import { EventEmitter } from "events";
 })
 export class SwipeCardComponent extends EventEmitter implements OnInit, OnDestroy {
   @Input() profiles: Profile[];
-  @ViewChildren('card', { read: ElementRef}) card: QueryList<ElementRef>;
+  @ViewChildren('card', { read: ElementRef }) card: QueryList<ElementRef>;
+  @ViewChild('yesBubble', { read: ElementRef }) yesBubble: ElementRef;
+  @ViewChild('noBubble', { read: ElementRef }) noBubble: ElementRef;
+  @ViewChild('profileComponent') profileComponent: ProfileCardComponent;
 
   screenWidth: number;
   swipeYesAnimation: Animation;
   swipeNoAnimation: Animation;
+  yesBubbleAnimation: Animation;
+  noBubbleAnimation: Animation;
 
   @HostListener("window:resize", ["$event"])
   onResize() {
@@ -116,6 +122,7 @@ export class SwipeCardComponent extends EventEmitter implements OnInit, OnDestro
   }
 
   async doubleTap(choice) {
+
     this.swipeYesAnimation = SwipeYesAnimation(
       this.card.toArray()[0],
       this.screenWidth
@@ -126,6 +133,7 @@ export class SwipeCardComponent extends EventEmitter implements OnInit, OnDestro
     );
 
     this.screenTaps += 1;
+
     setTimeout(() => {
       this.screenTaps = 0;
     }, 500);
@@ -145,7 +153,23 @@ export class SwipeCardComponent extends EventEmitter implements OnInit, OnDestro
           this.onNoSwipe(this.profiles[0]);
         }, 400);
       };
-    };
+    }
+
+    else if (this.screenTaps == 1) {
+      if (choice === 'yes') {
+        this.yesBubbleAnimation = YesBubbleAnimation(
+          this.yesBubble, 
+          this.profileComponent.X, 
+          this.profileComponent.Y);
+        this.yesBubbleAnimation.play();
+      } else if (choice === 'no') {
+        this.noBubbleAnimation = NoBubbleAnimation(
+          this.noBubble, 
+          this.profileComponent.X, 
+          this.profileComponent.Y);
+        this.noBubbleAnimation.play();
+      }
+    }
   }
 
   ngOnDestroy() {

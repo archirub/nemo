@@ -4,6 +4,6 @@
     </div>
     <div class="text">
         <h2 class="question">{{ questions.question }}</h2>
-        <ion-textarea #answerInput (ionInput)="displayExit()" value={{questions.answer}}></ion-textarea>
+        <ion-textarea #answerInput (ionInput)="displayExit()" autoGrow='true' value={{questions.answer}}></ion-textarea>
     </div>
 </div>

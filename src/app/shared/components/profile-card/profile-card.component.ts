@@ -7,7 +7,8 @@ import { Component,
         AfterViewInit,
         ViewChild, 
         EventEmitter, 
-        ViewChildren } from "@angular/core";
+        ViewChildren, 
+        HostListener} from "@angular/core";
 import { Chat, Profile } from "@classes/index";
 import { IonContent, IonSlides } from "@ionic/angular";
 
@@ -28,7 +29,11 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
   @ViewChild('yes', { read: ElementRef }) yesSwipe: ElementRef;
   @ViewChild('no', { read: ElementRef }) noSwipe: ElementRef;
 
-  picturePaths: Array<string>;
+  picturePaths: Array<string>; 
+
+  /* Track touch locations */
+  X: number;
+  Y: number;
 
   //for sizing on chats page
   @ViewChild('fullCard', { read: ElementRef }) swipe: ElementRef; //full swipe-card id
@@ -43,6 +48,11 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
   @ViewChild('answer', { read: ElementRef }) answer: ElementRef; //answer
   @ViewChild('QandA', { read: ElementRef }) QandA: ElementRef; //question & answer container
 
+  @HostListener('touchstart', ['$event']) touchStart(event) {
+    this.X = event.touches[0].clientX;
+    this.Y = event.touches[0].clientY;
+  }
+
   constructor() {}
 
   ngOnInit() {
@@ -56,7 +66,6 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
     console.log("HERE IS THE bio:", this.profile.biography)
     console.log("HERE IS THE degree:", this.profile.degree)
     console.log("HERE IS THE society:", this.profile.society)
-
   }
 
   ngAfterViewInit() {

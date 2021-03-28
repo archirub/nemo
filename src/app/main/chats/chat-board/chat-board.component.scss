@@ -68,3 +68,7 @@ ion-row {
   font-size: medium;
   padding: 4px 0px 0px;
 }
+
+::-webkit-scrollbar, *::-webkit-scrollbar {
+  display: none !important;
+}

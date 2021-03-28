@@ -159,3 +159,7 @@ ion-icon[name="shield"] {
   --box-shadow: none;
   text-transform: none;
 }
+
+::-webkit-scrollbar, *::-webkit-scrollbar {
+  display: none !important;
+}

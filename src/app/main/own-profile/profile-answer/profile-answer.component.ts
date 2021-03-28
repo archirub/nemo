@@ -19,9 +19,14 @@ export class ProfileAnswerComponent implements OnInit {
     ngOnInit() {}
 
     displayExit() {
-        this.answerClose.nativeElement.style.display = "block";
+        if (this.answer.value != "") {
+            this.answerClose.nativeElement.style.display = "block";
+        }
+        else {
+            this.answerClose.nativeElement.style.display = "none";
+        };
         this.questions.answer = this.answer.value;
-    };
+    }
 
     clearInput() {
         this.answer.value = "";

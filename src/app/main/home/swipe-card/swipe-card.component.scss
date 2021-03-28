@@ -6,18 +6,23 @@ $swipe-width: 100vw;
 // tab-menu, if the latter touches the bottom of the screen
 $tab-height: 0vh;
 
-//.swipe-card {
-  // position: absolute;
-  // height: $swipe-height;
-  // width: $swipe-width;
-  // border-radius: 0px;
+#yesBubble {
+  display: none;
+  width: 8vh;
+  height: 8vh;
+  color: var(--ion-color-primary);
+  position: absolute;
+  z-index: 50;
+}
 
-  // ion-img {
-  //   height: 450px;
-  //   min-width: 100%;
-  //   max-width: none;
-  // }
-//}
+#noBubble {
+  display: none;
+  width: 8vh;
+  height: 8vh;
+  color: var(--ion-color-danger);
+  position: absolute;
+  z-index: 50;
+}
 
 .swipe-cards {
   position: fixed;
