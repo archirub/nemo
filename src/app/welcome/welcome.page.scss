@@ -44,18 +44,19 @@ $slide-height: 100vh;
 $slide-width: 100vw;
 
 ion-slides {
-  height: $slide-height;
+  height: 90vh;
 }
 
 .pager {
   display: flex;
-  top: 8vh;
+  top: 14vh;
   left: 8vw;
   z-index: 20;
   position: absolute;
 
   &-icon {
-    border: solid 2px var(--ion-color-secondary);
+    display: none;
+    border: solid 2px var(--ion-color-primary-tint);
     border-radius: 50%;
     color: var(--ion-color-primary);
     font-size: 4vh;
@@ -63,6 +64,7 @@ ion-slides {
   }
 
   &-dot {
+    display: none;
     padding: 2.5vh 2.5vw;
     font-size: 1.5vh;
     color: var(--ion-color-light-shade);
@@ -70,6 +72,8 @@ ion-slides {
 }
 
 ion-item {
+  position: absolute;
+  bottom: 0;
   height: 80vh;
   overflow: visible;
   width: 100vw;
@@ -85,7 +89,7 @@ ion-button.scroll {
   --border-radius: 100%;
   --padding-start: 0;
   --padding-end: 0;
-  color: var(--ion-color-secondary);
+  color: var(--ion-color-primary-contrast);
   --background: var(--ion-color-primary);
   height: $button-width;
   width: $button-width;
@@ -454,4 +458,8 @@ ion-content {
     font-size: 2vh;
     text-decoration: underline;
   }
+}
+
+.tip h3 {
+  margin-top: 4vh;
 }

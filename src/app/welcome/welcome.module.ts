@@ -13,6 +13,8 @@ import { SignuprequiredPage } from './signuprequired/signuprequired.page';
 import { SignupoptionalPage } from './signupoptional/signupoptional.page';
 import { SignupauthPageModule } from './signupauth/signupauth.module';
 import { SignupauthPageRoutingModule } from './signupauth/signupauth-routing.module';
+import { AddPhotoComponent, AppDatetimeComponent } from '@components/index';
+import { AddPhotoModule } from '@components/add-photo/add-photo.component.module';
 
 @NgModule({
   imports: [
@@ -22,7 +24,8 @@ import { SignupauthPageRoutingModule } from './signupauth/signupauth-routing.mod
     SignupauthPageModule, 
     FormsModule,
     ReactiveFormsModule,
+    AddPhotoModule
   ],
-  declarations: [SignupauthPage, SignuprequiredPage, SignupoptionalPage, LoginPage, WelcomePage]
+  declarations: [SignupauthPage, SignuprequiredPage, SignupoptionalPage, LoginPage, WelcomePage, AppDatetimeComponent]
 })
 export class WelcomePageModule {}

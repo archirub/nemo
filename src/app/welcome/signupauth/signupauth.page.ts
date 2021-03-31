@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthResponseData } from '@interfaces/auth-response.model';
-import { AlertController } from '@ionic/angular';
+import { AlertController, IonSlides } from '@ionic/angular';
 import { AngularAuthService } from '@services/login/auth/angular-auth.service';
 import { Observable } from 'rxjs';
 
@@ -12,6 +12,9 @@ import { Observable } from 'rxjs';
   styleUrls: ['../welcome.page.scss'],
 })
 export class SignupauthPage implements OnInit {
+  @ViewChild('slides') slides: IonSlides;
+
+  slidesLeft: number;
 
   authForm = new FormGroup({
     email: new FormControl('',[Validators.required, Validators.email, Validators.pattern('[a-zA-Z]*@[a-zA-Z]*\.ac\.uk')]),
@@ -20,7 +23,45 @@ export class SignupauthPage implements OnInit {
 
   constructor(private signUpAuthService: AngularAuthService, private alertCtrl: AlertController, private router: Router) { }
 
-  ngOnInit() {
+  ngOnInit() {}
+
+  ionViewDidEnter() {
+    this.slides.lockSwipes(true);
+    this.updatePager();
+  }
+
+  async updatePager() {
+    var email = document.getElementById('email');
+    var pass = document.getElementById('pass');
+
+    var map = {
+      0: email,
+      1: pass
+    }
+
+    Object.values(map).forEach(element => element.style.display = "none");
+
+    var dots: HTMLCollectionOf<any> = document.getElementsByClassName('pager-dot');
+    Array.from(dots).forEach(element => element.style.display = "none"); //ignore this error, it works fine
+
+    var l = await this.slides.length();
+    var current = await this.slides.getActiveIndex();
+    this.slidesLeft = l - current - 1;
+
+    var slice = Array.from(dots).slice(0,this.slidesLeft);
+    slice.forEach(element => element.style.display = "block"); //ignore this error, it works fine
+
+    map[current].style.display = "block";
+  }
+
+  async unlockAndSwipe() {
+    this.slides.lockSwipes(false);
+
+    this.slides.slideNext();
+
+    this.updatePager();
+
+    this.slides.lockSwipes(true);
   }
 
   onSubmit() {

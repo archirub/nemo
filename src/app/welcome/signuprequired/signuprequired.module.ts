@@ -8,6 +8,7 @@ import { SignuprequiredPageRoutingModule } from './signuprequired-routing.module
 
 import { SignuprequiredPage } from './signuprequired.page';
 import { AddPhotoModule } from '@components/add-photo/add-photo.component.module';
+import { AddPhotoComponent, AppDatetimeComponent } from '@components/index';
 
 @NgModule({
   imports: [
@@ -17,6 +18,6 @@ import { AddPhotoModule } from '@components/add-photo/add-photo.component.module
     SignuprequiredPageRoutingModule,
     AddPhotoModule,
   ],
-  declarations: []
+  declarations: [SignuprequiredPage, AppDatetimeComponent]
 })
 export class SignuprequiredPageModule {}

@@ -1,16 +1,3 @@
-<ion-content id="cards">
-    <ion-list>
-        <ion-item *ngFor="let interest of this.interests">
-            <ion-avatar slot="start">
-                <img src="/assets/interests/pubcrawler.png" alt="icon" />
-            </ion-avatar>
-            <ion-label>
-                <h1>{{interest}}</h1>
-            </ion-label>
-        </ion-item>
-    </ion-list>
-</ion-content>
-
 <ion-content id="selector">
     <ion-slides [options]="this.slideOpts">
         <ion-slide 
@@ -25,4 +12,17 @@
             <h2>{{this.names[i]}}</h2>
         </ion-slide>
     </ion-slides>
+</ion-content>
+
+<ion-content id="cards">
+    <ion-list>
+        <ion-item *ngFor="let interest of this.interests">
+            <ion-avatar slot="start">
+                <img src="/assets/interests/pubcrawler.png" alt="icon" />
+            </ion-avatar>
+            <ion-label>
+                <h1>{{interest}}</h1>
+            </ion-label>
+        </ion-item>
+    </ion-list>
 </ion-content>

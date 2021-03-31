@@ -34,6 +34,7 @@ export const MatchesEnterAnimation = (
             overflow: 'scroll',
             '--overflow': 'scroll',
             background: 'transparent',
+            opacity: '1',
           })
           .fromTo(
             "transform",

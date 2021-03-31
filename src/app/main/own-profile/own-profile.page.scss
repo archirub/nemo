@@ -120,4 +120,34 @@ a {
     color: var(--ion-color-light-contrast);
 }
 
-;
+@media only screen and (max-device-height: 650px) {
+    #profile {
+        position: fixed;
+        left: 0;
+        height: 94%;
+        top: 4.5vh;
+        overflow: hidden;
+    }
+
+    #editing {
+        // padding: 1vh 3vw;
+        padding: 30px;
+        width: 93%;
+        height: 91%;
+        z-index: 3;
+        background: white;
+        position: absolute;
+        top: 4.5vh;
+        margin: 10px 11px;
+        border-radius: 30px;
+        flex-direction: column;
+        justify-content: space-evenly;
+        overflow-y: scroll !important;
+        --overflow-y: scroll !important;
+
+        box-shadow: 0px 0px 20px -12px;
+        .container {
+            height: 97.5%;
+        }
+    } 
+}

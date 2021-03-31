@@ -1,8 +1,18 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>signuprequired</ion-title>
+    <!--ion-title>signuprequired</ion-title-->
   </ion-toolbar>
 </ion-header>
+
+<div class="pager">
+  <ion-icon id="person" class="pager-icon" name="person"></ion-icon>
+  <ion-icon id="gift" class="pager-icon" name="gift"></ion-icon>
+  <ion-icon id="camera" class="pager-icon" name="camera"></ion-icon>
+  <ion-icon id="palette" class="pager-icon" name="color-palette-outline"></ion-icon>
+  <ion-icon class="pager-dot" name="ellipse"></ion-icon>
+  <ion-icon class="pager-dot" name="ellipse"></ion-icon>
+  <ion-icon class="pager-dot" name="ellipse"></ion-icon>
+</div>
 
 <ion-content>
   <form [formGroup]="requiredForm" (ngSubmit)="onSubmit()">
@@ -23,7 +33,7 @@
           </div>
       
           <!-- <ion-button class="next-slide scroll" (click)="unlockAndSwipe('next')"> -->
-            <ion-button class="next-slide scroll" (click)="slides.slideNext()">
+            <ion-button class="next-slide scroll" (click)="unlockAndSwipe()">
 
             <ion-icon name="chevron-forward-outline"></ion-icon>
           </ion-button>
@@ -39,17 +49,18 @@
           </div>
       
           <div class="input flexend-col">
-            <div>
+            <!--div>
               <ion-datetime displayFormat="DD MM YYYY" formControlName="dateOfBirth"></ion-datetime>
-            </div>
+            </div-->
+            <app-datetime-component #date [yearRange]="[2021,1990]"></app-datetime-component>
           </div>
       
           <div class="tip flexstart-col">
-            <!-- Lazy fix -->
+            <h3>You have selected: {{ this.date.text }}</h3>
           </div>
       
           <!-- <ion-button class="next-slide scroll" (click)="unlockAndSwipe('next')"> -->
-            <ion-button class="next-slide scroll" (click)="slides.slideNext()">
+            <ion-button class="next-slide scroll" (click)="unlockAndSwipe()">
             <ion-icon name="chevron-forward-outline"></ion-icon>
           </ion-button>
         </ion-item>
@@ -83,7 +94,7 @@
           </div>
       
           <!-- <ion-button class="next-slide scroll" (click)="unlockAndSwipe('next')"> -->
-            <ion-button class="next-slide scroll" (click)="slides.slideNext()">
+            <ion-button class="next-slide scroll" (click)="unlockAndSwipe()">
             <ion-icon name="chevron-forward-outline"></ion-icon>
           </ion-button>
         </ion-item>
@@ -141,7 +152,7 @@
           </div>
       
           <!-- <ion-button class="next-slide scroll" (click)="unlockAndSwipe('next')"> -->
-            <ion-button class="next-slide scroll" (click)="slides.slideNext()">
+            <ion-button class="next-slide scroll" (click)="unlockAndSwipe()">
             <ion-icon name="chevron-forward-outline"></ion-icon>
           </ion-button>
         <!-- </ion-item>  -->
