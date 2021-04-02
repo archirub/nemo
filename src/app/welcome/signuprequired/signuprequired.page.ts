@@ -47,13 +47,13 @@ export class SignuprequiredPage implements OnInit {
     var person = document.getElementById('person');
     var gift = document.getElementById('gift');
     var camera = document.getElementById('camera');
-    var palette = document.getElementById('palette');
+    var happy = document.getElementById('happy');
 
     var map = {
       0: person,
       1: gift,
       2: camera,
-      3: palette
+      3: happy
     }
 
     Object.values(map).forEach(element => element.style.display = "none");
@@ -68,7 +68,9 @@ export class SignuprequiredPage implements OnInit {
     var slice = Array.from(dots).slice(0,this.slidesLeft);
     slice.forEach(element => element.style.display = "block"); //ignore this error, it works fine
 
-    map[current].style.display = "block";
+    if (current != 4) {
+      map[current].style.display = "block";
+    }
   }
 
   async unlockAndSwipe() {

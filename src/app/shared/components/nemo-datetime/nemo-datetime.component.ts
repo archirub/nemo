@@ -14,17 +14,23 @@ export class AppDatetimeComponent implements OnInit {
 
     @Input() yearRange: Array<number>;
 
+    completeDays: Array<number>;
     days: Array<number>;
     months: Array<string>;
     years: Array<number>;
     value: ISODateString;
-    text: string;
+    age: number;
 
     constructor() {}
 
     ngOnInit() {
-        this.days = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,
+        //For reference to push date value
+        this.completeDays = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,
                     21,22,23,24,25,26,27,28,29,30,31];
+
+        //Initialise ion slides
+        this.days = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,
+                    24,25,26,27,28,29,30,31];
         this.months = ["January", "February", "March", "April",
                         "May", "June", "July", "August",
                         "September", "October", "November", "December"]
@@ -46,9 +52,46 @@ export class AppDatetimeComponent implements OnInit {
         var d = await this.daySlides.getActiveIndex();
         var m = await this.monthSlides.getActiveIndex();
         var y = await this.yearSlides.getActiveIndex();
-        this.text = `${this.days[d]} ${this.months[m]} ${this.years[y]}`;
-        var birthday = new Date(`${this.months[m]} ${this.days[d]}, ${this.years[y]} 12:00:00`);
+
+        if (m === 3 || m === 5 || m === 8 || m === 10) { //30 days months
+            this.days = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,
+                        21,22,23,24,25,26,27,28,29,30];
+            if (d > 29) {
+                this.daySlides.slideTo(29);
+            };
+        } else if (m === 1 && this.years[y]%4 === 0) { //leap year case
+            this.days = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,
+                        21,22,23,24,25,26,27,28,29];
+            if (d > 28) {
+                this.daySlides.slideTo(28);
+            };
+        } else if (m === 1 && this.years[y]%4 != 0) { //feb has 28 days
+            this.days = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,
+                        21,22,23,24,25,26,27,28];
+            if (d > 27) {
+                this.daySlides.slideTo(27);
+            };
+        } else { //31 day months
+            this.days = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,
+                        21,22,23,24,25,26,27,28,29,30,31];
+        };
+
+        var birthday = new Date(`${this.months[m]} ${this.completeDays[d]}, ${this.years[y]} 12:00:00`);
         this.value = birthday.toISOString();
+
+        var today = new Date();
+        var dy = today.getFullYear() - birthday.getFullYear();
+        var dm = today.getMonth() - birthday.getMonth();
+        var dd = today.getDate() - birthday.getDate();
+
+        if (dm < 0) {
+            this.age = dy - 1;
+        } else if (dm === 0 && dd < 0) {
+            this.age = dy - 1;
+        } else {
+            this.age = dy
+        };
+
         console.log("Selected:", this.value);
     }
 }

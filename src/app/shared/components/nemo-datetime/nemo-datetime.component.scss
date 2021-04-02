@@ -10,7 +10,10 @@ ion-slides {
     font-size: 5vh;
 }
 
-.center {
-    border-left: solid 1px var(--ion-color-primary-tint);
+#day {
     border-right: solid 1px var(--ion-color-primary-tint);
+}
+
+#year {
+    border-left: solid 1px var(--ion-color-primary-tint);
 }

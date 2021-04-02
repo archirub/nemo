@@ -232,7 +232,7 @@ add-photo {
 .photos {
   flex-wrap: wrap;
   height: 35vh;
-  margin-top: 5vh;
+  margin: 5vh auto;
 }
 
 p {
@@ -412,7 +412,7 @@ ion-content {
   }
 }
 
-.personal-pref {
+/*.personal-pref {
   height: auto;
   --border-radius: 10px;
   margin: 1vh;
@@ -420,7 +420,7 @@ ion-content {
   --padding: 0;
   --inner-border-width: none;
   --border-color: transparent;
-}
+}*/
 
 .add-info {
   font-size: 3vh;
@@ -462,4 +462,12 @@ ion-content {
 
 .tip h3 {
   margin-top: 4vh;
+}
+
+.center {
+  margin: 0 auto;
+
+  h3 {
+      text-align: center;
+  }
 }
