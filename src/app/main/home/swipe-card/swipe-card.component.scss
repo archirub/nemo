@@ -10,7 +10,7 @@ $tab-height: 0vh;
   position: absolute;
     box-shadow: 0px 0px 20px -12px;
     width: 92.5%;
-    height: 92.8%;
+    height: 92.2%;
     left: 3.5%;
     top: 6.2%;
     border-radius: 30px;
@@ -30,7 +30,7 @@ $tab-height: 0vh;
   display: none;
   width: 8vh;
   height: 8vh;
-  color: var(--ion-color-danger);
+  color: var(--ion-color-light-contrast);
   position: absolute;
   z-index: 50;
 }

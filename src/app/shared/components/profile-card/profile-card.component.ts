@@ -22,6 +22,7 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
   @Output() tapped = new EventEmitter();
   @Input() moreInfo: boolean;
   @Input() profile: Profile;
+  @Input() reportable: boolean = true;
   @ViewChild(IonContent) ionContent: IonContent;
   @ViewChild(IonSlides) slides: IonSlides;
   @ViewChildren('bullets', { read: ElementRef }) bullets: QueryList<ElementRef>;
@@ -29,7 +30,9 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
   @ViewChild('yes', { read: ElementRef }) yesSwipe: ElementRef;
   @ViewChild('no', { read: ElementRef }) noSwipe: ElementRef;
 
-  picturePaths: Array<string>; 
+  picturePaths: Array<string>;
+
+  loaded: boolean = false;
 
   /* Track touch locations */
   X: number;
@@ -47,6 +50,7 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
   @ViewChild('question', { read: ElementRef }) question: ElementRef; //question
   @ViewChild('answer', { read: ElementRef }) answer: ElementRef; //answer
   @ViewChild('QandA', { read: ElementRef }) QandA: ElementRef; //question & answer container
+  @ViewChild('shadow', { read: ElementRef }) shadow: ElementRef //photo shadow div
 
   @HostListener('touchstart', ['$event']) touchStart(event) {
     this.X = event.touches[0].clientX;
@@ -90,9 +94,9 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
     let index = 0;
     this.bullets.forEach((bullet: ElementRef) => {
       if (current === index) {
-        bullet.nativeElement.style.color = 'var(--ion-color-primary)';
+        bullet.nativeElement.style.color = 'var(--ion-color-primary-contrast)';
       } else {
-        bullet.nativeElement.style.color = 'var(--ion-color-light-shade)';
+        bullet.nativeElement.style.color = 'var(--ion-color-dark-tint)';
       };
       index += 1;
     })

@@ -30,7 +30,9 @@ ion-content {
 .swipe-stack {
   position: relative;
   width: 100%;
-  height: 98.5%;
+  height: 99%;
+  overflow: hidden !important;
+  overscroll-behavior: none !important;
 
   app-swipe-card {
     --background: transparent;

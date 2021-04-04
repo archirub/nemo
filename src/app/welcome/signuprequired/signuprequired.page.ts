@@ -15,7 +15,7 @@ type requiredForm = FormGroup & { value: SignupRequired };
 @Component({
   selector: 'app-signuprequired',
   templateUrl: './signuprequired.page.html',
-  styleUrls: ['../welcome.page.scss']
+  styleUrls: ['../welcome.page.scss'],
 })
 export class SignuprequiredPage implements OnInit {
   @ViewChild("slides") slides: IonSlides;

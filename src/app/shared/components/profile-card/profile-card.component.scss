@@ -35,8 +35,18 @@ img {
 
 .img-container {
   height: 75vh;
-  padding: 0px 1px;
   overflow: hidden;
+}
+
+.img-shadow {
+  height: 20vh;
+  width: 92vw;
+  position: absolute;
+  overflow: hidden;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+  top: 55vh;
 }
 
 ion-slides {
@@ -77,7 +87,7 @@ ion-slides {
 }
 
 #snippetInfo {
-  z-index: 1;
+  z-index: 3;
   border-bottom-left-radius: 30px;
   border-bottom-right-radius: 30px;
   background-color: #FBFBFB;
@@ -86,12 +96,12 @@ ion-slides {
   max-height: 12vh;
   height: 12vh;
   bottom: 1.5vh;
-  left: 15px;
+  left: 14px;
   right: 15px;
 }
 
 #completeInfo {
-  z-index: 1;
+  z-index: 3;
   overflow-y: scroll;
   border-bottom-left-radius: 30px;
   border-bottom-right-radius: 30px;
@@ -258,12 +268,13 @@ ion-slides {
 }
 
 .name-age {
-  padding: 15px 20px 10px;
+  padding: 12px 20px 10px;
 }
 
 .sticky {
+  box-shadow: 0px 30px 10px -20px rgb(251 251 251);
   position: fixed;
-  width: 88.5vw; //this is not okay
+  width: 92vw; //this should be okay now
   background-color: #FBFBFB;
   z-index: 100;
 }
@@ -273,7 +284,7 @@ ion-slides {
   text-transform: none;
   color: var(--ion-color-primary);
   //font-family: var(--ion-font-secondary);
-  margin-top: 5px;
+  margin-top: 10px;
   margin-bottom: 0px;
   letter-spacing: 1px;
 }
@@ -392,7 +403,7 @@ ion-slides {
   }
 
   #snippetInfo {
-    z-index: 1;
+    z-index: 3;
     border-bottom-left-radius: 30px;
     border-bottom-right-radius: 30px;
     background-color: #FBFBFB;
@@ -401,8 +412,22 @@ ion-slides {
     max-height: 12vh;
     height: 12vh;
     bottom: 1.5vh;
-    left: 12px;
+    left: 11px;
     right: 11px;
+  }
+
+  #completeInfo {
+    z-index: 3;
+    overflow-y: scroll;
+    border-bottom-left-radius: 30px;
+    border-bottom-right-radius: 30px;
+    background-color: #FBFBFB;
+    position: absolute;
+    top: 18%;
+    left: 11px;
+    right: 11px;
+    max-height: 80%;
+    height: 80%;
   }
 }
 

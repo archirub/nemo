@@ -1,18 +1,31 @@
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, OnInit, ViewChild, forwardRef} from '@angular/core';
 import { ISODateString } from '@capacitor/core';
 import { IonSlides } from '@ionic/angular';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 @Component({
   selector: 'app-datetime-component',
   templateUrl: './nemo-datetime.component.html',
   styleUrls: ['./nemo-datetime.component.scss'],
+  providers: [
+    {
+       provide: NG_VALUE_ACCESSOR,
+       useExisting: forwardRef(() => AppDatetimeComponent),
+       multi: true
+    }
+ ]
 })
-export class AppDatetimeComponent implements OnInit {
+export class AppDatetimeComponent implements OnInit, ControlValueAccessor {
     @ViewChild('day') daySlides: IonSlides;
     @ViewChild('month') monthSlides: IonSlides;
     @ViewChild('year') yearSlides: IonSlides;
 
     @Input() yearRange: Array<number>;
+
+    disabled = false;
+
+    onChange: any = () => { };
+    onTouched: any = () => { };
 
     completeDays: Array<number>;
     days: Array<number>;
@@ -78,6 +91,7 @@ export class AppDatetimeComponent implements OnInit {
 
         var birthday = new Date(`${this.months[m]} ${this.completeDays[d]}, ${this.years[y]} 12:00:00`);
         this.value = birthday.toISOString();
+        this.onChange(this.value);
 
         var today = new Date();
         var dy = today.getFullYear() - birthday.getFullYear();
@@ -93,5 +107,21 @@ export class AppDatetimeComponent implements OnInit {
         };
 
         console.log("Selected:", this.value);
+    }
+
+    writeValue(value: ISODateString): void {
+        this.value = value;
+    }
+    
+    registerOnChange(fn: any): void {
+        this.onChange = fn;
+    }
+    
+    registerOnTouched(fn: any): void {
+        this.onTouched = fn;
+    }
+    
+    setDisabledState?(isDisabled: boolean): void {
+        this.disabled = isDisabled;
     }
 }

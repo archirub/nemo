@@ -1,11 +1,11 @@
 <ion-content>
     <form class="criteria-container" [formGroup]="searchCriteriaForm">
-        <div class="exit" (click)="closeAndConfirmChoices()">
+        <div id="closeButton" class="exit" (click)="closeAndConfirmChoices()">
             <ion-icon name="close-outline"></ion-icon>
         </div>
 
         <div class="image" *ngIf="!viewEntered">
-            <div class="flex">
+            <div class="flex loading">
                 <h1 class="nemo">nemo</h1>
                 <h1>search</h1>
             </div>

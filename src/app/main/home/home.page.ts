@@ -93,18 +93,12 @@ export class HomePage implements OnInit, OnDestroy {
 
   ionViewDidEnter() {
     this.SCenterAnimation = SCenterAnimation(
-      this.searchButton,
       this.tabElementRef.tabRef,
       this.homeContainer,
-      this.screenWidth,
-      this.screenHeight
     );
     this.SCleaveAnimation = SCleaveAnimation(
-      this.searchButton,
       this.tabElementRef.tabRef,
       this.homeContainer,
-      this.screenWidth,
-      this.screenHeight
     );
 
     this.modalCtrl

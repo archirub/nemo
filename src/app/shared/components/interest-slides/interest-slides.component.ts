@@ -27,7 +27,7 @@ export class InterestSlidesComponent implements AfterViewInit {
 
     this.slideOpts = {
       coverflowEffect: {
-        rotate: 50,
+        rotate: 30,
         stretch: 50,
         depth: 100,
         modifier: 1,

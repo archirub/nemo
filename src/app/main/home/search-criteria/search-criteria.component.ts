@@ -160,6 +160,8 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
       }
     }
 
+    const exit = document.getElementById('closeButton');
+    exit.style.display = "none";
     this.frame.scrollToTop(100);
   }
 
@@ -177,35 +179,43 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
       });
     }, 200);
 
+    const exit = document.getElementById('closeButton');
+    exit.style.display = "block";
+
     this.checkClear();
   }
 
   selectReplace(option, label) {
-    var names = ["aos","society","interests"]
-    var sections = [document.getElementById("aos"), document.getElementById("society"), document.getElementById("interests")];
-
     // Have to manually set here, cannot be done in for loop below
     if (label==="aos") {
-      this.studySelection = option;
-      this.searchCriteriaForm.value.areaOfStudy = this.studySelection;
+      if (this.studySelection === option) {
+        this.studySelection = undefined;
+        this.resetFormat(label);
+      } else {
+        this.studySelection = option;
+        this.searchCriteriaForm.value.areaOfStudy = this.studySelection;
+        this.newFormat(label);
+      }
 
     } else if (label==="society") {
-      this.societySelection = option;
-      this.searchCriteriaForm.value.societyCategory = this.societySelection;
+      if (this.societySelection === option) {
+        this.societySelection = undefined;
+        this.resetFormat(label);
+      } else {
+        this.societySelection = option;
+        this.searchCriteriaForm.value.societyCategory = this.societySelection;
+        this.newFormat(label);
+      }
 
     } else if (label==="interests") {
-      this.interestSelection = option;
-      this.searchCriteriaForm.value.interests = this.interestSelection;
-    };
-
-    for (let i = 0; i < sections.length; i++) {
-      if (label==names[i]) {
-        sections[i].style.marginTop = "0";
-        sections[i].style.fontSize = "2vh";
-        sections[i].style.color = "var(--ion-color-medium-shade)";
-        sections[i].style.top = "2vh";
-        sections[i].style.position = "absolute";
-      };
+      if (this.interestSelection === option) {
+        this.interestSelection = undefined;
+        this.resetFormat(label);
+      } else {
+        this.interestSelection = option;
+        this.searchCriteriaForm.value.interests = this.interestSelection;
+        this.newFormat(label);
+      }
     };
   }
 
@@ -222,21 +232,46 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
     this.interestSelection = undefined;
     this.searchCriteriaForm.value.interests = undefined;
 
-    var sections = [document.getElementById("aos"), document.getElementById("society"), document.getElementById("interests")];
-
-    // Reset formatting of placeholders
-    for (let i = 0; i < sections.length; i++) {
-      sections[i].style.marginTop = "1.9vh";
-      sections[i].style.fontSize = "22px";
-      sections[i].style.color = "var(--ion-color-light-contrast)";
-      sections[i].style.top = "0";
-      sections[i].style.position = "initial";
+    //Reset formatting of placeholders
+    var names = ["aos","society","interests"];
+    for (let i = 0; i < names.length; i++) {
+      this.resetFormat(names[i]);
     };
 
     this.degreeHandle.selectOption("undergrad");
     this.locationHandle.selectOption("Everyone");
 
     this.slideUp();
+  }
+
+  resetFormat(section) {
+    var names = ["aos","society","interests"]
+    var sections = [document.getElementById("aos"), document.getElementById("society"), document.getElementById("interests")];
+
+    for (let i = 0; i < sections.length; i++) {
+      if (section==names[i]) {
+        sections[i].style.marginTop = "1.9vh";
+        sections[i].style.fontSize = "22px";
+        sections[i].style.color = "var(--ion-color-light-contrast)";
+        sections[i].style.top = "0";
+        sections[i].style.position = "initial";
+      };
+    };
+  }
+
+  newFormat(section) {
+    var names = ["aos","society","interests"]
+    var sections = [document.getElementById("aos"), document.getElementById("society"), document.getElementById("interests")];
+
+    for (let i = 0; i < sections.length; i++) {
+      if (section==names[i]) {
+        sections[i].style.marginTop = "0";
+        sections[i].style.fontSize = "2vh";
+        sections[i].style.color = "var(--ion-color-medium-shade)";
+        sections[i].style.top = "2vh";
+        sections[i].style.position = "absolute";
+      };
+    };
   }
 
   ngOnDestroy() {

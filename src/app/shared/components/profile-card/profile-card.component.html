@@ -1,5 +1,6 @@
 <div #fullCard id="swipe-card">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <div #shadow class="img-shadow"></div>
     <div class="img-container">
         <div class="pager">
             <ion-icon #bullets name="ellipse" *ngFor="let path of this.picturePaths"></ion-icon>
@@ -99,6 +100,17 @@
                         </div>
                     </div>
                 </div>
+
+                <div id="info-segment" *ngIf="reportable">
+                    <div id="interests-container">
+                        <div id="interests-box">
+                            <ion-icon name="shield" id="bottom-icon" style="color: var(--ion-color-danger)"></ion-icon>
+                            <br />
+                            <ion-label id="interest-label">Report this user</ion-label>
+                        </div>
+                    </div>
+                </div>
+
 
                 <!--div id="bio-bubble"></div-->
             </div>
