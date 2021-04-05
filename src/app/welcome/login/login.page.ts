@@ -20,7 +20,7 @@ export class LoginPage implements OnInit {
       Validators.required,
       // Validators.pattern("[a-zA-Z]*@[a-zA-Z]*.ac.uk"),
     ]),
-    password: new FormControl("", [Validators.minLength(8), Validators.required]),
+    password: new FormControl("", [Validators.required]),
   });
 
   constructor(
@@ -50,13 +50,12 @@ export class LoginPage implements OnInit {
   onSubmit() {
     // console.log("Submitted form");
     if (!this.loginForm.valid) {
-      // console.log("Form is not valid");
-      return;
+      return this.showAlert("This shit ain't valid fam");
     }
     let authObs: Observable<AuthResponseData>;
     const email: string = this.loginForm.get("email").value;
     const password: string = this.loginForm.get("password").value;
-    // console.log(email, password);
+    console.log(email, password);
 
     authObs = this.signUpAuthService.login(email, password);
 
@@ -69,14 +68,14 @@ export class LoginPage implements OnInit {
         const code = errRes.error.error.message;
         let message = "Please check your info and try again";
         if (code == "EMAIL_NOT_FOUND") {
-          let message =
+          message =
             "There is no user record corresponding to this identifier. The user may have been deleted.";
         }
         if (code == "INVALID_PASSWORD") {
-          let message = "The password is invalid or the user does not have a password.";
+          message = "The password is invalid or the user does not have a password.";
         }
         if (code == "USER_DISABLED") {
-          let message = "The user account has been disabled by an administrator.";
+          message = "The user account has been disabled by an administrator.";
         }
         this.showAlert(message);
       }
