@@ -263,12 +263,18 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
     var qcont = this.grandchildren.QandA.nativeElement; //question container
     var question = this.grandchildren.question.nativeElement; //question text
     var answer = this.grandchildren.answer.nativeElement; //answer text
+    var shadow = this.grandchildren.shadow.nativeElement; //photo shadow gradient div
 
     //size card appropriately
     profileCard.style.height = `${profileHeight}px`;
     swipeCard.style.height = `${profileHeight}px`;
     swipeCard.style.margin = "0";
     profileCard.style.width = `${profileWidth}px`;
+
+    //shape and place image shadow gradient
+    shadow.style.width = `${profileWidth}px`;
+    shadow.style.height = `${20/85 * profileHeight}px`;
+    shadow.style.top = `${55/85 * profileHeight}px`;
 
     //get width of image
     var imageSlides = this.grandchildren.picture.nativeElement;

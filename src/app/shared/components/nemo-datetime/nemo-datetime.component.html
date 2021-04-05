@@ -1,0 +1,19 @@
+<div class="container">
+    <ion-slides #day id="day" [options]="{ 'direction': 'vertical' }" (ionSlideDidChange)="getDate()">
+        <ion-slide *ngFor="let day of this.days">
+            {{ day }}
+        </ion-slide>
+    </ion-slides>
+
+    <ion-slides #month class="center" [options]="{ 'direction': 'vertical' }" (ionSlideDidChange)="getDate()">
+        <ion-slide *ngFor="let month of this.months">
+            {{ month }}
+        </ion-slide>
+    </ion-slides>
+
+    <ion-slides #year id="year" [options]="{ 'direction': 'vertical' }" (ionSlideDidChange)="getDate()">
+        <ion-slide *ngFor="let year of this.years">
+            {{ year }}
+        </ion-slide>
+    </ion-slides>
+</div>

@@ -6,10 +6,9 @@ import { IonicModule } from "@ionic/angular";
 
 import { SignuprequiredPageRoutingModule } from "./signuprequired-routing.module";
 
-import { AddPhotoComponent } from "@components/index";
-import { AddPhotoModule } from "@components/add-photo/add-photo.component.module";
 import { SignuprequiredPage } from "./signuprequired.page";
-import { BrowserModule } from "@angular/platform-browser";
+import { AddPhotoModule } from "@components/add-photo/add-photo.component.module";
+import { AppDatetimeComponent } from "@components/index";
 import { PipesModule } from "@pipes/pipes.module";
 
 @NgModule({
@@ -22,6 +21,6 @@ import { PipesModule } from "@pipes/pipes.module";
     ReactiveFormsModule,
     PipesModule,
   ],
-  declarations: [SignuprequiredPage],
+  declarations: [SignuprequiredPage, AppDatetimeComponent],
 })
 export class SignuprequiredPageModule {}

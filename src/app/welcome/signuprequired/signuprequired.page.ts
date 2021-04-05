@@ -28,6 +28,7 @@ import { AngularAuthService } from "@services/login/auth/angular-auth.service";
 
 import { SignupService } from "@services/signup/signup.service";
 import { allowOptionalProp } from "@interfaces/shared.model";
+import { AppDatetimeComponent } from "@components/index";
 
 @Component({
   selector: "app-signuprequired",
@@ -36,6 +37,9 @@ import { allowOptionalProp } from "@interfaces/shared.model";
 })
 export class SignuprequiredPage {
   @ViewChild("slides") slides: IonSlides;
+  @ViewChild("date") date: AppDatetimeComponent;
+
+  slidesLeft: number;
 
   // defines the number of picture boxes in template, as well as is used in logic to save picture picks
   pictureCount: number = 4;
@@ -79,6 +83,48 @@ export class SignuprequiredPage {
 
   ionViewWillEnter() {
     this.fillFieldsAndGoToSlide();
+    this.slides.lockSwipes(true);
+    this.updatePager();
+  }
+
+  async updatePager() {
+    var person = document.getElementById("person");
+    var gift = document.getElementById("gift");
+    var camera = document.getElementById("camera");
+    var happy = document.getElementById("happy");
+
+    var map = {
+      0: person,
+      1: gift,
+      2: camera,
+      3: happy,
+    };
+
+    Object.values(map).forEach((element) => (element.style.display = "none"));
+
+    var dots: HTMLCollectionOf<any> = document.getElementsByClassName("pager-dot");
+    Array.from(dots).forEach((element) => (element.style.display = "none")); //ignore this error, it works fine
+
+    var l = await this.slides.length();
+    var current = await this.slides.getActiveIndex();
+    this.slidesLeft = l - current - 2;
+
+    var slice = Array.from(dots).slice(0, this.slidesLeft);
+    slice.forEach((element) => (element.style.display = "block")); //ignore this error, it works fine
+
+    if (current != 4) {
+      map[current].style.display = "block";
+    }
+  }
+
+  async unlockAndSwipe() {
+    await this.slides.lockSwipes(false);
+
+    await this.slides.slideNext();
+
+    await this.updatePager();
+
+    await this.slides.lockSwipes(true);
   }
 
   /**
@@ -92,7 +138,6 @@ export class SignuprequiredPage {
   async fillFieldsAndGoToSlide() {
     const formFields = Object.keys(this.slideIndexes);
     const requiredData = {};
-
     // only getting a snapshot instead of subscribing as we only want to use this function
     // once at the start, not change swipe whenever
     const currentSignupData = this.signup.signupData.value;
@@ -129,9 +174,11 @@ export class SignuprequiredPage {
   fillFields(data: allowOptionalProp<SignupRequired>) {
     Object.keys(data).forEach((field) => {
       if (field === "pictures") {
-        data[field].forEach((pic, i) => {
-          this.savePhoto({ photo: pic, index: i });
-        });
+        if (data[field]) {
+          data[field].forEach((pic, i) => {
+            this.savePhoto({ photo: pic, index: i });
+          });
+        }
       } else {
         const formControl = this.form.get(field);
         if (formControl) formControl.setValue(data[field]);

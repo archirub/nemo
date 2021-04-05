@@ -7,22 +7,7 @@
         <app-profile-card #profileComponent (tapped)="doubleTap($event)" [profile] = "profile">
         </app-profile-card>
     </div>
+    <div class="shadow"></div>
   </div>
-  <!--div #yes draggable=true class="yesSwipe" (click)="doubleTap('yes')" on-drag="dragger()"></div>
-  <div #no class="noSwipe" (click)="doubleTap('no')"></div-->
-  <!--ion-grid>
-    <ion-row>
-      <ion-col [ngStyle]="{ zIndex: 1000 }">
-        <ion-button (click)="onNoSwipe(profiles[0])">
-          <ion-icon slot="icon-only" name="thumbs-down-outline"></ion-icon>
-        </ion-button>
-      </ion-col>
-      <ion-col [ngStyle]="{ zIndex: 1000 }">
-        <ion-button (click)="onYesSwipe(profiles[0])">
-          <ion-icon slot="icon-only" name="thumbs-up-outline"></ion-icon>
-        </ion-button>
-      </ion-col>
-    </ion-row>
-  </ion-grid-->
 </ion-content>
 

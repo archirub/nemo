@@ -1,8 +1,18 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>signuprequired</ion-title>
+    <!--ion-title>signuprequired</ion-title-->
   </ion-toolbar>
 </ion-header>
+
+<div class="pager">
+  <ion-icon id="person" class="pager-icon" name="person"></ion-icon>
+  <ion-icon id="gift" class="pager-icon" name="gift"></ion-icon>
+  <ion-icon id="camera" class="pager-icon" name="camera"></ion-icon>
+  <ion-icon id="happy" class="pager-icon" name="happy-outline"></ion-icon>
+  <ion-icon class="pager-dot" name="ellipse"></ion-icon>
+  <ion-icon class="pager-dot" name="ellipse"></ion-icon>
+  <ion-icon class="pager-dot" name="ellipse"></ion-icon>
+</div>
 
 <ion-content>
   <form [formGroup]="form" (ngSubmit)="onSubmit()">
@@ -19,8 +29,7 @@
             </div>
           </div>
 
-          <!-- <ion-button class="next-slide scroll" (click)="unlockAndSwipe('next')"> -->
-          <ion-button class="next-slide scroll" (click)="slides.slideNext()">
+          <ion-button class="next-slide scroll" (click)="unlockAndSwipe()">
             <ion-icon name="chevron-forward-outline"></ion-icon>
           </ion-button>
         </ion-item>
@@ -32,21 +41,24 @@
             <ion-label position="stacked"> What's your date of birth? </ion-label>
           </div>
 
-          <div class="input flexend-col">
-            <div>
-              <ion-datetime
-                displayFormat="DD MM YYYY"
-                formControlName="dateOfBirth"
-              ></ion-datetime>
-            </div>
+          <div class="input center flexend-col">
+            <!--div>
+              <ion-datetime displayFormat="DD MM YYYY" formControlName="dateOfBirth"></ion-datetime>
+            </div-->
+            <app-datetime-component
+              #date
+              [yearRange]="[2020,1990]"
+              formControlName="dateOfBirth"
+            ></app-datetime-component>
           </div>
 
-          <div class="tip flexstart-col">
-            <!-- Lazy fix -->
+          <div class="center">
+            <h3>Age: {{ this.date.age }}</h3>
+            <p class="tip">This can't be changed later</p>
           </div>
 
           <!-- <ion-button class="next-slide scroll" (click)="unlockAndSwipe('next')"> -->
-          <ion-button class="next-slide scroll" (click)="slides.slideNext()">
+          <ion-button class="next-slide scroll" (click)="unlockAndSwipe()">
             <ion-icon name="chevron-forward-outline"></ion-icon>
           </ion-button>
         </ion-item>
@@ -87,20 +99,18 @@
           </div>
 
           <!-- <ion-button class="next-slide scroll" (click)="unlockAndSwipe('next')"> -->
-          <ion-button class="next-slide scroll" (click)="slides.slideNext()">
+          <ion-button class="next-slide scroll" (click)="unlockAndSwipe()">
             <ion-icon name="chevron-forward-outline"></ion-icon>
           </ion-button>
         </ion-item>
       </ion-slide>
 
       <ion-slide>
-        <div class="personal-pref">
-          <!-- <ion-item lines="none"> -->
-          <!-- <div class="question">
-            <ion-label position="stacked">
-              Tell us a bit about yourself
-            </ion-label>
-          </div> -->
+        <!--div class="personal-pref"-->
+        <ion-item lines="none">
+          <div class="question">
+            <ion-label position="stacked"> Set your preferences </ion-label>
+          </div>
           <br />
 
           <div class="flexstart-col">
@@ -113,21 +123,23 @@
 
             <div class="preferences">
               <h3>I am interested in</h3>
-              <ion-select required formControlName="sexualPreference">
-                <ion-select-option
-                  *ngFor="let sexPref of sexualPreferenceOptions"
-                  value="{{sexPref}}"
-                  >{{sexPref | formatSexPref}}</ion-select-option
-                >
+              <ion-select
+                required
+                name="sexualPreference"
+                formControlName="sexualPreference"
+              >
+                <ion-select-option value="men">men</ion-select-option>
+                <ion-select-option value="women">women</ion-select-option>
+                <ion-select-option value="both">both</ion-select-option>
               </ion-select>
             </div>
 
             <div class="preferences">
               <h3>I identify as</h3>
-              <ion-select required formControlName="gender">
-                <ion-select-option *ngFor="let gender of genderOptions" value="{{gender}}"
-                  >{{gender}}</ion-select-option
-                >
+              <ion-select required name="gender" formControlName="gender">
+                <ion-select-option value="man">man</ion-select-option>
+                <ion-select-option value="woman">woman</ion-select-option>
+                <ion-select-option value="other">other</ion-select-option>
               </ion-select>
             </div>
 
@@ -136,21 +148,21 @@
             </div>
 
             <div class="terms">
-              <!-- <ion-checkbox name="terms"></ion-checkbox> -->
+              <!--ion-checkbox name="terms"></ion-checkbox-->
               <h2>I have read and understood the terms and conditions</h2>
             </div>
             <div class="terms">
-              <!-- <ion-checkbox name="privacy"></ion-checkbox> -->
+              <!--ion-checkbox name="privacy"></ion-checkbox-->
               <h2>I consent to the data and privacy policies of this app</h2>
             </div>
           </div>
 
           <!-- <ion-button class="next-slide scroll" (click)="unlockAndSwipe('next')"> -->
-          <ion-button class="next-slide scroll" (click)="slides.slideNext()">
+          <ion-button class="next-slide scroll" (click)="unlockAndSwipe()">
             <ion-icon name="chevron-forward-outline"></ion-icon>
           </ion-button>
-          <!-- </ion-item>  -->
-        </div>
+        </ion-item>
+        <!--/div-->
       </ion-slide>
 
       <ion-slide>

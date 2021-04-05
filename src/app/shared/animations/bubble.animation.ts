@@ -18,7 +18,7 @@ export const YesBubbleAnimation = (
   moveAnimation
     .addElement(bubble.nativeElement)
     .easing("ease-out")
-    .duration(400)
+    .duration(300)
     .beforeStyles({
         "display": "block"
     })
@@ -50,7 +50,7 @@ export const NoBubbleAnimation = (
     moveAnimation
       .addElement(bubble.nativeElement)
       .easing("ease-out")
-      .duration(400)
+      .duration(300)
       .beforeStyles({
           "display": "block"
       })

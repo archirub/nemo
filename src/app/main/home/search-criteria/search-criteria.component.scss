@@ -2,13 +2,22 @@
     height: 90vh;
     width: 90vw;
     background-color: var(--ion-color-primary-contrast);
-    padding-top: 38vh;
+    padding-top: 33vh;
     text-align: center;
+
     .flex {
         font-size: 10vh;
         display: flex;
         justify-content: center;
-    }
+    };
+
+    h4 {
+        margin-left: -50px;
+    };
+}
+
+.loading {
+    margin-left: -50px
 }
 
 .criteria-container {

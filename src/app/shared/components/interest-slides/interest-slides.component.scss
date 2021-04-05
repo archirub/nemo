@@ -1,10 +1,11 @@
 ion-content#selector {
     color: #000;
-    margin: 0;
-    padding: 0;
-    height: 75vw;
+    --padding-top: 10px;
+    height: 65vw;
     --overflow: hidden;
     text-rendering: optimizeLegibility;
+    --background: var(--ion-color-light-tint);
+    border: solid 2px var(--ion-color-light-shade);
 }
 
 ion-content#cards {

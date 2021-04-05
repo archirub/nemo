@@ -3,51 +3,36 @@ import { AnimationController } from "@ionic/angular";
 // import * as anime from "animejs"
 
 export const SCenterAnimation = (
-  searchButton: ElementRef<any>,
   tabComponent: ElementRef<any>,
   homeComponent: ElementRef<any>,
-  screenWidth: number,
-  screenHeight: number
 ) => {
-  const buttonXPosition = searchButton.nativeElement.getBoundingClientRect().x;
-  const buttonYPosition = searchButton.nativeElement.getBoundingClientRect().y;
-  const buttonWidth = searchButton.nativeElement.getBoundingClientRect().width;
-  const buttonHeight = searchButton.nativeElement.getBoundingClientRect().height;
 
-  const startingHorizontalPosition = buttonXPosition - screenWidth / 2 + buttonWidth / 2;
-  const startingVerticalPosition = buttonYPosition - screenHeight / 2 + buttonHeight / 2;
-
+  const INITIAL_MODAL_HEIGHT = 85;
+  const INITIAL_MODAL_WIDTH = 85;
   const FINAL_MODAL_HEIGHT = 90;
   const FINAL_MODAL_WIDTH = 90;
-  const scalingFactorHeight = FINAL_MODAL_HEIGHT / buttonHeight;
-  const scalingFactorWidth = FINAL_MODAL_WIDTH / buttonWidth;
-  const inverseSFheight = 1 / scalingFactorHeight;
-  const inverseSFwidth = 1 / scalingFactorWidth;
+  const heightRatio = FINAL_MODAL_HEIGHT/INITIAL_MODAL_HEIGHT;
+  const widthRatio = FINAL_MODAL_WIDTH/INITIAL_MODAL_WIDTH;
 
   const animation = (baseEl: any) => {
-    // BUTTON
-    // const buttonAnimation = this.animationCtrl
-    //   .create()
-    //   .addElement(this.searchButton.nativeElement)
-    //   .fromTo("transform", "scale3d(1,1,1)", "scale3d(35,35,1)");
-
     // MODAL
     const wrapperAnimation = new AnimationController()
       .create()
       .addElement(baseEl.querySelector(".modal-wrapper")!)
+      .duration(100)
       .beforeStyles({
-        height: `${FINAL_MODAL_HEIGHT}vh`,
-        width: `${FINAL_MODAL_WIDTH}vw`,
-        //overflow: 'scroll',
-        //'--overflow': 'scroll',
+        height: `${INITIAL_MODAL_HEIGHT}vh`,
+        width: `${INITIAL_MODAL_WIDTH}vw`,
         '--border-radius': '20px',
-        opacity: '1',
+        opacity: '0.5',
       })
-      // .afterStyles({ height: "20px", width: "20px" })
+      .fromTo(
+        "opacity", "0.5", "1"
+      )
       .fromTo(
         "transform",
-        `translate(${startingHorizontalPosition}px, ${startingVerticalPosition}px) scale(${inverseSFwidth},${inverseSFheight})`,
-        `translate(0%, 0%) scale(1,1)`
+        "scale(1,1)",
+        `scale(${heightRatio}, ${widthRatio})`
       );
 
     // ALL CONTENT BELOW MODAL
@@ -73,26 +58,19 @@ export const SCenterAnimation = (
         backdropAnimation,
         wrapperAnimation,
         contentAnimation,
-        // buttonAnimation,
       ]);
   };
   return animation;
 };
 
 export const SCleaveAnimation = (
-  searchButton: ElementRef<any>,
   tabComponent: ElementRef<any>,
   homeComponent: ElementRef<any>,
-  screenWidth: number,
-  screenHeight: number
 ) => {
   const animation = (baseEl) => {
     return SCenterAnimation(
-      searchButton,
       tabComponent,
       homeComponent,
-      screenWidth,
-      screenHeight
     )(baseEl).direction("reverse");
   };
   return animation;
