@@ -220,6 +220,7 @@ export class SignuprequiredPage {
   // USE THIS TO UPDATE THE DATA OBSERVABLE AT EACH SWIPE AS WELL AS TO STORE IT LOCALLY
   updateData(): Promise<void> {
     const validData = {};
+    console.log("yo");
 
     // MIGHT HAVE TO PASS THE PICTURES AS BASE64STRINGS HERE IF YOU WANT TO STORE THEM
     return this.signup.addToDataHolders(this.getFormValues());
