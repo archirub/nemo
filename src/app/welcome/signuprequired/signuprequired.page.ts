@@ -3,12 +3,13 @@
 // - Implement data check logic (before uploading to local storage, as well as implement template UI of validity)
 // - make guard based on Firebase auth / content of local storage (maybe based on function made in point above)
 // - have a skip button on all pages of optional
+// - create pipes for sexual preference and gender for template display
 // - COMMIT BEFORE DOING BELOW (once entire system above is self sufficient)
 // - create function that deletes the token once the account has succesfully been created
 // - create function that creates the normal app usage token and stores it locally. As well,
 // create function that checks whether that exists (that function is basically already done in autologin)
 
-import { Component, ViewChild } from "@angular/core";
+import { ChangeDetectorRef, Component, ViewChild } from "@angular/core";
 import { FormGroup, FormControl, Validators } from "@angular/forms";
 import { IonSlides } from "@ionic/angular";
 import { Router } from "@angular/router";
@@ -39,22 +40,7 @@ export class SignuprequiredPage {
   @ViewChild("slides") slides: IonSlides;
   @ViewChild("date") date: AppDatetimeComponent;
 
-  slidesLeft: number;
-
-  // defines the number of picture boxes in template, as well as is used in logic to save picture picks
-  pictureCount: number = 4;
-
-  // for storing pictures. Separate from rest of form, added to it on form submission
-  // NEXT TO DO, INSTEAD OF CHANGING TEMPLATE DIRECTLY IN TAKEPICTURE, CHANGE IT FROM THIS ARRAY, SO THAT
-  // WHAT IS DISPLAYED IN THE PICTURE SLOTS COMES DIRECTLY FROM WHAT IS STORED HERE, that way all is consistent
-  picturesHolder: CameraPhoto[] = Array.from({ length: this.pictureCount });
-
-  // Options available for those that have default options
-  genderOptions: Gender[] = genderOptions;
-  sexualPreferenceOptions: SexualPreference[] = sexualPreferenceOptions;
-  universityOptions: University[] = searchCriteriaOptions.university;
-  degreeOptions: Degree[] = searchCriteriaOptions.degree;
-
+  // FIELD FORM
   form = new FormGroup({
     firstName: new FormControl(null, [Validators.required, Validators.minLength(1)]),
     dateOfBirth: new FormControl(null, [Validators.required]),
@@ -63,6 +49,17 @@ export class SignuprequiredPage {
     university: new FormControl(null, [Validators.required]),
     degree: new FormControl(null, [Validators.required]),
   });
+
+  // OPTIONS
+  genderOptions: Gender[] = genderOptions;
+  sexualPreferenceOptions: SexualPreference[] = sexualPreferenceOptions;
+  universityOptions: University[] = searchCriteriaOptions.university;
+  degreeOptions: Degree[] = searchCriteriaOptions.degree;
+
+  pictureCount: number = 4; // defines the number of picture boxes in template, as well as is used in logic to save picture picks
+  picturesHolder: CameraPhoto[] = Array.from({ length: this.pictureCount }); // for storing pictures. Separate from rest of form, added to it on form submission
+
+  slidesLeft: number;
 
   // Getting these dynamically would be absolutely amazing, not sure how to however
   slideIndexes: { [k in keyof SignupRequired]: number } = {
@@ -78,13 +75,14 @@ export class SignuprequiredPage {
   constructor(
     private signUpAuthService: AngularAuthService,
     private router: Router,
-    private signup: SignupService
+    private signup: SignupService,
+    private changeDetectorRef: ChangeDetectorRef
   ) {}
 
-  ionViewWillEnter() {
-    this.fillFieldsAndGoToSlide();
-    this.slides.lockSwipes(true);
-    this.updatePager();
+  async ionViewWillEnter() {
+    await this.fillFieldsAndGoToSlide();
+    await this.slides.lockSwipes(true);
+    await this.updatePager();
   }
 
   async updatePager() {
@@ -112,15 +110,25 @@ export class SignuprequiredPage {
     var slice = Array.from(dots).slice(0, this.slidesLeft);
     slice.forEach((element) => (element.style.display = "block")); //ignore this error, it works fine
 
-    if (current != 4) {
+    if (current < 4) {
       map[current].style.display = "block";
     }
   }
 
-  async unlockAndSwipe() {
+  async unlockAndSlideToNext() {
     await this.slides.lockSwipes(false);
 
     await this.slides.slideNext();
+
+    await this.updatePager();
+
+    await this.slides.lockSwipes(true);
+  }
+
+  async unlockAndSlideTo(index: number) {
+    await this.slides.lockSwipes(false);
+
+    await this.slides.slideTo(index);
 
     await this.updatePager();
 
@@ -137,26 +145,13 @@ export class SignuprequiredPage {
    */
   async fillFieldsAndGoToSlide() {
     const formFields = Object.keys(this.slideIndexes);
-    const requiredData = {};
-    // only getting a snapshot instead of subscribing as we only want to use this function
-    // once at the start, not change swipe whenever
-    const currentSignupData = this.signup.signupData.value;
+    const currentSignupData = this.signup.signupData.value; // only getting a snapshot instead of subscribing as we only want to use this function once at the start, not change swipe whenever
 
-    // creating object with only required fields and their values from signupData observable
+    // creating object with ONLY required fields and their values from signupData observable
+    const requiredData = {};
     Object.keys(currentSignupData).forEach((field) => {
       if (formFields.includes(field)) {
         requiredData[field] = currentSignupData[field];
-      }
-    });
-
-    // finds smallest slide index that has incomplete information
-    let smallestIncompleteSlide = Math.max(...Object.values(this.slideIndexes));
-    formFields.forEach((field) => {
-      if (!requiredData[field]) {
-        smallestIncompleteSlide = Math.min(
-          smallestIncompleteSlide,
-          this.slideIndexes[field]
-        );
       }
     });
 
@@ -164,14 +159,49 @@ export class SignuprequiredPage {
     this.fillFields(requiredData);
 
     // moving to slide of index with earliest incomplete fields
-    await this.slides.slideTo(smallestIncompleteSlide);
+    // if there is none, then moving to last slide
+    await this.unlockAndSlideTo(
+      this.firstInvalidSlideIndex ?? (await this.slides.length())
+    );
+  }
+
+  /**
+   * From the current values of the fields, returns the index of the earliest
+   * slide that has invalid or missing information.
+   *
+   * CAREFUL: the slide indexes are based on the property "slideIndexes", which is fixed
+   * and not dynamically updated by changes in the template. Changes in the order of the template
+   * may therefore change its validity.
+   */
+  get firstInvalidSlideIndex(): number | null {
+    const fieldValues = this.formValues;
+    const initIndex = 20;
+    let slideIndex: number = initIndex;
+
+    // checks whether each field has a value and if that value is valid
+    Object.keys(this.slideIndexes).forEach((field) => {
+      if (field === "pictures") {
+        // checks first whether that field exists / contains a value
+        // and then whether there is at least one picture in the pictures array (the others should be null)
+        if (!(fieldValues[field] && fieldValues[field].filter(Boolean).length > 0)) {
+          slideIndex = Math.min(slideIndex, this.slideIndexes[field]);
+        }
+      } else {
+        // checks whether element exists / is non null & whether its value is valid
+        if (!(fieldValues[field] && this.form.get(field).valid)) {
+          slideIndex = Math.min(slideIndex, this.slideIndexes[field]);
+        }
+      }
+    });
+
+    return slideIndex === initIndex ? null : slideIndex;
   }
 
   /**
    * From the data provided, fills the fields in the template
    * @param data
    */
-  fillFields(data: allowOptionalProp<SignupRequired>) {
+  fillFields(data: allowOptionalProp<SignupRequired>): void {
     Object.keys(data).forEach((field) => {
       if (field === "pictures") {
         if (data[field]) {
@@ -187,16 +217,21 @@ export class SignuprequiredPage {
   }
 
   // USE THIS TO UPDATE THE DATA OBSERVABLE AT EACH SWIPE AS WELL AS TO STORE IT LOCALLY
-  updateData() {
+  updateData(): Promise<void> {
     const validData = {};
+    console.log("yo");
 
     // MIGHT HAVE TO PASS THE PICTURES AS BASE64STRINGS HERE IF YOU WANT TO STORE THEM
-    this.signup.addToDataHolders(this.formValues);
+    return this.signup.addToDataHolders(this.formValues);
   }
 
   get formValues(): SignupRequired {
     const firstName: string = this.form.get("firstName").value;
-    const dateOfBirth: string = this.form.get("dateOfBirth").value;
+    let dateOfBirth: string = this.form.get("dateOfBirth").value;
+    // temporary, to make sure date is null if the thingy hasn't been touched
+    if (new Date("2020-01-01").toDateString() === new Date(dateOfBirth).toDateString()) {
+      dateOfBirth = null;
+    }
     const sexualPreference: SexualPreference = this.form.get("sexualPreference").value;
     const gender: Gender = this.form.get("gender").value;
     const university: University = this.form.get("university").value;
@@ -214,22 +249,19 @@ export class SignuprequiredPage {
     };
   }
 
-  // ************************************REQUIRED**************************************:
-  // - logic to show right away when a field is not valid
-  // (easily done in template with conditional styling based on validator value).
-  // - redirecting to that field when the form is submited while a field is not valid
-  onSubmit() {
-    const formValues = this.formValues;
+  /**
+   * Checks whether all the data is valid, if it isn't redirect to slide of unvalid data,
+   * if it is, then save the data and direct to signupoptional
+   */
+  async onSubmit() {
+    const invalidSlide = this.firstInvalidSlideIndex;
 
-    if (!this.form.valid) return console.error("Form is not valid");
-    if (formValues.pictures.length < 1)
-      return console.error("Form is not valid as no pictures were selected");
-
-    // const successful = this.signUpAuthService.createBaselineUser(myData);
-    // if (successful) {
-    //   this.router.navigateByUrl("/welcome/signupoptional");
-    // }
-    this.router.navigateByUrl("/welcome/signupoptional");
+    if (typeof invalidSlide === "number") {
+      await this.unlockAndSlideTo(invalidSlide);
+    } else {
+      await this.updateData(); // may not be necessary, but last check to make sure data we have in logic exactly reflects that in the UI
+      this.router.navigateByUrl("/welcome/signupoptional");
+    }
   }
 
   goToMain() {
@@ -247,5 +279,6 @@ export class SignuprequiredPage {
     const newPictureHolder = [...this.picturesHolder];
     newPictureHolder[e.index] = e.photo;
     this.picturesHolder = newPictureHolder;
+    this.changeDetectorRef.detectChanges(); // forces Angular to check updates in the template
   }
 }
