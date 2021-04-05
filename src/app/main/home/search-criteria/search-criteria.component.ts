@@ -1,5 +1,5 @@
-import { Component, OnInit, OnDestroy, ViewChild, AfterViewInit, ElementRef } from "@angular/core";
-import { IonSlides, IonToggle, IonContent, ModalController } from "@ionic/angular";
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from "@angular/core";
+import { IonSlides, IonContent, ModalController } from "@ionic/angular";
 import { FormControl, FormGroup } from "@angular/forms";
 
 import { Subscription } from "rxjs";
@@ -9,8 +9,6 @@ import { searchCriteriaOptions } from "@interfaces/search-criteria.model";
 import { SearchCriteria } from "@classes/index";
 
 import { AppToggleComponent } from "@components/index";
-import { App } from "@capacitor/core";
-import { runInThisContext } from "vm";
 
 @Component({
   selector: "app-search-criteria",
@@ -18,9 +16,9 @@ import { runInThisContext } from "vm";
   styleUrls: ["./search-criteria.component.scss"],
 })
 export class SearchCriteriaComponent implements OnInit, OnDestroy {
-  @ViewChild('options', { read: ElementRef }) options: ElementRef;
-  @ViewChild('clear', { read: ElementRef }) clear: ElementRef;
-  @ViewChild('grid', { read: ElementRef }) grid: ElementRef;
+  @ViewChild("options", { read: ElementRef }) options: ElementRef;
+  @ViewChild("clear", { read: ElementRef }) clear: ElementRef;
+  @ViewChild("grid", { read: ElementRef }) grid: ElementRef;
   @ViewChild("locationslider") locationHandle: AppToggleComponent;
   @ViewChild("degreeslider") degreeHandle: AppToggleComponent;
   @ViewChild("modalSlides") modalSlides: IonSlides;
@@ -84,7 +82,9 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
   slideDown() {
     this.options.nativeElement.style.transform = `translateY(${this.clearButtonHeight}px)`;
     this.options.nativeElement.style.transition = "0.4s ease-in-out";
-    this.grid.nativeElement.style.height = `${this.gridHeight + this.clearButtonHeight + 20}px`;
+    this.grid.nativeElement.style.height = `${
+      this.gridHeight + this.clearButtonHeight + 20
+    }px`;
   }
 
   slideUp() {
@@ -94,16 +94,22 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
   }
 
   checkClear() {
-
     this.clearButtonHeight = this.clear.nativeElement.getBoundingClientRect().height;
 
-    if (this.locationHandle.selection != "Everyone" || this.degreeHandle.selection != "undergrad") {
+    if (
+      this.locationHandle.selection != "Everyone" ||
+      this.degreeHandle.selection != "undergrad"
+    ) {
       this.slideDown();
-    } else if (this.studySelection != undefined || this.societySelection != undefined || this.interestSelection != undefined) {
+    } else if (
+      this.studySelection != undefined ||
+      this.societySelection != undefined ||
+      this.interestSelection != undefined
+    ) {
       this.slideDown();
     } else {
       this.slideUp();
-    };
+    }
 
     this.searchCriteriaForm.value.onCampus = this.locationHandle.selection;
     this.searchCriteriaForm.value.degree = this.degreeHandle.selection;
@@ -112,23 +118,27 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
   updateCriteria() {
     if (this.locationHandle.selections.includes(this.searchCriteriaForm.value.onCampus)) {
       this.locationHandle.selectOption(this.searchCriteriaForm.value.onCampus);
-    };
-    
+    }
+
     if (this.degreeHandle.selections.includes(this.searchCriteriaForm.value.degree)) {
       this.degreeHandle.selectOption(this.searchCriteriaForm.value.degree);
-    };  
+    }
 
     if (this.scOptions.areaOfStudy.includes(this.searchCriteriaForm.value.areaOfStudy)) {
       this.selectReplace(this.searchCriteriaForm.value.areaOfStudy, "aos");
-    };
+    }
 
-    if (this.scOptions.societyCategory.includes(this.searchCriteriaForm.value.societySelection)) {
+    if (
+      this.scOptions.societyCategory.includes(
+        this.searchCriteriaForm.value.societySelection
+      )
+    ) {
       this.selectReplace(this.searchCriteriaForm.value.societySelection, "society");
-    };
+    }
 
     if (this.scOptions.interest.includes(this.searchCriteriaForm.value.interests)) {
       this.selectReplace(this.searchCriteriaForm.value.interests, "interests");
-    };
+    }
 
     this.checkClear();
   }
@@ -136,13 +146,13 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
   /* Unlocks swipes, slides to next/prev and then locks swipes */
   async unlockAndSwipe(direction) {
     this.modalSlides.lockSwipes(false);
-  
+
     if (direction === "next") {
       this.modalSlides.slideNext();
     } else {
       this.modalSlides.slidePrev();
-    };
-  
+    }
+
     this.modalSlides.lockSwipes(true);
   }
 
@@ -150,7 +160,11 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
     var placeholder = document.getElementById("placeholder");
     placeholder.style.display = "none";
 
-    var slides = [document.getElementById("study"), document.getElementById("soc"), document.getElementById("int")];
+    var slides = [
+      document.getElementById("study"),
+      document.getElementById("soc"),
+      document.getElementById("int"),
+    ];
     var names = ["studies", "societies", "interests"];
 
     for (let i = 0; i < names.length; i++) {
@@ -165,15 +179,19 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
 
   async returnTo() {
     var placeholder = document.getElementById("placeholder");
-    var slides = [document.getElementById("study"), document.getElementById("soc"), document.getElementById("int")];
+    var slides = [
+      document.getElementById("study"),
+      document.getElementById("soc"),
+      document.getElementById("int"),
+    ];
 
     this.unlockAndSwipe("prev");
 
     // Wait 0.2s to replace slides with placeholder so people don't see it disappear in the slide animation
-    setTimeout(() => { 
+    setTimeout(() => {
       placeholder.style.display = "block";
-      slides.forEach(element => {
-        element.style.display = "none"
+      slides.forEach((element) => {
+        element.style.display = "none";
       });
     }, 200);
 
@@ -181,38 +199,40 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
   }
 
   selectReplace(option, label) {
-    var names = ["aos","society","interests"]
-    var sections = [document.getElementById("aos"), document.getElementById("society"), document.getElementById("interests")];
+    var names = ["aos", "society", "interests"];
+    var sections = [
+      document.getElementById("aos"),
+      document.getElementById("society"),
+      document.getElementById("interests"),
+    ];
 
     // Have to manually set here, cannot be done in for loop below
-    if (label==="aos") {
+    if (label === "aos") {
       this.studySelection = option;
       this.searchCriteriaForm.value.areaOfStudy = this.studySelection;
-
-    } else if (label==="society") {
+    } else if (label === "society") {
       this.societySelection = option;
       this.searchCriteriaForm.value.societyCategory = this.societySelection;
-
-    } else if (label==="interests") {
+    } else if (label === "interests") {
       this.interestSelection = option;
       this.searchCriteriaForm.value.interests = this.interestSelection;
-    };
+    }
 
     for (let i = 0; i < sections.length; i++) {
-      if (label==names[i]) {
+      if (label == names[i]) {
         sections[i].style.marginTop = "0";
         sections[i].style.fontSize = "2vh";
         sections[i].style.color = "var(--ion-color-medium-shade)";
         sections[i].style.top = "2vh";
         sections[i].style.position = "absolute";
-      };
-    };
+      }
+    }
   }
 
   clearSelect() {
     // Clear ion-selects
     this.degreeSelection = undefined;
-    
+
     this.studySelection = undefined;
     this.searchCriteriaForm.value.areaOfStudy = undefined;
 
@@ -222,7 +242,11 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
     this.interestSelection = undefined;
     this.searchCriteriaForm.value.interests = undefined;
 
-    var sections = [document.getElementById("aos"), document.getElementById("society"), document.getElementById("interests")];
+    var sections = [
+      document.getElementById("aos"),
+      document.getElementById("society"),
+      document.getElementById("interests"),
+    ];
 
     // Reset formatting of placeholders
     for (let i = 0; i < sections.length; i++) {
@@ -231,7 +255,7 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
       sections[i].style.color = "var(--ion-color-light-contrast)";
       sections[i].style.top = "0";
       sections[i].style.position = "initial";
-    };
+    }
 
     this.degreeHandle.selectOption("undergrad");
     this.locationHandle.selectOption("Everyone");

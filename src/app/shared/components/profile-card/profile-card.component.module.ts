@@ -6,18 +6,8 @@ import { ProfileCardComponent } from "./profile-card.component";
 import { PipesModule } from "../../pipes/pipes.module";
 
 @NgModule({
-  imports: [
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    IonicModule,
-    PipesModule
-  ],
-  declarations: [
-    ProfileCardComponent
-  ],
-  exports: [
-    ProfileCardComponent
-  ],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, IonicModule],
+  declarations: [ProfileCardComponent],
+  exports: [ProfileCardComponent],
 })
 export class ProfileCardModule {}

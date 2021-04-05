@@ -12,16 +12,27 @@ const routes: Routes = [
     component: WelcomePage,
   },
   {
-    path: 'signupauth',
-    loadChildren: () => import('./signupauth/signupauth.module').then( m => m.SignupauthPageModule)
+    path: "signupauth",
+    loadChildren: () =>
+      import("./signupauth/signupauth.module").then((m) => m.SignupauthPageModule),
   },
   {
-    path: 'login',
-    loadChildren: () => import('./login/login.module').then( m => m.LoginPageModule)
+    path: "login",
+    loadChildren: () => import("./login/login.module").then((m) => m.LoginPageModule),
   },
   {
-    path: 'signupoptional',
-    loadChildren: () => import('./signupoptional/signupoptional.module').then( m => m.SignupoptionalPageModule)  
+    path: "signuprequired",
+    loadChildren: () =>
+      import("./signuprequired/signuprequired.module").then(
+        (m) => m.SignuprequiredPageModule
+      ),
+  },
+  {
+    path: "signupoptional",
+    loadChildren: () =>
+      import("./signupoptional/signupoptional.module").then(
+        (m) => m.SignupoptionalPageModule
+      ),
   },
   // {
   //   path: '**',

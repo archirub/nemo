@@ -5,100 +5,104 @@
 </ion-header>
 
 <ion-content>
-  <form [formGroup]="requiredForm" (ngSubmit)="onSubmit()">
-    <ion-slides #slides>
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <ion-slides #slides (ionSlideDidChange)="updateData()">
       <ion-slide>
         <ion-item lines="none">
           <div class="question">
-            <ion-label position="stacked">
-              What's your name?<br><br>
-            </ion-label>
+            <ion-label position="stacked"> What's your name?<br /><br /> </ion-label>
           </div>
-      
+
           <div class="input flexend-col">
             <div>
-              <ion-input placeholder="First Name" 
-              formControlName="firstName"></ion-input>
+              <ion-input placeholder="First Name" formControlName="firstName"></ion-input>
             </div>
           </div>
-      
-          <!-- <ion-button class="next-slide scroll" (click)="unlockAndSwipe('next')"> -->
-            <ion-button class="next-slide scroll" (click)="slides.slideNext()">
 
+          <!-- <ion-button class="next-slide scroll" (click)="unlockAndSwipe('next')"> -->
+          <ion-button class="next-slide scroll" (click)="slides.slideNext()">
             <ion-icon name="chevron-forward-outline"></ion-icon>
           </ion-button>
         </ion-item>
       </ion-slide>
-      
+
       <ion-slide>
         <ion-item lines="none">
           <div class="question">
-            <ion-label position="stacked">
-              What's your date of birth?
-            </ion-label>
+            <ion-label position="stacked"> What's your date of birth? </ion-label>
           </div>
-      
+
           <div class="input flexend-col">
             <div>
-              <ion-datetime displayFormat="DD MM YYYY" formControlName="dateOfBirth"></ion-datetime>
+              <ion-datetime
+                displayFormat="DD MM YYYY"
+                formControlName="dateOfBirth"
+              ></ion-datetime>
             </div>
           </div>
-      
+
           <div class="tip flexstart-col">
             <!-- Lazy fix -->
           </div>
-      
+
           <!-- <ion-button class="next-slide scroll" (click)="unlockAndSwipe('next')"> -->
-            <ion-button class="next-slide scroll" (click)="slides.slideNext()">
+          <ion-button class="next-slide scroll" (click)="slides.slideNext()">
             <ion-icon name="chevron-forward-outline"></ion-icon>
           </ion-button>
         </ion-item>
       </ion-slide>
-      
+
       <ion-slide>
         <ion-item lines="none">
           <div class="question">
             <ion-label position="stacked">
-              Choose your photos <!-- BACKEND - possible to fill in name here from previous slide's input?-->
+              Choose your photos
+              <!-- BACKEND - possible to fill in name here from previous slide's input?-->
             </ion-label>
           </div>
-      
+
           <div class="input photos flexeven">
+            <add-photo
+              *ngFor="let p of picturesHolder; let i=index"
+              (onPhotoPicked)="savePhoto($event)"
+              [photoIndex]="i"
+              [photoDisplayed]="picturesHolder[i]"
+            ></add-photo>
+
+            <!-- <add-photo></add-photo>
             <add-photo></add-photo>
-            <add-photo></add-photo>
-            <add-photo></add-photo>
-            <add-photo></add-photo>
-            <!--ion-button
+            <add-photo></add-photo> -->
+            <!-- <ion-button
               (click)="onPickPicture()"
               expand="block"
               fill="clear"
               shape="round"
             >
               Get me to my photo gallery
-            </ion-button-->
+            </ion-button> -->
           </div>
-      
+
           <div class="skip">
             <p class="tip-center">You must have at least one photo on your profile.</p>
           </div>
-      
+
           <!-- <ion-button class="next-slide scroll" (click)="unlockAndSwipe('next')"> -->
-            <ion-button class="next-slide scroll" (click)="slides.slideNext()">
+          <ion-button class="next-slide scroll" (click)="slides.slideNext()">
             <ion-icon name="chevron-forward-outline"></ion-icon>
           </ion-button>
         </ion-item>
       </ion-slide>
-      
+
       <ion-slide>
         <div class="personal-pref">
-        <!-- <ion-item lines="none"> --> 
+          <!-- <ion-item lines="none"> -->
           <!-- <div class="question">
             <ion-label position="stacked">
               Tell us a bit about yourself
             </ion-label>
           </div> -->
-          <br>
-      
+          <br />
+
           <div class="flexstart-col">
             <!-- <div class="preferences">
               <h3>I am looking for</h3>
@@ -106,30 +110,31 @@
                 <ion-select-option value="option">option...</ion-select-option>
               </ion-select>
             </div> -->
-      
+
             <div class="preferences">
               <h3>I am interested in</h3>
               <ion-select required formControlName="sexualPreference">
-                <ion-select-option value="men">men</ion-select-option>
-                <ion-select-option value="women">women</ion-select-option>
-                <ion-select-option value="both">both</ion-select-option>
+                <ion-select-option
+                  *ngFor="let sexPref of sexualPreferenceOptions"
+                  value="{{sexPref}}"
+                  >{{sexPref | formatSexPref}}</ion-select-option
+                >
               </ion-select>
             </div>
-          
+
             <div class="preferences">
               <h3>I identify as</h3>
               <ion-select required formControlName="gender">
-                <ion-select-option value="man">man</ion-select-option>
-                <ion-select-option value="woman">woman</ion-select-option>
-                <ion-select-option value="other">other</ion-select-option>
+                <ion-select-option *ngFor="let gender of genderOptions" value="{{gender}}"
+                  >{{gender}}</ion-select-option
+                >
               </ion-select>
             </div>
-          
-      
+
             <div class="skip">
               <p class="tip-center">These preferences can be changed later.</p>
             </div>
-      
+
             <div class="terms">
               <!-- <ion-checkbox name="terms"></ion-checkbox> -->
               <h2>I have read and understood the terms and conditions</h2>
@@ -139,50 +144,87 @@
               <h2>I consent to the data and privacy policies of this app</h2>
             </div>
           </div>
-      
+
           <!-- <ion-button class="next-slide scroll" (click)="unlockAndSwipe('next')"> -->
-            <ion-button class="next-slide scroll" (click)="slides.slideNext()">
+          <ion-button class="next-slide scroll" (click)="slides.slideNext()">
             <ion-icon name="chevron-forward-outline"></ion-icon>
           </ion-button>
-        <!-- </ion-item>  -->
+          <!-- </ion-item>  -->
         </div>
       </ion-slide>
-      
+
+      <ion-slide>
+        <div class="personal-pref">
+          <br />
+
+          <div class="flexstart-col">
+            <div class="preferences">
+              <h3>My university is</h3>
+              <ion-select required formControlName="university">
+                <ion-select-option
+                  *ngFor="let university of universityOptions"
+                  value="{{university}}"
+                  >{{ university }}</ion-select-option
+                >
+              </ion-select>
+            </div>
+
+            <div class="preferences">
+              <h3>My degree is</h3>
+              <ion-select required formControlName="degree">
+                <ion-select-option *ngFor="let degree of degreeOptions" value="{{degree}}"
+                  >{{ degree }}</ion-select-option
+                >
+              </ion-select>
+            </div>
+
+            <ion-button class="next-slide scroll" (click)="slides.slideNext()">
+              <ion-icon name="chevron-forward-outline"></ion-icon>
+            </ion-button>
+          </div>
+        </div>
+      </ion-slide>
+
       <ion-slide>
         <div class="wave-background">
-          <img style="opacity: 1" class="waves front" src="../../../assets/signup/waves.png" alt="Waves">
-          <img class="waves behind" src="../../../assets/signup/waves_2.png" alt="Waves">
+          <img
+            style="opacity: 1"
+            class="waves front"
+            src="../../../assets/signup/waves.png"
+            alt="Waves"
+          />
+          <img
+            class="waves behind"
+            src="../../../assets/signup/waves_2.png"
+            alt="Waves"
+          />
         </div>
-      
+
         <div class="container-wave flexstart-col">
           <div class="scroll flexend-row">
-            <ion-button (click)="goHome()" class="exit">
+            <ion-button (click)="goToMain()" class="exit">
               <ion-icon name="close-outline"></ion-icon>
             </ion-button>
           </div>
-      
+
           <div style="opacity: 1" class="flexstart-col blow-up front">
             <h1>Adding basic info leads to better matches.</h1>
           </div>
-      
+
           <div class="flexend-col blow-up behind">
             <h1>So you can find a catch, or be caught yourself.</h1>
           </div>
-      
+
           <div class="flexend-col">
             <!-- <ion-button class="add-info" (click)="unlockAndSwipe(7)"> -->
-              <!-- <ion-button [routerLink]="['../signupoptional']" routerLinkActive="router-link-active" type ="submit"> -->
-                <ion-button type ="submit">
-
-              Enter Basic Information
-            </ion-button>
+            <!-- <ion-button [routerLink]="['../signupoptional']" routerLinkActive="router-link-active" type ="submit"> -->
+            <ion-button type="submit"> Enter Basic Information </ion-button>
           </div>
         </div>
-      </ion-slide>      
+      </ion-slide>
     </ion-slides>
   </form>
 </ion-content>
-
 
 <!-- <ion-content>
   <form [formGroup]="requiredForm" (ngSubmit)="onSubmit()">

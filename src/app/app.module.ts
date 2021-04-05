@@ -1,7 +1,7 @@
 import { NgModule } from "@angular/core";
 import { BrowserModule } from "@angular/platform-browser";
 import { CommonModule } from "@angular/common";
-
+import { HttpClientModule } from "@angular/common/http";
 import { RouteReuseStrategy } from "@angular/router";
 
 import { IonicModule, IonicRouteStrategy } from "@ionic/angular";
@@ -14,11 +14,13 @@ import { AppRoutingModule } from "./app-routing.module";
 import { AngularFireModule } from "@angular/fire";
 import { AngularFirestoreModule } from "@angular/fire/firestore";
 import { AngularFireFunctionsModule, REGION } from "@angular/fire/functions";
-import { HttpClientModule } from '@angular/common/http';
+import { AngularFireStorageModule } from "@angular/fire/storage";
+
 import { environment } from "src/environments/environment";
 
 import { pageTransition } from "./shared/animations/page-transition.component";
-import { FormsModule, ReactiveFormsModule } from "@angular/forms";
+import { SignuprequiredPageModule } from "./welcome/signuprequired/signuprequired.module";
+import { PipesModule } from "@pipes/pipes.module";
 
 @NgModule({
   declarations: [AppComponent],
@@ -32,6 +34,8 @@ import { FormsModule, ReactiveFormsModule } from "@angular/forms";
     AngularFireModule.initializeApp(environment.firebase),
     AngularFirestoreModule,
     AngularFireFunctionsModule,
+    AngularFireStorageModule,
+    PipesModule,
   ],
   providers: [
     StatusBar,

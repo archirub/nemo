@@ -7,18 +7,41 @@ import { LoadingController } from "@ionic/angular";
 export class LoadingService {
   constructor(public loadingController: LoadingController) {}
 
-  async presentLoading() {
+  /**
+   * Presents a loader until the promises in "events" complete (in series),
+   * then dismisses the loader and runs the promises in "onDismissEvents"
+   * @param events list of promises to complete while loader is spinning
+   * @param onDismissEvents list of promises to complete after loader is dismissed
+   * @param message message displayed
+   */
+  async presentLoader(
+    events: Array<{ promise: (...args: any[]) => Promise<any>; arguments: any[] }>,
+    onDismissEvents: Array<{
+      promise: (...args: any[]) => Promise<any>;
+      arguments: any[];
+    }> = [],
+    message: string = "Loading..."
+  ): Promise<void> {
     const loading = await this.loadingController.create({
-      cssClass: "my-custom-class",
-      spinner: null,
-      duration: 5000,
-      message: "Click the backdrop to dismiss early...",
+      // cssClass: "my-custom-class",
+      spinner: "bubbles",
+      // duration: 5000,
+      message,
       translucent: true,
-      backdropDismiss: true,
+      // backdropDismiss: true,
     });
     await loading.present();
 
-    const { role, data } = await loading.onDidDismiss();
-    console.log("Loading dismissed with role:", role);
+    events.forEach(async (event) => {
+      await event.promise(...event.arguments);
+    });
+
+    await loading.dismiss();
+
+    if (Array.isArray(onDismissEvents) && onDismissEvents.length > 0) {
+      onDismissEvents.forEach(async (event) => {
+        await event.promise(...event.arguments);
+      });
+    }
   }
 }

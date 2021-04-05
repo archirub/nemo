@@ -5,7 +5,7 @@
         <div #container class="container">
           <div class="flexbetween-row">
             <h1>My settings</h1>
-            <a href="/main/tabs/own-profile"><ion-icon name="close-outline"></ion-icon></a>
+            <a (click)="goBack()"><ion-icon name="close-outline"></ion-icon></a>
           </div>
           <div class="flexeven-col">
             <div class="slide-button" (click)="selectSlide('prefs')">
@@ -16,15 +16,20 @@
             <div class="slide-button go-under" #goUnder>
               <div class="flexbetween-row">
                 <p>Go 'under'</p>
-                <nemo-toggle (choice)="goneUnder($event)" [buttonWidth]=15 [fontSize]=3.5 [selections]="['off','on']"></nemo-toggle>
+                <nemo-toggle
+                  (choice)="goneUnder($event)"
+                  [buttonWidth]="15"
+                  [fontSize]="3.5"
+                  [selections]="['off','on']"
+                ></nemo-toggle>
               </div>
               <h3 #goUnderH3>
-                Going under allows you to chat with existing catches, but your profile will not be shown in
-                other people's catch-stack and you will not be able to swipe on new users.
+                Going under allows you to chat with existing catches, but your profile
+                will not be shown in other people's catch-stack and you will not be able
+                to swipe on new users.
               </h3>
             </div>
 
-            
             <div class="slide-button" (click)="selectSlide('legal')">
               <p>Legal</p>
               <ion-icon name="chevron-forward-outline"></ion-icon>
@@ -40,14 +45,13 @@
               <ion-icon name="chevron-forward-outline"></ion-icon>
             </div>
 
-            <div class="slide-button logout">
+            <div class="slide-button logout" (click)="logOut()">
               <p>Logout</p>
             </div>
 
             <div class="slide-button delete">
               <p>Delete Account</p>
             </div>
-
           </div>
         </div>
       </ion-item>

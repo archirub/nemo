@@ -9,12 +9,13 @@ import {
 
 // FOR CLOUD FUNCTION DEPLOYMENT, otherwise it doesn't recognize the type declaration below
 import * as firebase from "firebase";
+import { CameraPhoto } from "@capacitor/core";
 
 export interface profile {
   uid: string;
   firstName: string;
   dateOfBirth: Date;
-  pictures: profilePictureUrls;
+  pictures: profilePicturePaths;
   biography: string;
   university: University;
   degree: Degree;
@@ -36,7 +37,7 @@ export interface user extends profile {
 export interface profileFromDatabase {
   firstName: string;
   dateOfBirth: firebase.firestore.Timestamp;
-  pictures: profilePictureUrls;
+  pictures: profilePicturePaths;
   biography: string;
 
   university: University;
@@ -108,7 +109,7 @@ export type SocialMediaLink = { socialMedia: socialMedia; link: string };
 // }
 
 // users must have between 1 and 5 pictures
-export type profilePictureUrls = [
+export type profilePicturePaths = [
   string?,
   string?,
   string?,
@@ -118,16 +119,7 @@ export type profilePictureUrls = [
   string?,
   string?
 ];
-export type profilePicturesBase64 = [
-  string?,
-  string?,
-  string?,
-  string?,
-  string?,
-  string?,
-  string?,
-  string?
-];
+export type photoObject = CameraPhoto;
 
 export interface profileObject {
   ID: string;

@@ -7,14 +7,16 @@ import { WelcomePage } from "./welcome/welcome.page";
 
 const routes: Routes = [
   {
-    path: 'main',
-    loadChildren: () => import('./main/main.module').then( m => m.MainPageModule),
-    canLoad: [SignupAuthGuard]
+    path: "main",
+    loadChildren: () => import("./main/main.module").then((m) => m.MainPageModule),
+    canLoad: [SignupAuthGuard],
   },
   {
-    path: "welcome/signinrequired",
+    path: "welcome/signuprequired",
     loadChildren: () =>
-      import("./welcome/signuprequired/signuprequired.module").then((m) => m.SignuprequiredPageModule)
+      import("./welcome/signuprequired/signuprequired.module").then(
+        (m) => m.SignuprequiredPageModule
+      ),
     // canActivate: [SignupAuthGuard]
   },
   {
@@ -30,9 +32,7 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  imports: [
-    RouterModule.forRoot(routes, { preloadingStrategy: PreloadAllModules }),
-  ],
+  imports: [RouterModule.forRoot(routes, { preloadingStrategy: PreloadAllModules })],
   exports: [RouterModule],
 })
 export class AppRoutingModule {}

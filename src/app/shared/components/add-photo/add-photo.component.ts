@@ -1,46 +1,68 @@
-import { Component, Input, OnInit, ViewChild, ElementRef } from "@angular/core";
-import { CameraResultType, CameraSource, Capacitor, Plugins } from "@capacitor/core";
+import {
+  Component,
+  OnInit,
+  ViewChild,
+  ElementRef,
+  Output,
+  EventEmitter,
+  Input,
+  ChangeDetectionStrategy,
+} from "@angular/core";
+import { CameraPhoto, Plugins } from "@capacitor/core";
+const { CameraResultType, CameraSource, Capacitor } = Plugins;
 
 @Component({
-    selector: "add-photo",
-    templateUrl: "./add-photo.component.html",
-    styleUrls: ["./add-photo.component.scss"],
+  selector: "add-photo",
+  // changeDetection: ChangeDetectionStrategy.OnPush,
+  templateUrl: "./add-photo.component.html",
+  styleUrls: ["./add-photo.component.scss"],
 })
+export class AddPhotoComponent {
+  @ViewChild("icon", { read: ElementRef, static: true }) icon: ElementRef;
+  @ViewChild("text", { read: ElementRef, static: true }) text: ElementRef;
+  @ViewChild("view", { read: ElementRef, static: true }) view: ElementRef;
 
-export class AddPhotoComponent implements OnInit {
-    @ViewChild('icon', { read: ElementRef }) icon: ElementRef;
-    @ViewChild('text', {read: ElementRef }) text: ElementRef;
-    @ViewChild('view', { read: ElementRef }) view: ElementRef;
+  @Output() onPhotoPicked = new EventEmitter<{ photo: CameraPhoto; index: number }>();
 
-    constructor() {}
+  @Input() photoIndex: number;
+  @Input() set photoDisplayed(value: CameraPhoto) {
+    console.log("YOYO", value, this.view, this.icon, this.text);
 
-    ngOnInit() {}
+    if (!this.view || !this.icon || !this.text) return;
+    const view = this.view.nativeElement;
+    const icon = this.icon.nativeElement;
+    const text = this.text.nativeElement;
 
-    //Shamelessly stolen from signup.page.ts
-    onPickPicture() {
-        if (!Capacitor.isPluginAvailable("Camera")) {
-          return;
-        }
-        Plugins.Camera.getPhoto({
-          quality: 50,
-          source: CameraSource.Prompt,
-          correctOrientation: true,
-          height: 300,
-          width: 300,
-          resultType: CameraResultType.Uri, //changed from Base64
-          allowEditing: true,
-        }).then((image) => {
-            var imageUrl = image.webPath;
-            console.log(String(imageUrl));
-
-            console.log("Styling...");
-            var photo = this.view.nativeElement;
-            var icon = this.icon.nativeElement;
-            var text = this.text.nativeElement;
-            photo.style.background = `url(${String(imageUrl)})`;
-            photo.style.backgroundSize = 'cover';
-            icon.style.display = 'none';
-            text.style.display = 'none';
-        });
+    // if new value of photodisplayed is empty, then that means look should be reverted back
+    if (!value) {
+      view.style.background = "none";
+      icon.style.display = "inline";
+      text.style.display = "inline";
+    } else {
+      view.style.background = `url(${String(value.webPath)})`;
+      view.style.backgroundSize = "cover";
+      icon.style.display = "none";
+      text.style.display = "none";
     }
+  }
+
+  async pickPicture() {
+    if (!Capacitor.isPluginAvailable("Camera")) {
+      return console.error("Camera Capacitor plugin not available.");
+    }
+
+    // get image
+    const photo = await Plugins.Camera.getPhoto({
+      quality: 50,
+      source: CameraSource.Prompt,
+      correctOrientation: true,
+      height: 300,
+      width: 300,
+      resultType: CameraResultType.Uri,
+      allowEditing: true,
+    });
+
+    // send to parent component
+    this.onPhotoPicked.emit({ photo, index: this.photoIndex });
+  }
 }

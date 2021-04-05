@@ -1,4 +1,13 @@
-import { Component, Input, ViewChild, ElementRef, HostListener, OnInit, AfterViewInit, Output } from "@angular/core";
+import {
+  Component,
+  Input,
+  ViewChild,
+  ElementRef,
+  HostListener,
+  OnInit,
+  AfterViewInit,
+  Output,
+} from "@angular/core";
 import { Router } from "@angular/router";
 import { IonContent, ModalController } from "@ionic/angular";
 
@@ -30,7 +39,7 @@ export class ChatBoardComponent implements OnInit {
   constructor(
     private router: Router,
     private modalCtrl: ModalController,
-    private tabElementRef: TabElementRefService,
+    private tabElementRef: TabElementRefService
   ) {
     this.onResize();
   }
@@ -79,9 +88,9 @@ export class ChatBoardComponent implements OnInit {
         this.onModalDismiss(this.modal);
       });
   }*/
-  
+
   async presentMatches(): Promise<void> {
-    console.log("Matches modal initialised");
+    // console.log("Matches modal initialised");
 
     this.MatchesEnterAnimation = MatchesEnterAnimation(
       this.matchesButton,
@@ -109,11 +118,11 @@ export class ChatBoardComponent implements OnInit {
         this.modal = m;
         this.onModalDismiss(this.modal);
       });
-    
-      setTimeout(() => {
-        return this.modal.present();
-      },200);
-    }
+
+    setTimeout(() => {
+      return this.modal.present();
+    }, 200);
+  }
 
   // Used to preload modal as soon as the previous modal was dismissed
   // Shamelessly adapted from the homepage SC modal
@@ -170,8 +179,8 @@ export class ChatBoardComponent implements OnInit {
 
   /* Automates left margin of 'number matches' text so that it is never covered by match images */
   styleFromMatches() {
-    var images:any = document.getElementsByClassName('match-image');
-    var text:any = document.getElementById('match-text');
+    var images: any = document.getElementsByClassName("match-image");
+    var text: any = document.getElementById("match-text");
     text.style.marginLeft = `${(images.length - 1) * 20}px`;
   }
 }

@@ -83,9 +83,9 @@ export class SwipeOutcomeStore {
     const requestData: registerSwipeChoicesRequest = { choices };
 
     try {
-      const responseData = (await this.afFunctions
-        .httpsCallable("registerSwipeChoices")(requestData)
-        .toPromise()) as registerSwipeChoicesResponse;
+      // const responseData = (await this.afFunctions
+      //   .httpsCallable("registerSwipeChoices")(requestData)
+      //   .toPromise()) as registerSwipeChoicesResponse;
 
       this.removeFromSwipeAnswers(choices);
 

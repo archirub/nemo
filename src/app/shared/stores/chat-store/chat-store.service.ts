@@ -117,16 +117,16 @@ export class ChatStore {
           // .filter((ref) => ref.payload.doc.metadata.fromCache)
           .forEach((ref) => {
             if (ref.payload.doc.exists) {
-              console.log(ref.payload.doc.metadata.fromCache);
+              // console.log(ref.payload.doc.metadata.fromCache);
               if (ref.payload.type === "added") {
                 this.newChatDocObserver(ref.payload.doc.id, uid);
-                console.log("New chat observed from database:", ref.payload.doc.id);
+                // console.log("New chat observed from database:", ref.payload.doc.id);
               } else if (ref.payload.type === "removed") {
                 this.removeDatabaseObserver(ref.payload.doc.id);
-                console.log(
-                  "Removed chat observer after chat deletion",
-                  ref.payload.doc.id
-                );
+                // console.log(
+                //   "Removed chat observer after chat deletion",
+                //   ref.payload.doc.id
+                // );
               } else {
                 console.error("Unhandled DocumentChangeAction type: ", ref.type);
               }
@@ -197,7 +197,7 @@ export class ChatStore {
   private updateObservable(chats: Chat[]) {
     if (!chats) return;
     this.format.sortChats(chats);
-    console.log("chats", chats);
+    // console.log("chats", chats);
     this._chats.next(chats);
   }
 

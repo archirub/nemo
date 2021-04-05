@@ -142,7 +142,7 @@ export class InterestSlidesComponent implements AfterViewInit {
 
   selectInterest(choice) {
     if (this.interests.includes(choice)) {
-      console.log("In interests, removing");
+      // console.log("In interests, removing");
       var index = this.interests.indexOf(choice);
       this.interests.splice(index, 1);
     } else {

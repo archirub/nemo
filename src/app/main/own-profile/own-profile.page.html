@@ -1,58 +1,80 @@
 <ion-content>
-    <div id="profile" style="display: flex">
-        <app-profile-card [profile]="profile"></app-profile-card>
-        <!--div class="container">
+  <div id="profile" style="display: flex">
+    <app-profile-card [profile]="profile"></app-profile-card>
+    <!--div class="container">
             [User Profile]
         </div-->
-    </div>
+  </div>
 
-    <div class="flexend">
-        <nemo-toggle (choice)="toggleChange($event)" [buttonWidth]=15 [fontSize]=4 [selections]="['edit', 'view']"></nemo-toggle>
-    </div>
+  <div class="flexend">
+    <nemo-toggle
+      (choice)="toggleChange($event)"
+      [buttonWidth]="15"
+      [fontSize]="4"
+      [selections]="['edit', 'view']"
+    ></nemo-toggle>
+  </div>
 
-    <div id="editing" style="display: flex">
-        <div class="container">
-            <h1>{{profile.firstName}}, {{profile.dateOfBirth|age}}</h1>
+  <div id="editing" style="display: flex">
+    <div class="container">
+      <h1>{{profile.firstName}}, {{profile.dateOfBirth|age}}</h1>
 
-            <div class="slide-button">
-                <a href="/main/settings">
-                    <p>Go to my settings</p>
-                </a>
-                <ion-icon name="chevron-forward-outline"></ion-icon>
-            </div>
+      <div class="slide-button" (click)="goToSettings()">
+        <p>Go to my settings</p>
 
-            <h2>My photos</h2>
-            <div class="photos">
-                <!-- One photos are sorted on the backend we can use some ngFor magic here -->
-                <add-photo></add-photo>
-                <add-photo></add-photo>
-                <add-photo></add-photo>
-                <add-photo></add-photo>
-                <add-photo></add-photo>
-                <add-photo></add-photo>
-            </div>
+        <ion-icon name="chevron-forward-outline"></ion-icon>
+      </div>
 
-            <h2>My bio</h2>
-            <div>
-                <div #bioClose class="close-button" (click)="clearInput('bio')">
-                    <ion-icon name="close-outline"></ion-icon>
-                </div>
-                <div class="bio">
-                    <ion-textarea #bioInput value={{profile.biography}} autoGrow='true' (ionInput)="displayExit('bio')"></ion-textarea>
-                </div>
-            </div>
+      <h2>My photos</h2>
+      <div class="photos">
+        <!-- One photos are sorted on the backend we can use some ngFor magic here -->
+        <add-photo></add-photo>
+        <add-photo></add-photo>
+        <add-photo></add-photo>
+        <add-photo></add-photo>
+        <add-photo></add-photo>
+        <add-photo></add-photo>
+      </div>
 
-            <h2>My answers</h2>
-            <profile-answer *ngFor="let questions of profile.questions; let i = index" [questions]="profile.questions[i]"></profile-answer>
-
-            <h2>My course</h2>
-            <profile-course #depts [departments]="profile.course" [type]="courses" [profile]="profile"></profile-course>
-
-            <h2>My society</h2>
-            <profile-course #socs [departments]="profile.society" [type]="societies" [profile]="profile"></profile-course>
-
-            <h2>My interests</h2>
-            <interest-slides [interests]="profile.interests"></interest-slides>
+      <h2>My bio</h2>
+      <div>
+        <div #bioClose class="close-button" (click)="clearInput('bio')">
+          <ion-icon name="close-outline"></ion-icon>
         </div>
+        <div class="bio">
+          <ion-textarea
+            #bioInput
+            value="{{profile.biography}}"
+            autoGrow="true"
+            (ionInput)="displayExit('bio')"
+          ></ion-textarea>
+        </div>
+      </div>
+
+      <h2>My answers</h2>
+      <profile-answer
+        *ngFor="let questions of profile.questions; let i = index"
+        [questions]="profile.questions[i]"
+      ></profile-answer>
+
+      <h2>My course</h2>
+      <profile-course
+        #depts
+        [departments]="profile.course"
+        [type]="courses"
+        [profile]="profile"
+      ></profile-course>
+
+      <h2>My society</h2>
+      <profile-course
+        #socs
+        [departments]="profile.society"
+        [type]="societies"
+        [profile]="profile"
+      ></profile-course>
+
+      <h2>My interests</h2>
+      <interest-slides [interests]="profile.interests"></interest-slides>
     </div>
+  </div>
 </ion-content>

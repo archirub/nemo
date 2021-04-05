@@ -31,5 +31,7 @@ npm-debug.log*
 /www
 /ios
 
+package-lock.json
+
 /functions/lib
 /functions/node_modules

@@ -1,10 +1,13 @@
 <ion-content>
-    <div #view (click)="onPickPicture()" 
+  <div
+    #view
+    (click)="pickPicture()"
     expand="block"
     fill="clear"
     shape="round"
-    id="photo-box">
-        <ion-icon #icon name="add-outline"></ion-icon>
-        <p #text>Choose photo</p>
-    </div>
+    id="photo-box"
+  >
+    <ion-icon #icon name="add-outline"></ion-icon>
+    <p #text>Choose photo</p>
+  </div>
 </ion-content>

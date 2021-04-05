@@ -1,13 +1,15 @@
 import { ModalController, Animation } from "@ionic/angular";
-import { Component, 
+import {
+  Component,
   OnInit,
-  OnDestroy, 
-  Input, 
-  QueryList, 
-  HostListener, 
+  OnDestroy,
+  Input,
+  QueryList,
+  HostListener,
   ViewChildren,
-  ViewChild, 
-  ElementRef } from "@angular/core";
+  ViewChild,
+  ElementRef,
+} from "@angular/core";
 
 import { Subscription } from "rxjs";
 
@@ -19,7 +21,12 @@ import {
 } from "@stores/index";
 import { Profile, User } from "@classes/index";
 import { MatchModalComponent, ProfileCardComponent } from "@components/index";
-import { SwipeYesAnimation, SwipeNoAnimation, YesBubbleAnimation, NoBubbleAnimation } from "@animations/index";
+import {
+  SwipeYesAnimation,
+  SwipeNoAnimation,
+  YesBubbleAnimation,
+  NoBubbleAnimation,
+} from "@animations/index";
 import { swipeChoice } from "@interfaces/index";
 import { EventEmitter } from "events";
 
@@ -30,10 +37,10 @@ import { EventEmitter } from "events";
 })
 export class SwipeCardComponent extends EventEmitter implements OnInit, OnDestroy {
   @Input() profiles: Profile[];
-  @ViewChildren('card', { read: ElementRef }) card: QueryList<ElementRef>;
-  @ViewChild('yesBubble', { read: ElementRef }) yesBubble: ElementRef;
-  @ViewChild('noBubble', { read: ElementRef }) noBubble: ElementRef;
-  @ViewChild('profileComponent') profileComponent: ProfileCardComponent;
+  @ViewChildren("card", { read: ElementRef }) card: QueryList<ElementRef>;
+  @ViewChild("yesBubble", { read: ElementRef }) yesBubble: ElementRef;
+  @ViewChild("noBubble", { read: ElementRef }) noBubble: ElementRef;
+  @ViewChild("profileComponent") profileComponent: ProfileCardComponent;
 
   screenWidth: number;
   swipeYesAnimation: Animation;
@@ -122,24 +129,17 @@ export class SwipeCardComponent extends EventEmitter implements OnInit, OnDestro
   }
 
   async doubleTap(choice) {
-
-    this.swipeYesAnimation = SwipeYesAnimation(
-      this.card.toArray()[0],
-      this.screenWidth
-    );
-    this.swipeNoAnimation = SwipeNoAnimation(
-      this.card.toArray()[0],
-      this.screenWidth
-    );
+    this.swipeYesAnimation = SwipeYesAnimation(this.card.toArray()[0], this.screenWidth);
+    this.swipeNoAnimation = SwipeNoAnimation(this.card.toArray()[0], this.screenWidth);
 
     this.screenTaps += 1;
 
     setTimeout(() => {
       this.screenTaps = 0;
     }, 500);
-    
+
     if (this.screenTaps > 1) {
-      console.log("Double tap detected.");
+      // console.log("Double tap detected.");
       this.screenTaps = 0;
 
       if (choice === "yes") {
@@ -152,21 +152,21 @@ export class SwipeCardComponent extends EventEmitter implements OnInit, OnDestro
         setTimeout(() => {
           this.onNoSwipe(this.profiles[0]);
         }, 400);
-      };
-    }
-
-    else if (this.screenTaps == 1) {
-      if (choice === 'yes') {
+      }
+    } else if (this.screenTaps == 1) {
+      if (choice === "yes") {
         this.yesBubbleAnimation = YesBubbleAnimation(
-          this.yesBubble, 
-          this.profileComponent.X, 
-          this.profileComponent.Y);
+          this.yesBubble,
+          this.profileComponent.X,
+          this.profileComponent.Y
+        );
         this.yesBubbleAnimation.play();
-      } else if (choice === 'no') {
+      } else if (choice === "no") {
         this.noBubbleAnimation = NoBubbleAnimation(
-          this.noBubble, 
-          this.profileComponent.X, 
-          this.profileComponent.Y);
+          this.noBubble,
+          this.profileComponent.X,
+          this.profileComponent.Y
+        );
         this.noBubbleAnimation.play();
       }
     }

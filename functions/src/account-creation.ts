@@ -1,5 +1,5 @@
 import {
-  accountCreationRequest,
+  createAccountRequest,
   genderOptions,
   Interest,
   mdDatingPickingFromDatabase,
@@ -21,7 +21,7 @@ import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 
 type DataChecker = {
-  [key in keyof accountCreationRequest]: {
+  [key in keyof createAccountRequest]: {
     typeCheck: (a: any, options: any) => boolean;
     allowedValues: Array<any> | null;
     isRequired: boolean;
@@ -29,12 +29,12 @@ type DataChecker = {
   };
 };
 
-export const generateSwipeStack = functions.region("europe-west2").https.onCall(
-  async (data: accountCreationRequest, context): Promise<successResponse> => {
+export const createAccount = functions.region("europe-west2").https.onCall(
+  async (data: createAccountRequest, context): Promise<successResponse> => {
     const MAX_UID_COUNT_PI_STORAGE = 2000;
 
     const dataHolder: {
-      [key in keyof accountCreationRequest]: accountCreationRequest[key] | null;
+      [key in keyof createAccountRequest]: createAccountRequest[key] | null;
     } = {
       uid: null,
       firstName: null,
@@ -43,7 +43,6 @@ export const generateSwipeStack = functions.region("europe-west2").https.onCall(
       gender: null,
       sexualPreference: null,
       // swipeMode: null,
-      pictures: null,
       biography: null,
       course: null,
       society: null,
@@ -66,7 +65,7 @@ export const generateSwipeStack = functions.region("europe-west2").https.onCall(
 
     // Renaming for Typescript
     const checkedData = dataHolder as {
-      [key in keyof accountCreationRequest]: accountCreationRequest[key];
+      [key in keyof createAccountRequest]: createAccountRequest[key];
     };
 
     // GET DEMOGRAPHICS OF USER
@@ -81,6 +80,7 @@ export const generateSwipeStack = functions.region("europe-west2").https.onCall(
         >[] = [];
 
         // data needed for PI storage
+        // (case where no document matches the condition is handled in (addToPiStorage))
         databaseFetchingPromises.push(
           transaction.get(
             admin
@@ -117,8 +117,6 @@ export const generateSwipeStack = functions.region("europe-west2").https.onCall(
         addToMatchDataDating(transaction, checkedData);
         addToPiStorage(transaction, piStorageDocument, checkedData);
         addToUidDatingStorage(transaction, uidStorageDocuments, checkedData);
-
-        return;
       });
 
       // TO DO
@@ -143,13 +141,13 @@ export const generateSwipeStack = functions.region("europe-west2").https.onCall(
 
 function checkData(
   checkedData: {
-    [key in keyof accountCreationRequest]: accountCreationRequest[key] | null;
+    [key in keyof createAccountRequest]: createAccountRequest[key] | null;
   },
-  incData: accountCreationRequest,
+  incData: createAccountRequest,
   dataChecker_: DataChecker
 ): boolean {
   for (const [property, value] of Object.entries(incData)) {
-    const checks = dataChecker_[property as keyof accountCreationRequest];
+    const checks = dataChecker_[property as keyof createAccountRequest];
 
     // check if key is an allowed property
     if (!checkedData.hasOwnProperty(property)) return false;
@@ -174,7 +172,7 @@ function checkData(
       return false;
 
     // add property value to checkedData object
-    checkedData[property as keyof accountCreationRequest] = value;
+    checkedData[property as keyof createAccountRequest] = value;
   }
 
   return true;
@@ -222,20 +220,20 @@ function sexualPreferenceCheck(a: any, options: SexualPreference[]): boolean {
   return true;
 }
 
-function picturesCheck(a: any, options: unknown): boolean {
-  if (!Array.isArray(a)) return false;
+// function picturesCheck(a: any, options: unknown): boolean {
+//   if (!Array.isArray(a)) return false;
 
-  for (const el of a) {
-    // Checks whether pictures are in base64 format by attempting to decode them
-    try {
-      window.atob(el);
-    } catch {
-      return false;
-    }
-  }
+//   for (const el of a) {
+//     // Checks whether pictures are in base64 format by attempting to decode them
+//     try {
+//       window.atob(el);
+//     } catch {
+//       return false;
+//     }
+//   }
 
-  return true;
-}
+//   return true;
+// }
 
 // allowedValues is an array of the default values that the property can have, if there are default values
 // isRequired
@@ -243,6 +241,7 @@ function picturesCheck(a: any, options: unknown): boolean {
 // allowedValues. It can't if the value is an object (array, or wtv), and then I already check for the
 // validity of the values of typeCheck, where I will have built a special function for checking the type
 // of that particular property (case of sexualPref, interests, questions)
+
 const dataChecker: DataChecker = {
   uid: {
     typeCheck: stringCheck,
@@ -286,12 +285,12 @@ const dataChecker: DataChecker = {
   //   isRequired: true,
   //   valueIsObject: false,
   // },
-  pictures: {
-    typeCheck: picturesCheck,
-    allowedValues: null,
-    isRequired: true,
-    valueIsObject: true,
-  },
+  // pictures: {
+  //   typeCheck: picturesCheck,
+  //   allowedValues: null,
+  //   isRequired: true,
+  //   valueIsObject: true,
+  // },
   biography: {
     typeCheck: stringCheck,
     allowedValues: null,
@@ -357,7 +356,7 @@ interface demographicMap {
 function addToUidDatingStorage(
   transaction: admin.firestore.Transaction,
   uidStorageDocuments: FirebaseFirestore.QuerySnapshot<uidDatingStorage>[],
-  data: accountCreationRequest
+  data: createAccountRequest
 ) {
   // that step is the most complex, since the uidDatingStorage uid arrays are ordered
   // in percentile, and their may me multiple uidDatingStorage arrays, for which, if we add
@@ -411,7 +410,7 @@ function addToUidDatingStorage(
   });
 }
 
-function getDemographics(data: accountCreationRequest): demographicMap {
+function getDemographics(data: createAccountRequest): demographicMap {
   if (data.gender === "other") {
     return {
       sexualPreference: data.sexualPreference,
@@ -429,7 +428,7 @@ function getDemographics(data: accountCreationRequest): demographicMap {
 
 function addToProfile(
   transaction: admin.firestore.Transaction,
-  data: accountCreationRequest
+  data: createAccountRequest
 ) {
   const profile: profileFromDatabase = {
     firstName: data.firstName,
@@ -457,7 +456,7 @@ function addToProfile(
 
 function addToPrivateProfile(
   transaction: admin.firestore.Transaction,
-  data: accountCreationRequest
+  data: createAccountRequest
 ) {
   const privateProfile: privateProfileFromDatabase = {
     settings: {},
@@ -482,7 +481,7 @@ function addToPrivateProfile(
 
 function addToMatchDataMain(
   transaction: admin.firestore.Transaction,
-  data: accountCreationRequest
+  data: createAccountRequest
 ) {
   const matchData: mdFromDatabase = {
     matchedUsers: {},
@@ -502,7 +501,7 @@ function addToMatchDataMain(
 
 function addToMatchDataDating(
   transaction: admin.firestore.Transaction,
-  data: accountCreationRequest
+  data: createAccountRequest
 ) {
   const matchDataDating: mdDatingPickingFromDatabase = {
     searchFeatures: {
@@ -531,7 +530,7 @@ function addToMatchDataDating(
 function addToPiStorage(
   transaction: admin.firestore.Transaction,
   piStorageDocument: FirebaseFirestore.QuerySnapshot<piStorage>,
-  data: accountCreationRequest
+  data: createAccountRequest
 ) {
   const piStorageMap: SwipeUserInfo = {
     seenCount: 0,

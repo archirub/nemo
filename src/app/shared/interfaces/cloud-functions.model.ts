@@ -44,4 +44,5 @@ export interface updateGenderSexPrefRequest {
   value: Gender | SexualPreference;
 }
 
-export type accountCreationRequest = SignupRequired & SignupOptional & { uid: string };
+export type createAccountRequest = Omit<SignupRequired, "pictures"> &
+  SignupOptional & { uid: string };

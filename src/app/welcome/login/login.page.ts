@@ -48,21 +48,21 @@ export class LoginPage implements OnInit {
   // }
 
   onSubmit() {
-    console.log("Submitted form");
+    // console.log("Submitted form");
     if (!this.loginForm.valid) {
-      console.log("Form is not valid");
+      // console.log("Form is not valid");
       return;
     }
     let authObs: Observable<AuthResponseData>;
     const email: string = this.loginForm.get("email").value;
     const password: string = this.loginForm.get("password").value;
-    console.log(email, password);
+    // console.log(email, password);
 
     authObs = this.signUpAuthService.login(email, password);
 
     authObs.subscribe(
       (resData) => {
-        console.log(resData);
+        // console.log(resData);
         this.router.navigateByUrl("/main/tabs/home");
       },
       (errRes) => {

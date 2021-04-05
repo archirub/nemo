@@ -1,7 +1,7 @@
 import { SexualPreference, Gender, SwipeMode } from "./../interfaces/match-data.model";
 import { Profile } from "./profile.class";
 import {
-  profilePictureUrls,
+  profilePicturePaths,
   SocialMediaLink,
   QuestionAndAnswer,
   InterestAndPath,
@@ -26,7 +26,7 @@ export class User extends Profile implements user {
     uid: string,
     firstName: string,
     dateOfBirth: Date,
-    pictures: profilePictureUrls,
+    pictures: profilePicturePaths,
     biography: string,
     university: University,
     course: string,

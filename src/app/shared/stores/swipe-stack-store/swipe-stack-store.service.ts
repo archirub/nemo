@@ -80,7 +80,7 @@ export class SwipeStackStore {
       .httpsCallable("generateSwipeStack")(requestData)
       .toPromise()) as generateSwipeStackResponse;
 
-    console.log(responseData);
+    console.log("BROTHA", responseData);
     this.swipeOutcomeStore.addToSwipeAnswers(responseData.users);
 
     return responseData.users.map((user) => user.uid);

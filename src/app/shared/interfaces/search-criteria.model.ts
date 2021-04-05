@@ -1,6 +1,6 @@
 // DO NOT ADD ANY FIELDS
 export const searchCriteriaOptions = {
-  university: ["UCL" as const],
+  university: ["UCL" as const, "KCL" as const],
 
   // DO NOT CHANGE
   degree: ["undergrad" as const, "postgrad" as const],

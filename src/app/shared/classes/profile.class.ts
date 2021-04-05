@@ -1,6 +1,6 @@
 import {
   profile,
-  profilePictureUrls,
+  profilePicturePaths,
   SocialMediaLink,
   QuestionAndAnswer,
   InterestAndPath,
@@ -13,7 +13,7 @@ export class Profile implements profile {
   private _uid: string;
   private _firstName: string;
   private _dateOfBirth: Date;
-  private _pictures: profilePictureUrls;
+  private _pictures: profilePicturePaths;
   private _biography: string;
   private _university: University;
   private _course: string;
@@ -28,7 +28,7 @@ export class Profile implements profile {
     uid: string,
     firstName: string,
     dateOfBirth: Date,
-    pictures: profilePictureUrls,
+    pictures: profilePicturePaths,
     biography: string,
     university: University,
     course: string,
@@ -75,10 +75,10 @@ export class Profile implements profile {
     this._dateOfBirth = value;
   }
 
-  public get pictures(): profilePictureUrls {
+  public get pictures(): profilePicturePaths {
     return this._pictures;
   }
-  public set pictures(value: profilePictureUrls) {
+  public set pictures(value: profilePicturePaths) {
     this._pictures = value;
   }
 
@@ -152,13 +152,13 @@ export class Profile implements profile {
     );
   }
 
-  degrees = {'undergrad': 'UG', 'postgrad': 'PG'}
+  degrees = { undergrad: "UG", postgrad: "PG" };
 
   shortDegree() {
-    let ret = ''
-    if(this.degree) {
-      ret = this.degrees[this.degree]
+    let ret = "";
+    if (this.degree) {
+      ret = this.degrees[this.degree];
     }
-    return ret
+    return ret;
   }
 }
