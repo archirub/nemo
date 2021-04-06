@@ -177,7 +177,7 @@ export class SignuprequiredPage {
     // moving to slide of index with earliest incomplete fields
     // if there is none, then moving to last slide
     await this.unlockAndSlideTo(
-      this.firstInvalidSlideIndex ?? (await this.slides.length())
+      this.getFirstInvalidSlideIndex() ?? (await this.slides.length())
     );
   }
 
@@ -189,8 +189,8 @@ export class SignuprequiredPage {
    * and not dynamically updated by changes in the template. Changes in the order of the template
    * may therefore change its validity.
    */
-  get firstInvalidSlideIndex(): number | null {
-    const fieldValues = this.formValues;
+  getFirstInvalidSlideIndex(): number | null {
+    const fieldValues = this.getFormValues();
     const initIndex = 20;
     let slideIndex: number = initIndex;
 
@@ -221,6 +221,7 @@ export class SignuprequiredPage {
     Object.keys(data).forEach((field) => {
       if (field === "pictures") {
         if (data[field]) {
+          console.log(data[field]);
           data[field].forEach((pic, i) => {
             this.savePhoto({ photo: pic, index: i });
           });
@@ -238,10 +239,10 @@ export class SignuprequiredPage {
     console.log("yo");
 
     // MIGHT HAVE TO PASS THE PICTURES AS BASE64STRINGS HERE IF YOU WANT TO STORE THEM
-    return this.signup.addToDataHolders(this.formValues);
+    return this.signup.addToDataHolders(this.getFormValues());
   }
 
-  get formValues(): SignupRequired {
+  getFormValues(): SignupRequired {
     const firstName: string = this.form.get("firstName").value;
     let dateOfBirth: string = this.form.get("dateOfBirth").value;
     // temporary, to make sure date is null if the thingy hasn't been touched
@@ -252,7 +253,9 @@ export class SignuprequiredPage {
     const gender: Gender = this.form.get("gender").value;
     const university: University = this.form.get("university").value;
     const degree: Degree = this.form.get("degree").value;
+
     const pictures: CameraPhoto[] = this.picturesHolder.filter(Boolean); // removes empty picture slots
+    console.log("a", this.picturesHolder, pictures);
 
     return {
       firstName,
@@ -270,7 +273,7 @@ export class SignuprequiredPage {
    * if it is, then save the data and direct to signupoptional
    */
   async onSubmit() {
-    const invalidSlide = this.firstInvalidSlideIndex;
+    const invalidSlide = this.getFirstInvalidSlideIndex();
 
     if (typeof invalidSlide === "number") {
       await this.unlockAndSlideTo(invalidSlide);
@@ -292,9 +295,7 @@ export class SignuprequiredPage {
   }
 
   savePhoto(e: { photo: CameraPhoto; index: number }) {
-    const newPictureHolder = [...this.picturesHolder];
-    newPictureHolder[e.index] = e.photo;
-    this.picturesHolder = newPictureHolder;
+    this.picturesHolder[e.index] = e.photo;
     this.changeDetectorRef.detectChanges(); // forces Angular to check updates in the template
   }
 }
