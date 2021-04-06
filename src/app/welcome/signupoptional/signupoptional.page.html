@@ -1,14 +1,30 @@
-<ion-header>
+<!--ion-header>
   <ion-toolbar>
     <ion-title>signupoptional</ion-title>
   </ion-toolbar>
-</ion-header>
+</ion-header-->
+
+<div class="pager">
+  <ion-icon id="people" class="pager-icon" name="people"></ion-icon>
+  <ion-icon id="chatbox" class="pager-icon" name="chatbox-ellipses-outline"></ion-icon>
+  <ion-icon id="palette" class="pager-icon" name="color-palette-outline"></ion-icon>
+  <ion-icon id="help" class="pager-icon" name="help-outline"></ion-icon>
+  <ion-icon id="bio" class="pager-icon" name="accessibility"></ion-icon>
+  <ion-icon id="insta" class="pager-icon" name="logo-instagram"></ion-icon>
+
+  <ion-icon class="pager-dot" name="ellipse"></ion-icon>
+  <ion-icon class="pager-dot" name="ellipse"></ion-icon>
+  <ion-icon class="pager-dot" name="ellipse"></ion-icon>
+  <ion-icon class="pager-dot" name="ellipse"></ion-icon>
+  <ion-icon class="pager-dot" name="ellipse"></ion-icon>
+</div>
 
 <ion-content>
   <form [formGroup]="optionalForm">
-    <ion-slides pager="true" #slides>
+    <ion-slides #slides>
       <ion-slide> 
-        <ion-item lines="none">
+        <!--ion-item lines="none"-->
+          <div class="personal-pref">
            <div class="optionals flexstart-col">
               <div class="question">
                 <ion-label position="stacked">
@@ -16,7 +32,7 @@
                 </ion-label>
               </div>
               
-              <div class="scrollable">
+              <div class="multi-input">
 
                 <div class="input">
                   <select required>
@@ -54,20 +70,19 @@
 
           <div class="skipdiv">
             <p class="tip-center">These details are optional and can be changed later.</p>
-            <div class="skip">
-              <!-- <ion-button (click)="unlockAndSwipe('next')">Skip</ion-button> -->
-                <ion-button class="next-slide scroll" (click)="slides.slideNext()"></ion-button>
-            </div>
           </div>
 
-          <!-- <ion-button class="next-slide scroll" (click)="unlockAndSwipe('next')">
-            <ion-icon name="chevron-forward-outline"></ion-icon>
-          </ion-button> -->
-          <ion-button class="next-slide scroll" (click)="slides.slideNext()">
-            <ion-icon name="chevron-forward-outline"></ion-icon>
-          </ion-button>
-          
-        </ion-item> 
+          <div class="buttons first">
+
+            <div class="skip">
+              <ion-button (click)="unlockAndSlideToNext()">Skip</ion-button>
+            </div>
+
+            <ion-button class="next-slide scroll" (click)="unlockAndSlideToNext()">
+              <ion-icon name="chevron-forward-outline"></ion-icon>
+            </ion-button>
+          </div>
+        </div>
       </ion-slide>
 
       <ion-slide> 
@@ -79,7 +94,7 @@
               </ion-label>
             </div>
 
-            <div class="scrollable">
+            <div class="multi-input">
               <div class="input">
                 <select required>
                   <option value="Question 1" selected hidden></option>
@@ -108,24 +123,24 @@
             </div>
           </div>
 
-            <div class="skipdiv">
-              <p class="tip-center">Max 30 characters per answer</p>
-              <p class="tip-center">These details are optional and can be changed later.</p>
+          <div class="skipdiv">
+            <p class="tip-center">Max 30 characters per answer</p>
+            <p class="tip-center">These details are optional and can be changed later.</p>
+          </div>
 
-              <div class="skip">
-                <!-- <ion-button (click)="unlockAndSwipe('next')">Skip</ion-button> -->
-                <ion-button class="next-slide scroll" (click)="slides.slideNext()">
-                  <ion-icon name="chevron-forward-outline"></ion-icon>
-                </ion-button>
-              </div>
+          <div class="buttons">
+            <ion-button class="next-slide scroll" (click)="unlockAndSlideToPrev()">
+              <ion-icon name="chevron-back-outline"></ion-icon>
+            </ion-button>
+
+            <div class="skip">
+              <ion-button (click)="unlockAndSlideToNext()">Skip</ion-button>
             </div>
 
-          <!-- <ion-button class="next-slide scroll" (click)="unlockAndSwipe('next')">
-            <ion-icon name="chevron-forward-outline"></ion-icon>
-          </ion-button> -->
-          <ion-button class="next-slide scroll" (click)="slides.slideNext()">
-            <ion-icon name="chevron-forward-outline"></ion-icon>
-          </ion-button>
+            <ion-button class="next-slide scroll" (click)="unlockAndSlideToNext()">
+              <ion-icon name="chevron-forward-outline"></ion-icon>
+            </ion-button>
+          </div>
         </ion-item>
       </ion-slide>
 
@@ -138,7 +153,7 @@
               </ion-label>
             </div>
 
-            <div class="scrollable">
+            <div class="multi-input">
 
               <!-- These currently all change together as the items have not been separated in TS -->
               <ion-list>
@@ -223,7 +238,7 @@
 
               <div class="skip">
                 <!-- <ion-button (click)="unlockAndSwipe('next')">Skip</ion-button> -->
-                <ion-button class="next-slide scroll" (click)="slides.slideNext()">
+                <ion-button class="next-slide scroll" (click)="unlockAndSlideToNext()">
                   <ion-icon name="chevron-forward-outline"></ion-icon>
                 </ion-button>
               </div>
@@ -232,7 +247,7 @@
           <!-- <ion-button class="next-slide scroll" (click)="unlockAndSwipe('next')">
             <ion-icon name="chevron-forward-outline"></ion-icon>
           </ion-button> -->
-          <ion-button class="next-slide scroll" (click)="slides.slideNext()">
+          <ion-button class="next-slide scroll" (click)="unlockAndSlideToNext()">
             <ion-icon name="chevron-forward-outline"></ion-icon>
           </ion-button>
         </ion-item>
@@ -252,7 +267,7 @@
           <!-- <ion-button class="next-slide scroll" (click)="unlockAndSwipe('next')">
             <ion-icon name="chevron-forward-outline"></ion-icon>
           </ion-button> -->
-          <ion-button class="next-slide scroll" (click)="slides.slideNext()">
+          <ion-button class="next-slide scroll" (click)="unlockAndSlideToNext()">
             <ion-icon name="chevron-forward-outline"></ion-icon>
           </ion-button>
         </ion-item> 
@@ -278,7 +293,7 @@
 
               <div class="skip">
                 <!-- <ion-button (click)="unlockAndSwipe('next')">Skip</ion-button> -->
-                <ion-button class="next-slide scroll" (click)="slides.slideNext()">
+                <ion-button class="next-slide scroll" (click)="unlockAndSlideToNext()">
                   <ion-icon name="chevron-forward-outline"></ion-icon>
                 </ion-button>
               </div>
@@ -287,7 +302,7 @@
           <!-- <ion-button class="next-slide scroll" (click)="unlockAndSwipe('next')">
             <ion-icon name="chevron-forward-outline"></ion-icon>
           </ion-button> -->
-          <ion-button class="next-slide scroll" (click)="slides.slideNext()">
+          <ion-button class="next-slide scroll" (click)="unlockAndSlideToNext()">
             <ion-icon name="chevron-forward-outline"></ion-icon>
           </ion-button>
         </ion-item>

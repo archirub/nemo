@@ -19,30 +19,30 @@ const { CameraResultType, CameraSource, Capacitor } = Plugins;
 })
 export class AddPhotoComponent {
   @ViewChild("icon", { read: ElementRef, static: true }) icon: ElementRef;
-  @ViewChild("text", { read: ElementRef, static: true }) text: ElementRef;
+  //@ViewChild("text", { read: ElementRef, static: true }) text: ElementRef;
   @ViewChild("view", { read: ElementRef, static: true }) view: ElementRef;
 
   @Output() onPhotoPicked = new EventEmitter<{ photo: CameraPhoto; index: number }>();
 
   @Input() photoIndex: number;
   @Input() set photoDisplayed(value: CameraPhoto) {
-    console.log("YOYO", value, this.view, this.icon, this.text);
+    console.log("YOYO", value, this.view, this.icon, /*this.text*/);
 
-    if (!this.view || !this.icon || !this.text) return;
+    if (!this.view || !this.icon /*|| !this.text*/) return;
     const view = this.view.nativeElement;
     const icon = this.icon.nativeElement;
-    const text = this.text.nativeElement;
+    //const text = this.text.nativeElement;
 
     // if new value of photodisplayed is empty, then that means look should be reverted back
     if (!value) {
-      view.style.background = "none";
+      view.style.background = "var(--ion-color-light-tint)";
       icon.style.display = "inline";
-      text.style.display = "inline";
+      //text.style.display = "inline";
     } else {
       view.style.background = `url(${String(value.webPath)})`;
       view.style.backgroundSize = "cover";
       icon.style.display = "none";
-      text.style.display = "none";
+      //text.style.display = "none";
     }
   }
 

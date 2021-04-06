@@ -61,6 +61,8 @@ export class SignuprequiredPage {
 
   slidesLeft: number;
 
+  age: number;
+
   // Getting these dynamically would be absolutely amazing, not sure how to however
   slideIndexes: { [k in keyof SignupRequired]: number } = {
     firstName: 0,
@@ -133,21 +135,25 @@ export class SignuprequiredPage {
 
   async unlockAndSlideToNext() {
     await this.slides.lockSwipes(false);
-
     await this.slides.slideNext();
 
     await this.updatePager();
+    //await this.slides.lockSwipes(true);
+  }
 
+  async unlockAndSlideToPrev() {
+    await this.slides.lockSwipes(false);
+    await this.slides.slidePrev();
+
+    await this.updatePager();
     //await this.slides.lockSwipes(true);
   }
 
   async unlockAndSlideTo(index: number) {
     await this.slides.lockSwipes(false);
-
     await this.slides.slideTo(index);
 
     await this.updatePager();
-
     //await this.slides.lockSwipes(true);
   }
 

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ViewChild, forwardRef} from '@angular/core';
+import { Component, Input, OnInit, ViewChild, forwardRef, Output, EventEmitter } from '@angular/core';
 import { ISODateString } from '@capacitor/core';
 import { IonSlides } from '@ionic/angular';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
@@ -31,7 +31,7 @@ export class AppDatetimeComponent implements OnInit, ControlValueAccessor {
     days: Array<number>;
     months: Array<string>;
     years: Array<number>;
-    value: ISODateString;
+    value: any;
     age: number;
 
     constructor() {}
@@ -52,6 +52,10 @@ export class AppDatetimeComponent implements OnInit, ControlValueAccessor {
 
     ngAfterViewInit() {
         this.getDate();
+        //this.value = null;
+        //this.onChange(this.value);
+        this.getWrittenValue();
+        console.log(this.value);
     }
 
     fillArray(a,b) {
@@ -61,11 +65,27 @@ export class AppDatetimeComponent implements OnInit, ControlValueAccessor {
         };
     }
 
-    async getDate() {
-        var d = await this.daySlides.getActiveIndex();
-        var m = await this.monthSlides.getActiveIndex();
-        var y = await this.yearSlides.getActiveIndex();
+    async getWrittenValue() {
+        /* 
+        * Checks if component's value has been written by formControls,
+        * Updates UI accordingly
+        */
 
+        if (typeof this.value === 'string') {
+            var date  = new Date(Date.parse(this.value));
+            var y = date.getFullYear() - 1960;
+            var m = date.getMonth();
+            var d = date.getDate() - 1;
+
+            this.updateOptions(d,m,y);
+
+            await this.daySlides.slideTo(d);
+            await this.monthSlides.slideTo(m);
+            await this.yearSlides.slideTo(y);
+        };
+    }
+
+    updateOptions(d,m,y) {
         if (m === 3 || m === 5 || m === 8 || m === 10) { //30 days months
             this.days = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,
                         21,22,23,24,25,26,27,28,29,30];
@@ -88,6 +108,14 @@ export class AppDatetimeComponent implements OnInit, ControlValueAccessor {
             this.days = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,
                         21,22,23,24,25,26,27,28,29,30,31];
         };
+    }
+
+    async getDate() {
+        var d = await this.daySlides.getActiveIndex();
+        var m = await this.monthSlides.getActiveIndex();
+        var y = await this.yearSlides.getActiveIndex();
+
+        this.updateOptions(d,m,y);
 
         var birthday = new Date(`${this.months[m]} ${this.completeDays[d]}, ${this.years[y]} 12:00:00`);
         this.value = birthday.toISOString();
@@ -112,7 +140,7 @@ export class AppDatetimeComponent implements OnInit, ControlValueAccessor {
     writeValue(value: ISODateString): void {
         this.value = value;
     }
-    
+
     registerOnChange(fn: any): void {
         this.onChange = fn;
     }

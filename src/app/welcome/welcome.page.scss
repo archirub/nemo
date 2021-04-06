@@ -35,15 +35,12 @@ ion-content.welcome {
   color: var(--ion-color-secondary);
 }
 
-ion-item {
-  --background: none;
-}
-
 $button-width: 6.25vh;
 $slide-height: 100vh;
 $slide-width: 100vw;
 
 ion-slides {
+  margin-top: 5vh;
   height: 90vh;
 }
 
@@ -64,7 +61,7 @@ ion-slides {
   }
 
   &-dot {
-    display: none;
+    //display: none;
     padding: 2.5vh 2.5vw;
     font-size: 1.5vh;
     color: var(--ion-color-light-shade);
@@ -79,10 +76,29 @@ ion-item {
   width: 100vw;
   --border-width: 0;
   --inner-border-width: 0;
+  background: none;
 }
 
 p {
   margin: 0;
+}
+
+.buttons {
+  width: 90%;
+  display: flex;
+  justify-content: space-between;
+  position: absolute;
+  top: 70vh;
+  margin-left: 1vh;
+}
+
+.first {
+  justify-content: flex-end;
+
+  .skip {
+    text-align: center;
+    margin-right: 23vw;
+  }
 }
 
 ion-button.scroll {
@@ -94,9 +110,6 @@ ion-button.scroll {
   height: $button-width;
   width: $button-width;
   z-index: 4;
-  top: 70vh;
-  right: 10vw;
-  position: absolute;
 }
 
 .scroll ion-icon[name="close-outline"] {
@@ -190,7 +203,7 @@ ion-button.scroll {
 
 .input {
   width: 90%;
-  height: 20vh;
+  height: 30vh;
   background: var(--ion-color-primary-contrast);
   --background: var(--ion-color-primary-contrast);
 
@@ -232,7 +245,8 @@ add-photo {
 .photos {
   flex-wrap: wrap;
   height: 35vh;
-  margin: 5vh auto;
+  width: 80vw;
+  margin: 10vh auto 5vh;
 }
 
 p {
@@ -277,7 +291,6 @@ p {
 }
 
 .skip {
-  margin: 0 auto;
   text-align: center;
 
   ion-button {
@@ -287,6 +300,7 @@ p {
     --background-activated: transparent;
     --box-shadow: none;
     text-transform: none;
+    z-index: 5;
   }
 }
 
@@ -337,12 +351,11 @@ p {
     color: var(--ion-color-medium-shade);
     font-size: 3vh;
     margin: 0;
-    flex: 1;
     font-weight: normal;
   }
 
   .flexstart-col & {
-    margin-top: 3vh;
+    margin: 5vh 0 2vh 0;
   }
 
   ion-select {
@@ -352,6 +365,7 @@ p {
     --background: var(--ion-color-primary-contrast);
     flex: 1;
     padding: 0 2vw;
+    font-size: 3vh;
 
     &:visited,
     &:active {
@@ -383,14 +397,13 @@ p {
 }
 
 ion-content {
+  --overflow: hidden;
   flex: 2;
 }
 
-.scrollable {
-  height: 36vh;
+.multi-input {
+  height: 44vh;
   width: 90vw;
-  margin-top: 4vh;
-  overflow-y: scroll;
 
   ion-item {
     height: auto;
@@ -412,15 +425,18 @@ ion-content {
   }
 }
 
-/*.personal-pref {
-  height: auto;
-  --border-radius: 10px;
-  margin: 1vh;
-  width: auto;
-  --padding: 0;
-  --inner-border-width: none;
-  --border-color: transparent;
-}*/
+.personal-pref {
+  padding: 2vh;
+  position: absolute;
+  bottom: 0;
+  height: 80vh;
+  overflow: visible;
+  width: 100vw;
+  --border-width: 0;
+  --inner-border-width: 0;
+  background: none;
+  text-align: left;
+}
 
 .add-info {
   font-size: 3vh;
@@ -434,7 +450,7 @@ ion-content {
 
 .skipdiv {
   position: absolute;
-  top: 59.5vh;
+  top: 65vh;
   width: 95%;
 
   &-multiple {
@@ -451,7 +467,7 @@ ion-content {
 
   ion-checkbox {
     width: 4vh;
-    margin: 2.5vh 1vw 0 0;
+    margin: 3vh 4vw 0 0;
   }
 
   h2 {
