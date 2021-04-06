@@ -81,36 +81,52 @@ export class SignuprequiredPage {
 
   async ionViewWillEnter() {
     await this.fillFieldsAndGoToSlide();
-    await this.slides.lockSwipes(true);
+    //await this.slides.lockSwipes(true);
     await this.updatePager();
   }
 
   async updatePager() {
+    /* 
+    * Function to get the current slider and update the pager icons accordingly, no inputs
+    * Should be called on launch and after a slide is changed each time
+    */
+
+    //Retrieve all icons as element variables
     var person = document.getElementById("person");
     var gift = document.getElementById("gift");
     var camera = document.getElementById("camera");
     var happy = document.getElementById("happy");
+    var school = document.getElementById("school");
 
+    //Hash maps are quickest and most efficient; keys are slide numbers, values are icon to show
     var map = {
       0: person,
       1: gift,
       2: camera,
       3: happy,
+      4: school,
     };
 
+    //Initially display none
     Object.values(map).forEach((element) => (element.style.display = "none"));
 
+    //Don't display dots for slides left either
     var dots: HTMLCollectionOf<any> = document.getElementsByClassName("pager-dot");
-    Array.from(dots).forEach((element) => (element.style.display = "none")); //ignore this error, it works fine
+    Array.from(dots).forEach((element) => (element.style.display = "none"));
 
+    //Get current slide index and calculate slides left after this one
     var l = await this.slides.length();
     var current = await this.slides.getActiveIndex();
     this.slidesLeft = l - current - 2;
 
-    var slice = Array.from(dots).slice(0, this.slidesLeft);
-    slice.forEach((element) => (element.style.display = "block")); //ignore this error, it works fine
+    //Get the number of dots equal to slides left and display them
+    if (current < 5) { //stops anything being displayed on slides after last one
+      var slice = Array.from(dots).slice(0, this.slidesLeft);
+      slice.forEach((element) => (element.style.display = "block"));
+    }
 
-    if (current < 4) {
+    //Get correct icon to display
+    if (current < 5) {
       map[current].style.display = "block";
     }
   }
@@ -122,7 +138,7 @@ export class SignuprequiredPage {
 
     await this.updatePager();
 
-    await this.slides.lockSwipes(true);
+    //await this.slides.lockSwipes(true);
   }
 
   async unlockAndSlideTo(index: number) {
@@ -132,7 +148,7 @@ export class SignuprequiredPage {
 
     await this.updatePager();
 
-    await this.slides.lockSwipes(true);
+    //await this.slides.lockSwipes(true);
   }
 
   /**
