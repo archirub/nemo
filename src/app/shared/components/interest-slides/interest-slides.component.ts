@@ -12,18 +12,18 @@ import { InterestAndPath } from "@interfaces/index";
   styleUrls: ["./interest-slides.component.scss"],
 })
 export class InterestSlidesComponent implements AfterViewInit {
-  @Input() interests: InterestAndPath[];
+  @Input() interests: any;
 
-  pictures;
-  names;
+  pictures = assetsInterestsPath;
+  names = searchCriteriaOptions.interest;
   slideOpts;
   slideWidth: number;
 
   constructor() {}
 
   ngAfterViewInit() {
-    this.pictures = assetsInterestsPath;
-    this.names = searchCriteriaOptions.interest;
+    //this.pictures = assetsInterestsPath;
+    //this.names = searchCriteriaOptions.interest;
 
     this.slideOpts = {
       coverflowEffect: {
@@ -147,6 +147,7 @@ export class InterestSlidesComponent implements AfterViewInit {
       this.interests.splice(index, 1);
     } else {
       this.interests.push(choice);
-    }
+    };
+    console.log(this.interests);
   }
 }

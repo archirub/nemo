@@ -98,6 +98,7 @@ p {
   .skip {
     text-align: center;
     margin-right: 23vw;
+    margin-top: -1vh;
   }
 }
 
@@ -292,6 +293,7 @@ p {
 
 .skip {
   text-align: center;
+  margin-top: -1vh;
 
   ion-button {
     font-size: 3vh;
@@ -384,15 +386,18 @@ p {
     --background: var(--ion-color-primary-contrast);
   }
 
-  select {
+  ion-select {
     font-size: 3vh;
     font-weight: bold;
-    border-radius: 1vw;
-    border: 1px solid var(--ion-color-medium-shade);
+    border-bottom: 1px solid var(--ion-color-medium-shade);
     width: 100%;
-    margin: 4vh 0 2vh 0;
+    margin: 2vh 0;
+    padding-left: 0;
+    padding-bottom: 1vh;
     background: var(--ion-color-primary-contrast);
     --background: var(--ion-color-primary-contrast);
+    --placeholder-color: var(--ion-color-light);
+    --placeholder-opacity: 1;
   }
 }
 
@@ -402,7 +407,7 @@ ion-content {
 }
 
 .multi-input {
-  height: 44vh;
+  margin-top: 8.5vh;
   width: 90vw;
 
   ion-item {
@@ -450,8 +455,8 @@ ion-content {
 
 .skipdiv {
   position: absolute;
-  top: 65vh;
-  width: 95%;
+  top: 48vh;
+  width: 92.5%;
 
   &-multiple {
     position: absolute;

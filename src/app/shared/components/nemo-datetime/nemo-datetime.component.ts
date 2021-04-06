@@ -50,14 +50,6 @@ export class AppDatetimeComponent implements OnInit, ControlValueAccessor {
         this.fillArray(this.yearRange[0], this.yearRange[1]);
     }
 
-    ngAfterViewInit() {
-        this.getDate();
-        //this.value = null;
-        //this.onChange(this.value);
-        this.getWrittenValue();
-        console.log(this.value);
-    }
-
     fillArray(a,b) {
         this.years = [];
         for (let i = a; i >= b; i--) {
@@ -68,14 +60,14 @@ export class AppDatetimeComponent implements OnInit, ControlValueAccessor {
     async getWrittenValue() {
         /* 
         * Checks if component's value has been written by formControls,
-        * Updates UI accordingly
+        * Updates UI accordingly by getting saved day index, month index and year index
         */
-
         if (typeof this.value === 'string') {
+            var currentYear = new Date().getFullYear();
             var date  = new Date(Date.parse(this.value));
-            var y = date.getFullYear() - 1960;
+            var y = currentYear - date.getFullYear() - 1; //Year slide indexes run backwards, i.e. 2001 is on index 19, -1 for indexes starting at 0
             var m = date.getMonth();
-            var d = date.getDate() - 1;
+            var d = date.getDate() - 1; //-1 for indexes starting at 0
 
             this.updateOptions(d,m,y);
 

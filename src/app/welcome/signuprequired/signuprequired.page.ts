@@ -83,6 +83,8 @@ export class SignuprequiredPage {
 
   async ionViewWillEnter() {
     await this.fillFieldsAndGoToSlide();
+    this.date.getWrittenValue();
+    this.date.getDate();
     //await this.slides.lockSwipes(true);
     await this.updatePager();
   }
@@ -232,6 +234,8 @@ export class SignuprequiredPage {
             this.savePhoto({ photo: pic, index: i });
           });
         }
+      } else if (field === "dateOfBirth") {
+        this.date.writeValue(data[field]);
       } else {
         const formControl = this.form.get(field);
         if (formControl) formControl.setValue(data[field]);

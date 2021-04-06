@@ -1,7 +1,8 @@
 import { Component, OnInit, ViewChild, ElementRef } from "@angular/core";
 import { FormGroup, FormControl } from "@angular/forms";
+import { InterestSlidesComponent } from "@components/index";
 
-import { searchCriteriaOptions, questionsOptions } from "@interfaces/index";
+import { searchCriteriaOptions, questionsOptions, InterestAndPath } from "@interfaces/index";
 import { IonSlides } from "@ionic/angular";
 
 @Component({
@@ -11,6 +12,7 @@ import { IonSlides } from "@ionic/angular";
 })
 export class SignupoptionalPage implements OnInit {
   @ViewChild("slides", { read: ElementRef }) slides: ElementRef; //ISSUE HERE? Won't get methods for IonSlides component?? Has to use ElementRef??
+  @ViewChild("interestSlides", { read: ElementRef }) interestSlides : ElementRef;
 
   slidesLeft: number;
 
@@ -36,6 +38,8 @@ export class SignupoptionalPage implements OnInit {
   interestsOptions = searchCriteriaOptions.interest;
   questionsOptions = questionsOptions;
 
+  selectedInterests: Array<string> = [];
+
   constructor() {}
 
   ngOnInit() {}
@@ -46,6 +50,12 @@ export class SignupoptionalPage implements OnInit {
     await this.updatePager();
   }
 
+  ionViewDidEnter() {
+    console.log(this.interestSlides);
+    console.log(this.interestSlides.nativeElement.pictures);
+    console.log(this.interestSlides.nativeElement.interests);
+  }
+
   async updatePager() {
     /*
      * Function to get the current slider and update the pager icons accordingly, no inputs
@@ -53,19 +63,19 @@ export class SignupoptionalPage implements OnInit {
      */
 
     //Retrieve all icons as element variables
+    var book = document.getElementById("book");
     var people = document.getElementById("people");
     var chatbox = document.getElementById("chatbox");
     var palette = document.getElementById("palette");
-    var help = document.getElementById("help");
     var bio = document.getElementById("bio");
     var insta = document.getElementById("insta");
 
     //Hash maps are quickest and most efficient; keys are slide numbers, values are icon to show
     var map = {
-      0: people,
-      1: chatbox,
-      2: palette,
-      3: help,
+      0: book,
+      1: people,
+      2: chatbox,
+      3: palette,
       4: bio,
       5: insta,
     };
