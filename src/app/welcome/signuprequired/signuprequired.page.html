@@ -144,18 +144,20 @@
                 name="sexualPreference"
                 formControlName="sexualPreference"
               >
-                <ion-select-option value="men">men</ion-select-option>
-                <ion-select-option value="women">women</ion-select-option>
-                <ion-select-option value="both">both</ion-select-option>
+                <ion-select-option
+                  *ngFor="let sexPref of sexualPreferenceOptions"
+                  [value]="sexPref"
+                  >{{sexPref}}</ion-select-option
+                >
               </ion-select>
             </div>
 
             <div class="preferences">
               <h3>I identify as</h3>
               <ion-select required name="gender" formControlName="gender">
-                <ion-select-option value="man">man</ion-select-option>
-                <ion-select-option value="woman">woman</ion-select-option>
-                <ion-select-option value="other">other</ion-select-option>
+                <ion-select-option *ngFor="let gender of genderOptions" [value]="gender"
+                  >{{gender}}</ion-select-option
+                >
               </ion-select>
             </div>
 

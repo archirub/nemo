@@ -1,9 +1,8 @@
 import { Component, OnInit, ViewChild, ElementRef } from "@angular/core";
 import { FormGroup, FormControl } from "@angular/forms";
-import { SignupRequired } from "@interfaces/signup.model";
-import { IonSlides } from "@ionic/angular";
 
-type optionalForm = FormGroup & { value: SignupRequired };
+import { searchCriteriaOptions, questionsOptions } from "@interfaces/index";
+import { IonSlides } from "@ionic/angular";
 
 @Component({
   selector: "app-signupoptional",
@@ -15,15 +14,27 @@ export class SignupoptionalPage implements OnInit {
 
   slidesLeft: number;
 
-  optionalForm: optionalForm = new FormGroup({
-    biography: new FormControl(null),
+  optionalForm = new FormGroup({
+    course: new FormControl(null),
+    areaOfStudy: new FormControl(null),
+    interests: new FormControl(null),
     society: new FormControl(null),
-    // areaOfStudy: new FormControl(null),
-    // societyCategory: new FormControl(null),
-    // interests: new FormControl(null),
-    // questions: new FormControl(null),
-    // location: new FormControl(null)
+    societyCategory: new FormControl(null),
+    questions: new FormGroup({
+      q: new FormControl(null),
+      a: new FormControl(null),
+    }),
+    biography: new FormControl(null),
+    onCampus: new FormControl(null),
   });
+
+  // I think the order should be :
+  // course & areaOfStudy, society & societyCategory, interests, questions, biography, onCampus
+
+  societyCategoryOptions = searchCriteriaOptions.societyCategory;
+  areaOfStudyOptions = searchCriteriaOptions.areaOfStudy;
+  interestsOptions = searchCriteriaOptions.interest;
+  questionsOptions = questionsOptions;
 
   constructor() {}
 
@@ -36,10 +47,10 @@ export class SignupoptionalPage implements OnInit {
   }
 
   async updatePager() {
-    /* 
-    * Function to get the current slider and update the pager icons accordingly, no inputs
-    * Should be called on launch and after a slide is changed each time
-    */
+    /*
+     * Function to get the current slider and update the pager icons accordingly, no inputs
+     * Should be called on launch and after a slide is changed each time
+     */
 
     //Retrieve all icons as element variables
     var people = document.getElementById("people");
@@ -66,7 +77,7 @@ export class SignupoptionalPage implements OnInit {
     //This means we also have to slice for dots just on this page.
     var allDots: HTMLCollectionOf<any> = document.getElementsByClassName("pager-dot");
 
-    var dots = Array.from(allDots).slice(4,9); //Select only dots on signupoptional
+    var dots = Array.from(allDots).slice(4, 9); //Select only dots on signupoptional
     dots.forEach((element) => (element.style.display = "none"));
 
     //Get current slide index and calculate slides left after this one
@@ -76,7 +87,7 @@ export class SignupoptionalPage implements OnInit {
 
     //Get the number of dots equal to slides left and display them
     var slice = dots.slice(0, this.slidesLeft);
-    slice.forEach(element => (element.style.display = "block"));
+    slice.forEach((element) => (element.style.display = "block"));
 
     //Get correct icon to display
     map[current].style.display = "block";
@@ -109,4 +120,10 @@ export class SignupoptionalPage implements OnInit {
   item = {
     checked: false,
   };
+  // next to do here:
+  // - format the "questions" right (use FormArray of FormGroups of two FormControls)
+  // - format interests right
+  // - implement data update at each slide swipe
+  // - implement "fillFieldsAndGoToSlide"
+  // - Implement submit function
 }

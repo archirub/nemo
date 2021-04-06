@@ -35,7 +35,7 @@ export class SignupDataHolder implements signupDataHolder {
   society: string;
   areaOfStudy: AreaOfStudy;
   onCampus: boolean;
-  societyCategory: string;
+  societyCategory: SocietyCategory;
   interests: Interest[];
   questions: QuestionAndAnswer[];
 

@@ -251,13 +251,17 @@ export class SignuprequiredPage {
   getFormValues(): SignupRequired {
     const firstName: string = this.form.get("firstName").value;
     let dateOfBirth: string = this.form.get("dateOfBirth").value;
+
     // temporary, to make sure date is null if the thingy hasn't been touched
     if (new Date("2020-01-01").toDateString() === new Date(dateOfBirth).toDateString()) {
       dateOfBirth = null;
     }
     const sexualPreference: SexualPreference = this.form.get("sexualPreference").value;
     const gender: Gender = this.form.get("gender").value;
+    // const sexualPreference = ["female" as const];
+    // const gender = "male";
     const university: University = this.form.get("university").value;
+
     const degree: Degree = this.form.get("degree").value;
 
     const pictures: CameraPhoto[] = this.picturesHolder.filter(Boolean); // removes empty picture slots
@@ -281,6 +285,8 @@ export class SignuprequiredPage {
   async onSubmit() {
     const invalidSlide = this.getFirstInvalidSlideIndex();
 
+    // if invalidSlide is non-null, then there is a slide with invalid data
+    // cannot just use if (invalidSlide) {} syntax as number 0 is falsy
     if (typeof invalidSlide === "number") {
       await this.unlockAndSlideTo(invalidSlide);
     } else {
