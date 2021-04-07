@@ -21,7 +21,7 @@
 
 <ion-content>
   <form [formGroup]="form">
-    <ion-slides #slides>
+    <ion-slides #slides (ionSlideDidChange)="updateData()">
       <ion-slide>
         <div class="personal-pref">
           <div class="optionals flexstart-col">
@@ -32,7 +32,7 @@
             <div class="multi-input">
               <div class="input">
                 <!--Area of Study?-->
-                <ion-select placeholder="Area of study">
+                <ion-select placeholder="Area of study" formControlName="areaOfStudy">
                   <ion-select-option [value]="null">nuthin</ion-select-option>
 
                   <ion-select-option
@@ -46,8 +46,8 @@
                   <ion-input
                     type="text"
                     maxlength="20"
-                    placeholder="Degree"
-                    formControlName="degree"
+                    placeholder="course"
+                    formControlName="course"
                   ></ion-input>
                 </div>
               </div>
@@ -196,7 +196,10 @@
               <ion-label position="stacked"> What are your interests? </ion-label>
             </div>
 
-            <interest-slides #interestSlides [interests]="[]"></interest-slides>
+            <interest-slides
+              #interestSlides
+              [(interests)]="form.get('interests').value"
+            ></interest-slides>
 
             <div class="skipdiv">
               <p class="tip-center">You can choose a maximum of three interests.</p>

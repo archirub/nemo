@@ -5,7 +5,7 @@ import {
   ViewChild,
   ElementRef,
 } from "@angular/core";
-import { FormGroup, FormControl, FormArray } from "@angular/forms";
+import { FormGroup, FormControl, FormArray, FormBuilder } from "@angular/forms";
 import { IonSlides } from "@ionic/angular";
 import { Router } from "@angular/router";
 
@@ -36,7 +36,7 @@ export class SignupoptionalPage implements OnInit {
   form = new FormGroup({
     course: new FormControl(null),
     areaOfStudy: new FormControl(null),
-    interests: new FormControl(null),
+    interests: new FormArray([]),
     society: new FormControl(null),
     societyCategory: new FormControl(null),
     questions: new FormArray([]),
@@ -85,14 +85,15 @@ export class SignupoptionalPage implements OnInit {
   constructor(
     private signup: SignupService,
     private router: Router,
-    private changeDetectorRef: ChangeDetectorRef
+    private changeDetectorRef: ChangeDetectorRef,
+    private formBuilder: FormBuilder
   ) {}
 
   ngOnInit() {}
 
   async ionViewWillEnter() {
-    //await this.fillFieldsAndGoToSlide();
-    //await this.slides.lockSwipes(true);
+    await this.fillFieldsAndGoToSlide();
+    // await this.slides.lockSwipes(true);
     await this.updatePager();
   }
 
@@ -247,16 +248,13 @@ export class SignupoptionalPage implements OnInit {
    */
   fillFields(data: allowOptionalProp<SignupOptional>): void {
     Object.keys(data).forEach((field) => {
-      // **************************************************************************************
-      // *************************** ADAPT TO OPTIONAL SIGNUP *********************************
-      // **************************************************************************************
-      if (field === "pictures") {
-        // if (data[field]) {
-        //   console.log(data[field]);
-        //   data[field].forEach((pic, i) => {
-        //     this.savePhoto({ photo: pic, index: i });
-        //   });
-        // }
+      if (field === "interests") {
+        this.form.setControl(field, this.formBuilder.array(data[field] || []));
+      } else if (field === "questions") {
+        const questionFormGroups = (data[field] as QuestionAndAnswer[]).map((QandA) =>
+          this.formBuilder.group({ q: QandA.question, a: QandA.answer })
+        );
+        this.form.setControl(field, this.formBuilder.array(questionFormGroups || []));
       } else {
         const formControl = this.form.get(field);
         if (formControl) formControl.setValue(data[field]);
@@ -267,7 +265,6 @@ export class SignupoptionalPage implements OnInit {
   // USE THIS TO UPDATE THE DATA OBSERVABLE AT EACH SWIPE AS WELL AS TO STORE IT LOCALLY
   updateData(): Promise<void> {
     const validData = {};
-    console.log("yo");
 
     // MIGHT HAVE TO PASS THE PICTURES AS BASE64STRINGS HERE IF YOU WANT TO STORE THEM
     return this.signup.addToDataHolders(this.getFormValues());
@@ -279,9 +276,10 @@ export class SignupoptionalPage implements OnInit {
     const interests: Interest[] = this.form.get("interests").value;
     const society: string = this.form.get("society").value;
     const societyCategory: SocietyCategory = this.form.get("societyCategory").value;
-
-    // CHANGE TO MATCH SHAPE OF QUESTIONS, MIGHT HAVE TO DO SAME FOR INTERESTS
-    const questions: QuestionAndAnswer[] = this.form.get("questions").value;
+    const questions: QuestionAndAnswer[] = (this.form.get("questions")
+      .value as Array<any>).map((qst) => {
+      return { question: qst.q, answer: qst.a };
+    });
     const biography: string = this.form.get("biography").value;
 
     // TEMPORARY AND WRONG (need to ask for geolocalisation and shit, should probably create a store for this shit)
