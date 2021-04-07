@@ -1,10 +1,11 @@
-import { Component, Input, AfterViewInit } from "@angular/core";
+import { Component, Input, AfterViewInit, Output, EventEmitter } from "@angular/core";
 
 import {
+  InterestAndPath,
   assetsInterestsPath,
+  Interest,
   searchCriteriaOptions,
-} from "@interfaces/search-criteria.model";
-import { InterestAndPath } from "@interfaces/index";
+} from "@interfaces/index";
 
 @Component({
   selector: "interest-slides",
@@ -12,7 +13,8 @@ import { InterestAndPath } from "@interfaces/index";
   styleUrls: ["./interest-slides.component.scss"],
 })
 export class InterestSlidesComponent implements AfterViewInit {
-  @Input() interests: any;
+  @Input() interests: Interest[];
+  @Output() interestsChange = new EventEmitter<Interest[]>();
 
   pictures = assetsInterestsPath;
   names = searchCriteriaOptions.interest;
@@ -147,7 +149,9 @@ export class InterestSlidesComponent implements AfterViewInit {
       this.interests.splice(index, 1);
     } else {
       this.interests.push(choice);
-    };
+    }
+
+    this.interestsChange.emit(this.interests);
     console.log(this.interests);
   }
 }
