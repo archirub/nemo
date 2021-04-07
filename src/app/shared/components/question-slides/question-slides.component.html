@@ -1,0 +1,30 @@
+<ion-content>
+    <ion-slides #questionSlides>
+        <ion-slide *ngFor="let number of this.slideArray">
+            <ion-select (ionChange)="updateQuestionArray(number,$event)">
+                <ion-select-option 
+                *ngFor="let question of this.availableQuestionsMap[number]"
+                [value]="question">
+                    {{question}}
+                </ion-select-option>
+            </ion-select>
+
+            <ion-textarea
+            autoGrow="true"
+            (ionChange)="updateAnswerArray(number,$event)">
+            </ion-textarea>
+        </ion-slide>
+    </ion-slides>
+
+    <div id="prev" class="prev button" (click)="unlockAndSlide('prev')">
+        <ion-icon name="chevron-back"></ion-icon>
+    </div>
+
+    <div id="next" class="next button" (click)="unlockAndSlide('next')">
+        <ion-icon name="chevron-forward"></ion-icon>
+    </div>
+
+    <div id="add" class="add button" (click)="addQuestion()">
+        <ion-icon name="add"></ion-icon>
+    </div>
+</ion-content>

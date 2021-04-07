@@ -1,0 +1,62 @@
+ion-content {
+    --overflow: hidden;
+}
+
+ion-slides {
+    height: 30vh;
+    width: 80vw;
+}
+
+ion-slide {
+    border: solid 2px var(--ion-color-primary-tint);
+    padding: 10px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+ion-select {
+    font-size: 3vh;
+    font-weight: bold;
+    border-bottom: 1px solid var(--ion-color-medium-shade);
+    width: 100%;
+    margin: 2vh 0;
+    padding-left: 0;
+    padding-bottom: 1vh;
+    background: var(--ion-color-primary-contrast);
+    --background: var(--ion-color-primary-contrast);
+    --placeholder-color: var(--ion-color-light);
+    --placeholder-opacity: 1;
+}
+
+ion-textarea {
+    width: 100%;
+    border: solid 1px var(--ion-color-medium-shade);
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 3vh;
+    margin-bottom: 1vh;
+}
+
+.button {
+    color: var(--ion-color-primary-contrast);
+    background: var(--ion-color-primary);
+    border-radius: 50%;
+    font-size: 4vh;
+    width: 4vh;
+    justify-content: center;
+    display: flex;
+    flex-direction: column;
+    height: 4vh;
+    position: absolute;
+    z-index: 2;
+}
+
+.add, .next {
+    top: 32%;
+    right: 0;
+}
+
+.prev {
+    top: 32%;
+}

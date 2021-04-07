@@ -269,6 +269,12 @@ p {
   }
 }
 
+question-slides {
+  width: 90vw;
+  height: 40vh;
+  margin-top: 3vh;
+}
+
 /* ADD PHOTOS SLIDE SPECIFICS */
 
 /*Photo square div alignment*/
@@ -455,7 +461,7 @@ ion-content {
 
 .skipdiv {
   position: absolute;
-  top: 48vh;
+  top: 60vh;
   width: 92.5%;
 
   &-multiple {
