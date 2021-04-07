@@ -20,6 +20,6 @@ import { InterestSlidesModule } from "@components/interest-slides/interest-slide
     SignupoptionalPageRoutingModule,
     InterestSlidesModule
   ],
-  declarations: [],
+  declarations: [SignupoptionalPage],
 })
 export class SignupoptionalPageModule {}

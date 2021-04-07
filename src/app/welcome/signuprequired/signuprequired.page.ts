@@ -90,10 +90,10 @@ export class SignuprequiredPage {
   }
 
   async updatePager() {
-    /* 
-    * Function to get the current slider and update the pager icons accordingly, no inputs
-    * Should be called on launch and after a slide is changed each time
-    */
+    /*
+     * Function to get the current slider and update the pager icons accordingly, no inputs
+     * Should be called on launch and after a slide is changed each time
+     */
 
     //Retrieve all icons as element variables
     var person = document.getElementById("person");
@@ -124,7 +124,8 @@ export class SignuprequiredPage {
     this.slidesLeft = l - current - 2;
 
     //Get the number of dots equal to slides left and display them
-    if (current < 5) { //stops anything being displayed on slides after last one
+    if (current < 5) {
+      //stops anything being displayed on slides after last one
       var slice = Array.from(dots).slice(0, this.slidesLeft);
       slice.forEach((element) => (element.style.display = "block"));
     }
@@ -199,7 +200,7 @@ export class SignuprequiredPage {
    */
   getFirstInvalidSlideIndex(): number | null {
     const fieldValues = this.getFormValues();
-    const initIndex = 20;
+    const initIndex = 100;
     let slideIndex: number = initIndex;
 
     // checks whether each field has a value and if that value is valid
