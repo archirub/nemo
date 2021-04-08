@@ -40,6 +40,9 @@ export class SignuprequiredPage {
   @ViewChild("slides") slides: IonSlides;
   @ViewChild("date") date: AppDatetimeComponent;
 
+  // UI MAP TO CHECK VALIDATORS, BUILD ON ionViewDidEnter() HOOK
+  reqValidatorChecks: object;
+
   // FIELD FORM
   form = new FormGroup({
     firstName: new FormControl(null, [Validators.required, Validators.minLength(1)]),
@@ -83,10 +86,71 @@ export class SignuprequiredPage {
 
   async ionViewWillEnter() {
     await this.fillFieldsAndGoToSlide();
+
     this.date.getWrittenValue();
     this.date.getDate();
-    //await this.slides.lockSwipes(true);
+
+    await this.slides.lockSwipes(true);
     await this.updatePager();
+
+    // UI elements map to show on invalid checks when trying to move slide, see validateAndSlide()
+    this.reqValidatorChecks = {
+      firstName: document.getElementById("nameCheck"),
+      dateOfBirth: document.getElementById("dateCheck"),
+      sexualPreference: document.getElementById("sexCheck"),
+      gender: document.getElementById("genderCheck"),
+      university: document.getElementById("uniCheck"),
+      degree: document.getElementById("degreeCheck")
+    };
+  }
+
+  validateAndSlide(entry) {
+    /** 
+     * Checks whether the field on the current slide has valid value, allows continuing if true, input
+     * entry (string): the field of the form to check validator for, e.g. email, password
+     * If on the final validator, password, submits form instead of sliding to next slide
+     * THIS SHOULD BE USED ON THE NEXT SLIDE BUTTONS
+    **/
+    Object.values(this.reqValidatorChecks).forEach(element => element.style.display = "none"); // Clear any UI already up
+
+    if (typeof entry === "object") { // Checking multiple validators
+      var falseCount = 0; // Count how many are invalid
+
+      entry.forEach(element => {
+        var validity = this.form.get(element).valid;
+
+        if (validity === false) { // If invalid, increase falseCount and display "invalid" UI
+          falseCount ++;
+          this.reqValidatorChecks[element].style.display = "flex";
+        };
+      });
+
+      if (falseCount === 0 && entry.includes("degree")) { // All valid, last entry means submit
+        Object.values(this.reqValidatorChecks).forEach(element => element.style.display = "none"); // Hide all "invalid" UI
+        this.onSubmit();
+
+      } else if (falseCount === 0) { // All valid, not last entry so slide next
+        Object.values(this.reqValidatorChecks).forEach(element => element.style.display = "none"); // Hide all "invalid" UI
+        this.unlockAndSlideToNext();
+      }
+
+    } else {
+      var validity = this.form.get(entry).valid;
+
+      if (validity === true) {
+        Object.values(this.reqValidatorChecks).forEach(element => element.style.display = "none"); // Hide all "invalid" UI
+
+        if (entry === "password") { // If password valid, submit form
+          this.onSubmit();
+        } else {
+          this.unlockAndSlideToNext(); // If others valid, slide next
+        };
+
+      } else {
+        this.reqValidatorChecks[entry].style.display = "flex"; // Show "invalid" UI for invalid validator
+        console.log("Not valid, don't slide");
+      };
+    };  
   }
 
   async updatePager() {
@@ -141,7 +205,7 @@ export class SignuprequiredPage {
     await this.slides.slideNext();
 
     await this.updatePager();
-    //await this.slides.lockSwipes(true);
+    await this.slides.lockSwipes(true);
   }
 
   async unlockAndSlideToPrev() {
@@ -149,7 +213,7 @@ export class SignuprequiredPage {
     await this.slides.slidePrev();
 
     await this.updatePager();
-    //await this.slides.lockSwipes(true);
+    await this.slides.lockSwipes(true);
   }
 
   async unlockAndSlideTo(index: number) {
@@ -157,7 +221,7 @@ export class SignuprequiredPage {
     await this.slides.slideTo(index);
 
     await this.updatePager();
-    //await this.slides.lockSwipes(true);
+    await this.slides.lockSwipes(true);
   }
 
   /**

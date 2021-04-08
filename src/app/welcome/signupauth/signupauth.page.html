@@ -1,12 +1,15 @@
-<ion-header>
+<!--ion-header>
   <ion-toolbar>
-    <!--ion-title>signupauth</ion-title-->
+    <ion-title>signupauth</ion-title>
   </ion-toolbar>
-</ion-header>
+</ion-header-->
 
 <div class="pager">
   <ion-icon id="email" class="pager-icon" name="at-outline"></ion-icon>
+  <ion-icon id="hourglass" class="pager-icon" name="hourglass-outline"></ion-icon>
+  <ion-icon id="tick" class="pager-icon" name="checkmark-outline"></ion-icon>
   <ion-icon id="pass" class="pager-icon" name="ellipsis-horizontal"></ion-icon>
+  <ion-icon class="pager-dot" name="ellipse"></ion-icon>
   <ion-icon class="pager-dot" name="ellipse"></ion-icon>
 </div>
 
@@ -15,7 +18,7 @@
     <ion-slides pager="false" #slides>
 
       <ion-slide>
-        <ion-item lines="none">
+        <div class="personal-pref">
           <div class="question">
             <ion-label position="stacked">
               What's your uni email address?
@@ -32,15 +35,62 @@
             <p class="tip">Only UCL email addresses will allow for verification.</p>
           </div>
 
-          <!-- <ion-button class="next-slide scroll" (click)="unlockAndSwipe('next')"> -->
-          <ion-button class="next-slide scroll" (click)="unlockAndSwipe()">
-            <ion-icon name="chevron-forward-outline"></ion-icon>
-          </ion-button>
-        </ion-item>
+          <div id="emailCheck">
+            <ion-icon name="alert-circle-outline"></ion-icon>
+            <p>Please enter a valid email address</p>
+          </div>
+
+          <div class="buttons first">
+            <ion-button class="next-slide scroll" (click)="validateAndSlide('email')">
+              <ion-icon name="chevron-forward-outline"></ion-icon>
+            </ion-button>
+          </div>
+        </div>
       </ion-slide>
 
       <ion-slide>
-        <ion-item lines="none">
+        <div class="personal-pref">
+          <div class="question" *ngIf="this.awaitingConfirm">
+            <ion-label position="stacked">
+              An email has been sent
+            </ion-label>
+          </div>
+
+          <h2 style="margin-top: 20vh" *ngIf="this.awaitingConfirm">Click 
+            <a (click)="resendConfirmation()">here</a>
+          if you would like us to send another conformation email.</h2>
+
+          <div class="buttons flexstart" *ngIf="this.awaitingConfirm">
+            <ion-button class="next-slide scroll" (click)="unlockAndSlideToPrev()">
+              <ion-icon name="chevron-back-outline"></ion-icon>
+            </ion-button>
+          </div>
+
+          <ion-icon id="letter" #email name="mail-outline" *ngIf="this.awaitingConfirm"></ion-icon>
+          <p id="sentEmail" *ngIf="this.awaitingConfirm">Email sent!</p>
+
+          <!--SWITCHES TO BELOW ONCE EMAIL IS CONFIRMED-->
+
+          <div class="question" *ngIf="this.confirmed">
+            <ion-label position="stacked">
+              Email confirmed!
+            </ion-label>
+          </div>
+
+          <h2 style="margin-top: 20vh" *ngIf="this.confirmed">
+            Click the button to go to the next slide and continue your sign up.
+          </h2>
+
+          <div class="buttons first" *ngIf="this.confirmed">
+            <ion-button class="next-slide scroll" (click)="unlockAndSlideToNext()">
+              <ion-icon name="chevron-forward-outline"></ion-icon>
+            </ion-button>
+          </div>
+        </div>
+      </ion-slide>
+
+      <ion-slide>
+        <div class="personal-pref">
           <div class="question">
             <ion-label position="stacked">
               Choose a password for your account
@@ -57,12 +107,22 @@
             <p class="tip">Your password must be at least 10 characters long.</p>
           </div>
 
-          <!-- <ion-button class="next-slide scroll" [routerLink]="['../../signuprequired']" routerLinkActive="router-link-active"  type="submit"> -->
-            <ion-button class="next-slide scroll" type="submit">
+          <div id="passCheck">
+            <ion-icon name="alert-circle-outline"></ion-icon>
+            <p>Please enter a valid password</p>
+          </div>
 
-            <ion-icon name="chevron-forward-outline"></ion-icon>
-          </ion-button>
-        </ion-item>
+          <!-- <ion-button class="next-slide scroll" [routerLink]="['../../signuprequired']" routerLinkActive="router-link-active"  type="submit"> -->
+          <div class="buttons">
+            <ion-button class="next-slide scroll" (click)="unlockAndSlideToPrev()">
+              <ion-icon name="chevron-back-outline"></ion-icon>
+            </ion-button>
+
+            <ion-button class="next-slide scroll" (click)="validateAndSlide('password')">
+              <ion-icon name="chevron-forward-outline"></ion-icon>
+            </ion-button>
+          </div>
+        </div>
       </ion-slide>
     </ion-slides>
   </form>

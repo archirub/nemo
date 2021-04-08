@@ -49,6 +49,29 @@ interest-slides {
   margin-top: 1vh;
 }
 
+#letter {
+  font-size: 6vh;
+  color: var(--ion-color-primary);
+  display: none;
+  margin-top: 10vh;
+}
+
+#sentEmail {
+  margin: 0 auto;
+  text-align: center;
+  color: var(--ion-color-primary);
+  display: none;
+}
+
+#emailCheck, #passCheck, #nameCheck, #dateCheck, #sexCheck, #genderCheck, #uniCheck, #degreeCheck {
+  display: none;
+  color: var(--ion-color-danger-shade);
+
+  p {
+    margin-left: 3px;
+  }
+}
+
 .pager {
   display: flex;
   top: 14vh;
@@ -102,7 +125,7 @@ p {
 
   .skip {
     text-align: center;
-    margin-right: 23vw;
+    margin-right: 17vw;
     margin-top: -1vh;
   }
 }

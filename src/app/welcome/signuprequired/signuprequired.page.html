@@ -32,8 +32,13 @@
             </div>
           </div>
 
+          <div id="nameCheck">
+            <ion-icon name="alert-circle-outline"></ion-icon>
+            <p>Please enter a name</p>
+          </div>
+
           <div class="buttons first">
-            <ion-button class="next-slide scroll" (click)="unlockAndSlideToNext()">
+            <ion-button class="next-slide scroll" (click)="validateAndSlide('firstName')">
               <ion-icon name="chevron-forward-outline"></ion-icon>
             </ion-button>
           </div>
@@ -61,12 +66,17 @@
             <p class="tip-center">This can't be changed later</p>
           </div>
 
+          <div id="dateCheck">
+            <ion-icon name="alert-circle-outline"></ion-icon>
+            <p>Please select a valid date of birth</p>
+          </div>
+
           <div class="buttons">
             <ion-button class="next-slide scroll" (click)="unlockAndSlideToPrev()">
               <ion-icon name="chevron-back-outline"></ion-icon>
             </ion-button>
 
-            <ion-button class="next-slide scroll" (click)="unlockAndSlideToNext()">
+            <ion-button class="next-slide scroll" (click)="validateAndSlide('dateOfBirth')">
               <ion-icon name="chevron-forward-outline"></ion-icon>
             </ion-button>
           </div>
@@ -161,6 +171,16 @@
               </ion-select>
             </div>
 
+            <div id="sexCheck">
+              <ion-icon name="alert-circle-outline"></ion-icon>
+              <p>Please select your interest</p>
+            </div>
+
+            <div id="genderCheck">
+              <ion-icon name="alert-circle-outline"></ion-icon>
+              <p>Please select your identification</p>
+            </div>
+
             <div class="skipdiv">
               <p class="tip-center">These preferences can be changed later.</p>
             </div>
@@ -171,7 +191,7 @@
               <ion-icon name="chevron-back-outline"></ion-icon>
             </ion-button>
 
-            <ion-button class="next-slide scroll" (click)="unlockAndSlideToNext()">
+            <ion-button class="next-slide scroll" (click)="validateAndSlide(['sexualPreference','gender'])">
               <ion-icon name="chevron-forward-outline"></ion-icon>
             </ion-button>
           </div>
@@ -215,12 +235,22 @@
               <h2>I consent to the data and privacy policies of this app</h2>
             </div>
 
+            <div id="uniCheck">
+              <ion-icon name="alert-circle-outline"></ion-icon>
+              <p>Please select your university</p>
+            </div>
+
+            <div id="degreeCheck">
+              <ion-icon name="alert-circle-outline"></ion-icon>
+              <p>Please select your study level</p>
+            </div>
+
             <div class="buttons">
               <ion-button class="next-slide scroll" (click)="unlockAndSlideToPrev()">
                 <ion-icon name="chevron-back-outline"></ion-icon>
               </ion-button>
   
-              <ion-button class="next-slide scroll" (click)="onSubmit()">
+              <ion-button class="next-slide scroll" (click)="validateAndSlide(['university','degree'])">
                 <ion-icon name="chevron-forward-outline"></ion-icon>
               </ion-button>
             </div>
