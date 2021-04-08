@@ -1,4 +1,4 @@
-import { Component, Input, AfterViewInit, OnInit, ViewChild, ChangeDetectorRef } from "@angular/core";
+import { Component, ElementRef, AfterViewInit, OnInit, ViewChild, ChangeDetectorRef } from "@angular/core";
 import { QuestionAndAnswer } from "@interfaces/index";
 import { questionsOptions } from "@interfaces/index";
 import { IonSlides } from "@ionic/angular";
@@ -68,7 +68,7 @@ export class QuestionSlidesComponent implements OnInit {
     var l = await this.slides.length();
     var last = l - 1;
 
-    console.log(l);
+    console.log(l); //You will see here that slides update one state behind??
 
     if (l === 1) {
       if (typeof this.questionArray[0] === 'string') {

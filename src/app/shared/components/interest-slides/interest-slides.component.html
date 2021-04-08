@@ -14,7 +14,7 @@
     </ion-slides>
 </ion-content>
 
-<ion-content id="cards">
+<ion-content *ngIf="this.listed" id="cards">
     <ion-list>
         <ion-item *ngFor="let interest of this.interests">
             <ion-avatar slot="start">

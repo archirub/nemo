@@ -46,7 +46,7 @@
                   <ion-input
                     type="text"
                     maxlength="20"
-                    placeholder="course"
+                    placeholder="Course"
                     formControlName="course"
                   ></ion-input>
                 </div>
@@ -201,6 +201,7 @@
             <interest-slides
               #interestSlides
               [(interests)]="form.get('interests').value"
+              [listed]="false"
             ></interest-slides>
 
             <div class="skipdiv">
@@ -228,40 +229,45 @@
       </ion-slide>
 
       <ion-slide>
-        <ion-item>
+        <div class="personal-pref">
           <div class="optionals flexstart-col">
             <div class="question">
               <ion-label position="stacked"> Add a bio </ion-label>
             </div>
 
             <div class="bio input">
-              <ion-textarea maxlength="150" formControlName="biography"></ion-textarea>
+              <ion-textarea 
+              maxlength="150" 
+              formControlName="biography" 
+              autoGrow="true"
+              placeholder="Write about yourself!">
+            </ion-textarea>
             </div>
-          </div>
 
-          <div class="skipdiv">
-            <p class="tip-center">Maximum 30 characters.</p>
-            <p class="tip-center">These details are optional and can be changed later.</p>
+            <div class="skipdiv">
+              <p class="tip-center">Maximum 30 characters.</p>
+              <p class="tip-center">These details are optional and can be changed later.</p>
+            </div>
 
-            <div class="skip">
-              <!-- <ion-button (click)="unlockAndSwipe('next')">Skip</ion-button> -->
+            <div class="buttons">
+              <ion-button class="next-slide scroll" (click)="unlockAndSlideToPrev()">
+                <ion-icon name="chevron-back-outline"></ion-icon>
+              </ion-button>
+
+              <div class="skip">
+                <ion-button (click)="unlockAndSlideToNext()">Skip</ion-button>
+              </div>
+
               <ion-button class="next-slide scroll" (click)="unlockAndSlideToNext()">
                 <ion-icon name="chevron-forward-outline"></ion-icon>
               </ion-button>
             </div>
           </div>
-
-          <!-- <ion-button class="next-slide scroll" (click)="unlockAndSwipe('next')">
-            <ion-icon name="chevron-forward-outline"></ion-icon>
-          </ion-button> -->
-          <ion-button class="next-slide scroll" (click)="unlockAndSlideToNext()">
-            <ion-icon name="chevron-forward-outline"></ion-icon>
-          </ion-button>
-        </ion-item>
+        </div>
       </ion-slide>
 
       <ion-slide>
-        <ion-item>
+        <div class="personal-pref">
           <div class="flexend-col container">
             <div class="question">
               <ion-label position="stacked"> Link your social media </ion-label>
@@ -278,20 +284,23 @@
               <p class="tip-center">
                 The linked social media account can be changed later.
               </p>
+            </div>
+
+            <div class="buttons">
+              <ion-button class="next-slide scroll" (click)="unlockAndSlideToPrev()">
+                <ion-icon name="chevron-back-outline"></ion-icon>
+              </ion-button>
 
               <div class="skip">
-                <ion-button>Skip</ion-button>
+                <ion-button (click)="unlockAndSlideToNext()">Skip</ion-button>
               </div>
+
+              <ion-button class="next-slide scroll" (click)="unlockAndSlideToNext()">
+                <ion-icon name="chevron-forward-outline"></ion-icon>
+              </ion-button>
             </div>
           </div>
-
-          <!-- <ion-button class="next-slide scroll" (click)="unlockAndSwipe('next')">
-            <ion-icon name="chevron-forward-outline"></ion-icon>
-          </ion-button> -->
-          <ion-button class="next-slide scroll" type="submit">
-            <ion-icon name="chevron-forward-outline"></ion-icon>
-          </ion-button>
-        </ion-item>
+        </div>
       </ion-slide>
     </ion-slides>
   </form>

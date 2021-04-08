@@ -44,6 +44,11 @@ ion-slides {
   height: 90vh;
 }
 
+interest-slides {
+  width: 93vw;
+  margin-top: 1vh;
+}
+
 .pager {
   display: flex;
   top: 14vh;
@@ -366,6 +371,10 @@ question-slides {
     margin: 5vh 0 2vh 0;
   }
 
+  .flexstart-col &.top {
+    margin: 10vh 0 2vh 0;
+  }
+
   ion-select {
     color: var(--ion-color-light-contrast);
     border: 0;
@@ -457,6 +466,12 @@ ion-content {
 
 .bio {
   margin-top: 5vh;
+  width: 100%;
+  
+  ion-textarea {
+    min-height: 18.5vh;
+    padding-right: 5px;
+  }
 }
 
 .skipdiv {
@@ -477,11 +492,12 @@ ion-content {
   display: flex;
 
   ion-checkbox {
-    width: 4vh;
-    margin: 3vh 4vw 0 0;
+    margin-top: 3vh;
+    width: 7.5vw;
   }
 
   h2 {
+    margin-left: 4vw;
     font-size: 2vh;
     text-decoration: underline;
   }

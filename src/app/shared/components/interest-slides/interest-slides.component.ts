@@ -13,6 +13,7 @@ import {
   styleUrls: ["./interest-slides.component.scss"],
 })
 export class InterestSlidesComponent implements AfterViewInit {
+  @Input() listed: boolean = true; //Option to hide the listed interests, automatically shown (false = hidden)
   @Input() interests: Interest[];
   @Output() interestsChange = new EventEmitter<Interest[]>();
 
