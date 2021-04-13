@@ -3,7 +3,9 @@ import {
   Component,
   OnInit,
   ViewChild,
+  ViewChildren,
   ElementRef,
+  QueryList,
 } from "@angular/core";
 import { FormGroup, FormControl, FormArray, FormBuilder } from "@angular/forms";
 import { IonSlides } from "@ionic/angular";
@@ -29,6 +31,7 @@ import { SignupService } from "@services/signup/signup.service";
 export class SignupoptionalPage implements OnInit {
   @ViewChild("interestSlides", { read: ElementRef }) interestSlides: ElementRef;
   @ViewChild("slides") slides: IonSlides;
+  @ViewChildren("pagerDots", { read: ElementRef }) dots: QueryList<ElementRef>; 
 
   slidesLeft: number;
 
@@ -92,15 +95,14 @@ export class SignupoptionalPage implements OnInit {
   ngOnInit() {}
 
   async ionViewWillEnter() {
-    await this.fillFieldsAndGoToSlide();
+    await this.fillFieldsAndGoToSlide(); //Might need to be moved this to ionViewDidEnter hook
     // await this.slides.lockSwipes(true);
-    await this.updatePager();
   }
 
   ionViewDidEnter() {
-    console.log(this.interestSlides);
     console.log(this.interestSlides.nativeElement.pictures);
     console.log(this.interestSlides.nativeElement.interests);
+    this.updatePager();
   }
 
   /*
@@ -129,12 +131,9 @@ export class SignupoptionalPage implements OnInit {
     //Initially display none
     Object.values(map).forEach((element) => (element.style.display = "none"));
 
-    //Signuprequired is still present in document, so this gets all pager dots including signuprequired.
-    //This means we also have to slice for dots just on this page.
-    var allDots: HTMLCollectionOf<any> = document.getElementsByClassName("pager-dot");
-
-    var dots = Array.from(allDots).slice(4, 9); //Select only dots on signupoptional
-    dots.forEach((element) => (element.style.display = "none"));
+    //Hide all pager dots also
+    var dots = this.dots.toArray();
+    dots.forEach((element) => (element.nativeElement.style.display = "none"));
 
     //Get current slide index and calculate slides left after this one
     var l = await this.slides.length();
@@ -143,7 +142,7 @@ export class SignupoptionalPage implements OnInit {
 
     //Get the number of dots equal to slides left and display them
     var slice = dots.slice(0, this.slidesLeft);
-    slice.forEach((element) => (element.style.display = "block"));
+    slice.forEach((element) => (element.nativeElement.style.display = "block"));
 
     //Get correct icon to display
     map[current].style.display = "block";

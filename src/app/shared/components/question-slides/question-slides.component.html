@@ -1,5 +1,5 @@
-<ion-content>
-    <ion-slides #questionSlides>
+<ion-content #grid>
+    <ion-slides #questionSlides (ionSlideDidChange)="this.updatePager()">
         <ion-slide *ngFor="let number of this.slideArray">
             <ion-select (ionChange)="updateQuestionArray(number,$event)">
                 <ion-select-option 
@@ -11,20 +11,17 @@
 
             <ion-textarea
             autoGrow="true"
+            maxlength="70"
             (ionChange)="updateAnswerArray(number,$event)">
             </ion-textarea>
         </ion-slide>
     </ion-slides>
 
-    <div id="prev" class="prev button" (click)="unlockAndSlide('prev')">
-        <ion-icon name="chevron-back"></ion-icon>
-    </div>
-
-    <div id="next" class="next button" (click)="unlockAndSlide('next')">
-        <ion-icon name="chevron-forward"></ion-icon>
-    </div>
-
     <div id="add" class="add button" (click)="addQuestion()">
         <ion-icon name="add"></ion-icon>
     </div>
 </ion-content>
+
+<div id="pager" #pager>
+    <ion-icon #pagerDot class="pager-dot" name="ellipse" *ngFor="let number of this.slideArray"></ion-icon>
+</div>

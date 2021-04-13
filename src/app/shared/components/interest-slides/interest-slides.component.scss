@@ -1,11 +1,9 @@
 ion-content#selector {
     color: #000;
     --padding-top: 10px;
-    height: 65vw;
+    height: 70vw;
     --overflow: hidden;
     text-rendering: optimizeLegibility;
-    --background: var(--ion-color-light-tint);
-    border: solid 2px var(--ion-color-light-shade);
 }
 
 ion-content#cards {
@@ -18,6 +16,7 @@ ion-content#cards {
 ion-slides {
     width: 65vw !important;
     text-rendering: optimizeLegibility;
+    overflow: visible;
 }
 
 ion-slide {
@@ -31,6 +30,7 @@ ion-slide {
     border: solid 2px var(--ion-color-primary);
     border-radius: 15px;
     background-color: var(--ion-color-primary-contrast);
+    box-shadow: 0 10px 20px -10px;
 }
 
 .image-container {

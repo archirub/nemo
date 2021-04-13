@@ -10,10 +10,11 @@
   <ion-icon id="camera" class="pager-icon" name="camera"></ion-icon>
   <ion-icon id="happy" class="pager-icon" name="happy-outline"></ion-icon>
   <ion-icon id="school" class="pager-icon" name="school"></ion-icon>
-  <ion-icon class="pager-dot" name="ellipse"></ion-icon>
-  <ion-icon class="pager-dot" name="ellipse"></ion-icon>
-  <ion-icon class="pager-dot" name="ellipse"></ion-icon>
-  <ion-icon class="pager-dot" name="ellipse"></ion-icon>
+
+  <ion-icon #pagerDots class="pager-dot" name="ellipse"></ion-icon>
+  <ion-icon #pagerDots class="pager-dot" name="ellipse"></ion-icon>
+  <ion-icon #pagerDots class="pager-dot" name="ellipse"></ion-icon>
+  <ion-icon #pagerDots class="pager-dot" name="ellipse"></ion-icon>
 </div>
 
 <ion-content>
@@ -63,6 +64,9 @@
 
           <div class="center">
             <h3>Age: {{ this.date.age }}</h3>
+          </div>
+
+          <div class="skipdiv">
             <p class="tip-center">This can't be changed later</p>
           </div>
 
@@ -115,7 +119,7 @@
             </ion-button> -->
           </div>
 
-          <div class="skip">
+          <div class="skipdiv">
             <p class="tip-center">You must have at least one photo on your profile.</p>
           </div>
 
@@ -147,7 +151,7 @@
               </ion-select>
             </div> -->
 
-            <div class="preferences top">
+            <div class="preferences">
               <h3>I am interested in</h3>
               <ion-select
                 required
@@ -162,6 +166,11 @@
               </ion-select>
             </div>
 
+            <div id="sexCheck">
+              <ion-icon name="alert-circle-outline"></ion-icon>
+              <p>Please select your interest</p>
+            </div>
+
             <div class="preferences">
               <h3>I identify as</h3>
               <ion-select required name="gender" formControlName="gender">
@@ -169,11 +178,6 @@
                   >{{gender}}</ion-select-option
                 >
               </ion-select>
-            </div>
-
-            <div id="sexCheck">
-              <ion-icon name="alert-circle-outline"></ion-icon>
-              <p>Please select your interest</p>
             </div>
 
             <div id="genderCheck">
@@ -217,6 +221,11 @@
               </ion-select>
             </div>
 
+            <div id="uniCheck">
+              <ion-icon name="alert-circle-outline"></ion-icon>
+              <p>Please select your university</p>
+            </div>
+
             <div class="preferences">
               <h3>My level of study is</h3>
               <ion-select required formControlName="degree">
@@ -226,23 +235,20 @@
               </ion-select>
             </div>
 
-            <div class="terms">
-              <ion-checkbox mode="ios" name="terms"></ion-checkbox>
-              <h2>I have read and understood the terms and conditions</h2>
-            </div>
-            <div class="terms">
-              <ion-checkbox mode="ios" name="privacy"></ion-checkbox>
-              <h2>I consent to the data and privacy policies of this app</h2>
-            </div>
-
-            <div id="uniCheck">
-              <ion-icon name="alert-circle-outline"></ion-icon>
-              <p>Please select your university</p>
-            </div>
-
             <div id="degreeCheck">
               <ion-icon name="alert-circle-outline"></ion-icon>
               <p>Please select your study level</p>
+            </div>
+
+            <div class="terms">
+              <div class="terms-singular">
+                <ion-checkbox mode="ios" name="terms"></ion-checkbox>
+                <h2>I have read and understood the terms and conditions</h2>
+              </div>
+              <div class="terms-singular">
+                <ion-checkbox mode="ios" name="privacy"></ion-checkbox>
+                <h2>I consent to the data and privacy policies of this app</h2>
+              </div>
             </div>
 
             <div class="buttons">

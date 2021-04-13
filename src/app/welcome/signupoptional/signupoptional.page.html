@@ -12,11 +12,11 @@
   <ion-icon id="bio" class="pager-icon" name="accessibility"></ion-icon>
   <ion-icon id="insta" class="pager-icon" name="logo-instagram"></ion-icon>
 
-  <ion-icon class="pager-dot" name="ellipse"></ion-icon>
-  <ion-icon class="pager-dot" name="ellipse"></ion-icon>
-  <ion-icon class="pager-dot" name="ellipse"></ion-icon>
-  <ion-icon class="pager-dot" name="ellipse"></ion-icon>
-  <ion-icon class="pager-dot" name="ellipse"></ion-icon>
+  <ion-icon #pagerDots class="pager-dot" name="ellipse"></ion-icon>
+  <ion-icon #pagerDots class="pager-dot" name="ellipse"></ion-icon>
+  <ion-icon #pagerDots class="pager-dot" name="ellipse"></ion-icon>
+  <ion-icon #pagerDots class="pager-dot" name="ellipse"></ion-icon>
+  <ion-icon #pagerDots class="pager-dot" name="ellipse"></ion-icon>
 </div>
 
 <ion-content>
@@ -135,7 +135,7 @@
         <div class="personal-pref">
           <div class="optionals flexstart-col">
             <div class="question">
-              <ion-label position="stacked"> Answer some questions </ion-label>
+              <ion-label position="stacked"> Add some questions </ion-label>
             </div>
 
             <!--div class="multi-input">
@@ -171,7 +171,7 @@
           </ion-button-->
 
           <div class="skipdiv">
-            <p class="tip-center">Max 30 characters per answer</p>
+            <p class="tip-center">Max 70 characters per answer</p>
             <p class="tip-center">These details are optional and can be changed later.</p>
           </div>
 
@@ -195,7 +195,7 @@
         <div class="personal-pref">
           <div class="optionals flexstart-col">
             <div class="question">
-              <ion-label position="stacked"> What are your interests? </ion-label>
+              <ion-label position="stacked"> Got any interests? </ion-label>
             </div>
 
             <interest-slides
@@ -204,7 +204,7 @@
               [listed]="false"
             ></interest-slides>
 
-            <div class="skipdiv">
+            <div class="skipdiv-multiple">
               <p class="tip-center">You can choose a maximum of three interests.</p>
               <p class="tip-center">
                 These details are optional and can be changed later.
@@ -245,7 +245,7 @@
             </div>
 
             <div class="skipdiv">
-              <p class="tip-center">Maximum 30 characters.</p>
+              <p class="tip-center">Maximum 150 characters.</p>
               <p class="tip-center">These details are optional and can be changed later.</p>
             </div>
 

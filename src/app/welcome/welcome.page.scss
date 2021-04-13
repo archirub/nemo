@@ -46,7 +46,7 @@ ion-slides {
 
 interest-slides {
   width: 93vw;
-  margin-top: 1vh;
+  margin-top: 6vh;
 }
 
 #letter {
@@ -63,7 +63,8 @@ interest-slides {
   display: none;
 }
 
-#emailCheck, #passCheck, #nameCheck, #dateCheck, #sexCheck, #genderCheck, #uniCheck, #degreeCheck {
+#emailCheck, #passCheck, #nameCheck, #dateCheck, #uniCheck, #sexCheck, #degreeCheck, #genderCheck {
+  margin-top: 10px;
   display: none;
   color: var(--ion-color-danger-shade);
 
@@ -72,16 +73,28 @@ interest-slides {
   }
 }
 
+#uniCheck, #sexCheck  {
+  position: absolute;
+  z-index: 2;
+  top: 24vh;
+}
+
+#degreeCheck, #genderCheck {
+  position: absolute;
+  z-index: 2;
+  top: 35vh;
+}
+
 .pager {
   display: flex;
-  top: 14vh;
+  top: 9vh;
   left: 8vw;
   z-index: 20;
   position: absolute;
 
   &-icon {
     display: none;
-    border: solid 2px var(--ion-color-primary-tint);
+    border: solid 3px var(--ion-color-primary-tint);
     border-radius: 50%;
     color: var(--ion-color-primary);
     font-size: 4vh;
@@ -116,8 +129,7 @@ p {
   display: flex;
   justify-content: space-between;
   position: absolute;
-  top: 70vh;
-  margin-left: 1vh;
+  top: 75vh;
 }
 
 .first {
@@ -139,6 +151,8 @@ ion-button.scroll {
   height: $button-width;
   width: $button-width;
   z-index: 4;
+  border-radius: 100%; //This is purely for dropshadow
+  box-shadow: 0 2px 5px -3px var(--ion-color-light-contrast);
 }
 
 .scroll ion-icon[name="close-outline"] {
@@ -226,7 +240,7 @@ ion-button.scroll {
   ion-label {
     overflow-wrap: break-word;
     white-space: normal;
-    font-size: 5vh;
+    font-size: 4.4vh;
   }
 }
 
@@ -241,11 +255,11 @@ ion-button.scroll {
     height: 5vh;
     width: 100%;
     border-bottom: solid 1px var(--ion-color-medium-shade);
-    font-weight: bold;
     font-size: 3vh;
     margin-bottom: 1vh;
     background: var(--ion-color-primary-contrast);
     --background: var(--ion-color-primary-contrast);
+    --placeholder-font-weight: normal;
   }
 
   ion-textarea {
@@ -255,6 +269,7 @@ ion-button.scroll {
     font-weight: bold;
     font-size: 3vh;
     margin-bottom: 1vh;
+    --placeholder-font-weight: normal;
   }
 
   .verification_input {
@@ -266,8 +281,8 @@ ion-button.scroll {
 }
 
 add-photo {
-  height: 16vh;
-  width: 16vh;
+  height: 12vh;
+  width: 12vh;
   font-size: 2.25vh;
 }
 
@@ -299,8 +314,8 @@ p {
 
 question-slides {
   width: 90vw;
-  height: 40vh;
-  margin-top: 3vh;
+  height: 50vh;
+  margin-top: 5vh;
 }
 
 /* ADD PHOTOS SLIDE SPECIFICS */
@@ -394,9 +409,9 @@ question-slides {
     margin: 5vh 0 2vh 0;
   }
 
-  .flexstart-col &.top {
+  /*.flexstart-col &.top {
     margin: 10vh 0 2vh 0;
-  }
+  }*/
 
   ion-select {
     color: var(--ion-color-light-contrast);
@@ -406,6 +421,7 @@ question-slides {
     flex: 1;
     padding: 0 2vw;
     font-size: 3vh;
+    --placeholder-font-weight: normal;
 
     &:visited,
     &:active {
@@ -426,7 +442,6 @@ question-slides {
 
   ion-select {
     font-size: 3vh;
-    font-weight: bold;
     border-bottom: 1px solid var(--ion-color-medium-shade);
     width: 100%;
     margin: 2vh 0;
@@ -436,6 +451,7 @@ question-slides {
     --background: var(--ion-color-primary-contrast);
     --placeholder-color: var(--ion-color-light);
     --placeholder-opacity: 1;
+    --placeholder-font-weight: normal;
   }
 }
 
@@ -471,7 +487,7 @@ ion-content {
 .personal-pref {
   padding: 2vh;
   position: absolute;
-  bottom: 0;
+  bottom: 5vh;
   height: 80vh;
   overflow: visible;
   width: 100vw;
@@ -494,35 +510,47 @@ ion-content {
   ion-textarea {
     min-height: 18.5vh;
     padding-right: 5px;
+    border: none;
+    font-weight: normal;
+    --placeholder-font-weight: normal;
   }
 }
 
 .skipdiv {
   position: absolute;
-  top: 60vh;
+  top: 65vh;
   width: 92.5%;
 
   &-multiple {
     position: absolute;
-    top: 51.5vh;
+    top: 55.5vh;
     width: 95%;
   }
 }
 
 .terms {
-  width: 90vw;
-  margin: 1vh auto;
-  display: flex;
+  margin-top: 5vh;
 
-  ion-checkbox {
-    margin-top: 3vh;
-    width: 7.5vw;
-  }
+  &-singular {
+    width: 90vw;
+    margin: 0.5vh auto;
+    display: flex;
 
-  h2 {
-    margin-left: 4vw;
-    font-size: 2vh;
-    text-decoration: underline;
+    ion-checkbox {
+      margin-top: 3vh;
+      width: 9vw;
+      --background: var(--ion-color-primary-contrast);
+      --background-checked: var(--ion-color-primary-contrast);
+      --checkmark-color: var(--ion-color-primary);
+      --border-color-checked: var(--ion-color-primary-contrast);
+      --transition: 0.3s;
+    }
+
+    h2 {
+      margin-left: 4vw;
+      font-size: 2vh;
+      text-decoration: underline;
+    }
   }
 }
 

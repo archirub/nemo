@@ -3,8 +3,10 @@ ion-content {
 }
 
 ion-slides {
-    height: 30vh;
+    height: 40vh;
     width: 80vw;
+    overflow: visible;
+    --bullet-background: #000;
 }
 
 ion-slide {
@@ -13,6 +15,7 @@ ion-slide {
     border-radius: 10px;
     display: flex;
     flex-direction: column;
+    box-shadow: 0 10px 20px -10px;
 }
 
 ion-select {
@@ -29,11 +32,17 @@ ion-select {
     --placeholder-opacity: 1;
 }
 
+//Allows select to expand to accommodate multi-line questions
+ion-select::part(text) {
+    white-space: pre-wrap !important;
+}
+
 ion-textarea {
     width: 100%;
     border: solid 1px var(--ion-color-medium-shade);
     border-radius: 5px;
-    font-weight: bold;
+    text-align: left;
+    padding: 5px;
     font-size: 3vh;
     margin-bottom: 1vh;
 }
@@ -59,4 +68,19 @@ ion-textarea {
 
 .prev {
     top: 32%;
+}
+
+#pager {
+    display: flex;
+    width: 90%;
+    justify-content: center;
+    position: absolute;
+    top: 62.5vh;
+    z-index: 5;
+}
+
+.pager-dot {
+    font-size: 1.5vh;
+    color: var(--ion-color-light-shade);
+    margin: 0 1vw;
 }

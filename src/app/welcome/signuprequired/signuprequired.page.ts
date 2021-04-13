@@ -9,9 +9,9 @@
 // - create function that creates the normal app usage token and stores it locally. As well,
 // create function that checks whether that exists (that function is basically already done in autologin)
 
-import { ChangeDetectorRef, Component, ViewChild } from "@angular/core";
+import { ChangeDetectorRef, Component, ElementRef, ViewChild, ViewChildren, QueryList } from "@angular/core";
 import { FormGroup, FormControl, Validators } from "@angular/forms";
-import { IonSlides } from "@ionic/angular";
+import { IonCheckbox, IonSlides } from "@ionic/angular";
 import { Router } from "@angular/router";
 import { CameraPhoto } from "@capacitor/core";
 
@@ -39,6 +39,7 @@ import { AppDatetimeComponent } from "@components/index";
 export class SignuprequiredPage {
   @ViewChild("slides") slides: IonSlides;
   @ViewChild("date") date: AppDatetimeComponent;
+  @ViewChildren("pagerDots", { read: ElementRef }) dots: QueryList<ElementRef>;
 
   // UI MAP TO CHECK VALIDATORS, BUILD ON ionViewDidEnter() HOOK
   reqValidatorChecks: object;
@@ -59,7 +60,7 @@ export class SignuprequiredPage {
   universityOptions: University[] = searchCriteriaOptions.university;
   degreeOptions: Degree[] = searchCriteriaOptions.degree;
 
-  pictureCount: number = 4; // defines the number of picture boxes in template, as well as is used in logic to save picture picks
+  pictureCount: number = 6; // defines the number of picture boxes in template, as well as is used in logic to save picture picks
   picturesHolder: CameraPhoto[] = Array.from({ length: this.pictureCount }); // for storing pictures. Separate from rest of form, added to it on form submission
 
   slidesLeft: number;
@@ -91,7 +92,6 @@ export class SignuprequiredPage {
     this.date.getDate();
 
     await this.slides.lockSwipes(true);
-    await this.updatePager();
 
     // UI elements map to show on invalid checks when trying to move slide, see validateAndSlide()
     this.reqValidatorChecks = {
@@ -102,6 +102,10 @@ export class SignuprequiredPage {
       university: document.getElementById("uniCheck"),
       degree: document.getElementById("degreeCheck")
     };
+  }
+
+  ionViewDidEnter() {
+    this.updatePager();
   }
 
   validateAndSlide(entry) {
@@ -179,8 +183,8 @@ export class SignuprequiredPage {
     Object.values(map).forEach((element) => (element.style.display = "none"));
 
     //Don't display dots for slides left either
-    var dots: HTMLCollectionOf<any> = document.getElementsByClassName("pager-dot");
-    Array.from(dots).forEach((element) => (element.style.display = "none"));
+    var dots = Array.from(this.dots);
+    Array.from(dots).forEach((element) => (element.nativeElement.style.display = "none"));
 
     //Get current slide index and calculate slides left after this one
     var l = await this.slides.length();
@@ -191,7 +195,7 @@ export class SignuprequiredPage {
     if (current < 5) {
       //stops anything being displayed on slides after last one
       var slice = Array.from(dots).slice(0, this.slidesLeft);
-      slice.forEach((element) => (element.style.display = "block"));
+      slice.forEach((element) => (element.nativeElement.style.display = "block"));
     }
 
     //Get correct icon to display

@@ -77,7 +77,7 @@ export const questionsOptions = [
   "Netflix n Chill is" as const,
   "After school, you can find me" as const,
   "During seminars, I" as const,
-  "If I were Provost," as const,
+  "If I were Provost, I" as const,
   "During Covid, I have" as const,
   "At 9am you can find me" as const,
   "Society needs to change" as const,
