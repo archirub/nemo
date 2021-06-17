@@ -26,6 +26,7 @@ import { InterestSlidesModule } from "@components/interests-slides/interests-sli
     AddPhotoModule,
     AppToggleModule,
     InterestSlidesModule,
+    PipesModule,
   ],
   declarations: [OwnProfilePage, ProfileAnswerComponent, ProfileCourseComponent],
 })

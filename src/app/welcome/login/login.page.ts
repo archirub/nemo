@@ -1,4 +1,5 @@
 import { Component, OnInit } from "@angular/core";
+import { AngularFireAuth } from "@angular/fire/auth";
 import { FormControl, FormGroup, Validators } from "@angular/forms";
 import { Router } from "@angular/router";
 import { AuthResponseData } from "@interfaces/auth-response.model";
@@ -6,6 +7,7 @@ import { AlertController } from "@ionic/angular";
 
 import { AuthService } from "@services/index";
 import { AngularAuthService } from "@services/login/auth/angular-auth.service";
+import { SwipeStackStore, CurrentUserStore } from "@stores/index";
 import { Observable } from "rxjs";
 
 @Component({
@@ -27,7 +29,10 @@ export class LoginPage implements OnInit {
     private auth: AuthService,
     private signUpAuthService: AngularAuthService,
     private router: Router,
-    private alertCtrl: AlertController
+    private alertCtrl: AlertController,
+    private afAuth: AngularFireAuth,
+    private currentUserStore: CurrentUserStore,
+    private swipeStackStore: SwipeStackStore
   ) {}
 
   ngOnInit() {}
@@ -52,34 +57,48 @@ export class LoginPage implements OnInit {
     if (!this.loginForm.valid) {
       return this.showAlert("This shit ain't valid fam");
     }
-    let authObs: Observable<AuthResponseData>;
     const email: string = this.loginForm.get("email").value;
     const password: string = this.loginForm.get("password").value;
     console.log(email, password);
 
-    authObs = this.signUpAuthService.login(email, password);
-
-    authObs.subscribe(
-      (resData) => {
-        // console.log(resData);
-        this.router.navigateByUrl("/main/tabs/home");
-      },
-      (errRes) => {
-        const code = errRes.error.error.message;
-        let message = "Please check your info and try again";
-        if (code == "EMAIL_NOT_FOUND") {
-          message =
-            "There is no user record corresponding to this identifier. The user may have been deleted.";
-        }
-        if (code == "INVALID_PASSWORD") {
-          message = "The password is invalid or the user does not have a password.";
-        }
-        if (code == "USER_DISABLED") {
-          message = "The user account has been disabled by an administrator.";
-        }
-        this.showAlert(message);
-      }
+    const auth$: Observable<AuthResponseData> = this.signUpAuthService.login(
+      email,
+      password
     );
+    this.afAuth
+      .signInWithEmailAndPassword(email, password)
+      .then(() => this.router.navigateByUrl("/main/tabs/home"))
+      .then(() => this.afAuth.currentUser)
+      .then((user) => {
+        console.log("brwadfasdf", user);
+        if (user) {
+          this.currentUserStore.initializeStore(user.uid);
+
+          this.swipeStackStore.initializeStore(user.uid);
+        }
+      });
+
+    // auth$.subscribe(
+    //   (resData) => {
+    //     // console.log(resData);
+    //     this.router.navigateByUrl("/main/tabs/home");
+    //   },
+    //   (errRes) => {
+    //     const code = errRes.error.error.message;
+    //     let message = "Please check your info and try again";
+    //     if (code == "EMAIL_NOT_FOUND") {
+    //       message =
+    //         "There is no user record corresponding to this identifier. The user may have been deleted.";
+    //     }
+    //     if (code == "INVALID_PASSWORD") {
+    //       message = "The password is invalid or the user does not have a password.";
+    //     }
+    //     if (code == "USER_DISABLED") {
+    //       message = "The user account has been disabled by an administrator.";
+    //     }
+    //     this.showAlert(message);
+    //   }
+    // );
   }
 
   private showAlert(message: string) {

@@ -18,7 +18,7 @@ import {
   QueryList,
 } from "@angular/core";
 import { FormGroup, FormControl, Validators } from "@angular/forms";
-import { IonCheckbox, IonSlides } from "@ionic/angular";
+import { IonSlides } from "@ionic/angular";
 import { Router } from "@angular/router";
 import { CameraPhoto } from "@capacitor/core";
 
@@ -54,7 +54,10 @@ export class SignuprequiredPage {
   // FIELD FORM
   form = new FormGroup({
     firstName: new FormControl(null, [Validators.required, Validators.minLength(1)]),
-    dateOfBirth: new FormControl(null, [Validators.required]),
+    dateOfBirth: new FormControl(
+      null
+      // [Validators.required]
+    ),
     sexualPreference: new FormControl(null, [Validators.required]),
     gender: new FormControl(null, [Validators.required]),
     university: new FormControl(null, [Validators.required]),
