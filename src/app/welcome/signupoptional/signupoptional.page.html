@@ -198,11 +198,11 @@
               <ion-label position="stacked"> Got any interests? </ion-label>
             </div>
 
-            <interest-slides
+            <interests-slides
               #interestSlides
               [(interests)]="form.get('interests').value"
               [listed]="false"
-            ></interest-slides>
+            ></interests-slides>
 
             <div class="skipdiv-multiple">
               <p class="tip-center">You can choose a maximum of three interests.</p>
@@ -300,7 +300,14 @@
               </ion-button>
             </div>
           </div>
-        </div>
+
+          <!-- <ion-button class="next-slide scroll" (click)="unlockAndSwipe('next')">
+            <ion-icon name="chevron-forward-outline"></ion-icon>
+          </ion-button> -->
+        </ion-item>
+        <ion-button class="next-slide scroll" (click)="onSubmit()">
+          <ion-icon name="chevron-forward-outline"></ion-icon>
+        </ion-button>
       </ion-slide>
     </ion-slides>
   </form>

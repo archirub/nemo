@@ -1,25 +1,28 @@
 import { Injectable } from "@angular/core";
-import { BehaviorSubject, Observable, of, PartialObserver } from "rxjs";
-import { delay, flatMap, map, take, tap } from "rxjs/operators";
 import { HttpClient } from "@angular/common/http";
+import { Router } from "@angular/router";
+import { AngularFireStorage } from "@angular/fire/storage";
+import { AngularFireFunctions } from "@angular/fire/functions";
+import { AngularFireAuth } from "@angular/fire/auth";
+
+import { CameraPhoto, Plugins } from "@capacitor/core";
+import { BehaviorSubject, Observable, from } from "rxjs";
+import { take, tap } from "rxjs/operators";
+
 import { environment } from "src/environments/environment";
 
-import { AngularFireAuth } from "@angular/fire/auth";
-import { AuthResponseData, signupDataHolder } from "@interfaces/auth-response.model";
+import { CurrentUserStore } from "@stores/index";
 import {
+  AuthResponseData,
   SignupRequired,
   createAccountRequest,
   successResponse,
   SignupOptional,
   SignupAuthenticated,
+  allowOptionalProp,
 } from "@interfaces/index";
-import { CameraPhoto, Plugins } from "@capacitor/core";
-import { from } from "rxjs";
-import { SignupDataHolder } from "@classes/signup.class";
-import { AngularFireFunctions } from "@angular/fire/functions";
-import { AngularFireStorage } from "@angular/fire/storage";
-import { allowOptionalProp } from "@interfaces/shared.model";
-import { Router } from "@angular/router";
+import { SignupDataHolder } from "@classes/index";
+
 @Injectable({
   providedIn: "root",
 })
@@ -38,7 +41,8 @@ export class SignupService {
     private afAuth: AngularFireAuth,
     private afFunctions: AngularFireFunctions,
     private afStorage: AngularFireStorage,
-    private router: Router
+    private router: Router,
+    private currentUserStore: CurrentUserStore
   ) {}
 
   /**
@@ -89,9 +93,10 @@ export class SignupService {
     const creationRequestData: createAccountRequest = {
       uid: dataStored.uid,
       firstName: dataStored.firstName,
+      picturesCount: dataStored.pictures.filter(Boolean).length,
       sexualPreference: dataStored.sexualPreference,
       gender: dataStored.gender,
-      dateOfBirth: dataStored.dateOfBirth,
+      dateOfBirth: new Date(dataStored.dateOfBirth),
       university: dataStored.university,
       degree: dataStored.degree,
       biography: dataStored.biography,
@@ -102,6 +107,7 @@ export class SignupService {
       societyCategory: dataStored.societyCategory,
       interests: dataStored.interests,
       questions: dataStored.questions,
+      socialMediaLinks: dataStored.socialMediaLinks,
     };
     return this.afFunctions
       .httpsCallable("createAccount")(creationRequestData)
@@ -117,6 +123,17 @@ export class SignupService {
         take(1),
         tap(() => from(this.storePictures(dataStored.pictures, dataStored.uid)))
       );
+  }
+
+  async initializeUser() {
+    const user = await this.afAuth.currentUser;
+
+    if (user) {
+      this.currentUserStore.initializeStore(user.uid);
+    } else {
+      console.error("No user signed in");
+      await this.router.navigateByUrl("/welcome/signin");
+    }
   }
 
   /**

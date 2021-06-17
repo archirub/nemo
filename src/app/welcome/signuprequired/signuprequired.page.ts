@@ -9,7 +9,14 @@
 // - create function that creates the normal app usage token and stores it locally. As well,
 // create function that checks whether that exists (that function is basically already done in autologin)
 
-import { ChangeDetectorRef, Component, ElementRef, ViewChild, ViewChildren, QueryList } from "@angular/core";
+import {
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  ViewChild,
+  ViewChildren,
+  QueryList,
+} from "@angular/core";
 import { FormGroup, FormControl, Validators } from "@angular/forms";
 import { IonCheckbox, IonSlides } from "@ionic/angular";
 import { Router } from "@angular/router";
@@ -100,7 +107,7 @@ export class SignuprequiredPage {
       sexualPreference: document.getElementById("sexCheck"),
       gender: document.getElementById("genderCheck"),
       university: document.getElementById("uniCheck"),
-      degree: document.getElementById("degreeCheck")
+      degree: document.getElementById("degreeCheck"),
     };
   }
 
@@ -109,52 +116,62 @@ export class SignuprequiredPage {
   }
 
   validateAndSlide(entry) {
-    /** 
+    /**
      * Checks whether the field on the current slide has valid value, allows continuing if true, input
      * entry (string): the field of the form to check validator for, e.g. email, password
      * If on the final validator, password, submits form instead of sliding to next slide
      * THIS SHOULD BE USED ON THE NEXT SLIDE BUTTONS
-    **/
-    Object.values(this.reqValidatorChecks).forEach(element => element.style.display = "none"); // Clear any UI already up
+     **/
+    Object.values(this.reqValidatorChecks).forEach(
+      (element) => (element.style.display = "none")
+    ); // Clear any UI already up
 
-    if (typeof entry === "object") { // Checking multiple validators
+    if (typeof entry === "object") {
+      // Checking multiple validators
       var falseCount = 0; // Count how many are invalid
 
-      entry.forEach(element => {
+      entry.forEach((element) => {
         var validity = this.form.get(element).valid;
 
-        if (validity === false) { // If invalid, increase falseCount and display "invalid" UI
-          falseCount ++;
+        if (validity === false) {
+          // If invalid, increase falseCount and display "invalid" UI
+          falseCount++;
           this.reqValidatorChecks[element].style.display = "flex";
-        };
+        }
       });
 
-      if (falseCount === 0 && entry.includes("degree")) { // All valid, last entry means submit
-        Object.values(this.reqValidatorChecks).forEach(element => element.style.display = "none"); // Hide all "invalid" UI
+      if (falseCount === 0 && entry.includes("degree")) {
+        // All valid, last entry means submit
+        Object.values(this.reqValidatorChecks).forEach(
+          (element) => (element.style.display = "none")
+        ); // Hide all "invalid" UI
         this.onSubmit();
-
-      } else if (falseCount === 0) { // All valid, not last entry so slide next
-        Object.values(this.reqValidatorChecks).forEach(element => element.style.display = "none"); // Hide all "invalid" UI
+      } else if (falseCount === 0) {
+        // All valid, not last entry so slide next
+        Object.values(this.reqValidatorChecks).forEach(
+          (element) => (element.style.display = "none")
+        ); // Hide all "invalid" UI
         this.unlockAndSlideToNext();
       }
-
     } else {
       var validity = this.form.get(entry).valid;
 
       if (validity === true) {
-        Object.values(this.reqValidatorChecks).forEach(element => element.style.display = "none"); // Hide all "invalid" UI
+        Object.values(this.reqValidatorChecks).forEach(
+          (element) => (element.style.display = "none")
+        ); // Hide all "invalid" UI
 
-        if (entry === "password") { // If password valid, submit form
+        if (entry === "password") {
+          // If password valid, submit form
           this.onSubmit();
         } else {
           this.unlockAndSlideToNext(); // If others valid, slide next
-        };
-
+        }
       } else {
         this.reqValidatorChecks[entry].style.display = "flex"; // Show "invalid" UI for invalid validator
         console.log("Not valid, don't slide");
-      };
-    };  
+      }
+    }
   }
 
   async updatePager() {
@@ -304,7 +321,7 @@ export class SignuprequiredPage {
           });
         }
       } else if (field === "dateOfBirth") {
-        this.date.writeValue(data[field]);
+        this.date.writeValue(data[field] as unknown as string);
       } else {
         const formControl = this.form.get(field);
         if (formControl) formControl.setValue(data[field]);
@@ -323,7 +340,7 @@ export class SignuprequiredPage {
 
   getFormValues(): SignupRequired {
     const firstName: string = this.form.get("firstName").value;
-    let dateOfBirth: string = this.form.get("dateOfBirth").value;
+    let dateOfBirth: Date = new Date(this.form.get("dateOfBirth").value);
 
     // temporary, to make sure date is null if the thingy hasn't been touched
     if (new Date("2020-01-01").toDateString() === new Date(dateOfBirth).toDateString()) {

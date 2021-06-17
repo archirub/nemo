@@ -179,17 +179,18 @@ export async function createFriendChatDocuments(
       const targetUserData = targetUserProfile.data() as profileFromDatabase;
       const matchedUserData = matchedUserProfile.data() as profileFromDatabase;
 
+      // PICTURE FIXING REQUIRED
       const uids = sortUIDs([targetUserProfile.id, matchedUserProfile?.id]);
       const userSnippets: userSnippet[] = [
         {
           uid: targetUserProfile.id,
           name: targetUserData.firstName,
-          picture: targetUserData.pictures[0] || "",
+          picture: "",
         },
         {
           uid: matchedUserProfile.id,
           name: matchedUserData.firstName,
-          picture: matchedUserData.pictures[0] || "",
+          picture: "",
         },
       ];
       const messages: [] = [];

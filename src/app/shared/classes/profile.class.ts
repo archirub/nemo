@@ -3,10 +3,10 @@ import {
   profilePicturePaths,
   SocialMediaLink,
   QuestionAndAnswer,
-  InterestAndPath,
   University,
   OnCampus,
   Degree,
+  Interests,
 } from "@interfaces/index";
 
 export class Profile implements profile {
@@ -18,7 +18,7 @@ export class Profile implements profile {
   private _university: University;
   private _course: string;
   private _society: string;
-  private _interests: InterestAndPath[];
+  private _interests: Interests[];
   private _questions: QuestionAndAnswer[];
   private _onCampus: OnCampus;
   private _degree: Degree;
@@ -33,7 +33,7 @@ export class Profile implements profile {
     university: University,
     course: string,
     society: string,
-    interests: InterestAndPath[],
+    interests: Interests[],
     questions: QuestionAndAnswer[],
     onCampus: OnCampus,
     degree: Degree,
@@ -110,10 +110,10 @@ export class Profile implements profile {
     this._society = value;
   }
 
-  public get interests(): InterestAndPath[] {
+  public get interests(): Interests[] {
     return this._interests;
   }
-  public set interests(value: InterestAndPath[]) {
+  public set interests(value: Interests[]) {
     this._interests = value;
   }
 

@@ -1,7 +1,7 @@
 import {
   createAccountRequest,
   genderOptions,
-  Interest,
+  Interests,
   mdDatingPickingFromDatabase,
   mdFromDatabase,
   piStorage,
@@ -12,6 +12,8 @@ import {
   searchCriteriaOptions,
   SexualPreference,
   sexualPreferenceOptions,
+  socialMedia,
+  socialMediaOptions,
   successResponse,
   swipeModeOptions,
   SwipeUserInfo,
@@ -29,8 +31,9 @@ type DataChecker = {
   };
 };
 
-export const createAccount = functions.region("europe-west2").https.onCall(
-  async (data: createAccountRequest, context): Promise<successResponse> => {
+export const createAccount = functions
+  .region("europe-west2")
+  .https.onCall(async (data: createAccountRequest, context): Promise<successResponse> => {
     const MAX_UID_COUNT_PI_STORAGE = 2000;
 
     const dataHolder: {
@@ -39,6 +42,7 @@ export const createAccount = functions.region("europe-west2").https.onCall(
       uid: null,
       firstName: null,
       dateOfBirth: null,
+      picturesCount: null,
       university: null,
       gender: null,
       sexualPreference: null,
@@ -52,6 +56,7 @@ export const createAccount = functions.region("europe-west2").https.onCall(
       interests: null,
       questions: null,
       onCampus: null,
+      socialMediaLinks: null,
     };
     // if allowedValues is null, then there are no default values,
     // if property can be null (i.e. is optional), then add "null" to array (if that doesn't work, add property canBeNull: boolean)
@@ -136,8 +141,7 @@ export const createAccount = functions.region("europe-west2").https.onCall(
       console.warn(`uid: ${data.uid}, ${e}`);
       return { successful: false };
     }
-  }
-);
+  });
 
 function checkData(
   checkedData: {
@@ -181,7 +185,7 @@ function checkData(
 function stringCheck(a: any, options: unknown): a is string {
   return typeof a === "string";
 }
-function interestsCheck(a: any, options: Interest[]): boolean {
+function interestsCheck(a: any, options: Interests[]): boolean {
   if (!Array.isArray(a)) return false;
 
   for (const el of a) {
@@ -217,6 +221,19 @@ function sexualPreferenceCheck(a: any, options: SexualPreference[]): boolean {
     }
   }
   if (!found) return false;
+  return true;
+}
+
+function socialMediaLinksCheck(a: any, options: socialMedia[]): boolean {
+  if (!Array.isArray(a)) return false;
+
+  for (const el of a) {
+    for (const key in el) {
+      if (!["socialMedia", "link"].includes(key)) return false;
+      if (typeof el[key] !== "string") return false;
+      if (key === "socialMedia" && !options.includes(el[key])) return false;
+    }
+  }
   return true;
 }
 
@@ -257,6 +274,12 @@ const dataChecker: DataChecker = {
   },
   dateOfBirth: {
     typeCheck: (a) => a instanceof admin.firestore.Timestamp,
+    allowedValues: null,
+    isRequired: true,
+    valueIsObject: false,
+  },
+  picturesCount: {
+    typeCheck: (a) => typeof a === "number",
     allowedValues: null,
     isRequired: true,
     valueIsObject: false,
@@ -329,7 +352,7 @@ const dataChecker: DataChecker = {
   },
   interests: {
     typeCheck: interestsCheck,
-    allowedValues: searchCriteriaOptions.interest,
+    allowedValues: searchCriteriaOptions.interests,
     isRequired: false,
     valueIsObject: true,
   },
@@ -344,6 +367,12 @@ const dataChecker: DataChecker = {
     allowedValues: searchCriteriaOptions.onCampus,
     isRequired: false,
     valueIsObject: false,
+  },
+  socialMediaLinks: {
+    typeCheck: socialMediaLinksCheck,
+    allowedValues: socialMediaOptions,
+    isRequired: false,
+    valueIsObject: true,
   },
 };
 
@@ -433,21 +462,16 @@ function addToProfile(
   const profile: profileFromDatabase = {
     firstName: data.firstName,
     dateOfBirth: admin.firestore.Timestamp.fromDate(data.dateOfBirth),
-    // pictures: [""],
-    // DEAL WITH PICTURES HERE, MUST BE DECODED AND SENT TO BUCKET,
-    // HERE STORE THE URL TO THE BUCKET, SO STORE THE PICTURES BEFORE YOU START
-    // TAKING CARE OF profile
-    // pictures: data.pictures,
+    picturesCount: data.picturesCount,
     biography: data.biography,
-    university: data.university === "UCL" ? data.university : "UCL",
+    university: data.university,
     degree: data.degree,
     course: data.course,
     society: data.society,
-    interest: data.interests,
+    interests: data.interests,
     questions: data.questions,
     onCampus: data.onCampus,
-    socialMediaLinks: [],
-    // socialMediaLinks: data.socialMediaLinks
+    socialMediaLinks: data.socialMediaLinks,
   };
   const ref = admin.firestore().collection("profile").doc(data.uid);
 
@@ -465,7 +489,7 @@ function addToPrivateProfile(
       areaOfStudy: null,
       degree: null,
       societyCategory: null,
-      interest: null,
+      interests: null,
       onCampus: null,
     },
   };
@@ -491,7 +515,8 @@ function addToMatchDataMain(
     reportedUsers: {},
     gender: data.gender,
     sexualPreference: data.sexualPreference,
-    swipeMode: data.swipeMode,
+    swipeMode: "dating",
+    // swipeMode: data.swipeMode,
     uidCount: 0,
   };
   const ref = admin.firestore().collection("matchData").doc(data.uid);
@@ -509,7 +534,7 @@ function addToMatchDataDating(
       areaOfStudy: data.areaOfStudy,
       degree: data.degree,
       societyCategory: data.societyCategory,
-      interest: data.interests,
+      interests: data.interests,
       onCampus: data.onCampus,
     },
     reportedUsers: {},
@@ -540,7 +565,8 @@ function addToPiStorage(
     sexualPreference: data.sexualPreference,
     degree: data.degree,
     showProfile: true,
-    swipeMode: data.swipeMode,
+    // swipeMode: data.swipeMode,
+    swipeMode: "dating",
   };
 
   if (!piStorageDocument.empty) {

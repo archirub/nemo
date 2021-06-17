@@ -6,13 +6,14 @@ import {
   Degree,
   Full,
   Gender,
-  Interest,
+  Interests,
   profilePicturePaths,
   QuestionAndAnswer,
   SexualPreference,
   SignupAuthenticated,
   SignupOptional,
   SignupRequired,
+  SocialMediaLink,
   SocietyCategory,
   SwipeMode,
   University,
@@ -23,21 +24,22 @@ export class SignupDataHolder implements signupDataHolder {
   uid: string;
   token: string;
   tokenExpirationDate: string;
-  firstName: string;
-  dateOfBirth: string;
-  gender: Gender;
-  sexualPreference: SexualPreference;
-  degree: Degree;
-  university: University;
-  pictures: CameraPhoto[];
-  biography: string;
-  course: string;
-  society: string;
-  areaOfStudy: AreaOfStudy;
-  onCampus: boolean;
-  societyCategory: SocietyCategory;
-  interests: Interest[];
-  questions: QuestionAndAnswer[];
+  firstName: string | null;
+  dateOfBirth: Date | null;
+  gender: Gender | null;
+  sexualPreference: SexualPreference | null;
+  degree: Degree | null;
+  university: University | null;
+  pictures: CameraPhoto[] | null;
+  biography: string | null;
+  course: string | null;
+  society: string | null;
+  areaOfStudy: AreaOfStudy | null;
+  onCampus: boolean | null;
+  societyCategory: SocietyCategory | null;
+  interests: Interests[] | null;
+  questions: QuestionAndAnswer[] | null;
+  socialMediaLinks: SocialMediaLink[] | null;
 
   constructor({
     email,
@@ -59,6 +61,7 @@ export class SignupDataHolder implements signupDataHolder {
     societyCategory = null,
     interests = null,
     questions = null,
+    socialMediaLinks = null,
   }) {
     this.email = email;
     this.uid = uid;
@@ -79,6 +82,7 @@ export class SignupDataHolder implements signupDataHolder {
     this.societyCategory = societyCategory;
     this.interests = interests;
     this.questions = questions;
+    this.socialMediaLinks = socialMediaLinks;
   }
 }
 
@@ -133,7 +137,7 @@ export class BaselineUser extends AuthenticatedUser implements SignupRequired {
     // this.swipeMode = myMap.swipeMode
   }
   private _firstName: string;
-  private _dateOfBirth: string;
+  private _dateOfBirth: Date;
   private _gender: Gender;
   private _sexualPreference: SexualPreference;
   private _pictures: CameraPhoto[];
@@ -148,10 +152,10 @@ export class BaselineUser extends AuthenticatedUser implements SignupRequired {
     this._firstName = value;
   }
 
-  public get dateOfBirth(): string {
+  public get dateOfBirth(): Date {
     return this._dateOfBirth;
   }
-  public set dateOfBirth(value: string) {
+  public set dateOfBirth(value: Date) {
     this._dateOfBirth = value;
   }
 
@@ -209,15 +213,17 @@ export class FullUser extends BaselineUser implements SignupOptional {
     this.interests = m.interests;
     this.questions = m.questions;
     this.onCampus = m.onCampus;
+    this.socialMediaLinks = m.socialMediaLinks;
   }
   private _biography: string;
   private _course: string;
   private _society: string;
   private _areaOfStudy: AreaOfStudy;
   private _societyCategory: SocietyCategory;
-  private _interests: Interest[];
+  private _interests: Interests[];
   private _questions: QuestionAndAnswer[];
   private _onCampus: boolean;
+  private _socialMediaLinks: SocialMediaLink[];
 
   public get biography(): string {
     return this._biography;
@@ -250,10 +256,10 @@ export class FullUser extends BaselineUser implements SignupOptional {
   public set societyCategory(value: SocietyCategory) {
     this._societyCategory = value;
   }
-  public get interests(): Interest[] {
+  public get interests(): Interests[] {
     return this._interests;
   }
-  public set interests(value: Interest[]) {
+  public set interests(value: Interests[]) {
     this._interests = value;
   }
   public get questions(): QuestionAndAnswer[] {
@@ -267,5 +273,12 @@ export class FullUser extends BaselineUser implements SignupOptional {
   }
   public set onCampus(value: boolean) {
     this._onCampus = value;
+  }
+
+  public get socialMediaLinks(): SocialMediaLink[] {
+    return this._socialMediaLinks;
+  }
+  public set socialMediaLinks(value: SocialMediaLink[]) {
+    this._socialMediaLinks = value;
   }
 }

@@ -16,9 +16,11 @@ import {
   questionsOptions,
   SignupOptional,
   AreaOfStudy,
-  Interest,
+  Interests,
   SocietyCategory,
   QuestionAndAnswer,
+  successResponse,
+  SocialMediaLink,
 } from "@interfaces/index";
 import { allowOptionalProp } from "@interfaces/shared.model";
 import { SignupService } from "@services/signup/signup.service";
@@ -31,7 +33,7 @@ import { SignupService } from "@services/signup/signup.service";
 export class SignupoptionalPage implements OnInit {
   @ViewChild("interestSlides", { read: ElementRef }) interestSlides: ElementRef;
   @ViewChild("slides") slides: IonSlides;
-  @ViewChildren("pagerDots", { read: ElementRef }) dots: QueryList<ElementRef>; 
+  @ViewChildren("pagerDots", { read: ElementRef }) dots: QueryList<ElementRef>;
 
   slidesLeft: number;
 
@@ -45,6 +47,10 @@ export class SignupoptionalPage implements OnInit {
     questions: new FormArray([]),
     biography: new FormControl(null),
     onCampus: new FormControl(null),
+    instagramLink: new FormGroup({
+      socialMedia: new FormControl("instagram"),
+      link: new FormControl(null),
+    }),
   });
 
   /**
@@ -68,7 +74,7 @@ export class SignupoptionalPage implements OnInit {
   // OPTIONS
   societyCategoryOptions = searchCriteriaOptions.societyCategory;
   areaOfStudyOptions = searchCriteriaOptions.areaOfStudy;
-  interestsOptions = searchCriteriaOptions.interest;
+  interestsOptions = searchCriteriaOptions.interests;
   questionsOptions = questionsOptions;
 
   selectedInterests: Array<string> = [];
@@ -83,6 +89,7 @@ export class SignupoptionalPage implements OnInit {
     questions: 3,
     biography: 4,
     onCampus: 5,
+    socialMediaLinks: 6,
   };
 
   constructor(
@@ -208,7 +215,7 @@ export class SignupoptionalPage implements OnInit {
 
   /**
    * From the current values of the fields, returns the index of the earliest
-   * slide that has invalid or missing information.
+   * slide that has invalid (ONLY, as opposed to required which also accounts for missing fields)
    *
    * CAREFUL: the slide indexes are based on the property "slideIndexes", which is fixed
    * and not dynamically updated by changes in the template. Changes in the order of the template
@@ -226,7 +233,7 @@ export class SignupoptionalPage implements OnInit {
       // **************************************************************************************
 
       // checks whether element exists / is non null & whether its value is valid
-      if (!(fieldValues[field] && this.form.get(field).valid)) {
+      if (!this.form.get(field).valid) {
         slideIndex = Math.min(slideIndex, this.slideIndexes[field]);
       }
     });
@@ -265,17 +272,20 @@ export class SignupoptionalPage implements OnInit {
   getFormValues(): SignupOptional {
     const course: string = this.form.get("course").value;
     const areaOfStudy: AreaOfStudy = this.form.get("areaOfStudy").value;
-    const interests: Interest[] = this.form.get("interests").value;
+    const interests: Interests[] = this.form.get("interests").value;
     const society: string = this.form.get("society").value;
     const societyCategory: SocietyCategory = this.form.get("societyCategory").value;
-    const questions: QuestionAndAnswer[] = (this.form.get("questions")
-      .value as Array<any>).map((qst) => {
+    const questions: QuestionAndAnswer[] = (
+      this.form.get("questions").value as Array<any>
+    ).map((qst) => {
       return { question: qst.q, answer: qst.a };
     });
     const biography: string = this.form.get("biography").value;
 
     // TEMPORARY AND WRONG (need to ask for geolocalisation and shit, should probably create a store for this shit)
     const onCampus: boolean = this.form.get("onCampus").value;
+
+    const socialMediaLinks: SocialMediaLink[] = [this.form.get("instagramLink").value];
 
     return {
       course,
@@ -286,6 +296,7 @@ export class SignupoptionalPage implements OnInit {
       questions,
       biography,
       onCampus,
+      socialMediaLinks,
     };
   }
 
@@ -302,20 +313,22 @@ export class SignupoptionalPage implements OnInit {
       await this.unlockAndSlideTo(invalidSlide);
     } else {
       await this.updateData(); // may not be necessary, but last check to make sure data we have in logic exactly reflects that in the UI
+      this.signup.createFirestoreAccount().subscribe(async (res: successResponse) => {
+        if (res.successful) {
+          console.log("THAT FCKIN WORKED");
+          await this.signup.removeLocalStorage();
+          await this.signup.initializeUser();
+          await this.router.navigateByUrl("/main/home");
+        } else {
+          console.error("Signup was unsuccessful. HANDLE");
+        }
+      });
       this.router.navigateByUrl("/welcome/signupoptional");
     }
   }
 }
 
 // next to do here:
-// - discuss with Ewan new way to display questions logic (maybe initial screen just shows an
-// "add question" button which once clicked, slides of the possible questions pop up, (same style as for interests) and once selected
-// the question slides disappear showing the "add question" button shifted down to leave space for the question selected and a field below
-// to enter the answer. New questions can be added by clicking the add question button and same procedure is followed. A cross is shown
-// for each question to delete it)
-// - format the "questions" right (use FormArray of FormGroups of two FormControls)
-// - maybe do the same thing for interests (use FormArray)
-// - make "fillFields" right
 // - change submit function so that:
 //       - either it redirects to an INVALID field (an empty field is fine as shit is optional here)
 //       -  either it: does a final save of the data to the observable, submits the data to the database to create the account
@@ -324,8 +337,20 @@ export class SignupoptionalPage implements OnInit {
 // - make all validators accurate for all data
 
 // not directly related but necessary:
+// - fix picture logic in register-swipe-stack: should we not store anything in userSnippets and just fetch
+// it from the app (since it's very straightforward), or store there a picture in base64 format? Keep in mind the
+// picture can be low quality since the image is displayed in very small. But fetching it from the database is not bad
+// since it will make sure it is completely up to date (no possible mismatch between the true pictures of the user and what is shown
+// in the small circle profile tingy).
 // - implement asking for geolocalisation and whole onCampus shit (other things might be worth doing before hand, that could come at a later stage)
 // - implement email verification logic (that means we create the account (and hence init local data signup storage will still being in auth
 // part, so we must have an additional field there that says whether email verification has been full filled, that way,
 // you are taken there if it hasn't yet)
 // - before anything is added to the observable, validate it (only add those that are okay by the validators, filter the rest out (for both required and optional))
+// - handle social media links (i.e. generally find how that works (do you just need a url?), how to ask for it in the signup process,
+// how it is displayed, and what should be stored in the database)
+
+// next to do immediatly
+// - upload account creation cloud function to firebase
+// - update all "interests" properties to "interests"
+// - test creating a new account

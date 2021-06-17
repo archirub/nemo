@@ -1,7 +1,7 @@
 import {
   AreaOfStudy,
   SocietyCategory,
-  Interest,
+  Interests,
   searchCriteria,
   searchCriteriaOptions,
   University,
@@ -14,7 +14,7 @@ export class SearchCriteria implements searchCriteria {
   _areaOfStudy: AreaOfStudy;
   _degree: Degree;
   _societyCategory: SocietyCategory;
-  _interest: Interest;
+  _interest: Interests;
   _onCampus: OnCampus;
 
   options = searchCriteriaOptions;
@@ -24,14 +24,14 @@ export class SearchCriteria implements searchCriteria {
     areaOfStudy: AreaOfStudy,
     degree: Degree,
     societyCategory: SocietyCategory,
-    interest: Interest,
+    interests: Interests,
     onCampus: OnCampus
   ) {
     this.university = university;
     this.areaOfStudy = areaOfStudy;
     this.degree = degree;
     this.societyCategory = societyCategory;
-    this.interest = interest;
+    this.interests = interests;
     this.onCampus = onCampus;
   }
 
@@ -73,12 +73,12 @@ export class SearchCriteria implements searchCriteria {
     return this._societyCategory;
   }
 
-  public set interest(v: Interest) {
-    if (this.options.interest.includes(v)) {
+  public set interests(v: Interests) {
+    if (this.options.interests.includes(v)) {
       this._interest = v;
     }
   }
-  public get interest(): Interest {
+  public get interests(): Interests {
     return this._interest;
   }
 

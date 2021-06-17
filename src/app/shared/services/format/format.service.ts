@@ -35,7 +35,7 @@ export class FormatService {
     const areaOfStudy = searchCriteria.areaOfStudy;
     const degree = searchCriteria.degree;
     const societyCategory = searchCriteria.societyCategory;
-    const interest = searchCriteria.interest;
+    const interests = searchCriteria.interests;
     const onCampus = searchCriteria.onCampus;
 
     return new SearchCriteria(
@@ -43,7 +43,7 @@ export class FormatService {
       areaOfStudy,
       degree,
       societyCategory,
-      interest,
+      interests,
       onCampus
     );
   }
@@ -54,7 +54,7 @@ export class FormatService {
     const areaOfStudy = searchCriteria.areaOfStudy;
     const degree = searchCriteria.degree;
     const societyCategory = searchCriteria.societyCategory;
-    const interest = searchCriteria.interest;
+    const interests = searchCriteria.interests;
     const onCampus = searchCriteria.onCampus;
 
     return {
@@ -62,7 +62,7 @@ export class FormatService {
       areaOfStudy,
       degree,
       societyCategory,
-      interest,
+      interests,
       onCampus,
     };
   }
@@ -76,7 +76,7 @@ export class FormatService {
     const university = profileData.university;
     const course = profileData.course;
     const society = profileData.society;
-    const interests = profileData.interest;
+    const interests = profileData.interests;
     const questions = profileData.questions;
     const onCampus = profileData.onCampus;
     const degree = profileData.degree;

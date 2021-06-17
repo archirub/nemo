@@ -30,7 +30,7 @@ export const searchCriteriaOptions = {
     "Science and Technology" as const,
     "Sports" as const,
   ],
-  interest: [
+  interests: [
     "Herb Friendly" as const,
     "Book Worm" as const,
     "Life Saver" as const,
@@ -64,29 +64,33 @@ export type searchCriteria = {
   [k in keyof typeof searchCriteriaOptions]: typeof searchCriteriaOptions[k][number];
 };
 
+export function interestToPath(interest: Interests): string {
+  return "/assets/interests/" + interest.toLowerCase().replace(/\s/g, "") + ".png";
+}
+
 // Important for backend
 export const searchCriteriaNames: (keyof searchCriteria)[] = [
   "university",
   "areaOfStudy",
   "degree",
   "societyCategory",
-  "interest",
+  "interests",
   "onCampus",
 ];
 
-// same as searchCriteria but some SC can be multiple i.e. for interest where
-// we have an array of interest
-export type SearchFeatures = Omit<searchCriteria, "interest"> & {
-  interest: typeof searchCriteriaOptions["interest"][number][];
+// same as searchCriteria but some SC can be multiple i.e. for interests where
+// we have an array of interests
+export type SearchFeatures = Omit<searchCriteria, "interests"> & {
+  interests: typeof searchCriteriaOptions["interests"][number][];
 };
 
 export type University = typeof searchCriteriaOptions.university[number];
 export type AreaOfStudy = typeof searchCriteriaOptions.areaOfStudy[number]; //MOCK DATA
 export type Degree = typeof searchCriteriaOptions.degree[number];
 export type SocietyCategory = typeof searchCriteriaOptions.societyCategory[number];
-export type Interest = typeof searchCriteriaOptions.interest[number];
-export type Path = typeof assetsInterestsPath[number];
-export type InterestAndPath = { name: Interest; path: Path };
+export type Interests = typeof searchCriteriaOptions.interests[number];
+// export type InterestPath = typeof assetsInterestsPath[number];
+// export type InterestAndPath = { name: Interests; path: InterestPath };
 export type OnCampus = typeof searchCriteriaOptions.onCampus[number];
 
 export type Criterion = keyof typeof searchCriteriaOptions;

@@ -45,4 +45,4 @@ export interface updateGenderSexPrefRequest {
 }
 
 export type createAccountRequest = Omit<SignupRequired, "pictures"> &
-  SignupOptional & { uid: string };
+  SignupOptional & { uid: string; picturesCount: number };

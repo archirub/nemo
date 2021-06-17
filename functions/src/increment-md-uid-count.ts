@@ -8,8 +8,11 @@ import { mdFromDatabase } from "../../src/app/shared/interfaces/index";
  * ( "reportedUsers", "dislikedUsers","fdislikedUsers","fmatchedUsers","matchedUsers"),
  * and sets the property "uidCount" of that document to that value.
  */
-export const updateUidCountMatchData = functions.firestore
-  .document("matchData/{uid}")
+
+// export
+const updateUidCountMatchData = functions
+  .region("europe-west2")
+  .firestore.document("matchData/{uid}")
   .onUpdate(async (change, context) => {
     const uid = context.params.uid;
     const v = change.after.data() as mdFromDatabase;

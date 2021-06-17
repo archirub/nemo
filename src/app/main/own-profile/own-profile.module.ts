@@ -14,7 +14,7 @@ import { PipesModule } from "../../shared/pipes/pipes.module";
 import { ProfileAnswerComponent } from "./profile-answer/profile-answer.component";
 import { ProfileCourseComponent } from "./profile-course/profile-course.component";
 import { InterestSlidesComponent } from "@components/index";
-import { InterestSlidesModule } from "@components/interest-slides/interest-slides.component.module";
+import { InterestSlidesModule } from "@components/interests-slides/interests-slides.component.module";
 
 @NgModule({
   imports: [
@@ -25,12 +25,8 @@ import { InterestSlidesModule } from "@components/interest-slides/interest-slide
     ProfileCardModule,
     AddPhotoModule,
     AppToggleModule,
-    InterestSlidesModule
+    InterestSlidesModule,
   ],
-  declarations: [
-    OwnProfilePage,
-    ProfileAnswerComponent,
-    ProfileCourseComponent,
-  ],
+  declarations: [OwnProfilePage, ProfileAnswerComponent, ProfileCourseComponent],
 })
 export class OwnProfilePageModule {}

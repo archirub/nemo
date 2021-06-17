@@ -3,7 +3,7 @@
 // export type IDarray = string[];
 
 export type allowOptionalProp<T> = {
-  [P in keyof T]?: T[P];
+  [P in keyof T]?: T[P] | null;
 };
 
 // fucking around down there

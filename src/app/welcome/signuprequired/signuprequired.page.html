@@ -18,7 +18,7 @@
 </div>
 
 <ion-content>
-  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+  <form [formGroup]="form">
     <ion-slides #slides (ionSlideDidChange)="updateData()">
       <ion-slide>
         <!--ion-item lines="none"-->
@@ -43,7 +43,7 @@
               <ion-icon name="chevron-forward-outline"></ion-icon>
             </ion-button>
           </div>
-        <!--/ion-item-->
+          <!--/ion-item-->
         </div>
       </ion-slide>
 
@@ -80,11 +80,14 @@
               <ion-icon name="chevron-back-outline"></ion-icon>
             </ion-button>
 
-            <ion-button class="next-slide scroll" (click)="validateAndSlide('dateOfBirth')">
+            <ion-button
+              class="next-slide scroll"
+              (click)="validateAndSlide('dateOfBirth')"
+            >
               <ion-icon name="chevron-forward-outline"></ion-icon>
             </ion-button>
           </div>
-        <!--/ion-item-->
+          <!--/ion-item-->
         </div>
       </ion-slide>
 
@@ -132,7 +135,7 @@
               <ion-icon name="chevron-forward-outline"></ion-icon>
             </ion-button>
           </div>
-        <!--/ion-item-->
+          <!--/ion-item-->
         </div>
       </ion-slide>
 
@@ -168,7 +171,7 @@
 
             <div id="sexCheck">
               <ion-icon name="alert-circle-outline"></ion-icon>
-              <p>Please select your interest</p>
+              <p>Please select your interests</p>
             </div>
 
             <div class="preferences">
@@ -195,7 +198,10 @@
               <ion-icon name="chevron-back-outline"></ion-icon>
             </ion-button>
 
-            <ion-button class="next-slide scroll" (click)="validateAndSlide(['sexualPreference','gender'])">
+            <ion-button
+              class="next-slide scroll"
+              (click)="validateAndSlide(['sexualPreference','gender'])"
+            >
               <ion-icon name="chevron-forward-outline"></ion-icon>
             </ion-button>
           </div>
@@ -255,8 +261,11 @@
               <ion-button class="next-slide scroll" (click)="unlockAndSlideToPrev()">
                 <ion-icon name="chevron-back-outline"></ion-icon>
               </ion-button>
-  
-              <ion-button class="next-slide scroll" (click)="validateAndSlide(['university','degree'])">
+
+              <ion-button
+                class="next-slide scroll"
+                (click)="validateAndSlide(['university','degree'])"
+              >
                 <ion-icon name="chevron-forward-outline"></ion-icon>
               </ion-button>
             </div>

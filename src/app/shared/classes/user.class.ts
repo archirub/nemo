@@ -4,12 +4,12 @@ import {
   profilePicturePaths,
   SocialMediaLink,
   QuestionAndAnswer,
-  InterestAndPath,
   University,
   OnCampus,
   user,
   Settings,
   Degree,
+  Interests,
 } from "@interfaces/index";
 import { SearchCriteria } from "./search-criteria.class";
 
@@ -31,7 +31,7 @@ export class User extends Profile implements user {
     university: University,
     course: string,
     society: string,
-    interests: InterestAndPath[],
+    interests: Interests[],
     questions: QuestionAndAnswer[],
     onCampus: OnCampus,
     degree: Degree,

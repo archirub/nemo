@@ -24,6 +24,7 @@
     "target": "es2017",
     "strictPropertyInitialization": false,
     "noImplicitThis": false,
+    "noImplicitAny": false,
     "resolveJsonModule": true
   },
   "compileOnSave": true,

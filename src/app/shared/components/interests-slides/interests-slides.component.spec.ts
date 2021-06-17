@@ -1,16 +1,16 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { IonicModule } from '@ionic/angular';
+import { async, ComponentFixture, TestBed } from "@angular/core/testing";
+import { IonicModule } from "@ionic/angular";
 
-import { InterestSlidesComponent } from './interest-slides.component';
+import { InterestSlidesComponent } from "./interests-slides.component";
 
-describe('InterestSlidesComponent', () => {
+describe("InterestSlidesComponent", () => {
   let component: InterestSlidesComponent;
   let fixture: ComponentFixture<InterestSlidesComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ InterestSlidesComponent ],
-      imports: [IonicModule.forRoot()]
+      declarations: [InterestSlidesComponent],
+      imports: [IonicModule.forRoot()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(InterestSlidesComponent);
@@ -18,7 +18,7 @@ describe('InterestSlidesComponent', () => {
     fixture.detectChanges();
   }));
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

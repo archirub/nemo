@@ -9,7 +9,7 @@ import {
   ChangeDetectionStrategy,
 } from "@angular/core";
 import { CameraPhoto, Plugins } from "@capacitor/core";
-const { CameraResultType, CameraSource, Capacitor } = Plugins;
+const { CameraResultType, CameraSource, Capacitor, Photos } = Plugins;
 
 @Component({
   selector: "add-photo",
@@ -26,7 +26,7 @@ export class AddPhotoComponent {
 
   @Input() photoIndex: number;
   @Input() set photoDisplayed(value: CameraPhoto) {
-    console.log("YOYO", value, this.view, this.icon, /*this.text*/);
+    console.log("YOYO", value, this.view, this.icon /*this.text*/);
 
     if (!this.view || !this.icon /*|| !this.text*/) return;
     const view = this.view.nativeElement;

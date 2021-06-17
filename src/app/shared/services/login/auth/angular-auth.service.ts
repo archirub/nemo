@@ -236,41 +236,41 @@ export class AngularAuthService {
    * and stores its pictures in Firebase storage
    * @param data object containing all of the data from all parts of the signup process
    */
-  createFullUser(data: Full): Observable<successResponse> {
-    const creationRequestData: createAccountRequest = {
-      uid: data.uid,
-      firstName: data.firstName,
-      sexualPreference: data.sexualPreference,
-      gender: data.gender,
-      dateOfBirth: data.dateOfBirth,
-      university: data.university,
-      degree: data.degree,
-      biography: data.biography,
-      course: data.course,
-      society: data.society,
-      areaOfStudy: data.areaOfStudy,
-      onCampus: data.onCampus,
-      societyCategory: data.societyCategory,
-      interests: data.interests,
-      questions: data.questions,
-    };
-    return this.afFunctions
-      .httpsCallable("createAccount")(creationRequestData)
-      .pipe(
-        // error handling:
-        //   - if the error is due to misformat in data, then don't retry (with same data at least,
-        //    inform the user that there is a problem with regards to that, and which fields are a problem)
-        //   - if the error is due to connection error or something of the sort, retry
-        //   - if the error is due to an error inside of the cloud function, then retry maybe
-        // (basically retry only if the error is due to connection error. )
-        // easiest option is to just retry a bunch of times regardless of the case, and if it doesn't work
-        // just display an error message
-        take(1),
-        // IMAGE FORMAT "JPG" IS FOR DEVELOPMENT, it should be changed to a variable like data.pictureFormat
-        // (flatMap is the Observable equivalent of then, and from converts a promise to an observable)
-        tap(() => from(this.storePictures(data.pictures, data.uid)))
-      );
-  }
+  // createFullUser(data: Full): Observable<successResponse> {
+  //   const creationRequestData: createAccountRequest = {
+  //     uid: data.uid,
+  //     firstName: data.firstName,
+  //     sexualPreference: data.sexualPreference,
+  //     gender: data.gender,
+  //     dateOfBirth: data.dateOfBirth,
+  //     university: data.university,
+  //     degree: data.degree,
+  //     biography: data.biography,
+  //     course: data.course,
+  //     society: data.society,
+  //     areaOfStudy: data.areaOfStudy,
+  //     onCampus: data.onCampus,
+  //     societyCategory: data.societyCategory,
+  //     interests: data.interests,
+  //     questions: data.questions,
+  //   };
+  //   return this.afFunctions
+  //     .httpsCallable("createAccount")(creationRequestData)
+  //     .pipe(
+  //       // error handling:
+  //       //   - if the error is due to misformat in data, then don't retry (with same data at least,
+  //       //    inform the user that there is a problem with regards to that, and which fields are a problem)
+  //       //   - if the error is due to connection error or something of the sort, retry
+  //       //   - if the error is due to an error inside of the cloud function, then retry maybe
+  //       // (basically retry only if the error is due to connection error. )
+  //       // easiest option is to just retry a bunch of times regardless of the case, and if it doesn't work
+  //       // just display an error message
+  //       take(1),
+  //       // IMAGE FORMAT "JPG" IS FOR DEVELOPMENT, it should be changed to a variable like data.pictureFormat
+  //       // (flatMap is the Observable equivalent of then, and from converts a promise to an observable)
+  //       tap(() => from(this.storePictures(data.pictures, data.uid)))
+  //     );
+  // }
 
   private async storePictures(pictures: CameraPhoto[], uid: string) {
     if (!uid) return;

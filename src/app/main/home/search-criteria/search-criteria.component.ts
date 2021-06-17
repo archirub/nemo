@@ -45,7 +45,7 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
     degree: new FormControl(null),
     areaOfStudy: new FormControl(null),
     societyCategory: new FormControl(null),
-    interest: new FormControl(null),
+    interests: new FormControl(null),
   });
 
   constructor(private SCstore: SearchCriteriaStore, private modalCtrl: ModalController) {}
@@ -58,7 +58,7 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
           degree: sc.degree,
           areaOfStudy: sc.areaOfStudy,
           societyCategory: sc.societyCategory,
-          interest: sc.interest,
+          interests: sc.interests,
         });
       },
     });
@@ -125,7 +125,7 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
     }
 
     if (this.scOptions.areaOfStudy.includes(this.searchCriteriaForm.value.areaOfStudy)) {
-      this.selectReplace(this.searchCriteriaForm.value.areaOfStudy, "aos");
+      this.selectReplace(this.searchCriteriaForm.value.areaOfStudy, "areaOfStudy");
     }
 
     if (
@@ -136,7 +136,7 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
       this.selectReplace(this.searchCriteriaForm.value.societySelection, "society");
     }
 
-    if (this.scOptions.interest.includes(this.searchCriteriaForm.value.interests)) {
+    if (this.scOptions.interests.includes(this.searchCriteriaForm.value.interests)) {
       this.selectReplace(this.searchCriteriaForm.value.interests, "interests");
     }
 
@@ -205,7 +205,7 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
 
   selectReplace(option, label) {
     // Have to manually set here, cannot be done in for loop below
-    if (label === "aos") {
+    if (label === "areaOfStudy") {
       if (this.studySelection === option) {
         this.studySelection = undefined;
         this.resetFormat(label);
@@ -249,7 +249,7 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
     this.searchCriteriaForm.value.interests = undefined;
 
     //Reset formatting of placeholders
-    var names = ["aos", "society", "interests"];
+    var names = ["areaOfStudy", "society", "interests"];
     for (let i = 0; i < names.length; i++) {
       this.resetFormat(names[i]);
     }
@@ -261,9 +261,9 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
   }
 
   resetFormat(section) {
-    var names = ["aos", "society", "interests"];
+    var names = ["areaOfStudy", "society", "interests"];
     var sections = [
-      document.getElementById("aos"),
+      document.getElementById("areaOfStudy"),
       document.getElementById("society"),
       document.getElementById("interests"),
     ];
@@ -280,9 +280,9 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
   }
 
   newFormat(section) {
-    var names = ["aos", "society", "interests"];
+    var names = ["areaOfStudy", "society", "interests"];
     var sections = [
-      document.getElementById("aos"),
+      document.getElementById("areaOfStudy"),
       document.getElementById("society"),
       document.getElementById("interests"),
     ];

@@ -13,4 +13,5 @@ export * from "./get-match-data-user-info.function";
 export * from "./register-swipe-stack/main";
 export * from "./update-PI-system/main";
 export * from "./update-duplicate-data/index";
-export * from "./increment-md-uid-count";
+// export * from "./increment-md-uid-count";
+export * from "./account-creation";

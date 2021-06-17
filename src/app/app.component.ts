@@ -2,14 +2,13 @@ import { Component, OnInit, OnDestroy } from "@angular/core";
 
 import { Platform } from "@ionic/angular";
 
-import { Plugins } from "@capacitor/core";
+import { Plugins, Capacitor } from "@capacitor/core";
 import { ChatStore, CurrentUserStore, SwipeStackStore } from "@stores/index";
 import { AuthService } from "@services/index";
 import { AngularAuthService } from "@services/login/auth/angular-auth.service";
 import { Router } from "@angular/router";
 import { Subscription } from "rxjs";
 import { take } from "rxjs/operators";
-import { Capacitor } from "@capacitor/core";
 import { SignupService } from "@services/signup/signup.service";
 
 @Component({

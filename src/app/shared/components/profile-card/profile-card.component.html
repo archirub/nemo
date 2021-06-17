@@ -1,57 +1,76 @@
 <div #fullCard id="swipe-card">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <div #shadow class="img-shadow"></div>
-    <div class="img-container">
-        <div class="pager">
-            <ion-icon #bullets name="ellipse" *ngFor="let path of this.picturePaths"></ion-icon>
-        </div>
-        <ion-slides #picSlides (ionSlideDidChange)="updatePager()" (ionSlideWillChange)="checkSlide()">
-            <ion-slide #pic *ngFor="let path of this.picturePaths" [ngStyle]="{
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <div #shadow class="img-shadow"></div>
+  <div class="img-container">
+    <div class="pager">
+      <ion-icon #bullets name="ellipse" *ngFor="let path of this.picturePaths"></ion-icon>
+    </div>
+    <ion-slides
+      #picSlides
+      (ionSlideDidChange)="updatePager()"
+      (ionSlideWillChange)="checkSlide()"
+    >
+      <ion-slide
+        #pic
+        *ngFor="let path of this.picturePaths"
+        [ngStyle]="{
           'background-image': 'url(' + path + ')',
           'background-size': 'cover'
-        }">
-                <div class="yesSwipe" (click)="this.tapped.emit('yes')"></div>
-                <div class="noSwipe" (click)="this.tapped.emit('no')"></div>
-            </ion-slide>
-        </ion-slides>
-        <div #QandA class="question" [hidden]="moreInfo">
-            <ion-card-title #question>{{ profile.questions[0].question }}</ion-card-title>
-            <ion-card-subtitle #answer>{{ profile.questions[0].answer }}</ion-card-subtitle>
-        </div>
+        }"
+      >
+        <div class="yesSwipe" (click)="this.tapped.emit('yes')"></div>
+        <div class="noSwipe" (click)="this.tapped.emit('no')"></div>
+      </ion-slide>
+    </ion-slides>
+    <div #QandA class="question" [hidden]="moreInfo">
+      <ion-card-title #question>{{ profile.questions[0].question }}</ion-card-title>
+      <ion-card-subtitle #answer>{{ profile.questions[0].answer }}</ion-card-subtitle>
     </div>
-    <!-- <div id="QandA">
+  </div>
+  <!-- <div id="QandA">
     <ion-chip color="tertiary"><ion-label id="answers">Loop?: "Never! lol i hate it"</ion-label></ion-chip>
   </div> -->
-    <!-- <div id="photo-shadow"></div> -->
-    <div id="info" button>
-        <div #snippet id="snippetInfo" [hidden]="moreInfo" (click)="expandProfile($event)">
-            <ion-card-header class="name-age">
-                <ion-card-title #name>{{profile.firstName}}, {{profile.dateOfBirth|age}}</ion-card-title>
-                <ion-card-subtitle #department id="department">{{profile.course}}, {{profile.shortDegree()}}</ion-card-subtitle>
-            </ion-card-header>
+  <!-- <div id="photo-shadow"></div> -->
+  <div id="info" button>
+    <div #snippet id="snippetInfo" [hidden]="moreInfo" (click)="expandProfile($event)">
+      <ion-card-header class="name-age">
+        <ion-card-title #name
+          >{{ profile.firstName }}, {{ profile.dateOfBirth | age }}</ion-card-title
+        >
+        <ion-card-subtitle #department id="department"
+          >{{ profile.course }}, {{ profile.shortDegree() }}</ion-card-subtitle
+        >
+      </ion-card-header>
+    </div>
+    <div #complete id="completeInfo" [hidden]="!moreInfo">
+      <ion-card-header #header class="name-age sticky" (click)="expandProfile($event)">
+        <ion-card-title
+          >{{ profile.firstName }}, {{ profile.dateOfBirth | age }}
+        </ion-card-title>
+        <ion-card-subtitle id="department"
+          >{{ profile.course }}, {{ profile.shortDegree() }}</ion-card-subtitle
+        >
+      </ion-card-header>
+      <div #content id="content">
+        <div #yes class="yesSwipeInfo" (click)="this.tapped.emit('yes')"></div>
+        <div #no class="noSwipeInfo" (click)="this.tapped.emit('no')"></div>
+        <div id="info-segment">
+          <!--INTERESTS IN THE DATABASE DON'T CURRENTLY MATCH LOCAL, THIS IS NOT WIRED UP FOR ICONS -->
+          <div id="interests-container">
+            <div id="interests-box" *ngFor="let interests of profile.interests">
+              <img
+                id="interests-icon"
+                src="/assets/interests/pubcrawler.png"
+                alt="icon"
+              />
+              <br />
+              <ion-label id="interests-label">{{ interests }}</ion-label>
+              <!-- would be {{interests.name}} -->
+            </div>
+          </div>
         </div>
-        <div #complete id="completeInfo" [hidden]="!moreInfo">
-            <ion-card-header #header class="name-age sticky" (click)="expandProfile($event)">
-                <ion-card-title>{{profile.firstName}}, {{profile.dateOfBirth|age}} </ion-card-title>
-                <ion-card-subtitle id="department">{{profile.course}}, {{profile.shortDegree()}}</ion-card-subtitle>
-            </ion-card-header>
-            <div #content id="content">
-                <div #yes class="yesSwipeInfo" (click)="this.tapped.emit('yes')"></div>
-                <div #no class="noSwipeInfo" (click)="this.tapped.emit('no')"></div>
-                <div id="info-segment">
 
-                    <!--INTERESTS IN THE DATABASE DON'T CURRENTLY MATCH LOCAL, THIS IS NOT WIRED UP FOR ICONS -->
-                    <div id="interests-container">
-                        <div id="interests-box" *ngFor="let interest of profile.interests">
-                            <img id="interest-icon" src="/assets/interests/pubcrawler.png" alt="icon" />
-                            <br>
-                            <ion-label id="interest-label">{{interest}}</ion-label>
-                            <!-- would be {{interest.name}} -->
-                        </div>
-                    </div>
-                </div>
-
-                <!--div id="info-grid">
+        <!--div id="info-grid">
           <div id="info-box">
             <ion-label id="trait-field">Graduates:</ion-label>
             <br>
@@ -72,48 +91,59 @@
         </div>
         </div-->
 
-                <div id="info-segment">
-                    <div id="bio">
-                        "{{ profile.biography }}" <br /><br />
-                        <span *ngFor="let sm of profile.socialMediaLinks">
+        <div id="info-segment">
+          <div id="bio">
+            "{{ profile.biography }}" <br /><br />
+            <span *ngFor="let sm of profile.socialMediaLinks">
               <!-- dont delete this line, it is a safegaurd for missing links -->
               <!-- <div *ngIf="sm.link">{{sm.socialMedia | titlecase}}: {{sm.link}}<br/></div> -->
               <div *ngIf="sm.link">
                 {{ sm.socialMedia | titlecase }}: {{ sm.link }}<br />
               </div>
             </span>
-                    </div>
-                </div>
-
-                <div id="info-segment">
-                    <div id="interests-container">
-                        <div id="interests-box">
-                            <ion-icon name="location" id="bottom-icon" style="color: var(--ion-color-primary)"></ion-icon>
-                            <br />
-                            <ion-label id="interest-label">Moscow</ion-label>
-                        </div>
-
-                        <div id="interests-box">
-                            <ion-icon name="people" id="bottom-icon" style="color: var(--ion-color-primary)"></ion-icon>
-                            <br />
-                            <ion-label id="interest-label">{{ profile.society }}</ion-label>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="info-segment" *ngIf="reportable">
-                    <div id="interests-container">
-                        <div id="interests-box">
-                            <ion-icon name="shield" id="bottom-icon" style="color: var(--ion-color-danger)"></ion-icon>
-                            <br />
-                            <ion-label id="interest-label">Report this user</ion-label>
-                        </div>
-                    </div>
-                </div>
-
-
-                <!--div id="bio-bubble"></div-->
-            </div>
+          </div>
         </div>
+
+        <div id="info-segment">
+          <div id="interests-container">
+            <div id="interests-box">
+              <ion-icon
+                name="location"
+                id="bottom-icon"
+                style="color: var(--ion-color-primary)"
+              ></ion-icon>
+              <br />
+              <ion-label id="interests-label">Moscow</ion-label>
+            </div>
+
+            <div id="interests-box">
+              <ion-icon
+                name="people"
+                id="bottom-icon"
+                style="color: var(--ion-color-primary)"
+              ></ion-icon>
+              <br />
+              <ion-label id="interests-label">{{ profile.society }}</ion-label>
+            </div>
+          </div>
+        </div>
+
+        <div id="info-segment" *ngIf="reportable">
+          <div id="interests-container">
+            <div id="interests-box">
+              <ion-icon
+                name="shield"
+                id="bottom-icon"
+                style="color: var(--ion-color-danger)"
+              ></ion-icon>
+              <br />
+              <ion-label id="interests-label">Report this user</ion-label>
+            </div>
+          </div>
+        </div>
+
+        <!--div id="bio-bubble"></div-->
+      </div>
     </div>
+  </div>
 </div>

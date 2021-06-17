@@ -1,15 +1,16 @@
 import {
-  InterestAndPath,
   SocietyCategory,
   University,
   searchCriteria,
   OnCampus,
   Degree,
+  Interests,
 } from "./search-criteria.model";
 
 // FOR CLOUD FUNCTION DEPLOYMENT, otherwise it doesn't recognize the type declaration below
 import * as firebase from "firebase";
 import { CameraPhoto } from "@capacitor/core";
+import { allowOptionalProp } from "./shared.model";
 
 export interface profile {
   uid: string;
@@ -21,15 +22,13 @@ export interface profile {
   degree: Degree;
   course: string;
   society: string;
-  interests: InterestAndPath[];
+  interests: Interests[];
   questions: QuestionAndAnswer[];
   onCampus: OnCampus;
   socialMediaLinks: SocialMediaLink[];
 }
 
 export interface user extends profile {
-  // firstName: string;
-  // lastName: string;
   settings: Settings;
   latestSearchCriteria: searchCriteria;
 }
@@ -37,30 +36,24 @@ export interface user extends profile {
 export interface profileFromDatabase {
   firstName: string;
   dateOfBirth: firebase.firestore.Timestamp;
-  pictures: profilePicturePaths;
+  picturesCount: number;
   biography: string;
 
   university: University;
   degree: Degree;
-  // areaOfStudy: AreaOfStudy;
   course: string;
-  society: string; // SOCIETIES???
+  society: string;
 
-  // societyCategory: SocietyCategory;
-  interest: InterestAndPath[]; // This needs to be changed in the database
+  interests: Interests[]; // This needs to be changed in the database
   questions: QuestionAndAnswer[];
   onCampus: OnCampus;
 
   socialMediaLinks: SocialMediaLink[];
-
-  // hasMatchDocument: boolean; // TEMPORARY Helps in match-generator to find profiles with no match document
 }
 
 export interface privateProfileFromDatabase {
-  // firstName: string;
-  // lastName: string;
   settings: Settings;
-  latestSearchCriteria: searchCriteria;
+  latestSearchCriteria: allowOptionalProp<searchCriteria>;
 }
 
 // TO DEFINE BUT SHOWPROFILE MUST BE IN THERE
@@ -98,7 +91,7 @@ export const questionsOptions = [
 export type Question = typeof questionsOptions[number];
 export type QuestionAndAnswer = { question: Question; answer: string };
 
-const socialMediaOptions = ["facebook", "instagram"] as const;
+export const socialMediaOptions = ["facebook" as const, "instagram" as const];
 export type socialMedia = typeof socialMediaOptions[number];
 export type SocialMediaLink = { socialMedia: socialMedia; link: string };
 
@@ -126,4 +119,5 @@ export interface profileObject {
   profileSnapshot: profileSnapshot;
 }
 
-export type profileSnapshot = firebase.firestore.QueryDocumentSnapshot<firebase.firestore.DocumentData>;
+export type profileSnapshot =
+  firebase.firestore.QueryDocumentSnapshot<firebase.firestore.DocumentData>;

@@ -1,24 +1,19 @@
 import { Component, Input, AfterViewInit, Output, EventEmitter } from "@angular/core";
 
-import {
-  InterestAndPath,
-  assetsInterestsPath,
-  Interest,
-  searchCriteriaOptions,
-} from "@interfaces/index";
+import { assetsInterestsPath, Interests, searchCriteriaOptions } from "@interfaces/index";
 
 @Component({
-  selector: "interest-slides",
-  templateUrl: "./interest-slides.component.html",
-  styleUrls: ["./interest-slides.component.scss"],
+  selector: "interests-slides",
+  templateUrl: "./interests-slides.component.html",
+  styleUrls: ["./interests-slides.component.scss"],
 })
 export class InterestSlidesComponent implements AfterViewInit {
   @Input() listed: boolean = true; //Option to hide the listed interests, automatically shown (false = hidden)
-  @Input() interests: Interest[];
-  @Output() interestsChange = new EventEmitter<Interest[]>();
+  @Input() interests: Interests[];
+  @Output() interestsChange = new EventEmitter<Interests[]>();
 
   pictures = assetsInterestsPath;
-  names = searchCriteriaOptions.interest;
+  names = searchCriteriaOptions.interests;
   slideOpts;
   slideWidth: number;
 
@@ -26,7 +21,7 @@ export class InterestSlidesComponent implements AfterViewInit {
 
   ngAfterViewInit() {
     //this.pictures = assetsInterestsPath;
-    //this.names = searchCriteriaOptions.interest;
+    //this.names = searchCriteriaOptions.interests;
 
     this.slideOpts = {
       coverflowEffect: {

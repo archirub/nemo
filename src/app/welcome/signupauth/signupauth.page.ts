@@ -54,29 +54,30 @@ export class SignupauthPage implements OnInit {
     };
   }
 
+  /**
+   * Checks whether the field on the current slide has valid value, allows continuing if true, input
+   * entry (string): the field of the form to check validator for, e.g. email, password
+   * If on the final validator, password, submits form instead of sliding to next slide
+   * THIS SHOULD BE USED ON THE NEXT SLIDE BUTTONS
+   **/
   validateAndSlide(entry) {
-    /** 
-     * Checks whether the field on the current slide has valid value, allows continuing if true, input
-     * entry (string): the field of the form to check validator for, e.g. email, password
-     * If on the final validator, password, submits form instead of sliding to next slide
-     * THIS SHOULD BE USED ON THE NEXT SLIDE BUTTONS
-    **/
-
     var validity = this.authForm.get(entry).valid; // Check validator
 
     if (validity === true) {
-      Object.values(this.validatorChecks).forEach(element => element.style.display = "none"); // Hide all "invalid" UI
+      Object.values(this.validatorChecks).forEach(
+        (element) => (element.style.display = "none")
+      ); // Hide all "invalid" UI
 
-      if (entry === "password") { // If password valid, submit form
+      if (entry === "password") {
+        // If password valid, submit form
         this.onSubmit();
       } else {
         this.unlockAndSlideToNext(); // If others valid, slide next
-      };
-
+      }
     } else {
       this.validatorChecks[entry].style.display = "flex"; // Show "invalid" UI for invalid validator
       console.log("Not valid, don't slide");
-    };
+    }
   }
 
   async updatePager() {
@@ -88,19 +89,19 @@ export class SignupauthPage implements OnInit {
     var map = {
       0: email,
       1: {
-        'true': hourglass,
-        'false': tick,
+        true: hourglass,
+        false: tick,
       },
       2: pass,
     };
 
     for (let i = 0; i < 3; i++) {
       if (i != 1) {
-        map[i].style.display = "none" 
+        map[i].style.display = "none";
       } else {
-        Object.values(map[i]).forEach((element) => element.style.display = "none");
-      };
-    };
+        Object.values(map[i]).forEach((element) => (element.style.display = "none"));
+      }
+    }
 
     var dots: HTMLCollectionOf<any> = document.getElementsByClassName("pager-dot");
     Array.from(dots).forEach((element) => (element.style.display = "none")); //ignore this error, it works fine
@@ -116,7 +117,7 @@ export class SignupauthPage implements OnInit {
       map[current].style.display = "block";
     } else {
       map[current][`${this.awaitingConfirm}`].style.display = "block";
-    };
+    }
   }
 
   async unlockAndSlideToNext() {
@@ -149,10 +150,14 @@ export class SignupauthPage implements OnInit {
     var text = document.getElementById("sentEmail");
 
     this.flyingLetterAnimation.play();
-    setTimeout(() => {text.style.display = "block"}, 800);
-    setTimeout(() => {text.style.display = "none"}, 2200);
     setTimeout(() => {
-      this.awaitingConfirm = false; 
+      text.style.display = "block";
+    }, 800);
+    setTimeout(() => {
+      text.style.display = "none";
+    }, 2200);
+    setTimeout(() => {
+      this.awaitingConfirm = false;
       this.confirmed = true;
       this.updatePager();
     }, 4200);

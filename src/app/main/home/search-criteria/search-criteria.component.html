@@ -1,50 +1,51 @@
 <ion-content>
-    <form class="criteria-container" [formGroup]="searchCriteriaForm">
-        <div id="closeButton" class="exit" (click)="closeAndConfirmChoices()">
-            <ion-icon name="close-outline"></ion-icon>
-        </div>
+  <form class="criteria-container" [formGroup]="searchCriteriaForm">
+    <div id="closeButton" class="exit" (click)="closeAndConfirmChoices()">
+      <ion-icon name="close-outline"></ion-icon>
+    </div>
 
-        <div class="image" *ngIf="!viewEntered">
-            <div class="flex loading">
+    <div class="image" *ngIf="!viewEntered">
+      <div class="flex loading">
+        <h1 class="nemo">nemo</h1>
+        <h1>search</h1>
+      </div>
+      <h4>loading...</h4>
+    </div>
+
+    <ion-slides #modalSlides *ngIf="viewEntered">
+      <ion-slide>
+        <ion-grid #grid>
+          <ion-row>
+            <div class="flexbetween">
+              <div class="flex">
                 <h1 class="nemo">nemo</h1>
                 <h1>search</h1>
+              </div>
             </div>
-            <h4>loading...</h4>
-        </div>
+          </ion-row>
 
-        <ion-slides #modalSlides *ngIf="viewEntered">
-            <ion-slide>
-                <ion-grid #grid>
-                    <ion-row>
-                        <div class="flexbetween">
-                            <div class="flex">
-                                <h1 class="nemo">nemo</h1>
-                                <h1>search</h1>
-                            </div>
-                        </div>
-                    </ion-row>
+          <ion-row>
+            <p>
+              This feature allows you to refine which profiles appear in your
+              "catch-stack".
+            </p>
+          </ion-row>
 
-                    <ion-row>
-                        <p>
-                            This feature allows you to refine which profiles appear in your "catch-stack".
-                        </p>
-                    </ion-row>
+          <ion-row #clear>
+            <ion-col>
+              <ion-button class="clear-button" (click)="clearSelect()">
+                <ion-icon name="refresh-outline"></ion-icon>
+                <h3>Clear selections</h3>
+              </ion-button>
+            </ion-col>
+          </ion-row>
 
-                    <ion-row #clear>
-                        <ion-col>
-                            <ion-button class="clear-button" (click)="clearSelect()">
-                                <ion-icon name="refresh-outline"></ion-icon>
-                                <h3>Clear selections</h3>
-                            </ion-button>
-                        </ion-col>
-                    </ion-row>
-
-                    <div #options class="slide-down">
-                        <ion-row>
-                            <ion-col>
-                                <div class="criterion">
-                                    <h3 id="degree">Degree</h3>
-                                    <!--ion-select
+          <div #options class="slide-down">
+            <ion-row>
+              <ion-col>
+                <div class="criterion">
+                  <h3 id="degree">Degree</h3>
+                  <!--ion-select
                     [(ngModel)] = "degreeSelection"
                     slot="end"
                     cancelText="Nah"
@@ -59,32 +60,44 @@
                       {{ option }}
                     </ion-select-option>
                   </ion-select-->
-                                    <nemo-toggle #degreeslider [buttonWidth]="17" [fontSize]="3" [selections]="this.scOptions.degree.reverse()" (click)="checkClear()"></nemo-toggle>
-                                </div>
-                            </ion-col>
-                        </ion-row>
+                  <nemo-toggle
+                    #degreeslider
+                    [buttonWidth]="17"
+                    [fontSize]="3"
+                    [selections]="this.scOptions.degree.reverse()"
+                    (click)="checkClear()"
+                  ></nemo-toggle>
+                </div>
+              </ion-col>
+            </ion-row>
 
-                        <ion-row>
-                            <ion-col>
-                                <div class="criterion">
-                                    <h3>Location</h3>
-                                    <nemo-toggle #locationslider [buttonWidth]="17" [fontSize]="3" [selections]="['On campus', 'Everyone']" (click)="checkClear()"></nemo-toggle>
-                                </div>
-                            </ion-col>
-                        </ion-row>
+            <ion-row>
+              <ion-col>
+                <div class="criterion">
+                  <h3>Location</h3>
+                  <nemo-toggle
+                    #locationslider
+                    [buttonWidth]="17"
+                    [fontSize]="3"
+                    [selections]="['On campus', 'Everyone']"
+                    (click)="checkClear()"
+                  ></nemo-toggle>
+                </div>
+              </ion-col>
+            </ion-row>
 
-                        <ion-row>
-                            <ion-col>
-                                <div (click)="moveTo('studies')" class="criterion">
-                                    <h3 id="aos">Area of Study</h3>
-                                    <!--ion-select
+            <ion-row>
+              <ion-col>
+                <div (click)="moveTo('studies')" class="criterion">
+                  <h3 id="areaOfStudy">Area of Study</h3>
+                  <!--ion-select
                     [(ngModel)] = "studySelection"
                     slot="end"
                     formControlName="areaOfStudy"
                     cancelText="Nah"
                     okText="Okay!"
                     [value]="'haha'"
-                    (ionChange)="selectReplace('aos')"
+                    (ionChange)="selectReplace('areaOfStudy')"
                   >
                     <ion-select-option
                       *ngFor="let option of this.scOptions.areaOfStudy"
@@ -93,17 +106,17 @@
                       {{ option }}
                     </ion-select-option>
                   </ion-select-->
-                                    <h2 *ngIf="this.studySelection">{{ this.studySelection }}</h2>
-                                    <ion-icon name="chevron-forward-outline"></ion-icon>
-                                </div>
-                            </ion-col>
-                        </ion-row>
+                  <h2 *ngIf="this.studySelection">{{ this.studySelection }}</h2>
+                  <ion-icon name="chevron-forward-outline"></ion-icon>
+                </div>
+              </ion-col>
+            </ion-row>
 
-                        <ion-row>
-                            <ion-col>
-                                <div (click)="moveTo('societies')" class="criterion">
-                                    <h3 id="society">Societies</h3>
-                                    <!--ion-select
+            <ion-row>
+              <ion-col>
+                <div (click)="moveTo('societies')" class="criterion">
+                  <h3 id="society">Societies</h3>
+                  <!--ion-select
                     [(ngModel)] = "societySelection"
                     slot="end"
                     formControlName="societyCategory"
@@ -118,107 +131,125 @@
                       {{ option }}
                     </ion-select-option>
                   </ion-select-->
-                                    <h2 *ngIf="this.societySelection">{{ this.societySelection }}</h2>
-                                    <ion-icon name="chevron-forward-outline"></ion-icon>
-                                </div>
-                            </ion-col>
-                        </ion-row>
+                  <h2 *ngIf="this.societySelection">{{ this.societySelection }}</h2>
+                  <ion-icon name="chevron-forward-outline"></ion-icon>
+                </div>
+              </ion-col>
+            </ion-row>
 
-                        <ion-row>
-                            <ion-col>
-                                <div (click)="moveTo('interests')" class="criterion">
-                                    <h3 id="interests">Interests</h3>
-                                    <!--ion-select
+            <ion-row>
+              <ion-col>
+                <div (click)="moveTo('interests')" class="criterion">
+                  <h3 id="interests">Interests</h3>
+                  <!--ion-select
                     [(ngModel)] = "interestSelection"
                     slot="end"
-                    formControlName="interest"
+                    formControlName="interests"
                     cancelText="Nah"
                     okText="Okay!"
                     (ionChange)="selectReplace('interests')"
                   >
                     <ion-select-option
-                      *ngFor="let option of this.scOptions.interest"
+                      *ngFor="let option of this.scOptions.interests"
                       value="{{ option }}"
                     >
                       {{ option }}
                     </ion-select-option>
                   </ion-select-->
-                                    <h2 *ngIf="this.interestSelection">{{ this.interestSelection }}</h2>
-                                    <ion-icon name="chevron-forward-outline"></ion-icon>
-                                </div>
-                            </ion-col>
-                        </ion-row>
-                    </div>
-                </ion-grid>
-            </ion-slide>
+                  <h2 *ngIf="this.interestSelection">{{ this.interestSelection }}</h2>
+                  <ion-icon name="chevron-forward-outline"></ion-icon>
+                </div>
+              </ion-col>
+            </ion-row>
+          </div>
+        </ion-grid>
+      </ion-slide>
 
-            <ion-slide id="placeholder" style="display: block">placeholder</ion-slide>
+      <ion-slide id="placeholder" style="display: block">placeholder</ion-slide>
 
-            <ion-slide id="study">
-                <div class="flexstart-col">
-                    <div (click)="returnTo()" class="flexstart-row return">
-                        <ion-icon name="arrow-back-outline"></ion-icon>
-                        <h4>Back</h4>
-                    </div>
-                    <ion-list>
-                        <ion-item (click)="selectReplace(option, 'aos')" lines="none" *ngFor="let option of this.scOptions.areaOfStudy" [style.--background]="
+      <ion-slide id="study">
+        <div class="flexstart-col">
+          <div (click)="returnTo()" class="flexstart-row return">
+            <ion-icon name="arrow-back-outline"></ion-icon>
+            <h4>Back</h4>
+          </div>
+          <ion-list>
+            <ion-item
+              (click)="selectReplace(option, 'areaOfStudy')"
+              lines="none"
+              *ngFor="let option of this.scOptions.areaOfStudy"
+              [style.--background]="
                 this.studySelection === option
                   ? 'var(--ion-color-primary)'
                   : 'var(--ion-color-primary-contrast)'
-              " [style.color]="
+              "
+              [style.color]="
                 this.studySelection === option
                   ? 'var(--ion-color-primary-contrast)'
                   : 'var(--ion-color-light-contrast)'
-              ">
-                            <ion-label>{{ option }}</ion-label>
-                        </ion-item>
-                    </ion-list>
-                </div>
-            </ion-slide>
+              "
+            >
+              <ion-label>{{ option }}</ion-label>
+            </ion-item>
+          </ion-list>
+        </div>
+      </ion-slide>
 
-            <ion-slide id="soc">
-                <div class="flexstart-col">
-                    <div (click)="returnTo()" class="flexstart-row return">
-                        <ion-icon name="arrow-back-outline"></ion-icon>
-                        <h4>Back</h4>
-                    </div>
-                    <ion-list>
-                        <ion-item (click)="selectReplace(option, 'society')" lines="none" *ngFor="let option of this.scOptions.societyCategory" [style.--background]="
+      <ion-slide id="soc">
+        <div class="flexstart-col">
+          <div (click)="returnTo()" class="flexstart-row return">
+            <ion-icon name="arrow-back-outline"></ion-icon>
+            <h4>Back</h4>
+          </div>
+          <ion-list>
+            <ion-item
+              (click)="selectReplace(option, 'society')"
+              lines="none"
+              *ngFor="let option of this.scOptions.societyCategory"
+              [style.--background]="
                 this.societySelection === option
                   ? 'var(--ion-color-primary)'
                   : 'var(--ion-color-primary-contrast)'
-              " [style.color]="
+              "
+              [style.color]="
                 this.societySelection === option
                   ? 'var(--ion-color-primary-contrast)'
                   : 'var(--ion-color-light-contrast)'
-              ">
-                            <ion-label>{{ option }}</ion-label>
-                        </ion-item>
-                    </ion-list>
-                </div>
-            </ion-slide>
+              "
+            >
+              <ion-label>{{ option }}</ion-label>
+            </ion-item>
+          </ion-list>
+        </div>
+      </ion-slide>
 
-            <ion-slide id="int">
-                <div class="flexstart-col">
-                    <div (click)="returnTo()" class="flexstart-row return">
-                        <ion-icon name="arrow-back-outline"></ion-icon>
-                        <h4>Back</h4>
-                    </div>
-                    <ion-list>
-                        <ion-item (click)="selectReplace(option, 'interests')" lines="none" *ngFor="let option of this.scOptions.interest" [style.--background]="
+      <ion-slide id="int">
+        <div class="flexstart-col">
+          <div (click)="returnTo()" class="flexstart-row return">
+            <ion-icon name="arrow-back-outline"></ion-icon>
+            <h4>Back</h4>
+          </div>
+          <ion-list>
+            <ion-item
+              (click)="selectReplace(option, 'interests')"
+              lines="none"
+              *ngFor="let option of this.scOptions.interests"
+              [style.--background]="
                 this.interestSelection === option
                   ? 'var(--ion-color-primary)'
                   : 'var(--ion-color-primary-contrast)'
-              " [style.color]="
+              "
+              [style.color]="
                 this.interestSelection === option
                   ? 'var(--ion-color-primary-contrast)'
                   : 'var(--ion-color-light-contrast)'
-              ">
-                            <ion-label>{{ option }}</ion-label>
-                        </ion-item>
-                    </ion-list>
-                </div>
-            </ion-slide>
-        </ion-slides>
-    </form>
+              "
+            >
+              <ion-label>{{ option }}</ion-label>
+            </ion-item>
+          </ion-list>
+        </div>
+      </ion-slide>
+    </ion-slides>
+  </form>
 </ion-content>

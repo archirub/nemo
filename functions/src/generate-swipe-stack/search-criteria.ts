@@ -5,7 +5,7 @@ import {
   University,
   AreaOfStudy,
   SocietyCategory,
-  Interest,
+  Interests,
   profile,
   OnCampus,
   Degree,
@@ -58,7 +58,7 @@ export function searchCriteriaGrouping(
       case "societyCategory":
         SC_Checker[SC] = societyCategoryMatchCheck;
         break;
-      case "interest":
+      case "interests":
         SC_Checker[SC] = interestMatchCheck;
         break;
       case "onCampus":
@@ -137,7 +137,7 @@ function societyCategoryMatchCheck(
   if (!criteria || !feature) return false;
   return criteria === feature;
 }
-function interestMatchCheck(criteria: Interest, feature: Interest[]): boolean {
+function interestMatchCheck(criteria: Interests, feature: Interests[]): boolean {
   if (!criteria || !feature) return false;
   for (const f of feature) {
     return criteria === f;

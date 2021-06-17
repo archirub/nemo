@@ -205,16 +205,17 @@ export async function createDatingChatDocuments(
       const matchedUserData = matchedUserProfile.data() as profileFromDatabase;
 
       const uids = sortUIDs([targetUserProfile.id, matchedUserProfile?.id]);
+      // FIX, ADD RIGHT PICTURES LOGIC
       const userSnippets: userSnippet[] = [
         {
           uid: targetUserProfile.id,
           name: targetUserData.firstName,
-          picture: targetUserData.pictures[0] || "",
+          picture: "",
         },
         {
           uid: matchedUserProfile.id,
           name: matchedUserData.firstName,
-          picture: matchedUserData.pictures[0] || "",
+          picture: "",
         },
       ];
       const messages: [] = [];
