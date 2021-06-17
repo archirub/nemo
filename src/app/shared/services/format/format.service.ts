@@ -2,6 +2,7 @@ import { Injectable } from "@angular/core";
 
 import { Chat, Message, Profile, SearchCriteria } from "@classes/index";
 import {
+  allowOptionalProp,
   chatFromDatabase,
   messageFromDatabase,
   profileFromDatabase,
@@ -29,7 +30,9 @@ export class FormatService {
     return uids.sort((a, b) => ("" + a).localeCompare(b));
   }
 
-  public searchCriteriaDatabaseToClass(searchCriteria: searchCriteria): SearchCriteria {
+  public searchCriteriaDatabaseToClass(
+    searchCriteria: allowOptionalProp<searchCriteria>
+  ): SearchCriteria {
     if (!searchCriteria) return;
     const university = searchCriteria.university;
     const areaOfStudy = searchCriteria.areaOfStudy;
@@ -38,14 +41,14 @@ export class FormatService {
     const interests = searchCriteria.interests;
     const onCampus = searchCriteria.onCampus;
 
-    return new SearchCriteria(
+    return new SearchCriteria({
       university,
       areaOfStudy,
       degree,
       societyCategory,
       interests,
-      onCampus
-    );
+      onCampus,
+    });
   }
 
   public searchCriteriaClassToDatabase(searchCriteria: SearchCriteria): searchCriteria {
@@ -71,7 +74,7 @@ export class FormatService {
     if (!uid || !profileData) return;
     const firstName = profileData.firstName;
     const dateOfBirth = profileData.dateOfBirth.toDate();
-    const pictures = profileData.pictures;
+    // const pictures = profileData.pictures;
     const biography = profileData.biography;
     const university = profileData.university;
     const course = profileData.course;
@@ -86,7 +89,7 @@ export class FormatService {
       uid,
       firstName,
       dateOfBirth,
-      pictures,
+      // pictures,
       biography,
       university,
       course,

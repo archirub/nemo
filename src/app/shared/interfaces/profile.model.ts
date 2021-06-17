@@ -16,7 +16,7 @@ export interface profile {
   uid: string;
   firstName: string;
   dateOfBirth: Date;
-  pictures: profilePicturePaths;
+  // pictures: profilePicturePaths;
   biography: string;
   university: University;
   degree: Degree;

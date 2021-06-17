@@ -34,14 +34,7 @@ export class HomePage implements OnInit, OnDestroy {
   swipeProfiles: Observable<Profile[]>;
   private swipeStackRefill$: Subscription;
 
-  private searchCriteria: SearchCriteria = new SearchCriteria(
-    null,
-    null,
-    null,
-    null,
-    null,
-    null
-  );
+  private searchCriteria: SearchCriteria = new SearchCriteria({});
   private searchCriteria$: Subscription;
 
   // PROPERTIES FOR MODAL ANIMATION
@@ -81,7 +74,9 @@ export class HomePage implements OnInit, OnDestroy {
     // is already being processed.
     this.swipeStackRefill$ = this.swipeProfiles
       .pipe(
-        filter((profiles) => profiles /*&& profiles.length !== 0*/ && profiles.length <= 4),
+        filter(
+          (profiles) => profiles /*&& profiles.length !== 0*/ && profiles.length <= 4
+        ),
         throttle(async () => {
           console.log("Refilling swipe stack");
           await this.swipeOutcomeStore.registerSwipeChoices(),
@@ -94,11 +89,11 @@ export class HomePage implements OnInit, OnDestroy {
   ionViewDidEnter() {
     this.SCenterAnimation = SCenterAnimation(
       this.tabElementRef.tabRef,
-      this.homeContainer,
+      this.homeContainer
     );
     this.SCleaveAnimation = SCleaveAnimation(
       this.tabElementRef.tabRef,
-      this.homeContainer,
+      this.homeContainer
     );
 
     this.modalCtrl

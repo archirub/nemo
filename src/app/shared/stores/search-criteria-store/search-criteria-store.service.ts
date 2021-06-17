@@ -78,6 +78,6 @@ export class SearchCriteriaStore {
   }
 
   private emptySearchCriteria() {
-    return new SearchCriteria(null, null, null, null, null, null);
+    return new SearchCriteria({});
   }
 }

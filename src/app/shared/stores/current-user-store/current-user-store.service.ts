@@ -133,7 +133,7 @@ export class CurrentUserStore {
       profile.uid,
       profile.firstName,
       profile.dateOfBirth,
-      profile.pictures,
+      // profile.pictures,
       profile.biography,
       profile.university,
       profile.course,

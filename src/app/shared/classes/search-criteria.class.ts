@@ -7,26 +7,27 @@ import {
   University,
   OnCampus,
   Degree,
+  allowOptionalProp,
 } from "@interfaces/index";
 
 export class SearchCriteria implements searchCriteria {
-  _university: University;
-  _areaOfStudy: AreaOfStudy;
-  _degree: Degree;
-  _societyCategory: SocietyCategory;
-  _interest: Interests;
-  _onCampus: OnCampus;
+  _university: University | null;
+  _areaOfStudy: AreaOfStudy | null;
+  _degree: Degree | null;
+  _societyCategory: SocietyCategory | null;
+  _interest: Interests | null;
+  _onCampus: OnCampus | null;
 
   options = searchCriteriaOptions;
 
-  constructor(
-    university: University,
-    areaOfStudy: AreaOfStudy,
-    degree: Degree,
-    societyCategory: SocietyCategory,
-    interests: Interests,
-    onCampus: OnCampus
-  ) {
+  constructor({
+    university = null,
+    areaOfStudy = null,
+    degree = null,
+    societyCategory = null,
+    interests = null,
+    onCampus = null,
+  }: allowOptionalProp<searchCriteria>) {
     this.university = university;
     this.areaOfStudy = areaOfStudy;
     this.degree = degree;

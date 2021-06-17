@@ -13,7 +13,7 @@ export class Profile implements profile {
   private _uid: string;
   private _firstName: string;
   private _dateOfBirth: Date;
-  private _pictures: profilePicturePaths;
+  // private _pictures: profilePicturePaths;
   private _biography: string;
   private _university: University;
   private _course: string;
@@ -28,7 +28,7 @@ export class Profile implements profile {
     uid: string,
     firstName: string,
     dateOfBirth: Date,
-    pictures: profilePicturePaths,
+    // pictures: profilePicturePaths,
     biography: string,
     university: University,
     course: string,
@@ -42,7 +42,7 @@ export class Profile implements profile {
     this.uid = uid;
     this.firstName = firstName;
     this.dateOfBirth = dateOfBirth;
-    this.pictures = pictures;
+    // this.pictures = pictures;
     this.biography = biography;
     this.university = university;
     this.course = course;
@@ -75,12 +75,12 @@ export class Profile implements profile {
     this._dateOfBirth = value;
   }
 
-  public get pictures(): profilePicturePaths {
-    return this._pictures;
-  }
-  public set pictures(value: profilePicturePaths) {
-    this._pictures = value;
-  }
+  // public get pictures(): profilePicturePaths {
+  //   return this._pictures;
+  // }
+  // public set pictures(value: profilePicturePaths) {
+  //   this._pictures = value;
+  // }
 
   public get biography(): string {
     return this._biography;
