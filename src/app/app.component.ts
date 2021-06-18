@@ -10,6 +10,7 @@ import { Router } from "@angular/router";
 import { Subscription } from "rxjs";
 import { take } from "rxjs/operators";
 import { SignupService } from "@services/signup/signup.service";
+import { AngularFireAuth } from "@angular/fire/auth";
 
 @Component({
   selector: "app-root",
@@ -27,7 +28,8 @@ export class AppComponent implements OnInit, OnDestroy {
     private swipeStackStore: SwipeStackStore,
     private signUpAuthService: AngularAuthService,
     private router: Router,
-    private signup: SignupService
+    private signup: SignupService,
+    private afAuth: AngularFireAuth
   ) {
     this.initializeApp();
   }
@@ -38,30 +40,28 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.signUpAuthService.autologin().subscribe(() => {
-      this.authSub = this.signUpAuthService.userIsAuthenticated.subscribe((isAuth) => {
-        if (isAuth) {
-          console.log("User has been authenticated");
-          this.signUpAuthService.userType.subscribe((user_type) => {
-            if (user_type == "BaselineUser" || user_type == "FullUser") {
-              console.log("ROUTER: HOME");
-              this.router.navigateByUrl("main/tabs/home");
-            } else if (user_type == "AuthenticatedUser") {
-              console.log("ROUTER: REQUIRED");
-
-              // DEVELOPMENT
-              // this.router.navigateByUrl("main/tabs/home");
-
-              // PRODUCTION
-              this.router.navigateByUrl("welcome/signuprequired"); //uncomment to have specialized routing
-            }
-          });
-        } else {
-          // console.log("ROUTER: WELCOME");
-          this.router.navigateByUrl("welcome");
-        }
-      });
-    });
+    // this.signUpAuthService.autologin().subscribe(() => {
+    //   this.authSub = this.signUpAuthService.userIsAuthenticated.subscribe((isAuth) => {
+    //     if (isAuth) {
+    //       console.log("User has been authenticated");
+    //       this.signUpAuthService.userType.subscribe((user_type) => {
+    //         if (user_type == "BaselineUser" || user_type == "FullUser") {
+    //           console.log("ROUTER: HOME");
+    //           this.router.navigateByUrl("main/tabs/home");
+    //         } else if (user_type == "AuthenticatedUser") {
+    //           console.log("ROUTER: REQUIRED");
+    //           // DEVELOPMENT
+    //           // this.router.navigateByUrl("main/tabs/home");
+    //           // PRODUCTION
+    //           this.router.navigateByUrl("welcome/signuprequired"); //uncomment to have specialized routing
+    //         }
+    //       });
+    //     } else {
+    //       // console.log("ROUTER: WELCOME");
+    //       this.router.navigateByUrl("welcome");
+    //     }
+    //   });
+    // });
   }
 
   logOut(): void {
@@ -75,6 +75,14 @@ export class AppComponent implements OnInit, OnDestroy {
       }
       console.log("yayayaya");
       this.signup.checkAndRedirect();
+
+      // TEMPORARY (though works fine), not thought through
+      this.afAuth.user.subscribe((user) => {
+        console.log("current user logged in,", user?.uid);
+        if (user) {
+          this.router.navigateByUrl("main/tabs/home");
+        }
+      });
 
       // HERE UID SHOULD COME FROM FIREBASE AUTH, NOT TOKEN
       //   this.signUpAuthService.userId.subscribe(async (uid) => {

@@ -41,7 +41,7 @@
                 fill="clear"
                 shape="round"
                 type="submit"
-                [disabled]="!loginForm.valid"
+                [disabled]="(loginForm.statusChanges | async) !== 'VALID'"
                 >Enter Nemo</ion-button
               >
             </div>

@@ -5,7 +5,6 @@ import { HttpClient } from "@angular/common/http";
 import { environment } from "src/environments/environment";
 import { AlertController } from "@ionic/angular";
 import { AbstractFormGroupDirective } from "@angular/forms";
-import { AngularFireAuth } from "@angular/fire/auth";
 import { AuthResponseData } from "@interfaces/auth-response.model";
 import { User } from "@classes/user.class";
 import {
@@ -21,6 +20,7 @@ import { from } from "rxjs";
 import { AuthenticatedUser, BaselineUser, FullUser } from "@classes/signup.class";
 import { AngularFireFunctions } from "@angular/fire/functions";
 import { AngularFireStorage } from "@angular/fire/storage";
+import { AngularFireAuth } from "@angular/fire/auth";
 
 @Injectable({
   providedIn: "root",
@@ -293,12 +293,15 @@ export class AngularAuthService {
   // TEMPORARY - THIS WAY UNTIL THE USER STATES FOR SIGNING UP AND FOR NORMAL USAGE ARE UNTANGLED
   async logout(): Promise<void> {
     // using allSettled in an attempt to do both processes regardless of whether the other fails
-    await (Promise as any).allSettled([
-      Plugins.Storage.remove({ key: "authData" }),
-      this.afAuth.signOut(),
-    ]);
-
-    this._user.next(null);
+    // await (Promise as any).allSettled([
+    //   Plugins.Storage.remove({ key: "authData" }),
+    //   this.afAuth.signOut(),
+    // ]);
+    // await Plugins.Storage.remove({ key: "authData" });
+    // await this.afAuth
+    //   .signOut()
+    //   .then(() => this.afAuth.user.subscribe((a) => console.log("YES LE SANG", a))),
+    //   this._user.next(null);
   }
 
   // // ORIGINAL SHAPE OF FUNCTION ABOVE!

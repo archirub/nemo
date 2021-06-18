@@ -53,7 +53,6 @@ export class LoginPage implements OnInit {
   // }
 
   onSubmit() {
-    // console.log("Submitted form");
     if (!this.loginForm.valid) {
       return this.showAlert("This shit ain't valid fam");
     }
@@ -70,7 +69,6 @@ export class LoginPage implements OnInit {
       .then(() => this.router.navigateByUrl("/main/tabs/home"))
       .then(() => this.afAuth.currentUser)
       .then((user) => {
-        console.log("brwadfasdf", user);
         if (user) {
           this.currentUserStore.initializeStore(user.uid);
 

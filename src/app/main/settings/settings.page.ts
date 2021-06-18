@@ -1,8 +1,9 @@
-import { Component, AfterViewInit, ViewChild, ElementRef } from "@angular/core";
+import { Component, AfterViewInit, ViewChild, ElementRef, NgZone } from "@angular/core";
 import { IonSlides, NavController } from "@ionic/angular";
 import { AngularFireAuth } from "@angular/fire/auth";
 
 import { LoadingService, AngularAuthService } from "@services/index";
+import { Router } from "@angular/router";
 
 @Component({
   selector: "app-settings",
@@ -17,7 +18,9 @@ export class SettingsPage implements AfterViewInit {
     private navCtrl: NavController,
     private afAuth: AngularFireAuth,
     private loadingService: LoadingService,
-    private AngularAuthService: AngularAuthService
+    private AngularAuthService: AngularAuthService,
+    private router: Router,
+    private zone: NgZone
   ) {}
 
   ngAfterViewInit() {
@@ -35,11 +38,22 @@ export class SettingsPage implements AfterViewInit {
   }
 
   async logOut() {
+    // have to explicitely do it this way instead of using directly "this.navCtrl.navigateRoot"
+    // otherwise it causes an error
+    // calling ngZone.run() is necessary otherwise we will get into trouble with changeDecection
+    // back at the welcome page (it seems like it's then not active), which cases problem for example
+    // while trying to log back in where the "log in" button doesn't get enabled when the email-password form becomes valid
+    const navigateToWelcome = (url: string) => {
+      return this.zone.run(() => {
+        this.navCtrl.setDirection("root");
+        return this.router.navigateByUrl(url);
+      });
+    };
+
     await this.loadingService.presentLoader(
-      [{ promise: this.AngularAuthService.logout, arguments: [] }]
-      // [{ promise: this.navCtrl.navigateRoot.bind(this), arguments: [["/welcome"]] }]
+      [{ promise: this.afAuth.signOut, arguments: [] }],
+      [{ promise: navigateToWelcome, arguments: ["/welcome"] }]
     );
-    await this.navCtrl.navigateRoot("/welcome");
   }
 
   /* Styles gone 'under' tab on toggle */
