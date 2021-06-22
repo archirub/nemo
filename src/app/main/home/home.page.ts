@@ -4,10 +4,9 @@ import {
   OnDestroy,
   OnInit,
   ViewChild,
-  HostListener,
-  Output,
+  HostListener
 } from "@angular/core";
-import { IonBackdrop, ModalController } from "@ionic/angular";
+import { ModalController } from "@ionic/angular";
 
 import { Observable, Subscription } from "rxjs";
 import { throttle, filter } from "rxjs/operators";
@@ -16,10 +15,9 @@ import { SearchCriteriaComponent } from "./search-criteria/search-criteria.compo
 
 import { Profile, SearchCriteria } from "@classes/index";
 import { SearchCriteriaStore, SwipeOutcomeStore, SwipeStackStore } from "@stores/index";
-import { SCenterAnimation, SCleaveAnimation } from "@animations/index";
+import { SCenterAnimation, SCleaveAnimation, LeftPicAnimation, RightPicAnimation, TextAnimation } from "@animations/index";
 import { FormatService } from "@services/index";
 import { TabElementRefService } from "src/app/main/tab-menu/tab-element-ref.service";
-import { EventEmitter } from "events";
 import { SwipeCardComponent } from "./swipe-card/swipe-card.component";
 
 @Component({
@@ -28,8 +26,6 @@ import { SwipeCardComponent } from "./swipe-card/swipe-card.component";
   styleUrls: ["home.page.scss"],
 })
 export class HomePage implements OnInit, OnDestroy {
-  //@Output() backdropEmitter = new EventEmitter();
-  //@ViewChild(IonBackdrop) backdrop: IonBackdrop;
 
   swipeProfiles: Observable<Profile[]>;
   private swipeStackRefill$: Subscription;
@@ -40,6 +36,9 @@ export class HomePage implements OnInit, OnDestroy {
   // PROPERTIES FOR MODAL ANIMATION
   @ViewChild("homeContainer", { read: ElementRef }) homeContainer: ElementRef;
   @ViewChild("searchButton", { read: ElementRef }) searchButton: ElementRef;
+  @ViewChild('pic1', { read: ElementRef }) pic1: ElementRef;
+  @ViewChild('pic2', { read: ElementRef }) pic2: ElementRef;
+  @ViewChild('catchText', { read: ElementRef }) catchText: ElementRef;
   screenHeight: number;
   screenWidth: number;
   @HostListener("window:resize", ["$event"])
@@ -47,6 +46,8 @@ export class HomePage implements OnInit, OnDestroy {
     this.screenHeight = window.innerHeight;
     this.screenWidth = window.innerWidth;
   }
+
+  @ViewChild(SwipeCardComponent) child: SwipeCardComponent;
 
   constructor(
     private swipeStackStore: SwipeStackStore,
@@ -62,6 +63,7 @@ export class HomePage implements OnInit, OnDestroy {
   modal: HTMLIonModalElement;
   SCenterAnimation;
   SCleaveAnimation;
+  catchAnimations;
 
   async ngOnInit() {
     this.swipeProfiles = this.swipeStackStore.profiles;
@@ -130,7 +132,28 @@ export class HomePage implements OnInit, OnDestroy {
     });
   }
 
-  @ViewChild(SwipeCardComponent) child: SwipeCardComponent;
+  playCatch() {
+    this.catchAnimations = [
+      LeftPicAnimation(
+        this.screenHeight,
+        this.screenWidth,
+        this.pic1
+      ),
+      RightPicAnimation (
+        this.screenHeight,
+        this.screenWidth,
+        this.pic2
+      ),
+      TextAnimation(
+        this.catchText
+      )
+    ];
+
+    this.catchAnimations.forEach(anim => {
+      anim.play();
+    });
+
+  }
 
   ngOnDestroy() {
     this.searchCriteria$.unsubscribe();

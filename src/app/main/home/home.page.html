@@ -1,4 +1,13 @@
 <ion-content #homeContainer>
+  <div>
+    <ion-button style="z-index: 100;" (click)="playCatch()">Catch</ion-button>
+    <div #pic1 class="picholder left"></div>
+    <div #pic2 class="picholder right"></div>
+    <div #catchText class="textholder">
+      <h1 class="catchtext">It's a Catch!</h1>
+    </div>
+  </div>
+
   <div class="swipe-stack">
     <div class="search">
       <ion-button #searchButton id="searchButton" (click)="presentSCmodal()">
