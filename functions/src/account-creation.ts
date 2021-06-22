@@ -462,7 +462,7 @@ function addToProfile(
   const profile: profileFromDatabase = {
     firstName: data.firstName,
     dateOfBirth: admin.firestore.Timestamp.fromDate(data.dateOfBirth),
-    picturesCount: data.picturesCount,
+    pictureCount: data.picturesCount,
     biography: data.biography,
     university: data.university,
     degree: data.degree,

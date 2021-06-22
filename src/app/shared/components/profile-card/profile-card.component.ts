@@ -63,17 +63,17 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
     this.moreInfo = false;
-    this.picturePaths = [
-      "https://staticg.sportskeeda.com/editor/2020/06/a19cc-15923264235917.jpg",
-      "/assets/picture2.jpg",
-      "/assets/picture3.jpg",
-      "/assets/picture6.jpg",
-    ];
-    console.log("HERE IS THE interests:", this.profile.interests);
-    console.log("HERE IS THE age:", this.profile.age());
-    console.log("HERE IS THE bio:", this.profile.biography);
-    console.log("HERE IS THE degree:", this.profile.degree);
-    console.log("HERE IS THE society:", this.profile.society);
+    // this.picturePaths = [
+    //   "https://staticg.sportskeeda.com/editor/2020/06/a19cc-15923264235917.jpg",
+    //   "/assets/picture2.jpg",
+    //   "/assets/picture3.jpg",
+    //   "/assets/picture6.jpg",
+    // ];
+    // console.log("HERE IS THE interests:", this.profile.interests);
+    // console.log("HERE IS THE age:", this.profile.age());
+    // console.log("HERE IS THE bio:", this.profile.biography);
+    // console.log("HERE IS THE degree:", this.profile.degree);
+    // console.log("HERE IS THE society:", this.profile.society);
   }
 
   ngAfterViewInit() {

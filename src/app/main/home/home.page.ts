@@ -8,8 +8,8 @@ import {
 } from "@angular/core";
 import { ModalController } from "@ionic/angular";
 
-import { Observable, Subscription } from "rxjs";
-import { throttle, filter } from "rxjs/operators";
+import { forkJoin, from, interval, Observable, of, Subscription } from "rxjs";
+import { throttle, filter, tap, take, delay, map } from "rxjs/operators";
 
 import { SearchCriteriaComponent } from "./search-criteria/search-criteria.component";
 
@@ -19,6 +19,9 @@ import { SCenterAnimation, SCleaveAnimation, LeftPicAnimation, RightPicAnimation
 import { FormatService } from "@services/index";
 import { TabElementRefService } from "src/app/main/tab-menu/tab-element-ref.service";
 import { SwipeCardComponent } from "./swipe-card/swipe-card.component";
+import { AngularFireStorage } from "@angular/fire/storage";
+import { PicturesService } from "@services/pictures/pictures.service";
+import { OwnPicturesService } from "@services/pictures/own-pictures/own-pictures.service";
 
 @Component({
   selector: "app-home",
@@ -26,6 +29,8 @@ import { SwipeCardComponent } from "./swipe-card/swipe-card.component";
   styleUrls: ["home.page.scss"],
 })
 export class HomePage implements OnInit, OnDestroy {
+
+  testPicture: Observable<any>;
 
   swipeProfiles: Observable<Profile[]>;
   private swipeStackRefill$: Subscription;
@@ -55,7 +60,10 @@ export class HomePage implements OnInit, OnDestroy {
     private modalCtrl: ModalController,
     private tabElementRef: TabElementRefService,
     private swipeOutcomeStore: SwipeOutcomeStore,
-    private format: FormatService
+    private format: FormatService,
+    private afStorage: AngularFireStorage,
+    private picturesService: PicturesService,
+    private ownPicturesService: OwnPicturesService
   ) {
     this.onResize();
   }
@@ -66,26 +74,24 @@ export class HomePage implements OnInit, OnDestroy {
   catchAnimations;
 
   async ngOnInit() {
-    this.swipeProfiles = this.swipeStackStore.profiles;
     this.searchCriteria$ = this.SCstore.searchCriteria.subscribe((SC) => {
       this.searchCriteria = SC;
     });
-
     // Makes sure swipe stack is only filled when its length is smaller or equal to a given
     // length, and that no new query to refill the swipe stack is made while a query
     // is already being processed.
-    this.swipeStackRefill$ = this.swipeProfiles
-      .pipe(
-        filter(
-          (profiles) => profiles /*&& profiles.length !== 0*/ && profiles.length <= 4
-        ),
-        throttle(async () => {
-          console.log("Refilling swipe stack");
-          await this.swipeOutcomeStore.registerSwipeChoices(),
-            await this.swipeStackStore.addToSwipeStackQueue(this.searchCriteria);
-        })
-      )
-      .subscribe();
+    // this.swipeStackRefill$ = this.swipeProfiles
+    //   .pipe(
+    //     filter(
+    //       (profiles) => profiles /*&& profiles.length !== 0*/ && profiles.length <= 4
+    //     ),
+    //     throttle(async () => {
+    //       console.log("Refilling swipe stack");
+    //       await this.swipeOutcomeStore.registerSwipeChoices();
+    //       await this.swipeStackStore.addToSwipeStackQueue(this.searchCriteria);
+    //     })
+    //   )
+    //   .subscribe();
   }
 
   ionViewDidEnter() {

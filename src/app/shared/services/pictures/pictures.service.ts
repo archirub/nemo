@@ -1,7 +1,8 @@
 import { Injectable } from "@angular/core";
 import { AngularFireStorage } from "@angular/fire/storage";
-import { Observable } from "rxjs";
+import { from, Observable } from "rxjs";
 import { Plugins } from "@capacitor/core";
+import { concatMap, map } from "rxjs/operators";
 
 @Injectable({
   providedIn: "root",
@@ -80,7 +81,7 @@ export class PicturesService {
     return storageKey;
   }
 
-  private async blobFromURL(downloadURL: string): Promise<Blob> {
+  async blobFromURL(downloadURL: string): Promise<Blob> {
     return await (await fetch(downloadURL)).blob();
   }
 
@@ -94,5 +95,11 @@ export class PicturesService {
     });
     fileReader.readAsDataURL(blob);
     return observable;
+  }
+
+  urlToBase64(downloadURL: string): Observable<string> {
+    return from(this.blobFromURL(downloadURL)).pipe(
+      concatMap((blob) => this.blobToBase64(blob))
+    );
   }
 }

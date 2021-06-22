@@ -16,7 +16,8 @@ export interface profile {
   uid: string;
   firstName: string;
   dateOfBirth: Date;
-  // pictures: profilePicturePaths;
+  pictureCount: number;
+  pictureUrls: string[];
   biography: string;
   university: University;
   degree: Degree;
@@ -36,7 +37,7 @@ export interface user extends profile {
 export interface profileFromDatabase {
   firstName: string;
   dateOfBirth: firebase.firestore.Timestamp;
-  picturesCount: number;
+  pictureCount: number;
   biography: string;
 
   university: University;

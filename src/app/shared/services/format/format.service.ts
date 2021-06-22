@@ -74,7 +74,8 @@ export class FormatService {
     if (!uid || !profileData) return;
     const firstName = profileData.firstName;
     const dateOfBirth = profileData.dateOfBirth.toDate();
-    // const pictures = profileData.pictures;
+    const pictureCount = profileData.pictureCount;
+    const pictureUrls = Array(pictureCount).fill("") as string[];
     const biography = profileData.biography;
     const university = profileData.university;
     const course = profileData.course;
@@ -89,7 +90,8 @@ export class FormatService {
       uid,
       firstName,
       dateOfBirth,
-      // pictures,
+      pictureCount,
+      pictureUrls,
       biography,
       university,
       course,

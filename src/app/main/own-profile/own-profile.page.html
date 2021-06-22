@@ -17,7 +17,7 @@
 
   <div id="editing" style="display: flex">
     <div class="container">
-      <h1>{{profile.firstName}}, {{profile.dateOfBirth|age}}</h1>
+      <h1>{{profile?.firstName}}, {{profile?.dateOfBirth|age}}</h1>
 
       <div class="slide-button" (click)="goToSettings()">
         <p>Go to my settings</p>
@@ -26,14 +26,24 @@
       </div>
 
       <h2>My photos</h2>
-      <div class="photos">
+      <div class class="photos" *ngIf="ownPicturesService?.urls$ | async as pictureUrls">
         <!-- One photos are sorted on the backend we can use some ngFor magic here -->
+        <app-profile-edit-photo [url]="pictureUrls[0]"></app-profile-edit-photo>
+        <app-profile-edit-photo [url]="pictureUrls[1]"></app-profile-edit-photo>
+        <app-profile-edit-photo [url]="pictureUrls[2]"></app-profile-edit-photo>
+        <app-profile-edit-photo [url]="pictureUrls[3]"></app-profile-edit-photo>
+        <app-profile-edit-photo [url]="pictureUrls[4]"></app-profile-edit-photo>
+        <app-profile-edit-photo [url]="pictureUrls[5]"></app-profile-edit-photo>
+        <!-- <add-photo></add-photo>
         <add-photo></add-photo>
+
         <add-photo></add-photo>
+
         <add-photo></add-photo>
+
         <add-photo></add-photo>
-        <add-photo></add-photo>
-        <add-photo></add-photo>
+
+        <add-photo></add-photo> -->
       </div>
 
       <h2>My bio</h2>
@@ -44,7 +54,7 @@
         <div class="bio">
           <ion-textarea
             #bioInput
-            value="{{profile.biography}}"
+            value="{{profile?.biography}}"
             autoGrow="true"
             (ionInput)="displayExit('bio')"
           ></ion-textarea>
@@ -53,14 +63,14 @@
 
       <h2>My answers</h2>
       <profile-answer
-        *ngFor="let questions of profile.questions; let i = index"
-        [questions]="profile.questions[i]"
+        *ngFor="let questions of profile?.questions; let i = index"
+        [questions]="profile?.questions[i]"
       ></profile-answer>
 
       <h2>My course</h2>
       <profile-course
         #depts
-        [departments]="profile.course"
+        [departments]="profile?.course"
         [type]="courses"
         [profile]="profile"
       ></profile-course>
@@ -68,13 +78,13 @@
       <h2>My society</h2>
       <profile-course
         #socs
-        [departments]="profile.society"
+        [departments]="profile?.society"
         [type]="societies"
         [profile]="profile"
       ></profile-course>
 
       <h2>My interests</h2>
-      <interests-slides [interests]="profile.interests"></interests-slides>
+      <interests-slides [interests]="profile?.interests"></interests-slides>
     </div>
   </div>
 </ion-content>

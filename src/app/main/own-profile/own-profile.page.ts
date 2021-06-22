@@ -7,6 +7,7 @@ import { AddPhotoComponent } from "@components/index";
 import { ProfileCourseComponent } from "./profile-course/profile-course.component";
 import { IonTextarea } from "@ionic/angular";
 import { Router } from "@angular/router";
+import { OwnPicturesService } from "@services/pictures/own-pictures/own-pictures.service";
 
 @Component({
   selector: "app-own-profile",
@@ -20,13 +21,20 @@ export class OwnProfilePage implements OnInit {
   @ViewChild("depts") depts: ProfileCourseComponent;
   @ViewChild("socs") socs: ProfileCourseComponent;
 
-  profile$: Subscription;
+  profileSub: Subscription;
   profile: User;
 
-  constructor(private currentUserStore: CurrentUserStore, private router: Router) {}
+  ownPicturesSub: Subscription;
+
+  constructor(
+    private currentUserStore: CurrentUserStore,
+    private router: Router,
+    private ownPicturesService: OwnPicturesService
+  ) {}
 
   ngOnInit() {
-    this.profile$ = this.currentUserStore.user.subscribe(
+    this.ownPicturesSub = this.ownPicturesService.emptinessObserver$.subscribe();
+    this.profileSub = this.currentUserStore.user$.subscribe(
       (profile) => (this.profile = profile)
     );
   }
@@ -71,6 +79,7 @@ export class OwnProfilePage implements OnInit {
   }
 
   ngOnDestroy() {
-    this.profile$.unsubscribe();
+    this.ownPicturesSub.unsubscribe();
+    this.profileSub.unsubscribe();
   }
 }

@@ -1,0 +1,16 @@
+import { NgModule } from "@angular/core";
+import { CommonModule } from "@angular/common";
+import { FormsModule } from "@angular/forms";
+
+import { IonicModule } from "@ionic/angular";
+
+import { ProfileEditPhotoPageRoutingModule } from "./profile-edit-photo-routing.module";
+
+import { ProfileEditPhotoPage } from "./profile-edit-photo.page";
+
+@NgModule({
+  imports: [CommonModule, FormsModule, IonicModule],
+  declarations: [ProfileEditPhotoPage],
+  exports: [ProfileEditPhotoPage],
+})
+export class ProfileEditPhotoPageModule {}
