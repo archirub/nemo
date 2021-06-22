@@ -1,115 +1,183 @@
 import { Injectable } from "@angular/core";
-import { AngularFirestore } from "@angular/fire/firestore";
+import { AngularFirestore, DocumentSnapshot } from "@angular/fire/firestore";
 import { AngularFireFunctions } from "@angular/fire/functions";
 
-import { BehaviorSubject, Observable } from "rxjs";
-
-import { NameService, FormatService } from "@services/index";
-import { Profile, SearchCriteria } from "@classes/index";
-import { SearchCriteriaStore } from "@stores/search-criteria-store/search-criteria-store.service";
-import { SwipeOutcomeStore } from "@stores/swipe-outcome-store/swipe-outcome-store.service";
+import { BehaviorSubject, combineLatest, concat, forkJoin, Observable, of } from "rxjs";
 import {
-  generateSwipeStackResponse,
-  generateSwipeStackRequest,
-  profileFromDatabase,
-} from "@interfaces/index";
+  concatMap,
+  exhaustMap,
+  last,
+  map,
+  switchMap,
+  take,
+  tap,
+  withLatestFrom,
+} from "rxjs/operators";
+
+import { FormatService } from "@services/index";
+import { Profile, SearchCriteria } from "@classes/index";
+// store imports written this way to avoid circular dependency
+import { SwipeOutcomeStore } from "@stores/swipe-outcome-store/swipe-outcome-store.service";
+import { SearchCriteriaStore } from "@stores/search-criteria-store/search-criteria-store.service";
+import { generateSwipeStackResponse, profileFromDatabase } from "@interfaces/index";
+import { AngularFireStorage } from "@angular/fire/storage";
+// import { StackPicturesService } from "@services/pictures/stack-pictures/stack-pictures.service";
 
 @Injectable({
   providedIn: "root",
 })
 export class SwipeStackStore {
-  private _profiles: BehaviorSubject<Profile[]>;
-  public readonly profiles: Observable<Profile[]>;
+  private profiles = new BehaviorSubject<Profile[]>([]);
+  public readonly profiles$ = this.profiles.asObservable();
 
   constructor(
     private firestore: AngularFirestore,
-    private name: NameService,
     private afFunctions: AngularFireFunctions,
+    private afStorage: AngularFireStorage,
     private format: FormatService,
     private SCstore: SearchCriteriaStore,
-    private swipeOutcomeStore: SwipeOutcomeStore
-  ) {
-    this._profiles = new BehaviorSubject<Profile[]>([]);
-    this.profiles = this._profiles.asObservable();
-  }
+    private swipeOutcomeStore: SwipeOutcomeStore // private stackPictures: StackPicturesService
+  ) {}
 
   /** Initializes the store by adding new profiles to the queue (which should be empty at this point)
    * returns uid so that store initializations can be chained
    */
-  public async initializeStore(uid: string): Promise<string> {
-    let searchCriteria: SearchCriteria;
-    this.SCstore.searchCriteria.subscribe((SC) => (searchCriteria = SC)).unsubscribe();
-    await this.addToSwipeStackQueue(searchCriteria);
+  public initializeStore(uid: string): Observable<string> {
+    return this.SCstore.searchCriteria.pipe(
+      take(1),
+      exhaustMap((SC) => this.addToSwipeStackQueue(SC)),
+      tap(() => console.log("SwipeStackStore initialized.")),
+      map(() => uid)
+    );
+  }
 
-    console.log("SwipeStackStore initialized.");
-    return uid;
+  public managePictures(profiles: Profile[]): Observable<void> {
+    const pictureDownloads$ = profiles.reverse().map((p) => this.downloadPictures(p));
+    return concat(...pictureDownloads$).pipe(last());
+  }
+
+  // not good because only sends pictures of a given profile once they are all downloaded,
+  // but best I can do for now
+  public downloadPictures(profile: Profile) {
+    const pictureUrls$ = Array.from({ length: profile.pictureCount }).map((v, index) =>
+      this.getUrl(profile.uid, index)
+    );
+
+    return forkJoin(pictureUrls$).pipe(
+      concatMap((pictureUrls) => this.addUrls(pictureUrls, profile.uid))
+    );
+  }
+
+  private getUrl(uid: string, pictureIndex: number): Observable<string> {
+    return this.afStorage
+      .ref("profilePictures/" + uid + "/" + pictureIndex)
+      .getDownloadURL()
+      .pipe(take(1));
+  }
+
+  private addUrls(urls: string[], uid: string): Observable<void> {
+    return this.profiles$.pipe(
+      take(1),
+      tap((profiles) => {
+        const userIndex = profiles.map((p) => p.uid).indexOf(uid);
+        profiles[userIndex].pictureUrls = urls;
+
+        this.profiles.next(profiles);
+      }),
+      map(() => null)
+    );
   }
 
   /** Adds profiles to the queue a.k.a. beginning of Profiles array */
-  public async addToSwipeStackQueue(searchCriteria: SearchCriteria) {
-    if (!searchCriteria) {
-      console.error("No SC provided");
-      return;
-    }
-    const uids = await this.fetchUIDs(searchCriteria);
-    const newProfiles = await this.fetchProfiles(uids);
-    this.addToBottom(newProfiles);
+  public addToSwipeStackQueue(SC: SearchCriteria) {
+    return this.fetchUIDs(SC).pipe(
+      //using exhaustMap s.t. other requests are not listened to while profiles are being fetched
+      // this is because it is a costly operation w.r.t backened and money-wise, and that it is most likely
+      // a mistake
+      exhaustMap((uids) => this.fetchProfiles(uids)),
+      concatMap((profiles) => this.addToQueue(profiles)),
+      // THIS NEXT ONE IS WHY IT CONSOLE LOGS MANY TIMES STORE INITIALISED, AS THIS ONE EMITS
+      // ONCE FOR EVERY USER IT MANAGES THE PICTURES OF, HENCE EVERYTHING IS WORKING FINE,
+      // THE LOG JUST BECOMES MISLEADING DUE TO THIS SETUP
+      concatMap((profiles) => this.managePictures(profiles))
+    );
   }
 
   /** Removes a specific profile from the stack*/
-  public removeProfile(profile: Profile) {
-    this._profiles.next(
-      this._profiles.getValue().filter((profile_) => profile_.uid !== profile.uid)
+  public removeProfile(profile: Profile): Observable<void | string[]> {
+    return this.profiles$.pipe(
+      take(1),
+      map((profiles) => {
+        if (!profiles) return;
+        let profileToRemove: Profile;
+        this.profiles.next(
+          profiles.filter((p) => {
+            if (p.uid !== profile.uid) return true;
+            else {
+              profileToRemove = p;
+              return false;
+            }
+          })
+        );
+        return profileToRemove.pictureUrls;
+      }),
+      tap((urls) => {
+        if (!Array.isArray(urls)) return;
+        urls.forEach((url) => {
+          URL.revokeObjectURL(url);
+        });
+      })
     );
   }
 
-  /** Adds profiles to the bottom of the swipe stack a.k.a. the queue */
-  private addToBottom(newProfiles: Profile[]) {
-    this._profiles.next(newProfiles.concat(this._profiles.getValue()));
+  /** Adds profiles to the bottom of the swipe stack a.k.a. the queue
+   * Returns an observable of the new profiles
+   */
+  private addToQueue(newProfiles: Profile[]): Observable<Profile[]> {
+    return this.profiles$.pipe(
+      take(1),
+      tap((profiles) => this.profiles.next(newProfiles.concat(profiles))),
+      concatMap(() => of(newProfiles)) // makes it so that the observable returned gives an array of the new profiles
+    );
   }
 
   /** Gets the uids generated by the swipe stack generation algorithm */
-  private async fetchUIDs(SC: SearchCriteria): Promise<string[]> {
-    if (!SC) {
-      console.error("No SC or uid provided.");
-      return;
-    }
-    const searchCriteria = this.format.searchCriteriaClassToDatabase(SC);
-    const requestData: generateSwipeStackRequest = { searchCriteria };
-    const responseData = (await this.afFunctions
-      .httpsCallable("generateSwipeStack")(requestData)
-      .toPromise()) as generateSwipeStackResponse;
-
-    console.log("BROTHA", responseData);
-    this.swipeOutcomeStore.addToSwipeAnswers(responseData.users);
-
-    return responseData.users.map((user) => user.uid);
+  private fetchUIDs(SC: SearchCriteria): Observable<string[]> {
+    return of(this.format.searchCriteriaClassToDatabase(SC)).pipe(
+      map((SC) => {
+        return { SearchCriteria: SC };
+      }),
+      exhaustMap(
+        (request) =>
+          this.afFunctions.httpsCallable("generateSwipeStack")(
+            request
+          ) as Observable<generateSwipeStackResponse>
+      ),
+      tap((response) => this.swipeOutcomeStore.addToSwipeAnswers(response.users)),
+      map((response) => response.users.map((u) => u.uid))
+    );
   }
 
   /** Gets data from profile docs from an array of uids */
-  private async fetchProfiles(uids: string[]): Promise<Profile[]> {
-    if (!uids) {
-      console.error("No uids provided.");
-      return;
-    }
-
-    const snapshots = await Promise.all(
-      uids.map(async (userID) => {
-        const snapshot = await this.firestore
-          .collection(this.name.profileCollection)
-          .doc(userID)
-          .get()
-          .toPromise();
-        return snapshot;
-      })
+  private fetchProfiles(uids: string[]): Observable<Profile[]> {
+    return forkJoin(
+      uids.map(
+        (uid) =>
+          this.firestore.collection("profiles").doc(uid).get() as Observable<
+            DocumentSnapshot<profileFromDatabase>
+          >
+      )
+    ).pipe(
+      // formating profiles and filtering out those which are null
+      map((profileSnapshots) =>
+        profileSnapshots
+          .map((s) => {
+            if (!s.exists) return;
+            const data = s.data() as profileFromDatabase;
+            return this.format.profileDatabaseToClass(s.id, data);
+          })
+          .filter((s) => s)
+      )
     );
-
-    const profiles: Profile[] = snapshots.map((snap) => {
-      if (!snap.exists) return;
-      const data = snap.data() as profileFromDatabase;
-      return this.format.profileDatabaseToClass(snap.id, data);
-    });
-
-    return profiles;
   }
 }

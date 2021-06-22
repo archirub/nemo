@@ -1,7 +1,6 @@
 import { SexualPreference, Gender, SwipeMode } from "./../interfaces/match-data.model";
 import { Profile } from "./profile.class";
 import {
-  profilePicturePaths,
   SocialMediaLink,
   QuestionAndAnswer,
   University,
@@ -26,7 +25,8 @@ export class User extends Profile implements user {
     uid: string,
     firstName: string,
     dateOfBirth: Date,
-    // pictures: profilePicturePaths,
+    pictureCount: number,
+    pictureUrls: string[],
     biography: string,
     university: University,
     course: string,
@@ -41,14 +41,13 @@ export class User extends Profile implements user {
     gender: Gender,
     sexualPreference: SexualPreference,
     swipeMode: SwipeMode
-    // token: string|null,
-    // tokenExpirationDate: Date|null,
   ) {
     super(
       uid,
       firstName,
       dateOfBirth,
-      // pictures,
+      pictureCount,
+      pictureUrls,
       biography,
       university,
       course,
@@ -64,28 +63,7 @@ export class User extends Profile implements user {
     this.gender = gender;
     this.sexualPreference = sexualPreference;
     this.swipeMode = swipeMode;
-    // this.token = token;
-    // this.tokenExpirationDate = tokenExpirationDate;
   }
-  // public get tokenExpirationDate(): Date {
-  //   return this._tokenExpirationDate;
-  // }
-
-  // public set tokenExpirationDate(value: Date) {
-  //   this._tokenExpirationDate = value;
-  // }
-
-  // public get token(): string {
-  //   // check for an invalid token
-  //   if (!this._tokenExpirationDate || this.tokenExpirationDate <= new Date()) {
-  //     return null
-  //   }
-  //   return this._token;
-  // }
-
-  // public set token(value: string) {
-  //   this._token = value;
-  // }
 
   public get latestSearchCriteria(): SearchCriteria {
     return this._latestSearchCriteria;

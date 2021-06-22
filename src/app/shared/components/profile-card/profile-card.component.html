@@ -3,7 +3,11 @@
   <div #shadow class="img-shadow"></div>
   <div class="img-container">
     <div class="pager">
-      <ion-icon #bullets name="ellipse" *ngFor="let path of this.picturePaths"></ion-icon>
+      <ion-icon
+        #bullets
+        name="ellipse"
+        *ngFor="let path of profile?.pictureUrls"
+      ></ion-icon>
     </div>
     <ion-slides
       #picSlides
@@ -12,7 +16,7 @@
     >
       <ion-slide
         #pic
-        *ngFor="let path of this.picturePaths"
+        *ngFor="let path of profile?.pictureUrls"
         [ngStyle]="{
           'background-image': 'url(' + path + ')',
           'background-size': 'cover'
@@ -23,8 +27,8 @@
       </ion-slide>
     </ion-slides>
     <div #QandA class="question" [hidden]="moreInfo">
-      <ion-card-title #question>{{ profile.questions[0].question }}</ion-card-title>
-      <ion-card-subtitle #answer>{{ profile.questions[0].answer }}</ion-card-subtitle>
+      <ion-card-title #question>{{ profile?.questions[0].question }}</ion-card-title>
+      <ion-card-subtitle #answer>{{ profile?.questions[0].answer }}</ion-card-subtitle>
     </div>
   </div>
   <!-- <div id="QandA">
@@ -35,20 +39,20 @@
     <div #snippet id="snippetInfo" [hidden]="moreInfo" (click)="expandProfile($event)">
       <ion-card-header class="name-age">
         <ion-card-title #name
-          >{{ profile.firstName }}, {{ profile.dateOfBirth | age }}</ion-card-title
+          >{{ profile?.firstName }}, {{ profile?.dateOfBirth | age }}</ion-card-title
         >
         <ion-card-subtitle #department id="department"
-          >{{ profile.course }}, {{ profile.shortDegree() }}</ion-card-subtitle
+          >{{ profile?.course }}, {{ profile?.shortDegree() }}</ion-card-subtitle
         >
       </ion-card-header>
     </div>
     <div #complete id="completeInfo" [hidden]="!moreInfo">
       <ion-card-header #header class="name-age sticky" (click)="expandProfile($event)">
         <ion-card-title
-          >{{ profile.firstName }}, {{ profile.dateOfBirth | age }}
+          >{{ profile?.firstName }}, {{ profile?.dateOfBirth | age }}
         </ion-card-title>
         <ion-card-subtitle id="department"
-          >{{ profile.course }}, {{ profile.shortDegree() }}</ion-card-subtitle
+          >{{ profile?.course }}, {{ profile?.shortDegree() }}</ion-card-subtitle
         >
       </ion-card-header>
       <div #content id="content">
@@ -57,7 +61,7 @@
         <div id="info-segment">
           <!--INTERESTS IN THE DATABASE DON'T CURRENTLY MATCH LOCAL, THIS IS NOT WIRED UP FOR ICONS -->
           <div id="interests-container">
-            <div id="interests-box" *ngFor="let interests of profile.interests">
+            <div id="interests-box" *ngFor="let interests of profile?.interests">
               <img
                 id="interests-icon"
                 src="/assets/interests/pubcrawler.png"
@@ -86,19 +90,19 @@
         </div>
         <div id="society-list">
           <p>
-        <span id="society-field">Member of: </span> <span id="society-label">{{profile.society}}</span>
+        <span id="society-field">Member of: </span> <span id="society-label">{{profile?.society}}</span>
         <p>
         </div>
         </div-->
 
         <div id="info-segment">
           <div id="bio">
-            "{{ profile.biography }}" <br /><br />
-            <span *ngFor="let sm of profile.socialMediaLinks">
+            "{{ profile?.biography }}" <br /><br />
+            <span *ngFor="let sm of profile?.socialMediaLinks">
               <!-- dont delete this line, it is a safegaurd for missing links -->
               <!-- <div *ngIf="sm.link">{{sm.socialMedia | titlecase}}: {{sm.link}}<br/></div> -->
               <div *ngIf="sm.link">
-                {{ sm.socialMedia | titlecase }}: {{ sm.link }}<br />
+                {{ sm?.socialMedia | titlecase }}: {{ sm?.link }}<br />
               </div>
             </span>
           </div>
@@ -123,7 +127,7 @@
                 style="color: var(--ion-color-primary)"
               ></ion-icon>
               <br />
-              <ion-label id="interests-label">{{ profile.society }}</ion-label>
+              <ion-label id="interests-label">{{ profile?.society }}</ion-label>
             </div>
           </div>
         </div>

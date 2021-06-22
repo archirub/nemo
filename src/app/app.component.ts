@@ -81,6 +81,11 @@ export class AppComponent implements OnInit, OnDestroy {
         console.log("current user logged in,", user?.uid);
         if (user) {
           this.router.navigateByUrl("main/tabs/home");
+          this.currentUserStore.initializeStore(user.uid);
+
+          this.swipeStackStore.initializeStore(user.uid).subscribe();
+
+          // this.chatStore.initializeStore(user.uid);
         }
       });
 

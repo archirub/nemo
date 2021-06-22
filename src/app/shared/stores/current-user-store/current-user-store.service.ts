@@ -19,18 +19,15 @@ import { SearchCriteriaStore } from "../search-criteria-store/search-criteria-st
   providedIn: "root",
 })
 export class CurrentUserStore {
-  private _user: BehaviorSubject<User>;
-  public readonly user: Observable<User>;
+  private user: BehaviorSubject<User> = new BehaviorSubject<User>(null);
+  public readonly user$: Observable<User> = this.user.asObservable();
 
   constructor(
     private fs: AngularFirestore,
     private afFunctions: AngularFireFunctions,
     private format: FormatService,
     private SCstore: SearchCriteriaStore
-  ) {
-    this._user = new BehaviorSubject<User>(null);
-    this.user = this._user.asObservable();
-  }
+  ) {}
 
   /** Initialises the store
    * returns uid so that store initializations can be chained
@@ -133,7 +130,8 @@ export class CurrentUserStore {
       profile.uid,
       profile.firstName,
       profile.dateOfBirth,
-      // profile.pictures,
+      profile.pictureCount,
+      profile.pictureUrls,
       profile.biography,
       profile.university,
       profile.course,
@@ -150,6 +148,6 @@ export class CurrentUserStore {
       infoFromMatchData.swipeMode
     );
 
-    this._user.next(user);
+    this.user.next(user);
   }
 }

@@ -4,17 +4,17 @@
       *ngFor="let picture of this.pictures; let i = index"
       (click)="selectInterest(this.names[i])"
       [style.border]="
-        this.interests.includes(this.names[i])
+        this.interests?.includes(this.names[i])
           ? 'solid 1px var(--ion-color-primary)'
           : 'solid 1px var(--ion-color-primary-contrast)'
       "
       [style.background]="
-        this.interests.includes(this.names[i])
+        this.interests?.includes(this.names[i])
           ? '#FFDED0'
           : 'var(--ion-color-primary-contrast)'
       "
       [style.color]="
-        this.interests.includes(this.names[i])
+        this.interests?.includes(this.names[i])
           ? 'var(--ion-color-primary)'
           : 'var(--ion-color-light-contrast)'
       "

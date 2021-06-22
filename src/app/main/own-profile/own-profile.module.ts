@@ -13,8 +13,9 @@ import { AppToggleModule } from "@components/nemo-toggle/nemo-toggle.component.m
 import { PipesModule } from "../../shared/pipes/pipes.module";
 import { ProfileAnswerComponent } from "./profile-answer/profile-answer.component";
 import { ProfileCourseComponent } from "./profile-course/profile-course.component";
-import { InterestSlidesComponent } from "@components/index";
+import { InterestSlidesComponent, ProfileEditPhotoPage } from "@components/index";
 import { InterestSlidesModule } from "@components/interests-slides/interests-slides.component.module";
+import { ProfileEditPhotoPageModule } from "@components/profile-edit-photo/profile-edit-photo.module";
 
 @NgModule({
   imports: [
@@ -27,6 +28,7 @@ import { InterestSlidesModule } from "@components/interests-slides/interests-sli
     AppToggleModule,
     InterestSlidesModule,
     PipesModule,
+    ProfileEditPhotoPageModule,
   ],
   declarations: [OwnProfilePage, ProfileAnswerComponent, ProfileCourseComponent],
 })

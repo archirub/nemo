@@ -1,9 +1,6 @@
 import { Component, OnInit, ViewChild, OnDestroy } from "@angular/core";
 import { IonContent } from "@ionic/angular";
-import {
-  AngularFirestore,
-  DocumentChangeAction,
-} from "@angular/fire/firestore";
+import { AngularFirestore, DocumentChangeAction } from "@angular/fire/firestore";
 
 import { Observable, Subscription } from "rxjs";
 import { map, take } from "rxjs/operators";
@@ -27,14 +24,11 @@ export class ChatsPage implements OnInit, OnDestroy {
   public chats: Observable<Chat[]>;
   public chatProfiles: Observable<Profile[]>;
 
-  constructor(
-    private swipeStackStore: SwipeStackStore,
-    private chatStore: ChatStore
-    ) {}
+  constructor(private swipeStackStore: SwipeStackStore, private chatStore: ChatStore) {}
 
   ngOnInit() {
     this.chats = this.chatStore.chats;
-    this.chatProfiles = this.swipeStackStore.profiles;
+    this.chatProfiles = this.swipeStackStore.profiles$;
   }
 
   scrollToTop() {

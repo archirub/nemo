@@ -69,7 +69,7 @@ export class SwipeCardComponent extends EventEmitter implements OnInit, OnDestro
 
   ngOnInit() {
     // Subscription for chat doc creation in case of match
-    this.currentUser$ = this.currentUserStore.user.subscribe(
+    this.currentUser$ = this.currentUserStore.user$.subscribe(
       (profile) => (this.currentUser = profile)
     );
     this.screenTaps = 0;

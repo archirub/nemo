@@ -5,8 +5,6 @@
         <ion-icon slot="icon-only" name="search-outline"></ion-icon>
       </ion-button>
     </div>
-    <app-swipe-card
-      [profiles]="swipeProfiles | async"
-    ></app-swipe-card>
+    <app-swipe-card [profiles]="swipeStackStore.profiles$ | async"></app-swipe-card>
   </div>
 </ion-content>
