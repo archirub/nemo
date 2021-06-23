@@ -9,6 +9,8 @@ import {
   ViewChildren,
   ViewChild,
   ElementRef,
+  Output,
+  EventEmitter
 } from "@angular/core";
 
 import { Subscription } from "rxjs";
@@ -28,7 +30,6 @@ import {
   NoBubbleAnimation,
 } from "@animations/index";
 import { swipeChoice } from "@interfaces/index";
-import { EventEmitter } from "events";
 
 @Component({
   selector: "app-swipe-card",
@@ -37,6 +38,7 @@ import { EventEmitter } from "events";
 })
 export class SwipeCardComponent extends EventEmitter implements OnInit, OnDestroy {
   @Input() profiles: Profile[];
+  @Output() matched = new EventEmitter();
   @ViewChildren("card", { read: ElementRef }) card: QueryList<ElementRef>;
   @ViewChild("yesBubble", { read: ElementRef }) yesBubble: ElementRef;
   @ViewChild("noBubble", { read: ElementRef }) noBubble: ElementRef;
@@ -138,22 +140,26 @@ export class SwipeCardComponent extends EventEmitter implements OnInit, OnDestro
       this.screenTaps = 0;
     }, 500);
 
-    if (this.screenTaps > 1) {
-      // console.log("Double tap detected.");
+    if (this.screenTaps > 1) { //Double tap event
       this.screenTaps = 0;
 
-      if (choice === "yes") {
+      if (choice === "yes") { //Yes side of profile
         this.swipeYesAnimation.play();
         setTimeout(() => {
           this.onYesSwipe(this.profiles[0]);
+
+          this.matched.emit([this.profiles[0].firstName,this.profiles[0].pictureUrls[0]]); //BASIC MATCH TRIGGER TO BE WIRED PROPERLY
         }, 400);
-      } else if (choice === "no") {
+
+      } else if (choice === "no") { //No side of profile
         this.swipeNoAnimation.play();
         setTimeout(() => {
           this.onNoSwipe(this.profiles[0]);
         }, 400);
       }
+
     } else if (this.screenTaps == 1) {
+
       if (choice === "yes") {
         this.yesBubbleAnimation = YesBubbleAnimation(
           this.yesBubble,
@@ -161,6 +167,7 @@ export class SwipeCardComponent extends EventEmitter implements OnInit, OnDestro
           this.profileComponent.Y
         );
         this.yesBubbleAnimation.play();
+
       } else if (choice === "no") {
         this.noBubbleAnimation = NoBubbleAnimation(
           this.noBubble,

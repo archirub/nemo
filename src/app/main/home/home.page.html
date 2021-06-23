@@ -1,19 +1,26 @@
-<ion-content #homeContainer>
-  <div>
-    <ion-button style="z-index: 100;" (click)="playCatch()">Catch</ion-button>
-    <div #pic1 class="picholder left"></div>
-    <div #pic2 class="picholder right"></div>
-    <div #catchText class="textholder">
-      <h1 class="catchtext">It's a Catch!</h1>
-    </div>
-  </div>
+<!--ion-button style="z-index: 100; width: 20vw" (click)="playCatch()">Catch</ion-button-->
 
-  <div class="swipe-stack">
+<div id="catchEls">
+  <div #pic1 class="picholder left"></div>
+  <div #pic2 class="picholder right"></div>
+  <div #catchText class="textholder">
+    <h1 class="catchtext">It's a Catch!</h1>
+  </div>
+  <ion-button id="closeAnimation" (click)="closeCatch()"><ion-icon name="close-outline"></ion-icon></ion-button>
+  <div #messageText id="messageText">
+    <h1 class="catchtext">Chat with {{ this.matchedName }}</h1>
+  </div>
+</div>
+
+<ion-content #homeContainer>
+  <div class="swipe-stack" #swipeCards>
     <div class="search">
       <ion-button #searchButton id="searchButton" (click)="presentSCmodal()">
         <ion-icon slot="icon-only" name="search-outline"></ion-icon>
       </ion-button>
     </div>
-    <app-swipe-card [profiles]="swipeStackStore.profiles$ | async"></app-swipe-card>
+    <app-swipe-card 
+    [profiles]="swipeStackStore.profiles$ | async"
+    (matched)="playCatch($event)"></app-swipe-card>
   </div>
 </ion-content>

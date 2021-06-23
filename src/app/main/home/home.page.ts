@@ -14,8 +14,15 @@ import { throttle, filter, tap, take, delay, map } from "rxjs/operators";
 import { SearchCriteriaComponent } from "./search-criteria/search-criteria.component";
 
 import { Profile, SearchCriteria } from "@classes/index";
-import { SearchCriteriaStore, SwipeOutcomeStore, SwipeStackStore } from "@stores/index";
-import { SCenterAnimation, SCleaveAnimation, LeftPicAnimation, RightPicAnimation, TextAnimation } from "@animations/index";
+import { CurrentUserStore, SearchCriteriaStore, SwipeOutcomeStore, SwipeStackStore } from "@stores/index";
+
+import { 
+  SCenterAnimation, 
+  SCleaveAnimation, 
+  OpenCatchAnimation,
+  CloseCatchAnimation
+ } from "@animations/index";
+
 import { FormatService } from "@services/index";
 import { TabElementRefService } from "src/app/main/tab-menu/tab-element-ref.service";
 import { SwipeCardComponent } from "./swipe-card/swipe-card.component";
@@ -41,9 +48,12 @@ export class HomePage implements OnInit, OnDestroy {
   // PROPERTIES FOR MODAL ANIMATION
   @ViewChild("homeContainer", { read: ElementRef }) homeContainer: ElementRef;
   @ViewChild("searchButton", { read: ElementRef }) searchButton: ElementRef;
+
   @ViewChild('pic1', { read: ElementRef }) pic1: ElementRef;
   @ViewChild('pic2', { read: ElementRef }) pic2: ElementRef;
   @ViewChild('catchText', { read: ElementRef }) catchText: ElementRef;
+  @ViewChild('swipeCards', { read: ElementRef }) swipeCards: ElementRef;
+
   screenHeight: number;
   screenWidth: number;
   @HostListener("window:resize", ["$event"])
@@ -57,6 +67,7 @@ export class HomePage implements OnInit, OnDestroy {
   constructor(
     private swipeStackStore: SwipeStackStore,
     private SCstore: SearchCriteriaStore,
+    private currentUserStore: CurrentUserStore,
     private modalCtrl: ModalController,
     private tabElementRef: TabElementRefService,
     private swipeOutcomeStore: SwipeOutcomeStore,
@@ -71,7 +82,13 @@ export class HomePage implements OnInit, OnDestroy {
   modal: HTMLIonModalElement;
   SCenterAnimation;
   SCleaveAnimation;
-  catchAnimations;
+
+  openCatchAnimation;
+  closeCatchAnimation;
+  matchedName: string;
+  matchedPicture;
+  currentUser; //profile
+  currentUser$; //subscription
 
   async ngOnInit() {
     this.searchCriteria$ = this.SCstore.searchCriteria.subscribe((SC) => {
@@ -95,6 +112,13 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   ionViewDidEnter() {
+    // Subscription for chat doc creation in case of match
+    this.currentUser$ = this.currentUserStore.user$.subscribe(
+      (profile) => {
+        this.currentUser = profile;
+      }
+    );
+
     this.SCenterAnimation = SCenterAnimation(
       this.tabElementRef.tabRef,
       this.homeContainer
@@ -102,6 +126,24 @@ export class HomePage implements OnInit, OnDestroy {
     this.SCleaveAnimation = SCleaveAnimation(
       this.tabElementRef.tabRef,
       this.homeContainer
+    );
+
+    this.openCatchAnimation = OpenCatchAnimation(
+      this.screenHeight,
+      this.screenWidth,
+      this.pic1,
+      this.pic2,
+      this.catchText,
+      this.swipeCards
+    );
+
+    this.closeCatchAnimation = CloseCatchAnimation(
+      this.screenHeight,
+      this.screenWidth,
+      this.pic1,
+      this.pic2,
+      this.catchText,
+      this.swipeCards
     );
 
     this.modalCtrl
@@ -138,27 +180,43 @@ export class HomePage implements OnInit, OnDestroy {
     });
   }
 
-  playCatch() {
-    this.catchAnimations = [
-      LeftPicAnimation(
-        this.screenHeight,
-        this.screenWidth,
-        this.pic1
-      ),
-      RightPicAnimation (
-        this.screenHeight,
-        this.screenWidth,
-        this.pic2
-      ),
-      TextAnimation(
-        this.catchText
-      )
-    ];
+  playCatch(matchContents) {
+    this.matchedName = matchContents[0];
+    this.matchedPicture = matchContents[1];
+    
+    console.log(this.currentUser);
+    this.pic1.nativeElement.style.background = `url(${this.currentUser.pictureUrls[0]})`;
+    this.pic1.nativeElement.style.backgroundSize = 'cover';
 
-    this.catchAnimations.forEach(anim => {
-      anim.play();
-    });
+    //style match profile to have matched picture
+    this.pic2.nativeElement.style.background = `url(${this.matchedPicture})`;
+    this.pic2.nativeElement.style.backgroundSize = 'cover';
 
+    let catchItems = document.getElementById("catchEls");
+
+    catchItems.style.display = "block";
+
+    var closeButton = document.getElementById('closeAnimation');
+    var messageText = document.getElementById('messageText');
+
+    this.openCatchAnimation.play();
+
+    closeButton.style.display = "block";
+    messageText.style.display = "flex";
+
+  }
+
+  closeCatch() {
+    let catchItems = document.getElementById("catchEls");
+
+    this.closeCatchAnimation.play();
+
+    setTimeout(() => { 
+      catchItems.style.display = "none"; 
+
+      //Remove background photo from match card
+      this.pic2.nativeElement.style.background = 'black';
+    }, 350);
   }
 
   ngOnDestroy() {

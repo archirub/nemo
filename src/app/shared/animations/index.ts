@@ -4,3 +4,4 @@ export * from "./matches.animation";
 export * from "./swipe.animation";
 export * from "./bubble.animation";
 export * from "./letter.animation";
+export * from "./catch.animation";
