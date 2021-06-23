@@ -105,7 +105,7 @@ export const BackAnimation = (baseEl: any) => {
 
     return backAnimation;
   };
-
+  
 export const OpenCatchAnimation = (
   viewHeight: number,
   viewWidth: number,

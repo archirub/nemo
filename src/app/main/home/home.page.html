@@ -6,10 +6,17 @@
   <div #catchText class="textholder">
     <h1 class="catchtext">It's a Catch!</h1>
   </div>
+  
   <ion-button id="closeAnimation" (click)="closeCatch()"><ion-icon name="close-outline"></ion-icon></ion-button>
   <div #messageText id="messageText">
     <h1 class="catchtext">Chat with {{ this.matchedName }}</h1>
   </div>
+
+  <div class="center">
+    <img #fish src="/assets/nemo.png" class="fish"/>
+  </div>
+  <img #leftFish src="/assets/singlefish.png" class="singlefish left"/>
+  <img #rightFish src="/assets/singlefish.png" class="singlefish right"/>
 </div>
 
 <ion-content #homeContainer>

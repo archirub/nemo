@@ -20,7 +20,9 @@ import {
   SCenterAnimation, 
   SCleaveAnimation, 
   OpenCatchAnimation,
-  CloseCatchAnimation
+  CloseCatchAnimation,
+  FishSwimAnimation,
+  FishEnterAnimation
  } from "@animations/index";
 
 import { FormatService } from "@services/index";
@@ -53,6 +55,9 @@ export class HomePage implements OnInit, OnDestroy {
   @ViewChild('pic2', { read: ElementRef }) pic2: ElementRef;
   @ViewChild('catchText', { read: ElementRef }) catchText: ElementRef;
   @ViewChild('swipeCards', { read: ElementRef }) swipeCards: ElementRef;
+  @ViewChild('fish', { read: ElementRef }) fish: ElementRef;
+  @ViewChild('leftFish', { read: ElementRef }) leftFish: ElementRef;
+  @ViewChild('rightFish', { read: ElementRef }) rightFish: ElementRef;
 
   screenHeight: number;
   screenWidth: number;
@@ -85,6 +90,8 @@ export class HomePage implements OnInit, OnDestroy {
 
   openCatchAnimation;
   closeCatchAnimation;
+  fishEnterAnimation;
+  fishSwimAnimation;
   matchedName: string;
   matchedPicture;
   currentUser; //profile
@@ -146,6 +153,9 @@ export class HomePage implements OnInit, OnDestroy {
       this.swipeCards
     );
 
+    this.fishSwimAnimation = FishSwimAnimation(this.fish);
+    this.fishEnterAnimation = FishEnterAnimation(this.screenWidth, this.leftFish, this.rightFish);
+
     this.modalCtrl
       .create({
         component: SearchCriteriaComponent,
@@ -184,7 +194,6 @@ export class HomePage implements OnInit, OnDestroy {
     this.matchedName = matchContents[0];
     this.matchedPicture = matchContents[1];
     
-    console.log(this.currentUser);
     this.pic1.nativeElement.style.background = `url(${this.currentUser.pictureUrls[0]})`;
     this.pic1.nativeElement.style.backgroundSize = 'cover';
 
@@ -195,11 +204,13 @@ export class HomePage implements OnInit, OnDestroy {
     let catchItems = document.getElementById("catchEls");
 
     catchItems.style.display = "block";
+    this.fish.nativeElement.style.display = "flex";
 
     var closeButton = document.getElementById('closeAnimation');
     var messageText = document.getElementById('messageText');
 
     this.openCatchAnimation.play();
+    this.fishSwimAnimation.play();
 
     closeButton.style.display = "block";
     messageText.style.display = "flex";
@@ -216,6 +227,7 @@ export class HomePage implements OnInit, OnDestroy {
 
       //Remove background photo from match card
       this.pic2.nativeElement.style.background = 'black';
+      this.fishSwimAnimation.destroy();
     }, 350);
   }
 
