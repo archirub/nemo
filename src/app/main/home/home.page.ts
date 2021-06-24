@@ -235,6 +235,6 @@ export class HomePage implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.searchCriteria$.unsubscribe();
-    this.swipeStackRefill$.unsubscribe();
+    //this.swipeStackRefill$.unsubscribe();
   }
 }

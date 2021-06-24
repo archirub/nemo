@@ -1,10 +1,10 @@
 <ion-content>
+  <form [formGroup]="form">
   <ion-slides pager="false" options="{pagination: false, onlyExternal: false}" #slide>
     <ion-slide>
-      <ion-item lines="none">
         <div #container class="container">
           <div class="flexbetween-row">
-            <h1>My settings</h1>
+            <h1>Your settings</h1>
             <a (click)="goBack()"><ion-icon name="close-outline"></ion-icon></a>
           </div>
           <div class="flexeven-col">
@@ -54,7 +54,6 @@
             </div>
           </div>
         </div>
-      </ion-item>
     </ion-slide>
 
     <!-- Necessary in order to allow swipes to specific slides,
@@ -62,11 +61,10 @@
     <ion-slide id="placeholder"></ion-slide>
 
     <ion-slide id="legal">
-      <ion-item lines="none">
         <div class="container">
           <div class="flexbetween-row">
             <h1>Legal</h1>
-            <a href="/tabs/own-profile"><ion-icon name="close-outline"></ion-icon></a>
+            <a (click)="goBack()"><ion-icon name="close-outline"></ion-icon></a>
           </div>
 
           <div class="flexstart-row" (click)="returnToSettings()">
@@ -86,15 +84,13 @@
             </div>
           </div>
         </div>
-      </ion-item>
     </ion-slide>
 
     <ion-slide id="preferences">
-      <ion-item lines="none">
         <div class="container">
           <div class="flexbetween-row">
             <h1>Your Preferences</h1>
-            <a href="/tabs/own-profile"><ion-icon name="close-outline"></ion-icon></a>
+            <a (click)="goBack()"><ion-icon name="close-outline"></ion-icon></a>
           </div>
 
           <div class="flexstart-row" (click)="returnToSettings()">
@@ -102,84 +98,79 @@
             <p class="return">Return to Settings</p>
           </div>
 
-          <!-- NOTE: ion-select is also commented out below available to be implemented -->
-          <!-- Remember to change sass if switching to ion-selects -->
+          <!-- NOTE: select is also commented out below available to be implemented -->
 
-          <div class="flexstart-col">
-            <div class="slide-button preferences">
-              <p>I am looking for</p>
-              <!--ion-select
-                cancelText="Nah"
-                okText="Okay!"
-              >
-                <ion-select-option>dating</ion-select-option>
-                <ion-select-option>friends</ion-select-option>
-              </ion-select-->
-              <select>
-                <option disabled selected hidden value></option>
-                <option value="dating">dating</option>
-                <option value="friends">friends</option>
-              </select>
-            </div>
+            <div class="flexstart-col">
+              <div class="slide-button preferences">
+                <p>I am looking for</p>
+                <ion-select formControlName="swipeMode">
+                  <ion-select-option 
+                  *ngFor="let swipeMode of swipeModeOptions" 
+                  value="{{swipeMode}}">
+                    {{ swipeMode }}
+                  </ion-select-option>
+                </ion-select>
+                <!--select>
+                  <option disabled selected hidden value></option>
+                  <option value="dating">dating</option>
+                  <option value="friends">friends</option>
+                </select-->
+              </div>
 
-            <div class="slide-button preferences">
-              <p>I am interested in</p>
-              <!--ion-select
-                cancelText="Nah"
-                okText="Okay!"
-              >
-                <ion-select-option>boys</ion-select-option>
-                <ion-select-option>girls</ion-select-option>
-                <ion-select-option>all genders</ion-select-option>
-              </ion-select-->
-              <select>
-                <option disabled selected hidden value></option>
-                <option value="boys">boys</option>
-                <option value="girls">girls</option>
-                <option value="all genders">all genders</option>
-              </select>
-            </div>
+              <div class="slide-button preferences">
+                <p>I am interested in</p>
+                <ion-select formControlName="sexualPreference">
+                  <ion-select-option
+                    *ngFor="let sexPref of sexualPreferenceOptions"
+                    value="{{sexPref}}">
+                    {{ sexPref }}
+                    </ion-select-option>
+                </ion-select>
+                <!--select>
+                  <option disabled selected hidden value></option>
+                  <option value="boys">boys</option>
+                  <option value="girls">girls</option>
+                  <option value="all genders">all genders</option>
+                </select-->
+              </div>
 
-            <div class="slide-button preferences">
-              <p>I identify as</p>
-              <!--ion-select
-                cancelText="Nah"
-                okText="Okay!"
-              >
-                <ion-select-option>female</ion-select-option>
-                <ion-select-option>male</ion-select-option>
-                <ion-select-option>non-binary</ion-select-option>
-                <ion-select-option>gender fluid</ion-select-option>
-                <ion-select-option>agender</ion-select-option>
-              </ion-select-->
-              <select>
-                <option disabled selected hidden value></option>
-                <option value="female">female</option>
-                <option value="male">male</option>
-                <option value="non-binary">non-binary</option>
-                <option value="gender-fluid">gender fluid</option>
-                <option value="agender">agender</option>
-              </select>
-            </div>
+              <div class="slide-button preferences">
+                <p>I identify as</p>
+                <ion-select formControlName="gender">
+                  <ion-select-option 
+                  *ngFor="let gender of genderOptions" 
+                  value="{{gender}}">
+                    {{ gender }}
+                  </ion-select-option>
+                </ion-select>
+                <!--select>
+                  <option disabled selected hidden value></option>
+                  <option value="female">female</option>
+                  <option value="male">male</option>
+                  <option value="non-binary">non-binary</option>
+                  <option value="gender-fluid">gender fluid</option>
+                  <option value="agender">agender</option>
+                </select-->
+              </div>
 
-            <div class="slide-button preferences">
-              <p>I am currently living</p>
-              <!--ion-select
-                cancelText="Nah"
-                okText="Okay!"
-              >
-                <ion-select-option>on campus</ion-select-option>
-                <ion-select-option>off campus</ion-select-option>
-              </ion-select-->
-              <select>
-                <option disabled selected hidden value></option>
-                <option value="campus">on campus</option>
-                <option value="home">off campus</option>
-              </select>
+              <div class="slide-button preferences">
+                <p>I am currently on campus</p>
+                <ion-select formControlName="onCampus">
+                  <ion-select-option 
+                  *ngFor="let onCampus of onCampusOptions" 
+                  value="{{onCampus}}">
+                    {{ onCampus }}
+                  </ion-select-option>
+                </ion-select>
+                <!--select>
+                  <option disabled selected hidden value></option>
+                  <option value="campus">on campus</option>
+                  <option value="home">off campus</option>
+                </select-->
+              </div>
             </div>
-          </div>
         </div>
-      </ion-item>
     </ion-slide>
   </ion-slides>
+  </form>
 </ion-content>
