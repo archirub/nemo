@@ -135,26 +135,8 @@ export class HomePage implements OnInit, OnDestroy {
       this.homeContainer
     );
 
-    this.openCatchAnimation = OpenCatchAnimation(
-      this.screenHeight,
-      this.screenWidth,
-      this.pic1,
-      this.pic2,
-      this.catchText,
-      this.swipeCards
-    );
-
-    this.closeCatchAnimation = CloseCatchAnimation(
-      this.screenHeight,
-      this.screenWidth,
-      this.pic1,
-      this.pic2,
-      this.catchText,
-      this.swipeCards
-    );
-
     this.fishSwimAnimation = FishSwimAnimation(this.fish);
-    this.fishEnterAnimation = FishEnterAnimation(this.screenWidth, this.leftFish, this.rightFish);
+    //this.fishEnterAnimation = FishEnterAnimation(this.screenWidth, this.leftFish, this.rightFish);
 
     this.modalCtrl
       .create({
@@ -191,6 +173,16 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   playCatch(matchContents) {
+    this.openCatchAnimation = OpenCatchAnimation(
+      this.screenHeight,
+      this.screenWidth,
+      this.pic1,
+      this.pic2,
+      this.catchText,
+      this.swipeCards
+    ); //DO NOT MOVE THIS OUT TO ANOTHER HOOK
+    //CANNOT REPLAY UNLESS REINITIALISED HERE BECAUSE IT USES THE SAME ELEMENTS AS CLOSE
+
     this.matchedName = matchContents[0];
     this.matchedPicture = matchContents[1];
     
@@ -218,6 +210,16 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   closeCatch() {
+    this.closeCatchAnimation = CloseCatchAnimation(
+      this.screenHeight,
+      this.screenWidth,
+      this.pic1,
+      this.pic2,
+      this.catchText,
+      this.swipeCards
+    ); //DO NOT MOVE THIS OUT TO ANOTHER HOOK
+    //CANNOT REPLAY UNLESS REINITIALISED HERE BECAUSE IT USES THE SAME ELEMENTS AS OPEN
+
     let catchItems = document.getElementById("catchEls");
 
     this.closeCatchAnimation.play();
@@ -227,7 +229,7 @@ export class HomePage implements OnInit, OnDestroy {
 
       //Remove background photo from match card
       this.pic2.nativeElement.style.background = 'black';
-      this.fishSwimAnimation.destroy();
+      this.fishSwimAnimation.pause();
     }, 350);
   }
 

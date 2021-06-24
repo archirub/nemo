@@ -100,12 +100,13 @@ export const BackAnimation = (baseEl: any) => {
     backAnimation
       .addElement(baseEl.nativeElement)
       .duration(300)
-      .fromTo("opacity", "1", "0.8")
+      .fromTo("opacity", "1", "0.4")
       .fromTo("filter", "blur(0px) opacity(1)", "blur(20px) opacity(1)")
+      .fromTo("backgroundColor", "transparent", "var(--ion-color-secondary-shade)");
 
     return backAnimation;
   };
-  
+
 export const OpenCatchAnimation = (
   viewHeight: number,
   viewWidth: number,

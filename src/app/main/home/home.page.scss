@@ -53,7 +53,7 @@
 h1.catchtext {
   font-family: 'Grand Hotel';
   font-size: 6vh;
-  color: var(--ion-color-primary);
+  color: var(--ion-color-tertiary);
 }
 
 .backdrop {
@@ -65,7 +65,7 @@ h1.catchtext {
 }
 
 #closeAnimation {
-  color: var(--ion-color-primary);
+  color: var(--ion-color-tertiary);
   --background: transparent;
   --background-activated: transparent;
   position: absolute;
@@ -82,11 +82,11 @@ h1.catchtext {
   width: 100vw;
   position: absolute;
   z-index: 101;
-  bottom: 18.5vh;
+  bottom: 27vh;
 
   h1 {
     font-family: 'Cabin';
-    color: var(--ion-color-primary);
+    color: var(--ion-color-tertiary);
     font-size: 3.5vh;
   }
 }
@@ -97,6 +97,15 @@ h1.catchtext {
   position: absolute;
   z-index: 100;
   top: 60vh;
+}
+
+//This is here to stop click throughs to swipe stack on match event
+#catchEls {
+  display: none;
+  height: 100vh;
+  z-index: 99;
+  position: absolute;
+  width: 100vw;
 }
 
 /*.singlefish {
