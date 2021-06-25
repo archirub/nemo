@@ -130,6 +130,7 @@ export class SettingsPage implements AfterViewInit {
     this.unlockAndSwipe("prev");
     var legal = document.getElementById("legal");
     var prefs = document.getElementById("preferences");
+    var support = document.getElementById("support");
     var placeholder = document.getElementById("placeholder");
 
     // Wait 0.2s to replace slides with placeholder so people don't see it disappear in the slide animation
@@ -137,24 +138,26 @@ export class SettingsPage implements AfterViewInit {
       placeholder.style.display = "block";
       legal.style.display = "none";
       prefs.style.display = "none";
+      support.style.display = "none";
     }, 200);
   }
 
-  /* Replaces placeholder slide with selected slide and swipes to */
   selectSlide(slide) {
-    var legal = document.getElementById("legal");
-    var prefs = document.getElementById("preferences");
+    /** For this function to work, the input 'slide' should be the same as the slide id
+     * Hides placeholder slide and displays selected slide by id
+     * Swipes to the targeted slide
+    **/
+
     var placeholder = document.getElementById("placeholder");
     placeholder.style.display = "none";
 
-    if (slide == "legal") {
-      legal.style.display = "block";
-      this.unlockAndSwipe("next");
-    } else if (slide == "prefs") {
-      prefs.style.display = "block";
-      this.unlockAndSwipe("next");
-    } else {
-      console.log("Missing slides?");
-    }
+    var target = document.getElementById(`${slide}`); //get slide by id from input
+    target.style.display = "block";
+
+    this.unlockAndSwipe("next"); //move to slide
+  }
+
+  openEmail() {
+    window.open('mailto:customersupport@nemodating.com');
   }
 }

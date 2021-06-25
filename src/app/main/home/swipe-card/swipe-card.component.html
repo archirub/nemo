@@ -2,11 +2,13 @@
   <div class="background">
     <ion-icon id="yesBubble" #yesBubble name="heart-circle-outline"></ion-icon>
     <ion-icon id="noBubble" #noBubble name="close-circle-outline"></ion-icon>
+
     <div #card class="swipe-cards" *ngFor="let profile of profiles; index as i; first as isFirst; last as isLast"
     [ngStyle]="{ 'zIndex': profiles.length - i }">
         <app-profile-card #profileComponent (tapped)="doubleTap($event)" [profile] = "profile">
         </app-profile-card>
     </div>
+    
     <div class="shadow"></div>
   </div>
 </ion-content>

@@ -1,4 +1,6 @@
 <ion-content>
+  <div class="shadow"></div>
+
   <div id="profile" style="display: flex">
     <app-profile-card [profile]="profile" [reportable]="false"></app-profile-card>
     <!--div class="container">
@@ -84,7 +86,10 @@
       ></profile-course>
 
       <h2>My interests</h2>
-      <interests-slides [interests]="profile?.interests"></interests-slides>
+      <interests-slides 
+      [interests]="profile?.interests" 
+      [listed]="false"
+      ></interests-slides>
     </div>
   </div>
 </ion-content>

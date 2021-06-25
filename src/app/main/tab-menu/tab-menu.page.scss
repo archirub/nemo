@@ -5,3 +5,16 @@
 ion-tab-button {
     --ripple-color: transparent;
 } 
+
+img[name=fish] {
+    height: 27px;
+    transform: rotate(-190deg);
+}
+
+ion-icon {
+    height: 25px;
+}
+
+ion-label {
+    font-size: 12px;
+}

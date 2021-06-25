@@ -6,6 +6,10 @@ $swipe-width: 100vw;
 // tab-menu, if the latter touches the bottom of the screen
 $tab-height: 0vh;
 
+ion-content {
+  --overflow: hidden;
+}
+
 .shadow {
   position: absolute;
     box-shadow: 0px 0px 20px -12px;
