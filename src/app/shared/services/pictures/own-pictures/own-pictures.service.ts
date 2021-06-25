@@ -2,10 +2,12 @@ import { Injectable } from "@angular/core";
 import { AngularFireStorage } from "@angular/fire/storage";
 import { AngularFireAuth } from "@angular/fire/auth";
 import { Plugins } from "@capacitor/core";
+const { Storage } = Plugins;
+
 import { BehaviorSubject, combineLatest, forkJoin, from, Observable, of } from "rxjs";
 import { filter, map, skipWhile, switchMap, take, tap } from "rxjs/operators";
 
-import { Base64ToUrl, urlToBase64 } from "../common-functions";
+import { Base64ToUrl, firebaseStoragePath, urlToBase64 } from "../common-functions";
 import { CurrentUserStore } from "@stores/index";
 
 interface ownPicturesStorage {
@@ -16,9 +18,9 @@ interface ownPicturesStorage {
   providedIn: "root",
 })
 export class OwnPicturesService {
-  localStorageKey: string = "own_pictures";
+  private localStorageKey: string = "own_pictures";
 
-  urls: BehaviorSubject<string[]> = new BehaviorSubject([]);
+  private urls: BehaviorSubject<string[]> = new BehaviorSubject([]);
   urls$: Observable<string[]> = this.urls.asObservable();
 
   emptinessObserver$: Observable<any>;
@@ -28,7 +30,7 @@ export class OwnPicturesService {
     private afAuth: AngularFireAuth,
     private currentUser: CurrentUserStore
   ) {
-    this.emptinessObserver$ = combineLatest([this.urls$, this.getPictureCount()]).pipe(
+    this.emptinessObserver$ = combineLatest([this.urls$, this.getOwnPictureCount()]).pipe(
       filter(([currentUrls, pictureCount]) => {
         const currentUrlCount = currentUrls.filter(
           (url) => typeof url === "string"
@@ -45,23 +47,23 @@ export class OwnPicturesService {
         // or we need to check for consistency every once in a while by fetching the user's pics from the database
         if (localStorageContent) {
           const localPictureCount = Object.keys(localStorageContent).length;
-          if (localPictureCount === pictureCount) console.log("yesyesyes");
-          return this.nextFromLocal(localStorageContent);
+          if (localPictureCount === pictureCount)
+            return this.nextFromLocal(localStorageContent);
         }
 
-        return this.nextFromFirebase().pipe(switchMap((urls) => this.saveToLocal(urls)));
+        return this.nextFromFirebase().pipe(switchMap((urls) => this.storeInLocal(urls)));
       })
     );
   }
 
   checkLocal(): Observable<ownPicturesStorage | null> {
-    return from(Plugins.Storage.get({ key: this.localStorageKey })).pipe(
+    return from(Storage.get({ key: this.localStorageKey })).pipe(
       take(1),
       map((v) => JSON.parse(v.value))
     );
   }
 
-  saveToLocal(urls: string[]): Observable<void> {
+  storeInLocal(urls: string[]): Observable<void> {
     // format based on the assumption that the urlToBase64() function doesn't get executed right away
     // as "base64Pictures" gets defined (as that would then happen one after the other), but that it does
     // if forkJoin below (as that would then happen in parallel)
@@ -79,7 +81,7 @@ export class OwnPicturesService {
         return storageObject;
       }),
       switchMap((storageObject) =>
-        Plugins.Storage.set({
+        Storage.set({
           key: this.localStorageKey,
           value: JSON.stringify(storageObject),
         })
@@ -102,7 +104,7 @@ export class OwnPicturesService {
 
   nextFromFirebase(): Observable<string[]> {
     const uid$: Observable<string> = this.afAuth.user.pipe(map((user) => user.uid));
-    const pictureCount$: Observable<number> = this.getPictureCount();
+    const pictureCount$: Observable<number> = this.getOwnPictureCount();
 
     // here we are using the switchMap operator (instead of concatMap or mergeMap for ex) as it allows
     // to, if either uid$ or pictureCount$ gets a new value, cancel the current profile picture fetching
@@ -118,26 +120,15 @@ export class OwnPicturesService {
   fetchProfilePictures(uid: string, pictureCount: number): Observable<string[]> {
     let urlArray$: Observable<string>[] = Array.from({ length: pictureCount }).map(
       (v, index) =>
-        this.afStorage
-          .ref("/profilePictures/" + uid + "/" + index)
-          .getDownloadURL()
-          // ensures it completes
-          .pipe(take(1))
+        this.afStorage.ref(firebaseStoragePath(uid, index)).getDownloadURL().pipe(take(1)) // ensures it completes
     );
     return forkJoin(urlArray$);
   }
 
-  getPictureCount(): Observable<number> {
+  getOwnPictureCount(): Observable<number> {
     return this.currentUser.user$.pipe(
-      skipWhile((user) => user === null),
+      skipWhile((user) => user === null), // since behaviorSubject can hold null before it is initialised
       map((user) => user?.pictureCount)
     );
   }
 }
-
-// check storage
-// if storage is non empty (meaning it at least contains one picture (later do it based on whether
-//                          the number of pictures in contains matches the number of pictureCount in ownProfileStore ))
-//    then take transform base64 to blob, create urls for the objects and pass these to the behaviorSubject
-// if storage is empty then get pictureCount (so you need pictureCount regardless actually) and uid and fetch all of the user's pics from
-// the Firebase storage, put them in behaviorSubject, and then convert them to base64 and store them in the local storage

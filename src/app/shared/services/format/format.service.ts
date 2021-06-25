@@ -17,15 +17,6 @@ import firebase from "firebase";
 export class FormatService {
   constructor() {}
 
-  /** Sorts the chats so that lastly interacted chats are at the top of the array */
-  public sortChats(chats: Chat[]): Chat[] {
-    if (!chats) return;
-    chats.sort(
-      (chat1, chat2) => chat2.lastInteracted.getTime() - chat1.lastInteracted.getTime()
-    );
-    return chats;
-  }
-
   public sortUIDs(uids: string[]): string[] {
     return uids.sort((a, b) => ("" + a).localeCompare(b));
   }

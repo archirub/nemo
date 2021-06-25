@@ -39,13 +39,10 @@ import { OwnPicturesService } from "@services/pictures/own-pictures/own-pictures
 })
 export class HomePage implements OnInit, OnDestroy {
 
-  testPicture: Observable<any>;
-
   swipeProfiles: Observable<Profile[]>;
   private swipeStackRefill$: Subscription;
 
-  private searchCriteria: SearchCriteria = new SearchCriteria({});
-  private searchCriteria$: Subscription;
+  private searchCriteriaSub: Subscription;
 
   // PROPERTIES FOR MODAL ANIMATION
   @ViewChild("homeContainer", { read: ElementRef }) homeContainer: ElementRef;
@@ -98,9 +95,6 @@ export class HomePage implements OnInit, OnDestroy {
   currentUser$; //subscription
 
   async ngOnInit() {
-    this.searchCriteria$ = this.SCstore.searchCriteria.subscribe((SC) => {
-      this.searchCriteria = SC;
-    });
     // Makes sure swipe stack is only filled when its length is smaller or equal to a given
     // length, and that no new query to refill the swipe stack is made while a query
     // is already being processed.
@@ -234,7 +228,7 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.searchCriteria$.unsubscribe();
+    this.searchCriteriaSub.unsubscribe();
     this.swipeStackRefill$.unsubscribe();
   }
 }

@@ -4,7 +4,6 @@ import { Message } from "@classes/index";
 export interface userSnippet {
   uid: string;
   name: string;
-  picture: string;
 }
 export interface chatFromDatabase {
   uids: string[];

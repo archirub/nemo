@@ -1,22 +1,21 @@
 <ion-content #chatContainer>
-  <ion-row><!--*ngIf="new-matches"-->
+  <ion-row
+    ><!--*ngIf="new-matches"-->
     <!-- Not correct source, just placeholder for now -->
-    <ion-item 
-      detail="false"
-      #matchesButton
-      button 
-      (click)="presentMatches()"
-    >
+    <ion-item detail="false" #matchesButton button (click)="presentMatches()">
       <ion-avatar slot="start">
-        <ion-img 
-          *ngFor="let chat of chats.slice(0,3); index as j" 
-          [ngStyle]="{ 'zIndex': j, 
-                        'margin-left': 3*j + 'vh', 
-                        'position': 'absolute', 
-                        'width': 9 + 'vh',
-                        'height': 9 + 'vh' }"
+        <ion-img
+          *ngFor="let chat of chats.slice(0, 3); index as j"
+          [ngStyle]="{
+            zIndex: j,
+            'margin-left': 3 * j + 'vh',
+            position: 'absolute',
+            width: 9 + 'vh',
+            height: 9 + 'vh'
+          }"
           [src]="chat?.recipient?.picture"
-          class="match-image">
+          class="match-image"
+        >
         </ion-img>
       </ion-avatar>
       <div class="text-container" id="match-text" [ngStyle]="styleFromMatches()">
@@ -24,7 +23,6 @@
       </div>
     </ion-item>
   </ion-row>
-
   <ion-list *ngIf="chats">
     <ion-item
       detail="true"
@@ -33,7 +31,7 @@
       *ngFor="let chat of chats; index as i"
     >
       <ion-avatar slot="start">
-        <ion-img [src]="chat?.recipient?.picture"></ion-img>
+        <ion-img [src]="(chatboardPictures$ | async)[chat?.recipient?.uid]"></ion-img>
       </ion-avatar>
       <div class="text-container">
         <ion-label color="primary" class="text-container name">
@@ -70,8 +68,11 @@
         <!-- <span> {{ getDate(chat.messages[chat.messages.length - 1].time) }}</span> -->
       </div>
       <ion-badge
-      *ngIf="chat?.messages[chat.messages.length-1]?.senderID === chat?.recipient?.uid" 
-      id="unread-badge">
+        *ngIf="
+          chat?.messages[chat.messages.length - 1]?.senderID === chat?.recipient?.uid
+        "
+        id="unread-badge"
+      >
         Your turn!
       </ion-badge>
     </ion-item>

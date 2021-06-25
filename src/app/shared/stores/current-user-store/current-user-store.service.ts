@@ -33,10 +33,6 @@ export class CurrentUserStore {
    * returns uid so that store initializations can be chained
    */
   public async initializeStore(uid: string): Promise<string> {
-    if (!uid) {
-      console.error("No uid provided");
-      return;
-    }
     await this.updateUser(uid);
     console.log("currentUserStore initialized.");
     return uid;

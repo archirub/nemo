@@ -7,6 +7,8 @@ import {
   OnInit,
   AfterViewInit,
   Output,
+  ChangeDetectorRef,
+  OnDestroy,
 } from "@angular/core";
 import { Router } from "@angular/router";
 import { IonContent, ModalController } from "@ionic/angular";
@@ -15,13 +17,22 @@ import { Chat, Profile } from "@classes/index";
 import { MatchesEnterAnimation, MatchesLeaveAnimation } from "@animations/index";
 import { MatchesComponent } from "../matches/matches.component";
 import { TabElementRefService } from "src/app/main/tab-menu/tab-element-ref.service";
+import {
+  ChatboardPicturesService,
+  pictureHolder,
+} from "@services/pictures/chatboard-pictures/chatboard-pictures.service";
+import { forkJoin, Observable, of, Subscription } from "rxjs";
+import { concatMap, map, tap } from "rxjs/operators";
+import { ChatStore } from "@stores/index";
 
 @Component({
   selector: "app-chat-board",
   templateUrl: "./chat-board.component.html",
   styleUrls: ["./chat-board.component.scss"],
 })
-export class ChatBoardComponent implements OnInit {
+export class ChatBoardComponent implements OnInit, OnDestroy {
+  chatboardPictures$: Observable<pictureHolder>;
+  chatboardPicturesSub: Subscription;
   @Input() chats: Chat[];
   @ViewChild(IonContent) ionContent: IonContent;
 
@@ -39,7 +50,10 @@ export class ChatBoardComponent implements OnInit {
   constructor(
     private router: Router,
     private modalCtrl: ModalController,
-    private tabElementRef: TabElementRefService
+    private tabElementRef: TabElementRefService,
+    private chatboardPicturesService: ChatboardPicturesService, // used in template,
+    private chatStore: ChatStore,
+    private changeDetectorRef: ChangeDetectorRef
   ) {
     this.onResize();
   }
@@ -49,9 +63,22 @@ export class ChatBoardComponent implements OnInit {
   MatchesLeaveAnimation;
 
   ngOnInit() {
+    this.chatboardPictures$ = this.chatboardPicturesService.holder$;
+    this.chatboardPicturesSub = this.chatboardPicturesService
+      .activateStore(this.chatStore.chats$)
+      .subscribe();
+
+    // this.chatboardPicturesService
+    //   .getUidsLocal()
+    //   .pipe(tap((a) => console.log("ca check par ici", a)))
+    //   .subscribe((a) => console.log("CADASDASDA", a));
     //this.ActivatedRoute.paramMap.subscribe();
     //this.displayedText = this.fakeData.generateSentences(this.profiles.length);
     // this.chats[0].messages[6].
+  }
+
+  ngOnDestroy() {
+    this.chatboardPicturesSub.unsubscribe();
   }
 
   //The below was originally using ionViewDidEnter, but that wasn't firing

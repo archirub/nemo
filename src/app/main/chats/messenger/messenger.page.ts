@@ -66,7 +66,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
     private chatStore: ChatStore,
     private afauth: AngularFireAuth,
     private swipeStackStore: SwipeStackStore,
-    private recentMatchesStore: RecentMatchesStore,
+    private recentMatchesStore: RecentMatchesStore
   ) {}
 
   ngOnInit() {
@@ -76,9 +76,10 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
 
     //Currently fetch profiles and outputting first one from subscription
     const chat: Chat = this.currentChat.getValue();
-    const recipientUID: string = chat.recipient.uid
-    this.recentMatchesStore.fetchProfile(recipientUID).then((a)=>{this.chatProfile = a
-    })
+    const recipientUID: string = chat.recipient.uid;
+    this.recentMatchesStore.fetchProfile(recipientUID).then((a) => {
+      this.chatProfile = a;
+    });
   }
 
   ngAfterViewInit() {
@@ -92,7 +93,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
     if (!parameter.has("chatID")) return this.navCtrl.navigateBack("/tabs/chats");
     this.CHAT_ID = parameter.get("chatID");
 
-    this.chats$ = this.chatStore.chats
+    this.chats$ = this.chatStore.chats$
       .pipe(
         map((chats) => {
           chats.forEach((chat) => {
@@ -273,8 +274,8 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
 
     //shape and place image shadow gradient
     shadow.style.width = `${profileWidth}px`;
-    shadow.style.height = `${20/85 * profileHeight}px`;
-    shadow.style.top = `${55/85 * profileHeight}px`;
+    shadow.style.height = `${(20 / 85) * profileHeight}px`;
+    shadow.style.top = `${(55 / 85) * profileHeight}px`;
 
     //get width of image
     var imageSlides = this.grandchildren.picture.nativeElement;

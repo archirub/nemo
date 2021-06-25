@@ -24,7 +24,7 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
   @ViewChild("modalSlides") modalSlides: IonSlides;
   @ViewChild(IonContent) frame: IonContent;
 
-  searchCriteria$: Subscription;
+  searchCriteriaSub: Subscription;
   searchCriteria: SearchCriteria;
   scOptions = searchCriteriaOptions;
 
@@ -51,7 +51,7 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
   constructor(private SCstore: SearchCriteriaStore, private modalCtrl: ModalController) {}
 
   ngOnInit() {
-    this.searchCriteria$ = this.SCstore.searchCriteria.subscribe({
+    this.searchCriteriaSub = this.SCstore.searchCriteria.subscribe({
       next: (sc) => {
         this.searchCriteriaForm.patchValue({
           onCampus: sc.onCampus,
@@ -299,7 +299,7 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.searchCriteria$.unsubscribe();
+    this.searchCriteriaSub.unsubscribe();
     this.viewEntered = false;
   }
 

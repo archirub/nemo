@@ -7,8 +7,8 @@ import { ChatStore, CurrentUserStore, SwipeStackStore } from "@stores/index";
 import { AuthService } from "@services/index";
 import { AngularAuthService } from "@services/login/auth/angular-auth.service";
 import { Router } from "@angular/router";
-import { Subscription } from "rxjs";
-import { take } from "rxjs/operators";
+import { from, of, Subscription } from "rxjs";
+import { exhaustMap, map, switchMap, take } from "rxjs/operators";
 import { SignupService } from "@services/signup/signup.service";
 import { AngularFireAuth } from "@angular/fire/auth";
 
@@ -17,16 +17,14 @@ import { AngularFireAuth } from "@angular/fire/auth";
   templateUrl: "app.component.html",
   styleUrls: ["app.component.scss"],
 })
-export class AppComponent implements OnInit, OnDestroy {
-  private authSub: Subscription;
+export class AppComponent implements OnDestroy {
+  private appInitSub: Subscription;
 
   constructor(
     private platform: Platform,
-    private auth: AuthService,
     private chatStore: ChatStore,
     private currentUserStore: CurrentUserStore,
     private swipeStackStore: SwipeStackStore,
-    private signUpAuthService: AngularAuthService,
     private router: Router,
     private signup: SignupService,
     private afAuth: AngularFireAuth
@@ -34,38 +32,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.initializeApp();
   }
   ngOnDestroy(): void {
-    if (this.authSub) {
-      this.authSub.unsubscribe();
-    }
-  }
-
-  ngOnInit(): void {
-    // this.signUpAuthService.autologin().subscribe(() => {
-    //   this.authSub = this.signUpAuthService.userIsAuthenticated.subscribe((isAuth) => {
-    //     if (isAuth) {
-    //       console.log("User has been authenticated");
-    //       this.signUpAuthService.userType.subscribe((user_type) => {
-    //         if (user_type == "BaselineUser" || user_type == "FullUser") {
-    //           console.log("ROUTER: HOME");
-    //           this.router.navigateByUrl("main/tabs/home");
-    //         } else if (user_type == "AuthenticatedUser") {
-    //           console.log("ROUTER: REQUIRED");
-    //           // DEVELOPMENT
-    //           // this.router.navigateByUrl("main/tabs/home");
-    //           // PRODUCTION
-    //           this.router.navigateByUrl("welcome/signuprequired"); //uncomment to have specialized routing
-    //         }
-    //       });
-    //     } else {
-    //       // console.log("ROUTER: WELCOME");
-    //       this.router.navigateByUrl("welcome");
-    //     }
-    //   });
-    // });
-  }
-
-  logOut(): void {
-    this.signUpAuthService.logout();
+    this.appInitSub ? this.appInitSub.unsubscribe() : null;
   }
 
   initializeApp() {
@@ -73,35 +40,28 @@ export class AppComponent implements OnInit, OnDestroy {
       if (Capacitor.isPluginAvailable("SplashScreen")) {
         Plugins.SplashScreen.hide();
       }
-      console.log("yayayaya");
-      this.signup.checkAndRedirect();
 
-      // TEMPORARY (though works fine), not thought through
-      this.afAuth.user.subscribe((user) => {
-        console.log("current user logged in,", user?.uid);
-        if (user) {
-          this.router.navigateByUrl("main/tabs/home");
-          this.currentUserStore.initializeStore(user.uid);
+      const storesInit$ = (uid: string) =>
+        from(this.currentUserStore.initializeStore(uid)).pipe(
+          exhaustMap((uid) => this.swipeStackStore.initializeStore(uid)),
+          exhaustMap((uid) => this.chatStore.initializeStore(uid))
+        );
 
-          this.swipeStackStore.initializeStore(user.uid).subscribe();
-
-          // this.chatStore.initializeStore(user.uid);
-        }
-      });
-
-      // HERE UID SHOULD COME FROM FIREBASE AUTH, NOT TOKEN
-      //   this.signUpAuthService.userId.subscribe(async (uid) => {
-      //     console.log("HAHA", uid);
-      //     if (uid) {
-      //       this.currentUserStore.initializeStore(uid);
-
-      //       this.swipeStackStore.initializeStore(uid);
-
-      //       this.chatStore.initializeStore(uid);
-      //     } else {
-      //       // console.log("Waiting for uid")
-      //     }
-      //   });
+      // still not perfect, in case where there is both an ongoing signup process and someone is signed in, it doesn't
+      // take care of that conflict. It will end up initialising the stores while keeping the person at the signup process so not good
+      this.appInitSub = from(this.signup.checkAndRedirect())
+        .pipe(
+          take(1),
+          exhaustMap(() => this.afAuth.user),
+          exhaustMap((user) => {
+            if (user) {
+              this.router.navigateByUrl("main/tabs/home");
+              return storesInit$(user.uid);
+            }
+            return of(null);
+          })
+        )
+        .subscribe();
     });
   }
 }

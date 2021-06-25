@@ -27,7 +27,7 @@ export class ChatsPage implements OnInit, OnDestroy {
   constructor(private swipeStackStore: SwipeStackStore, private chatStore: ChatStore) {}
 
   ngOnInit() {
-    this.chats = this.chatStore.chats;
+    this.chats = this.chatStore.chats$;
     this.chatProfiles = this.swipeStackStore.profiles$;
   }
 
