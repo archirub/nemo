@@ -79,6 +79,7 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
   ngAfterViewInit() {
     this.updatePager();
     this.slides.lockSwipeToPrev(true);
+    this.styleInterests();
   }
 
   expandProfile() {
@@ -127,5 +128,15 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
       this.slides.lockSwipeToPrev(false);
       this.slides.lockSwipeToNext(false);
     }
+  }
+
+  styleInterests() {
+    let box = document.getElementById('interests-container');
+
+    if (this.profile.interests.length > 2) {
+      box.style.justifyContent = "none";
+    } else {
+      box.style.justifyContent = "center";
+    };
   }
 }

@@ -1,3 +1,7 @@
+ion-content {
+  --overflow: hidden;
+}
+
 #photo-box {
     background: var(--ion-color-light-tint);
     color: var(--ion-color-light);

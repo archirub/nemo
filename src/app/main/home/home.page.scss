@@ -74,6 +74,8 @@ h1.catchtext {
   top: 2vh;
   display: none;
   z-index: 100;
+  box-shadow: none;
+  --box-shadow: none;
 }
 
 #messageText {
@@ -133,6 +135,7 @@ h1.catchtext {
 /* SHADOW ROOT main.inner-scroll.scroll-y BLOCKS BACKGROUND COLORS SO VARIABLE HAS TO BE CHANGED */
 ion-content {
   --ion-background-color: transparent;
+  --overflow: hidden;
   //Shadow root is also the cause of the right line shadow overlap on iOS, something that cannot be fixed this way
 }
 

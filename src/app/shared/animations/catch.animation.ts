@@ -99,7 +99,7 @@ export const BackAnimation = (baseEl: any) => {
 
     backAnimation
       .addElement(baseEl.nativeElement)
-      .duration(300)
+      .duration(500)
       .fromTo("opacity", "1", "0.4")
       .fromTo("filter", "blur(0px) opacity(1)", "blur(20px) opacity(1)")
       .fromTo("backgroundColor", "transparent", "var(--ion-color-secondary-shade)");

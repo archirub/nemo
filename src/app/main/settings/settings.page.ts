@@ -4,6 +4,20 @@ import { AngularFireAuth } from "@angular/fire/auth";
 
 import { LoadingService, AngularAuthService } from "@services/index";
 import { Router } from "@angular/router";
+import { Subscription } from "rxjs";
+import { CurrentUserStore } from "@stores/index";
+import { FormControl, FormGroup, Validators } from "@angular/forms";
+
+import { 
+  Gender, 
+  SexualPreference, 
+  OnCampus, 
+  searchCriteriaOptions,
+  genderOptions,
+  sexualPreferenceOptions,
+  SwipeMode,
+  swipeModeOptions
+} from "@interfaces/index";
 
 @Component({
   selector: "app-settings",
@@ -14,11 +28,29 @@ export class SettingsPage implements AfterViewInit {
   @ViewChild("slide") slides: IonSlides;
   @ViewChild("goUnder") goUnder: ElementRef;
 
+  currentUser;
+  currentUser$: Subscription;
+
+  // FORM
+  form = new FormGroup({
+    swipeMode: new FormControl(null),
+    sexualPreference: new FormControl(null),
+    gender: new FormControl(null),
+    onCampus: new FormControl(null)
+  });
+
+  // OPTIONS
+  swipeModeOptions: SwipeMode[] = swipeModeOptions;
+  sexualPreferenceOptions: SexualPreference[] = sexualPreferenceOptions;
+  genderOptions: Gender[] = genderOptions;
+  onCampusOptions: OnCampus[] = searchCriteriaOptions.onCampus;
+
   constructor(
     private navCtrl: NavController,
     private afAuth: AngularFireAuth,
     private loadingService: LoadingService,
     private AngularAuthService: AngularAuthService,
+    private currentUserStore: CurrentUserStore,
     private router: Router,
     private zone: NgZone
   ) {}
@@ -31,6 +63,15 @@ export class SettingsPage implements AfterViewInit {
     prefs.style.display = "none";
 
     this.slides.lockSwipes(true); //Stop swiping of slides so that users cannot see placeholder slide
+  }
+
+  ionViewDidEnter() {
+    //Fetch current user profile to change preferences
+    this.currentUser$ = this.currentUserStore.user$.subscribe(
+      (profile) => {
+        this.currentUser = profile;
+      }
+    );
   }
 
   goBack() {
@@ -89,6 +130,7 @@ export class SettingsPage implements AfterViewInit {
     this.unlockAndSwipe("prev");
     var legal = document.getElementById("legal");
     var prefs = document.getElementById("preferences");
+    var support = document.getElementById("support");
     var placeholder = document.getElementById("placeholder");
 
     // Wait 0.2s to replace slides with placeholder so people don't see it disappear in the slide animation
@@ -96,24 +138,26 @@ export class SettingsPage implements AfterViewInit {
       placeholder.style.display = "block";
       legal.style.display = "none";
       prefs.style.display = "none";
+      support.style.display = "none";
     }, 200);
   }
 
-  /* Replaces placeholder slide with selected slide and swipes to */
   selectSlide(slide) {
-    var legal = document.getElementById("legal");
-    var prefs = document.getElementById("preferences");
+    /** For this function to work, the input 'slide' should be the same as the slide id
+     * Hides placeholder slide and displays selected slide by id
+     * Swipes to the targeted slide
+    **/
+
     var placeholder = document.getElementById("placeholder");
     placeholder.style.display = "none";
 
-    if (slide == "legal") {
-      legal.style.display = "block";
-      this.unlockAndSwipe("next");
-    } else if (slide == "prefs") {
-      prefs.style.display = "block";
-      this.unlockAndSwipe("next");
-    } else {
-      console.log("Missing slides?");
-    }
+    var target = document.getElementById(`${slide}`); //get slide by id from input
+    target.style.display = "block";
+
+    this.unlockAndSwipe("next"); //move to slide
+  }
+
+  openEmail() {
+    window.open('mailto:customersupport@nemodating.com');
   }
 }

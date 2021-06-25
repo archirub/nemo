@@ -167,16 +167,19 @@ ion-slides {
 
 #interests-container {
   display: flex;
-  justify-content: center;
   align-items: center;
   align-content: center;
   text-align: center;
-  margin-left: 4vw;
-  margin-right: 4vw;
   margin-top: 1vh;
   margin-bottom: 2vh;
   overflow-x: scroll;
   padding-bottom: 1vh;
+  position: relative;
+  z-index: 10;
+
+  &.centered {
+    justify-content: center;
+  }
 }
 
 #interests-box {

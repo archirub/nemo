@@ -81,7 +81,6 @@ export class ChatboardPicturesService {
             concatMap(([pictureUrl, pictureHolder]) => {
               pictureHolder[uid] = pictureUrl;
               this.holder.next(pictureHolder);
-              console.log(holder);
               return urlToBase64(pictureUrl).pipe(
                 exhaustMap((base64Picture) => this.storeInLocal(uid, base64Picture, true))
               );
@@ -182,8 +181,6 @@ export class ChatboardPicturesService {
   getUidsLocal(): Observable<string[]> {
     return from(Storage.get({ key: this.uidsStorageKey })).pipe(
       take(1),
-      tap(() => console.log("ssssadassa")),
-
       map((res) => JSON.parse(res.value) || [])
     );
   }
