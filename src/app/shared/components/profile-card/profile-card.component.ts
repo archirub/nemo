@@ -34,6 +34,9 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
 
   picturePaths: Array<string>;
 
+  interestSlideContent: Array<Array<string>>;
+  interestsBuilt: boolean = false;
+
   loaded: boolean = false;
 
   /* Track touch locations */
@@ -53,6 +56,8 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
   @ViewChild("answer", { read: ElementRef }) answer: ElementRef; //answer
   @ViewChild("QandA", { read: ElementRef }) QandA: ElementRef; //question & answer container
   @ViewChild("shadow", { read: ElementRef }) shadow: ElementRef; //photo shadow div
+
+  @ViewChild('intSlides') intSlides: IonSlides;
 
   @HostListener("touchstart", ["$event"]) touchStart(event) {
     this.X = event.touches[0].clientX;
@@ -74,12 +79,13 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
     // console.log("HERE IS THE bio:", this.profile.biography);
     // console.log("HERE IS THE degree:", this.profile.degree);
     // console.log("HERE IS THE society:", this.profile.society);
+
+    this.buildInterestSlides();
   }
 
   ngAfterViewInit() {
     this.updatePager();
     this.slides.lockSwipeToPrev(true);
-    this.styleInterests();
   }
 
   expandProfile() {
@@ -89,8 +95,10 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
       this.moreInfo = true;
     }
     this.expanded.emit(this.moreInfo);
+
     setTimeout(() => {
       this.sizeSwipers();
+      this.intSlides.update(); //Fixes broken swiper mechanism that ruins IonSlides snap-swiping
     }, 100);
   }
 
@@ -130,13 +138,32 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
     }
   }
 
-  styleInterests() {
-    let box = document.getElementById('interests-container');
+  buildInterestSlides() {
+    this.interestSlideContent = []; //clear any previous slides, mainly for own profile changes
 
-    if (this.profile.interests.length > 2) {
-      box.style.justifyContent = "none";
-    } else {
-      box.style.justifyContent = "center";
-    };
+    let count = 0;
+    let pushArray = [];
+
+    this.profile.interests?.forEach(int => {
+      count ++
+
+      if (count < 4) {
+        pushArray.push(int);
+      } else {
+        this.interestSlideContent.push(pushArray);
+        pushArray = [int];
+        count = 1;
+      };
+    });
+
+    this.interestSlideContent.push(pushArray); //pushes either last interests, or if less than three interests in total
+    this.interestsBuilt = true;
+  }
+
+  findInterestIcon(interest: string) {
+    interest = interest.toLowerCase();
+    interest = interest.replace(/\s/g, ''); //remove spaces
+
+    return `/assets/interests/${interest}.png`;
   }
 }

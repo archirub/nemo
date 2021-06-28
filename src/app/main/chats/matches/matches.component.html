@@ -1,7 +1,11 @@
 <ion-content>
-    <ion-button (click)="closeModal()">
-        <ion-icon name="close-outline"></ion-icon>
-    </ion-button>
+    <div class="text">
+        <h1><span style="color:var(--ion-color-primary)">nemo</span>catches</h1>
+
+        <div class="exit" (click)="closeModal()">
+            <ion-icon name="close-outline"></ion-icon>
+        </div>
+    </div>
     <ion-row>
         <div class="profile"
         *ngFor="let chat of chats; index as j" >

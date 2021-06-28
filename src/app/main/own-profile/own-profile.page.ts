@@ -3,7 +3,7 @@ import { Component, ElementRef, OnInit, ViewChild } from "@angular/core";
 import { Subscription } from "rxjs";
 import { User } from "@classes/index";
 import { CurrentUserStore } from "@stores/index";
-import { AddPhotoComponent } from "@components/index";
+import { AddPhotoComponent, ProfileCardComponent } from "@components/index";
 import { ProfileCourseComponent } from "./profile-course/profile-course.component";
 import { IonTextarea } from "@ionic/angular";
 import { Router } from "@angular/router";
@@ -20,6 +20,8 @@ export class OwnProfilePage implements OnInit {
   @ViewChild("bioClose", { read: ElementRef }) bioClose: ElementRef;
   @ViewChild("depts") depts: ProfileCourseComponent;
   @ViewChild("socs") socs: ProfileCourseComponent;
+
+  @ViewChild('profileCard') profileCard: ProfileCardComponent;
 
   profileSub: Subscription;
   profile: User;
@@ -76,6 +78,11 @@ export class OwnProfilePage implements OnInit {
       editor.style.display = "none";
       profile.style.display = "flex";
     }
+  }
+
+  buildInterests() {
+    console.log(this.profile.interests);
+    this.profileCard.buildInterestSlides();
   }
 
   ngOnDestroy() {

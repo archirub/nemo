@@ -16,45 +16,48 @@ export const MatchesEnterAnimation = (
     const startingHorizontalPosition = buttonXPosition - screenWidth / 2 + buttonWidth / 2;
     const startingVerticalPosition = buttonYPosition - screenHeight / 2 + buttonHeight / 2;
 
-    const FINAL_MODAL_HEIGHT = 90;
-    const FINAL_MODAL_WIDTH = 90;
-    const scalingFactorHeight = FINAL_MODAL_HEIGHT / buttonHeight;
-    const scalingFactorWidth = FINAL_MODAL_WIDTH / buttonWidth;
-    const inverseSFheight = 1 / scalingFactorHeight;
-    const inverseSFwidth = 1 / scalingFactorWidth;
-
     const animation = (baseEl: any) => {
-        // MODAL
-        const wrapperAnimation = new AnimationController()
-          .create()
-          .addElement(baseEl.querySelector(".modal-wrapper")!)
-          .beforeStyles({
-            height: `${FINAL_MODAL_HEIGHT}vh`,
-            width: `${FINAL_MODAL_WIDTH}vw`,
-            overflow: 'scroll',
-            '--overflow': 'scroll',
-            background: 'transparent',
-            opacity: '1',
-          })
-          .fromTo(
-            "transform",
-            `translate(${startingHorizontalPosition}px, ${startingVerticalPosition}px) scale(${inverseSFwidth},${inverseSFheight})`,
-            `translate(0%, 0%) scale(1,1)`
-          );
+      // MODAL
+      const wrapperAnimation = new AnimationController()
+        .create()
+        .addElement(baseEl.querySelector(".modal-wrapper")!)
+        .beforeStyles({
+          height: "90vh",
+          width: "90vw",
+          overflow: 'scroll',
+          '--overflow': 'scroll',
+          background: 'transparent',
+          opacity: '1',
+        })
+        .fromTo("transform", "scale(0.8,0.8)", "scale(1,1)");
 
-    // ALL CONTENT BELOW MODAL
-    const contentAnimation = new AnimationController()
-    .create()
-    .addElement(chatComponent.nativeElement)
-    .addElement(tabComponent.nativeElement)
-    .fromTo("filter", "blur(0px)", "blur(20px)");
+      // SHADOW IOS
+      const shadowIOSAnimation = new AnimationController()
+        .create()
+        .addElement(baseEl.querySelector(".modal-shadow")!)
+        .fromTo("background", "transparent", "var(--ion-color-dark)")
+        .fromTo("opacity","0","0.2");
 
-    // BACKDROP
-    const backdropAnimation = new AnimationController()
-    .create()
-    .addElement(baseEl.querySelector("ion-backdrop"))
-    .fromTo("opacity", "0.01", "var(--backdrop-opacity)")
-    .fromTo("backdropFilter", "blur(0px) opacity(1)", "blur(100px) opacity(0)");
+        // SHADOW ANDROID
+      const shadowAndroidAnimation = new AnimationController()
+      .create()
+      .addElement(baseEl.querySelector(".sc-ion-modal-md")!)
+      .fromTo("background", "transparent", "var(--ion-color-dark)")
+      .fromTo("opacity","0","0.2");
+
+      // ALL CONTENT BELOW MODAL
+      const contentAnimation = new AnimationController()
+      .create()
+      .addElement(chatComponent.nativeElement)
+      .addElement(tabComponent.nativeElement)
+      .fromTo("filter", "blur(0px)", "blur(20px)");
+
+      // BACKDROP
+      const backdropAnimation = new AnimationController()
+      .create()
+      .addElement(baseEl.querySelector("ion-backdrop"))
+      .fromTo("opacity", "0.01", "var(--backdrop-opacity)")
+      .fromTo("backdropFilter", "blur(0px) opacity(1)", "blur(100px) opacity(0)");
 
     return new AnimationController()
     .create()
@@ -63,6 +66,8 @@ export const MatchesEnterAnimation = (
     .duration(200)
     .addAnimation([
       backdropAnimation,
+      shadowIOSAnimation,
+      shadowAndroidAnimation,
       wrapperAnimation,
       contentAnimation,
     ]);

@@ -41,6 +41,16 @@ export const searchCriteriaOptions = {
     "Tik Toker" as const,
     "Library Fiend" as const,
     "Pub Crawler" as const,
+    "Math Geek" as const,
+    "Sports Knight" as const,
+    "Club Goer" as const,
+    "Casual Cupid" as const,
+    "Spiritual" as const,
+    "Activist" as const,
+    "Hopeless Romantic" as const,
+    "Radical" as const,
+    "Raver" as const,
+    "Music Nerd" as const,
   ],
 
   onCampus: [true as const, false as const],
@@ -58,6 +68,16 @@ export const assetsInterestsPath = [
   "/assets/interests/tiktoker.png",
   "/assets/interests/libraryfiend.png",
   "/assets/interests/pubcrawler.png",
+  "/assets/interests/mathgeek.png",
+  "/assets/interests/sportsknight.png",
+  "/assets/interests/clubgoer.png",
+  "/assets/interests/casualcupid.png",
+  "/assets/interests/spiritual.png",
+  "/assets/interests/activist.png",
+  "/assets/interests/hopelessromantic.png",
+  "/assets/interests/radical.png",
+  "/assets/interests/raver.png",
+  "/assets/interests/musicnerd.png",
 ] as const;
 
 export type searchCriteria = {
