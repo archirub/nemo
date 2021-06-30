@@ -1,0 +1,37 @@
+ion-grid {
+    position: absolute;
+    top: 26.5vh;
+}
+
+.center {
+    display: flex;
+    justify-content: center;
+}
+
+.fish {
+    height: 20vh;
+    position: absolute;
+    z-index: 2;
+    top: 4vh;
+}
+
+.logo {
+    position: absolute;
+    top: 11.5vh;
+    height: 5vh;
+    z-index: 3;
+}
+
+.wavesSlow {
+    position: absolute;
+    z-index: 2;
+    bottom: 0.5vh;
+    transform: scale(1.4);
+}
+
+.wavesFast {
+    position: absolute;
+    bottom: 4vh;
+    z-index: 1;
+    transform: scale(1.4);
+}

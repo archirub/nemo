@@ -9,8 +9,7 @@
     <ion-row>
         <div class="profile"
         *ngFor="let chat of chats; index as j" >
-            <!--ion-img [src]="chat?.recipient?.picture"></ion-img-->
-            <ion-img src="/assets/picture4.jpg"></ion-img>
+            <img [src]="(chatboardPictures$ | async)[chat?.recipient?.uid]"/>
             <div class="data">
                 <ion-label>{{ chat?.recipient?.name }}</ion-label>
                 <ion-icon name="chatbubbles-outline"></ion-icon>

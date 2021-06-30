@@ -1,6 +1,14 @@
-import { Component, Input, AfterViewInit, Output, EventEmitter } from "@angular/core";
+import { 
+  Component, 
+  Input, 
+  AfterViewInit, 
+  Output, 
+  EventEmitter } from "@angular/core";
 
-import { assetsInterestsPath, Interests, searchCriteriaOptions } from "@interfaces/index";
+import { 
+  assetsInterestsPath, 
+  Interests, 
+  searchCriteriaOptions } from "@interfaces/index";
 
 @Component({
   selector: "interests-slides",

@@ -1,13 +1,19 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-back-button></ion-back-button>
-    </ion-buttons>
-  </ion-toolbar>
-</ion-header>
-
 <ion-content>
-  <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+
+  <div class="center">
+    <img #fish src="/assets/nemo.png" class="fish"/>
+    <img src="/assets/signup/nemo-icon-orange.png" class="logo"/>
+  </div>
+
+  <div class="center">
+    <img #wavesFast src="/assets/signup/waves.png" class="wavesFast"/>
+    <img #wavesSlow src="/assets/signup/waves-2.png" class="wavesSlow"/>
+  </div>
+
+  <form 
+  [formGroup]="loginForm" 
+  (ngSubmit)="onSubmit()"
+  (keydown)="enterSubmit($event)">
     <ion-grid>
       <ion-row>
         <ion-col size="12">
@@ -15,7 +21,7 @@
             <ion-label>University Email</ion-label>
             <ion-input
               type="email"
-              placeholder="john.smith@ucl.ac.uk"
+              placeholder="first.last@ucl.ac.uk"
               formControlName="email"
             ></ion-input>
           </ion-item>

@@ -51,7 +51,7 @@ export class ChatBoardComponent implements OnInit, OnDestroy {
     private router: Router,
     private modalCtrl: ModalController,
     private tabElementRef: TabElementRefService,
-    private chatboardPicturesService: ChatboardPicturesService, // used in template,
+    private chatboardPicturesService: ChatboardPicturesService, // used in template
     private chatStore: ChatStore,
     private changeDetectorRef: ChangeDetectorRef
   ) {
@@ -80,41 +80,6 @@ export class ChatBoardComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.chatboardPicturesSub.unsubscribe();
   }
-
-  //The below was originally using ionViewDidEnter, but that wasn't firing
-  //For this reason ngAfterViewInit is used
-  //I have no idea why ionViewDidEnter wouldn't fire
-
-  /*ngAfterViewInit() {
-    console.log("Matches modal initialised");
-
-    this.MatchesEnterAnimation = MatchesEnterAnimation(
-      this.matchesButton,
-      this.tabElementRef.tabRef,
-      this.chatContainer,
-      this.screenHeight,
-      this.screenWidth
-    );
-    this.MatchesLeaveAnimation = MatchesLeaveAnimation(
-      this.matchesButton,
-      this.tabElementRef.tabRef,
-      this.chatContainer,
-      this.screenHeight,
-      this.screenWidth
-    );
-
-    this.modalCtrl
-      .create({
-        component: MatchesComponent,
-        componentProps: { chats: this.chats },
-        enterAnimation: this.MatchesEnterAnimation,
-        leaveAnimation: this.MatchesLeaveAnimation,
-      })
-      .then((m) => {
-        this.modal = m;
-        this.onModalDismiss(this.modal);
-      });
-  }*/
 
   async presentMatches(): Promise<void> {
     // console.log("Matches modal initialised");

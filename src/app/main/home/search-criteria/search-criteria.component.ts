@@ -22,6 +22,7 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
   @ViewChild("locationslider") locationHandle: AppToggleComponent;
   @ViewChild("degreeslider") degreeHandle: AppToggleComponent;
   @ViewChild("modalSlides") modalSlides: IonSlides;
+  @ViewChild("modalSlides", { read: ElementRef }) slidesRef: ElementRef;
   @ViewChild(IonContent) frame: IonContent;
 
   searchCriteriaSub: Subscription;
@@ -69,6 +70,11 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
 
     /* Timeout as elements don't exist until viewEntered set to true */
     setTimeout(() => {
+      //This initialises slide heights, for some unknown reason
+      //USER DOESN'T SEE THIS, KEEP IT HERE
+      this.moveTo('studies');
+      this.returnTo();
+
       this.degreeHandle.selectOption("undergrad");
       this.locationHandle.selectOption("Everyone");
       this.modalSlides.lockSwipes(true);
@@ -154,6 +160,7 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
     }
 
     this.modalSlides.lockSwipes(true);
+    this.modalSlides.update();
   }
 
   async moveTo(name) {
@@ -173,6 +180,13 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
         this.unlockAndSwipe("next");
       }
     }
+
+    // Get slide height working properly using DOM
+    /*setTimeout(() => {
+      let swipers = Array.from(document.querySelectorAll(".swiper-wrapper")) as HTMLElement[];
+      let modalSwiper = swipers[swipers.length-1]
+      modalSwiper.style.height = "auto";
+    }, 200);*/
 
     const exit = document.getElementById("closeButton");
     exit.style.display = "none";

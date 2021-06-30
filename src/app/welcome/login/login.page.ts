@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, ElementRef, OnInit, ViewChild } from "@angular/core";
 import { AngularFireAuth } from "@angular/fire/auth";
 import { FormControl, FormGroup, Validators } from "@angular/forms";
 import { Router } from "@angular/router";
@@ -10,12 +10,18 @@ import { AngularAuthService } from "@services/login/auth/angular-auth.service";
 import { SwipeStackStore, CurrentUserStore } from "@stores/index";
 import { Observable } from "rxjs";
 
+import { FishSwimAnimation, WavesSlowAnimation, WavesFastAnimation } from "@animations/index";
+
 @Component({
   selector: "app-login",
   templateUrl: "./login.page.html",
   styleUrls: ["./login.page.scss"],
 })
 export class LoginPage implements OnInit {
+  @ViewChild('fish', { read: ElementRef }) fish: ElementRef;
+  @ViewChild('wavesFast', { read: ElementRef }) wavesFast: ElementRef;
+  @ViewChild('wavesSlow', { read: ElementRef }) wavesSlow: ElementRef;
+
   loginForm = new FormGroup({
     email: new FormControl("", [
       Validators.email,
@@ -35,6 +41,10 @@ export class LoginPage implements OnInit {
     private swipeStackStore: SwipeStackStore
   ) {}
 
+  fishSwimAnimation;
+  wavesSlowAnimation;
+  wavesFastAnimation;
+
   ngOnInit() {}
 
   // async signIn() {
@@ -51,6 +61,24 @@ export class LoginPage implements OnInit {
   //     console.error("Unsuccessful sign in", e);
   //   }
   // }
+
+  ionViewDidEnter() {
+    //Initialise animations
+    this.fishSwimAnimation = FishSwimAnimation(this.fish);
+    this.wavesSlowAnimation = WavesSlowAnimation(this.wavesSlow);
+    this.wavesFastAnimation = WavesFastAnimation(this.wavesFast);
+
+    //Play animations (WILL LOOP INFINITELY)
+    this.fishSwimAnimation.play();
+    this.wavesFastAnimation.play();
+    this.wavesSlowAnimation.play();
+  }
+
+  enterSubmit(event) {
+    if (event.keyCode === 13) {
+      this.onSubmit();
+    }
+  }
 
   onSubmit() {
     if (!this.loginForm.valid) {
@@ -97,6 +125,10 @@ export class LoginPage implements OnInit {
     //     this.showAlert(message);
     //   }
     // );
+  }
+
+  ionViewWillLeave() {
+    this.fishSwimAnimation.pause();
   }
 
   private showAlert(message: string) {

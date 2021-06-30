@@ -7,22 +7,15 @@ export const SCenterAnimation = (
   homeComponent: ElementRef<any>,
 ) => {
 
-  const INITIAL_MODAL_HEIGHT = 85;
-  const INITIAL_MODAL_WIDTH = 85;
-  const FINAL_MODAL_HEIGHT = 90;
-  const FINAL_MODAL_WIDTH = 90;
-  const heightRatio = FINAL_MODAL_HEIGHT/INITIAL_MODAL_HEIGHT;
-  const widthRatio = FINAL_MODAL_WIDTH/INITIAL_MODAL_WIDTH;
-
   const animation = (baseEl: any) => {
     // MODAL
     const wrapperAnimation = new AnimationController()
       .create()
       .addElement(baseEl.querySelector(".modal-wrapper")!)
-      .duration(100)
+      .duration(200)
       .beforeStyles({
-        height: `${INITIAL_MODAL_HEIGHT}vh`,
-        width: `${INITIAL_MODAL_WIDTH}vw`,
+        height: "90vh",
+        width: "90vw",
         '--border-radius': '20px',
         opacity: '0.5',
       })
@@ -31,8 +24,8 @@ export const SCenterAnimation = (
       )
       .fromTo(
         "transform",
-        "scale(1,1)",
-        `scale(${heightRatio}, ${widthRatio})`
+        "scale(0.8,0.8)",
+        "scale(1,1)"
       );
 
     // ALL CONTENT BELOW MODAL
