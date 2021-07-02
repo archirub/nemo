@@ -137,38 +137,12 @@
             <div class="question">
               <ion-label position="stacked"> Add some questions </ion-label>
             </div>
-
-            <!--div class="multi-input">
-              <div class="input">
-                <div
-                  formArrayName="questions"
-                  *ngFor="let questionForm of form.get('questions').controls; let i=index"
-                >
-                  <div [formGroupName]="i">
-                    <ion-select formControlName="q">
-                      <ion-select-option [value]="null"
-                        >selected hidden</ion-select-option
-                      >
-                      <ion-select-option
-                        *ngFor="let question of questionsOptions"
-                        [value]="question"
-                      >
-                        {{question}}
-                      </ion-select-option>
-                    </ion-select>
-                    <div>
-                      <ion-textarea maxlength="30" formControlName="a"></ion-textarea>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div-->
-
-            <question-slides></question-slides>
+            <question-slides
+            #qSlides
+            (questionDeleted)="this.removeQuestion($event)"
+            formArrayName="questions">
+            </question-slides>
           </div>
-          <!--ion-button (click)="addQuestion()" expand="block" fill="clear" shape="round">
-            Add Question
-          </ion-button-->
 
           <div class="skipdiv">
             <p class="tip-center">Max 70 characters per answer</p>
@@ -184,7 +158,7 @@
               <ion-button (click)="unlockAndSlideToNext()">Skip</ion-button>
             </div>
 
-            <ion-button class="next-slide scroll" (click)="unlockAndSlideToNext()">
+            <ion-button class="next-slide scroll" (click)="submitQuestions()">
               <ion-icon name="chevron-forward-outline"></ion-icon>
             </ion-button>
           </div>
@@ -295,18 +269,11 @@
                 <ion-button (click)="unlockAndSlideToNext()">Skip</ion-button>
               </div>
 
-              <ion-button class="next-slide scroll" (click)="unlockAndSlideToNext()">
+              <ion-button class="next-slide scroll" (click)="onSubmit()">
                 <ion-icon name="chevron-forward-outline"></ion-icon>
               </ion-button>
             </div>
           </div>
-
-          <!-- <ion-button class="next-slide scroll" (click)="unlockAndSwipe('next')">
-            <ion-icon name="chevron-forward-outline"></ion-icon>
-          </ion-button> -->
-        <ion-button class="next-slide scroll" (click)="onSubmit()">
-          <ion-icon name="chevron-forward-outline"></ion-icon>
-        </ion-button>
         </div>
       </ion-slide>
     </ion-slides>

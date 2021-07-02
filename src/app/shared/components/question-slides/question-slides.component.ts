@@ -4,32 +4,58 @@ import { Component,
   OnInit, 
   ViewChild, 
   ChangeDetectorRef, 
-  ViewChildren } from "@angular/core";
-import { QuestionAndAnswer } from "@interfaces/index";
+  ViewChildren, 
+  Output,
+  EventEmitter,
+  forwardRef,
+  Input
+} from "@angular/core";
+import { ControlValueAccessor, FormArray, FormControl, FormGroup, NG_VALUE_ACCESSOR } from "@angular/forms";
+
+import { Question, QuestionAndAnswer } from "@interfaces/index";
 import { questionsOptions } from "@interfaces/index";
-import { IonSlides } from "@ionic/angular";
+import { IonSelect, IonSlides, IonTextarea } from "@ionic/angular";
 
 @Component({
   selector: "question-slides",
   templateUrl: "./question-slides.component.html",
   styleUrls: ["./question-slides.component.scss"],
+  providers: [
+    {
+       provide: NG_VALUE_ACCESSOR,
+       useExisting: forwardRef(() => QuestionSlidesComponent),
+       multi: true
+    }
+ ]
 })
-export class QuestionSlidesComponent implements OnInit {
+export class QuestionSlidesComponent implements OnInit, ControlValueAccessor {
   @ViewChild('questionSlides') slides: IonSlides;
   @ViewChild('grid', { read: ElementRef }) grid: ElementRef;
   @ViewChild('pager', { read: ElementRef }) pager: ElementRef;
   @ViewChildren('pagerDot', { read: ElementRef }) dots: QueryList<ElementRef>;
 
+  @ViewChildren('selects') selects: QueryList<IonSelect>;
+  @ViewChildren('texts') texts: QueryList<IonTextarea>;
+
+  @Output() questionAnswered = new EventEmitter();
+  @Output() questionDeleted = new EventEmitter();
+
+  // QUESTION FORMARRAY
+  questionForm = new FormArray([]);
+
+  disabled = false;
+  onChange: any = () => { };
+  onTouched: any = () => { };
+  //value: QuestionAndAnswer[];
+  value: any = [];
+
   counter: number;
   slideArray: Array<number> = [0];
   answerArray: Array<string> = [];
-  questionArray: Array<string> = [];
+  questionArray: Array<Question> = [];
   questions = questionsOptions;
-  newAvailableQuestions: Array<string> = [...this.questions]; //Copy of this.questions, not pointer to it, so it is mutable but doesn't change this.questions
-
-  availableQuestionsMap = {
-    0: this.questions,
-  }
+  newAvailableQuestions: Array<string> = [...this.questions]; 
+  //Copy of this.questions, not pointer to it, so it IS mutable but doesn't change this.questions
 
   constructor(
     public detector: ChangeDetectorRef,
@@ -52,10 +78,22 @@ export class QuestionSlidesComponent implements OnInit {
     dots[current].nativeElement.style.color = "var(--ion-color-primary)"; //Colour active dot orange
   }
 
+  /**
+   * Builds group of Q/A combo to push to FormArray
+   */
+  initQuestion() {
+    return new FormGroup({
+      q: new FormControl(''),
+      a: new FormControl('')
+    });
+  }
+
+  /**
+   * Adds a new question slide and updates the counter etc. to allow for UI updates
+   * Sends the last added question to parent form also
+   */
   addQuestion() {
     this.slideArray.push(this.counter);
-
-    this.availableQuestionsMap[this.counter] = this.newAvailableQuestions;
 
     this.detector.detectChanges(); //Trigger angular detection ONLY ON THIS COMPONENT to update slides UI
 
@@ -67,6 +105,73 @@ export class QuestionSlidesComponent implements OnInit {
     this.counter++;
 
     this.slides.lockSwipes(false);
+
+    // Push last added question to value of this component
+    this.value.push({
+      q: this.questionArray[this.questionArray.length-1],
+      a: this.answerArray[this.answerArray.length-1]
+    });
+
+    const questionArray = this.questionForm as FormArray;
+    questionArray.push(this.initQuestion());
+
+    // Send last added question to parent form
+    this.questionAnswered.emit([
+      this.questionArray[this.questionArray.length-1],
+      this.answerArray[this.answerArray.length-1]
+    ]);
+
+    this.onChange(this.value);
+  }
+
+  deleteQuestion(i) {
+    this.questionArray.splice(i,1);
+    this.answerArray.splice(i,1);
+
+    this.slides.slidePrev();
+    this.counter--
+
+    //This essentially rebuilds the slides from scratch
+    setTimeout(() => {
+      //Fill new slide array up to number of new slides
+      this.slideArray = Array.from(Array(this.slideArray.length-1).keys());
+      this.detector.detectChanges();
+      
+      for (let j = 0; j < Array.from(this.texts).length; j++) {
+        //Manually enter all selects and textareas
+        Array.from(this.selects)[j].value = this.questionArray[j];
+        Array.from(this.texts)[j].value = this.answerArray[j];
+      };
+
+      this.detector.detectChanges();
+    }, 50);
+
+    this.updateAddButton();
+
+    //Clear value and push all answered questions
+    this.value = [];
+    for (let j = 0; j < this.questionArray.length; j++) {
+      this.value.push({
+        q: this.questionArray[j],
+        a: this.answerArray[j]
+      });
+    };
+
+    this.questionDeleted.emit(i);
+
+    this.onChange(this.value);
+  }
+
+  async updateDeleteButton(i) {
+    const deleteButton = document.getElementsByClassName('delete')[i] as HTMLElement;
+
+    // Show delete button only if a question has been selected, answer not necessary
+    // Can't delete first slide, otherwise UI disappears lol
+    if (typeof this.questionArray[i] === 'string' && i != 0) {
+      deleteButton.style.display = "block";
+    } else {
+      deleteButton.style.display = "none";
+    };
   }
 
   async updateAddButton() {
@@ -102,23 +207,6 @@ export class QuestionSlidesComponent implements OnInit {
     });
   }
 
-  removeChosenQuestions(index,question) {
-    /**
-     * Update questionsLeft array to stop users picking the same question again, with input
-     * index (number): the slide where the question was chosen; question is removed from all OTHER slides
-     * question (string): question to be removed from options
-    **/
-    this.newAvailableQuestions = [...this.questions];
-    this.filterArray(this.newAvailableQuestions, this.questionArray);
-
-    for (let i = 0; i < Object.keys(this.availableQuestionsMap).length; i++) {
-      if (i != index) {
-        this.availableQuestionsMap[i] = [...this.questions];
-        this.filterArray(this.availableQuestionsMap[i],this.questionArray);
-      };
-    };
-  }
-
   updateQuestionArray(index,$event) {
     /**
      *  Update question array when one is selected, with inputs
@@ -126,8 +214,8 @@ export class QuestionSlidesComponent implements OnInit {
      * $event: used to target the value of the ion-select where the question is chosen
     **/
     this.questionArray[index] = $event.target.value; //How to target select's value without ViewChild, check event origin
-    this.removeChosenQuestions(index,$event.target.value); //Remove chosen question
     this.updateAddButton();
+    this.updateDeleteButton(index);
   }
 
   updateAnswerArray(index,$event) {
@@ -143,5 +231,57 @@ export class QuestionSlidesComponent implements OnInit {
     };
 
     this.updateAddButton();
+  }
+
+  /**
+   * Triggered by parent, fills out form value
+   * Rebuilds the slide UI and fills out each slide
+   */
+  writeValue(value: any): void {
+    this.value = value;
+
+    //Reinitialise everything ready for filling out UI
+    this.slideArray = [];
+    this.questionArray = [];
+    this.answerArray = [];
+
+    if (value.length < 1) {
+      this.slideArray = [0]; //No questions answered, blank slate
+    } else {
+      let count = 0;
+
+      value.forEach(obj => {
+        //Iterate through value saved and add each question/answer
+        this.questionArray.push(obj.q);
+        this.answerArray.push(obj.a);
+        this.slideArray.push(count); //Add slides for each answer
+        count ++;
+      });
+
+      this.counter = count; //This is related to the delete button UI
+      this.detector.detectChanges(); //Detect template changes for getting IonSelects/Textareas
+      //IMPORTANT LEAVE THIS HERE
+
+      for (let i=0; i < this.slideArray.length; i++) {
+        //Fill out all the UI slides
+        Array.from(this.selects)[i].value = this.questionArray[i];
+        Array.from(this.texts)[i].value = this.answerArray[i];
+        this.updateDeleteButton(i);
+      };
+    };
+
+    this.slides.slideTo(this.slideArray.length-1); //Go to last slide
+  }
+
+  registerOnChange(fn: any): void {
+      this.onChange = fn;
+  }
+
+  registerOnTouched(fn: any): void {
+      this.onTouched = fn;
+  }
+
+  setDisabledState?(isDisabled: boolean): void {
+      this.disabled = isDisabled;
   }
 }

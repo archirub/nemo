@@ -1,7 +1,7 @@
 import { 
   Component, 
-  Input, 
-  AfterViewInit, 
+  Input,
+  OnInit, 
   Output, 
   EventEmitter } from "@angular/core";
 
@@ -15,7 +15,7 @@ import {
   templateUrl: "./interests-slides.component.html",
   styleUrls: ["./interests-slides.component.scss"],
 })
-export class InterestSlidesComponent implements AfterViewInit {
+export class InterestSlidesComponent implements OnInit {
   @Input() listed: boolean = true; //Option to hide the listed interests, automatically shown (false = hidden)
   @Input() interests: Interests[];
   @Output() interestsChange = new EventEmitter<Interests[]>();
@@ -27,7 +27,7 @@ export class InterestSlidesComponent implements AfterViewInit {
 
   constructor() {}
 
-  ngAfterViewInit() {
+  ngOnInit() {
     //this.pictures = assetsInterestsPath;
     //this.names = searchCriteriaOptions.interests;
 

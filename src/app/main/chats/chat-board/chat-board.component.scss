@@ -1,5 +1,7 @@
 ion-content {
   height: 78vh;
+  width: calc(100% + 15px);
+  --padding-end: 15px;
 }
 
 ion-item {

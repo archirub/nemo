@@ -75,7 +75,7 @@ export class SignuprequiredPage {
 
   slidesLeft: number;
 
-  age: number;
+  age: number = 0;
 
   // Getting these dynamically would be absolutely amazing, not sure how to however
   slideIndexes: { [k in keyof SignupRequired]: number } = {
@@ -116,6 +116,11 @@ export class SignuprequiredPage {
 
   ionViewDidEnter() {
     this.updatePager();
+  }
+
+  updateAge(age: number) {
+    this.age = age;
+    this.changeDetectorRef.detectChanges();
   }
 
   validateAndSlide(entry) {

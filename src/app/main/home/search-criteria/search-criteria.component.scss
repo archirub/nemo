@@ -1,3 +1,8 @@
+ion-content {
+    width: calc(100% + 15px);
+    --padding-end: 15px;
+}
+
 .image {
     height: 90vh;
     width: 90vw;
@@ -164,7 +169,7 @@ h2 {
 p {
     margin: 0 auto;
     padding-bottom: 3vh;
-    font-size: 1.3vh;
+    font-size: 1.8vh;
     border-bottom: 1px solid var(--ion-color-light-shade);
     color: var(--ion-color-dark-shade);
 }
@@ -176,7 +181,7 @@ p {
 .exit {
     z-index: 3;
     position: absolute;
-    right: 2vh;
+    right: 4vh;
     top: 2vh;
     width: 5.2vh;
     font-size: 3vh;

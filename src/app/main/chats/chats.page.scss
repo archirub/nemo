@@ -1,3 +1,7 @@
+ion-content {
+  --overflow: hidden;
+}
+
 .header-collapse-condense ion-toolbar:first-of-type {
   height: 15vh;
   width: 90%;

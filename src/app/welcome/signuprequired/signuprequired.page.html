@@ -59,11 +59,12 @@
               #date
               [yearRange]="[2020, 1960]"
               formControlName="dateOfBirth"
+              (ageChange)="updateAge($event)"
             ></app-datetime-component>
           </div>
 
           <div class="center">
-            <h3>Age: {{ this.date.age }}</h3>
+            <h3>Age: {{ this.age }}</h3>
           </div>
 
           <div class="skipdiv">
@@ -147,12 +148,6 @@
           <br />
 
           <div class="flexstart-col">
-            <!-- <div class="preferences">
-              <h3>I am looking for</h3>
-              <ion-select required [formControl]="swipeMode">
-                <ion-select-option value="option">option...</ion-select-option>
-              </ion-select>
-            </div> -->
 
             <div class="preferences">
               <h3>I am interested in</h3>
@@ -296,11 +291,11 @@
           </div>
 
           <div style="opacity: 1" class="flexstart-col blow-up front">
-            <h1>Adding basic info leads to better matches.</h1>
+            <h1>You're all set! Feel free to dive straight in...</h1>
           </div>
 
           <div class="flexend-col blow-up behind">
-            <h1>So you can find a catch, or be caught yourself.</h1>
+            <h1>Enter some basic info so you can catch more fish!</h1>
           </div>
 
           <div class="flexend-col">

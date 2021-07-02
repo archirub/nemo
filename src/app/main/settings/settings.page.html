@@ -1,4 +1,4 @@
-<ion-content>
+<ion-content class="noScroll">
   <form [formGroup]="form">
   <ion-slides pager="false" options="{pagination: false, onlyExternal: false}" #slide>
     <ion-slide>
@@ -60,7 +60,7 @@
       one other slide has to have display != none in order for this.slides.slideNext() to work -->
     <ion-slide id="placeholder"></ion-slide>
 
-    <ion-slide id="legal">
+    <ion-slide id="legal" class="noScroll">
         <div class="container">
           <div class="flexbetween-row">
             <h1>Legal</h1>
@@ -86,7 +86,7 @@
         </div>
     </ion-slide>
 
-    <ion-slide id="preferences">
+    <ion-slide id="preferences" class="noScroll">
         <div class="container">
           <div class="flexbetween-row">
             <h1>Your Preferences</h1>
@@ -151,7 +151,7 @@
         </div>
     </ion-slide>
 
-    <ion-slide id="support">
+    <ion-slide id="support" class="noScroll">
       <div class="container">
         <div class="flexbetween-row">
           <h1>Help & Support</h1>

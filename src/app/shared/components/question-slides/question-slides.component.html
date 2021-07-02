@@ -1,19 +1,27 @@
 <ion-content #grid>
-    <ion-slides #questionSlides (ionSlideDidChange)="this.updatePager()">
-        <ion-slide *ngFor="let number of this.slideArray">
-            <ion-select (ionChange)="updateQuestionArray(number,$event)">
+    <ion-slides 
+    #questionSlides 
+    (ionSlideDidChange)="this.updatePager()">
+        <ion-slide 
+        *ngFor="let number of this.slideArray">
+            <ion-select #selects (ionChange)="updateQuestionArray(number,$event)">
                 <ion-select-option 
-                *ngFor="let question of this.availableQuestionsMap[number]"
+                *ngFor="let question of this.questions"
                 [value]="question">
                     {{question}}
                 </ion-select-option>
             </ion-select>
 
             <ion-textarea
+            #texts
             autoGrow="true"
             maxlength="70"
             (ionChange)="updateAnswerArray(number,$event)">
             </ion-textarea>
+
+            <div id="delete" class="delete button" (click)="deleteQuestion(number)">
+                <ion-icon name="close-outline"></ion-icon>
+            </div>
         </ion-slide>
     </ion-slides>
 

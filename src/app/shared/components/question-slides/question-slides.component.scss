@@ -5,6 +5,7 @@ ion-content {
 ion-slides {
     height: 40vh;
     width: 80vw;
+    margin-top: 2px;
     overflow: visible;
     --bullet-background: #000;
 }
@@ -68,6 +69,17 @@ ion-textarea {
 
 .prev {
     top: 32%;
+}
+
+.delete {
+    color: var(--ion-color-primary);
+    --background: transparent;
+    background: transparent;
+    --background-activated: transparent;
+    --ripple-color: transparent;
+    display: none;
+    top: 0;
+    right: 0;
 }
 
 #pager {

@@ -24,6 +24,7 @@ import {
 } from "@interfaces/index";
 import { allowOptionalProp } from "@interfaces/shared.model";
 import { SignupService } from "@services/signup/signup.service";
+import { QuestionSlidesComponent } from "@components/index";
 
 @Component({
   selector: "app-signupoptional",
@@ -34,8 +35,11 @@ export class SignupoptionalPage implements OnInit {
   @ViewChild("interestSlides", { read: ElementRef }) interestSlides: ElementRef;
   @ViewChild("slides") slides: IonSlides;
   @ViewChildren("pagerDots", { read: ElementRef }) dots: QueryList<ElementRef>;
+  @ViewChild('qSlides') qSlides: QuestionSlidesComponent;
 
   slidesLeft: number;
+
+  questionArray: QuestionAndAnswer[];
 
   // FIELD FORM
   form = new FormGroup({
@@ -44,7 +48,12 @@ export class SignupoptionalPage implements OnInit {
     interests: new FormArray([]),
     society: new FormControl(null),
     societyCategory: new FormControl(null),
-    questions: new FormArray([]),
+    questions: new FormArray([
+      new FormGroup({
+        q: new FormControl(''),
+        a: new FormControl('')
+      })
+    ]),
     biography: new FormControl(null),
     onCampus: new FormControl(null),
     instagramLink: new FormGroup({
@@ -52,21 +61,6 @@ export class SignupoptionalPage implements OnInit {
       link: new FormControl(null),
     }),
   });
-
-  /**
-   * Pushes a new question to the questions formArray (thereby showing in the template)
-   */
-  addQuestion() {
-    const questionArray = this.form.get("questions") as FormArray;
-    console.log(questionArray);
-    questionArray.push(
-      new FormGroup({
-        q: new FormControl(null),
-        a: new FormControl(null),
-      })
-    );
-    this.changeDetectorRef.detectChanges(); // forces Angular to check updates in the template
-  }
 
   // I think the order should be :
   // course & areaOfStudy, society & societyCategory, interests, questions, biography, onCampus
@@ -99,7 +93,18 @@ export class SignupoptionalPage implements OnInit {
     private formBuilder: FormBuilder
   ) {}
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.clearFormArray(this.form.controls.questions as FormArray);
+  }
+
+  /**
+   * Empties a FormArray (given as input) of all its values
+   */
+  clearFormArray(formArray: FormArray) {
+    while (formArray.length !== 0) {
+      formArray.removeAt(0)
+    };
+  }
 
   async ionViewWillEnter() {
     await this.fillFieldsAndGoToSlide(); //Might need to be moved this to ionViewDidEnter hook
@@ -110,6 +115,36 @@ export class SignupoptionalPage implements OnInit {
     console.log(this.interestSlides.nativeElement.pictures);
     console.log(this.interestSlides.nativeElement.interests);
     this.updatePager();
+  }
+
+  /**
+   * Pushes a new question to the questions formArray (thereby showing in the template)
+   */
+   addQuestion(input) {
+    const questionArray = this.form.controls.questions as FormArray;
+    questionArray.push(this.initQuestion(input[0], input[1]));
+    
+    this.changeDetectorRef.detectChanges(); // forces Angular to check updates in the template
+  }
+
+  /**
+   * Removes specific question from formArray
+   */
+  removeQuestion(index: number) {
+    const questionArray = this.form.controls.questions as FormArray;
+    questionArray.removeAt(index);
+    
+    this.changeDetectorRef.detectChanges(); // forces Angular to check updates in the template
+  }
+
+  /**
+   * Builds group of Q/A combo to push to FormArray based on input
+   */
+  initQuestion(q, a) {
+    return new FormGroup({
+      q: new FormControl(q),
+      a: new FormControl(a)
+    });
   }
 
   /*
@@ -155,6 +190,24 @@ export class SignupoptionalPage implements OnInit {
     map[current].style.display = "block";
   }
 
+  /**
+   * Grabs all questions and answers from question slides component and adds them to form array
+   * This is the only way currently written to submit them to the form
+   */
+  async submitQuestions() {
+    this.clearFormArray(this.form.controls.questions as FormArray); 
+    //Clears any previous answers to avoid pushing same twice
+
+    for (let i = 0; i < this.qSlides.questionArray.length; i++) {
+      this.addQuestion([
+        this.qSlides.questionArray[i], 
+        this.qSlides.answerArray[i]
+      ]);
+    };
+
+    this.unlockAndSlideToNext();
+  }
+
   async unlockAndSlideToNext() {
     await this.slides.lockSwipes(false);
     await this.slides.slideNext();
@@ -178,10 +231,6 @@ export class SignupoptionalPage implements OnInit {
     await this.updatePager();
     await this.slides.lockSwipes(true);
   }
-
-  item = {
-    checked: false,
-  };
 
   /**
    * Gets the current data stored in the signupData observable from the service.
@@ -254,6 +303,7 @@ export class SignupoptionalPage implements OnInit {
           this.formBuilder.group({ q: QandA.question, a: QandA.answer })
         );
         this.form.setControl(field, this.formBuilder.array(questionFormGroups || []));
+        this.qSlides.writeValue(this.form.controls.questions.value);
       } else {
         const formControl = this.form.get(field);
         if (formControl) formControl.setValue(data[field]);

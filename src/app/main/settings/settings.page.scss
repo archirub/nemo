@@ -12,6 +12,11 @@ nemo-toggle {
     margin: 4vh auto 0;
 }
 
+.noScroll {
+    overflow: hidden;
+    --overflow: hidden;
+}
+
 .flexbetween-row {
     display: flex;
     justify-content: space-between;

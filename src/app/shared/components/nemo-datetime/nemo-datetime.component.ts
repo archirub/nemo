@@ -34,6 +34,8 @@ export class AppDatetimeComponent implements OnInit, ControlValueAccessor {
     value: any;
     age: number;
 
+    @Output() ageChange = new EventEmitter();
+
     constructor() {}
 
     ngOnInit() {
@@ -127,6 +129,7 @@ export class AppDatetimeComponent implements OnInit, ControlValueAccessor {
         };
 
         console.log("Selected:", this.value);
+        this.ageChange.emit(this.age);
     }
 
     writeValue(value: ISODateString): void {
