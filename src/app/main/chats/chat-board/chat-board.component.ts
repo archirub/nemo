@@ -67,14 +67,6 @@ export class ChatBoardComponent implements OnInit, OnDestroy {
     this.chatboardPicturesSub = this.chatboardPicturesService
       .activateStore(this.chatStore.chats$)
       .subscribe();
-
-    // this.chatboardPicturesService
-    //   .getUidsLocal()
-    //   .pipe(tap((a) => console.log("ca check par ici", a)))
-    //   .subscribe((a) => console.log("CADASDASDA", a));
-    //this.ActivatedRoute.paramMap.subscribe();
-    //this.displayedText = this.fakeData.generateSentences(this.profiles.length);
-    // this.chats[0].messages[6].
   }
 
   ngOnDestroy() {

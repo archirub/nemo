@@ -62,15 +62,12 @@ export class ChatboardPicturesService {
       // and if not to get them from the database, display them and store them locally
       withLatestFrom(this.holder$),
       concatMap(([chats, holder]) => {
-        let holdingAllPictures = true;
-
         let uidsToAdd: string[] = [];
         const uidsContained = Object.keys(holder);
 
         chats.forEach((chat) => {
           const index = uidsContained.indexOf(chat.recipient.uid);
           if (index === -1) {
-            holdingAllPictures = false;
             uidsToAdd.push(chat.recipient.uid);
           }
         });
@@ -81,9 +78,7 @@ export class ChatboardPicturesService {
             concatMap(([pictureUrl, pictureHolder]) => {
               pictureHolder[uid] = pictureUrl;
               this.holder.next(pictureHolder);
-              return urlToBase64(pictureUrl).pipe(
-                exhaustMap((base64Picture) => this.storeInLocal(uid, base64Picture, true))
-              );
+              return this.storeInLocal(uid, pictureUrl, true);
             })
           )
         );
@@ -101,14 +96,14 @@ export class ChatboardPicturesService {
 
   storeInLocal(
     uid: string,
-    base64Picture: string,
+    pictureUrl: string,
     setQuality: boolean = true
   ): Observable<string> {
-    return iif(
-      () => setQuality,
-      this.setPictureQuality(base64Picture),
-      of(base64Picture)
-    ).pipe(
+    return urlToBase64(pictureUrl).pipe(
+      take(1),
+      concatMap((base64Picture) =>
+        iif(() => setQuality, this.setPictureQuality(base64Picture), of(base64Picture))
+      ),
       concatMap((pic) => {
         const storePicture$ = from(
           Storage.set({
@@ -132,16 +127,22 @@ export class ChatboardPicturesService {
         const urls$ = uids.map((uid) => this.getPictureLocal(uid));
         return forkJoin([uids$, forkJoin(urls$)]);
       }),
-      withLatestFrom(this.holder$),
-      map(([[uids, urls], holder]) => {
-        Array(uids.length)
+      concatMap(([uids, urls]) => this.addToHolder({ uids, urls }))
+    );
+  }
+
+  addToHolder(obj: { uids: string[]; urls: string[] }): Observable<string[][]> {
+    return this.holder$.pipe(
+      take(1),
+      map((holder) => {
+        Array(obj.uids.length)
           .fill(null)
           .map((_, i) => {
-            holder[uids[i]] = urls[i];
+            holder[obj.uids[i]] = obj.urls[i];
           });
         this.holder.next(holder);
 
-        return [uids, urls];
+        return [obj.uids, obj.urls];
       })
     );
   }

@@ -3,39 +3,41 @@ import { ModalController } from "@ionic/angular";
 
 import { ChatStore } from "@stores/index";
 import { Chat } from "@classes/index";
-import { ChatboardPicturesService, pictureHolder } from "@services/pictures/chatboard-pictures/chatboard-pictures.service";
+import {
+  ChatboardPicturesService,
+  pictureHolder,
+} from "@services/pictures/chatboard-pictures/chatboard-pictures.service";
 import { Observable, Subscription } from "rxjs";
 
 @Component({
-    selector: "app-matches",
-    templateUrl: "./matches.component.html",
-    styleUrls: ["./matches.component.scss"],
+  selector: "app-matches",
+  templateUrl: "./matches.component.html",
+  styleUrls: ["./matches.component.scss"],
 })
-
 export class MatchesComponent implements OnInit, OnDestroy {
-    chatboardPictures$: Observable<pictureHolder>;
-    chatboardPicturesSub: Subscription;
-    @Input() chats: Chat[];
+  chatboardPictures$: Observable<pictureHolder>;
+  chatboardPicturesSub: Subscription;
 
-    constructor(
-        private modalCtrl: ModalController,
-        private chatStore: ChatStore,
-        private chatboardPicturesService: ChatboardPicturesService, // used in template
-    ) {}
+  @Input() chats: Chat[];
 
-    ngOnInit() {
-        this.chatboardPictures$ = this.chatboardPicturesService.holder$;
-        this.chatboardPicturesSub = this.chatboardPicturesService
-            .activateStore(this.chatStore.chats$)
-            .subscribe();
-    }
+  constructor(
+    private modalCtrl: ModalController,
+    private chatStore: ChatStore,
+    private chatboardPicturesService: ChatboardPicturesService // used in template
+  ) {}
 
-    ngOnDestroy() {
-        this.chatboardPicturesSub.unsubscribe();
-    }
+  ngOnInit() {
+    this.chatboardPictures$ = this.chatboardPicturesService.holder$;
+    this.chatboardPicturesSub = this.chatboardPicturesService
+      .activateStore(this.chatStore.chats$)
+      .subscribe();
+  }
 
-    async closeModal() {
-        return await this.modalCtrl.dismiss();
-    }
+  ngOnDestroy() {
+    this.chatboardPicturesSub.unsubscribe();
+  }
+
+  async closeModal() {
+    return await this.modalCtrl.dismiss();
+  }
 }
-

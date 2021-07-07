@@ -8,23 +8,19 @@ import {
   ElementRef,
 } from "@angular/core";
 
-import {
-  NavController,
-  IonContent,
-  IonSlides,
-  IonSlide,
-  IonHeader,
-} from "@ionic/angular";
+import { NavController, IonContent, IonSlides } from "@ionic/angular";
 import { AngularFireAuth } from "@angular/fire/auth";
 import { ActivatedRoute, ParamMap } from "@angular/router";
 
-import { BehaviorSubject, Subscription, Observable } from "rxjs";
-import { map } from "rxjs/operators";
+import { BehaviorSubject, forkJoin, Observable, of, Subscription } from "rxjs";
+import { concatMap, map, tap } from "rxjs/operators";
 
 import { Chat, Message, Profile } from "@classes/index";
 import { SwipeStackStore, ChatStore } from "@stores/index";
 import { ProfileCardComponent } from "@components/index";
 import { RecentMatchesStore } from "@stores/recent-matches-store/recent-matches-store.service";
+import { OtherProfilesStoreService } from "@stores/other-profiles-store/other-profiles-store.service";
+import { ChatboardPicturesService } from "@services/pictures/chatboard-pictures/chatboard-pictures.service";
 
 @Component({
   selector: "app-messenger",
@@ -41,9 +37,11 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild("profCard", { read: ElementRef }) profCard: ElementRef; //for styling
   @ViewChild("profCard") grandchildren: ProfileCardComponent; //for access to grandchildren
 
-  profiles$: Subscription;
+  profilesSub: Subscription;
+  profileHandlingSub: Subscription;
+
   chatProfiles: Profile[];
-  chatProfile: Profile;
+  recipientProfile: Observable<Profile>;
   recipientUID: string;
 
   // Constants
@@ -54,11 +52,11 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
   public latestChatInput: string;
 
   // Scroll functionality
-  private scroll$: Subscription;
+  private scrollSub: Subscription;
   private timeOfNewestMsg: Date;
 
-  private chats$: Subscription;
-  public currentChat = new BehaviorSubject<Chat>(null);
+  private chatsSub: Subscription;
+  public thisChat = new BehaviorSubject<Chat>(null);
 
   constructor(
     private route: ActivatedRoute,
@@ -66,20 +64,31 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
     private chatStore: ChatStore,
     private afauth: AngularFireAuth,
     private swipeStackStore: SwipeStackStore,
-    private recentMatchesStore: RecentMatchesStore
+    private profilesStore: OtherProfilesStoreService,
+    private chatboardPictures: ChatboardPicturesService
   ) {}
 
   ngOnInit() {
     this.route.paramMap.subscribe((param) => this.messengerInitHandler(param));
     this.timeOfNewestMsg = this.lastInteracted();
-    this.scroll$ = this.currentChat.subscribe((c) => this.scrollHandler(c));
+    this.scrollSub = this.thisChat.subscribe((c) => this.scrollHandler(c));
 
     //Currently fetch profiles and outputting first one from subscription
-    const chat: Chat = this.currentChat.getValue();
-    const recipientUID: string = chat.recipient.uid;
-    this.recentMatchesStore.fetchProfile(recipientUID).then((a) => {
-      this.chatProfile = a;
-    });
+    this.recipientUID = this.thisChat.getValue().recipient.uid;
+
+    this.profileHandlingSub = this.profilesStore
+      .checkAndSave(this.recipientUID)
+      .pipe(
+        tap(() => console.log("hiyooooooo")),
+        concatMap(({ uid, pictures }) => {
+          return forkJoin([
+            this.chatboardPictures.storeInLocal(uid, pictures[0], true),
+            this.chatboardPictures.addToHolder({ uids: [uid], urls: [pictures[0]] }),
+          ]);
+        }) // this logic is for updating the locally stored chatboard picture whenever that person's
+        // profile is loaded. It is how we update this locally stored picture
+      )
+      .subscribe();
   }
 
   ngAfterViewInit() {
@@ -93,13 +102,13 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
     if (!parameter.has("chatID")) return this.navCtrl.navigateBack("/tabs/chats");
     this.CHAT_ID = parameter.get("chatID");
 
-    this.chats$ = this.chatStore.chats$
+    this.chatsSub = this.chatStore.chats$
       .pipe(
         map((chats) => {
           chats.forEach((chat) => {
             // this.chatProfile = db.getuserfromuid(chat.recipient.uid)
             if (chat.id === this.CHAT_ID) {
-              this.currentChat.next(chat);
+              this.thisChat.next(chat);
               if (!this.latestChatInput) {
                 this.latestChatInput = chat.latestChatInput;
               }
@@ -117,7 +126,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
 
     if (!messageContent) return;
 
-    const chat: Chat = this.currentChat.getValue();
+    const chat: Chat = this.thisChat.getValue();
     if (!chat) return console.error("Chat object is empty");
 
     const user = await this.afauth.currentUser;
@@ -151,7 +160,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
   async retryUpdateMessage(message: Message) {
     if (!message || message.state !== "failed") return;
 
-    const chat: Chat = this.currentChat.getValue();
+    const chat: Chat = this.thisChat.getValue();
     if (!chat) return console.error("Chat object is empty");
 
     try {
@@ -181,7 +190,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
 
   /** Returns the time of the newest message */
   private lastInteracted(): Date {
-    const chat = this.currentChat.getValue();
+    const chat = this.thisChat.getValue();
     if (!chat) return;
     return new Date(
       Math.max.apply(
@@ -209,7 +218,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
 
   isOwnMessage(message: Message): boolean {
     if (!message) return;
-    const chat: Chat = this.currentChat.getValue();
+    const chat: Chat = this.thisChat.getValue();
     if (message.senderID === chat.recipient.uid) return false;
     return true;
   }
@@ -330,11 +339,9 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.chatStore.updateLatestChatInput(
-      this.currentChat.getValue(),
-      this.latestChatInput
-    );
-    this.chats$.unsubscribe();
-    this.scroll$.unsubscribe();
+    this.chatStore.updateLatestChatInput(this.thisChat.getValue(), this.latestChatInput);
+    this.profileHandlingSub.unsubscribe();
+    this.chatsSub.unsubscribe();
+    this.scrollSub.unsubscribe();
   }
 }
