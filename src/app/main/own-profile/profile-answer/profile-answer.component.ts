@@ -42,7 +42,7 @@ export class ProfileAnswerComponent implements OnInit {
         };
         this.questions.answer = this.answer.value;
     }
-    
+
     /**
      * Removes written answer on click of cross, updates question
      **/

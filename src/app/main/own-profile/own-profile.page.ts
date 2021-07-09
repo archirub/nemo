@@ -48,10 +48,6 @@ export class OwnProfilePage implements OnInit {
 
   ownPicturesSub: Subscription;
 
-  QEnterAnimation;
-  QLeaveAnimation;
-  modal: HTMLIonModalElement;
-
   constructor(
     private currentUserStore: CurrentUserStore,
     private router: Router,
@@ -97,9 +93,11 @@ export class OwnProfilePage implements OnInit {
   toggleChange(option) {
     var editor = document.getElementById("editing");
     var profile = document.getElementById("profile");
+
     if (option == "edit") {
       editor.style.display = "flex";
       profile.style.display = "none";
+
     } else if (option == "view") {
       editor.style.display = "none";
       profile.style.display = "flex";

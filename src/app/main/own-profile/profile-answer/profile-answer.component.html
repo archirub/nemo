@@ -9,7 +9,8 @@
 
             <ion-select
             #qInput
-            id="replace" 
+            id="replace"
+            interface="action-sheet" 
             placeholder="Choose a question"
             (ionChange)="changeQuestion($event)">
                 <ion-select-option *ngFor="let q of this.questionsAvailable">
@@ -22,7 +23,8 @@
 </div>
 
 <div class="add" *ngIf="!this.addable">
-    <ion-select 
+    <ion-select
+    interface="action-sheet" 
     placeholder="Choose a question"
     (ionChange)="chooseQuestion($event)">
         <ion-select-option *ngFor="let q of this.questionsAvailable">
