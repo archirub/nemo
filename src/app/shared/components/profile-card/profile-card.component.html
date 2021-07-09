@@ -11,8 +11,8 @@
     </div>
     <ion-slides
       #picSlides
-      (ionSlideDidChange)="updatePager()"
       (ionSlideWillChange)="checkSlide()"
+      (ionSlideDidChange)="updatePager()"
     >
       <ion-slide
         #pic
@@ -73,7 +73,9 @@
                     alt="icon"
                   />
                   <br />
-                  <ion-label id="interests-label">{{ interest }}</ion-label>
+                  <div class="interests-text">
+                    <ion-label id="interests-label">{{ interest }}</ion-label>
+                  </div>
                   <!-- would be {{interests.name}} -->
                 </div>
               </ion-slide>
@@ -118,20 +120,19 @@
           </div>
         </div>
 
-        <div id="info-segment">
+        <div id="info-segment" *ngIf="socialFound">
           <!--iframe src="https://www.instagram.com/ewannmilezz/"></iframe-->
         </div>
 
         <div id="info-segment" *ngIf="reportable">
           <div id="interests-container" class="centered">
-            <div id="interests-box">
+            <div class="reportButton">
               <ion-icon
                 name="shield"
-                id="bottom-icon"
                 style="color: var(--ion-color-danger)"
               ></ion-icon>
               <br />
-              <ion-label id="interests-label">Report this user</ion-label>
+              <ion-label>Report this user</ion-label>
             </div>
           </div>
         </div>

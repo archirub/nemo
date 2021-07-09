@@ -1,4 +1,10 @@
-import { Component, ElementRef, OnInit, ViewChild } from "@angular/core";
+import { ChangeDetectorRef, Component, 
+  ElementRef, 
+  HostListener, 
+  OnInit, 
+  QueryList, 
+  ViewChild, 
+  ViewChildren } from "@angular/core";
 
 import { Subscription } from "rxjs";
 import { User } from "@classes/index";
@@ -8,6 +14,7 @@ import { ProfileCourseComponent } from "./profile-course/profile-course.componen
 import { IonTextarea } from "@ionic/angular";
 import { Router } from "@angular/router";
 import { OwnPicturesService } from "@services/pictures/own-pictures/own-pictures.service";
+import { ProfileAnswerComponent } from "./profile-answer/profile-answer.component";
 
 @Component({
   selector: "app-own-profile",
@@ -22,16 +29,34 @@ export class OwnProfilePage implements OnInit {
   @ViewChild("socs") socs: ProfileCourseComponent;
 
   @ViewChild('profileCard') profileCard: ProfileCardComponent;
+  @ViewChild('profileContainer', { read: ElementRef }) profileContainer: ElementRef;
+
+  @ViewChildren('answers') answers: QueryList<ProfileAnswerComponent>;
+  lastAnsRef;
+
+  screenHeight: number;
+  screenWidth: number;
+
+  @HostListener("window:resize", ["$event"])
+  onResize() {
+    this.screenHeight = window.innerHeight;
+    this.screenWidth = window.innerWidth;
+  }
 
   profileSub: Subscription;
   profile: User;
 
   ownPicturesSub: Subscription;
 
+  QEnterAnimation;
+  QLeaveAnimation;
+  modal: HTMLIonModalElement;
+
   constructor(
     private currentUserStore: CurrentUserStore,
     private router: Router,
-    private ownPicturesService: OwnPicturesService
+    private ownPicturesService: OwnPicturesService,
+    private detector: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -44,6 +69,7 @@ export class OwnProfilePage implements OnInit {
   ngAfterViewInit() {
     this.depts.type = "courses";
     this.socs.type = "societies";
+    this.lastAnsRef = Array.from(this.answers)[this.answers.length-1];
   }
 
   goToSettings() {
@@ -81,8 +107,25 @@ export class OwnProfilePage implements OnInit {
   }
 
   buildInterests() {
-    console.log(this.profile.interests);
     this.profileCard.buildInterestSlides();
+  }
+
+  addQuestion() {
+    this.lastAnsRef.addable = false; //Show input for new question on last profile answer component
+    this.answers.last.chosenQuestion = undefined;
+    this.answers.last.chosenAnswer = undefined;
+  }
+
+  submitQuestion() {
+    this.lastAnsRef.submitQuestion();
+    Array.from(this.answers).forEach(q => {
+      q.addable = true; //Remove all ion select options
+    });
+
+    this.detector.detectChanges(); //Detect template changes
+    this.lastAnsRef = Array.from(this.answers)[this.answers.length-1]; //Check which is now last answer element
+    
+    this.answers.last.formAvailableQuestions();
   }
 
   ngOnDestroy() {

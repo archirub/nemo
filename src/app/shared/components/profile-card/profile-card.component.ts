@@ -38,6 +38,7 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
   interestsBuilt: boolean = false;
 
   loaded: boolean = false;
+  socialFound = false; //Make this TRUE when social media acct is loaded
 
   /* Track touch locations */
   X: number;
@@ -105,6 +106,7 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
   async updatePager() {
     var current = await this.slides.getActiveIndex();
     let index = 0;
+
     this.bullets.forEach((bullet: ElementRef) => {
       if (current === index) {
         bullet.nativeElement.style.color = "var(--ion-color-primary-contrast)";
@@ -128,10 +130,12 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
     var current = await this.slides.getActiveIndex();
     var len = await this.slides.length();
 
-    if (current === len - 1) {
-      this.slides.lockSwipeToNext(true);
-    } else if (current === 0) {
+    if (current === 0) {
       this.slides.lockSwipeToPrev(true);
+      this.slides.lockSwipeToNext(false);
+    } else if (current === len - 1) {
+      this.slides.lockSwipeToPrev(false);
+      this.slides.lockSwipeToNext(true);
     } else {
       this.slides.lockSwipeToPrev(false);
       this.slides.lockSwipeToNext(false);

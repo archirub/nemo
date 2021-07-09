@@ -7,8 +7,14 @@ export const FishSwimAnimation = (fish: ElementRef) => {
 
     fishAnimation
       .addElement(fish.nativeElement)
-      .duration(2000)
-      .fromTo("transform", "rotate(0deg)", "rotate(-360deg)")
+      .duration(1200)
+      .keyframes([
+        { offset: 0, transform: 'rotate(0deg)' },
+        { offset: 0.395, transform: 'rotate(-90deg)' },
+        { offset: 0.511, transform: 'rotate(-110deg)' },
+        { offset: 0.884, transform: 'rotate(-160deg)' },
+        { offset: 1, transform: 'rotate(-180deg)' }
+      ])
       .iterations(Infinity);
 
     return fishAnimation;

@@ -1,4 +1,4 @@
-<ion-content>
+<ion-content #profileContainer>
   <div class="shadow"></div>
 
   <div id="profile" style="display: flex">
@@ -65,9 +65,27 @@
 
       <h2>My answers</h2>
       <profile-answer
+        #answers
         *ngFor="let questions of profile?.questions; let i = index"
         [questions]="profile?.questions[i]"
+        [profile]="profile"
       ></profile-answer>
+
+      <ng-container *ngIf="this.answers">
+        <div *ngIf="this.lastAnsRef.addable === true" class="flexcenter">
+          <ion-icon 
+          id="addQuestion" 
+          name="add-circle"
+          (click)="addQuestion()"></ion-icon>
+        </div>
+  
+        <div *ngIf="this.lastAnsRef.addable === false" class="flexcenter">
+          <ion-icon
+          id="submitQuestion"
+          name="checkmark-outline"
+          (click)="submitQuestion()"></ion-icon>
+        </div>
+      </ng-container>
 
       <h2>My course</h2>
       <profile-course

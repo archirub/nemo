@@ -4,7 +4,8 @@ ion-content {
 
 ion-grid {
     position: absolute;
-    top: 26.5vh;
+    top: 40.5vh;
+    left: -4vw
 }
 
 .center {
@@ -16,17 +17,17 @@ ion-grid {
     height: 20vh;
     position: absolute;
     z-index: 2;
-    top: 4vh;
+    top: 11vh;
 }
 
 .logo {
     position: absolute;
-    top: 11.5vh;
+    top: 18.5vh;
     height: 5vh;
     z-index: 3;
 }
 
-.wavesSlow {
+/*.wavesSlow {
     position: absolute;
     z-index: 2;
     bottom: 0.5vh;
@@ -38,4 +39,4 @@ ion-grid {
     bottom: 4vh;
     z-index: 1;
     transform: scale(1.4);
-}
+}*/

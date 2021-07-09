@@ -10,7 +10,7 @@
     };
 }
 
-.question {
+#question {
     color: var(--ion-color-light-contrast);
     font-size: 2.3vh;
 }
@@ -22,10 +22,34 @@
   background: var(--ion-color-medium);
   border-radius: 50%;
   height: 4vh;
-  margin-top: 3vh;
+  margin-top: 5.5vh;
 
   ion-icon {
     font-size: 20px;
     padding: 0.5vh;
   }
+}
+
+ion-select {
+  font-size: 2.3vh;
+  --padding-start: none;
+}
+
+.add {
+  margin-top: 1vh;
+}
+
+.flex {
+  display: flex;
+}
+
+#replace {
+  display: none;
+}
+
+.edit {
+  margin-top: 16px;
+  margin-right: 5px;
+  font-size: 2.8vh;
+  color: var(--ion-color-primary);
 }
