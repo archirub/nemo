@@ -12,13 +12,15 @@
       #picSlides
       (ionSlideWillChange)="checkSlide()"
       (ionSlideDidChange)="updatePager()"
+      *ngIf="ownPicturesService?.urls$ | async as pictureUrls"
     >
       <ion-slide
         #pic
-        *ngFor="let path of profile?.pictureUrls; index as i"
+        *ngFor="let path of this.pictureUrls; index as i"
         [ngStyle]="{
           'background-image': 'url(' + path + ')',
-          'background-size': 'cover'
+          'background-size': 'cover',
+          'background-position': 'center'
         }"
       >
       <div *ngIf="profile?.questions[i]" #QandA class="question" [hidden]="moreInfo">

@@ -13,6 +13,8 @@ import {
 } from "@angular/core";
 import { Chat, Profile } from "@classes/index";
 import { IonContent, IonSlides } from "@ionic/angular";
+import { OwnPicturesService } from "@services/pictures/own-pictures/own-pictures.service";
+import { Subscription } from "rxjs";
 
 @Component({
   selector: "app-profile-card",
@@ -22,9 +24,12 @@ import { IonContent, IonSlides } from "@ionic/angular";
 export class ProfileCardComponent implements OnInit, AfterViewInit {
   @Output() expanded = new EventEmitter();
   @Output() tapped = new EventEmitter();
+
   @Input() moreInfo: boolean;
   @Input() profile: Profile;
   @Input() reportable: boolean = true;
+  @Input() ownProfile: boolean = false;
+
   @ViewChild(IonContent) ionContent: IonContent;
   @ViewChild(IonSlides) slides: IonSlides;
   @ViewChildren("bullets", { read: ElementRef }) bullets: QueryList<ElementRef>;
@@ -33,6 +38,7 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
   @ViewChild("no", { read: ElementRef }) noSwipe: ElementRef;
 
   picturePaths: Array<string>;
+  ownPicturesSub: Subscription;
 
   interestSlideContent: Array<Array<string>>;
   interestsBuilt: boolean = false;
@@ -65,9 +71,15 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
     this.Y = event.touches[0].clientY;
   }
 
-  constructor() {}
+  constructor(
+    private ownPicturesService: OwnPicturesService
+  ) {}
 
   ngOnInit() {
+    if (this.ownProfile = true) {
+      this.ownPicturesSub = this.ownPicturesService.emptinessObserver$.subscribe();
+    }
+
     this.moreInfo = false;
     // this.picturePaths = [
     //   "https://staticg.sportskeeda.com/editor/2020/06/a19cc-15923264235917.jpg",
@@ -82,6 +94,7 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
     // console.log("HERE IS THE society:", this.profile.society);
 
     this.buildInterestSlides();
+    console.log(this.profile);
   }
 
   ngAfterViewInit() {
@@ -171,5 +184,9 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
     interest = interest.replace(/\s/g, ''); //remove spaces
 
     return `/assets/interests/${interest}.png`;
+  }
+
+  ngOnDestroy() {
+    this.ownPicturesSub.unsubscribe();
   }
 }
