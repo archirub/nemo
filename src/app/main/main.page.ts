@@ -1,5 +1,4 @@
 import { Component, OnInit } from "@angular/core";
-import { AngularFireAuth } from "@angular/fire/auth";
 
 @Component({
   selector: "app-main",
@@ -7,7 +6,7 @@ import { AngularFireAuth } from "@angular/fire/auth";
   styleUrls: ["./main.page.scss"],
 })
 export class MainPage implements OnInit {
-  constructor(private afAuth: AngularFireAuth) {}
+  constructor() {}
 
   ngOnInit() {}
 }

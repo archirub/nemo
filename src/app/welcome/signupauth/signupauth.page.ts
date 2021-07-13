@@ -13,7 +13,7 @@ import { Subscription } from "rxjs";
   templateUrl: "./signupauth.page.html",
   styleUrls: ["../welcome.page.scss"],
 })
-export class SignupauthPage implements OnInit {
+export class SignupauthPage {
   @ViewChild("slides") slides: IonSlides;
   @ViewChild("email", { read: ElementRef }) email: ElementRef;
 
@@ -34,7 +34,7 @@ export class SignupauthPage implements OnInit {
     password: new FormControl("", [Validators.required, Validators.min(8)]),
   });
 
-  signup$: Subscription;
+  signupSub: Subscription;
 
   constructor(
     private alertCtrl: AlertController,
@@ -42,8 +42,6 @@ export class SignupauthPage implements OnInit {
     private signup: SignupService,
     private afAuth: AngularFireAuth
   ) {}
-
-  ngOnInit() {}
 
   ionViewDidEnter() {
     this.slides.lockSwipes(true);
@@ -178,7 +176,7 @@ export class SignupauthPage implements OnInit {
     const email: string = this.authForm.get("email").value;
     const password: string = this.authForm.get("password").value;
 
-    this.signup$ = this.signup.createFirebaseAccount(email, password).subscribe(
+    this.signupSub = this.signup.createFirebaseAccount(email, password).subscribe(
       (a) => {
         console.log(a);
         this.router.navigateByUrl("welcome/signuprequired");
@@ -197,8 +195,6 @@ export class SignupauthPage implements OnInit {
         this.showAlert(message);
       }
     );
-
-    this.afAuth.authState.subscribe((a) => console.log("this is the auth state:", a));
   }
 
   private showAlert(message: string) {
@@ -212,6 +208,6 @@ export class SignupauthPage implements OnInit {
   }
 
   ngOnDestroy() {
-    this.signup$.unsubscribe();
+    this.signupSub.unsubscribe();
   }
 }

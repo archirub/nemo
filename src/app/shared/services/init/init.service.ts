@@ -8,10 +8,17 @@ import {
   CurrentUserStore,
   SearchCriteriaStore,
   SwipeOutcomeStore,
-  OtherProfilesStoreService,
+  OtherProfilesStore,
   SwipeStackStore,
   SettingsStore,
 } from "@stores/index";
+// import { ChatStore } from "@stores/chat-store/chat-store.service";
+// import { CurrentUserStore } from "@stores/current-user-store/current-user-store.service";
+// import { SearchCriteriaStore } from "@stores/search-criteria-store/search-criteria-store.service";
+// import { OtherProfilesStore } from "@stores/other-profiles-store/other-profiles-store.service";
+// import { SwipeOutcomeStore } from "@stores/swipe-outcome-store/swipe-outcome-store.service";
+// import { SwipeStackStore } from "@stores/swipe-stack-store/swipe-stack-store.service";
+// import { SettingsStore } from "@stores/settings-store/settings-store.service";
 
 import firebase from "firebase";
 import { catchError, concatMap, first, map, switchMap, take, tap } from "rxjs/operators";
@@ -19,7 +26,8 @@ import { Router } from "@angular/router";
 import { Storage } from "@capacitor/core";
 import { AlertController } from "@ionic/angular";
 import { AngularFirestore } from "@angular/fire/firestore";
-import { SignupService } from "@services/index";
+import { SignupService } from "@services/signup/signup.service";
+// import { SignupService } from "@services/index";
 
 @Injectable({
   providedIn: "root",
@@ -35,7 +43,7 @@ export class InitService {
     private userStore: CurrentUserStore,
     private chatStore: ChatStore,
     private searchCriteriaStore: SearchCriteriaStore,
-    private otherProfilesStore: OtherProfilesStoreService,
+    private otherProfilesStore: OtherProfilesStore,
     private swipeOutcomeStore: SwipeOutcomeStore,
     private swipeStackStore: SwipeStackStore,
     private settingsStore: SettingsStore

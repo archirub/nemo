@@ -4,9 +4,9 @@ import { ModalController } from "@ionic/angular";
 import { ChatStore } from "@stores/index";
 import { Chat } from "@classes/index";
 import {
-  ChatboardPicturesService,
+  ChatboardPicturesStore,
   pictureHolder,
-} from "@services/pictures/chatboard-pictures/chatboard-pictures.service";
+} from "@stores/pictures-stores/chatboard-pictures-store/chatboard-pictures.service";
 import { Observable, Subscription } from "rxjs";
 
 @Component({
@@ -23,7 +23,7 @@ export class MatchesComponent implements OnInit, OnDestroy {
   constructor(
     private modalCtrl: ModalController,
     private chatStore: ChatStore,
-    private chatboardPicturesService: ChatboardPicturesService // used in template
+    private chatboardPicturesService: ChatboardPicturesStore // used in template
   ) {}
 
   ngOnInit() {

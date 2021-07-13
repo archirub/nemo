@@ -18,8 +18,7 @@ import { AngularFireStorageModule } from "@angular/fire/storage";
 
 import { environment } from "src/environments/environment";
 
-import { pageTransition } from "./shared/animations/page-transition.component";
-import { SignuprequiredPageModule } from "./welcome/signuprequired/signuprequired.module";
+import { pageTransition } from "./shared/animations/page-transition.animation";
 import { PipesModule } from "@pipes/pipes.module";
 
 @NgModule({

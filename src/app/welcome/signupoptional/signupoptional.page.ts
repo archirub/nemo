@@ -1,11 +1,3 @@
-// NEXT TO DO (AFTER JULY 12TH 2021),
-// - understand why onSubmit has some weird behavior where it always chooses the "true" option
-// of the iif rxjs function,
-// - you need two version of the function "slideToFirstInvalidIndex", one where it checks whether
-// the fields are empty / invalid. Its use is to redirect the user directly to where they left off
-// in case of error etc. for a seamless experience. The other is only if the fields are invalid, that
-// one is when it is time to submit the entire form and create an account (as the fields here are optional)
-
 import {
   ChangeDetectorRef,
   Component,
@@ -15,9 +7,12 @@ import {
   ElementRef,
   QueryList,
 } from "@angular/core";
-import { FormGroup, FormControl, FormArray, FormBuilder } from "@angular/forms";
 import { IonSlides } from "@ionic/angular";
 import { Router } from "@angular/router";
+import { FormGroup, FormControl, FormArray, FormBuilder } from "@angular/forms";
+
+import { concat, from } from "rxjs";
+import { catchError, concatMap, switchMap } from "rxjs/operators";
 
 import {
   searchCriteriaOptions,
@@ -27,14 +22,11 @@ import {
   Interests,
   SocietyCategory,
   QuestionAndAnswer,
-  successResponse,
   SocialMediaLink,
 } from "@interfaces/index";
-import { allowOptionalProp } from "@interfaces/shared.model";
+import { allowOptionalProp } from "@interfaces/index";
 import { SignupService } from "@services/signup/signup.service";
 import { QuestionSlidesComponent } from "@components/index";
-import { concat, forkJoin, from, iif } from "rxjs";
-import { catchError, concatMap, exhaustMap, switchMap, take } from "rxjs/operators";
 
 @Component({
   selector: "app-signupoptional",
@@ -75,9 +67,6 @@ export class SignupoptionalPage implements OnInit {
       // }),
     ]),
   });
-
-  // I think the order should be :
-  // course & areaOfStudy, society & societyCategory, interests, questions, biography, onCampus
 
   // OPTIONS
   societyCategoryOptions = searchCriteriaOptions.societyCategory;
@@ -458,61 +447,5 @@ export class SignupoptionalPage implements OnInit {
         })
       )
       .toPromise();
-
-    // PREVIOUS NONE OBSERVABLE BASED CODE
-    // const invalidSlide = this.getFirstInvalidSlideIndex();
-
-    // // if invalidSlide is non-null, then there is a slide with invalid data
-    // // cannot just use if (invalidSlide) {} syntax as number 0 is falsy
-    // if (typeof invalidSlide === "number") {
-    //   await this.unlockAndSlideTo(invalidSlide);
-    // } else {
-    //   await this.updateData(); // may not be necessary, but last check to make sure data we have in logic exactly reflects that in the UI
-    //   this.signup.createFirestoreAccount().subscribe(async (res) => {
-    //     console.log("ye ye ye");
-    //     if (res.accountCreation && res.pictureStoring) {
-    //       console.log("THAT FCKIN WORKED");
-    //       await this.signup.removeLocalStorage();
-    //       await this.signup.initializeUser();
-    //       await this.router.navigateByUrl("/main/home");
-    //     } else {
-    //       console.error("Signup was unsuccessful. HANDLE: ", res);
-
-    //       // FOR DEVELOPMENT, in real life, you need to retry based on which one fucked up and handle it
-    //       // properly. You'd need to at least display an error message saying which one fucked up, and
-    //       // absolutely create a system which sends us a log so that we are alerted of when that happens
-    //       await this.signup.removeLocalStorage();
-    //       this.signup.resetDataHolder();
-    //       this.router.navigateByUrl("/welcome/signupoptional");
-    //     }
-    //   });
-    // }
   }
 }
-
-// next to do here:
-// - change submit function so that:
-//       - either it redirects to an INVALID field (an empty field is fine as shit is optional here)
-//       -  either it: does a final save of the data to the observable, submits the data to the database to create the account
-//     upon success: delete the signup local storage, initialize the stores, direct to home
-//     upon failure, make sure that doesn't happen lmao
-// - make all validators accurate for all data
-
-// not directly related but necessary:
-// - fix picture logic in register-swipe-stack: should we not store anything in userSnippets and just fetch
-// it from the app (since it's very straightforward), or store there a picture in base64 format? Keep in mind the
-// picture can be low quality since the image is displayed in very small. But fetching it from the database is not bad
-// since it will make sure it is completely up to date (no possible mismatch between the true pictures of the user and what is shown
-// in the small circle profile tingy).
-// - implement asking for geolocalisation and whole onCampus shit (other things might be worth doing before hand, that could come at a later stage)
-// - implement email verification logic (that means we create the account (and hence init local data signup storage will still being in auth
-// part, so we must have an additional field there that says whether email verification has been full filled, that way,
-// you are taken there if it hasn't yet)
-// - before anything is added to the observable, validate it (only add those that are okay by the validators, filter the rest out (for both required and optional))
-// - handle social media links (i.e. generally find how that works (do you just need a url?), how to ask for it in the signup process,
-// how it is displayed, and what should be stored in the database)
-
-// next to do immediatly
-// - upload account creation cloud function to firebase
-// - update all "interests" properties to "interests"
-// - test creating a new account

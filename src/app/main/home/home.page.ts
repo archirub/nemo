@@ -34,8 +34,7 @@ import { FormatService } from "@services/index";
 import { TabElementRefService } from "src/app/main/tab-menu/tab-element-ref.service";
 import { SwipeCardComponent } from "./swipe-card/swipe-card.component";
 import { AngularFireStorage } from "@angular/fire/storage";
-import { PicturesService } from "@services/pictures/pictures.service";
-import { OwnPicturesService } from "@services/pictures/own-pictures/own-pictures.service";
+import { OwnPicturesStore } from "@stores/pictures-stores/own-pictures-store/own-pictures.service";
 
 @Component({
   selector: "app-home",
@@ -79,8 +78,7 @@ export class HomePage implements OnInit, OnDestroy {
     private swipeOutcomeStore: SwipeOutcomeStore,
     private format: FormatService,
     private afStorage: AngularFireStorage,
-    private picturesService: PicturesService,
-    private ownPicturesService: OwnPicturesService
+    private ownPicturesService: OwnPicturesStore
   ) {
     this.onResize();
   }
@@ -98,23 +96,7 @@ export class HomePage implements OnInit, OnDestroy {
   currentUser; //profile
   currentUser$; //subscription
 
-  async ngOnInit() {
-    // Makes sure swipe stack is only filled when its length is smaller or equal to a given
-    // length, and that no new query to refill the swipe stack is made while a query
-    // is already being processed.
-    // this.swipeStackRefill$ = this.swipeProfiles
-    //   .pipe(
-    //     filter(
-    //       (profiles) => profiles /*&& profiles.length !== 0*/ && profiles.length <= 4
-    //     ),
-    //     throttle(async () => {
-    //       console.log("Refilling swipe stack");
-    //       await this.swipeOutcomeStore.registerSwipeChoices();
-    //       await this.swipeStackStore.addToSwipeStackQueue(this.searchCriteria);
-    //     })
-    //   )
-    //   .subscribe();
-  }
+  ngOnInit() {}
 
   ionViewDidEnter() {
     // Subscription for chat doc creation in case of match

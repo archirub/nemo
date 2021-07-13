@@ -1,13 +1,13 @@
 import { TestBed } from "@angular/core/testing";
 
-import { DatabaseService } from "./database.service";
+import { OwnPicturesStore } from "./own-pictures.service";
 
-describe("HttpService", () => {
-  let service: DatabaseService;
+describe("OwnPicturesService", () => {
+  let service: OwnPicturesStore;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(DatabaseService);
+    service = TestBed.inject(OwnPicturesStore);
   });
 
   it("should be created", () => {

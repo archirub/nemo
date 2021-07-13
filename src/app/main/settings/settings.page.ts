@@ -4,7 +4,7 @@ import { AngularFireAuth } from "@angular/fire/auth";
 
 import { Plugins } from "@capacitor/core";
 
-import { LoadingService, AngularAuthService } from "@services/index";
+import { LoadingService } from "@services/index";
 import { Router } from "@angular/router";
 import { Subscription } from "rxjs";
 import { CurrentUserStore } from "@stores/index";
@@ -51,7 +51,6 @@ export class SettingsPage implements AfterViewInit {
     private navCtrl: NavController,
     private afAuth: AngularFireAuth,
     private loadingService: LoadingService,
-    private AngularAuthService: AngularAuthService,
     private currentUserStore: CurrentUserStore,
     private router: Router,
     private zone: NgZone

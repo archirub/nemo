@@ -1,16 +1,16 @@
-import { TestBed } from '@angular/core/testing';
+import { TestBed } from "@angular/core/testing";
 
-import { OtherProfilesStoreService } from './other-profiles-store.service';
+import { OtherProfilesStore } from "./other-profiles-store.service";
 
-describe('OtherProfilesStoreService', () => {
-  let service: OtherProfilesStoreService;
+describe("OtherProfilesStore", () => {
+  let service: OtherProfilesStore;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(OtherProfilesStoreService);
+    service = TestBed.inject(OtherProfilesStore);
   });
 
-  it('should be created', () => {
+  it("should be created", () => {
     expect(service).toBeTruthy();
   });
 });

@@ -18,27 +18,19 @@ interface ProfileHolder {
 // This is not necessary for the swipe stack, as these profiles are only viewed once. It is
 // useful for profiles in the messenger and in new matches
 
-// How to use: two things to do
+// HOW TO USE: two things to do
 // - subscribe to the "profiles$" observable in the template. this will give all the profiles stored,
 // the profile of the user that's needed will be found under the key that's his/her uid
 // - subscribe to checkAndSave in the component. This will fetch the profile and the pictures and add
 // them to the observable if they aren't already there
 
-// Note:
+// NOTE:
 // - All profiles must be deleted, or at least all ObjectUrls must be revoked when the app terminates
-
-// - integrate picture logic from others pictures
-// - add to messenger logic and matches logic use of this store
-// - create logic that, once a profile from the chatboard is loaded,
-// resave its first pic to the local storage for the chatboard, and add to the chatboard observable
-// - create logic that when there is a new match, add their profile to the store
-// - create logic that loads first picture of latest three matches, that should be an observable
-// holding them such that it is automatically updated when the list of matches is updated
 
 @Injectable({
   providedIn: "root",
 })
-export class OtherProfilesStoreService {
+export class OtherProfilesStore {
   private profiles = new BehaviorSubject<ProfileHolder>({});
   profiles$ = this.profiles.asObservable();
 

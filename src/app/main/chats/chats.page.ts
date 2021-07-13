@@ -1,13 +1,9 @@
-import { Component, OnInit, ViewChild, OnDestroy } from "@angular/core";
-import { IonContent } from "@ionic/angular";
-import { AngularFirestore, DocumentChangeAction } from "@angular/fire/firestore";
+import { Component, OnInit, ViewChild } from "@angular/core";
 
-import { Observable, Subscription } from "rxjs";
-import { map, take } from "rxjs/operators";
+import { Observable } from "rxjs";
 
 import { ChatStore, SwipeStackStore } from "@stores/index";
 import { Chat, Profile } from "@classes/index";
-import { chatFromDatabase } from "@interfaces/index";
 import { ChatBoardComponent } from "./chat-board/chat-board.component";
 
 @Component({
@@ -15,12 +11,11 @@ import { ChatBoardComponent } from "./chat-board/chat-board.component";
   templateUrl: "./chats.page.html",
   styleUrls: ["./chats.page.scss"],
 })
-export class ChatsPage implements OnInit, OnDestroy {
+export class ChatsPage implements OnInit {
   @ViewChild("chatboard") chatboard: ChatBoardComponent;
 
   TOP_SCROLL_SPEED = 100;
 
-  // private chats$: Subscription;
   public chats: Observable<Chat[]>;
   public chatProfiles: Observable<Profile[]>;
 
@@ -33,9 +28,5 @@ export class ChatsPage implements OnInit, OnDestroy {
 
   scrollToTop() {
     this.chatboard.scroll(this.TOP_SCROLL_SPEED);
-  }
-
-  ngOnDestroy() {
-    // this.chats$.unsubscribe();
   }
 }

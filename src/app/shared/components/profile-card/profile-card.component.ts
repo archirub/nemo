@@ -13,7 +13,7 @@ import {
 } from "@angular/core";
 import { Chat, Profile } from "@classes/index";
 import { IonContent, IonSlides } from "@ionic/angular";
-import { OwnPicturesService } from "@services/pictures/own-pictures/own-pictures.service";
+import { OwnPicturesStore } from "@stores/pictures-stores/own-pictures-store/own-pictures.service";
 import { Subscription } from "rxjs";
 
 @Component({
@@ -64,19 +64,17 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
   @ViewChild("QandA", { read: ElementRef }) QandA: ElementRef; //question & answer container
   @ViewChild("shadow", { read: ElementRef }) shadow: ElementRef; //photo shadow div
 
-  @ViewChild('intSlides') intSlides: IonSlides;
+  @ViewChild("intSlides") intSlides: IonSlides;
 
   @HostListener("touchstart", ["$event"]) touchStart(event) {
     this.X = event.touches[0].clientX;
     this.Y = event.touches[0].clientY;
   }
 
-  constructor(
-    private ownPicturesService: OwnPicturesService
-  ) {}
+  constructor(private ownPicturesService: OwnPicturesStore) {}
 
   ngOnInit() {
-    if (this.ownProfile = true) {
+    if ((this.ownProfile = true)) {
       this.ownPicturesSub = this.ownPicturesService.emptinessObserver$.subscribe();
     }
 
@@ -163,8 +161,8 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
     let count = 0;
     let pushArray = [];
 
-    this.profile.interests?.forEach(int => {
-      count ++
+    this.profile.interests?.forEach((int) => {
+      count++;
 
       if (count < 4) {
         pushArray.push(int);
@@ -172,7 +170,7 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
         this.interestSlideContent.push(pushArray);
         pushArray = [int];
         count = 1;
-      };
+      }
     });
 
     this.interestSlideContent.push(pushArray); //pushes either last interests, or if less than three interests in total
@@ -181,7 +179,7 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
 
   findInterestIcon(interest: string) {
     interest = interest.toLowerCase();
-    interest = interest.replace(/\s/g, ''); //remove spaces
+    interest = interest.replace(/\s/g, ""); //remove spaces
 
     return `/assets/interests/${interest}.png`;
   }

@@ -18,9 +18,8 @@ import { concatMap, map, tap } from "rxjs/operators";
 import { Chat, Message, Profile } from "@classes/index";
 import { SwipeStackStore, ChatStore } from "@stores/index";
 import { ProfileCardComponent } from "@components/index";
-import { RecentMatchesStore } from "@stores/recent-matches-store/recent-matches-store.service";
-import { OtherProfilesStoreService } from "@stores/other-profiles-store/other-profiles-store.service";
-import { ChatboardPicturesService } from "@services/pictures/chatboard-pictures/chatboard-pictures.service";
+import { OtherProfilesStore } from "@stores/other-profiles-store/other-profiles-store.service";
+import { ChatboardPicturesStore } from "@stores/pictures-stores/chatboard-pictures-store/chatboard-pictures.service";
 
 @Component({
   selector: "app-messenger",
@@ -64,8 +63,8 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
     private chatStore: ChatStore,
     private afauth: AngularFireAuth,
     private swipeStackStore: SwipeStackStore,
-    private profilesStore: OtherProfilesStoreService,
-    private chatboardPictures: ChatboardPicturesService
+    private profilesStore: OtherProfilesStore,
+    private chatboardPictures: ChatboardPicturesStore
   ) {}
 
   ngOnInit() {

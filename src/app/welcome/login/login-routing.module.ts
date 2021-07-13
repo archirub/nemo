@@ -1,6 +1,5 @@
 import { NgModule } from "@angular/core";
 import { Routes, RouterModule } from "@angular/router";
-import { SignupAuthGuard } from "@services/login/signup-auth.guard";
 import { HomePage } from "../../main/home/home.page";
 
 import { LoginPage } from "./login.page";

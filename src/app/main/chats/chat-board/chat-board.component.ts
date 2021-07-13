@@ -18,9 +18,9 @@ import { MatchesEnterAnimation, MatchesLeaveAnimation } from "@animations/index"
 import { MatchesComponent } from "../matches/matches.component";
 import { TabElementRefService } from "src/app/main/tab-menu/tab-element-ref.service";
 import {
-  ChatboardPicturesService,
+  ChatboardPicturesStore,
   pictureHolder,
-} from "@services/pictures/chatboard-pictures/chatboard-pictures.service";
+} from "@stores/pictures-stores/chatboard-pictures-store/chatboard-pictures.service";
 import { forkJoin, Observable, of, Subscription } from "rxjs";
 import { concatMap, map, tap } from "rxjs/operators";
 import { ChatStore } from "@stores/index";
@@ -51,7 +51,7 @@ export class ChatBoardComponent implements OnInit, OnDestroy {
     private router: Router,
     private modalCtrl: ModalController,
     private tabElementRef: TabElementRefService,
-    private chatboardPicturesService: ChatboardPicturesService, // used in template
+    private chatboardPicturesService: ChatboardPicturesStore, // used in template
     private chatStore: ChatStore,
     private changeDetectorRef: ChangeDetectorRef
   ) {

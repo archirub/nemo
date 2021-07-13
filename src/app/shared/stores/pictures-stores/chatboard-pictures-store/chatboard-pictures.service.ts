@@ -1,4 +1,4 @@
-import { Chat } from "./../../../classes/chat.class";
+import { Chat } from "../../../classes/chat.class";
 import { Injectable } from "@angular/core";
 import { AngularFireStorage } from "@angular/fire/storage";
 import { BehaviorSubject, forkJoin, from, iif, Observable, of } from "rxjs";
@@ -11,7 +11,7 @@ import {
   tap,
   withLatestFrom,
 } from "rxjs/operators";
-import { urlToBase64, Base64ToUrl } from "../common-functions";
+import { urlToBase64, Base64ToUrl } from "../common-pictures-functions";
 import { Plugins } from "@capacitor/core";
 import { ChatStore } from "@stores/index";
 const { Storage } = Plugins;
@@ -35,7 +35,7 @@ export interface pictureHolder {
 @Injectable({
   providedIn: "root",
 })
-export class ChatboardPicturesService {
+export class ChatboardPicturesStore {
   private uidsStorageKey = "chatboard_picture_uids";
 
   private picture_width = 300;

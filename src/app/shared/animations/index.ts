@@ -1,4 +1,4 @@
-export * from "./page-transition.component";
+export * from "./page-transition.animation";
 export * from "./search-criteria.animation";
 export * from "./matches.animation";
 export * from "./swipe.animation";

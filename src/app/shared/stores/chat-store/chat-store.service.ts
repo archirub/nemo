@@ -9,15 +9,12 @@ import {
 import { BehaviorSubject, from, Observable, Subscription } from "rxjs";
 import { filter, map, switchMap, tap } from "rxjs/operators";
 
-import firebase from "firebase";
-
-import { Chat, Message, Profile, User } from "@classes/index";
+import { Chat, Message } from "@classes/index";
 import {
   chatFromDatabase,
   messageFromDatabase,
   messageState,
   messageStateOptions,
-  userSnippet,
 } from "@interfaces/index";
 import { FormatService } from "@services/index";
 
@@ -46,6 +43,7 @@ export class ChatStore {
   }
 
   resetStore() {
+    // TO DO
     // empty the store, remove the observables to the chat documents
   }
 

@@ -1,9 +1,3 @@
-<!--ion-header>
-  <ion-toolbar>
-    <ion-title>signupauth</ion-title>
-  </ion-toolbar>
-</ion-header-->
-
 <div class="pager">
   <ion-icon id="email" class="pager-icon" name="at-outline"></ion-icon>
   <ion-icon id="hourglass" class="pager-icon" name="hourglass-outline"></ion-icon>
@@ -16,23 +10,25 @@
 <ion-content>
   <form [formGroup]="authForm" (ngSubmit)="onSubmit()">
     <ion-slides pager="false" #slides>
-
       <ion-slide>
         <div class="personal-pref">
           <div class="question">
-            <ion-label position="stacked">
-              What's your uni email?
-            </ion-label>
+            <ion-label position="stacked"> What's your uni email? </ion-label>
           </div>
 
           <div class="input flexend-col">
             <div>
-              <ion-input placeholder="email@ucl.ac.uk" formControlName="email"></ion-input>
+              <ion-input
+                placeholder="email@ucl.ac.uk"
+                formControlName="email"
+              ></ion-input>
             </div>
           </div>
-           
+
           <div class="flexstart-col">
-            <p class="tip">Only UCL or KCL email addresses will allow for verification.</p>
+            <p class="tip">
+              Only UCL or KCL email addresses will allow for verification.
+            </p>
           </div>
 
           <div id="emailCheck">
@@ -51,14 +47,14 @@
       <ion-slide>
         <div class="personal-pref">
           <div class="question" *ngIf="this.awaitingConfirm">
-            <ion-label position="stacked">
-              An email has been sent
-            </ion-label>
+            <ion-label position="stacked"> An email has been sent </ion-label>
           </div>
 
-          <h2 style="margin-top: 20vh" *ngIf="this.awaitingConfirm">Click 
+          <h2 style="margin-top: 20vh" *ngIf="this.awaitingConfirm">
+            Click
             <a (click)="resendConfirmation()">here</a>
-          if you would like us to send another conformation email.</h2>
+            if you would like us to send another conformation email.
+          </h2>
 
           <div class="buttons flexstart" *ngIf="this.awaitingConfirm">
             <ion-button class="next-slide scroll" (click)="unlockAndSlideToPrev()">
@@ -66,15 +62,18 @@
             </ion-button>
           </div>
 
-          <ion-icon id="letter" #email name="mail-outline" *ngIf="this.awaitingConfirm"></ion-icon>
+          <ion-icon
+            id="letter"
+            #email
+            name="mail-outline"
+            *ngIf="this.awaitingConfirm"
+          ></ion-icon>
           <p id="sentEmail" *ngIf="this.awaitingConfirm">Email sent!</p>
 
           <!--SWITCHES TO BELOW ONCE EMAIL IS CONFIRMED-->
 
           <div class="question" *ngIf="this.confirmed">
-            <ion-label position="stacked">
-              Email confirmed!
-            </ion-label>
+            <ion-label position="stacked"> Email confirmed! </ion-label>
           </div>
 
           <h2 style="margin-top: 20vh" *ngIf="this.confirmed">
@@ -92,9 +91,7 @@
       <ion-slide>
         <div class="personal-pref">
           <div class="question">
-            <ion-label position="stacked">
-              Choose a password for your account
-            </ion-label>
+            <ion-label position="stacked"> Choose a password for your account </ion-label>
           </div>
 
           <div class="input flexend-col">

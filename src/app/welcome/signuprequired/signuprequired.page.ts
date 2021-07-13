@@ -1,14 +1,3 @@
-// next to do:
-// - Implement logic from required in optional
-// - Implement data check logic (before uploading to local storage, as well as implement template UI of validity)
-// - make guard based on Firebase auth / content of local storage (maybe based on function made in point above)
-// - have a skip button on all pages of optional
-// - create pipes for sexual preference and gender for template display
-// - COMMIT BEFORE DOING BELOW (once entire system above is self sufficient)
-// - create function that deletes the token once the account has succesfully been created
-// - create function that creates the normal app usage token and stores it locally. As well,
-// create function that checks whether that exists (that function is basically already done in autologin)
-
 import {
   ChangeDetectorRef,
   Component,
@@ -16,7 +5,6 @@ import {
   ViewChild,
   ViewChildren,
   QueryList,
-  OnInit,
 } from "@angular/core";
 import { FormGroup, FormControl, Validators } from "@angular/forms";
 import { IonSlides } from "@ionic/angular";
@@ -32,19 +20,17 @@ import {
   genderOptions,
 } from "@interfaces/index";
 import { SignupRequired } from "@interfaces/signup.model";
-import { AngularAuthService } from "@services/login/auth/angular-auth.service";
 
 import { SignupService } from "@services/signup/signup.service";
-import { allowOptionalProp } from "@interfaces/shared.model";
+import { allowOptionalProp } from "@interfaces/index";
 import { AppDatetimeComponent } from "@components/index";
-import firebase from "firebase";
 
 @Component({
   selector: "app-signuprequired",
   templateUrl: "./signuprequired.page.html",
   styleUrls: ["../welcome.page.scss"],
 })
-export class SignuprequiredPage implements OnInit {
+export class SignuprequiredPage {
   @ViewChild("slides") slides: IonSlides;
   @ViewChild("date") date: AppDatetimeComponent;
   @ViewChildren("pagerDots", { read: ElementRef }) dots: QueryList<ElementRef>;
@@ -53,7 +39,6 @@ export class SignuprequiredPage implements OnInit {
   reqValidatorChecks: object;
 
   // FIELD FORM
-  form = new FormGroup({});
   blankForm = new FormGroup({
     firstName: new FormControl(null, [Validators.required, Validators.minLength(1)]),
     dateOfBirth: new FormControl(
@@ -65,6 +50,7 @@ export class SignuprequiredPage implements OnInit {
     university: new FormControl(null, [Validators.required]),
     degree: new FormControl(null, [Validators.required]),
   });
+  form = this.blankForm; // put this way so that we have a trace of what a blank form is like so that we can reset it
 
   // OPTIONS
   genderOptions: Gender[] = genderOptions;
@@ -91,16 +77,10 @@ export class SignuprequiredPage implements OnInit {
   };
 
   constructor(
-    private signUpAuthService: AngularAuthService,
     private router: Router,
     private signup: SignupService,
     private changeDetectorRef: ChangeDetectorRef
   ) {}
-
-  ngOnInit() {
-    // put this way so that we have a trace of what a blank form is like so that we can reset it
-    this.form = this.blankForm;
-  }
 
   async ionViewWillEnter() {
     // UI elements map to show on invalid checks when trying to move slide, see validateAndSlide()
@@ -355,12 +335,8 @@ export class SignuprequiredPage implements OnInit {
 
   getFormValues(): SignupRequired {
     const firstName: string = this.form.get("firstName").value;
-    let dateOfBirth: Date = new Date(this.form.get("dateOfBirth").value);
 
-    // temporary, to make sure date is null if the thingy hasn't been touched
-    // if (new Date("2020-01-01").toDateString() === new Date(dateOfBirth).toDateString()) {
-    //   dateOfBirth = null;
-    // }
+    let dateOfBirth: Date = new Date(this.form.get("dateOfBirth").value);
 
     const formatedSexualPreference: "male" | "female" | "both" =
       this.form.get("sexualPreference").value;
@@ -372,14 +348,12 @@ export class SignuprequiredPage implements OnInit {
     }
 
     const gender: Gender = this.form.get("gender").value;
-    // const sexualPreference = ["female" as const];
-    // const gender = "male";
+
     const university: University = this.form.get("university").value;
 
     const degree: Degree = this.form.get("degree").value;
 
-    const pictures: string[] = this.picturesHolder.filter(Boolean); // removes empty picture slots
-    console.log("a", dateOfBirth);
+    const pictures: string[] = this.picturesHolder.filter(Boolean);
 
     return {
       firstName,
@@ -407,17 +381,6 @@ export class SignuprequiredPage implements OnInit {
       await this.updateData(); // may not be necessary, but last check to make sure data we have in logic exactly reflects that in the UI
       this.router.navigateByUrl("/welcome/signupoptional");
     }
-  }
-
-  goToMain() {
-    this.router.navigateByUrl("/main/tabs/home");
-    // next to do:
-    // - make it so that you can create an account with all the required data (and any of the optional)
-    // - create the account in two cases: if the optional part is skipped, or when the optional part if finished
-    // - singup token must be changed: while required is being filled out, it must be updated with each new data
-    // inputed, so that if someone loses connection, all data that was input is restored. Currently, I believe
-    // that the token is only created at the end of the required part, which is a bit stupid and incomplete.
-    // if (this.requiredData) this.signUpAuthService.createFullUser(this.requiredData);
   }
 
   savePhoto(e: { photoUrl: string; index: number }) {

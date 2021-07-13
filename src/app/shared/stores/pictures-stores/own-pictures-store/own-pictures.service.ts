@@ -7,7 +7,11 @@ const { Storage } = Plugins;
 import { BehaviorSubject, combineLatest, forkJoin, from, Observable, of } from "rxjs";
 import { filter, map, skipWhile, switchMap, take, tap } from "rxjs/operators";
 
-import { Base64ToUrl, firebaseStoragePath, urlToBase64 } from "../common-functions";
+import {
+  Base64ToUrl,
+  firebaseStoragePath,
+  urlToBase64,
+} from "../common-pictures-functions";
 import { CurrentUserStore } from "@stores/index";
 
 interface ownPicturesStorage {
@@ -17,7 +21,7 @@ interface ownPicturesStorage {
 @Injectable({
   providedIn: "root",
 })
-export class OwnPicturesService {
+export class OwnPicturesStore {
   private localStorageKey: string = "own_pictures";
 
   private urls: BehaviorSubject<string[]> = new BehaviorSubject([]);
