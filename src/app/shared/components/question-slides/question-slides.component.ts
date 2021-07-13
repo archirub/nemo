@@ -57,12 +57,20 @@ export class QuestionSlidesComponent implements OnInit, ControlValueAccessor {
   newAvailableQuestions: Array<string> = [...this.questions]; 
   //Copy of this.questions, not pointer to it, so it IS mutable but doesn't change this.questions
 
+  availableQuestionsMap = {};
+
   constructor(
     public detector: ChangeDetectorRef,
   ) {}
 
   ngOnInit() {
     this.counter = 1; //counter to add slides to array
+
+    if (this.questionArray.length < 1) {
+      this.availableQuestionsMap[0] = [...this.questions];
+    } else {
+      this.formAQM();
+    };
   }
 
   ngAfterViewInit() {
@@ -86,6 +94,35 @@ export class QuestionSlidesComponent implements OnInit, ControlValueAccessor {
       q: new FormControl(''),
       a: new FormControl('')
     });
+  }
+
+  formAQM() {
+    this.availableQuestionsMap = {};
+
+    for (let i = 0; i < this.questionArray.length; i++) {
+      let arrayToPush = [];
+
+      for (let j = 0; j < this.questions.length; j++) {
+        if (!(this.questionArray.includes(this.questions[j]))) {
+          arrayToPush.push(this.questions[j]);
+        };
+      };
+      
+      arrayToPush.push(this.questionArray[i]);
+
+      this.availableQuestionsMap[i] = arrayToPush;
+    };
+
+    let arrayToPush = [];
+    this.questions.forEach(q => {
+      if (!(this.questionArray.includes(q))) {
+        arrayToPush.push(q);
+      };
+    });
+
+    this.availableQuestionsMap[this.questionArray.length] = arrayToPush;
+
+    console.log(this.availableQuestionsMap);
   }
 
   /**
@@ -216,6 +253,8 @@ export class QuestionSlidesComponent implements OnInit, ControlValueAccessor {
     this.questionArray[index] = $event.target.value; //How to target select's value without ViewChild, check event origin
     this.updateAddButton();
     this.updateDeleteButton(index);
+
+    this.formAQM();
   }
 
   updateAnswerArray(index,$event) {

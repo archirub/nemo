@@ -69,6 +69,7 @@
         *ngFor="let questions of profile?.questions; let i = index"
         [questions]="profile?.questions[i]"
         [profile]="profile"
+        (questionChanged)="this.formatAllQuestions()"
       ></profile-answer>
 
       <ng-container *ngIf="this.answers">

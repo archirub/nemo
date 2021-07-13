@@ -85,8 +85,10 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    this.updatePager();
     this.slides.lockSwipeToPrev(true);
+    setTimeout(() => {
+      this.updatePager(); //Timeout necessary, slides finally load once pictures arrive
+    }, 4000);
   }
 
   expandProfile() {

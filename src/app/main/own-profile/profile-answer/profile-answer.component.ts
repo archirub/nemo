@@ -1,4 +1,12 @@
-import { Component, ElementRef, Input, OnInit, ViewChild } from "@angular/core";
+import { 
+    EventEmitter, 
+    Component, 
+    ElementRef, 
+    Input, 
+    OnInit, 
+    Output, 
+    ViewChild 
+} from "@angular/core";
 import { User } from "@classes/user.class";
 import { QuestionAndAnswer, questionsOptions } from "@interfaces/profile.model";
 import { IonSelect, IonTextarea } from "@ionic/angular";
@@ -17,6 +25,8 @@ export class ProfileAnswerComponent implements OnInit {
 
     @Input() questions: QuestionAndAnswer;
     @Input() profile: User;
+
+    @Output() questionChanged = new EventEmitter();
 
     addable: boolean = true;
     questionsAvailable: Array<string> = [];
@@ -53,28 +63,20 @@ export class ProfileAnswerComponent implements OnInit {
     };
 
     /**
-     * This is SUPPOSED to update the questions available to answer by checking the ones already used on the profile
-     * It updates the 'used' array correctly as you can see in the console.
-     * For some reason, the questionsAvailable does not work with the used array as expected
-     * A better man than me will need to figure this out, or I can come back to it later -Ewan xx
+     * Checks the questions used on profile
+     * Updates available other questions to choose from using that array
      **/
     formAvailableQuestions() {
-        //THIS DOESN'T WORK AND I HAVE NO IDEA WHY???
-        this.questionsAvailable = [];
+        this.questionsAvailable = [...questionsOptions]; //Start with all available
 
-        let used = [];
-
-        this.profile.questions.forEach(obj => {
-            used.push(obj.question);
+        this.profile.questions.forEach(qAndA => { //For each question on profile
+            Object.values(qAndA).forEach(str => { //For each value in each question
+                if (this.questionsAvailable.includes(str)) {
+                    this.questionsAvailable.splice(this.questionsAvailable.indexOf(str), 1);
+                    //If questionsAvailable includes one already in profile, remove it
+                };
+            });
         });
-
-        console.log(used);
-
-        questionsOptions.forEach(q => {
-            if (!used.includes(q)) {
-                this.questionsAvailable.push(q);
-            };
-        }); 
     }
 
     /**
@@ -90,19 +92,21 @@ export class ProfileAnswerComponent implements OnInit {
      * Changes the profile question based on selection
      **/
     changeQuestion(q) {
-        this.questions.question = q.target.value; //Get value of selected question
+        this.questions.question = q.target.value.slice(1,-1); //Get value of selected question
 
         this.qHead.nativeElement.style.display = "block"; //Change UI from select to text
         this.qInput.nativeElement.style.display = "none";
 
-        console.log(this.profile.questions); //Console.log to check the new profile questions
+        this.questionChanged.emit(q.target.value.slice(1,-1));
+
+        this.formAvailableQuestions();
     }
 
     /**
      * Choose question from select when adding new answer
      **/
     chooseQuestion(q) {
-        this.chosenQuestion = q.target.value;
+        this.chosenQuestion = q.target.value.slice(1,-1);
     }
 
     /**
@@ -119,8 +123,8 @@ export class ProfileAnswerComponent implements OnInit {
         //Make sure they have actually selected a question and written an answer
         if (this.chosenQuestion && this.chosenAnswer) {
             this.profile.questions.push({
-                question: this.chosenQuestion, //Push new q/a to profile
-                answer: this.chosenAnswer
+                answer: this.chosenAnswer,
+                question: this.chosenQuestion //Push new q/a to profile
             });
         };
 

@@ -1,6 +1,5 @@
 <div #fullCard id="swipe-card">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-  <div #shadow class="img-shadow"></div>
   <div class="img-container">
     <div class="pager">
       <ion-icon
@@ -16,20 +15,25 @@
     >
       <ion-slide
         #pic
-        *ngFor="let path of profile?.pictureUrls"
+        *ngFor="let path of profile?.pictureUrls; index as i"
         [ngStyle]="{
           'background-image': 'url(' + path + ')',
           'background-size': 'cover'
         }"
       >
+      <div *ngIf="profile?.questions[i]" #QandA class="question" [hidden]="moreInfo">
+        <ion-card-title #question>{{ profile?.questions[i].question }}</ion-card-title>
+        <ion-card-subtitle #answer>{{ profile?.questions[i].answer }}</ion-card-subtitle>
+      </div>
+      <div #shadow class="img-shadow"></div>
         <div class="yesSwipe" (click)="this.tapped.emit('yes')"></div>
         <div class="noSwipe" (click)="this.tapped.emit('no')"></div>
       </ion-slide>
     </ion-slides>
-    <div #QandA class="question" [hidden]="moreInfo">
+    <!--div #QandA class="question" [hidden]="moreInfo">
       <ion-card-title #question>{{ profile?.questions[0].question }}</ion-card-title>
       <ion-card-subtitle #answer>{{ profile?.questions[0].answer }}</ion-card-subtitle>
-    </div>
+    </div-->
   </div>
   <!-- <div id="QandA">
     <ion-chip color="tertiary"><ion-label id="answers">Loop?: "Never! lol i hate it"</ion-label></ion-chip>
@@ -121,7 +125,7 @@
         </div>
 
         <div id="info-segment" *ngIf="socialFound">
-          <!--iframe src="https://www.instagram.com/ewannmilezz/"></iframe-->
+          <!-- INSTA API CONTENT HERE -->
         </div>
 
         <div id="info-segment" *ngIf="reportable">

@@ -20,7 +20,6 @@ img {
   background-position: center;
   border-radius: 30px;
   overflow: hidden;
-  //box-shadow: 0px 0px 20px -12px rgba(0,0,0,0.2);
 }
 
 #pictureFrame {
@@ -83,7 +82,6 @@ ion-slides {
   box-shadow: 0px 4px 34px -13px rgba(0, 0, 0, 0.75);
   border-bottom-left-radius: 30px;
   border-bottom-right-radius: 30px;
-  // clip-path: inset(-20vh 0 0 0);
 }
 
 #snippetInfo {
@@ -91,7 +89,6 @@ ion-slides {
   border-bottom-left-radius: 30px;
   border-bottom-right-radius: 30px;
   background-color: #FBFBFB;
-  //box-shadow: 0px 5px 20px -12px rgba(0,0,0,0.2);
   position: absolute;
   max-height: 12vh;
   height: 12vh;
@@ -112,11 +109,9 @@ ion-slides {
   right: 13px;
   max-height: 80%;
   height: 80%;
-  // box-shadow: 0px 0px 48px 12px rgba(0, 0, 0, 0.75);
 }
 
 .verticalLine {
-  // border-left: thick solid var(--ion-color-light);
   vertical-align: center;
   width: 2px; /* Line width */
   background-color: var(--ion-color-light);
@@ -146,7 +141,6 @@ ion-slides {
   text-align: center;
   margin-left: 5vw;
   margin-right: 5vw;
-  // padding-top: 3vh;
   max-width: 39vw;
   width: 39vw;
   max-height: 7vh;
@@ -241,22 +235,6 @@ ion-slides {
   color: var(--ion-color-light-contrast);
 }
 
-// #interests-collection {
-//   display: flex;
-//   position: absolute;
-//   padding: 15px;
-//   top: 5px;
-//   left: 15px;
-// }
-
-// #interests-button {
-//   height: 40px;
-//   width: 40px;
-//   margin-right: -7px;
-//   border-radius: 50% !important;
-//   border: 2px solid #f75e18 !important;
-// }
-
 #society-list {
   // margin-top: 1vh;
   display: flex;
@@ -314,7 +292,6 @@ ion-slides {
   font-size: 2.25vh;
   text-transform: none;
   color: var(--ion-color-primary);
-  //font-family: var(--ion-font-secondary);
   margin-top: 10px;
   margin-bottom: 0px;
   letter-spacing: 1px;
@@ -327,7 +304,6 @@ ion-slides {
   padding: 5vw;
   font-size: 4vh;
   color: var(--ion-color-light-contrast);
-  //font-family: var(--ion-font-secondary);
   font-weight: 500;
 }
 
@@ -344,8 +320,8 @@ ion-slides {
   position: absolute;
   bottom: 15vh;
   width: 85vw;
-  left: 8vw;
-  z-index: 2;
+  text-align: left;
+  z-index: 3;
 
   ion-card-title {
     color: var(--ion-color-primary-contrast);
@@ -387,6 +363,7 @@ ion-slides {
   width: 46vw;
   height: 73vh;
   background: transparent;
+  z-index: 4;
 }
 
 .noSwipe {
@@ -396,6 +373,7 @@ ion-slides {
   width: 46vw;
   height: 73vh;
   background: transparent;
+  z-index: 4;
 }
 
 @media only screen and (max-device-height: 650px) {
@@ -406,6 +384,7 @@ ion-slides {
     width: 46vw;
     height: 71vh;
     background: transparent;
+    z-index: 4;
   }
   
   .noSwipe {
@@ -415,6 +394,7 @@ ion-slides {
     width: 46vw;
     height: 71vh;
     background: transparent;
+    z-index: 4;
   }
 }
 

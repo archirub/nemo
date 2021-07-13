@@ -108,6 +108,12 @@ export class OwnProfilePage implements OnInit {
     this.profileCard.buildInterestSlides();
   }
 
+  formatAllQuestions() {
+    this.answers.forEach(comp => {
+      comp.formAvailableQuestions();
+    });
+  }
+
   addQuestion() {
     this.lastAnsRef.addable = false; //Show input for new question on last profile answer component
     this.answers.last.chosenQuestion = undefined;
@@ -122,8 +128,8 @@ export class OwnProfilePage implements OnInit {
 
     this.detector.detectChanges(); //Detect template changes
     this.lastAnsRef = Array.from(this.answers)[this.answers.length-1]; //Check which is now last answer element
-    
-    this.answers.last.formAvailableQuestions();
+
+    this.formatAllQuestions();
   }
 
   ngOnDestroy() {
