@@ -24,6 +24,24 @@ ion-content {
     margin: 0 auto;
 }
 
+.flexcenter {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+#addQuestion {
+    margin-top: -2vh;
+    font-size: 4vh;
+    color: var(--ion-color-primary);
+}
+
+#submitQuestion {
+    margin-top: -2vh;
+    font-size: 4vh;
+    color: var(--ion-color-primary);
+}
+
 nemo-toggle {
     position: sticky;
     background: var(--ion-color-primary-contrast);
@@ -78,7 +96,7 @@ h2 {
     border-top: solid 1px var(--ion-color-light-shade);
     border-bottom: solid 1px var(--ion-color-light-shade);
     margin: 3vh 0;
-    font-weight: bold;
+    //font-weight: bold;
     font-size: 2.75vh;
     ion-icon {
         margin: 3vh 0;
@@ -104,8 +122,8 @@ h2 {
     justify-content: space-evenly;
     flex-wrap: wrap;
     app-profile-edit-photo {
-        width: 15vh;
-        height: 15vh;
+        width: 11vh;
+        height: 14vh;
         margin-top: 1vh;
     }
     ;

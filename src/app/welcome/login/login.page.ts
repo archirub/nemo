@@ -19,8 +19,6 @@ import { FishSwimAnimation, WavesSlowAnimation, WavesFastAnimation } from "@anim
 })
 export class LoginPage implements OnInit {
   @ViewChild('fish', { read: ElementRef }) fish: ElementRef;
-  @ViewChild('wavesFast', { read: ElementRef }) wavesFast: ElementRef;
-  @ViewChild('wavesSlow', { read: ElementRef }) wavesSlow: ElementRef;
 
   loginForm = new FormGroup({
     email: new FormControl("", [
@@ -42,8 +40,6 @@ export class LoginPage implements OnInit {
   ) {}
 
   fishSwimAnimation;
-  wavesSlowAnimation;
-  wavesFastAnimation;
 
   ngOnInit() {}
 
@@ -65,13 +61,9 @@ export class LoginPage implements OnInit {
   ionViewDidEnter() {
     //Initialise animations
     this.fishSwimAnimation = FishSwimAnimation(this.fish);
-    this.wavesSlowAnimation = WavesSlowAnimation(this.wavesSlow);
-    this.wavesFastAnimation = WavesFastAnimation(this.wavesFast);
 
     //Play animations (WILL LOOP INFINITELY)
     this.fishSwimAnimation.play();
-    this.wavesFastAnimation.play();
-    this.wavesSlowAnimation.play();
   }
 
   enterSubmit(event) {

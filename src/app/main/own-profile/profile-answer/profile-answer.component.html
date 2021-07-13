@@ -3,7 +3,37 @@
         <ion-icon name="close-outline"></ion-icon>
     </div>
     <div class="text">
-        <h2 class="question">{{ questions.question }}</h2>
+        <div class="flex">
+            <ion-icon class="edit" name="pencil" (click)="showInput()"></ion-icon>
+            <h2 #qHead id="question">{{ questions.question }}</h2>
+
+            <ion-select
+            #qInput
+            id="replace"
+            interface="action-sheet" 
+            placeholder="Choose a question"
+            (ionChange)="changeQuestion($event)">
+                <ion-select-option *ngFor="let q of this.questionsAvailable">
+                    {{ q }}
+                </ion-select-option>
+            </ion-select>
+        </div>
         <ion-textarea #answerInput (ionInput)="displayExit()" autoGrow='true' value={{questions.answer}}></ion-textarea>
+    </div>
+</div>
+
+<div class="add" *ngIf="!this.addable">
+    <ion-select
+    interface="action-sheet" 
+    placeholder="Choose a question"
+    (ionChange)="chooseQuestion($event)">
+        <ion-select-option *ngFor="let q of this.questionsAvailable">
+            {{ q }}
+        </ion-select-option>
+    </ion-select>
+    <div class="text">
+        <ion-textarea 
+        autoGrow="true" 
+        (ionChange)="answerQuestion($event)"></ion-textarea>
     </div>
 </div>

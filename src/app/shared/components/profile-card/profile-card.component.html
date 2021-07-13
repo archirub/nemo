@@ -1,6 +1,5 @@
 <div #fullCard id="swipe-card">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-  <div #shadow class="img-shadow"></div>
   <div class="img-container">
     <div class="pager">
       <ion-icon
@@ -11,25 +10,30 @@
     </div>
     <ion-slides
       #picSlides
-      (ionSlideDidChange)="updatePager()"
       (ionSlideWillChange)="checkSlide()"
+      (ionSlideDidChange)="updatePager()"
     >
       <ion-slide
         #pic
-        *ngFor="let path of profile?.pictureUrls"
+        *ngFor="let path of profile?.pictureUrls; index as i"
         [ngStyle]="{
           'background-image': 'url(' + path + ')',
           'background-size': 'cover'
         }"
       >
+      <div *ngIf="profile?.questions[i]" #QandA class="question" [hidden]="moreInfo">
+        <ion-card-title #question>{{ profile?.questions[i].question }}</ion-card-title>
+        <ion-card-subtitle #answer>{{ profile?.questions[i].answer }}</ion-card-subtitle>
+      </div>
+      <div #shadow class="img-shadow"></div>
         <div class="yesSwipe" (click)="this.tapped.emit('yes')"></div>
         <div class="noSwipe" (click)="this.tapped.emit('no')"></div>
       </ion-slide>
     </ion-slides>
-    <div #QandA class="question" [hidden]="moreInfo">
+    <!--div #QandA class="question" [hidden]="moreInfo">
       <ion-card-title #question>{{ profile?.questions[0].question }}</ion-card-title>
       <ion-card-subtitle #answer>{{ profile?.questions[0].answer }}</ion-card-subtitle>
-    </div>
+    </div-->
   </div>
   <!-- <div id="QandA">
     <ion-chip color="tertiary"><ion-label id="answers">Loop?: "Never! lol i hate it"</ion-label></ion-chip>
@@ -73,7 +77,9 @@
                     alt="icon"
                   />
                   <br />
-                  <ion-label id="interests-label">{{ interest }}</ion-label>
+                  <div class="interests-text">
+                    <ion-label id="interests-label">{{ interest }}</ion-label>
+                  </div>
                   <!-- would be {{interests.name}} -->
                 </div>
               </ion-slide>
@@ -118,20 +124,19 @@
           </div>
         </div>
 
-        <div id="info-segment">
-          <!--iframe src="https://www.instagram.com/ewannmilezz/"></iframe-->
+        <div id="info-segment" *ngIf="socialFound">
+          <!-- INSTA API CONTENT HERE -->
         </div>
 
         <div id="info-segment" *ngIf="reportable">
           <div id="interests-container" class="centered">
-            <div id="interests-box">
+            <div class="reportButton">
               <ion-icon
                 name="shield"
-                id="bottom-icon"
                 style="color: var(--ion-color-danger)"
               ></ion-icon>
               <br />
-              <ion-label id="interests-label">Report this user</ion-label>
+              <ion-label>Report this user</ion-label>
             </div>
           </div>
         </div>

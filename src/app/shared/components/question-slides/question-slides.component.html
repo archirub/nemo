@@ -4,9 +4,12 @@
     (ionSlideDidChange)="this.updatePager()">
         <ion-slide 
         *ngFor="let number of this.slideArray">
-            <ion-select #selects (ionChange)="updateQuestionArray(number,$event)">
+            <ion-select 
+            #selects 
+            interface="action-sheet"
+            (ionChange)="updateQuestionArray(number,$event)">
                 <ion-select-option 
-                *ngFor="let question of this.questions"
+                *ngFor="let question of this.availableQuestionsMap[number]"
                 [value]="question">
                     {{question}}
                 </ion-select-option>
