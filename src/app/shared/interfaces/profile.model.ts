@@ -31,7 +31,7 @@ export interface profile {
 
 export interface user extends profile {
   settings: Settings;
-  latestSearchCriteria: searchCriteria;
+  latestSearchCriteria: allowOptionalProp<searchCriteria>;
 }
 
 export interface profileFromDatabase {
@@ -113,7 +113,6 @@ export type profilePicturePaths = [
   string?,
   string?
 ];
-export type photoObject = CameraPhoto;
 
 export interface profileObject {
   ID: string;

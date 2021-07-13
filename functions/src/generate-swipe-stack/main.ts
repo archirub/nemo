@@ -40,89 +40,94 @@ export interface PickingWeights {
   searchCriteriaGroup: number;
 }
 
-export const generateSwipeStack = functions.region("europe-west2").https.onCall(
-  async (
-    data: generateSwipeStackRequest,
-    context
-  ): Promise<generateSwipeStackResponse> => {
-    if (!context.auth)
-      throw new functions.https.HttpsError("unauthenticated", "User not autenticated.");
+export const generateSwipeStack = functions
+  .region("europe-west2")
+  .https.onCall(
+    async (
+      data: generateSwipeStackRequest,
+      context
+    ): Promise<generateSwipeStackResponse> => {
+      if (!context.auth)
+        throw new functions.https.HttpsError("unauthenticated", "User not autenticated.");
 
-    // DATA FROM REQUEST
-    const uid: string = context.auth.uid;
-    const searchCriteria: searchCriteria = data.searchCriteria || {};
+      // DATA FROM REQUEST
+      const uid: string = context.auth.uid;
+      // eslint-disable-next-line no-shadow
+      const searchCriteria: searchCriteria = data.searchCriteria || {};
 
-    // DATA FOR TESTING <-> UNCOMMENT BELOW AND COMMENT ABOVE
-    // const targetuid: string = "oY6HiUHmUvcKbFQQnb88t3U4Zew1";
-    // const searchCriteria: searchCriteria = {
-    //   university: null,
-    //   areaOfStudy: "biology",
-    //   degree: null,
-    //   societyCategory: null,
-    //   interests: null,
-    //   onCampus: null,
-    // };
+      // DATA FOR TESTING <-> UNCOMMENT BELOW AND COMMENT ABOVE
+      // const targetuid: string = "oY6HiUHmUvcKbFQQnb88t3U4Zew1";
+      // const searchCriteria: searchCriteria = {
+      //   university: null,
+      //   areaOfStudy: "biology",
+      //   degree: null,
+      //   societyCategory: null,
+      //   interests: null,
+      //   onCampus: null,
+      // };
 
-    // INDEPENDENT PARAMETERS
-    const profilesPerWave: number = 20;
-    const PIPickingVariance: number = 3.5;
-    const SCPickingVariance: number = 1.7;
-    const pickingWeights: PickingWeights = {
-      likeGroup: 0.2,
-      searchCriteriaGroup: 0.8,
-    };
+      // INDEPENDENT PARAMETERS
+      const profilesPerWave: number = 20;
+      const PIPickingVariance: number = 3.5;
+      const SCPickingVariance: number = 1.7;
+      const pickingWeights: PickingWeights = {
+        likeGroup: 0.2,
+        searchCriteriaGroup: 0.8,
+      };
 
-    try {
-      const matchDataMain = (
-        await admin.firestore().collection("matchData").doc(uid).get()
-      ).data() as mdFromDatabase;
+      try {
+        const matchDataMain = (
+          await admin.firestore().collection("matchData").doc(uid).get()
+        ).data() as mdFromDatabase;
 
-      const swipeMode: SwipeMode = matchDataMain.swipeMode;
-      let pickedUsers: uidChoiceMap[] = [];
+        const swipeMode: SwipeMode = matchDataMain.swipeMode;
+        let pickedUsers: uidChoiceMap[] = [];
 
-      if (swipeMode === "dating") {
-        const percentile = ((
-          await admin
-            .firestore()
-            .collection("piStorage")
-            .where("uids", "array-contains", uid)
-            .limit(1)
-            .get()
-        ).docs[0].data() as piStorage)[uid].percentile;
+        if (swipeMode === "dating") {
+          const percentile = (
+            (
+              await admin
+                .firestore()
+                .collection("piStorage")
+                .where("uids", "array-contains", uid)
+                .limit(1)
+                .get()
+            ).docs[0].data() as piStorage
+          )[uid].percentile;
 
-        pickedUsers = await datingMode(
-          uid,
-          matchDataMain,
-          searchCriteria,
-          percentile,
-          pickingWeights,
-          PIPickingVariance,
-          SCPickingVariance,
-          profilesPerWave
-        );
-        // } else if (swipeMode === "friend") {
-        //   pickedUsers = await friendMode(
-        //     uid,
-        //     matchDataMain,
-        //     searchCriteria,
-        //     pickingWeights,
-        //     SCPickingVariance,
-        //     profilesPerWave
-        //   );
-      } else {
-        throw new functions.https.HttpsError(
-          "aborted",
-          `Unrecognized swipeMode: ${swipeMode}`
-        );
+          pickedUsers = await datingMode(
+            uid,
+            matchDataMain,
+            searchCriteria,
+            percentile,
+            pickingWeights,
+            PIPickingVariance,
+            SCPickingVariance,
+            profilesPerWave
+          );
+          // } else if (swipeMode === "friend") {
+          //   pickedUsers = await friendMode(
+          //     uid,
+          //     matchDataMain,
+          //     searchCriteria,
+          //     pickingWeights,
+          //     SCPickingVariance,
+          //     profilesPerWave
+          //   );
+        } else {
+          throw new functions.https.HttpsError(
+            "aborted",
+            `Unrecognized swipeMode: ${swipeMode}`
+          );
+        }
+
+        // SENDING RESPONSE
+        return { users: pickedUsers } as generateSwipeStackResponse;
+      } catch (e) {
+        throw new functions.https.HttpsError("unknown", e);
       }
-
-      // SENDING RESPONSE
-      return { users: pickedUsers } as generateSwipeStackResponse;
-    } catch (e) {
-      throw new functions.https.HttpsError("unknown", e);
     }
-  }
-);
+  );
 
 // function removeElementInFrom(
 //   array: uidChoiceMap[],

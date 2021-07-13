@@ -12,19 +12,21 @@ import { FormatService } from "@services/index";
   providedIn: "root",
 })
 export class SearchCriteriaStore {
-  private _searchCriteria: BehaviorSubject<SearchCriteria>;
-  public readonly searchCriteria: Observable<SearchCriteria>;
+  private searchCriteria: BehaviorSubject<SearchCriteria>;
+  public readonly searchCriteria$: Observable<SearchCriteria>;
 
   constructor(private fs: AngularFirestore, private format: FormatService) {
-    this._searchCriteria = new BehaviorSubject<SearchCriteria>(
-      this.emptySearchCriteria()
-    );
-    this.searchCriteria = this._searchCriteria.asObservable();
+    this.searchCriteria = new BehaviorSubject<SearchCriteria>(this.emptySearchCriteria());
+    this.searchCriteria$ = this.searchCriteria.asObservable();
   }
 
   public async initializeStore(uid: string) {
     if (!uid) return console.error("No uid provided.");
     await this.fetchCriteria(uid);
+  }
+
+  resetStore() {
+    this.searchCriteria.next(this.emptySearchCriteria());
   }
 
   public initalizeThroughCurrentUserStore(SC: SearchCriteria) {
@@ -34,12 +36,12 @@ export class SearchCriteriaStore {
 
   /** Adds criteria to search */
   public addCriteria(newCriteria: SearchCriteria): void {
-    let currentCriteria: SearchCriteria = this._searchCriteria.getValue();
+    let currentCriteria: SearchCriteria = this.searchCriteria.getValue();
 
     for (const [criterion, value] of Object.entries(newCriteria)) {
       currentCriteria[criterion] = value;
     }
-    this._searchCriteria.next(currentCriteria);
+    this.searchCriteria.next(currentCriteria);
   }
 
   /** Removes all criterion listed in array */
@@ -68,7 +70,7 @@ export class SearchCriteriaStore {
         const latestSearchCriteria = this.format.searchCriteriaDatabaseToClass(
           data.latestSearchCriteria
         );
-        this._searchCriteria.next(latestSearchCriteria);
+        this.searchCriteria.next(latestSearchCriteria);
       } else {
         console.error();
       }

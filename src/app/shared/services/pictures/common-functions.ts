@@ -1,5 +1,5 @@
-import { forkJoin, from, Observable } from "rxjs";
-import { concatMap, map, switchMap, tap } from "rxjs/operators";
+import { from, Observable } from "rxjs";
+import { concatMap, map } from "rxjs/operators";
 
 export function firebaseStoragePath(uid: string, pictureIndex: number): string {
   return "/profilePictures/" + uid + "/" + pictureIndex;

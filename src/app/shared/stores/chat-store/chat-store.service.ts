@@ -45,6 +45,10 @@ export class ChatStore {
     // this.startDocumentCreationDeletionObserver(uid),
   }
 
+  resetStore() {
+    // empty the store, remove the observables to the chat documents
+  }
+
   /** fetches all the chats for the authenticated user */
   public fetchChats(uid: string): Observable<Chat[]> {
     const query = this.fs.firestore

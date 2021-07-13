@@ -22,10 +22,10 @@ export class AddPhotoComponent {
   //@ViewChild("text", { read: ElementRef, static: true }) text: ElementRef;
   @ViewChild("view", { read: ElementRef, static: true }) view: ElementRef;
 
-  @Output() onPhotoPicked = new EventEmitter<{ photo: CameraPhoto; index: number }>();
+  @Output() onPhotoPicked = new EventEmitter<{ photoUrl: string; index: number }>();
 
   @Input() photoIndex: number;
-  @Input() set photoDisplayed(value: CameraPhoto) {
+  @Input() set photoDisplayedUrl(value: string) {
     console.log("YOYO", value, this.view, this.icon /*this.text*/);
 
     if (!this.view || !this.icon /*|| !this.text*/) return;
@@ -39,7 +39,7 @@ export class AddPhotoComponent {
       icon.style.display = "inline";
       //text.style.display = "inline";
     } else {
-      view.style.background = `url(${String(value.webPath)})`;
+      view.style.background = `url(${value})`;
       view.style.backgroundSize = "cover";
       icon.style.display = "none";
       //text.style.display = "none";
@@ -62,7 +62,10 @@ export class AddPhotoComponent {
       allowEditing: true,
     });
 
+    const blob = await (await fetch(photo.webPath)).blob();
+    const url = URL.createObjectURL(blob);
+
     // send to parent component
-    this.onPhotoPicked.emit({ photo, index: this.photoIndex });
+    this.onPhotoPicked.emit({ photoUrl: url, index: this.photoIndex });
   }
 }

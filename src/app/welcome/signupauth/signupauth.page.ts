@@ -1,4 +1,5 @@
 import { Component, OnInit, ViewChild, ElementRef } from "@angular/core";
+import { AngularFireAuth } from "@angular/fire/auth";
 import { FormControl, FormGroup, Validators } from "@angular/forms";
 import { Router } from "@angular/router";
 import { FlyingLetterAnimation } from "@animations/letter.animation";
@@ -38,7 +39,8 @@ export class SignupauthPage implements OnInit {
   constructor(
     private alertCtrl: AlertController,
     private router: Router,
-    private signup: SignupService
+    private signup: SignupService,
+    private afAuth: AngularFireAuth
   ) {}
 
   ngOnInit() {}
@@ -177,7 +179,8 @@ export class SignupauthPage implements OnInit {
     const password: string = this.authForm.get("password").value;
 
     this.signup$ = this.signup.createFirebaseAccount(email, password).subscribe(
-      () => {
+      (a) => {
+        console.log(a);
         this.router.navigateByUrl("welcome/signuprequired");
       },
       (errRes) => {
@@ -194,6 +197,8 @@ export class SignupauthPage implements OnInit {
         this.showAlert(message);
       }
     );
+
+    this.afAuth.authState.subscribe((a) => console.log("this is the auth state:", a));
   }
 
   private showAlert(message: string) {

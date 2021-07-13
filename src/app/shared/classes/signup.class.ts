@@ -1,4 +1,3 @@
-import { CameraPhoto } from "@capacitor/core";
 import { signupDataHolder } from "@interfaces/auth-response.model";
 import {
   AreaOfStudy,
@@ -20,17 +19,17 @@ import {
 } from "@interfaces/index";
 
 export class SignupDataHolder implements signupDataHolder {
-  email: string;
-  uid: string;
-  token: string;
-  tokenExpirationDate: string;
+  // email: string;
+  // uid: string;
+  // token: string;
+  // tokenExpirationDate: string;
   firstName: string | null;
   dateOfBirth: Date | null;
   gender: Gender | null;
   sexualPreference: SexualPreference | null;
   degree: Degree | null;
   university: University | null;
-  pictures: CameraPhoto[] | null;
+  pictures: string[] | null;
   biography: string | null;
   course: string | null;
   society: string | null;
@@ -42,10 +41,10 @@ export class SignupDataHolder implements signupDataHolder {
   socialMediaLinks: SocialMediaLink[] | null;
 
   constructor({
-    email,
-    uid,
-    token,
-    tokenExpirationDate,
+    // email,
+    // uid,
+    // token,
+    // tokenExpirationDate,
     firstName = null,
     dateOfBirth = null,
     gender = null,
@@ -63,10 +62,10 @@ export class SignupDataHolder implements signupDataHolder {
     questions = null,
     socialMediaLinks = null,
   }) {
-    this.email = email;
-    this.uid = uid;
-    this.token = token;
-    this.tokenExpirationDate = tokenExpirationDate;
+    // this.email = email;
+    // this.uid = uid;
+    // this.token = token;
+    // this.tokenExpirationDate = tokenExpirationDate;
     this.firstName = firstName;
     this.dateOfBirth = dateOfBirth;
     this.gender = gender;
@@ -140,7 +139,7 @@ export class BaselineUser extends AuthenticatedUser implements SignupRequired {
   private _dateOfBirth: Date;
   private _gender: Gender;
   private _sexualPreference: SexualPreference;
-  private _pictures: CameraPhoto[];
+  private _pictures: string[];
   private _university: University;
   private _degree: Degree;
   //   private _swipeMode: SwipeMode;
@@ -173,10 +172,10 @@ export class BaselineUser extends AuthenticatedUser implements SignupRequired {
     this._sexualPreference = value;
   }
 
-  public get pictures(): CameraPhoto[] {
+  public get pictures(): string[] {
     return this._pictures;
   }
-  public set pictures(value: CameraPhoto[]) {
+  public set pictures(value: string[]) {
     this._pictures = value;
   }
 

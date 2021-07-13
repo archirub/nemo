@@ -13,6 +13,7 @@ import { searchCriteriaGrouping } from "./search-criteria";
 export async function friendMode(
   uid: string,
   matchDataMain: mdFromDatabase,
+  // eslint-disable-next-line no-shadow
   searchCriteria: searchCriteria,
   pickingWeights: PickingWeights,
   SCPickingVariance: number,
@@ -47,19 +48,20 @@ export async function friendMode(
     Object.entries(likeGroupWeirdObject).map((keyValue) => keyValue[1])
   );
 
-  const matchDataFriendDocs: FirebaseFirestore.DocumentSnapshot<mdFriendPickingFromDatabase>[] = (
-    await Promise.all(
-      normalGroupUsers.map(async (uid_) => {
-        return (await admin
-          .firestore()
-          .collection("matchData")
-          .doc(uid_)
-          .collection("pickingData")
-          .doc("friend")
-          .get()) as FirebaseFirestore.DocumentSnapshot<mdFriendPickingFromDatabase>;
-      })
-    )
-  ).filter((doc) => doc.exists && !doc.data()?.reportedUsers[uid]?.exists);
+  const matchDataFriendDocs: FirebaseFirestore.DocumentSnapshot<mdFriendPickingFromDatabase>[] =
+    (
+      await Promise.all(
+        normalGroupUsers.map(async (uid_) => {
+          return (await admin
+            .firestore()
+            .collection("matchData")
+            .doc(uid_)
+            .collection("pickingData")
+            .doc("friend")
+            .get()) as FirebaseFirestore.DocumentSnapshot<mdFriendPickingFromDatabase>;
+        })
+      )
+    ).filter((doc) => doc.exists && !doc.data()?.reportedUsers[uid]?.exists);
 
   let SCGroupDocs = searchCriteriaGrouping(matchDataFriendDocs, searchCriteria);
   SCGroupDocs = pickFromSCArray(

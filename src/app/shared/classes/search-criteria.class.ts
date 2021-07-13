@@ -10,7 +10,7 @@ import {
   allowOptionalProp,
 } from "@interfaces/index";
 
-export class SearchCriteria implements searchCriteria {
+export class SearchCriteria implements allowOptionalProp<searchCriteria> {
   _university: University | null;
   _areaOfStudy: AreaOfStudy | null;
   _degree: Degree | null;
@@ -36,59 +36,45 @@ export class SearchCriteria implements searchCriteria {
     this.onCampus = onCampus;
   }
 
-  public set university(v: University) {
-    if (this.options.university.includes(v)) {
-      this._university = v;
-    } else {
-      console.error();
-    }
+  public set university(v: University | null) {
+    this._university = v;
   }
-  public get university(): University {
+  public get university(): University | null {
     return this._university;
   }
 
-  public set areaOfStudy(v: AreaOfStudy) {
-    if (this.options.areaOfStudy.includes(v)) {
-      this._areaOfStudy = v;
-    }
+  public set areaOfStudy(v: AreaOfStudy | null) {
+    this._areaOfStudy = v;
   }
-  public get areaOfStudy(): AreaOfStudy {
+  public get areaOfStudy(): AreaOfStudy | null {
     return this._areaOfStudy;
   }
 
-  public set degree(v: Degree) {
-    if (this.options.degree.includes(v)) {
-      this._degree = v;
-    }
+  public set degree(v: Degree | null) {
+    this._degree = v;
   }
-  public get degree(): Degree {
+  public get degree(): Degree | null {
     return this._degree;
   }
 
-  public set societyCategory(v: SocietyCategory) {
-    if (this.options.societyCategory.includes(v)) {
-      this._societyCategory = v;
-    }
+  public set societyCategory(v: SocietyCategory | null) {
+    this._societyCategory = v;
   }
-  public get societyCategory(): SocietyCategory {
+  public get societyCategory(): SocietyCategory | null {
     return this._societyCategory;
   }
 
-  public set interests(v: Interests) {
-    if (this.options.interests.includes(v)) {
-      this._interest = v;
-    }
+  public set interests(v: Interests | null) {
+    this._interest = v;
   }
-  public get interests(): Interests {
+  public get interests(): Interests | null {
     return this._interest;
   }
 
-  public set onCampus(v: OnCampus) {
-    if (this.options.onCampus.includes(v)) {
-      this._onCampus = v;
-    }
+  public set onCampus(v: OnCampus | null) {
+    this._onCampus = v;
   }
-  public get onCampus(): OnCampus {
+  public get onCampus(): OnCampus | null {
     return this._onCampus;
   }
 }

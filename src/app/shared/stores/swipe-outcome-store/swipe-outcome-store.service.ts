@@ -16,50 +16,55 @@ import {
   providedIn: "root",
 })
 export class SwipeOutcomeStore {
-  private _swipeChoices: BehaviorSubject<profileChoiceMap[]>;
-  private _swipeAnswers: BehaviorSubject<uidChoiceMap[]>;
+  private swipeChoices: BehaviorSubject<profileChoiceMap[]>;
+  private swipeAnswers: BehaviorSubject<uidChoiceMap[]>;
 
-  public readonly swipeChoices: Observable<profileChoiceMap[]>;
-  public readonly swipeAnswers: Observable<uidChoiceMap[]>;
+  public readonly swipeChoices$: Observable<profileChoiceMap[]>;
+  public readonly swipeAnswers$: Observable<uidChoiceMap[]>;
 
   constructor(private afFunctions: AngularFireFunctions) {
-    this._swipeChoices = new BehaviorSubject<profileChoiceMap[]>([]);
-    this._swipeAnswers = new BehaviorSubject<uidChoiceMap[]>([]);
-    this.swipeChoices = this._swipeChoices.asObservable();
-    this.swipeAnswers = this._swipeAnswers.asObservable();
+    this.swipeChoices = new BehaviorSubject<profileChoiceMap[]>([]);
+    this.swipeAnswers = new BehaviorSubject<uidChoiceMap[]>([]);
+    this.swipeChoices$ = this.swipeChoices.asObservable();
+    this.swipeAnswers$ = this.swipeAnswers.asObservable();
+  }
+
+  resetStore() {
+    this.swipeChoices.next([]);
+    this.swipeAnswers.next([]);
   }
 
   public yesSwipe(profile: Profile) {
     if (!profile) return;
     const choice: swipeChoice = "yes";
     const choiceMap: profileChoiceMap = { choice, profile };
-    this._swipeChoices.next(this._swipeChoices.getValue().concat(choiceMap));
+    this.swipeChoices.next(this.swipeChoices.getValue().concat(choiceMap));
   }
 
   public noSwipe(profile: Profile) {
     if (!profile) return;
     const choice: swipeChoice = "no";
     const choiceMap: profileChoiceMap = { choice, profile };
-    this._swipeChoices.next(this._swipeChoices.getValue().concat(choiceMap));
+    this.swipeChoices.next(this.swipeChoices.getValue().concat(choiceMap));
   }
 
   public superSwipe(profile: Profile) {
     if (!profile) return;
     const choice: swipeChoice = "yes";
     const choiceMap: profileChoiceMap = { choice, profile };
-    this._swipeChoices.next(this._swipeChoices.getValue().concat(choiceMap));
+    this.swipeChoices.next(this.swipeChoices.getValue().concat(choiceMap));
   }
 
   public addToSwipeAnswers(answers: uidChoiceMap[]) {
     if (!answers) return;
-    this._swipeAnswers.next(this._swipeAnswers.getValue().concat(answers));
-    console.log("New answers:", this._swipeAnswers.getValue());
+    this.swipeAnswers.next(this.swipeAnswers.getValue().concat(answers));
+    console.log("New answers:", this.swipeAnswers.getValue());
   }
 
   public removeFromSwipeAnswers(answers: uidChoiceMap[]) {
     if (!answers) return;
-    this._swipeAnswers.next(
-      this._swipeAnswers
+    this.swipeAnswers.next(
+      this.swipeAnswers
         .getValue()
         .filter((answer) => !answers.map((ans) => ans.uid).includes(answer.uid))
     );
@@ -67,7 +72,7 @@ export class SwipeOutcomeStore {
 
   public getChoiceOf(uid: string): swipeChoice {
     if (!uid) return;
-    const answers = this._swipeAnswers.getValue();
+    const answers = this.swipeAnswers.getValue();
     const index: number = answers.findIndex((answer) => answer.uid === uid);
     if (index === -1) {
       console.error("User not in answers observable:", uid);
@@ -77,7 +82,7 @@ export class SwipeOutcomeStore {
   }
 
   public async registerSwipeChoices() {
-    const choices: uidChoiceMap[] = this._swipeChoices.getValue().map((choiceMap) => {
+    const choices: uidChoiceMap[] = this.swipeChoices.getValue().map((choiceMap) => {
       return { uid: choiceMap.profile.uid, choice: choiceMap.choice };
     });
     const requestData: registerSwipeChoicesRequest = { choices };

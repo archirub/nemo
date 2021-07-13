@@ -43,12 +43,16 @@ export class SwipeStackStore {
    * returns uid so that store initializations can be chained
    */
   public initializeStore(uid: string): Observable<string> {
-    return this.SCstore.searchCriteria.pipe(
+    return this.SCstore.searchCriteria$.pipe(
       take(1),
       exhaustMap((SC) => this.addToSwipeStackQueue(SC)),
       tap(() => console.log("SwipeStackStore initialized.")),
       map(() => uid)
     );
+  }
+
+  resetStore() {
+    this.profiles.next([]);
   }
 
   public managePictures(profiles: Profile[]): Observable<void> {

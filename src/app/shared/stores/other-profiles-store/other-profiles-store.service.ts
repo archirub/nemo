@@ -48,6 +48,16 @@ export class OtherProfilesStoreService {
     private format: FormatService
   ) {}
 
+  resetStore() {
+    const profiles = this.profiles.value;
+
+    Object.keys(profiles).forEach((uid) => {
+      this.revokeUrls(profiles[uid].pictureUrls);
+    });
+
+    this.profiles.next({});
+  }
+
   /**
    * to subscribe to to check whether a certain user's profile is stored in the store,
    * and if it isn't, to add it as well as its pictures
@@ -60,7 +70,7 @@ export class OtherProfilesStoreService {
 
     return this.hasProfile(uid).pipe(
       filter((hasProfile) => !hasProfile), // continue only if profile is not in store
-      exhaustMap((a) => profileSnapshot$), // fetch profile fromd atabase
+      exhaustMap((a) => profileSnapshot$), // fetch profile from database
       map((doc) => {
         if (!doc.exists) return;
 

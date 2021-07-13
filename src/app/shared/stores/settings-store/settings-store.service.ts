@@ -5,4 +5,6 @@ import { Injectable } from "@angular/core";
 })
 export class SettingsStore {
   constructor() {}
+
+  resetStore() {} // to fill accordingly once store is made
 }

@@ -1,11 +1,6 @@
 import { searchCriteriaOptions } from "@interfaces/index";
 import { Gender, SexualPreference, SwipeMode } from "./match-data.model";
-import {
-  photoObject,
-  profilePicturePaths,
-  QuestionAndAnswer,
-  SocialMediaLink,
-} from "./profile.model";
+import { profilePicturePaths, QuestionAndAnswer, SocialMediaLink } from "./profile.model";
 import {
   AreaOfStudy,
   Degree,
@@ -29,7 +24,7 @@ export interface SignupRequired {
   sexualPreference: SexualPreference;
   degree: Degree; // degree must be part of required for backend
   university: University;
-  pictures: photoObject[];
+  pictures: string[];
   // swipeMode: SwipeMode;
 }
 

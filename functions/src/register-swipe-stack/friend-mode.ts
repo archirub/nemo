@@ -185,12 +185,10 @@ export async function createFriendChatDocuments(
         {
           uid: targetUserProfile.id,
           name: targetUserData.firstName,
-          picture: "",
         },
         {
           uid: matchedUserProfile.id,
           name: matchedUserData.firstName,
-          picture: "",
         },
       ];
       const messages: [] = [];

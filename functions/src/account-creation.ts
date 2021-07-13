@@ -31,6 +31,10 @@ type DataChecker = {
   };
 };
 
+// - Convert timestamps back to strings in the front end (i.e. use Date.toString()) for the date of birth
+// - then here convert it right away to timestamp from strings by doing Timestamp.fromDate(new Date(stringDate))
+// and do the typecheck accordingly OR don't do that specific check, just check whether it's a string and that's all
+
 export const createAccount = functions
   .region("europe-west2")
   .https.onCall(async (data: createAccountRequest, context): Promise<successResponse> => {
@@ -58,6 +62,7 @@ export const createAccount = functions
       onCampus: null,
       socialMediaLinks: null,
     };
+
     // if allowedValues is null, then there are no default values,
     // if property can be null (i.e. is optional), then add "null" to array (if that doesn't work, add property canBeNull: boolean)
     // for arrays, the logic is slightly different, allowedValues are the elements that can be in that array (not what
@@ -66,7 +71,13 @@ export const createAccount = functions
     // special function for questions
 
     // CHECK DATA VALIDITY
-    if (!checkData(dataHolder, data, dataChecker)) return { successful: false };
+    const checkDataObject = checkData(dataHolder, data, dataChecker);
+
+    if (!checkDataObject.allGood)
+      return {
+        successful: false,
+        message: checkDataObject.property + "   " + checkDataObject.value,
+      };
 
     // Renaming for Typescript
     const checkedData = dataHolder as {
@@ -139,7 +150,7 @@ export const createAccount = functions
       return { successful: true };
     } catch (e) {
       console.warn(`uid: ${data.uid}, ${e}`);
-      return { successful: false };
+      return { successful: false, message: "some shit went down: " + e };
     }
   });
 
@@ -149,12 +160,20 @@ function checkData(
   },
   incData: createAccountRequest,
   dataChecker_: DataChecker
-): boolean {
+): { allGood: boolean; property?: string; value?: string } {
+  const propertiesList = Object.values(incData);
+  const propertiesChecked: Array<[string, any]> = [];
+
   for (const [property, value] of Object.entries(incData)) {
     const checks = dataChecker_[property as keyof createAccountRequest];
 
     // check if key is an allowed property
-    if (!checkedData.hasOwnProperty(property)) return false;
+    if (!checkedData.hasOwnProperty(property))
+      return {
+        allGood: false,
+        property: JSON.stringify(property),
+        value: JSON.stringify(value),
+      };
 
     // if the property isn't a required one and its value is null, then no need for the additional checks
     if (!checks.isRequired && value == null) {
@@ -165,7 +184,11 @@ function checkData(
       // check if property's value has right type
       // // if options are not required for checking the type (a.k.a it's checking for a string,
       // // a.k.a it's not interests or questions), they are just not used by the function
-      return false;
+      return {
+        allGood: false,
+        property: JSON.stringify(property),
+        value: JSON.stringify(value),
+      };
 
     // checks against the default value options, if there is one and if the value isn't an object,
     if (
@@ -173,13 +196,21 @@ function checkData(
       checks.allowedValues !== null &&
       !checks.allowedValues.includes(value)
     )
-      return false;
+      return {
+        allGood: false,
+        property: JSON.stringify(property),
+        value: JSON.stringify(value),
+      };
 
     // add property value to checkedData object
     checkedData[property as keyof createAccountRequest] = value;
+
+    propertiesChecked.push([property, value]);
   }
 
-  return true;
+  return {
+    allGood: true,
+  };
 }
 
 function stringCheck(a: any, options: unknown): a is string {
@@ -230,7 +261,6 @@ function socialMediaLinksCheck(a: any, options: socialMedia[]): boolean {
   for (const el of a) {
     for (const key in el) {
       if (!["socialMedia", "link"].includes(key)) return false;
-      if (typeof el[key] !== "string") return false;
       if (key === "socialMedia" && !options.includes(el[key])) return false;
     }
   }
@@ -273,7 +303,7 @@ const dataChecker: DataChecker = {
     valueIsObject: false,
   },
   dateOfBirth: {
-    typeCheck: (a) => a instanceof admin.firestore.Timestamp,
+    typeCheck: (a) => !isNaN(Date.parse(a)),
     allowedValues: null,
     isRequired: true,
     valueIsObject: false,
@@ -461,7 +491,7 @@ function addToProfile(
 ) {
   const profile: profileFromDatabase = {
     firstName: data.firstName,
-    dateOfBirth: admin.firestore.Timestamp.fromDate(data.dateOfBirth),
+    dateOfBirth: admin.firestore.Timestamp.fromDate(new Date(data.dateOfBirth)),
     pictureCount: data.picturesCount,
     biography: data.biography,
     university: data.university,
@@ -473,7 +503,7 @@ function addToProfile(
     onCampus: data.onCampus,
     socialMediaLinks: data.socialMediaLinks,
   };
-  const ref = admin.firestore().collection("profile").doc(data.uid);
+  const ref = admin.firestore().collection("profiles").doc(data.uid);
 
   transaction.set(ref, profile);
 }
@@ -530,7 +560,7 @@ function addToMatchDataDating(
 ) {
   const matchDataDating: mdDatingPickingFromDatabase = {
     searchFeatures: {
-      university: data.university === "UCL" ? data.university : "UCL",
+      university: data.university,
       areaOfStudy: data.areaOfStudy,
       degree: data.degree,
       societyCategory: data.societyCategory,

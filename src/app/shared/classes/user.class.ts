@@ -9,12 +9,13 @@ import {
   Settings,
   Degree,
   Interests,
+  searchCriteria,
+  allowOptionalProp,
 } from "@interfaces/index";
-import { SearchCriteria } from "./search-criteria.class";
 
 export class User extends Profile implements user {
   private _settings: Settings;
-  private _latestSearchCriteria: SearchCriteria;
+  private _latestSearchCriteria: allowOptionalProp<searchCriteria>;
   private _gender: Gender;
   private _sexualPreference: SexualPreference;
   private _swipeMode: SwipeMode;
@@ -37,7 +38,7 @@ export class User extends Profile implements user {
     degree: Degree,
     socialMediaLinks: SocialMediaLink[],
     settings: Settings,
-    latestSearchCriteria: SearchCriteria,
+    latestSearchCriteria: allowOptionalProp<searchCriteria>,
     gender: Gender,
     sexualPreference: SexualPreference,
     swipeMode: SwipeMode
@@ -65,10 +66,10 @@ export class User extends Profile implements user {
     this.swipeMode = swipeMode;
   }
 
-  public get latestSearchCriteria(): SearchCriteria {
+  public get latestSearchCriteria(): allowOptionalProp<searchCriteria> {
     return this._latestSearchCriteria;
   }
-  public set latestSearchCriteria(value: SearchCriteria) {
+  public set latestSearchCriteria(value: allowOptionalProp<searchCriteria>) {
     this._latestSearchCriteria = value;
   }
 

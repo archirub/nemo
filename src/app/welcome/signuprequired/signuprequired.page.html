@@ -107,7 +107,7 @@
               *ngFor="let p of picturesHolder; let i=index"
               (onPhotoPicked)="savePhoto($event)"
               [photoIndex]="i"
-              [photoDisplayed]="picturesHolder[i]"
+              [photoDisplayedUrl]="picturesHolder[i]"
             ></add-photo>
 
             <!-- <add-photo></add-photo>
@@ -148,7 +148,6 @@
           <br />
 
           <div class="flexstart-col">
-
             <div class="preferences">
               <h3>I am interested in</h3>
               <ion-select
@@ -158,8 +157,8 @@
               >
                 <ion-select-option
                   *ngFor="let sexPref of sexualPreferenceOptions"
-                  [value]="sexPref"
-                  >{{sexPref}}</ion-select-option
+                  [value]="sexPref | formatSexPref"
+                  >{{sexPref | formatSexPref}}</ion-select-option
                 >
               </ion-select>
             </div>

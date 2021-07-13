@@ -210,12 +210,10 @@ export async function createDatingChatDocuments(
         {
           uid: targetUserProfile.id,
           name: targetUserData.firstName,
-          picture: "",
         },
         {
           uid: matchedUserProfile.id,
           name: matchedUserData.firstName,
-          picture: "",
         },
       ];
       const messages: [] = [];

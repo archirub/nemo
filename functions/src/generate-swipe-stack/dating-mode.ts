@@ -16,6 +16,7 @@ import { searchCriteriaGrouping } from "./search-criteria";
 export async function datingMode(
   uid: string,
   matchDataMain: mdFromDatabase,
+  // eslint-disable-next-line no-shadow
   searchCriteria: searchCriteria,
   percentile: number | null,
   pickingWeights: PickingWeights,
@@ -43,15 +44,12 @@ export async function datingMode(
     : ["postgrad", "undergrad"];
 
   // GET DEMOGRAPHICS THAT SHOULD BE FETCHED
-  const {
-    genderToFetch,
-    sexualPreferenceToFetch,
-    degreeToFetch,
-  } = getDemographicsToFetch(
-    matchDataMain.gender,
-    matchDataMain.sexualPreference,
-    degreePreference
-  );
+  const { genderToFetch, sexualPreferenceToFetch, degreeToFetch } =
+    getDemographicsToFetch(
+      matchDataMain.gender,
+      matchDataMain.sexualPreference,
+      degreePreference
+    );
 
   // FETCH DEMOGRAPHICS
   const uidStorageDocumentPromises: Promise<
@@ -73,7 +71,9 @@ export async function datingMode(
     }
   }
 
-  const uidStorageDocuments = ([] as FirebaseFirestore.QueryDocumentSnapshot<uidDatingStorage>[]).concat
+  const uidStorageDocuments = (
+    [] as FirebaseFirestore.QueryDocumentSnapshot<uidDatingStorage>[]
+  ).concat
     .apply(
       [],
       (await Promise.all(uidStorageDocumentPromises)).map((doc) => doc.docs)

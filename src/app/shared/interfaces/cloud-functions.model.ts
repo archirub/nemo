@@ -20,6 +20,7 @@ export interface registerSwipeChoicesResponse {}
 
 export interface successResponse {
   successful: boolean;
+  message?: string;
 }
 
 export interface changeShowProfileRequest {
@@ -44,5 +45,5 @@ export interface updateGenderSexPrefRequest {
   value: Gender | SexualPreference;
 }
 
-export type createAccountRequest = Omit<SignupRequired, "pictures"> &
-  SignupOptional & { uid: string; picturesCount: number };
+export type createAccountRequest = Omit<SignupRequired, "pictures" | "dateOfBirth"> &
+  SignupOptional & { uid: string; picturesCount: number; dateOfBirth: string };

@@ -30,6 +30,7 @@ interface SearchCriteriaChecker {
  */
 export function searchCriteriaGrouping(
   datingPickingDocs: datingPickingSnapshots[],
+  // eslint-disable-next-line no-shadow
   searchCriteria: searchCriteria
 ): datingPickingSnapshots[] {
   // removing null criteria
@@ -83,6 +84,7 @@ export function searchCriteriaGrouping(
  */
 function orderBySC(
   profiles: datingPickingSnapshots[],
+  // eslint-disable-next-line no-shadow
   searchCriteria: searchCriteria,
   SC_Checker: SearchCriteriaChecker
 ): datingPickingSnapshots[] {

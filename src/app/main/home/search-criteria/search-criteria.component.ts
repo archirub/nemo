@@ -52,7 +52,7 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
   constructor(private SCstore: SearchCriteriaStore, private modalCtrl: ModalController) {}
 
   ngOnInit() {
-    this.searchCriteriaSub = this.SCstore.searchCriteria.subscribe({
+    this.searchCriteriaSub = this.SCstore.searchCriteria$.subscribe({
       next: (sc) => {
         this.searchCriteriaForm.patchValue({
           onCampus: sc.onCampus,
@@ -72,7 +72,7 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
     setTimeout(() => {
       //This initialises slide heights, for some unknown reason
       //USER DOESN'T SEE THIS, KEEP IT HERE
-      this.moveTo('studies');
+      this.moveTo("studies");
       this.returnTo();
 
       this.degreeHandle.selectOption("undergrad");

@@ -1,3 +1,11 @@
+// NEXT TO DO (AFTER JULY 12TH 2021),
+// - understand why onSubmit has some weird behavior where it always chooses the "true" option
+// of the iif rxjs function,
+// - you need two version of the function "slideToFirstInvalidIndex", one where it checks whether
+// the fields are empty / invalid. Its use is to redirect the user directly to where they left off
+// in case of error etc. for a seamless experience. The other is only if the fields are invalid, that
+// one is when it is time to submit the entire form and create an account (as the fields here are optional)
+
 import {
   ChangeDetectorRef,
   Component,
@@ -25,6 +33,8 @@ import {
 import { allowOptionalProp } from "@interfaces/shared.model";
 import { SignupService } from "@services/signup/signup.service";
 import { QuestionSlidesComponent } from "@components/index";
+import { concat, forkJoin, from, iif } from "rxjs";
+import { catchError, concatMap, exhaustMap, switchMap, take } from "rxjs/operators";
 
 @Component({
   selector: "app-signupoptional",
@@ -35,14 +45,15 @@ export class SignupoptionalPage implements OnInit {
   @ViewChild("interestSlides", { read: ElementRef }) interestSlides: ElementRef;
   @ViewChild("slides") slides: IonSlides;
   @ViewChildren("pagerDots", { read: ElementRef }) dots: QueryList<ElementRef>;
-  @ViewChild('qSlides') qSlides: QuestionSlidesComponent;
+  @ViewChild("qSlides") qSlides: QuestionSlidesComponent;
 
   slidesLeft: number;
 
   questionArray: QuestionAndAnswer[];
 
   // FIELD FORM
-  form = new FormGroup({
+  form = new FormGroup({});
+  blankForm = new FormGroup({
     course: new FormControl(null),
     areaOfStudy: new FormControl(null),
     interests: new FormArray([]),
@@ -50,16 +61,19 @@ export class SignupoptionalPage implements OnInit {
     societyCategory: new FormControl(null),
     questions: new FormArray([
       new FormGroup({
-        q: new FormControl(''),
-        a: new FormControl('')
-      })
+        q: new FormControl(""),
+        a: new FormControl(""),
+      }),
     ]),
     biography: new FormControl(null),
     onCampus: new FormControl(null),
-    instagramLink: new FormGroup({
-      socialMedia: new FormControl("instagram"),
-      link: new FormControl(null),
-    }),
+    socialMediaLinks: new FormArray([
+      // commented out until we figure out wtf to do with that
+      // new FormGroup({
+      //   socialMedia: new FormControl("instagram"),
+      //   link: new FormControl(null),
+      // }),
+    ]),
   });
 
   // I think the order should be :
@@ -77,10 +91,10 @@ export class SignupoptionalPage implements OnInit {
   slideIndexes: { [k in keyof SignupOptional]: number } = {
     course: 0,
     areaOfStudy: 0,
-    interests: 1,
-    society: 2,
-    societyCategory: 2,
-    questions: 3,
+    society: 1,
+    societyCategory: 1,
+    questions: 2,
+    interests: 3,
     biography: 4,
     onCampus: 5,
     socialMediaLinks: 6,
@@ -94,6 +108,8 @@ export class SignupoptionalPage implements OnInit {
   ) {}
 
   ngOnInit() {
+    // put this way so that we have a trace of what a blank form is like so that we can reset it
+    this.form = this.blankForm;
     this.clearFormArray(this.form.controls.questions as FormArray);
   }
 
@@ -102,28 +118,27 @@ export class SignupoptionalPage implements OnInit {
    */
   clearFormArray(formArray: FormArray) {
     while (formArray.length !== 0) {
-      formArray.removeAt(0)
-    };
+      formArray.removeAt(0);
+    }
   }
 
   async ionViewWillEnter() {
+    await this.signup.getLocalStorage();
     await this.fillFieldsAndGoToSlide(); //Might need to be moved this to ionViewDidEnter hook
     // await this.slides.lockSwipes(true);
   }
 
   ionViewDidEnter() {
-    console.log(this.interestSlides.nativeElement.pictures);
-    console.log(this.interestSlides.nativeElement.interests);
     this.updatePager();
   }
 
   /**
    * Pushes a new question to the questions formArray (thereby showing in the template)
    */
-   addQuestion(input) {
+  addQuestion(input) {
     const questionArray = this.form.controls.questions as FormArray;
     questionArray.push(this.initQuestion(input[0], input[1]));
-    
+
     this.changeDetectorRef.detectChanges(); // forces Angular to check updates in the template
   }
 
@@ -133,7 +148,7 @@ export class SignupoptionalPage implements OnInit {
   removeQuestion(index: number) {
     const questionArray = this.form.controls.questions as FormArray;
     questionArray.removeAt(index);
-    
+
     this.changeDetectorRef.detectChanges(); // forces Angular to check updates in the template
   }
 
@@ -143,7 +158,7 @@ export class SignupoptionalPage implements OnInit {
   initQuestion(q, a) {
     return new FormGroup({
       q: new FormControl(q),
-      a: new FormControl(a)
+      a: new FormControl(a),
     });
   }
 
@@ -195,15 +210,12 @@ export class SignupoptionalPage implements OnInit {
    * This is the only way currently written to submit them to the form
    */
   async submitQuestions() {
-    this.clearFormArray(this.form.controls.questions as FormArray); 
+    this.clearFormArray(this.form.controls.questions as FormArray);
     //Clears any previous answers to avoid pushing same twice
 
     for (let i = 0; i < this.qSlides.questionArray.length; i++) {
-      this.addQuestion([
-        this.qSlides.questionArray[i], 
-        this.qSlides.answerArray[i]
-      ]);
-    };
+      this.addQuestion([this.qSlides.questionArray[i], this.qSlides.answerArray[i]]);
+    }
 
     this.unlockAndSlideToNext();
   }
@@ -225,6 +237,7 @@ export class SignupoptionalPage implements OnInit {
   }
 
   async unlockAndSlideTo(index: number) {
+    if (!index) return;
     await this.slides.lockSwipes(false);
     await this.slides.slideTo(index);
 
@@ -245,44 +258,79 @@ export class SignupoptionalPage implements OnInit {
     const currentSignupData = this.signup.signupData.value; // only getting a snapshot instead of subscribing as we only want to use this function once at the start, not change swipe whenever
 
     // creating object with ONLY required fields and their values from signupData observable
-    const requiredData = {};
+    const optionalData = {};
     Object.keys(currentSignupData).forEach((field) => {
       if (formFields.includes(field)) {
-        requiredData[field] = currentSignupData[field];
+        optionalData[field] = currentSignupData[field];
       }
     });
 
     // filling fields
-    this.fillFields(requiredData);
+    this.fillFields(optionalData);
 
     // moving to slide of index with earliest incomplete fields
     // if there is none, then moving to last slide
     await this.unlockAndSlideTo(
-      this.getFirstInvalidSlideIndex() ?? (await this.slides.length())
+      this.getFirstIncompleteSlideIndex() ?? (await this.slides.length())
     );
   }
 
   /**
    * From the current values of the fields, returns the index of the earliest
-   * slide that has invalid (ONLY, as opposed to required which also accounts for missing fields)
+   * slide that has incomplete data or incorrect data. This is used when the user is moved
+   * to this page so that they can continue completing from the earliest empty field
    *
    * CAREFUL: the slide indexes are based on the property "slideIndexes", which is fixed
    * and not dynamically updated by changes in the template. Changes in the order of the template
    * may therefore change its validity.
    */
-  getFirstInvalidSlideIndex(): number | null {
+  getFirstIncompleteSlideIndex(): number | null {
     const fieldValues = this.getFormValues();
     const initIndex = 100;
     let slideIndex: number = initIndex;
 
     // checks whether each field has a value and if that value is valid
-    Object.keys(this.slideIndexes).forEach((field) => {
-      // **************************************************************************************
-      // ***************** HANDLE FACT THAT OPTIONAL ELEMENTS CAN BE EMPTY ********************
-      // **************************************************************************************
+    Object.keys(this.slideIndexes).forEach((field: keyof SignupOptional) => {
+      const formControl = this.form.get(field);
 
-      // checks whether element exists / is non null & whether its value is valid
-      if (!this.form.get(field).valid) {
+      if (!formControl) return;
+
+      if (
+        (field === "questions" || field === "interests") &&
+        Array.isArray(formControl.value) &&
+        formControl.value.filter(Boolean).length < 1
+      ) {
+        slideIndex = Math.min(slideIndex, this.slideIndexes[field]);
+      }
+      // checks whether element exists / is non null & whether it has a value
+      else if (!formControl.value || !formControl.valid) {
+        slideIndex = Math.min(slideIndex, this.slideIndexes[field]);
+      }
+    });
+
+    return slideIndex === initIndex ? null : slideIndex;
+  }
+
+  /**
+   * As opposed to getFirstIncompleteSlideIndex, this method checks only for whether the
+   * element is invalid. This is used right before the form is submitted to create the documents
+   * on the database
+   *
+   * CAREFUL: the slide indexes are based on the property "slideIndexes", which is fixed
+   * and not dynamically updated by changes in the template. Changes in the order of the template
+   * may therefore change its validity.
+   */
+  getFirstInvalidSlideIndex() {
+    const fieldValues = this.getFormValues();
+    const initIndex = 100;
+    let slideIndex: number = initIndex;
+
+    // checks whether each field has a value and if that value is valid
+    Object.keys(this.slideIndexes).forEach((field: keyof SignupOptional) => {
+      const formControl = this.form.get(field);
+
+      // checks whether element is valid
+      if (!formControl.valid) {
         slideIndex = Math.min(slideIndex, this.slideIndexes[field]);
       }
     });
@@ -295,15 +343,20 @@ export class SignupoptionalPage implements OnInit {
    * @param data
    */
   fillFields(data: allowOptionalProp<SignupOptional>): void {
-    Object.keys(data).forEach((field) => {
+    Object.keys(data).forEach((field: keyof SignupOptional) => {
       if (field === "interests") {
         this.form.setControl(field, this.formBuilder.array(data[field] || []));
       } else if (field === "questions") {
-        const questionFormGroups = (data[field] as QuestionAndAnswer[]).map((QandA) =>
-          this.formBuilder.group({ q: QandA.question, a: QandA.answer })
+        const questionFormGroups = ((data[field] as QuestionAndAnswer[]) || []).map(
+          (QandA) => this.formBuilder.group({ q: QandA.question, a: QandA.answer })
         );
         this.form.setControl(field, this.formBuilder.array(questionFormGroups || []));
         this.qSlides.writeValue(this.form.controls.questions.value);
+      } else if (field === "socialMediaLinks") {
+        const socialMediaFormGroups = ((data[field] as SocialMediaLink[]) || []).map(
+          (sm) => this.formBuilder.group({ socialMedia: sm.socialMedia, link: sm.link })
+        );
+        this.form.setControl(field, this.formBuilder.array(socialMediaFormGroups || []));
       } else {
         const formControl = this.form.get(field);
         if (formControl) formControl.setValue(data[field]);
@@ -314,7 +367,6 @@ export class SignupoptionalPage implements OnInit {
   // USE THIS TO UPDATE THE DATA OBSERVABLE AT EACH SWIPE AS WELL AS TO STORE IT LOCALLY
   updateData(): Promise<void> {
     const validData = {};
-
     // MIGHT HAVE TO PASS THE PICTURES AS BASE64STRINGS HERE IF YOU WANT TO STORE THEM
     return this.signup.addToDataHolders(this.getFormValues());
   }
@@ -335,7 +387,7 @@ export class SignupoptionalPage implements OnInit {
     // TEMPORARY AND WRONG (need to ask for geolocalisation and shit, should probably create a store for this shit)
     const onCampus: boolean = this.form.get("onCampus").value;
 
-    const socialMediaLinks: SocialMediaLink[] = [this.form.get("instagramLink").value];
+    const socialMediaLinks: SocialMediaLink[] = this.form.get("socialMediaLinks").value;
 
     return {
       course,
@@ -354,27 +406,87 @@ export class SignupoptionalPage implements OnInit {
    * Checks whether all the data is valid, if it isn't redirect to slide of unvalid data,
    * if it is, then save the data and direct to signupoptional
    */
-  async onSubmit() {
-    const invalidSlide = this.getFirstInvalidSlideIndex();
+  onSubmit() {
+    let invalidSlide: number;
 
-    // if invalidSlide is non-null, then there is a slide with invalid data
-    // cannot just use if (invalidSlide) {} syntax as number 0 is falsy
-    if (typeof invalidSlide === "number") {
-      await this.unlockAndSlideTo(invalidSlide);
-    } else {
-      await this.updateData(); // may not be necessary, but last check to make sure data we have in logic exactly reflects that in the UI
-      this.signup.createFirestoreAccount().subscribe(async (res: successResponse) => {
-        if (res.successful) {
-          console.log("THAT FCKIN WORKED");
-          await this.signup.removeLocalStorage();
-          await this.signup.initializeUser();
-          await this.router.navigateByUrl("/main/home");
-        } else {
-          console.error("Signup was unsuccessful. HANDLE");
-        }
-      });
-      this.router.navigateByUrl("/welcome/signupoptional");
-    }
+    return from(this.slides.length())
+      .pipe(
+        concatMap((slideCount) => {
+          // if invalidSlide is non-null, then there is a slide with invalid data
+          // cannot just use if (invalidSlide) {} syntax as number 0 is falsy
+
+          invalidSlide = this.getFirstInvalidSlideIndex();
+          console.log("inv", invalidSlide);
+
+          // go to slide if invalidSlide is non null and that it isn't the last slide
+          if (invalidSlide && invalidSlide + 1 !== slideCount)
+            return this.unlockAndSlideTo(invalidSlide);
+
+          // alternative if it isn't a number (i.e. all is gucci, create account & co)
+          return concat(
+            this.updateData(), // to make sure data is up to date
+
+            this.signup
+              .createFirestoreAccount() // create firestore account
+              .pipe(
+                switchMap((res) =>
+                  // based on success of both account creation and picture storage, either
+                  {
+                    // erase traces of signing up, and initialize the user, and navigate to home
+                    return this.signup.initialiseUser();
+                  }
+                ),
+                catchError(
+                  (
+                    err // or do some other shit that needs to be more clearly defined
+                  ) =>
+                    (() => {
+                      console.error("Signup was unsuccessful. HANDLE: ", err);
+
+                      // FOR DEVELOPMENT, in real life, you need to retry based on which one fucked up and handle it
+                      // properly. You'd need to at least display an error message saying which one fucked up, and
+                      // absolutely create a system which sends us a log so that we are alerted of when that happens
+                      this.signup.resetDataHolder();
+                      return concat(
+                        this.signup.removeLocalStorage(),
+                        this.router.navigateByUrl("/welcome/signupoptional")
+                      );
+                    })()
+                )
+              )
+          );
+        })
+      )
+      .toPromise();
+
+    // PREVIOUS NONE OBSERVABLE BASED CODE
+    // const invalidSlide = this.getFirstInvalidSlideIndex();
+
+    // // if invalidSlide is non-null, then there is a slide with invalid data
+    // // cannot just use if (invalidSlide) {} syntax as number 0 is falsy
+    // if (typeof invalidSlide === "number") {
+    //   await this.unlockAndSlideTo(invalidSlide);
+    // } else {
+    //   await this.updateData(); // may not be necessary, but last check to make sure data we have in logic exactly reflects that in the UI
+    //   this.signup.createFirestoreAccount().subscribe(async (res) => {
+    //     console.log("ye ye ye");
+    //     if (res.accountCreation && res.pictureStoring) {
+    //       console.log("THAT FCKIN WORKED");
+    //       await this.signup.removeLocalStorage();
+    //       await this.signup.initializeUser();
+    //       await this.router.navigateByUrl("/main/home");
+    //     } else {
+    //       console.error("Signup was unsuccessful. HANDLE: ", res);
+
+    //       // FOR DEVELOPMENT, in real life, you need to retry based on which one fucked up and handle it
+    //       // properly. You'd need to at least display an error message saying which one fucked up, and
+    //       // absolutely create a system which sends us a log so that we are alerted of when that happens
+    //       await this.signup.removeLocalStorage();
+    //       this.signup.resetDataHolder();
+    //       this.router.navigateByUrl("/welcome/signupoptional");
+    //     }
+    //   });
+    // }
   }
 }
 

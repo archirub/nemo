@@ -4,3 +4,4 @@ export * from "./swipe-outcome-store/swipe-outcome-store.service";
 export * from "./current-user-store/current-user-store.service";
 export * from "./swipe-stack-store/swipe-stack-store.service";
 export * from "./search-criteria-store/search-criteria-store.service";
+export * from "./other-profiles-store/other-profiles-store.service";

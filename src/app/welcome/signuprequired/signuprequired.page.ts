@@ -16,11 +16,11 @@ import {
   ViewChild,
   ViewChildren,
   QueryList,
+  OnInit,
 } from "@angular/core";
 import { FormGroup, FormControl, Validators } from "@angular/forms";
 import { IonSlides } from "@ionic/angular";
 import { Router } from "@angular/router";
-import { CameraPhoto } from "@capacitor/core";
 
 import {
   Degree,
@@ -37,13 +37,14 @@ import { AngularAuthService } from "@services/login/auth/angular-auth.service";
 import { SignupService } from "@services/signup/signup.service";
 import { allowOptionalProp } from "@interfaces/shared.model";
 import { AppDatetimeComponent } from "@components/index";
+import firebase from "firebase";
 
 @Component({
   selector: "app-signuprequired",
   templateUrl: "./signuprequired.page.html",
   styleUrls: ["../welcome.page.scss"],
 })
-export class SignuprequiredPage {
+export class SignuprequiredPage implements OnInit {
   @ViewChild("slides") slides: IonSlides;
   @ViewChild("date") date: AppDatetimeComponent;
   @ViewChildren("pagerDots", { read: ElementRef }) dots: QueryList<ElementRef>;
@@ -52,7 +53,8 @@ export class SignuprequiredPage {
   reqValidatorChecks: object;
 
   // FIELD FORM
-  form = new FormGroup({
+  form = new FormGroup({});
+  blankForm = new FormGroup({
     firstName: new FormControl(null, [Validators.required, Validators.minLength(1)]),
     dateOfBirth: new FormControl(
       null
@@ -70,8 +72,8 @@ export class SignuprequiredPage {
   universityOptions: University[] = searchCriteriaOptions.university;
   degreeOptions: Degree[] = searchCriteriaOptions.degree;
 
-  pictureCount: number = 6; // defines the number of picture boxes in template, as well as is used in logic to save picture picks
-  picturesHolder: CameraPhoto[] = Array.from({ length: this.pictureCount }); // for storing pictures. Separate from rest of form, added to it on form submission
+  maxPictureCount: number = 6; // defines the number of picture boxes in template, as well as is used in logic to save picture picks
+  picturesHolder: string[] = Array.from({ length: this.maxPictureCount }); // for storing pictures. Separate from rest of form, added to it on form submission
 
   slidesLeft: number;
 
@@ -95,14 +97,12 @@ export class SignuprequiredPage {
     private changeDetectorRef: ChangeDetectorRef
   ) {}
 
+  ngOnInit() {
+    // put this way so that we have a trace of what a blank form is like so that we can reset it
+    this.form = this.blankForm;
+  }
+
   async ionViewWillEnter() {
-    await this.fillFieldsAndGoToSlide();
-
-    this.date.getWrittenValue();
-    this.date.getDate();
-
-    await this.slides.lockSwipes(true);
-
     // UI elements map to show on invalid checks when trying to move slide, see validateAndSlide()
     this.reqValidatorChecks = {
       firstName: document.getElementById("nameCheck"),
@@ -114,7 +114,15 @@ export class SignuprequiredPage {
     };
   }
 
-  ionViewDidEnter() {
+  async ionViewDidEnter() {
+    await this.signup.getLocalStorage();
+    await this.fillFieldsAndGoToSlide();
+
+    this.date.getWrittenValue();
+    this.date.getDate();
+
+    await this.slides.lockSwipes(true);
+
     this.updatePager();
   }
 
@@ -325,7 +333,7 @@ export class SignuprequiredPage {
         if (data[field]) {
           console.log(data[field]);
           data[field].forEach((pic, i) => {
-            this.savePhoto({ photo: pic, index: i });
+            this.savePhoto({ photoUrl: pic, index: i });
           });
         }
       } else if (field === "dateOfBirth") {
@@ -340,7 +348,6 @@ export class SignuprequiredPage {
   // USE THIS TO UPDATE THE DATA OBSERVABLE AT EACH SWIPE AS WELL AS TO STORE IT LOCALLY
   updateData(): Promise<void> {
     const validData = {};
-    console.log("yo");
 
     // MIGHT HAVE TO PASS THE PICTURES AS BASE64STRINGS HERE IF YOU WANT TO STORE THEM
     return this.signup.addToDataHolders(this.getFormValues());
@@ -351,10 +358,19 @@ export class SignuprequiredPage {
     let dateOfBirth: Date = new Date(this.form.get("dateOfBirth").value);
 
     // temporary, to make sure date is null if the thingy hasn't been touched
-    if (new Date("2020-01-01").toDateString() === new Date(dateOfBirth).toDateString()) {
-      dateOfBirth = null;
+    // if (new Date("2020-01-01").toDateString() === new Date(dateOfBirth).toDateString()) {
+    //   dateOfBirth = null;
+    // }
+
+    const formatedSexualPreference: "male" | "female" | "both" =
+      this.form.get("sexualPreference").value;
+    let sexualPreference: SexualPreference;
+    if (formatedSexualPreference === "both") {
+      sexualPreference = ["male", "female"];
+    } else {
+      sexualPreference = [formatedSexualPreference];
     }
-    const sexualPreference: SexualPreference = this.form.get("sexualPreference").value;
+
     const gender: Gender = this.form.get("gender").value;
     // const sexualPreference = ["female" as const];
     // const gender = "male";
@@ -362,8 +378,8 @@ export class SignuprequiredPage {
 
     const degree: Degree = this.form.get("degree").value;
 
-    const pictures: CameraPhoto[] = this.picturesHolder.filter(Boolean); // removes empty picture slots
-    console.log("a", this.picturesHolder, pictures);
+    const pictures: string[] = this.picturesHolder.filter(Boolean); // removes empty picture slots
+    console.log("a", dateOfBirth);
 
     return {
       firstName,
@@ -404,8 +420,8 @@ export class SignuprequiredPage {
     // if (this.requiredData) this.signUpAuthService.createFullUser(this.requiredData);
   }
 
-  savePhoto(e: { photo: CameraPhoto; index: number }) {
-    this.picturesHolder[e.index] = e.photo;
+  savePhoto(e: { photoUrl: string; index: number }) {
+    this.picturesHolder[e.index] = e.photoUrl;
     this.changeDetectorRef.detectChanges(); // forces Angular to check updates in the template
   }
 }

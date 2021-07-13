@@ -2,21 +2,23 @@ import { Component, AfterViewInit, ViewChild, ElementRef, NgZone } from "@angula
 import { IonSlides, NavController } from "@ionic/angular";
 import { AngularFireAuth } from "@angular/fire/auth";
 
+import { Plugins } from "@capacitor/core";
+
 import { LoadingService, AngularAuthService } from "@services/index";
 import { Router } from "@angular/router";
 import { Subscription } from "rxjs";
 import { CurrentUserStore } from "@stores/index";
 import { FormControl, FormGroup, Validators } from "@angular/forms";
 
-import { 
-  Gender, 
-  SexualPreference, 
-  OnCampus, 
+import {
+  Gender,
+  SexualPreference,
+  OnCampus,
   searchCriteriaOptions,
   genderOptions,
   sexualPreferenceOptions,
   SwipeMode,
-  swipeModeOptions
+  swipeModeOptions,
 } from "@interfaces/index";
 
 @Component({
@@ -36,7 +38,7 @@ export class SettingsPage implements AfterViewInit {
     swipeMode: new FormControl(null),
     sexualPreference: new FormControl(null),
     gender: new FormControl(null),
-    onCampus: new FormControl(null)
+    onCampus: new FormControl(null),
   });
 
   // OPTIONS
@@ -67,11 +69,9 @@ export class SettingsPage implements AfterViewInit {
 
   ionViewDidEnter() {
     //Fetch current user profile to change preferences
-    this.currentUser$ = this.currentUserStore.user$.subscribe(
-      (profile) => {
-        this.currentUser = profile;
-      }
-    );
+    this.currentUser$ = this.currentUserStore.user$.subscribe((profile) => {
+      this.currentUser = profile;
+    });
   }
 
   goBack() {
@@ -91,8 +91,19 @@ export class SettingsPage implements AfterViewInit {
       });
     };
 
+    const clearLocalCache = () => {
+      return Plugins.Storage.clear();
+    };
+
+    const logOut = () => {
+      return this.afAuth.signOut();
+    };
+
     await this.loadingService.presentLoader(
-      [{ promise: this.afAuth.signOut, arguments: [] }],
+      [
+        { promise: clearLocalCache, arguments: [] },
+        { promise: logOut, arguments: [] },
+      ],
       [{ promise: navigateToWelcome, arguments: ["/welcome"] }]
     );
   }
@@ -146,7 +157,7 @@ export class SettingsPage implements AfterViewInit {
     /** For this function to work, the input 'slide' should be the same as the slide id
      * Hides placeholder slide and displays selected slide by id
      * Swipes to the targeted slide
-    **/
+     **/
 
     var placeholder = document.getElementById("placeholder");
     placeholder.style.display = "none";
@@ -158,6 +169,6 @@ export class SettingsPage implements AfterViewInit {
   }
 
   openEmail() {
-    window.open('mailto:customersupport@nemodating.com');
+    window.open("mailto:customersupport@nemodating.com");
   }
 }
