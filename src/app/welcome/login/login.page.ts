@@ -45,6 +45,12 @@ export class LoginPage {
     this.afAuth.signInWithEmailAndPassword(email, password);
   }
 
+  enterSubmit(event) {
+    if (event.keyCode === 13) {
+      this.onSubmit();
+    }
+  }
+
   ionViewWillLeave() {
     this.fishSwimAnimation.pause();
   }

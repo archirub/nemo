@@ -1,14 +1,11 @@
 import { Platform } from "@ionic/angular";
 import { Component, OnInit, OnDestroy } from "@angular/core";
-import { Router } from "@angular/router";
 
 import { AngularFireAuth } from "@angular/fire/auth";
 import { Plugins, Capacitor } from "@capacitor/core";
 import { Subscription } from "rxjs";
 
-import { ChatStore, CurrentUserStore, SwipeStackStore } from "@stores/index";
 import { InitService } from "@services/init/init.service";
-import { SignupService } from "@services/signup/signup.service";
 
 @Component({
   selector: "app-root",
@@ -20,11 +17,6 @@ export class AppComponent implements OnDestroy, OnInit {
 
   constructor(
     private platform: Platform,
-    private chatStore: ChatStore,
-    private currentUserStore: CurrentUserStore,
-    private swipeStackStore: SwipeStackStore,
-    private router: Router,
-    private signup: SignupService,
     private afAuth: AngularFireAuth,
     private initService: InitService
   ) {
@@ -38,13 +30,13 @@ export class AppComponent implements OnDestroy, OnInit {
     this.appInitSub?.unsubscribe();
   }
 
-  initializeApp() {
-    this.platform.ready().then(() => {
-      if (Capacitor.isPluginAvailable("SplashScreen")) {
-        Plugins.SplashScreen.hide();
-      }
+  async initializeApp() {
+    await this.platform.ready();
 
-      this.appInitSub = this.initService.initRoutine().subscribe();
-    });
+    if (Capacitor.isPluginAvailable("SplashScreen")) {
+      await Plugins.SplashScreen.hide();
+    }
+
+    this.appInitSub = this.initService.initRoutine().subscribe();
   }
 }

@@ -1,7 +1,13 @@
 import { Injectable } from "@angular/core";
-import { AngularFireAuth } from "@angular/fire/auth";
+import { AlertController } from "@ionic/angular";
+import { Router } from "@angular/router";
 
-import { concat, forkJoin, from, iif, Observable, of } from "rxjs";
+import { AngularFireAuth } from "@angular/fire/auth";
+import { AngularFirestore } from "@angular/fire/firestore";
+import { Storage } from "@capacitor/core";
+
+import { concat, forkJoin, from, Observable, of } from "rxjs";
+import { catchError, concatMap, first, map, switchMap, take, tap } from "rxjs/operators";
 
 import {
   ChatStore,
@@ -12,33 +18,23 @@ import {
   SwipeStackStore,
   SettingsStore,
 } from "@stores/index";
-// import { ChatStore } from "@stores/chat-store/chat-store.service";
-// import { CurrentUserStore } from "@stores/current-user-store/current-user-store.service";
-// import { SearchCriteriaStore } from "@stores/search-criteria-store/search-criteria-store.service";
-// import { OtherProfilesStore } from "@stores/other-profiles-store/other-profiles-store.service";
-// import { SwipeOutcomeStore } from "@stores/swipe-outcome-store/swipe-outcome-store.service";
-// import { SwipeStackStore } from "@stores/swipe-stack-store/swipe-stack-store.service";
-// import { SettingsStore } from "@stores/settings-store/settings-store.service";
+import { SignupService } from "@services/signup/signup.service";
 
 import firebase from "firebase";
-import { catchError, concatMap, first, map, switchMap, take, tap } from "rxjs/operators";
-import { Router } from "@angular/router";
-import { Storage } from "@capacitor/core";
-import { AlertController } from "@ionic/angular";
-import { AngularFirestore } from "@angular/fire/firestore";
-import { SignupService } from "@services/signup/signup.service";
-// import { SignupService } from "@services/index";
-
+import { FirebaseAuthService } from "@services/firebase-auth/firebase-auth.service";
 @Injectable({
   providedIn: "root",
 })
 export class InitService {
   constructor(
     private router: Router,
+    private alertCtrl: AlertController,
+
     private afAuth: AngularFireAuth,
     private firestore: AngularFirestore,
-    private alertCtrl: AlertController,
+
     private signupService: SignupService,
+    private firebaseAuthService: FirebaseAuthService,
 
     private userStore: CurrentUserStore,
     private chatStore: ChatStore,
@@ -104,55 +100,23 @@ export class InitService {
    * to fetch that person's profile
    */
   private noDocumentsRoutine(user: firebase.User): Observable<void> {
-    const reAuthenticationProcedure = (user: firebase.User) => {
-      return from(
-        this.alertCtrl.create({
-          header: "Reauthenticate to abort",
-          message: `
-      The account was signed in too long ago. Please provide the password
-      to <strong>${user.email}</strong> so that we can complete the abortion procedure.
-    `,
-          inputs: [{ name: "password", type: "text" }],
-          buttons: [
-            {
-              text: "Cancel",
-              role: "cancel",
-              handler: async () => {
-                await this.afAuth.signOut();
-                return this.router.navigateByUrl("/welcome");
-              },
-            },
-            {
-              text: "Okay",
-              handler: async (data) => {
-                const credentials = firebase.auth.EmailAuthProvider.credential(
-                  user.email,
-                  data.password
-                );
-                await user.reauthenticateWithCredential(credentials);
-                await user.delete();
-                return this.router.navigateByUrl("/welcome");
-              },
-            },
-          ],
-        })
-      ).pipe(concatMap((alert) => alert.present()));
-    };
-
     const finishProfileProcedure = () => {
       this.emptyStores(); // to be safe
       return this.signupService.checkAndRedirect();
     };
     const abortProfileProcedure = async () => {
       this.emptyStores(); // to be safe
-      await from(user.delete())
-        .pipe(
-          catchError((err) => {
-            if (err?.code === "auth/requires-recent-login")
-              return reAuthenticationProcedure(user);
-          })
-        )
-        .toPromise();
+
+      try {
+        await user.delete();
+        await this.router.navigateByUrl("/welcome");
+      } catch (err) {
+        if (err?.code === "auth/requires-recent-login") {
+          await this.firebaseAuthService.reAuthenticationProcedure(user);
+          await user.delete();
+          await this.router.navigateByUrl("/welcome");
+        }
+      }
     };
 
     const alertOptions = {
