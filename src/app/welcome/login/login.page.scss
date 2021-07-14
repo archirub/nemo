@@ -27,16 +27,11 @@ ion-grid {
     z-index: 3;
 }
 
-/*.wavesSlow {
+#error {
+    display: none;
     position: absolute;
-    z-index: 2;
-    bottom: 0.5vh;
-    transform: scale(1.4);
+    bottom: 25vh;
+    display: flex;
+    justify-content: center;
+    width: 100vw;
 }
-
-.wavesFast {
-    position: absolute;
-    bottom: 4vh;
-    z-index: 1;
-    transform: scale(1.4);
-}*/

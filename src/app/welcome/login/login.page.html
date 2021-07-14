@@ -27,6 +27,7 @@
           </ion-item>
         </ion-col>
       </ion-row>
+
       <ion-row>
         <ion-col size="12">
           <ion-item>
@@ -38,6 +39,7 @@
             ></ion-input> </ion-item
         ></ion-col>
       </ion-row>
+
       <ion-row>
         <ion-col size="12">
           <div class="scroll flexstart-col">
@@ -56,4 +58,9 @@
       </ion-row>
     </ion-grid>
   </form>
+
+  <div id="error">
+    <ion-icon name="alert-circle-outline"></ion-icon>
+    <p>{{ this.errorMsg }}</p>
+  </div>
 </ion-content>
