@@ -11,6 +11,7 @@ import {
   ViewChildren,
   HostListener,
 } from "@angular/core";
+import { LessInfoAnimation, MoreInfoAnimation } from "@animations/info.animation";
 import { Chat, Profile } from "@classes/index";
 import { IonContent, IonSlides } from "@ionic/angular";
 import { OwnPicturesStore } from "@stores/pictures-stores/own-pictures-store/own-pictures.service";
@@ -39,6 +40,9 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
 
   picturePaths: Array<string>;
   ownPicturesSub: Subscription;
+
+  expandAnimation: any;
+  collapseAnimation: any;
 
   interestSlideContent: Array<Array<string>>;
   interestsBuilt: boolean = false;
@@ -79,23 +83,25 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
     }
 
     this.moreInfo = false;
-    // this.picturePaths = [
-    //   "https://staticg.sportskeeda.com/editor/2020/06/a19cc-15923264235917.jpg",
-    //   "/assets/picture2.jpg",
-    //   "/assets/picture3.jpg",
-    //   "/assets/picture6.jpg",
-    // ];
-    // console.log("HERE IS THE interests:", this.profile.interests);
-    // console.log("HERE IS THE age:", this.profile.age());
-    // console.log("HERE IS THE bio:", this.profile.biography);
-    // console.log("HERE IS THE degree:", this.profile.degree);
-    // console.log("HERE IS THE society:", this.profile.society);
 
     this.buildInterestSlides();
     console.log(this.profile);
   }
 
   ngAfterViewInit() {
+    //Animations for profile info sliding up and down
+    this.expandAnimation = MoreInfoAnimation(
+      this.complete,
+      18,
+      85
+    );
+
+    this.collapseAnimation = LessInfoAnimation(
+      this.complete,
+      18,
+      85
+    );
+
     this.slides.lockSwipeToPrev(true);
     setTimeout(() => {
       this.updatePager(); //Timeout necessary, slides finally load once pictures arrive
@@ -103,10 +109,36 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
   }
 
   expandProfile() {
-    if (this.moreInfo == true) {
-      this.moreInfo = false;
+    if (this.moreInfo == true) { //intends to hide profile info
+      if(this.expandAnimation) {
+        this.expandAnimation.destroy(); //Destroy previous animations to avoid buildup
+      };
+
+      this.collapseAnimation = LessInfoAnimation(
+        this.complete,
+        85,
+        18
+      ); //Have to reinitialise animation every time
+
+      this.collapseAnimation.play();
+
+      setTimeout(() => {
+        this.moreInfo = false; //Allow animation to play before hiding element
+      }, 300);
+
     } else {
-      this.moreInfo = true;
+      if (this.collapseAnimation) {
+        this.collapseAnimation.destroy(); //Destroy previous animations to avoid buildup
+      };
+
+      this.expandAnimation = MoreInfoAnimation(
+        this.complete,
+        85,
+        18
+      ); //Have to reinitialise animation every time
+
+      this.moreInfo = true; //show element and play animation
+      this.expandAnimation.play()
     }
     this.expanded.emit(this.moreInfo);
 
