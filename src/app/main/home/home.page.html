@@ -1,4 +1,6 @@
-<!--ion-button style="z-index: 100; width: 20vw" (click)="playCatch()">Catch</ion-button-->
+<ion-button style="z-index: 100; position: absolute" (click)="activateSwipeStack()"
+  >Activate swipe stack (dev)</ion-button
+>
 
 <div id="catchEls">
   <div #pic1 class="picholder left"></div>
@@ -7,13 +9,15 @@
     <h1 class="catchtext">It's a Catch!</h1>
   </div>
 
-  <ion-button id="closeAnimation" (click)="closeCatch()"><ion-icon name="close-outline"></ion-icon></ion-button>
+  <ion-button id="closeAnimation" (click)="closeCatch()"
+    ><ion-icon name="close-outline"></ion-icon
+  ></ion-button>
   <div #messageText id="messageText">
     <h1 class="catchtext">Chat with {{ this.matchedName }}</h1>
   </div>
 
   <div class="center">
-    <img #fish src="/assets/nemo.png" class="fish"/>
+    <img #fish src="/assets/nemo.png" class="fish" />
   </div>
   <!--img #leftFish src="/assets/singlefish.png" class="singlefish left"/>
   <img #rightFish src="/assets/singlefish.png" class="singlefish right"/-->
@@ -26,8 +30,9 @@
         <ion-icon slot="icon-only" name="search-outline"></ion-icon>
       </ion-button>
     </div>
-    <app-swipe-card 
-    [profiles]="swipeStackStore.profiles$ | async"
-    (matched)="playCatch($event)"></app-swipe-card>
+    <app-swipe-card
+      [profiles]="swipeStackStore.profiles$ | async"
+      (matched)="playCatch($event)"
+    ></app-swipe-card>
   </div>
 </ion-content>

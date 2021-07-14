@@ -23,11 +23,13 @@
           'background-position': 'center'
         }"
       >
-      <div *ngIf="profile?.questions[i]" #QandA class="question" [hidden]="moreInfo">
-        <ion-card-title #question>{{ profile?.questions[i].question }}</ion-card-title>
-        <ion-card-subtitle #answer>{{ profile?.questions[i].answer }}</ion-card-subtitle>
-      </div>
-      <div #shadow class="img-shadow"></div>
+        <div *ngIf="profile?.questions[i]" #QandA class="question" [hidden]="moreInfo">
+          <ion-card-title #question>{{ profile?.questions[i].question }}</ion-card-title>
+          <ion-card-subtitle #answer>{{
+            profile?.questions[i].answer
+          }}</ion-card-subtitle>
+        </div>
+        <div #shadow class="img-shadow"></div>
         <div class="yesSwipe" (click)="this.tapped.emit('yes')"></div>
         <div class="noSwipe" (click)="this.tapped.emit('no')"></div>
       </ion-slide>
@@ -48,7 +50,7 @@
           >{{ profile?.firstName }}, {{ profile?.dateOfBirth | age }}</ion-card-title
         >
         <ion-card-subtitle #department id="department"
-          >{{ profile?.course }}, {{ profile?.shortDegree() }}</ion-card-subtitle
+          >{{ profile?.course }}, {{ profile?.degree | degrees }}</ion-card-subtitle
         >
       </ion-card-header>
     </div>
@@ -58,16 +60,18 @@
           >{{ profile?.firstName }}, {{ profile?.dateOfBirth | age }}
         </ion-card-title>
         <ion-card-subtitle id="department"
-          >{{ profile?.course }}, {{ profile?.shortDegree() }}</ion-card-subtitle
+          >{{ profile?.course }}, {{ profile?.degree | degrees }}</ion-card-subtitle
         >
       </ion-card-header>
       <div #content id="content">
-
         <!-- DIVS FOR DOUBLE TAPPING YES/NO -->
-        <div #yes class="yesSwipeInfo" (click)="this.tapped.emit('yes')"></div> 
+        <div #yes class="yesSwipeInfo" (click)="this.tapped.emit('yes')"></div>
         <div #no class="noSwipeInfo" (click)="this.tapped.emit('no')"></div>
 
-        <div *ngIf="profile?.interests.length > 0 && interestsBuilt === true"  id="info-segment">
+        <div
+          *ngIf="profile?.interests?.length > 0 && interestsBuilt === true"
+          id="info-segment"
+        >
           <!--INTERESTS IN THE DATABASE DON'T CURRENTLY MATCH LOCAL, THIS IS NOT WIRED UP FOR ICONS -->
           <div id="interests-container">
             <ion-slides #intSlides class="interests-slides">
@@ -89,7 +93,7 @@
           </div>
         </div>
 
-        <div *ngIf="profile?.biography.length > 0" id="info-segment">
+        <div *ngIf="profile?.biography?.length > 0" id="info-segment">
           <div id="bio">
             "{{ profile?.biography }}" <br /><br />
             <span *ngFor="let sm of profile?.socialMediaLinks">
@@ -133,10 +137,7 @@
         <div id="info-segment" *ngIf="reportable">
           <div id="interests-container" class="centered">
             <div class="reportButton">
-              <ion-icon
-                name="shield"
-                style="color: var(--ion-color-danger)"
-              ></ion-icon>
+              <ion-icon name="shield" style="color: var(--ion-color-danger)"></ion-icon>
               <br />
               <ion-label>Report this user</ion-label>
             </div>

@@ -8,18 +8,12 @@ import {
 } from "@angular/core";
 import { ModalController } from "@ionic/angular";
 
-import { forkJoin, from, interval, Observable, of, Subscription } from "rxjs";
-import { throttle, filter, tap, take, delay, map } from "rxjs/operators";
+import { Observable, Subscription } from "rxjs";
 
 import { SearchCriteriaComponent } from "./search-criteria/search-criteria.component";
 
-import { Profile, SearchCriteria } from "@classes/index";
-import {
-  CurrentUserStore,
-  SearchCriteriaStore,
-  SwipeOutcomeStore,
-  SwipeStackStore,
-} from "@stores/index";
+import { Profile } from "@classes/index";
+import { CurrentUserStore, SwipeStackStore } from "@stores/index";
 
 import {
   SCenterAnimation,
@@ -43,9 +37,8 @@ import { OwnPicturesStore } from "@stores/pictures-stores/own-pictures-store/own
 })
 export class HomePage implements OnInit, OnDestroy {
   swipeProfiles: Observable<Profile[]>;
-  private swipeStackRefill$: Subscription;
 
-  private searchCriteriaSub: Subscription;
+  private swipeStackSub: Subscription;
 
   // PROPERTIES FOR MODAL ANIMATION
   @ViewChild("homeContainer", { read: ElementRef }) homeContainer: ElementRef;
@@ -71,14 +64,9 @@ export class HomePage implements OnInit, OnDestroy {
 
   constructor(
     private swipeStackStore: SwipeStackStore,
-    private SCstore: SearchCriteriaStore,
     private currentUserStore: CurrentUserStore,
     private modalCtrl: ModalController,
-    private tabElementRef: TabElementRefService,
-    private swipeOutcomeStore: SwipeOutcomeStore,
-    private format: FormatService,
-    private afStorage: AngularFireStorage,
-    private ownPicturesService: OwnPicturesStore
+    private tabElementRef: TabElementRefService
   ) {
     this.onResize();
   }
@@ -94,13 +82,20 @@ export class HomePage implements OnInit, OnDestroy {
   matchedName: string;
   matchedPicture;
   currentUser; //profile
-  currentUser$; //subscription
+  currentUserSub; //subscription
 
   ngOnInit() {}
 
+  /**
+   * Temporary, just for development, to avoid fetching the stack on each reload / document save
+   */
+  activateSwipeStack() {
+    this.swipeStackSub = this.swipeStackStore.activateStore().subscribe();
+  }
+
   ionViewDidEnter() {
     // Subscription for chat doc creation in case of match
-    this.currentUser$ = this.currentUserStore.user$.subscribe((profile) => {
+    this.currentUserSub = this.currentUserStore.user$.subscribe((profile) => {
       this.currentUser = profile;
     });
 
@@ -134,7 +129,6 @@ export class HomePage implements OnInit, OnDestroy {
 
   // Used to preload modal as soon as the previous SC window was dismissed
   onModalDismiss(modal: HTMLIonModalElement) {
-    if (!modal) return;
     modal.onDidDismiss().then(() => {
       this.modalCtrl
         .create({
@@ -211,7 +205,6 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.searchCriteriaSub.unsubscribe();
-    this.swipeStackRefill$.unsubscribe();
+    this.swipeStackSub.unsubscribe();
   }
 }

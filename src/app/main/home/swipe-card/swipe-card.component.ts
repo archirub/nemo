@@ -10,10 +10,10 @@ import {
   ViewChild,
   ElementRef,
   Output,
-  EventEmitter
+  EventEmitter,
 } from "@angular/core";
 
-import { Subscription } from "rxjs";
+import { concat, forkJoin, Observable, of, Subscription } from "rxjs";
 
 import {
   ChatStore,
@@ -30,6 +30,7 @@ import {
   NoBubbleAnimation,
 } from "@animations/index";
 import { swipeChoice } from "@interfaces/index";
+import { exhaustMap } from "rxjs/operators";
 
 @Component({
   selector: "app-swipe-card",
@@ -83,43 +84,40 @@ export class SwipeCardComponent extends EventEmitter implements OnInit, OnDestro
    * - registers swipe choice in swipeOutcomeStore,
    * - Checks whether other user likes as well, triggers onMatch method if match
    */
-  async onYesSwipe(profile: Profile) {
-    if (!profile) return;
-
-    this.swipeStackStore.removeProfile(profile);
-    this.swipeOutcomeStore.yesSwipe(profile);
-
-    const userChoice: swipeChoice = this.swipeOutcomeStore.getChoiceOf(profile.uid);
-    if (userChoice === "yes" || userChoice === "super") {
-      await this.onMatch(profile);
-    }
+  onYesSwipe(profile: Profile): Observable<any> {
+    return forkJoin([
+      this.swipeStackStore.removeProfile(profile),
+      this.swipeOutcomeStore.yesSwipe(profile),
+      this.swipeOutcomeStore.getChoiceOf(profile.uid),
+    ]).pipe(
+      exhaustMap(([wtv1, wtv2, userChoice]) => {
+        if (userChoice === "yes" || userChoice === "super") return this.onMatch(profile);
+        return of();
+      })
+    );
   }
 
   /**
    * - Removes profile from the swipe stack,
    * - registers swipe choice in swipeOutcomeStore
    * */
-  onNoSwipe(profile: Profile) {
-    if (!profile) return;
-    this.swipeStackStore.removeProfile(profile);
-    this.swipeOutcomeStore.noSwipe(profile);
+  onNoSwipe(profile: Profile): Observable<any> {
+    return concat(
+      this.swipeStackStore.removeProfile(profile),
+      this.swipeOutcomeStore.noSwipe(profile)
+    );
   }
 
   /**
    * - Shows the match animation / modal,
    * - triggers "registerSwipeChoices" from swipeOutcomeStore, which removes swipeOutcome list and
-   * saves them on the database
-   * - Creates a new chat document
+   * saves them on the database, new doc is created backened
    */
-  private async onMatch(profile: Profile) {
-    try {
-      await Promise.all([
-        this.presentMatchModal(),
-        this.swipeOutcomeStore.registerSwipeChoices(),
-      ]);
-    } catch (e) {
-      throw new Error(`onMatch operation wasn't successful - ${e.message}`);
-    }
+  private onMatch(profile: Profile) {
+    return concat(
+      this.presentMatchModal(),
+      this.swipeOutcomeStore.registerSwipeChoices()
+    );
   }
 
   /** Displays the modal that shows the match animation */
@@ -127,6 +125,7 @@ export class SwipeCardComponent extends EventEmitter implements OnInit, OnDestro
     const matchModal = await this.modalCtrl.create({
       component: MatchModalComponent,
     });
+
     await matchModal.present();
   }
 
@@ -140,26 +139,30 @@ export class SwipeCardComponent extends EventEmitter implements OnInit, OnDestro
       this.screenTaps = 0;
     }, 500);
 
-    if (this.screenTaps > 1) { //Double tap event
+    if (this.screenTaps > 1) {
+      //Double tap event
       this.screenTaps = 0;
 
-      if (choice === "yes") { //Yes side of profile
+      if (choice === "yes") {
+        //Yes side of profile
+
         this.swipeYesAnimation.play();
         setTimeout(() => {
           this.onYesSwipe(this.profiles[0]);
 
-          this.matched.emit([this.profiles[0].firstName,this.profiles[0].pictureUrls[0]]); //BASIC MATCH TRIGGER TO BE WIRED PROPERLY
+          this.matched.emit([
+            this.profiles[0].firstName,
+            this.profiles[0].pictureUrls[0],
+          ]); //BASIC MATCH TRIGGER TO BE WIRED PROPERLY
         }, 400);
-
-      } else if (choice === "no") { //No side of profile
+      } else if (choice === "no") {
+        //No side of profile
         this.swipeNoAnimation.play();
         setTimeout(() => {
           this.onNoSwipe(this.profiles[0]);
         }, 400);
       }
-
     } else if (this.screenTaps == 1) {
-
       if (choice === "yes") {
         this.yesBubbleAnimation = YesBubbleAnimation(
           this.yesBubble,
@@ -167,7 +170,6 @@ export class SwipeCardComponent extends EventEmitter implements OnInit, OnDestro
           this.profileComponent.Y
         );
         this.yesBubbleAnimation.play();
-
       } else if (choice === "no") {
         this.noBubbleAnimation = NoBubbleAnimation(
           this.noBubble,

@@ -6,6 +6,7 @@ import { BehaviorSubject, combineLatest, concat, forkJoin, Observable, of } from
 import {
   concatMap,
   exhaustMap,
+  filter,
   last,
   map,
   switchMap,
@@ -30,6 +31,8 @@ export class SwipeStackStore {
   private profiles = new BehaviorSubject<Profile[]>([]);
   public readonly profiles$ = this.profiles.asObservable();
 
+  minimumProfileCount = 4; // # of profiles in stack below which we make another request
+
   constructor(
     private firestore: AngularFirestore,
     private afFunctions: AngularFireFunctions,
@@ -38,6 +41,18 @@ export class SwipeStackStore {
     private SCstore: SearchCriteriaStore,
     private swipeOutcomeStore: SwipeOutcomeStore // private stackPictures: StackPicturesService
   ) {}
+
+  /**
+   * Have to subscribe to this to activate the chain of logic that fills the store etc.
+   */
+  activateStore(): Observable<void> {
+    return this.profiles$.pipe(
+      filter((profiles) => profiles.length <= this.minimumProfileCount),
+      withLatestFrom(this.SCstore.searchCriteria$),
+      // exhaustMap is a must use here, makes sure we don't have multiple requests to fill the swipe stack
+      exhaustMap(([profiles, SC]) => this.addToSwipeStackQueue(SC))
+    );
+  }
 
   /** Initializes the store by adding new profiles to the queue (which should be empty at this point)
    * returns uid so that store initializations can be chained

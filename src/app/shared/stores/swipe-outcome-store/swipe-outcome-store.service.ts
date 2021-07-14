@@ -1,102 +1,107 @@
 import { Injectable } from "@angular/core";
 import { AngularFireFunctions } from "@angular/fire/functions";
 
-import { BehaviorSubject, Observable } from "rxjs";
+import { BehaviorSubject, concat, Observable } from "rxjs";
 
 import { Profile } from "@classes/index";
-import {
-  registerSwipeChoicesRequest,
-  registerSwipeChoicesResponse,
-  uidChoiceMap,
-  profileChoiceMap,
-  swipeChoice,
-} from "@interfaces/index";
+import { uidChoiceMap, profileChoiceMap, swipeChoice } from "@interfaces/index";
+import { exhaustMap, map, retry, take } from "rxjs/operators";
 
 @Injectable({
   providedIn: "root",
 })
 export class SwipeOutcomeStore {
-  private swipeChoices: BehaviorSubject<profileChoiceMap[]>;
-  private swipeAnswers: BehaviorSubject<uidChoiceMap[]>;
+  private swipeChoices = new BehaviorSubject<profileChoiceMap[]>([]);
+  public readonly swipeChoices$ = this.swipeChoices.asObservable();
 
-  public readonly swipeChoices$: Observable<profileChoiceMap[]>;
-  public readonly swipeAnswers$: Observable<uidChoiceMap[]>;
+  private swipeAnswers = new BehaviorSubject<uidChoiceMap[]>([]);
+  public readonly swipeAnswers$ = this.swipeAnswers.asObservable();
 
-  constructor(private afFunctions: AngularFireFunctions) {
-    this.swipeChoices = new BehaviorSubject<profileChoiceMap[]>([]);
-    this.swipeAnswers = new BehaviorSubject<uidChoiceMap[]>([]);
-    this.swipeChoices$ = this.swipeChoices.asObservable();
-    this.swipeAnswers$ = this.swipeAnswers.asObservable();
-  }
+  constructor(private afFunctions: AngularFireFunctions) {}
 
   resetStore() {
     this.swipeChoices.next([]);
     this.swipeAnswers.next([]);
   }
 
-  public yesSwipe(profile: Profile) {
-    if (!profile) return;
-    const choice: swipeChoice = "yes";
-    const choiceMap: profileChoiceMap = { choice, profile };
-    this.swipeChoices.next(this.swipeChoices.getValue().concat(choiceMap));
-  }
-
-  public noSwipe(profile: Profile) {
-    if (!profile) return;
-    const choice: swipeChoice = "no";
-    const choiceMap: profileChoiceMap = { choice, profile };
-    this.swipeChoices.next(this.swipeChoices.getValue().concat(choiceMap));
-  }
-
-  public superSwipe(profile: Profile) {
-    if (!profile) return;
-    const choice: swipeChoice = "yes";
-    const choiceMap: profileChoiceMap = { choice, profile };
-    this.swipeChoices.next(this.swipeChoices.getValue().concat(choiceMap));
-  }
-
-  public addToSwipeAnswers(answers: uidChoiceMap[]) {
-    if (!answers) return;
-    this.swipeAnswers.next(this.swipeAnswers.getValue().concat(answers));
-    console.log("New answers:", this.swipeAnswers.getValue());
-  }
-
-  public removeFromSwipeAnswers(answers: uidChoiceMap[]) {
-    if (!answers) return;
-    this.swipeAnswers.next(
-      this.swipeAnswers
-        .getValue()
-        .filter((answer) => !answers.map((ans) => ans.uid).includes(answer.uid))
+  public yesSwipe(profile: Profile): Observable<void> {
+    return this.swipeChoices$.pipe(
+      take(1),
+      map((choices) => {
+        const newChoice: profileChoiceMap = { choice: "yes", profile };
+        this.swipeChoices.next(choices.concat(newChoice));
+      })
     );
   }
 
-  public getChoiceOf(uid: string): swipeChoice {
-    if (!uid) return;
-    const answers = this.swipeAnswers.getValue();
-    const index: number = answers.findIndex((answer) => answer.uid === uid);
-    if (index === -1) {
-      console.error("User not in answers observable:", uid);
-      return;
-    }
-    return answers[index].choice;
+  public noSwipe(profile: Profile): Observable<void> {
+    return this.swipeChoices$.pipe(
+      take(1),
+      map((choices) => {
+        const newChoice: profileChoiceMap = { choice: "no", profile };
+        this.swipeChoices.next(choices.concat(newChoice));
+      })
+    );
   }
 
-  public async registerSwipeChoices() {
-    const choices: uidChoiceMap[] = this.swipeChoices.getValue().map((choiceMap) => {
-      return { uid: choiceMap.profile.uid, choice: choiceMap.choice };
-    });
-    const requestData: registerSwipeChoicesRequest = { choices };
+  public superSwipe(profile: Profile): Observable<void> {
+    return this.swipeChoices$.pipe(
+      take(1),
+      map((choices) => {
+        const newChoice: profileChoiceMap = { choice: "super", profile };
+        this.swipeChoices.next(choices.concat(newChoice));
+      })
+    );
+  }
 
-    try {
-      // const responseData = (await this.afFunctions
-      //   .httpsCallable("registerSwipeChoices")(requestData)
-      //   .toPromise()) as registerSwipeChoicesResponse;
+  public addToSwipeAnswers(newAnswers: uidChoiceMap[]): Observable<void> {
+    return this.swipeAnswers$.pipe(
+      take(1),
+      map((answers) => {
+        this.swipeAnswers.next(answers.concat(newAnswers));
+      })
+    );
+  }
 
-      this.removeFromSwipeAnswers(choices);
+  public removeFromSwipeAnswers(newAnswers: uidChoiceMap[]): Observable<void> {
+    return this.swipeAnswers$.pipe(
+      take(1),
+      map((currentAnswers) => {
+        this.swipeAnswers.next(
+          currentAnswers.filter(
+            (answer) => !newAnswers.map((ans) => ans.uid).includes(answer.uid)
+          )
+        );
+      })
+    );
+  }
 
-      console.log("Successfully registered swipe choices to database.");
-    } catch (e) {
-      throw new Error(`An error occured while saving swipe choices to db - ${e}`);
-    }
+  public getChoiceOf(uid: string): Observable<swipeChoice | null> {
+    return this.swipeAnswers.pipe(
+      take(1),
+      map((answers) => {
+        const index = answers.findIndex((a) => a.uid === uid);
+        if (index === -1) return;
+        return answers[index].choice;
+      })
+    );
+  }
+
+  public registerSwipeChoices(): Observable<void> {
+    return this.swipeChoices$.pipe(
+      take(1),
+      map((choices): uidChoiceMap[] =>
+        choices.map((c) => {
+          return { uid: c.profile.uid, choice: c.choice };
+        })
+      ),
+      exhaustMap((choices) =>
+        concat(
+          this.afFunctions.httpsCallable("registerSwipeChoices")({ choices }),
+          this.removeFromSwipeAnswers(choices)
+        )
+      ),
+      retry(3)
+    );
   }
 }

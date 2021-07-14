@@ -156,9 +156,11 @@ export class InitService {
     return of(this.router.url).pipe(
       map((url) => {
         if (
-          url === "/welcome/signuprequired" ||
-          url === "/welcome/signupauth" ||
-          url === "/welcome/signupoptional"
+          [
+            "/welcome/signuprequired",
+            "/welcome/signupauth",
+            "/welcome/signupoptional",
+          ].includes(url)
         )
           return true;
         return false;
