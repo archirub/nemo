@@ -94,7 +94,7 @@ export class SwipeCardComponent extends EventEmitter implements OnInit, OnDestro
   onCardTapLogic() {
     return this.cardTap$.pipe(
       concatMap((choice: swipeChoice) => {
-        // behavior in case user taps different sides
+        // case where user taps different sides
         if (this.choiceOfLatestTap !== choice) {
           this.choiceOfLatestTap = choice;
 
@@ -103,6 +103,7 @@ export class SwipeCardComponent extends EventEmitter implements OnInit, OnDestro
 
         const now = Date.now();
 
+        // case where we have two taps on same side and close together in time
         if (Math.abs(now - this.timeOfLatestCardTap) <= this.DOUBLE_TAP_THRESHOLD) {
           this.timeOfLatestCardTap = 0;
           this.choiceOfLatestTap = choice;
@@ -110,6 +111,7 @@ export class SwipeCardComponent extends EventEmitter implements OnInit, OnDestro
           return this.doubleTapOnCard(choice);
         }
 
+        // case where we have one tap
         this.timeOfLatestCardTap = now;
         this.choiceOfLatestTap = choice;
 
