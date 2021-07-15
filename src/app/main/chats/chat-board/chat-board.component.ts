@@ -13,7 +13,7 @@ import {
 import { Router } from "@angular/router";
 import { IonContent, ModalController } from "@ionic/angular";
 
-import { Chat, Profile } from "@classes/index";
+import { Chat } from "@classes/index";
 import { MatchesEnterAnimation, MatchesLeaveAnimation } from "@animations/index";
 import { MatchesComponent } from "../matches/matches.component";
 import { TabElementRefService } from "src/app/main/tab-menu/tab-element-ref.service";
@@ -34,6 +34,7 @@ export class ChatBoardComponent implements OnInit, OnDestroy {
   chatboardPictures$: Observable<pictureHolder>;
   chatboardPicturesSub: Subscription;
   @Input() chats: Chat[];
+  @Input() matches: Chat[];
   @ViewChild(IonContent) ionContent: IonContent;
 
   // PROPERTIES FOR MODAL ANIMATION
@@ -68,7 +69,7 @@ export class ChatBoardComponent implements OnInit, OnDestroy {
       .activateStore(this.chatStore.chats$)
       .subscribe();
   }
-
+  
   ngOnDestroy() {
     this.chatboardPicturesSub.unsubscribe();
   }
@@ -94,7 +95,7 @@ export class ChatBoardComponent implements OnInit, OnDestroy {
     this.modalCtrl
       .create({
         component: MatchesComponent,
-        componentProps: { chats: this.chats },
+        componentProps: { matches: this.matches },
         enterAnimation: this.MatchesEnterAnimation,
         leaveAnimation: this.MatchesLeaveAnimation,
       })
@@ -163,8 +164,8 @@ export class ChatBoardComponent implements OnInit, OnDestroy {
 
   /* Automates left margin of 'number matches' text so that it is never covered by match images */
   styleFromMatches() {
-    var images: any = document.getElementsByClassName("match-image");
-    var text: any = document.getElementById("match-text");
+    var images = document.getElementsByClassName("match-image");
+    var text = document.getElementById("match-text");
     text.style.marginLeft = `${(images.length - 1) * 20}px`;
   }
 }

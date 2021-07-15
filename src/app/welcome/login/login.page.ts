@@ -17,8 +17,6 @@ export class LoginPage {
   @ViewChild("fish", { read: ElementRef }) fish: ElementRef;
   fishSwimAnimation;
 
-  errorMsg: string;
-
   loginForm = new FormGroup({
     email: new FormControl("", [
       Validators.email,

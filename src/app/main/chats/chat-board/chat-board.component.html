@@ -1,28 +1,43 @@
 <ion-content #chatContainer>
-  <ion-row
-    ><!--*ngIf="new-matches"-->
-    <!-- Not correct source, just placeholder for now -->
-    <ion-item detail="false" #matchesButton button (click)="presentMatches()">
-      <ion-avatar slot="start">
-        <ion-img
-          *ngFor="let chat of chats.slice(0, 3); index as j"
-          [ngStyle]="{
-            zIndex: j,
-            'margin-left': 3 * j + 'vh',
-            position: 'absolute',
-            width: 9 + 'vh',
-            height: 9 + 'vh'
-          }"
-          [src]="chat?.recipient?.picture"
-          class="match-image"
-        >
-        </ion-img>
-      </ion-avatar>
-      <div class="text-container" id="match-text" [ngStyle]="styleFromMatches()">
-        NUMBER new catches!
-      </div>
-    </ion-item>
+  <ion-row>
+    <ng-container *ngIf="matches.length > 0">
+      <ion-item detail="false" #matchesButton button (click)="presentMatches()">
+        <ion-avatar slot="start">
+          <ion-img
+            *ngFor="let match of matches.slice(0, 3); index as j"
+            [ngStyle]="{
+              zIndex: j,
+              'margin-left': 3 * j + 'vh',
+              position: 'absolute',
+              width: 9 + 'vh',
+              height: 9 + 'vh'
+            }"
+            [src]="(chatboardPictures$ | async)[match?.recipient?.uid]"
+            class="match-image"
+          >
+          </ion-img>
+        </ion-avatar>
+
+        <div 
+        *ngIf="matches.length < 31"
+        class="text-container" 
+        id="match-text" 
+        [ngStyle]="styleFromMatches()">
+          {{ matches.length }} new catches!
+        </div>
+
+        <div 
+        *ngIf="matches.length >= 31"
+        class="text-container" 
+        id="match-text" 
+        [ngStyle]="styleFromMatches()">
+          30+ new catches!
+        </div>
+
+      </ion-item>
+    </ng-container>
   </ion-row>
+
   <ion-list *ngIf="chats">
     <ion-item
       detail="true"

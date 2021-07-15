@@ -18,7 +18,7 @@ export class MatchesComponent implements OnInit, OnDestroy {
   chatboardPictures$: Observable<pictureHolder>;
   chatboardPicturesSub: Subscription;
 
-  @Input() chats: Chat[];
+  @Input() matches: Chat[];
 
   constructor(
     private modalCtrl: ModalController,

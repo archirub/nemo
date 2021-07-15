@@ -9,7 +9,26 @@
     <h1>Chats</h1>
   </div>
 
-  <app-chat-board #chatboard [chats]="chats | async"></app-chat-board>
+  <div *ngIf="chatNumber < 1" class="noChats">
+    <p>
+      Sorry, looks like you don't have any chats yet. Head to the catch tab to find someone new!
+    </p>
+
+    <div class="fish">
+      <img 
+      name="fish" 
+      src="/assets/singlefish-orange.png"
+      (click)="goToCatch()"/>
+
+      <h1>Catch</h1>
+    </div>
+  </div>
+
+  <app-chat-board 
+  #chatboard 
+  [chats]="chats | async"
+  [matches]="this.matches"
+  ></app-chat-board>
 
   <!--ion-button
     icon-only

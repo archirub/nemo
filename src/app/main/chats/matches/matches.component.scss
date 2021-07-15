@@ -50,7 +50,7 @@ ion-row {
     position: absolute;
     z-index: 1;
     width: 46%;
-    padding: 0 7px;
+    padding: 0 13px 0 7px;
 }
 
 img {
@@ -75,6 +75,7 @@ div.exit {
     justify-content: center;
     border-radius: 2.5vh;
     z-index: 2;
+    overflow: visible;
 
     ion-icon {
         position: relative;
