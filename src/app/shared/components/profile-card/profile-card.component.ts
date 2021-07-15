@@ -78,10 +78,6 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
   constructor(private ownPicturesService: OwnPicturesStore) {}
 
   ngOnInit() {
-    if ((this.ownProfile = true)) {
-      this.ownPicturesSub = this.ownPicturesService.emptinessObserver$.subscribe();
-    }
-
     this.moreInfo = false;
 
     this.buildInterestSlides();
@@ -90,17 +86,9 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit() {
     //Animations for profile info sliding up and down
-    this.expandAnimation = MoreInfoAnimation(
-      this.complete,
-      18,
-      85
-    );
+    this.expandAnimation = MoreInfoAnimation(this.complete, 18, 85);
 
-    this.collapseAnimation = LessInfoAnimation(
-      this.complete,
-      18,
-      85
-    );
+    this.collapseAnimation = LessInfoAnimation(this.complete, 18, 85);
 
     this.slides.lockSwipeToPrev(true);
     setTimeout(() => {
@@ -109,36 +97,28 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
   }
 
   expandProfile() {
-    if (this.moreInfo == true) { //intends to hide profile info
-      if(this.expandAnimation) {
+    if (this.moreInfo == true) {
+      //intends to hide profile info
+      if (this.expandAnimation) {
         this.expandAnimation.destroy(); //Destroy previous animations to avoid buildup
-      };
+      }
 
-      this.collapseAnimation = LessInfoAnimation(
-        this.complete,
-        85,
-        18
-      ); //Have to reinitialise animation every time
+      this.collapseAnimation = LessInfoAnimation(this.complete, 85, 18); //Have to reinitialise animation every time
 
       this.collapseAnimation.play();
 
       setTimeout(() => {
         this.moreInfo = false; //Allow animation to play before hiding element
       }, 300);
-
     } else {
       if (this.collapseAnimation) {
         this.collapseAnimation.destroy(); //Destroy previous animations to avoid buildup
-      };
+      }
 
-      this.expandAnimation = MoreInfoAnimation(
-        this.complete,
-        85,
-        18
-      ); //Have to reinitialise animation every time
+      this.expandAnimation = MoreInfoAnimation(this.complete, 85, 18); //Have to reinitialise animation every time
 
       this.moreInfo = true; //show element and play animation
-      this.expandAnimation.play()
+      this.expandAnimation.play();
     }
     this.expanded.emit(this.moreInfo);
 
@@ -216,7 +196,5 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
     return `/assets/interests/${interest}.png`;
   }
 
-  ngOnDestroy() {
-    this.ownPicturesSub.unsubscribe();
-  }
+  ngOnDestroy() {}
 }

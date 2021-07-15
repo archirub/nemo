@@ -30,9 +30,9 @@
           }}</ion-card-subtitle>
         </div>
         <div #shadow class="img-shadow"></div>
-        <div class="yesSwipe" (click)="this.tapped.emit('yes')"></div>
-        <div class="noSwipe" (click)="this.tapped.emit('no')"></div>
       </ion-slide>
+      <div class="yesSwipe" (click)="this.tapped.emit('yes')"></div>
+      <div class="noSwipe" (click)="this.tapped.emit('no')"></div>
     </ion-slides>
     <!--div #QandA class="question" [hidden]="moreInfo">
       <ion-card-title #question>{{ profile?.questions[0].question }}</ion-card-title>
