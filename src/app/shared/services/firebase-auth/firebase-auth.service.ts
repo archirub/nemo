@@ -20,46 +20,66 @@ export class FirebaseAuthService {
   ) {}
 
   async wrongPasswordPopup(folowUpPromise: Promise<any> | null): Promise<void> {
-    const alert = await this.alertCtrl.create({
+    const passAlert = await this.alertCtrl.create({
       header: "Incorrect Password",
       backdropDismiss: false,
       message: "The password you have entered is incorrect, please try again.",
       buttons: ["OK"],
     });
 
-    alert.onDidDismiss().then(() => {
+    passAlert.onDidDismiss().then(() => {
       if (folowUpPromise) return folowUpPromise;
     });
 
-    await alert.present();
+    await passAlert.present();
   }
 
   async wrongPasswordMaxAttemptsPopup(
     followUpPromise: Promise<any> | null
   ): Promise<void> {
-    const alert = await this.alertCtrl.create({
+    const attemptsAlert = await this.alertCtrl.create({
       header: "Maximum Number of Attempts",
       backdropDismiss: false,
       message:
-        "You have entered an incorrect password too many times. You will now be logged out and redirected to the welcome page.",
+        "You have entered an incorrect password too many times. The account has been temporarily disabled, please try again later.",
       buttons: ["OK"],
     });
 
-    alert.onDidDismiss().then(() => {
+    attemptsAlert.onDidDismiss().then(() => {
       if (followUpPromise) return followUpPromise;
     });
 
-    await alert.present();
+    await attemptsAlert.present();
   }
 
   async unknownErrorPopup(): Promise<void> {
-    const alert = await this.alertCtrl.create({
+    const unknownAlert = await this.alertCtrl.create({
       header: "Something went wrong",
-      message: "An error occured. Please contact us or try again later !",
+      message: "An unknown error occurred. Plase check your connection, or try again later.",
       buttons: ["OK"],
     });
 
-    await alert.present();
+    await unknownAlert.present();
+  }
+
+  async unknownUserPopup(): Promise<void> {
+    const userAlert = await this.alertCtrl.create({
+      header: "User not found",
+      message: "Sorry, we can't find a user for that account, please try again.",
+      buttons: ["OK"],
+    });
+
+    await userAlert.present();
+  }
+
+  async userDisabledPopup(): Promise<void> {
+    const disabledAlert = await this.alertCtrl.create({
+      header: "User disabled",
+      message: "This account has been disabled. If you think this is an error, please contact support.",
+      buttons: ["OK"],
+    });
+
+    await disabledAlert.present();
   }
 
   async reAuthenticationProcedure(user: firebase.User): Promise<firebase.User> {
