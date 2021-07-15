@@ -59,7 +59,7 @@ export class SwipeCardComponent extends EventEmitter implements OnInit, OnDestro
   currentUserSub: Subscription;
   currentUser: User;
 
-  timeOfLatestCardTap = 0; // in millisecond; starts this way to guarantee
+  timeOfLatestCardTap = 0; // in millisecond; set to 0 when we want the diff with current time to be larger than threshold
   DOUBLE_TAP_THRESHOLD = 500;
   choiceOfLatestTap: swipeChoice = null;
   cardTapSub: Subscription;
@@ -160,16 +160,7 @@ export class SwipeCardComponent extends EventEmitter implements OnInit, OnDestro
     );
   }
 
-  // /** Displays the modal that shows the match animation */
-  // private async presentMatchModal() {
-  //   const matchModal = await this.modalCtrl.create({
-  //     component: MatchModalComponent,
-  //   });
-
-  //   await matchModal.present();
-  // }
-
-  doubleTapOnCard(choice: swipeChoice): Observable<void> {
+  private doubleTapOnCard(choice: swipeChoice): Observable<void> {
     if (choice === "yes") {
       return of(SwipeYesAnimation(this.cards.first, this.screenWidth)).pipe(
         switchMap((swipeAnimation) =>
@@ -189,7 +180,7 @@ export class SwipeCardComponent extends EventEmitter implements OnInit, OnDestro
     }
   }
 
-  singleTapOnCard(choice: swipeChoice): Observable<void> {
+  private singleTapOnCard(choice: swipeChoice): Observable<void> {
     if (choice === "yes") {
       return of(
         YesBubbleAnimation(
@@ -209,60 +200,8 @@ export class SwipeCardComponent extends EventEmitter implements OnInit, OnDestro
     }
   }
 
-  // async doubleTap(choice) {
-  //   console.log("choice", choice);
-  //   this.swipeYesAnimation = SwipeYesAnimation(this.card.toArray()[0], this.screenWidth);
-  //   this.swipeNoAnimation = SwipeNoAnimation(this.card.toArray()[0], this.screenWidth);
-
-  //   this.screenTaps += 1;
-
-  //   setTimeout(() => {
-  //     this.screenTaps = 0;
-  //   }, 500);
-
-  //   if (this.screenTaps > 1) {
-  //     //Double tap event
-  //     this.screenTaps = 0;
-
-  //     if (choice === "yes") {
-  //       //Yes side of profile
-
-  //       this.swipeYesAnimation.play();
-  //       setTimeout(() => {
-  //         this.onYesSwipe(this.profiles[0]);
-
-  //         this.matched.emit([
-  //           this.profiles[0].firstName,
-  //           this.profiles[0].pictureUrls[0],
-  //         ]); //BASIC MATCH TRIGGER TO BE WIRED PROPERLY
-  //       }, 400);
-  //     } else if (choice === "no") {
-  //       //No side of profile
-  //       this.swipeNoAnimation.play();
-  //       setTimeout(() => {
-  //         this.onNoSwipe(this.profiles[0]);
-  //       }, 400);
-  //     }
-  //   } else if (this.screenTaps == 1) {
-  //     if (choice === "yes") {
-  //       this.yesBubbleAnimation = YesBubbleAnimation(
-  //         this.yesBubble,
-  //         this.profileComponent.X,
-  //         this.profileComponent.Y
-  //       );
-  //       this.yesBubbleAnimation.play();
-  //     } else if (choice === "no") {
-  //       this.noBubbleAnimation = NoBubbleAnimation(
-  //         this.noBubble,
-  //         this.profileComponent.X,
-  //         this.profileComponent.Y
-  //       );
-  //       this.noBubbleAnimation.play();
-  //     }
-  //   }
-  // }
-
   ngOnDestroy() {
     this.currentUserSub.unsubscribe();
+    this.cardTapSub.unsubscribe();
   }
 }
