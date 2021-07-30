@@ -37,14 +37,23 @@ export class OwnProfilePage implements OnInit {
   @ViewChildren("answers") answers: QueryList<ProfileAnswerComponent>;
   lastAnsRef;
 
-  screenHeight: number;
-  screenWidth: number;
+  // screenHeight: number;
+  // screenWidth: number;
 
-  @HostListener("window:resize", ["$event"])
-  onResize() {
-    this.screenHeight = window.innerHeight;
-    this.screenWidth = window.innerWidth;
-  }
+  // @HostListener("window:resize", ["$event"])
+  // onResize() {
+  //   this.screenHeight = window.innerHeight;
+  //   this.screenWidth = window.innerWidth;
+  // }
+
+  // @HostListener("window:scroll", ["$event"])
+  // onScroll(): void {
+  //   console.log("load more");
+
+  //   // if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
+  //   //   console.log("load more");
+  //   // }
+  // }
 
   profileSub: Subscription;
   profile: User;
@@ -59,7 +68,7 @@ export class OwnProfilePage implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.ownPicturesSub = this.ownPicturesService.emptinessObserver$.subscribe();
+    this.ownPicturesSub = this.ownPicturesService.activateStore().subscribe();
     this.profileSub = this.currentUserStore.user$.subscribe(
       (profile) => (this.profile = profile)
     );
@@ -76,7 +85,7 @@ export class OwnProfilePage implements OnInit {
   }
 
   displayExit(section) {
-    if (section === "bio" && this.bio.value != "") {
+    if (section === "bio" && this.bio.value !== "") {
       this.bioClose.nativeElement.style.display = "block";
     } else if (this.bio.value === "") {
       this.bioClose.nativeElement.style.display = "none";

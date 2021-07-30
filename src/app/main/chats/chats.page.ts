@@ -24,16 +24,16 @@ export class ChatsPage implements OnInit {
   public matches: Chat[];
 
   constructor(
-    private swipeStackStore: SwipeStackStore, 
-    private chatStore: ChatStore,
-    private router: Router
-    ) {}
+    private swipeStackStore: SwipeStackStore,
+    private router: Router,
+    private chatStore: ChatStore
+  ) {}
 
   ngOnInit() {
     this.chats = this.chatStore.chats$;
     this.chatProfiles = this.swipeStackStore.profiles$;
 
-    this.chats.forEach(c => {
+    this.chats.forEach((c) => {
       this.chatNumber = c.length;
     });
 
@@ -43,8 +43,8 @@ export class ChatsPage implements OnInit {
   buildMatches() {
     this.matches = [];
 
-    this.chats.forEach(c => {
-      c.forEach(chat => {
+    this.chats.forEach((c) => {
+      c.forEach((chat) => {
         this.matches.push(chat);
       });
     });
@@ -55,6 +55,6 @@ export class ChatsPage implements OnInit {
   }
 
   goToCatch() {
-    this.router.navigateByUrl('/main/tabs/home');
+    this.router.navigateByUrl("/main/tabs/home");
   }
 }

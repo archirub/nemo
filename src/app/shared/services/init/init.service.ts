@@ -67,7 +67,7 @@ export class InitService {
           take(1),
           concatMap((profileDocExists) => {
             if (!profileDocExists) return this.noDocumentsRoutine(user);
-            return this.hasDocumentsRoutine(user);
+            return this.hasDocumentsRoutine();
           })
         );
       })
@@ -81,8 +81,8 @@ export class InitService {
     return concat(this.resetAppState(), this.router.navigateByUrl("/welcome"));
   }
 
-  private hasDocumentsRoutine(user: firebase.User): Observable<any> {
-    return concat(this.resetAppState(), this.initMainStores(user.uid)).pipe(
+  private hasDocumentsRoutine(): Observable<any> {
+    return concat(this.resetAppState(), this.initMainStores()).pipe(
       concatMap(() => {
         // makes it such that we only navigate to home if the user is not in main
         // such that it doesn't infringe on the user experience
@@ -178,8 +178,9 @@ export class InitService {
       );
   }
 
-  private initMainStores(uid: string) {
-    return concat(this.userStore.fillStore(uid), this.chatStore.initializeStore(uid));
+  private initMainStores() {
+    console.log("initinit");
+    return concat(this.userStore.fillStore(), this.chatStore.activateStore());
   }
 
   /**
@@ -189,7 +190,7 @@ export class InitService {
     return forkJoin([of(this.emptyStores()), Storage.clear()]);
   }
 
-  private emptyStores() {
+  emptyStores() {
     this.userStore.resetStore();
     this.chatStore.resetStore();
     this.searchCriteriaStore.resetStore();

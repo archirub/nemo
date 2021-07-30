@@ -92,6 +92,7 @@ export class OtherProfilesStore {
         if (profileHolder.hasOwnProperty(uid)) {
           this.revokeUrls(profileHolder[uid].pictureUrls); // revokes urls
           delete profileHolder[uid]; // deletes the profile from the store
+
           this.profiles.next(profileHolder); // updates the store
         }
       })
@@ -134,6 +135,7 @@ export class OtherProfilesStore {
       map((holder) => {
         if (holder.hasOwnProperty(uid)) {
           holder[uid].pictureUrls = pictures;
+
           this.profiles.next(holder);
           return { uid, pictures };
         }

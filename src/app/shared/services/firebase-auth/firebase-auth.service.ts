@@ -55,7 +55,8 @@ export class FirebaseAuthService {
   async unknownErrorPopup(): Promise<void> {
     const unknownAlert = await this.alertCtrl.create({
       header: "Something went wrong",
-      message: "An unknown error occurred. Plase check your connection, or try again later.",
+      message:
+        "An unknown error occurred. Please check your connection, or try again later.",
       buttons: ["OK"],
     });
 
@@ -75,7 +76,8 @@ export class FirebaseAuthService {
   async userDisabledPopup(): Promise<void> {
     const disabledAlert = await this.alertCtrl.create({
       header: "User disabled",
-      message: "This account has been disabled. If you think this is an error, please contact support.",
+      message:
+        "This account has been disabled. If you think this is an error, please contact support.",
       buttons: ["OK"],
     });
 

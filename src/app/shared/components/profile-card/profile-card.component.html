@@ -12,11 +12,11 @@
       #picSlides
       (ionSlideWillChange)="checkSlide()"
       (ionSlideDidChange)="updatePager()"
-      *ngIf="ownPicturesService?.urls$ | async as pictureUrls"
+      *ngIf="profilePictures$ | async as pictureUrls"
     >
       <ion-slide
         #pic
-        *ngFor="let path of this.pictureUrls; index as i"
+        *ngFor="let path of pictureUrls; index as i"
         [ngStyle]="{
           'background-image': 'url(' + path + ')',
           'background-size': 'cover',

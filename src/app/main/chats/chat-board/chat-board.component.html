@@ -18,78 +18,81 @@
           </ion-img>
         </ion-avatar>
 
-        <div 
-        *ngIf="matches.length < 31"
-        class="text-container" 
-        id="match-text" 
-        [ngStyle]="styleFromMatches()">
+        <div
+          *ngIf="matches.length < 31"
+          class="text-container"
+          id="match-text"
+          [ngStyle]="styleFromMatches()"
+        >
           {{ matches.length }} new catches!
         </div>
 
-        <div 
-        *ngIf="matches.length >= 31"
-        class="text-container" 
-        id="match-text" 
-        [ngStyle]="styleFromMatches()">
+        <div
+          *ngIf="matches.length >= 31"
+          class="text-container"
+          id="match-text"
+          [ngStyle]="styleFromMatches()"
+        >
           30+ new catches!
         </div>
-
       </ion-item>
     </ng-container>
   </ion-row>
 
   <ion-list *ngIf="chats">
-    <ion-item
-      detail="true"
-      button
-      (click)="goToMessenger(chat.id)"
-      *ngFor="let chat of chats; index as i"
-    >
-      <ion-avatar slot="start">
-        <ion-img [src]="(chatboardPictures$ | async)[chat?.recipient?.uid]"></ion-img>
-      </ion-avatar>
-      <div class="text-container">
-        <ion-label color="primary" class="text-container name">
-          {{ chat?.recipient?.name }}</ion-label
-        >
-        <ion-label
-          color="black"
-          class="text-container chat"
-          id="lastMessage"
+    <app-infinite-scroll (scrolled)="scrollToBottom$.next('')">
+      <ion-item
+        detail="true"
+        button
+        (click)="goToMessenger(chat.id)"
+        *ngFor="let chat of chats; index as i"
+      >
+        <ion-avatar slot="start">
+          <ion-img [src]="(chatboardPictures$ | async)[chat?.recipient?.uid]"></ion-img>
+        </ion-avatar>
+        <div class="text-container">
+          <ion-label color="primary" class="text-container name">
+            {{ chat?.recipient?.name }}</ion-label
+          >
+          <ion-label
+            color="black"
+            class="text-container chat"
+            id="lastMessage"
+            *ngIf="
+              chat?.messages[chat.messages.length - 1]?.senderID === chat?.recipient?.uid
+            "
+          >
+            {{
+              shorten(
+                chat?.recipient?.name +
+                  ": " +
+                  chat?.messages[chat.messages.length - 1]?.content
+              )
+            }}</ion-label
+          >
+          <ion-label
+            color="black"
+            class="text-container chat"
+            id="lastMessage"
+            *ngIf="
+              chat?.messages[chat.messages.length - 1]?.senderID !== chat?.recipient?.uid
+            "
+          >
+            {{
+              shorten("You: " + chat?.messages[chat.messages.length - 1]?.content)
+            }}</ion-label
+          >
+          <!-- <span> {{ getDate(chat.messages[chat.messages.length - 1].time) }}</span> -->
+        </div>
+        <ion-badge
           *ngIf="
             chat?.messages[chat.messages.length - 1]?.senderID === chat?.recipient?.uid
           "
+          id="unread-badge"
         >
-          {{
-            shorten(
-              chat?.recipient?.name +
-                ": " +
-                chat?.messages[chat.messages.length - 1]?.content
-            )
-          }}</ion-label
-        >
-        <ion-label
-          color="black"
-          class="text-container chat"
-          id="lastMessage"
-          *ngIf="
-            chat?.messages[chat.messages.length - 1]?.senderID !== chat?.recipient?.uid
-          "
-        >
-          {{
-            shorten("You: " + chat?.messages[chat.messages.length - 1]?.content)
-          }}</ion-label
-        >
-        <!-- <span> {{ getDate(chat.messages[chat.messages.length - 1].time) }}</span> -->
-      </div>
-      <ion-badge
-        *ngIf="
-          chat?.messages[chat.messages.length - 1]?.senderID === chat?.recipient?.uid
-        "
-        id="unread-badge"
-      >
-        Your turn!
-      </ion-badge>
-    </ion-item>
+          Your turn!
+        </ion-badge>
+      </ion-item>
+    </app-infinite-scroll>
   </ion-list>
 </ion-content>

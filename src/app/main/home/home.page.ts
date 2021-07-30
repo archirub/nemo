@@ -5,6 +5,7 @@ import {
   OnInit,
   ViewChild,
   HostListener,
+  ApplicationRef,
 } from "@angular/core";
 import { ModalController } from "@ionic/angular";
 

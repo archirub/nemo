@@ -1,13 +1,38 @@
+// to do now:
+// - find the logic based on which you will fetch new chats in the activateStore method,
+// - Link fetching more chats to how far scrolls goes
+// - refactor the logic with which you watch the chats (you must watch all the chats here,
+// not just those which you have fetched)
+
+// might need two methods: one for just filling the store (fillStore), the other one for activating the whole
+// chain of logic (activateStore), meaning filling the store if it is empty, or based on scroll, and activating watching the chats
+
 import { Injectable } from "@angular/core";
 import {
   Action,
   AngularFirestore,
   DocumentSnapshot,
   Query,
+  QueryDocumentSnapshot,
 } from "@angular/fire/firestore";
 
-import { BehaviorSubject, from, Observable, Subscription } from "rxjs";
-import { filter, map, switchMap, tap } from "rxjs/operators";
+import {
+  BehaviorSubject,
+  concat,
+  forkJoin,
+  from,
+  Observable,
+  of,
+  Subscription,
+} from "rxjs";
+import {
+  catchError,
+  concatMap,
+  exhaustMap,
+  map,
+  take,
+  withLatestFrom,
+} from "rxjs/operators";
 
 import { Chat, Message } from "@classes/index";
 import {
@@ -17,120 +42,121 @@ import {
   messageStateOptions,
 } from "@interfaces/index";
 import { FormatService } from "@services/index";
+import { AngularFireAuth } from "@angular/fire/auth";
+// import firebase from "firebase";
 
 @Injectable({
   providedIn: "root",
 })
 export class ChatStore {
-  private chatSubscriptionsHandler: { [chatID: string]: Subscription } = {};
-  private allChatsSubscription = new Subscription();
+  private BATCH_SIZE = 10;
+
   private chats = new BehaviorSubject<Chat[]>([]);
   public readonly chats$ = this.chats.asObservable();
 
-  constructor(private fs: AngularFirestore, private format: FormatService) {}
+  private numberOfChatsToListen = new BehaviorSubject<number>(this.BATCH_SIZE);
+  public numberOfChatsToListen$ = this.numberOfChatsToListen.asObservable();
 
-  /** Initialisse the store
-   * returns uid so that store initializations can be chained
-   */
-  public initializeStore(uid: string): Observable<string> {
-    return this.fetchChats(uid).pipe(
-      switchMap(() => this.startChatDocObservers(uid)),
-      tap(() => console.log("ChatStore initialized.")),
-      map(() => uid)
+  private chatSubscriptionsHandler: { [chatID: string]: Subscription } = {};
+  private allChatsSubscription = new Subscription();
+  private databaseListenerUnsub: () => void = null;
+
+  constructor(
+    private afAuth: AngularFireAuth,
+    private firestore: AngularFirestore,
+    private format: FormatService
+  ) {}
+
+  public activateStore(): Observable<any> {
+    return this.numberOfChatsToListen$.pipe(
+      concatMap((countWanted) => {
+        return forkJoin([of(countWanted), this.afAuth.currentUser]);
+      }), // only way it emits for some reason? Otherwise it blocks if I use "withLatestFrom"
+      exhaustMap(([countWanted, user]) => {
+        if (!user) throw "no user authenticated";
+        return this.modifyDatabaseListener(countWanted, user.uid);
+      }),
+      catchError((error) => {
+        if (error === "no user authenticated") {
+          console.error("Unable to activate chat store; no user authenticated");
+        }
+        return of();
+      })
     );
-
-    // this.startDocumentCreationDeletionObserver(uid),
   }
 
-  resetStore() {
+  public incrementNumberOfChatsToListen(
+    increment: number = this.BATCH_SIZE
+  ): Observable<any> {
+    return this.chats$.pipe(
+      take(1),
+      concatMap((chats) => {
+        return forkJoin([of(chats.length), this.afAuth.currentUser]);
+      }), // only way it emits for some reason? Otherwise it blocks if I use "withLatestFrom"
+
+      exhaustMap(([currentCount, user]) => {
+        if (!user) throw "no user authenticated";
+
+        const countWanted = currentCount + increment;
+
+        return this.modifyDatabaseListener(countWanted, user.uid);
+      }),
+      catchError((error) => {
+        if (error === "no user authenticated") {
+          console.error("Unable to add chats to chat store; no user authenticated");
+        }
+        return of();
+      })
+    );
+  }
+
+  public resetStore() {
     // TO DO
     // empty the store, remove the observables to the chat documents
   }
 
-  /** fetches all the chats for the authenticated user */
-  public fetchChats(uid: string): Observable<Chat[]> {
-    const query = this.fs.firestore
-      .collection("chats")
-      .where("uids", "array-contains", uid)
-      .orderBy("lastInteracted", "desc") as Query<chatFromDatabase>;
+  private modifyDatabaseListener(count: number, uid: string): Observable<void> {
+    return this.numberOfChatsToListen$.pipe(
+      take(1),
+      map((currentCount) => {
+        // unsubscribes from previous subscription if there was one
+        this.databaseListenerUnsub ? this.databaseListenerUnsub() : null;
 
-    return from(query.get()).pipe(
-      map((snapshot) => snapshot.docs),
-      map((docs) => {
-        const chats: Chat[] = docs
-          .map((doc) => {
-            if (!doc.exists) return;
-            return this.format.chatDatabaseToClass(uid, doc.id, doc.data());
-          })
-          .filter((chat) => chat);
-        this.updateObservable(chats);
-        console.log(chats.map((c) => c.recipient.uid));
-        return chats;
+        // update behaviorSubject
+        // this.numberOfChatsToListen.next(count);
+
+        const query = this.firestore.firestore
+          .collection("chats")
+          .where("uids", "array-contains", uid)
+          .orderBy("lastInteracted", "desc")
+          .limit(count);
+
+        this.databaseListenerUnsub = query.onSnapshot({
+          next: (snapshot) => {
+            console.log("normal snapshot:", snapshot.docs);
+            console.log("docChanges: ", snapshot.docChanges());
+            return this.databaseToObservable(
+              uid,
+              snapshot.docs as QueryDocumentSnapshot<chatFromDatabase>[]
+            );
+          },
+        });
       })
     );
   }
 
-  /** Initialises listening in on updates from the user's chats */
-  private startChatDocObservers(uid: string): Observable<void> {
-    return this.chats$.pipe(
-      map((chats) => {
-        chats
-          .map((c) => c.id)
-          .forEach((chatID) => {
-            if (
-              this.chatSubscriptionsHandler.hasOwnProperty(chatID) &&
-              this.chatSubscriptionsHandler[chatID]
-            )
-              return;
-            this.newChatDocObserver(chatID, uid);
-          });
+  private databaseToObservable(
+    uid: string,
+    docs: QueryDocumentSnapshot<chatFromDatabase>[]
+  ): void {
+    const chats: Chat[] = docs
+      .map((doc) => {
+        if (!doc.exists) return;
+        return this.format.chatDatabaseToClass(uid, doc.id, doc.data());
       })
-    );
-  }
+      .filter((chat) => chat);
 
-  // TO REDO AND RETHINK, THIS DOESN'T WORK
-  /** Subscribes to the user's chat documents and listens in on the
-   * creation of new document to start listening to them. */
-  private startDocumentCreationDeletionObserver(uid: string): Observable<void> {
-    return this.fs
-      .collection("chats", (ref) => ref.where("uids", "array-contains", uid))
-      .snapshotChanges()
-      .pipe(
-        filter((refs) => {
-          let bool = true;
-          refs.forEach((ref) => {
-            if (ref.payload.doc.metadata.fromCache) {
-              bool = false;
-            }
-          });
-          return bool;
-        }),
-        map((refs) => {
-          refs
-            .filter((ref) => ref.type !== "modified")
-            // .filter((ref) => ref.payload.doc.metadata.fromCache)
-            .forEach((ref) => {
-              if (ref.payload.doc.exists) {
-                // console.log(ref.payload.doc.metadata.fromCache);
-                if (ref.payload.type === "added") {
-                  this.newChatDocObserver(ref.payload.doc.id, uid);
-                  // console.log("New chat observed from database:", ref.payload.doc.id);
-                } else if (ref.payload.type === "removed") {
-                  this.removeDatabaseObserver(ref.payload.doc.id);
-                  // console.log(
-                  //   "Removed chat observer after chat deletion",
-                  //   ref.payload.doc.id
-                  // );
-                } else {
-                  console.error("Unhandled DocumentChangeAction type: ", ref.type);
-                }
-              }
-            });
-        })
-      );
-
-    // this.chatSubscriptionsHandler["chatCreation"] = subscription;
-    // this.allChatsSubscription.add(subscription);
+    this.updateObservable(chats);
   }
 
   /** Updates the chat document on the database with the content
@@ -151,7 +177,7 @@ export class ChatStore {
     );
     const lastInteracted = chats[chatIndex].lastInteracted;
 
-    const snapshot = await this.fs.collection("chats").doc(chat.id).update({
+    const snapshot = await this.firestore.collection("chats").doc(chat.id).update({
       messages,
       lastInteracted,
     });
@@ -192,15 +218,13 @@ export class ChatStore {
    */
   private updateObservable(chats: Chat[]) {
     if (!chats) return;
-    this.sortChats(chats);
-    // console.log("chats", chats);
-    this.chats.next(chats);
+    this.chats.next(this.sortChats(this.removeDuplicates(chats)));
   }
 
   /** Adds a new listener for updates/deletions to the chat doc with id chatID*/
   private newChatDocObserver(chatID: string, currentUserID: string): void {
     if (!chatID || !currentUserID) return;
-    const listener = this.fs
+    const listener = this.firestore
       .collection("chats")
       .doc(chatID)
       .snapshotChanges() as Observable<Action<DocumentSnapshot<chatFromDatabase>>>;
@@ -333,6 +357,15 @@ export class ChatStore {
       (chat1, chat2) => chat2.lastInteracted.getTime() - chat1.lastInteracted.getTime()
     );
     return chats;
+  }
+
+  private removeDuplicates(chats: Chat[]): Chat[] {
+    if (!chats) return;
+
+    return chats.filter(
+      (chat, index, self) =>
+        index === self.findIndex((c) => c.recipient.uid === chat.recipient.uid)
+    );
   }
 
   //create function to set lastInteracted property to null for previous batchVolumes

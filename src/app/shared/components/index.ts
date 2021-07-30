@@ -6,3 +6,4 @@ export * from "./interests-slides/interests-slides.component";
 export * from "./nemo-datetime/nemo-datetime.component";
 export * from "./question-slides/question-slides.component";
 export * from "./profile-edit-photo/profile-edit-photo.page";
+export * from "./infinite-scroll/infinite-scroll.component";

@@ -13,13 +13,10 @@
           <ion-text color="dark">
             <div class="flexcolumn">
               <ion-avatar>
-                <img
-                  (click)="slideTo('profile')"
-                  [src]="(thisChat | async)?.recipient?.picture"
-                />
+                <img (click)="slideTo('profile')" [src]="bubblePicture$ | async" />
               </ion-avatar>
               <h3 class="messenger-header" (click)="slideTo('profile')">
-                {{(thisChat | async)?.recipient?.name}}
+                {{(thisChat$ | async)?.recipient?.name}}
               </h3>
             </div>
           </ion-text>
@@ -46,26 +43,26 @@
   <ion-slide>
     <ion-content>
       <ion-row
-        *ngFor="let message of ((thisChat | async)?.messages); index as i; let last='last'"
+        *ngFor="let message of ((thisChat$ | async)?.messages); index as i; let last='last'"
       >
         {{last ? fastScroll() : ""}}
         <ion-col
           size="8"
-          *ngIf="message?.senderID === (thisChat | async)?.recipient?.uid"
+          *ngIf="message?.senderID === (thisChat$ | async)?.recipient?.uid"
           class="message-col col-recieved"
         >
           <div
             class="message notOwnMessage"
             [ngClass]="{'failedToSend': hasFailed(message), 'isSending': isSending(message) }"
           >
-            {{message.content}}
+            {{message?.content}}
           </div>
         </ion-col>
 
         <ion-col
           size="8"
           offset="4"
-          *ngIf="message?.senderID !== (thisChat | async)?.recipient?.uid"
+          *ngIf="message?.senderID !== (thisChat$ | async)?.recipient?.uid"
           class="message-col col-sent"
         >
           <div
@@ -102,7 +99,7 @@
   <ion-slide #profSlide>
     <div class="flexcolumn prof">
       <app-profile-card
-        *ngIf="(profilesStore.profiles$ | async)[recipientUID] as profile"
+        *ngIf="recipientProfile$ | async as profile"
         #profCard
         (expanded)="scaleInfo($event)"
         [profile]="profile"

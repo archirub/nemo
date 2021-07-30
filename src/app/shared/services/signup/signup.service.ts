@@ -174,7 +174,7 @@ export class SignupService {
           return of();
         }
         return concat(
-          this.currentUserStore.fillStore(user.uid),
+          this.currentUserStore.fillStore(),
           this.removeLocalStorage(),
           this.router.navigateByUrl("/main/home")
         );

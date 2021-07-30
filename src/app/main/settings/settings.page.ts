@@ -1,4 +1,11 @@
-import { Component, AfterViewInit, ViewChild, ElementRef, NgZone } from "@angular/core";
+import {
+  Component,
+  AfterViewInit,
+  ViewChild,
+  ElementRef,
+  NgZone,
+  ApplicationRef,
+} from "@angular/core";
 import { IonSlides, NavController } from "@ionic/angular";
 import { AngularFireAuth } from "@angular/fire/auth";
 
@@ -20,6 +27,7 @@ import {
   SwipeMode,
   swipeModeOptions,
 } from "@interfaces/index";
+import { InitService } from "@services/init/init.service";
 
 @Component({
   selector: "app-settings",
@@ -53,7 +61,8 @@ export class SettingsPage implements AfterViewInit {
     private loadingService: LoadingService,
     private currentUserStore: CurrentUserStore,
     private router: Router,
-    private zone: NgZone
+    private zone: NgZone,
+    private initService: InitService
   ) {}
 
   ngAfterViewInit() {
@@ -83,15 +92,18 @@ export class SettingsPage implements AfterViewInit {
     // calling ngZone.run() is necessary otherwise we will get into trouble with changeDecection
     // back at the welcome page (it seems like it's then not active), which cases problem for example
     // while trying to log back in where the "log in" button doesn't get enabled when the email-password form becomes valid
-    const navigateToWelcome = (url: string) => {
+    const navigateToWelcome = async (url: string) => {
       return this.zone.run(() => {
-        this.navCtrl.setDirection("root");
-        return this.router.navigateByUrl(url);
+        return this.navCtrl.navigateRoot(url);
       });
     };
 
     const clearLocalCache = () => {
       return Plugins.Storage.clear();
+    };
+
+    const clearStores = async () => {
+      return this.initService.emptyStores();
     };
 
     const logOut = () => {
@@ -101,6 +113,7 @@ export class SettingsPage implements AfterViewInit {
     await this.loadingService.presentLoader(
       [
         { promise: clearLocalCache, arguments: [] },
+        { promise: clearStores, arguments: [] },
         { promise: logOut, arguments: [] },
       ],
       [{ promise: navigateToWelcome, arguments: ["/welcome"] }]

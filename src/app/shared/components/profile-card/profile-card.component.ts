@@ -15,7 +15,7 @@ import { LessInfoAnimation, MoreInfoAnimation } from "@animations/info.animation
 import { Chat, Profile } from "@classes/index";
 import { IonContent, IonSlides } from "@ionic/angular";
 import { OwnPicturesStore } from "@stores/pictures-stores/own-pictures-store/own-pictures.service";
-import { Subscription } from "rxjs";
+import { iif, Observable, of, Subscription } from "rxjs";
 
 @Component({
   selector: "app-profile-card",
@@ -29,7 +29,7 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
   @Input() moreInfo: boolean;
   @Input() profile: Profile;
   @Input() reportable: boolean = true;
-  @Input() ownProfile: boolean = false;
+  @Input() isOwnProfile: boolean = false;
 
   @ViewChild(IonContent) ionContent: IonContent;
   @ViewChild(IonSlides) slides: IonSlides;
@@ -38,8 +38,7 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
   @ViewChild("yes", { read: ElementRef }) yesSwipe: ElementRef;
   @ViewChild("no", { read: ElementRef }) noSwipe: ElementRef;
 
-  picturePaths: Array<string>;
-  ownPicturesSub: Subscription;
+  profilePictures$: Observable<string[]>;
 
   expandAnimation: any;
   collapseAnimation: any;
@@ -81,7 +80,17 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
     this.moreInfo = false;
 
     this.buildInterestSlides();
-    console.log(this.profile);
+
+    // if this is own profile, then use the pictures from the ownPicturesStore,
+    // (as they are then managed and automatically updated),
+    // otherwise use the pictures from the profile class
+    // (would be simplier if you just make the ownPicturesService such that it updates the
+    // pictureUrls property of the ownProfileStore, instead of having its own BehaviorSubject)
+    this.profilePictures$ = iif(
+      () => this.isOwnProfile,
+      this.ownPicturesService.urls$,
+      of(this.profile.pictureUrls)
+    );
   }
 
   ngAfterViewInit() {

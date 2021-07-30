@@ -27,14 +27,17 @@ export class OwnPicturesStore {
   private urls: BehaviorSubject<string[]> = new BehaviorSubject([]);
   urls$: Observable<string[]> = this.urls.asObservable();
 
-  emptinessObserver$: Observable<any>;
-
   constructor(
     private afStorage: AngularFireStorage,
     private afAuth: AngularFireAuth,
     private currentUser: CurrentUserStore
-  ) {
-    this.emptinessObserver$ = combineLatest([this.urls$, this.getOwnPictureCount()]).pipe(
+  ) {}
+
+  /**
+   * Subscribe to this method to activate the logic that manages the store
+   */
+  activateStore(): Observable<any> {
+    return combineLatest([this.urls$, this.getOwnPictureCount()]).pipe(
       filter(([currentUrls, pictureCount]) => {
         const currentUrlCount = currentUrls.filter(
           (url) => typeof url === "string"

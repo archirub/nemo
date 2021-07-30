@@ -3,7 +3,7 @@ import { Injectable } from "@angular/core";
 import { AngularFireAuth } from "@angular/fire/auth";
 import { AngularFirestore } from "@angular/fire/firestore";
 
-import { BehaviorSubject, forkJoin, from, Observable } from "rxjs";
+import { BehaviorSubject, forkJoin, from, Observable, of } from "rxjs";
 
 import { Profile, User } from "@classes/index";
 import {
@@ -14,7 +14,7 @@ import {
 } from "@interfaces/index";
 import { FormatService } from "@services/index";
 import { SearchCriteriaStore } from "../search-criteria-store/search-criteria-store.service";
-import { map } from "rxjs/operators";
+import { catchError, map, switchMap, take } from "rxjs/operators";
 
 @Injectable({
   providedIn: "root",
@@ -24,6 +24,7 @@ export class CurrentUserStore {
   public readonly user$: Observable<User> = this.user.asObservable();
 
   constructor(
+    private afAuth: AngularFireAuth,
     private fs: AngularFirestore,
     private afFunctions: AngularFireFunctions,
     private format: FormatService,
@@ -40,22 +41,29 @@ export class CurrentUserStore {
   // }
 
   /** Fetches info from database to update the User BehaviorSubject */
-  fillStore(uid: string): Observable<{
+  fillStore(): Observable<{
     profileSuccess: boolean;
     privateProfileSuccess: boolean;
     matchDataSuccess: boolean;
   }> {
-    const profileParts$ = [
-      this.fetchProfile(uid),
-      this.fetchPrivateProfile(uid),
-      this.fetchMatchDataInfo(uid),
-    ] as [
-      Observable<Profile>,
-      Observable<privateProfileFromDatabase>,
-      Observable<userInfoFromMatchData>
-    ];
+    return this.afAuth.user.pipe(
+      take(1),
+      switchMap((user) => {
+        if (!user) throw "no user authenticated";
 
-    return forkJoin(profileParts$).pipe(
+        const profileParts$ = [
+          this.fetchProfile(user.uid),
+          this.fetchPrivateProfile(user.uid),
+          this.fetchMatchDataInfo(user.uid),
+        ] as [
+          Observable<Profile>,
+          Observable<privateProfileFromDatabase>,
+          Observable<userInfoFromMatchData>
+        ];
+
+        return forkJoin(profileParts$);
+      }),
+
       map(([profile, privateProfile, infoFromMatchData]) => {
         const successResponse: {
           profileSuccess: boolean;
@@ -104,6 +112,14 @@ export class CurrentUserStore {
         this.user.next(user);
 
         return successResponse;
+      }),
+      catchError((error) => {
+        if (error === "no user authenticated")
+          return of({
+            profileSuccess: false,
+            privateProfileSuccess: false,
+            matchDataSuccess: false,
+          });
       })
     );
   }

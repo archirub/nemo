@@ -9,6 +9,7 @@ import {
   Output,
   ChangeDetectorRef,
   OnDestroy,
+  Renderer2,
 } from "@angular/core";
 import { Router } from "@angular/router";
 import { IonContent, ModalController } from "@ionic/angular";
@@ -21,9 +22,9 @@ import {
   ChatboardPicturesStore,
   pictureHolder,
 } from "@stores/pictures-stores/chatboard-pictures-store/chatboard-pictures.service";
-import { forkJoin, Observable, of, Subscription } from "rxjs";
-import { concatMap, map, tap } from "rxjs/operators";
-import { ChatStore } from "@stores/index";
+import { forkJoin, fromEvent, Observable, of, Subject, Subscription } from "rxjs";
+import { concatMap, exhaustMap, map, tap } from "rxjs/operators";
+import { ChatStore, OtherProfilesStore } from "@stores/index";
 
 @Component({
   selector: "app-chat-board",
@@ -37,9 +38,13 @@ export class ChatBoardComponent implements OnInit, OnDestroy {
   @Input() matches: Chat[];
   @ViewChild(IonContent) ionContent: IonContent;
 
+  scrollToBottom$ = new Subject();
+  additionalChatsLoadingSub: Subscription;
+
   // PROPERTIES FOR MODAL ANIMATION
   @ViewChild("chatContainer", { read: ElementRef }) chatContainer: ElementRef;
   @ViewChild("matchesButton", { read: ElementRef }) matchesButton: ElementRef;
+
   screenHeight: number;
   screenWidth: number;
   @HostListener("window:resize", ["$event"])
@@ -48,13 +53,20 @@ export class ChatBoardComponent implements OnInit, OnDestroy {
     this.screenWidth = window.innerWidth;
   }
 
+  activateAdditionalChatsLoading(): Observable<any> {
+    return this.scrollToBottom$.pipe(
+      exhaustMap((_) => this.chatStore.incrementNumberOfChatsToListen())
+    );
+  }
+  ngAfterViewInit() {}
+
   constructor(
     private router: Router,
     private modalCtrl: ModalController,
     private tabElementRef: TabElementRefService,
     private chatboardPicturesService: ChatboardPicturesStore, // used in template
     private chatStore: ChatStore,
-    private changeDetectorRef: ChangeDetectorRef
+    private profilesStore: OtherProfilesStore
   ) {
     this.onResize();
   }
@@ -64,14 +76,21 @@ export class ChatBoardComponent implements OnInit, OnDestroy {
   MatchesLeaveAnimation;
 
   ngOnInit() {
+    this.chatStore.chats$.subscribe(console.log);
+    this.profilesStore.profiles$.subscribe((a) =>
+      console.log("Profile store content:", a)
+    );
     this.chatboardPictures$ = this.chatboardPicturesService.holder$;
     this.chatboardPicturesSub = this.chatboardPicturesService
       .activateStore(this.chatStore.chats$)
       .subscribe();
+
+    this.additionalChatsLoadingSub = this.activateAdditionalChatsLoading().subscribe();
   }
-  
+
   ngOnDestroy() {
-    this.chatboardPicturesSub.unsubscribe();
+    this.chatboardPicturesSub?.unsubscribe();
+    this.additionalChatsLoadingSub?.unsubscribe();
   }
 
   async presentMatches(): Promise<void> {

@@ -525,7 +525,7 @@ function addToPrivateProfile(
   };
   const ref = admin
     .firestore()
-    .collection("profile")
+    .collection("profiles")
     .doc(data.uid)
     .collection("private")
     .doc("private");
