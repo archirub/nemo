@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, Input } from "@angular/core";
 import { ModalController } from "@ionic/angular";
 
-import { ChatStore } from "@stores/index";
+import { ChatboardStore } from "@stores/index";
 import { Chat } from "@classes/index";
 import {
   ChatboardPicturesStore,
@@ -22,14 +22,14 @@ export class MatchesComponent implements OnInit, OnDestroy {
 
   constructor(
     private modalCtrl: ModalController,
-    private chatStore: ChatStore,
+    private chatboardStore: ChatboardStore,
     private chatboardPicturesService: ChatboardPicturesStore // used in template
   ) {}
 
   ngOnInit() {
     this.chatboardPictures$ = this.chatboardPicturesService.holder$;
     this.chatboardPicturesSub = this.chatboardPicturesService
-      .activateStore(this.chatStore.chats$)
+      .activateStore(this.chatboardStore.chats$)
       .subscribe();
   }
 

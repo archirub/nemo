@@ -10,7 +10,7 @@ import { concat, forkJoin, from, Observable, of } from "rxjs";
 import { catchError, concatMap, first, map, switchMap, take, tap } from "rxjs/operators";
 
 import {
-  ChatStore,
+  // ChatStore,
   CurrentUserStore,
   SearchCriteriaStore,
   SwipeOutcomeStore,
@@ -37,7 +37,7 @@ export class InitService {
     private firebaseAuthService: FirebaseAuthService,
 
     private userStore: CurrentUserStore,
-    private chatStore: ChatStore,
+    // private chatStore: ChatStore,
     private searchCriteriaStore: SearchCriteriaStore,
     private otherProfilesStore: OtherProfilesStore,
     private swipeOutcomeStore: SwipeOutcomeStore,
@@ -180,7 +180,10 @@ export class InitService {
 
   private initMainStores() {
     console.log("initinit");
-    return concat(this.userStore.fillStore(), this.chatStore.activateStore());
+    return concat(
+      this.userStore.fillStore()
+      // this.chatStore.activateStore()
+    );
   }
 
   /**
@@ -192,7 +195,7 @@ export class InitService {
 
   emptyStores() {
     this.userStore.resetStore();
-    this.chatStore.resetStore();
+    // this.chatboardStore.resetStore();
     this.searchCriteriaStore.resetStore();
     this.swipeOutcomeStore.resetStore();
     this.swipeStackStore.resetStore();

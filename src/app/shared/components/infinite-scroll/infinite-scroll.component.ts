@@ -10,10 +10,13 @@ import {
 
 @Component({
   selector: "app-infinite-scroll",
-  template: "<ng-content></ng-content><div #anchor></div>",
+  template: `<ng-content *ngIf="location === 'above'"></ng-content>
+    <div #anchor></div>
+    <ng-content *ngIf="location === 'below'"></ng-content>`,
   styles: ["div { height: 1px }"],
 })
 export class InfiniteScrollComponent {
+  @Input() location: "above" | "below" = "above";
   @Input() options = {};
   @Output() scrolled = new EventEmitter();
   @ViewChild("anchor") anchor: ElementRef<HTMLElement>;

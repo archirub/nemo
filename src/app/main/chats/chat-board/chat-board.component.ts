@@ -24,7 +24,7 @@ import {
 } from "@stores/pictures-stores/chatboard-pictures-store/chatboard-pictures.service";
 import { forkJoin, fromEvent, Observable, of, Subject, Subscription } from "rxjs";
 import { concatMap, exhaustMap, map, tap } from "rxjs/operators";
-import { ChatStore, OtherProfilesStore } from "@stores/index";
+import { ChatboardStore, OtherProfilesStore } from "@stores/index";
 
 @Component({
   selector: "app-chat-board",
@@ -53,11 +53,12 @@ export class ChatBoardComponent implements OnInit, OnDestroy {
     this.screenWidth = window.innerWidth;
   }
 
-  activateAdditionalChatsLoading(): Observable<any> {
-    return this.scrollToBottom$.pipe(
-      exhaustMap((_) => this.chatStore.incrementNumberOfChatsToListen())
-    );
-  }
+  // activateAdditionalChatsLoading(): Observable<any> {
+  //   return this.scrollToBottom$.pipe(
+  //     exhaustMap((_) => this.chatStore.incrementNumberOfChatsToListen())
+  //   );
+  // }
+
   ngAfterViewInit() {}
 
   constructor(
@@ -65,7 +66,7 @@ export class ChatBoardComponent implements OnInit, OnDestroy {
     private modalCtrl: ModalController,
     private tabElementRef: TabElementRefService,
     private chatboardPicturesService: ChatboardPicturesStore, // used in template
-    private chatStore: ChatStore,
+    private chatboardStore: ChatboardStore,
     private profilesStore: OtherProfilesStore
   ) {
     this.onResize();
@@ -76,16 +77,15 @@ export class ChatBoardComponent implements OnInit, OnDestroy {
   MatchesLeaveAnimation;
 
   ngOnInit() {
-    this.chatStore.chats$.subscribe(console.log);
     this.profilesStore.profiles$.subscribe((a) =>
       console.log("Profile store content:", a)
     );
     this.chatboardPictures$ = this.chatboardPicturesService.holder$;
     this.chatboardPicturesSub = this.chatboardPicturesService
-      .activateStore(this.chatStore.chats$)
+      .activateStore(this.chatboardStore.chats$)
       .subscribe();
-
-    this.additionalChatsLoadingSub = this.activateAdditionalChatsLoading().subscribe();
+    setTimeout(() => console.log("chats:", this.chats), 4000);
+    // this.additionalChatsLoadingSub = this.activateAdditionalChatsLoading().subscribe();
   }
 
   ngOnDestroy() {
@@ -161,16 +161,6 @@ export class ChatBoardComponent implements OnInit, OnDestroy {
     let month = date.getMonth();
     let day = date.getDay();
     return day.toString() + "/" + month.toString;
-  }
-
-  calcUnread(chat: Chat) {
-    let counter = 0;
-    for (let msg of chat.messages) {
-      if (msg.senderID == chat.recipient.uid && msg.seen !== true) {
-        counter++;
-      }
-    }
-    return counter;
   }
 
   scroll(speed) {

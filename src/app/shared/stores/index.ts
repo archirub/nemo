@@ -1,4 +1,4 @@
-export * from "./chat-store/chat-store.service";
+export * from "./chatboard-store/chatboard-store.service";
 export * from "./settings-store/settings-store.service";
 export * from "./swipe-outcome-store/swipe-outcome-store.service";
 export * from "./current-user-store/current-user-store.service";

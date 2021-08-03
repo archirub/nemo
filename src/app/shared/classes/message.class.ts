@@ -4,24 +4,13 @@ export class Message implements message {
   private _senderID: string;
   private _time: Date;
   private _content: string;
-  private _reaction: messageReaction;
   private _state: messageState;
-  private _seen: boolean;
 
-  constructor(
-    senderID: string,
-    time: Date,
-    content: string,
-    reaction: messageReaction,
-    state: messageState,
-    seen: boolean
-  ) {
+  constructor(senderID: string, time: Date, content: string, state: messageState) {
     this.senderID = senderID;
     this.time = time;
     this.content = content;
-    this.reaction = reaction;
     this.state = state;
-    this.seen = seen;
   }
 
   public get senderID(): string {
@@ -45,24 +34,10 @@ export class Message implements message {
     this._content = value;
   }
 
-  public get reaction(): messageReaction {
-    return this._reaction;
-  }
-  public set reaction(value: messageReaction) {
-    this._reaction = value;
-  }
-
   public get state(): messageState {
     return this._state;
   }
   public set state(value: messageState) {
     this._state = value;
-  }
-
-  public get seen(): boolean {
-    return this._seen;
-  }
-  public set seen(value: boolean) {
-    this._seen = value;
   }
 }

@@ -2,10 +2,11 @@ import { Component, OnInit, ViewChild } from "@angular/core";
 
 import { Observable } from "rxjs";
 
-import { ChatStore, SwipeStackStore } from "@stores/index";
+import { ChatboardStore, SwipeStackStore } from "@stores/index";
 import { Chat, Profile } from "@classes/index";
 import { ChatBoardComponent } from "./chat-board/chat-board.component";
 import { Router } from "@angular/router";
+import { map } from "rxjs/operators";
 
 @Component({
   selector: "app-chats",
@@ -20,18 +21,15 @@ export class ChatsPage implements OnInit {
   chatNumber: number;
 
   public chats: Observable<Chat[]>;
-  public chatProfiles: Observable<Profile[]>;
   public matches: Chat[];
 
-  constructor(
-    private swipeStackStore: SwipeStackStore,
-    private router: Router,
-    private chatStore: ChatStore
-  ) {}
+  constructor(private router: Router, private chatboardStore: ChatboardStore) {}
 
   ngOnInit() {
-    this.chats = this.chatStore.chats$;
-    this.chatProfiles = this.swipeStackStore.profiles$;
+    this.chatboardStore.activateStore().subscribe();
+    this.chatboardStore.chats$.subscribe(console.log);
+
+    this.chats = this.chatboardStore.chats$.pipe(map((c) => this.sortChats(c)));
 
     this.chats.forEach((c) => {
       this.chatNumber = c.length;
@@ -56,5 +54,12 @@ export class ChatsPage implements OnInit {
 
   goToCatch() {
     this.router.navigateByUrl("/main/tabs/home");
+  }
+
+  private sortChats(chats: { [chatID: string]: Chat }): Chat[] {
+    return Object.values(chats).sort(
+      (chat1, chat2) =>
+        chat2?.recentMessage?.time?.getTime() - chat1?.recentMessage?.time?.getTime()
+    );
   }
 }

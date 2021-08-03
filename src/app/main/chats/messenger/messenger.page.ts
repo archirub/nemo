@@ -4,29 +4,30 @@
 
 import {
   Component,
-  Input,
   AfterViewInit,
   OnDestroy,
   OnInit,
   ViewChild,
   ElementRef,
-  ViewChildren,
-  QueryList,
 } from "@angular/core";
 
 import { NavController, IonContent, IonSlides } from "@ionic/angular";
 import { AngularFireAuth } from "@angular/fire/auth";
 import { ActivatedRoute, ParamMap } from "@angular/router";
 
-import { BehaviorSubject, forkJoin, from, Observable, of, Subscription } from "rxjs";
-import { concatMap, map, switchMap, take, tap, withLatestFrom } from "rxjs/operators";
+import { BehaviorSubject, forkJoin, from, Observable, Subscription } from "rxjs";
+import { filter, map, switchMap, take, tap, withLatestFrom } from "rxjs/operators";
 
 import { Chat, Message, Profile } from "@classes/index";
-import { SwipeStackStore, ChatStore } from "@stores/index";
+import { ChatboardStore } from "@stores/index";
 import { ProfileCardComponent } from "@components/index";
 import { OtherProfilesStore } from "@stores/other-profiles-store/other-profiles-store.service";
 import { ChatboardPicturesStore } from "@stores/pictures-stores/chatboard-pictures-store/chatboard-pictures.service";
+import { AngularFirestore, QuerySnapshot } from "@angular/fire/firestore";
+import { messageFromDatabase } from "@interfaces/message.model";
+import { FormatService } from "@services/index";
 
+import firebase from "firebase";
 @Component({
   selector: "app-messenger",
   templateUrl: "./messenger.page.html",
@@ -53,9 +54,12 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
   chatProfiles: Profile[];
   recipientProfile$: Observable<Profile>;
 
+  messages = new BehaviorSubject<Message[]>([]);
+
   // Constants
   private SCROLL_SPEED: number = 100;
-  private CHAT_ID: string;
+  private chatID: string;
+  private MSG_BATCH_SIZE: number = 20;
 
   // Storing latest chat input functionality
   public latestChatInput: string;
@@ -70,22 +74,24 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private navCtrl: NavController,
-    private chatStore: ChatStore,
+    private chatboardStore: ChatboardStore,
     private afauth: AngularFireAuth,
+    private firestore: AngularFirestore,
     private profilesStore: OtherProfilesStore,
-    private chatboardPictures: ChatboardPicturesStore
+    private chatboardPictures: ChatboardPicturesStore,
+    private format: FormatService
   ) {}
 
   ngOnInit() {
     this.route.paramMap
-      .pipe(switchMap((param) => this.messengerInitHandler(param)))
+      .pipe(switchMap((param) => this.initializeMessenger(param)))
       .subscribe();
 
     this.bubblePictureSub = this.chatboardPictures
-      .activateStore(this.chatStore.chats$)
+      .activateStore(this.chatboardStore.chats$)
       .subscribe();
 
-    this.chatStore.chats$.subscribe((a) => console.log("chat store:", a));
+    this.chatboardStore.chats$.subscribe((a) => console.log("chat store:", a));
     this.chatboardPictures.holder$.subscribe((a) =>
       console.log("chatboard pictures store:", a)
     );
@@ -132,79 +138,113 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
 
   /** Subscribes to chatStore's Chats osbervable using chatID
    * from paramMap */
-  private messengerInitHandler(parameter: ParamMap): Observable<any> {
+  private initializeMessenger(parameter: ParamMap): Observable<any> {
     if (!parameter.has("chatID")) return from(this.navCtrl.navigateBack("/tabs/chats"));
-    this.CHAT_ID = parameter.get("chatID");
+    this.chatID = parameter.get("chatID");
 
-    return this.chatStore.chats$.pipe(
+    return this.chatboardStore.chats$.pipe(
+      take(1),
       map((chats) => {
-        const chatIndex = chats.findIndex((chat) => chat.id === this.CHAT_ID);
+        this.thisChat$.next(chats[this.chatID]);
+        this.latestChatInput = chats[this.chatID].latestChatInput;
+      }),
+      map(() => {
+        return this.firestore.firestore
+          .collection("chats")
+          .doc(this.chatID)
+          .collection("messages")
+          .orderBy("time", "desc")
+          .limit(this.MSG_BATCH_SIZE)
+          .onSnapshot({
+            next: (snapshot: QuerySnapshot<messageFromDatabase>) =>
+              this.messages.next(
+                this.format.messagesDatabaseToClass(
+                  snapshot.docs.map((d) => d.data()).reverse()
+                )
+              ),
+          });
+      })
+    );
+  }
 
-        if (chatIndex !== -1) {
-          this.thisChat$.next(chats[chatIndex]);
-          this.latestChatInput = chats[chatIndex].latestChatInput;
-        }
+  sendMessage(): Observable<void> {
+    const messageContent: string = this.latestChatInput;
+    console.log("chat id", this.chatID);
+
+    return this.afauth.user.pipe(
+      filter((user) => !!user),
+      take(1),
+      switchMap((user) => {
+        if (!user) throw "no user authenticated";
+
+        const message: messageFromDatabase = {
+          senderID: user.uid,
+          time: firebase.firestore.Timestamp.fromDate(new Date()),
+          content: messageContent,
+        };
+
+        return from(
+          this.firestore.firestore
+            .collection("chats")
+            .doc(this.chatID)
+            .collection("messages")
+            .doc()
+            .set(message)
+        );
       })
     );
   }
 
   /** Updates Chats object of chatStore,
    * subsequently updates chat on database */
-  async sendMessage(): Promise<void> {
-    const messageContent: string = this.latestChatInput;
+  // async senddMessage(): Promise<void> {
+  //   const messageContent: string = this.latestChatInput;
 
-    if (!messageContent) return;
+  //   if (!messageContent) return;
 
-    const chat: Chat = this.thisChat$.getValue();
-    if (!chat) return console.error("Chat object is empty");
+  //   const chat: Chat = this.thisChat$.getValue();
+  //   if (!chat) return console.error("Chat object is empty");
 
-    const user = await this.afauth.currentUser;
-    if (!user) return console.error("User isn't logged in.");
+  //   const user = await this.afauth.currentUser;
+  //   if (!user) return console.error("User isn't logged in.");
 
-    const time: Date = new Date();
+  //   const time: Date = new Date();
 
-    const newMessage: Message = new Message(
-      user.uid,
-      time,
-      messageContent,
-      null,
-      "sending",
-      false
-    );
+  //   const newMessage: Message = new Message(user.uid, time, messageContent, null);
 
-    this.latestChatInput = "";
-    this.chatStore.localMessageAddition(newMessage, chat);
-    this.chatStore.updateLastInteracted(chat, time);
+  //   this.latestChatInput = "";
+  //   this.chatStore.localMessageAddition(newMessage, chat);
+  //   this.chatStore.updateLastInteracted(chat, time);
 
-    try {
-      await this.chatStore.databaseUpdateMessages(chat);
-      this.chatStore.updateMessageState(chat, newMessage, "sent");
-    } catch (e) {
-      console.error(`Message to ${chat.recipient.name} failed to send: ${e}`);
-      this.chatStore.updateMessageState(chat, newMessage, "failed");
-    }
-  }
+  //   try {
+  //     await this.chatStore.databaseUpdateMessages(chat);
+  //     this.chatStore.updateMessageState(chat, newMessage, "sent");
+  //   } catch (e) {
+  //     console.error(`Message to ${chat.recipient.name} failed to send: ${e}`);
+  //     this.chatStore.updateMessageState(chat, newMessage, "failed");
+  //   }
+  // }
 
   /** Makes an attempt to change db version of chat's messages from local version */
-  async retryUpdateMessage(message: Message) {
-    if (!message || message.state !== "failed") return;
+  // async retryUpdateMessage(message: Message) {
+  //   if (!message || message.state !== "failed") return;
 
-    const chat: Chat = this.thisChat$.getValue();
-    if (!chat) return console.error("Chat object is empty");
+  //   const chat: Chat = this.thisChat$.getValue();
+  //   if (!chat) return console.error("Chat object is empty");
 
-    try {
-      await this.chatStore.databaseUpdateMessages(chat);
-      this.chatStore.updateMessageState(chat, message, "sent");
-    } catch (e) {
-      console.error(`Message to ${chat.recipient.name} failed to send: ${e}`);
-    }
-  }
+  //   try {
+  //     await this.chatStore.databaseUpdateMessages(chat);
+  //     this.chatStore.updateMessageState(chat, message, "sent");
+  //   } catch (e) {
+  //     console.error(`Message to ${chat.recipient.name} failed to send: ${e}`);
+  //   }
+  // }
 
   /** Handles scrolling to bottom of messenger when there a new message is sent (on either side).
    * We assume a change in the time of the newest message means a new message appeared.
    */
   private scrollHandler(chat: Chat) {
-    if (!chat?.messages) return;
+    if (!chat?.recentMessage) return;
 
     if (this.lastInteracted() > this.timeOfNewestMsg) {
       this.timeOfNewestMsg = this.lastInteracted();
@@ -221,12 +261,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
   private lastInteracted(): Date {
     const chat = this.thisChat$.getValue();
     if (!chat) return;
-    return new Date(
-      Math.max.apply(
-        null,
-        chat.messages.map((msg) => msg.time)
-      )
-    );
+    return new Date(Math.max.apply(null, chat.recentMessage.time));
   }
 
   hasFailed(message: Message): boolean {
@@ -371,7 +406,6 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.chatStore.updateLatestChatInput(this.thisChat$.getValue(), this.latestChatInput);
     this.profileHandlingSub.unsubscribe();
     this.scrollSub.unsubscribe();
     this.bubblePictureSub.unsubscribe();

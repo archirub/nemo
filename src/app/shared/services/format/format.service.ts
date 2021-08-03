@@ -98,34 +98,27 @@ export class FormatService {
   public chatDatabaseToClass(
     currentUserID: string,
     chatID: string,
-    chatData: chatFromDatabase
+    chatData: chatFromDatabase,
+    recentMessage: Message
   ): Chat {
-    if (!currentUserID || !chatID || !chatData) return;
-
-    const batchVolume: number = chatData.batchVolume;
-    const lastInteracted: Date = chatData.lastInteracted.toDate();
-    const userSnippets: userSnippet[] = chatData.userSnippets;
-    const recipient: userSnippet = userSnippets.filter(
+    const recipient: userSnippet = chatData.userSnippets.filter(
       (snippet) => snippet.uid !== currentUserID
     )[0];
 
-    const messages: Message[] = this.messagesDatabaseToClass(chatData.messages);
-
-    return new Chat(chatID, recipient, messages, batchVolume, lastInteracted, null);
+    return new Chat(chatID, recipient, recentMessage, null);
   }
 
   public messagesDatabaseToClass(messages: messageFromDatabase[]): Message[] {
-    if (!messages) return;
+    return messages.map((msg) => this.messageDatabaseToClass(msg));
+  }
 
-    return messages.map((msg) => {
-      const content = msg.content;
-      const reaction = msg.reaction;
-      const senderID = msg.senderID;
-      const time = msg.time.toDate();
-      const seen = msg.seen;
+  public messageDatabaseToClass(message: messageFromDatabase): Message {
+    const content = message.content;
+    const senderID = message.senderID;
+    const time = message.time.toDate();
 
-      return new Message(senderID, time, content, reaction, "sent", seen);
-    });
+    // assuming the message has been sent and that it comes from the database
+    return new Message(senderID, time, content, "sent");
   }
 
   public messagesClassToDatabase(messages: Message[]): messageFromDatabase[] {
@@ -139,11 +132,9 @@ export class FormatService {
   private messageClassToDatabase(msg: Message): messageFromDatabase {
     if (!msg) return;
     const content = msg.content;
-    const reaction = msg.reaction;
     const senderID = msg.senderID;
     const time = firebase.firestore.Timestamp.fromDate(msg.time);
-    const seen = msg.seen;
 
-    return { senderID, seen, time, content, reaction };
+    return { senderID, time, content };
   }
 }

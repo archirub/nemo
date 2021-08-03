@@ -13,7 +13,7 @@ import {
 } from "rxjs/operators";
 import { urlToBase64, Base64ToUrl } from "../common-pictures-functions";
 import { Plugins } from "@capacitor/core";
-import { ChatStore } from "@stores/index";
+import { ChatboardStore } from "@stores/index";
 const { Storage } = Plugins;
 
 export interface pictureHolder {
@@ -44,12 +44,12 @@ export class ChatboardPicturesStore {
   private holder: BehaviorSubject<pictureHolder> = new BehaviorSubject({});
   holder$: Observable<pictureHolder> = this.holder.asObservable();
 
-  constructor(private chatStore: ChatStore, private afStorage: AngularFireStorage) {}
+  constructor(private afStorage: AngularFireStorage) {}
 
   /**
    * Gotta subscribe to this to activate the chain of logic that fills the store etc.
    */
-  activateStore(chats: Observable<Chat[]>): Observable<string[]> {
+  activateStore(chats: Observable<{ [chatID: string]: Chat }>): Observable<string[]> {
     return chats.pipe(
       concatMap((chats) => {
         // gets all pictures from local if the holder is empty
@@ -65,7 +65,7 @@ export class ChatboardPicturesStore {
         let uidsToAdd: string[] = [];
         const uidsContained = Object.keys(holder);
 
-        chats.forEach((chat) => {
+        Object.values(chats).forEach((chat) => {
           const index = uidsContained.indexOf(chat.recipient.uid);
           if (index === -1) {
             uidsToAdd.push(chat.recipient.uid);

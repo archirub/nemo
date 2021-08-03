@@ -15,12 +15,7 @@ import {
 
 import { concat, forkJoin, fromEvent, Observable, of, Subject, Subscription } from "rxjs";
 
-import {
-  ChatStore,
-  CurrentUserStore,
-  SwipeOutcomeStore,
-  SwipeStackStore,
-} from "@stores/index";
+import { CurrentUserStore, SwipeOutcomeStore, SwipeStackStore } from "@stores/index";
 import { Profile, User } from "@classes/index";
 import { MatchModalComponent, ProfileCardComponent } from "@components/index";
 import {
@@ -68,7 +63,6 @@ export class SwipeCardComponent extends EventEmitter implements OnInit, OnDestro
     private swipeOutcomeStore: SwipeOutcomeStore,
     private swipeStackStore: SwipeStackStore,
     private modalCtrl: ModalController,
-    private chatStore: ChatStore,
     private currentUserStore: CurrentUserStore
   ) {
     super();

@@ -1,4 +1,3 @@
-import { messageFromDatabase } from "./message.model";
 import { Message } from "@classes/index";
 
 export interface userSnippet {
@@ -8,15 +7,15 @@ export interface userSnippet {
 export interface chatFromDatabase {
   uids: string[];
   userSnippets: userSnippet[];
-  messages: messageFromDatabase[];
-  batchVolume: number;
-  lastInteracted: firebase.firestore.Timestamp;
+  // messages: messageFromDatabase[];
+  // batchVolume: number;
+  // lastInteracted: firebase.firestore.Timestamp;
 }
-
 export interface chat {
   id: string;
   recipient: userSnippet;
-  messages: Message[];
-  batchVolume: number;
-  lastInteracted: Date;
+  recentMessage: Message;
+  // messages: Message[];
+  // batchVolume: number;
+  // lastInteracted: Date;
 }
