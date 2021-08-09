@@ -9,6 +9,7 @@ import { searchCriteriaOptions } from "@interfaces/search-criteria.model";
 import { SearchCriteria } from "@classes/index";
 
 import { AppToggleComponent } from "@components/index";
+import { FishSwimAnimation } from "@animations/index";
 
 @Component({
   selector: "app-search-criteria",
@@ -24,6 +25,9 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
   @ViewChild("modalSlides") modalSlides: IonSlides;
   @ViewChild("modalSlides", { read: ElementRef }) slidesRef: ElementRef;
   @ViewChild(IonContent) frame: IonContent;
+
+  @ViewChild("fish", { read: ElementRef }) fish: ElementRef;
+  fishSwimAnimation;
 
   searchCriteriaSub: Subscription;
   searchCriteria: SearchCriteria;
@@ -52,6 +56,10 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
   constructor(private SCstore: SearchCriteriaStore, private modalCtrl: ModalController) {}
 
   ngOnInit() {
+    /*this.fishSwimAnimation = FishSwimAnimation(this.fish);
+    
+    this.fishSwimAnimation.play();*/
+
     this.searchCriteriaSub = this.SCstore.searchCriteria$.subscribe({
       next: (sc) => {
         this.searchCriteriaForm.patchValue({
@@ -65,8 +73,16 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
     });
   }
 
+  ngAfterViewInit() {
+    this.fishSwimAnimation = FishSwimAnimation(this.fish);
+    
+    this.fishSwimAnimation.play();
+  }
+
   async ionViewDidEnter() {
     this.viewEntered = true;
+
+    this.fishSwimAnimation.destroy();
 
     /* Timeout as elements don't exist until viewEntered set to true */
     setTimeout(() => {
@@ -75,8 +91,14 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
       this.moveTo("studies");
       this.returnTo();
 
-      this.degreeHandle.selectOption("undergrad");
-      this.locationHandle.selectOption("Everyone");
+      if (!this.searchCriteriaForm.value.degree) {
+        this.degreeHandle.selectOption("undergrad");
+      };
+
+      if (!this.searchCriteriaForm.value.onCampus) {
+        this.locationHandle.selectOption("Everyone");
+      };
+
       this.modalSlides.lockSwipes(true);
       this.optionsOriginalPos = this.options.nativeElement.getBoundingClientRect().y;
       this.gridHeight = this.grid.nativeElement.getBoundingClientRect().height;
@@ -103,8 +125,8 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
     this.clearButtonHeight = this.clear.nativeElement.getBoundingClientRect().height;
 
     if (
-      this.locationHandle.selection != "Everyone" ||
-      this.degreeHandle.selection != "undergrad"
+      this.locationHandle.value != "Everyone" ||
+      this.degreeHandle.value != "undergrad"
     ) {
       this.slideDown();
     } else if (
@@ -117,13 +139,20 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
       this.slideUp();
     }
 
-    this.searchCriteriaForm.value.onCampus = this.locationHandle.selection;
-    this.searchCriteriaForm.value.degree = this.degreeHandle.selection;
+    this.searchCriteriaForm.value.onCampus = this.locationHandle.value;
+    this.searchCriteriaForm.value.degree = this.degreeHandle.value;
   }
 
   updateCriteria() {
     if (this.locationHandle.selections.includes(this.searchCriteriaForm.value.onCampus)) {
-      this.locationHandle.selectOption(this.searchCriteriaForm.value.onCampus);
+      switch (this.searchCriteriaForm.value.onCampus) {
+        case true:
+          this.locationHandle.selectOption('On Campus');
+          break;
+        case false:
+          this.locationHandle.selectOption('Everyone');
+          break;
+      };
     }
 
     if (this.degreeHandle.selections.includes(this.searchCriteriaForm.value.degree)) {
@@ -134,12 +163,8 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
       this.selectReplace(this.searchCriteriaForm.value.areaOfStudy, "areaOfStudy");
     }
 
-    if (
-      this.scOptions.societyCategory.includes(
-        this.searchCriteriaForm.value.societySelection
-      )
-    ) {
-      this.selectReplace(this.searchCriteriaForm.value.societySelection, "society");
+    if (this.scOptions.societyCategory.includes(this.searchCriteriaForm.value.societyCategory)) {
+      this.selectReplace(this.searchCriteriaForm.value.societyCategory, "society");
     }
 
     if (this.scOptions.interests.includes(this.searchCriteriaForm.value.interests)) {
@@ -225,27 +250,29 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
         this.resetFormat(label);
       } else {
         this.studySelection = option;
-        this.searchCriteriaForm.value.areaOfStudy = this.studySelection;
         this.newFormat(label);
-      }
+      };
+      this.searchCriteriaForm.value.areaOfStudy = this.studySelection;
+
     } else if (label === "society") {
       if (this.societySelection === option) {
         this.societySelection = undefined;
         this.resetFormat(label);
       } else {
         this.societySelection = option;
-        this.searchCriteriaForm.value.societyCategory = this.societySelection;
         this.newFormat(label);
       }
+      this.searchCriteriaForm.value.societyCategory = this.societySelection;
+
     } else if (label === "interests") {
       if (this.interestSelection === option) {
         this.interestSelection = undefined;
         this.resetFormat(label);
       } else {
         this.interestSelection = option;
-        this.searchCriteriaForm.value.interests = this.interestSelection;
         this.newFormat(label);
       }
+      this.searchCriteriaForm.value.interests = this.interestSelection;
     }
   }
 
@@ -318,6 +345,7 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
   }
 
   async closeAndConfirmChoices() {
+    console.log(this.searchCriteriaForm.value);
     this.SCstore.addCriteria(this.searchCriteriaForm.value);
     return await this.modalCtrl.dismiss();
   }

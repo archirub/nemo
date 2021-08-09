@@ -12,7 +12,8 @@
             id="replace"
             interface="action-sheet" 
             placeholder="Choose a question"
-            (ionChange)="changeQuestion($event)">
+            (ionChange)="changeQuestion($event)"
+            (ionCancel)="cancelQuestion()">
                 <ion-select-option *ngFor="let q of this.questionsAvailable">
                     {{ q }}
                 </ion-select-option>
@@ -26,7 +27,9 @@
     <ion-select
     interface="action-sheet" 
     placeholder="Choose a question"
-    (ionChange)="chooseQuestion($event)">
+    (ionChange)="chooseQuestion($event)"
+    (ionCancel)="makeAddable()"
+    >
         <ion-select-option *ngFor="let q of this.questionsAvailable">
             {{ q }}
         </ion-select-option>

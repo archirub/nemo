@@ -106,7 +106,7 @@
               </p>
               <div class="slide-button preferences">
                 <p>I am looking for</p>
-                <ion-select formControlName="swipeMode">
+                <ion-select formControlName="swipeMode" interface="action-sheet">
                   <ion-select-option 
                   *ngFor="let swipeMode of swipeModeOptions" 
                   value="{{swipeMode}}">
@@ -117,7 +117,7 @@
 
               <div class="slide-button preferences">
                 <p>I am interested in</p>
-                <ion-select formControlName="sexualPreference">
+                <ion-select formControlName="sexualPreference" interface="action-sheet">
                   <ion-select-option
                     *ngFor="let sexPref of sexualPreferenceOptions"
                     value="{{sexPref}}">
@@ -128,7 +128,7 @@
 
               <div class="slide-button preferences">
                 <p>I identify as</p>
-                <ion-select formControlName="gender">
+                <ion-select formControlName="gender" interface="action-sheet">
                   <ion-select-option 
                   *ngFor="let gender of genderOptions" 
                   value="{{gender}}">
@@ -139,7 +139,7 @@
 
               <div class="slide-button preferences">
                 <p>I am currently on campus</p>
-                <ion-select formControlName="onCampus">
+                <ion-select formControlName="onCampus" interface="action-sheet">
                   <ion-select-option 
                   *ngFor="let onCampus of onCampusOptions" 
                   value="{{onCampus}}">

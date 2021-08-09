@@ -22,7 +22,13 @@ ion-content {
 }
 
 .loading {
-    margin-left: -50px
+    position: absolute;
+    left: 0;
+    width: 90vw;
+
+    img {
+        height: 20vh;
+    }
 }
 
 .criteria-container {

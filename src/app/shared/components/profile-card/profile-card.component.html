@@ -108,24 +108,28 @@
 
         <div id="info-segment">
           <div id="interests-container" class="centered">
-            <div id="interests-box">
+            <div id="interests-box-soc">
               <ion-icon
                 name="location"
                 id="bottom-icon"
                 style="color: var(--ion-color-primary)"
               ></ion-icon>
               <br />
-              <ion-label id="interests-label">Moscow</ion-label>
+              <div class="interests-text">
+                <ion-label id="interests-label">[LOCATION]</ion-label>
+              </div>
             </div>
 
-            <div id="interests-box">
+            <div id="interests-box-soc">
               <ion-icon
                 name="people"
                 id="bottom-icon"
                 style="color: var(--ion-color-primary)"
               ></ion-icon>
               <br />
-              <ion-label id="interests-label">{{ profile?.society }}</ion-label>
+              <div class="interests-text">
+                <ion-label id="interests-label">{{ profile?.society }}</ion-label>
+              </div>
             </div>
           </div>
         </div>

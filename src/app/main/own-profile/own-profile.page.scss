@@ -5,13 +5,13 @@ ion-content {
 
 .shadow {
     position: absolute;
-      box-shadow: 0px 0px 20px -12px;
-      width: 92.5%;
-      height: 91.2%;
-      left: 3.6%;
-      top: 6.3%;
-      border-radius: 30px;
-      overflow: hidden;
+    box-shadow: 0px 0px 20px -12px;
+    width: 92.5%;
+    height: 90.8%;
+    left: 3.6%;
+    top: 6.6%;
+    border-radius: 30px;
+    overflow: hidden;
   }
 
 .flexend {
@@ -22,6 +22,12 @@ ion-content {
     top: 9.5vh;
     width: 90%;
     margin: 0 auto;
+}
+
+.noQuestions {
+    text-align: center;
+    font-size: 2vh;
+    color: var(--ion-color-dark-tint);
 }
 
 .flexcenter {

@@ -28,6 +28,7 @@ import {
   swipeModeOptions,
 } from "@interfaces/index";
 import { InitService } from "@services/init/init.service";
+import { Profile } from "@classes/profile.class";
 
 @Component({
   selector: "app-settings",
@@ -38,8 +39,8 @@ export class SettingsPage implements AfterViewInit {
   @ViewChild("slide") slides: IonSlides;
   @ViewChild("goUnder") goUnder: ElementRef;
 
-  currentUser;
-  currentUser$: Subscription;
+  profileSub: Subscription;
+  profile: Profile;
 
   // FORM
   form = new FormGroup({
@@ -77,9 +78,11 @@ export class SettingsPage implements AfterViewInit {
 
   ionViewDidEnter() {
     //Fetch current user profile to change preferences
-    this.currentUser$ = this.currentUserStore.user$.subscribe((profile) => {
-      this.currentUser = profile;
-    });
+    this.profileSub = this.currentUserStore.user$.subscribe(
+      (profile) => (this.profile = profile)
+    );
+
+    this.fillPreferences();
   }
 
   goBack() {
@@ -180,7 +183,22 @@ export class SettingsPage implements AfterViewInit {
     this.unlockAndSwipe("next"); //move to slide
   }
 
+  /* Opens user's mail program with a new blank email to the address */
   openEmail() {
     window.open("mailto:customersupport@nemodating.com");
+  }
+
+  /* Finds preferences from profile and fills form with each control's value */
+  fillPreferences() {
+    //This is designed in such a way that in future we can add more controls in the same fashion
+    let controls = [{'swipeMode': this.profile['swipeMode']},
+                    {'sexualPreference': this.profile['sexualPreference']},
+                    {'gender': this.profile['gender']},
+                    {'onCampus': this.profile['onCampus']}]
+    
+    //Matches control name from objects above to profile's value and sets FormControl value
+    controls.forEach((obj: Object) => {
+      this.form.controls[Object.keys(obj)[0]].setValue(Object.values(obj)[0]);
+    });
   }
 }

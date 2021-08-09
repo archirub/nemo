@@ -19,14 +19,7 @@ ion-row {
     width: 100%;
     justify-content: center;
     top: 1vh;
-
-    h1 {
-        box-shadow: 0px 0px 15px 15px #FFF;
-        background: #FFF;
-        border-radius: 30px;
-        padding: none;
-        padding: 0;
-    }
+    height: 7vh;
 }
 
 .profile {
@@ -64,7 +57,7 @@ img {
 
 div.exit {
     position: absolute;
-    right: 0;
+    right: 1vw;
     top: 1vh;
     background: var(--ion-color-dark-contrast);
     color: var(--ion-color-dark);

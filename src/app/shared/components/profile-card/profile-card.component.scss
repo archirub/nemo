@@ -186,6 +186,14 @@ ion-slides {
   max-width: 27vw;
   width: 27vw;
   min-width: 20vw;
+
+  &-soc {
+    margin-left: 2vw;
+    margin-right: 2vw;
+    max-width: 30vw;
+    width: 30vw;
+    min-width: 20vw;
+  }
 }
 
 .interests-text {

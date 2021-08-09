@@ -103,6 +103,16 @@ export class ProfileAnswerComponent implements OnInit {
     }
 
     /**
+     * User cancels changing profile question
+     * Sets display back to profile question before the select was brought up
+     **/
+    cancelQuestion() {
+        this.qHead.nativeElement.style.display = "block"; //Change UI from select to text
+        this.qInput.nativeElement.style.display = "none";
+    }
+
+
+    /**
      * Choose question from select when adding new answer
      **/
     chooseQuestion(q) {
@@ -130,4 +140,12 @@ export class ProfileAnswerComponent implements OnInit {
 
         this.addable = true; //Hides the new question UI
     }
+
+    /**
+     * Sets addable property to true to hide input
+     **/
+    makeAddable() {
+        this.addable = true;
+    }
+
 }

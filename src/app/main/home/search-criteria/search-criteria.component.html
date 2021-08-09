@@ -6,10 +6,8 @@
 
     <div class="image" *ngIf="!viewEntered">
       <div class="flex loading">
-        <h1 class="nemo">nemo</h1>
-        <h1>search</h1>
+        <img #fish src="/assets/nemo.png" class="fish"/>
       </div>
-      <h4>loading...</h4>
     </div>
 
     <ion-slides #modalSlides *ngIf="viewEntered">
@@ -65,7 +63,8 @@
                     [buttonWidth]="17"
                     [fontSize]="3"
                     [selections]="this.scOptions.degree.reverse()"
-                    (click)="checkClear()"
+                    (choice)="checkClear()"
+                    formControlName='degree'
                   ></nemo-toggle>
                 </div>
               </ion-col>
@@ -79,8 +78,9 @@
                     #locationslider
                     [buttonWidth]="17"
                     [fontSize]="3"
-                    [selections]="['On campus', 'Everyone']"
-                    (click)="checkClear()"
+                    [selections]="['On Campus', 'Everyone']"
+                    (choice)="checkClear()"
+                    formControlName='onCampus'
                   ></nemo-toggle>
                 </div>
               </ion-col>
