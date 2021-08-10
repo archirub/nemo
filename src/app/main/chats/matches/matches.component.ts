@@ -14,9 +14,8 @@ import { Observable, Subscription } from "rxjs";
   templateUrl: "./matches.component.html",
   styleUrls: ["./matches.component.scss"],
 })
-export class MatchesComponent implements OnInit, OnDestroy {
+export class MatchesComponent implements OnInit {
   chatboardPictures$: Observable<pictureHolder>;
-  chatboardPicturesSub: Subscription;
 
   @Input() matches: Chat[];
 
@@ -28,13 +27,6 @@ export class MatchesComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.chatboardPictures$ = this.chatboardPicturesService.holder$;
-    this.chatboardPicturesSub = this.chatboardPicturesService
-      .activateStore(this.chatboardStore.allChats$)
-      .subscribe();
-  }
-
-  ngOnDestroy() {
-    this.chatboardPicturesSub.unsubscribe();
   }
 
   async closeModal() {

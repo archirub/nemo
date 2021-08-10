@@ -3,9 +3,11 @@ import { Component, OnInit, OnDestroy } from "@angular/core";
 
 import { AngularFireAuth } from "@angular/fire/auth";
 import { Plugins, Capacitor } from "@capacitor/core";
-import { Subscription } from "rxjs";
+import { ReplaySubject, Subscription } from "rxjs";
 
-import { InitService } from "@services/init/init.service";
+import { GlobalStateManagementService } from "@services/global-state-management/global-state-management.service";
+import { Router } from "@angular/router";
+import { routerInitListenerService } from "@services/index";
 
 @Component({
   selector: "app-root",
@@ -13,12 +15,13 @@ import { InitService } from "@services/init/init.service";
   styleUrls: ["app.component.scss"],
 })
 export class AppComponent implements OnDestroy, OnInit {
-  private appInitSub: Subscription;
+  private appGlobalStateManagementSub: Subscription;
 
   constructor(
     private platform: Platform,
     private afAuth: AngularFireAuth,
-    private initService: InitService
+    private GlobalStateManagement: GlobalStateManagementService,
+    private routerInitListener: routerInitListenerService
   ) {
     this.initializeApp();
   }
@@ -27,7 +30,7 @@ export class AppComponent implements OnDestroy, OnInit {
     this.afAuth.authState.subscribe((a) => console.log("change in authstate: ", a));
   }
   ngOnDestroy(): void {
-    this.appInitSub?.unsubscribe();
+    this.appGlobalStateManagementSub?.unsubscribe();
   }
 
   async initializeApp() {
@@ -37,6 +40,6 @@ export class AppComponent implements OnDestroy, OnInit {
       await Plugins.SplashScreen.hide();
     }
 
-    this.appInitSub = this.initService.initRoutine().subscribe();
+    this.appGlobalStateManagementSub = this.GlobalStateManagement.activate().subscribe();
   }
 }

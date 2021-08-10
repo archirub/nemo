@@ -31,9 +31,9 @@ import { ChatboardStore, OtherProfilesStore } from "@stores/index";
   templateUrl: "./chat-board.component.html",
   styleUrls: ["./chat-board.component.scss"],
 })
-export class ChatBoardComponent implements OnInit, OnDestroy {
+export class ChatBoardComponent implements OnInit {
   chatboardPictures$: Observable<pictureHolder>;
-  chatboardPicturesSub: Subscription;
+
   @Input() chats: Chat[];
   @Input() matches: Chat[];
   @ViewChild(IonContent) ionContent: IonContent;
@@ -50,15 +50,11 @@ export class ChatBoardComponent implements OnInit, OnDestroy {
     this.screenWidth = window.innerWidth;
   }
 
-  ngAfterViewInit() {}
-
   constructor(
     private router: Router,
     private modalCtrl: ModalController,
     private tabElementRef: TabElementRefService,
-    private chatboardPicturesService: ChatboardPicturesStore, // used in template
-    private chatboardStore: ChatboardStore,
-    private profilesStore: OtherProfilesStore
+    private chatboardPicturesService: ChatboardPicturesStore // used in template
   ) {
     this.onResize();
   }
@@ -69,13 +65,6 @@ export class ChatBoardComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.chatboardPictures$ = this.chatboardPicturesService.holder$;
-    this.chatboardPicturesSub = this.chatboardPicturesService
-      .activateStore(this.chatboardStore.allChats$)
-      .subscribe();
-  }
-
-  ngOnDestroy() {
-    this.chatboardPicturesSub?.unsubscribe();
   }
 
   async presentMatches(): Promise<void> {

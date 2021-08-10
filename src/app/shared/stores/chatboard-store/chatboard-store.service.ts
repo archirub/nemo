@@ -11,6 +11,8 @@ import {
   withLatestFrom,
   startWith,
   distinctUntilChanged,
+  shareReplay,
+  share,
 } from "rxjs/operators";
 import { chatFromDatabase, messageFromDatabase } from "@interfaces/index";
 
@@ -72,7 +74,7 @@ export class ChatboardStore {
       this.activateRecentMessageListening(),
       this.activateRecentMessagePreprocessing(),
       this.activateMsgAndChatDocumentsProcessing(),
-    ]);
+    ]).pipe(share());
   }
 
   public resetStore() {
@@ -84,7 +86,7 @@ export class ChatboardStore {
     });
   }
 
-  activateChatDocsListening(): Observable<void> {
+  private activateChatDocsListening(): Observable<void> {
     return this.afAuth.user.pipe(
       take(1),
       map((user) => {
@@ -105,7 +107,7 @@ export class ChatboardStore {
     );
   }
 
-  activateRecentMessageListening(): Observable<void> {
+  private activateRecentMessageListening(): Observable<void> {
     return this.chatsFromDatabase.asObservable().pipe(
       withLatestFrom(this.afAuth.user),
       map(([chatsFromDb, user]) => {
@@ -152,7 +154,7 @@ export class ChatboardStore {
    * the queue of messages that still need to be processed), and adds them
    * to the msg map contained in the BehaviorSubject
    */
-  activateRecentMessagePreprocessing(): Observable<void> {
+  private activateRecentMessagePreprocessing(): Observable<void> {
     return this.recentMsgToBeProcessed.pipe(
       withLatestFrom(this.recentMsgsFromDatabase),
       map(([msgToBeProcessed, currentMsgsMap]) => {
@@ -165,7 +167,7 @@ export class ChatboardStore {
   /**
    * Processes the arrival of new recent messages into the recentMsgsFromDatabase behaviorSubject
    */
-  activateMsgAndChatDocumentsProcessing(): Observable<void> {
+  private activateMsgAndChatDocumentsProcessing(): Observable<void> {
     return combineLatest([this.recentMsgsFromDatabase, this.chatsFromDatabase]).pipe(
       withLatestFrom(combineLatest([this.afAuth.user, this.allChats])),
       map(([[recentMsgs, chats], [user, currentChats]]) => {
@@ -208,7 +210,7 @@ export class ChatboardStore {
     );
   }
 
-  filterBasedOnNature(natureToKeep: chatNature): Observable<{
+  private filterBasedOnNature(natureToKeep: chatNature): Observable<{
     [chatID: string]: Chat;
   }> {
     return this.allChats.pipe(
@@ -227,7 +229,7 @@ export class ChatboardStore {
     );
   }
 
-  allChatsWithoutNatureProp(): Observable<{
+  private allChatsWithoutNatureProp(): Observable<{
     [chatID: string]: Chat;
   }> {
     return this.allChats.pipe(

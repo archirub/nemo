@@ -76,7 +76,6 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
   private timeOfNewestMsg: Date;
 
   public thisChat$ = new BehaviorSubject<Chat>(null);
-  bubblePictureSub: Subscription;
 
   constructor(
     private route: ActivatedRoute,
@@ -98,10 +97,6 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
           return this.initialiseMessenger(param);
         })
       )
-      .subscribe();
-
-    this.bubblePictureSub = this.chatboardPictures
-      .activateStore(this.chatboardStore.allChats$)
       .subscribe();
 
     this.timeOfNewestMsg = this.lastInteracted();
@@ -448,7 +443,6 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
   ngOnDestroy() {
     this.profileHandlingSub?.unsubscribe();
     this.scrollSub?.unsubscribe();
-    this.bubblePictureSub?.unsubscribe();
     this.messagesDatabaseSub ? this.messagesDatabaseSub() : null;
   }
 }

@@ -78,17 +78,18 @@
       ></profile-answer>
 
       <ng-container *ngIf="this.answers">
-        <div 
-        *ngIf="this.lastAnsRef.addable === true && this.profile.questions.length < 4" 
-        class="flexcenter">
+        <div
+          *ngIf="this.lastAnsRef?.addable === true && this.profile?.questions.length < 4"
+          class="flexcenter"
+        >
           <ion-icon id="addQuestion" name="add-circle" (click)="addQuestion()"></ion-icon>
         </div>
 
-        <div class="noQuestions" *ngIf="this.profile.questions.length >= 4">
+        <div class="noQuestions" *ngIf="this.profile?.questions.length >= 4">
           <span>Sorry, there's no space for any more questions!</span>
         </div>
 
-        <div *ngIf="this.lastAnsRef.addable === false" class="flexcenter">
+        <div *ngIf="this.lastAnsRef?.addable === false" class="flexcenter">
           <ion-icon
             id="submitQuestion"
             name="checkmark-outline"

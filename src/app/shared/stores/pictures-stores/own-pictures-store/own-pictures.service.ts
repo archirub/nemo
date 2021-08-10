@@ -5,7 +5,7 @@ import { Plugins } from "@capacitor/core";
 const { Storage } = Plugins;
 
 import { BehaviorSubject, combineLatest, forkJoin, from, Observable, of } from "rxjs";
-import { filter, map, skipWhile, switchMap, take, tap } from "rxjs/operators";
+import { filter, map, share, skipWhile, switchMap, take, tap } from "rxjs/operators";
 
 import {
   Base64ToUrl,
@@ -59,7 +59,8 @@ export class OwnPicturesStore {
         }
 
         return this.nextFromFirebase().pipe(switchMap((urls) => this.storeInLocal(urls)));
-      })
+      }),
+      share()
     );
   }
 
@@ -110,7 +111,7 @@ export class OwnPicturesStore {
   }
 
   nextFromFirebase(): Observable<string[]> {
-    const uid$: Observable<string> = this.afAuth.user.pipe(map((user) => user.uid));
+    const uid$: Observable<string> = this.afAuth.user.pipe(map((user) => user?.uid));
     const pictureCount$: Observable<number> = this.getOwnPictureCount();
 
     // here we are using the switchMap operator (instead of concatMap or mergeMap for ex) as it allows
@@ -118,6 +119,7 @@ export class OwnPicturesStore {
     // right away and start a new fetch with the new value. THis is also why take(1) comes after switchMap,
     // that way, we only take(1) after we got the profilePictures
     return combineLatest([uid$, pictureCount$]).pipe(
+      filter(([uid, pictureCount]) => !!uid),
       switchMap(([uid, pictureCount]) => this.fetchProfilePictures(uid, pictureCount)),
       take(1),
       tap((urls) => this.urls.next(urls))

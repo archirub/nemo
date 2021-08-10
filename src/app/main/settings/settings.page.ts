@@ -27,7 +27,7 @@ import {
   SwipeMode,
   swipeModeOptions,
 } from "@interfaces/index";
-import { InitService } from "@services/init/init.service";
+import { GlobalStateManagementService } from "@services/global-state-management/global-state-management.service";
 import { Profile } from "@classes/profile.class";
 
 @Component({
@@ -63,7 +63,7 @@ export class SettingsPage implements AfterViewInit {
     private currentUserStore: CurrentUserStore,
     private router: Router,
     private zone: NgZone,
-    private initService: InitService
+    private initService: GlobalStateManagementService
   ) {}
 
   ngAfterViewInit() {
@@ -191,11 +191,13 @@ export class SettingsPage implements AfterViewInit {
   /* Finds preferences from profile and fills form with each control's value */
   fillPreferences() {
     //This is designed in such a way that in future we can add more controls in the same fashion
-    let controls = [{'swipeMode': this.profile['swipeMode']},
-                    {'sexualPreference': this.profile['sexualPreference']},
-                    {'gender': this.profile['gender']},
-                    {'onCampus': this.profile['onCampus']}]
-    
+    let controls = [
+      { swipeMode: this.profile["swipeMode"] },
+      { sexualPreference: this.profile["sexualPreference"] },
+      { gender: this.profile["gender"] },
+      { onCampus: this.profile["onCampus"] },
+    ];
+
     //Matches control name from objects above to profile's value and sets FormControl value
     controls.forEach((obj: Object) => {
       this.form.controls[Object.keys(obj)[0]].setValue(Object.values(obj)[0]);

@@ -9,6 +9,7 @@ import {
   filter,
   last,
   map,
+  share,
   switchMap,
   take,
   tap,
@@ -50,7 +51,8 @@ export class SwipeStackStore {
       filter((profiles) => profiles.length <= this.minimumProfileCount),
       withLatestFrom(this.SCstore.searchCriteria$),
       // exhaustMap is a must use here, makes sure we don't have multiple requests to fill the swipe stack
-      exhaustMap(([profiles, SC]) => this.addToSwipeStackQueue(SC))
+      exhaustMap(([profiles, SC]) => this.addToSwipeStackQueue(SC)),
+      share()
     );
   }
 

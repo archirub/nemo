@@ -19,7 +19,7 @@
         </ion-avatar>
 
         <div
-          *ngIf="matches.length < 31"
+          *ngIf="matches.length > 1 && matches.length < 10"
           class="text-container"
           id="match-text"
           [ngStyle]="styleFromMatches()"
@@ -28,12 +28,21 @@
         </div>
 
         <div
-          *ngIf="matches.length >= 31"
+          *ngIf="matches.length === 1"
           class="text-container"
           id="match-text"
           [ngStyle]="styleFromMatches()"
         >
-          30+ new catches!
+          {{ matches.length }} new catch!
+        </div>
+
+        <div
+          *ngIf="matches.length >= 10"
+          class="text-container"
+          id="match-text"
+          [ngStyle]="styleFromMatches()"
+        >
+          10+ new catches!
         </div>
       </ion-item>
     </ng-container>

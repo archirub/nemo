@@ -1,35 +1,61 @@
+import { OwnPicturesStore } from "@stores/pictures-stores/own-pictures-store/own-pictures.service";
 import { Injectable } from "@angular/core";
 import { AlertController } from "@ionic/angular";
-import { Router } from "@angular/router";
+import { ActivatedRoute, NavigationStart, ParamMap, Router } from "@angular/router";
 
 import { AngularFireAuth } from "@angular/fire/auth";
 import { AngularFirestore } from "@angular/fire/firestore";
 import { Storage } from "@capacitor/core";
 
-import { BehaviorSubject, concat, forkJoin, from, Observable, of } from "rxjs";
-import { catchError, concatMap, first, map, switchMap, take, tap } from "rxjs/operators";
+import { BehaviorSubject, concat, forkJoin, from, merge, Observable, of } from "rxjs";
+import {
+  concatMap,
+  filter,
+  first,
+  last,
+  map,
+  mergeMap,
+  startWith,
+  switchMap,
+  take,
+  tap,
+} from "rxjs/operators";
 
 import {
-  // ChatStore,
   CurrentUserStore,
   SearchCriteriaStore,
   SwipeOutcomeStore,
   OtherProfilesStore,
   SwipeStackStore,
   SettingsStore,
+  ChatboardStore,
 } from "@stores/index";
+import { ChatboardPicturesStore } from "@stores/pictures-stores/chatboard-pictures-store/chatboard-pictures.service";
 import { SignupService } from "@services/signup/signup.service";
+import { routerInitListenerService } from "./initial-url.service";
+import { FirebaseAuthService } from "@services/firebase-auth/firebase-auth.service";
 
 import firebase from "firebase";
-import { FirebaseAuthService } from "@services/firebase-auth/firebase-auth.service";
+
+type pageName =
+  | "chats"
+  | "home"
+  | "own-profile"
+  | "settings"
+  | "messenger"
+  | "welcome"
+  | "login"
+  | "signup";
+
 @Injectable({
   providedIn: "root",
 })
-export class InitService {
+export class GlobalStateManagementService {
   auth$ = new BehaviorSubject<firebase.User>(null);
 
   constructor(
     private router: Router,
+    private activatedRoute: ActivatedRoute,
     private alertCtrl: AlertController,
 
     private afAuth: AngularFireAuth,
@@ -37,25 +63,80 @@ export class InitService {
 
     private signupService: SignupService,
     private firebaseAuthService: FirebaseAuthService,
+    private routerInitListener: routerInitListenerService,
 
     private userStore: CurrentUserStore,
-    // private chatStore: ChatStore,
+    private chatboardStore: ChatboardStore,
+    private chatboardPicturesStore: ChatboardPicturesStore,
     private searchCriteriaStore: SearchCriteriaStore,
     private otherProfilesStore: OtherProfilesStore,
     private swipeOutcomeStore: SwipeOutcomeStore,
     private swipeStackStore: SwipeStackStore,
-    private settingsStore: SettingsStore
+    private settingsStore: SettingsStore,
+    private OwnPicturesStore: OwnPicturesStore,
+    private CurrentUserStore: CurrentUserStore
   ) {
+    // format allows for this.auth$ to be a BehaviorSubject version of the Firebase.User observable
     this.afAuth.user.subscribe(this.auth$);
   }
 
-  initRoutine() {
+  activate(): Observable<any> {
+    return merge(this.authStateManagement(), this.storesManagement());
+  }
+
+  private authStateManagement() {
     return this.getFirebaseUser().pipe(
       concatMap((user) => {
         if (!user) return this.nobodyAuthenticatedRoutine();
         return this.somebodyAuthenticatedRoutine(user);
       })
     );
+  }
+
+  private storesManagement(): Observable<void> {
+    // serves as notification for when the router has been initialised
+    const initialUrl$ = this.routerInitListener.routerHasInit$.pipe(
+      map(() => this.router.url)
+    );
+
+    return concat(initialUrl$, this.router.events).pipe(
+      filter((event) => event instanceof NavigationStart || typeof event === "string"),
+      map((event: NavigationStart) =>
+        this.getPageFromUrl(event instanceof NavigationStart ? event.url : event)
+      ),
+      mergeMap((page) => this.activateCorrespondingStores(page))
+    );
+  }
+
+  private getPageFromUrl(url: string): pageName {
+    if (url.includes("chats")) return "chats";
+    if (url.includes("home")) return "home";
+    if (url.includes("own-profile")) return "own-profile";
+    if (url.includes("settings")) return "settings";
+    if (url.includes("messenger")) return "messenger";
+    if (url.includes("login")) return "login";
+    if (url.includes("signup")) return "signup";
+    if (url === "/welcome") return "welcome";
+    return null;
+  }
+
+  private activateCorrespondingStores(page: pageName): Observable<any> {
+    if (page === "chats" || page === "messenger")
+      return forkJoin([
+        this.chatboardStore.activateStore(),
+        this.chatboardPicturesStore.activateStore(this.chatboardStore.allChats$),
+      ]);
+
+    // temporarily commented out -  to not fetch a swipe stack every time
+    // if (page === "home") return this.swipeStackStore.activateStore();
+
+    if (page === "own-profile" || page === "settings")
+      return forkJoin([
+        this.OwnPicturesStore.activateStore(),
+        this.CurrentUserStore.fillStore(),
+      ]);
+
+    return of();
   }
 
   private getFirebaseUser(): Observable<firebase.User | null> {
@@ -91,8 +172,7 @@ export class InitService {
         // makes it such that we only navigate to home if the user is not in main
         // such that it doesn't infringe on the user experience
         const currentPath = this.router.url;
-        if (currentPath.startsWith("main") || currentPath.startsWith("/main"))
-          return of();
+        if (currentPath.startsWith("/main")) return of();
         return this.router.navigateByUrl("main/tabs/home");
       })
     );
@@ -198,6 +278,7 @@ export class InitService {
   }
 
   emptyStores() {
+    console.log("stores emptied");
     this.userStore.resetStore();
     // this.chatboardStore.resetStore();
     this.searchCriteriaStore.resetStore();

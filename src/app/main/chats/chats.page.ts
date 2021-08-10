@@ -14,14 +14,12 @@ import { map, tap } from "rxjs/operators";
   templateUrl: "./chats.page.html",
   styleUrls: ["./chats.page.scss"],
 })
-export class ChatsPage implements OnInit, OnDestroy {
+export class ChatsPage {
   @ViewChild("chatboard") chatboard: ChatBoardComponent;
 
   TOP_SCROLL_SPEED = 100;
 
-  chatboardActivationSub: Subscription;
-
-  numberOfChatsAndMatches$: Observable<number>;
+  numberOfChats$: Observable<number>;
   chats$: Observable<Chat[]>;
   matches$: Observable<Chat[]>;
 
@@ -31,17 +29,10 @@ export class ChatsPage implements OnInit, OnDestroy {
     );
 
     this.matches$ = this.chatboardStore.matches$.pipe(
-      map((chatsObject) => this.sortChats(chatsObject)),
-      tap((a) => console.log("matches$", a))
+      map((chatsObject) => this.sortChats(chatsObject))
     );
 
-    this.numberOfChatsAndMatches$ = combineLatest([this.chats$, this.matches$]).pipe(
-      map(([chats, matches]) => chats.length + matches.length)
-    );
-  }
-
-  ngOnInit() {
-    this.chatboardActivationSub = this.chatboardStore.activateStore().subscribe();
+    this.numberOfChats$ = this.chats$.pipe(map((chats) => chats.length));
   }
 
   scrollToTop() {
@@ -57,9 +48,5 @@ export class ChatsPage implements OnInit, OnDestroy {
       (chat1, chat2) =>
         chat2?.recentMessage?.time?.getTime() - chat1?.recentMessage?.time?.getTime()
     );
-  }
-
-  ngOnDestroy() {
-    this.chatboardActivationSub?.unsubscribe();
   }
 }

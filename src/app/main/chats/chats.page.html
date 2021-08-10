@@ -9,7 +9,7 @@
     <h1>Chats</h1>
   </div>
 
-  <div *ngIf="(numberOfChatsAndMatches$ | async) < 1" class="noChats">
+  <div *ngIf="(numberOfChats$ | async) < 1" class="noChats">
     <p>
       Sorry, looks like you don't have any chats yet. Head to the catch tab to find
       someone new!
