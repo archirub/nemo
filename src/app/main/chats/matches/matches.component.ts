@@ -29,7 +29,7 @@ export class MatchesComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.chatboardPictures$ = this.chatboardPicturesService.holder$;
     this.chatboardPicturesSub = this.chatboardPicturesService
-      .activateStore(this.chatboardStore.chats$)
+      .activateStore(this.chatboardStore.allChats$)
       .subscribe();
   }
 

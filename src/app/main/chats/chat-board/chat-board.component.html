@@ -1,6 +1,6 @@
 <ion-content #chatContainer>
   <ion-row>
-    <ng-container *ngIf="matches.length > 0">
+    <ng-container *ngIf="matches">
       <ion-item detail="false" #matchesButton button (click)="presentMatches()">
         <ion-avatar slot="start">
           <ion-img
@@ -40,7 +40,6 @@
   </ion-row>
 
   <ion-list *ngIf="chats">
-    <!-- <app-infinite-scroll (scrolled)="scrollToBottom$.next('')"> -->
     <ion-item
       detail="true"
       button
@@ -81,6 +80,5 @@
         Your turn!
       </ion-badge>
     </ion-item>
-    <!-- </app-infinite-scroll> -->
   </ion-list>
 </ion-content>

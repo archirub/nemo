@@ -42,7 +42,7 @@
 <ion-slides #slides>
   <ion-slide>
     <ion-content>
-      <ion-row *ngFor="let message of messages| async; index as i; let last='last'">
+      <ion-row *ngFor="let message of messages$ | async; index as i; let last='last'">
         {{last ? fastScroll() : ""}}
         <ion-col
           size="8"

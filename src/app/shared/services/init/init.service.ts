@@ -6,7 +6,7 @@ import { AngularFireAuth } from "@angular/fire/auth";
 import { AngularFirestore } from "@angular/fire/firestore";
 import { Storage } from "@capacitor/core";
 
-import { concat, forkJoin, from, Observable, of } from "rxjs";
+import { BehaviorSubject, concat, forkJoin, from, Observable, of } from "rxjs";
 import { catchError, concatMap, first, map, switchMap, take, tap } from "rxjs/operators";
 
 import {
@@ -26,6 +26,8 @@ import { FirebaseAuthService } from "@services/firebase-auth/firebase-auth.servi
   providedIn: "root",
 })
 export class InitService {
+  auth$ = new BehaviorSubject<firebase.User>(null);
+
   constructor(
     private router: Router,
     private alertCtrl: AlertController,
@@ -43,7 +45,9 @@ export class InitService {
     private swipeOutcomeStore: SwipeOutcomeStore,
     private swipeStackStore: SwipeStackStore,
     private settingsStore: SettingsStore
-  ) {}
+  ) {
+    this.afAuth.user.subscribe(this.auth$);
+  }
 
   initRoutine() {
     return this.getFirebaseUser().pipe(

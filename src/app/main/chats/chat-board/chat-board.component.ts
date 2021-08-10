@@ -38,9 +38,6 @@ export class ChatBoardComponent implements OnInit, OnDestroy {
   @Input() matches: Chat[];
   @ViewChild(IonContent) ionContent: IonContent;
 
-  scrollToBottom$ = new Subject();
-  additionalChatsLoadingSub: Subscription;
-
   // PROPERTIES FOR MODAL ANIMATION
   @ViewChild("chatContainer", { read: ElementRef }) chatContainer: ElementRef;
   @ViewChild("matchesButton", { read: ElementRef }) matchesButton: ElementRef;
@@ -52,12 +49,6 @@ export class ChatBoardComponent implements OnInit, OnDestroy {
     this.screenHeight = window.innerHeight;
     this.screenWidth = window.innerWidth;
   }
-
-  // activateAdditionalChatsLoading(): Observable<any> {
-  //   return this.scrollToBottom$.pipe(
-  //     exhaustMap((_) => this.chatStore.incrementNumberOfChatsToListen())
-  //   );
-  // }
 
   ngAfterViewInit() {}
 
@@ -77,25 +68,17 @@ export class ChatBoardComponent implements OnInit, OnDestroy {
   MatchesLeaveAnimation;
 
   ngOnInit() {
-    this.profilesStore.profiles$.subscribe((a) =>
-      console.log("Profile store content:", a)
-    );
     this.chatboardPictures$ = this.chatboardPicturesService.holder$;
     this.chatboardPicturesSub = this.chatboardPicturesService
-      .activateStore(this.chatboardStore.chats$)
+      .activateStore(this.chatboardStore.allChats$)
       .subscribe();
-    setTimeout(() => console.log("chats:", this.chats), 4000);
-    // this.additionalChatsLoadingSub = this.activateAdditionalChatsLoading().subscribe();
   }
 
   ngOnDestroy() {
     this.chatboardPicturesSub?.unsubscribe();
-    this.additionalChatsLoadingSub?.unsubscribe();
   }
 
   async presentMatches(): Promise<void> {
-    // console.log("Matches modal initialised");
-
     this.MatchesEnterAnimation = MatchesEnterAnimation(
       this.matchesButton,
       this.tabElementRef.tabRef,
@@ -111,41 +94,38 @@ export class ChatBoardComponent implements OnInit, OnDestroy {
       this.screenWidth
     );
 
-    this.modalCtrl
-      .create({
-        component: MatchesComponent,
-        componentProps: { matches: this.matches },
-        enterAnimation: this.MatchesEnterAnimation,
-        leaveAnimation: this.MatchesLeaveAnimation,
-      })
-      .then((m) => {
-        this.modal = m;
-        this.onModalDismiss(this.modal);
-      });
+    this.modal = await this.modalCtrl.create({
+      component: MatchesComponent,
+      componentProps: { matches: this.matches },
+      enterAnimation: this.MatchesEnterAnimation,
+      leaveAnimation: this.MatchesLeaveAnimation,
+    });
+    // .then((m) => {
+    //   this.modal = m;
+    //   this.onModalDismiss(this.modal);
+    // });
 
-    setTimeout(() => {
-      return this.modal.present();
-    }, 200);
+    return this.modal.present();
   }
 
   // Used to preload modal as soon as the previous modal was dismissed
   // Shamelessly adapted from the homepage SC modal
-  onModalDismiss(modal: HTMLIonModalElement) {
-    if (!modal) return;
-    modal.onDidDismiss().then(() => {
-      this.modalCtrl
-        .create({
-          component: MatchesComponent,
-          enterAnimation: this.MatchesEnterAnimation,
-          leaveAnimation: this.MatchesLeaveAnimation,
-        })
-        .then((m) => {
-          this.modal = m;
-          return this.modal;
-        })
-        .then((m) => this.onModalDismiss(m));
-    });
-  }
+  // onModalDismiss(modal: HTMLIonModalElement) {
+  //   if (!modal) return;
+  //   modal.onDidDismiss().then(() => {
+  //     this.modalCtrl
+  //       .create({
+  //         component: MatchesComponent,
+  //         enterAnimation: this.MatchesEnterAnimation,
+  //         leaveAnimation: this.MatchesLeaveAnimation,
+  //       })
+  //       .then((m) => {
+  //         this.modal = m;
+  //         return this.modal;
+  //       })
+  //       .then((m) => this.onModalDismiss(m));
+  //   });
+  // }
 
   shorten(sentence: string) {
     if (sentence.length > 25) {
@@ -154,7 +134,7 @@ export class ChatBoardComponent implements OnInit, OnDestroy {
         shortenedSentence = sentence.slice(0, 24);
       }
       return shortenedSentence + "...";
-    }
+    } else return sentence;
   }
 
   getDate(date: Date) {
