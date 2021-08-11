@@ -6,6 +6,7 @@ import {
   concatMap,
   exhaustMap,
   map,
+  share,
   switchMap,
   take,
   tap,
@@ -83,10 +84,9 @@ export class ChatboardPicturesStore {
           )
         );
 
-        return forkJoin(pictureAdditions$).pipe(
-          tap((content) => console.log("Picture added and stored locally:", content))
-        );
-      })
+        return forkJoin(pictureAdditions$);
+      }),
+      share()
     );
   }
 

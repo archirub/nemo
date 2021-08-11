@@ -206,6 +206,6 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.swipeStackSub.unsubscribe();
+    this.swipeStackSub?.unsubscribe();
   }
 }

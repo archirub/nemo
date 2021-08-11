@@ -68,7 +68,6 @@ export class OwnProfilePage implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.ownPicturesSub = this.ownPicturesService.activateStore().subscribe();
     this.profileSub = this.currentUserStore.user$.subscribe(
       (profile) => (this.profile = profile)
     );

@@ -88,8 +88,8 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
     // pictureUrls property of the ownProfileStore, instead of having its own BehaviorSubject)
     this.profilePictures$ = iif(
       () => this.isOwnProfile,
-      this.ownPicturesService.urls$,
-      of(this.profile.pictureUrls)
+      this.ownPicturesService?.urls$,
+      of(this.profile?.pictureUrls)
     );
   }
 
@@ -182,7 +182,7 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
     let count = 0;
     let pushArray = [];
 
-    this.profile.interests?.forEach((int) => {
+    this.profile?.interests?.forEach((int) => {
       count++;
 
       if (count < 4) {

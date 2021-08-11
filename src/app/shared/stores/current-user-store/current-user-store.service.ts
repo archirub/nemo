@@ -14,7 +14,7 @@ import {
 } from "@interfaces/index";
 import { FormatService } from "@services/index";
 import { SearchCriteriaStore } from "../search-criteria-store/search-criteria-store.service";
-import { catchError, map, switchMap, take } from "rxjs/operators";
+import { catchError, map, share, switchMap, take } from "rxjs/operators";
 
 @Injectable({
   providedIn: "root",
@@ -120,7 +120,8 @@ export class CurrentUserStore {
             privateProfileSuccess: false,
             matchDataSuccess: false,
           });
-      })
+      }),
+      share()
     );
   }
 

@@ -7,33 +7,22 @@
 <ion-content>
   <div class="toolbar"></div>
 
-  <div *ngIf="chatNumber < 1" class="noChats">
+  <div *ngIf="(numberOfChats$ | async) < 1" class="noChats">
     <p>
-      Sorry, looks like you don't have any chats yet. Head to the catch tab to find someone new!
+      Sorry, looks like you don't have any chats yet. Head to the catch tab to find
+      someone new!
     </p>
 
     <div class="fish" (click)="goToCatch()">
-      <img 
-      name="fish" 
-      src="/assets/singlefish-orange.png"/>
+      <img name="fish" src="/assets/singlefish-orange.png" />
 
       <h1>Catch</h1>
     </div>
   </div>
 
-  <app-chat-board 
-  #chatboard 
-  [chats]="chats | async"
-  [matches]="this.matches"
+  <app-chat-board
+    #chatboard
+    [chats]="chats$ | async"
+    [matches]="matches$ | async"
   ></app-chat-board>
-
-  <!--ion-button
-    icon-only
-    expand="block"
-    color="medium"
-    fill="clear"
-    (click)="scrollToTop()"
-  >
-    <ion-icon name="arrow-up-outline" size="medium" color="black"></ion-icon>
-  </ion-button-->
 </ion-content>

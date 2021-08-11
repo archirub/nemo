@@ -1,51 +1,38 @@
-import { Component, OnInit, ViewChild } from "@angular/core";
+import { chat } from "./../../shared/interfaces/chat.model";
+import { Component, OnDestroy, OnInit, ViewChild } from "@angular/core";
 
-import { Observable } from "rxjs";
+import { combineLatest, Observable, Subscription } from "rxjs";
 
 import { ChatboardStore, SwipeStackStore } from "@stores/index";
 import { Chat, Profile } from "@classes/index";
 import { ChatBoardComponent } from "./chat-board/chat-board.component";
 import { Router } from "@angular/router";
-import { map } from "rxjs/operators";
+import { map, tap } from "rxjs/operators";
 
 @Component({
   selector: "app-chats",
   templateUrl: "./chats.page.html",
   styleUrls: ["./chats.page.scss"],
 })
-export class ChatsPage implements OnInit {
+export class ChatsPage {
   @ViewChild("chatboard") chatboard: ChatBoardComponent;
 
   TOP_SCROLL_SPEED = 100;
 
-  chatNumber: number;
+  numberOfChats$: Observable<number>;
+  chats$: Observable<Chat[]>;
+  matches$: Observable<Chat[]>;
 
-  public chats: Observable<Chat[]>;
-  public matches: Chat[];
+  constructor(private router: Router, private chatboardStore: ChatboardStore) {
+    this.chats$ = this.chatboardStore.chats$.pipe(
+      map((chatsObject) => this.sortChats(chatsObject))
+    );
 
-  constructor(private router: Router, private chatboardStore: ChatboardStore) {}
+    this.matches$ = this.chatboardStore.matches$.pipe(
+      map((chatsObject) => this.sortChats(chatsObject))
+    );
 
-  ngOnInit() {
-    this.chatboardStore.activateStore().subscribe();
-    this.chatboardStore.chats$.subscribe(console.log);
-
-    this.chats = this.chatboardStore.chats$.pipe(map((c) => this.sortChats(c)));
-
-    this.chats.forEach((c) => {
-      this.chatNumber = c.length;
-    });
-
-    this.buildMatches();
-  }
-
-  buildMatches() {
-    this.matches = [];
-
-    this.chats.forEach((c) => {
-      c.forEach((chat) => {
-        this.matches.push(chat);
-      });
-    });
+    this.numberOfChats$ = this.chats$.pipe(map((chats) => chats.length));
   }
 
   scrollToTop() {
