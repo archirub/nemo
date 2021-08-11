@@ -1,5 +1,6 @@
 ion-content {
-  height: 90vh;
+  top: 5vh;
+  height: 85vh;
   width: calc(100% + 15px);
   --padding-end: 15px;
 }
@@ -9,7 +10,7 @@ ion-item {
   border-bottom: solid 1px var(--ion-color-primary-tint);
   margin: 0 15px;
   --background: rgb(255, 255, 255);
-  --min-height: 11vh;
+  --min-height: 13vh;
   --background-activated: var(--ion-color-primary-tint);
 }
 
@@ -28,10 +29,18 @@ ion-list {
   padding-top: 0;
 }
 
+.fish-back {
+  height: 15vh;
+  opacity: 0.5;
+  overflow: hidden;
+  position: absolute;
+  right: 0;
+}
+
 ion-badge {
   position: absolute;
   right: 10vw;
-  top: 2vh;
+  top: 3vh;
   background-color: var(--ion-color-primary);
 }
 
@@ -46,8 +55,9 @@ ion-row {
     font-weight: bold;
     border: solid var(--ion-color-primary-shade) 1px;
     border-radius: 10px;
-    --background: rgba(243, 161, 136, 0.1);
+    //--background: rgba(243, 161, 136, 0.1);
     --color: var(--ion-color-primary-shade);
+    max-height: 13vh;
   }
 }
 

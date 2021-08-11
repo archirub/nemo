@@ -32,10 +32,12 @@ export class InterestSlidesComponent implements OnInit {
     //this.names = searchCriteriaOptions.interests;
 
     this.slideOpts = {
+      speed: 200,
+      resistanceRatio: 0.5,
       coverflowEffect: {
         rotate: 0,
         stretch: 50,
-        depth: 100,
+        depth: 150,
         modifier: 1,
         slideShadows: false,
       },

@@ -12,20 +12,17 @@ export const SCenterAnimation = (
     const wrapperAnimation = new AnimationController()
       .create()
       .addElement(baseEl.querySelector(".modal-wrapper")!)
-      .duration(200)
+      .duration(350)
+      .easing('ease-in-out')
       .beforeStyles({
         height: "90vh",
         width: "90vw",
-        '--border-radius': '20px',
-        opacity: '0.5',
+        '--border-radius': '20px'
       })
       .fromTo(
-        "opacity", "0.5", "1"
-      )
-      .fromTo(
         "transform",
-        "scale(0.8,0.8)",
-        "scale(1,1)"
+        "translateY(-100vh)",
+        "translateY(0vh)"
       );
 
     // ALL CONTENT BELOW MODAL

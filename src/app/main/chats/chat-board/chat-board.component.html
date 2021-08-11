@@ -44,6 +44,8 @@
         >
           10+ new catches!
         </div>
+
+        <img class="fish-back" src="/assets/nemo.png">
       </ion-item>
     </ng-container>
   </ion-row>
@@ -59,7 +61,17 @@
         <ion-img [src]="(chatboardPictures$ | async)[chat?.recipient?.uid]"></ion-img>
       </ion-avatar>
       <div class="text-container">
-        <ion-label color="primary" class="text-container name">
+        <ion-label 
+        color="primary" 
+        class="text-container name"
+        [style.fontWeight]=
+            "chat?.recentMessage?.senderID === chat?.recipient?.uid 
+            ? 'bold'
+            : 'normal'"
+        [style.color]=
+            "chat?.recentMessage?.senderID === chat?.recipient?.uid 
+            ? 'var(--ion-color-primary)'
+            : 'var(--ion-color-primary-tint)'">
           {{ chat?.recipient?.name }}</ion-label
         >
         <ion-label
