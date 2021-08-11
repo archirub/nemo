@@ -7,7 +7,16 @@ import { AngularFireAuth } from "@angular/fire/auth";
 import { AngularFirestore } from "@angular/fire/firestore";
 import { Storage } from "@capacitor/core";
 
-import { BehaviorSubject, concat, forkJoin, from, merge, Observable, of } from "rxjs";
+import {
+  BehaviorSubject,
+  combineLatest,
+  concat,
+  forkJoin,
+  from,
+  merge,
+  Observable,
+  of,
+} from "rxjs";
 import {
   concatMap,
   filter,

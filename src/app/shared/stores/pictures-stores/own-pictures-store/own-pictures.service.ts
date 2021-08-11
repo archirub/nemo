@@ -5,7 +5,16 @@ import { Plugins } from "@capacitor/core";
 const { Storage } = Plugins;
 
 import { BehaviorSubject, combineLatest, forkJoin, from, Observable, of } from "rxjs";
-import { filter, map, share, skipWhile, switchMap, take, tap } from "rxjs/operators";
+import {
+  distinctUntilChanged,
+  filter,
+  map,
+  share,
+  skipWhile,
+  switchMap,
+  take,
+  tap,
+} from "rxjs/operators";
 
 import {
   Base64ToUrl,
@@ -27,6 +36,9 @@ export class OwnPicturesStore {
   private urls: BehaviorSubject<string[]> = new BehaviorSubject([]);
   urls$: Observable<string[]> = this.urls.asObservable();
 
+  private allPicturesLoaded = new BehaviorSubject<boolean>(false);
+  allPicturesLoaded$ = this.allPicturesLoaded.asObservable().pipe(distinctUntilChanged());
+
   constructor(
     private afStorage: AngularFireStorage,
     private afAuth: AngularFireAuth,
@@ -37,6 +49,13 @@ export class OwnPicturesStore {
    * Subscribe to this method to activate the logic that manages the store
    */
   activateStore(): Observable<any> {
+    return combineLatest([
+      this.activateHolderFillingLogic(),
+      this.activateLoadingListener(),
+    ]).pipe(share());
+  }
+
+  activateHolderFillingLogic() {
     return combineLatest([this.urls$, this.getOwnPictureCount()]).pipe(
       filter(([currentUrls, pictureCount]) => {
         const currentUrlCount = currentUrls.filter(
@@ -59,8 +78,17 @@ export class OwnPicturesStore {
         }
 
         return this.nextFromFirebase().pipe(switchMap((urls) => this.storeInLocal(urls)));
-      }),
-      share()
+      })
+    );
+  }
+
+  activateLoadingListener() {
+    return combineLatest([this.urls$, this.getOwnPictureCount()]).pipe(
+      map(([urls, pictureCount]) => {
+        if (urls.filter(Boolean).length === pictureCount)
+          return this.allPicturesLoaded.next(true);
+        return this.allPicturesLoaded.next(false);
+      })
     );
   }
 
