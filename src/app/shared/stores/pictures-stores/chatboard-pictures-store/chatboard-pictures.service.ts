@@ -76,11 +76,16 @@ export class ChatboardPicturesStore {
       map(([chats, pictureHolder]) => {
         let allPicturesLoaded = true;
 
-        Object.values(chats).forEach((chat) => {
-          if (!pictureHolder[chat.recipient.uid]) {
-            allPicturesLoaded = false;
-          }
-        });
+        // if there are no chats to be checked (otherwise it will give true)
+        if (Object.keys(chats).length === 0) {
+          allPicturesLoaded = false;
+        } else {
+          Object.values(chats).forEach((chat) => {
+            if (!pictureHolder[chat.recipient.uid]) {
+              allPicturesLoaded = false;
+            }
+          });
+        }
 
         this.allPicturesLoaded.next(allPicturesLoaded);
       })
