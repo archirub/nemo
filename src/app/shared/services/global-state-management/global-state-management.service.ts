@@ -78,6 +78,10 @@ export class GlobalStateManagementService {
   ) {
     // format allows for this.auth$ to be a BehaviorSubject version of the Firebase.User observable
     this.afAuth.user.subscribe(this.auth$);
+
+    this.chatboardPicturesStore.allPicturesLoaded$.subscribe((a) =>
+      console.log("allPicturesLoaded at management", a)
+    );
   }
 
   activate(): Observable<any> {

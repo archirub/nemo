@@ -1,9 +1,18 @@
 import { Chat } from "../../../classes/chat.class";
 import { Injectable } from "@angular/core";
 import { AngularFireStorage } from "@angular/fire/storage";
-import { BehaviorSubject, forkJoin, from, iif, Observable, of } from "rxjs";
+import {
+  BehaviorSubject,
+  combineLatest,
+  forkJoin,
+  from,
+  iif,
+  Observable,
+  of,
+} from "rxjs";
 import {
   concatMap,
+  distinctUntilChanged,
   exhaustMap,
   map,
   share,
@@ -45,12 +54,42 @@ export class ChatboardPicturesStore {
   private holder: BehaviorSubject<pictureHolder> = new BehaviorSubject({});
   holder$: Observable<pictureHolder> = this.holder.asObservable();
 
+  private allPicturesLoaded = new BehaviorSubject<boolean>(false);
+  allPicturesLoaded$ = this.allPicturesLoaded.asObservable().pipe(distinctUntilChanged());
+
   constructor(private afStorage: AngularFireStorage) {}
 
   /**
    * Gotta subscribe to this to activate the chain of logic that fills the store etc.
    */
-  activateStore(chats: Observable<{ [chatID: string]: Chat }>): Observable<string[]> {
+  activateStore(chats: Observable<{ [chatID: string]: Chat }>): Observable<any> {
+    return combineLatest([
+      this.activateHolderFillingLogic(chats),
+      this.activateLoadingListener(chats),
+    ]).pipe(share());
+  }
+
+  private activateLoadingListener(
+    chats: Observable<{ [chatID: string]: Chat }>
+  ): Observable<void> {
+    return combineLatest([chats, this.holder$]).pipe(
+      map(([chats, pictureHolder]) => {
+        let allPicturesLoaded = true;
+
+        Object.values(chats).forEach((chat) => {
+          if (!pictureHolder[chat.recipient.uid]) {
+            allPicturesLoaded = false;
+          }
+        });
+
+        this.allPicturesLoaded.next(allPicturesLoaded);
+      })
+    );
+  }
+
+  private activateHolderFillingLogic(
+    chats: Observable<{ [chatID: string]: Chat }>
+  ): Observable<string[]> {
     return chats.pipe(
       concatMap((chats) => {
         // gets all pictures from local if the holder is empty
@@ -85,16 +124,15 @@ export class ChatboardPicturesStore {
         );
 
         return forkJoin(pictureAdditions$);
-      }),
-      share()
+      })
     );
   }
 
-  storageKey(uid: string): string {
+  private storageKey(uid: string): string {
     return "chatboard_picture_" + uid;
   }
 
-  storeInLocal(
+  private storeInLocal(
     uid: string,
     pictureUrl: string,
     setQuality: boolean = true
@@ -118,7 +156,7 @@ export class ChatboardPicturesStore {
     );
   }
 
-  getAllPicturesFromLocalToHolder(): Observable<string[][]> {
+  private getAllPicturesFromLocalToHolder(): Observable<string[][]> {
     return this.getUidsLocal().pipe(
       switchMap((uids: string[]) => {
         // must do so so that we have a stream with both the uids and the urls,
@@ -131,7 +169,7 @@ export class ChatboardPicturesStore {
     );
   }
 
-  addToHolder(obj: { uids: string[]; urls: string[] }): Observable<string[][]> {
+  private addToHolder(obj: { uids: string[]; urls: string[] }): Observable<string[][]> {
     return this.holder$.pipe(
       take(1),
       map((holder) => {
@@ -147,7 +185,7 @@ export class ChatboardPicturesStore {
     );
   }
 
-  setPictureQuality(
+  private setPictureQuality(
     base64Picture: string,
     width: number = this.picture_width,
     height: number = this.picture_height
@@ -171,7 +209,7 @@ export class ChatboardPicturesStore {
     return from(promise as Promise<string>);
   }
 
-  getPictureLocal(uid: string): Observable<string> {
+  private getPictureLocal(uid: string): Observable<string> {
     return from(Storage.get({ key: this.storageKey(uid) })).pipe(
       take(1),
       map((res) => JSON.parse(res.value)),
@@ -179,14 +217,14 @@ export class ChatboardPicturesStore {
     );
   }
 
-  getUidsLocal(): Observable<string[]> {
+  private getUidsLocal(): Observable<string[]> {
     return from(Storage.get({ key: this.uidsStorageKey })).pipe(
       take(1),
       map((res) => JSON.parse(res.value) || [])
     );
   }
 
-  storeUid(uid: string): Observable<any> {
+  private storeUid(uid: string): Observable<any> {
     return this.getUidsLocal().pipe(
       switchMap((uids) => {
         if (uids.indexOf(uid) !== -1) return of("");
@@ -200,7 +238,7 @@ export class ChatboardPicturesStore {
     );
   }
 
-  fetchMainPicture(uid: string): Observable<string> {
+  private fetchMainPicture(uid: string): Observable<string> {
     const refString = "/profilePictures/" + uid + "/" + 0;
     const ref = this.afStorage.ref(refString);
     return ref.getDownloadURL() as Observable<string>;
