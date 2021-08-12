@@ -10,12 +10,16 @@ import {
   EventEmitter,
   ViewChildren,
   HostListener,
+  OnChanges,
+  SimpleChanges,
+  ChangeDetectorRef,
 } from "@angular/core";
 import { LessInfoAnimation, MoreInfoAnimation } from "@animations/info.animation";
-import { Chat, Profile } from "@classes/index";
+import { Profile } from "@classes/index";
 import { IonContent, IonSlides } from "@ionic/angular";
 import { OwnPicturesStore } from "@stores/pictures-stores/own-pictures-store/own-pictures.service";
-import { iif, Observable, of, Subscription } from "rxjs";
+import { BehaviorSubject, Observable, Subscription } from "rxjs";
+import { filter, map, tap } from "rxjs/operators";
 
 @Component({
   selector: "app-profile-card",
@@ -27,9 +31,22 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
   @Output() tapped = new EventEmitter();
 
   @Input() moreInfo: boolean;
-  @Input() profile: Profile;
   @Input() reportable: boolean = true;
   @Input() isOwnProfile: boolean = false;
+  @Input() profile: Profile;
+
+  // this format is used such that the pager is re-updated whenever we get a new input of pictures
+  // this also allows for the initial update of the pager
+  profilePictures$ = new BehaviorSubject<string[]>([]);
+  @Input() set profilePictures(value: string[]) {
+    if (!!value && value.length > 0) {
+      this.profilePictures$.next(value);
+
+      this.slides
+        ?.getActiveIndex()
+        .then((currentIndex) => this.updatePager(currentIndex));
+    }
+  }
 
   @ViewChild(IonContent) ionContent: IonContent;
   @ViewChild(IonSlides) slides: IonSlides;
@@ -38,7 +55,7 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
   @ViewChild("yes", { read: ElementRef }) yesSwipe: ElementRef;
   @ViewChild("no", { read: ElementRef }) noSwipe: ElementRef;
 
-  profilePictures$: Observable<string[]>;
+  // profilePictures$ = new BehaviorSubject<string[]>([]);
 
   expandAnimation: any;
   collapseAnimation: any;
@@ -74,35 +91,20 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
     this.Y = event.touches[0].clientY;
   }
 
-  constructor(private ownPicturesService: OwnPicturesStore) {}
+  constructor() {}
 
   ngOnInit() {
     this.moreInfo = false;
-
-    this.buildInterestSlides();
-
-    // if this is own profile, then use the pictures from the ownPicturesStore,
-    // (as they are then managed and automatically updated),
-    // otherwise use the pictures from the profile class
-    // (would be simplier if you just make the ownPicturesService such that it updates the
-    // pictureUrls property of the ownProfileStore, instead of having its own BehaviorSubject)
-    this.profilePictures$ = iif(
-      () => this.isOwnProfile,
-      this.ownPicturesService?.urls$,
-      of(this.profile?.pictureUrls)
-    );
   }
 
   ngAfterViewInit() {
     //Animations for profile info sliding up and down
-    this.expandAnimation = MoreInfoAnimation(this.complete, 18, 85);
-
-    this.collapseAnimation = LessInfoAnimation(this.complete, 18, 85);
-
-    this.slides.lockSwipeToPrev(true);
     setTimeout(() => {
-      this.updatePager(); //Timeout necessary, slides finally load once pictures arrive
-    }, 4000);
+      this.expandAnimation = MoreInfoAnimation(this.complete, 18, 85);
+      this.collapseAnimation = LessInfoAnimation(this.complete, 18, 85);
+    }, 2000);
+
+    this.slides?.lockSwipeToPrev(true);
   }
 
   expandProfile() {
@@ -137,12 +139,11 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
     }, 100);
   }
 
-  async updatePager() {
-    var current = await this.slides.getActiveIndex();
+  async updatePager(currentIndex: number) {
     let index = 0;
 
     this.bullets.forEach((bullet: ElementRef) => {
-      if (current === index) {
+      if (currentIndex === index) {
         bullet.nativeElement.style.color = "var(--ion-color-primary-contrast)";
       } else {
         bullet.nativeElement.style.color = "var(--ion-color-dark-tint)";
@@ -160,29 +161,44 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
     this.noSwipe.nativeElement.style.marginTop = "13vh";
   }
 
-  async checkSlide() {
-    var current = await this.slides.getActiveIndex();
-    var len = await this.slides.length();
+  async onSlideChange() {
+    const [slideIndex, slidesLength] = await Promise.all([
+      this.slides.getActiveIndex(),
+      this.slides.length(),
+    ]);
 
-    if (current === 0) {
-      this.slides.lockSwipeToPrev(true);
-      this.slides.lockSwipeToNext(false);
-    } else if (current === len - 1) {
-      this.slides.lockSwipeToPrev(false);
-      this.slides.lockSwipeToNext(true);
+    await Promise.all([
+      this.checkSlide(slideIndex, slidesLength),
+      this.updatePager(slideIndex),
+    ]);
+  }
+
+  async checkSlide(slideIndex: number, slidesLength: number) {
+    if (slideIndex === 0) {
+      await Promise.all([
+        this.slides.lockSwipeToPrev(true),
+        this.slides.lockSwipeToNext(false),
+      ]);
+    } else if (slideIndex === slidesLength - 1) {
+      await Promise.all([
+        this.slides.lockSwipeToPrev(false),
+        this.slides.lockSwipeToNext(true),
+      ]);
     } else {
-      this.slides.lockSwipeToPrev(false);
-      this.slides.lockSwipeToNext(false);
+      await Promise.all([
+        this.slides.lockSwipeToPrev(false),
+        this.slides.lockSwipeToNext(false),
+      ]);
     }
   }
 
-  buildInterestSlides() {
+  buildInterestSlides(profile: Profile): void {
     this.interestSlideContent = []; //clear any previous slides, mainly for own profile changes
 
     let count = 0;
     let pushArray = [];
 
-    this.profile?.interests?.forEach((int) => {
+    profile.interests?.forEach((int) => {
       count++;
 
       if (count < 4) {
@@ -204,6 +220,4 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
 
     return `/assets/interests/${interest}.png`;
   }
-
-  ngOnDestroy() {}
 }

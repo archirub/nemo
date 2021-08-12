@@ -102,10 +102,10 @@
   <ion-slide #profSlide>
     <div class="flexcolumn prof">
       <app-profile-card
-        *ngIf="recipientProfile$ | async as profile"
         #profCard
         (expanded)="scaleInfo($event)"
-        [profile]="profile"
+        [profile]="recipientProfile$ | async"
+        [profilePictures]="(recipientProfile$ | async)?.pictureUrls"
       ></app-profile-card>
     </div>
   </ion-slide>

@@ -31,7 +31,7 @@
       </ion-button>
     </div>
     <app-swipe-card
-      [profiles]="swipeStackStore.profiles$ | async"
+      [profiles$]="swipeStackStore.profiles$"
       (matched)="playCatch($event)"
     ></app-swipe-card>
   </div>

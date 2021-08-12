@@ -1,22 +1,21 @@
-<div #fullCard id="swipe-card">
+<div #fullCard id="swipe-card" *ngIf="profile">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <div class="img-container">
     <div class="pager">
       <ion-icon
         #bullets
         name="ellipse"
-        *ngFor="let path of profile?.pictureUrls"
+        *ngFor="let path of profilePictures$ | async"
       ></ion-icon>
     </div>
     <ion-slides
       #picSlides
-      (ionSlideWillChange)="checkSlide()"
-      (ionSlideDidChange)="updatePager()"
-      *ngIf="profilePictures$ | async as pictureUrls"
+      (ionSlideWillChange)="onSlideChange()"
+      *ngIf="profilePictures$ | async as profPictures"
     >
       <ion-slide
         #pic
-        *ngFor="let path of pictureUrls; index as i"
+        *ngFor="let path of profPictures; index as i"
         [ngStyle]="{
           'background-image': 'url(' + path + ')',
           'background-size': 'cover',

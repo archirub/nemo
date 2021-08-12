@@ -125,9 +125,10 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
 
     this.recipientProfile$ = this.profilesStore.profiles$.pipe(
       withLatestFrom(this.thisChat$),
-      map(([profiles, chat]) => profiles?.[chat?.recipient?.uid]),
-      tap((a) => console.log("Profile from otherProfilesStore:", a))
+      map(([profiles, chat]) => profiles?.[chat?.recipient?.uid])
     );
+
+    this.recipientProfile$.subscribe((a) => console.log("recipient profile", a));
   }
 
   ngAfterViewInit() {

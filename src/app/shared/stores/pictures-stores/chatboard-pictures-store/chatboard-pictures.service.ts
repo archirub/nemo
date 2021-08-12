@@ -62,11 +62,51 @@ export class ChatboardPicturesStore {
   /**
    * Gotta subscribe to this to activate the chain of logic that fills the store etc.
    */
-  activateStore(chats: Observable<{ [chatID: string]: Chat }>): Observable<any> {
+  public activateStore(chats: Observable<{ [chatID: string]: Chat }>): Observable<any> {
     return combineLatest([
       this.activateHolderFillingLogic(chats),
       this.activateLoadingListener(chats),
     ]).pipe(share());
+  }
+
+  public storeInLocal(
+    uid: string,
+    pictureUrl: string,
+    setQuality: boolean = true
+  ): Observable<string> {
+    return urlToBase64(pictureUrl).pipe(
+      take(1),
+      concatMap((base64Picture) =>
+        iif(() => setQuality, this.setPictureQuality(base64Picture), of(base64Picture))
+      ),
+      concatMap((pic) => {
+        const storePicture$ = from(
+          Storage.set({
+            key: this.storageKey(uid),
+            value: JSON.stringify(pic),
+          })
+        );
+        const storeUid$ = this.storeUid(uid);
+        return forkJoin([storeUid$, storePicture$]);
+      }),
+      map(() => uid)
+    );
+  }
+
+  public addToHolder(obj: { uids: string[]; urls: string[] }): Observable<string[][]> {
+    return this.holder$.pipe(
+      take(1),
+      map((holder) => {
+        Array(obj.uids.length)
+          .fill(null)
+          .map((_, i) => {
+            holder[obj.uids[i]] = obj.urls[i];
+          });
+        this.holder.next(holder);
+
+        return [obj.uids, obj.urls];
+      })
+    );
   }
 
   private activateLoadingListener(
@@ -137,30 +177,6 @@ export class ChatboardPicturesStore {
     return "chatboard_picture_" + uid;
   }
 
-  private storeInLocal(
-    uid: string,
-    pictureUrl: string,
-    setQuality: boolean = true
-  ): Observable<string> {
-    return urlToBase64(pictureUrl).pipe(
-      take(1),
-      concatMap((base64Picture) =>
-        iif(() => setQuality, this.setPictureQuality(base64Picture), of(base64Picture))
-      ),
-      concatMap((pic) => {
-        const storePicture$ = from(
-          Storage.set({
-            key: this.storageKey(uid),
-            value: JSON.stringify(pic),
-          })
-        );
-        const storeUid$ = this.storeUid(uid);
-        return forkJoin([storeUid$, storePicture$]);
-      }),
-      map(() => uid)
-    );
-  }
-
   private getAllPicturesFromLocalToHolder(): Observable<string[][]> {
     return this.getUidsLocal().pipe(
       switchMap((uids: string[]) => {
@@ -171,22 +187,6 @@ export class ChatboardPicturesStore {
         return forkJoin([uids$, forkJoin(urls$)]);
       }),
       concatMap(([uids, urls]) => this.addToHolder({ uids, urls }))
-    );
-  }
-
-  private addToHolder(obj: { uids: string[]; urls: string[] }): Observable<string[][]> {
-    return this.holder$.pipe(
-      take(1),
-      map((holder) => {
-        Array(obj.uids.length)
-          .fill(null)
-          .map((_, i) => {
-            holder[obj.uids[i]] = obj.urls[i];
-          });
-        this.holder.next(holder);
-
-        return [obj.uids, obj.urls];
-      })
     );
   }
 

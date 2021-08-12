@@ -114,10 +114,6 @@ export class OwnProfilePage implements OnInit {
     }
   }
 
-  buildInterests() {
-    this.profileCard.buildInterestSlides();
-  }
-
   formatAllQuestions() {
     this.answers.forEach((comp) => {
       comp.formAvailableQuestions();
