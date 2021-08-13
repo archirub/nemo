@@ -9,7 +9,7 @@ import {
   ViewChildren,
 } from "@angular/core";
 
-import { Subscription } from "rxjs";
+import { Observable, Subscription } from "rxjs";
 import { User } from "@classes/index";
 import { CurrentUserStore } from "@stores/index";
 import { AddPhotoComponent, ProfileCardComponent } from "@components/index";
@@ -18,6 +18,24 @@ import { IonTextarea } from "@ionic/angular";
 import { Router } from "@angular/router";
 import { OwnPicturesStore } from "@stores/pictures-stores/own-pictures-store/own-pictures.service";
 import { ProfileAnswerComponent } from "./profile-answer/profile-answer.component";
+import { FormArray, FormControl, FormGroup } from "@angular/forms";
+import {
+  AreaOfStudy,
+  Interests,
+  SocietyCategory,
+} from "@interfaces/search-criteria.model";
+import { QuestionAndAnswer } from "@interfaces/profile.model";
+import { map } from "rxjs/operators";
+
+interface editableProfileProperties {
+  biography: string;
+  course: string;
+  areaOfStudy: AreaOfStudy;
+  society: string;
+  societyCategory: SocietyCategory;
+  interests: Interests[];
+  questions: QuestionAndAnswer[];
+}
 
 @Component({
   selector: "app-own-profile",
@@ -60,6 +78,21 @@ export class OwnProfilePage implements OnInit {
 
   ownPicturesSub: Subscription;
 
+  form = new FormGroup({
+    biography: new FormControl(null),
+    course: new FormControl(null),
+    areaOfStudy: new FormControl(null),
+    society: new FormControl(null),
+    societyCategory: new FormControl(null),
+    interests: new FormArray([]),
+    questions: new FormArray([
+      new FormGroup({
+        q: new FormControl(""),
+        a: new FormControl(""),
+      }),
+    ]),
+  });
+
   constructor(
     private currentUserStore: CurrentUserStore,
     private router: Router,
@@ -68,15 +101,25 @@ export class OwnProfilePage implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.profileSub = this.currentUserStore.user$.subscribe(
-      (profile) => (this.profile = profile)
-    );
+    // this.profileSub = this.currentUserStore.user$.subscribe(
+    //   (profile) => (this.profile = profile)
+    // );
   }
 
   ngAfterViewInit() {
-    this.depts.type = "courses";
-    this.socs.type = "societies";
+    this.depts?.type ? (this.depts.type = "courses") : null;
+    this.socs?.type ? (this.socs.type = "societies") : null;
     this.lastAnsRef = Array.from(this.answers)[this.answers.length - 1];
+  }
+
+  activateFlowUserToForm(currentUser: Observable<User>): Observable<void> {
+    return currentUser.pipe(
+      map((user) => {
+        Object.keys(this.form.controls).forEach((control) => {
+          user?.[control] ? this.form.get(control).setValue(user[control]) : null;
+        });
+      })
+    );
   }
 
   goToSettings() {

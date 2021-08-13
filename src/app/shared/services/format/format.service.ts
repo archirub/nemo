@@ -61,21 +61,20 @@ export class FormatService {
     };
   }
 
-  public profileDatabaseToClass(uid: string, profileData: profileFromDatabase): Profile {
-    if (!uid || !profileData) return;
-    const firstName = profileData.firstName;
-    const dateOfBirth = profileData.dateOfBirth.toDate();
-    const pictureCount = profileData.pictureCount;
+  public profileDatabaseToClass(uid: string, profile: profileFromDatabase): Profile {
+    const firstName = profile.firstName;
+    const dateOfBirth = profile.dateOfBirth.toDate();
+    const pictureCount = profile.pictureCount;
     const pictureUrls = Array(pictureCount).fill("") as string[];
-    const biography = profileData.biography;
-    const university = profileData.university;
-    const course = profileData.course;
-    const society = profileData.society;
-    const interests = profileData.interests;
-    const questions = profileData.questions;
-    const onCampus = profileData.onCampus;
-    const degree = profileData.degree;
-    const socialMediaLinks = profileData.socialMediaLinks;
+    const biography = profile.biography;
+    const university = profile.university;
+    const course = profile.course;
+    const society = profile.society;
+    const interests = profile.interests;
+    const questions = profile.questions;
+    const onCampus = profile.onCampus;
+    const degree = profile.degree;
+    const socialMediaLinks = profile.socialMediaLinks;
 
     return new Profile(
       uid,
@@ -93,6 +92,36 @@ export class FormatService {
       degree,
       socialMediaLinks
     );
+  }
+
+  public profileClassToDatabase(profile: Profile): profileFromDatabase {
+    const firstName = profile.firstName;
+    const dateOfBirth = firebase.firestore.Timestamp.fromDate(profile.dateOfBirth);
+    const pictureCount = profile.pictureCount;
+    const biography = profile.biography;
+    const university = profile.university;
+    const course = profile.course;
+    const society = profile.society;
+    const interests = profile.interests;
+    const questions = profile.questions;
+    const onCampus = profile.onCampus;
+    const degree = profile.degree;
+    const socialMediaLinks = profile.socialMediaLinks;
+
+    return {
+      firstName,
+      dateOfBirth,
+      pictureCount,
+      biography,
+      university,
+      degree,
+      course,
+      society,
+      interests,
+      questions,
+      onCampus,
+      socialMediaLinks,
+    };
   }
 
   public chatDatabaseToClass(

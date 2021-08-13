@@ -329,7 +329,6 @@ export class SignupoptionalPage implements OnInit {
 
   /**
    * From the data provided, fills the fields in the template
-   * @param data
    */
   fillFields(data: allowOptionalProp<SignupOptional>): void {
     Object.keys(data).forEach((field: keyof SignupOptional) => {

@@ -5,7 +5,7 @@ import { AngularFirestore } from "@angular/fire/firestore";
 
 import { BehaviorSubject, forkJoin, from, Observable, of } from "rxjs";
 
-import { Profile, User } from "@classes/index";
+import { Profile, SearchCriteria, User } from "@classes/index";
 import {
   getMatchDataUserInfoResponse,
   privateProfileFromDatabase,
@@ -14,7 +14,7 @@ import {
 } from "@interfaces/index";
 import { FormatService } from "@services/index";
 import { SearchCriteriaStore } from "../search-criteria-store/search-criteria-store.service";
-import { catchError, map, share, switchMap, take } from "rxjs/operators";
+import { catchError, map, share, switchMap, take, withLatestFrom } from "rxjs/operators";
 
 @Injectable({
   providedIn: "root",
@@ -31,14 +31,33 @@ export class CurrentUserStore {
     private SCstore: SearchCriteriaStore
   ) {}
 
-  /** Initialises the store
-   * returns uid so that store initializations can be chained
-   */
-  // public async initializeStore(uid: string): Promise<string> {
-  //   await this.fillStore(uid);
-  //   console.log("currentUserStore initialized.");
-  //   return uid;
-  // }
+  updateProfile(newProfile: Profile): Observable<void> {
+    return this.afAuth.user.pipe(
+      take(1),
+      withLatestFrom(this.user$),
+      switchMap(([userAuth, userData]) => {
+        if (!userAuth) throw "no user authenticated";
+
+        return from(
+          this.fs
+            .collection("profiles")
+            .doc(userAuth.uid)
+            .set(this.format.profileClassToDatabase(newProfile))
+        ).pipe(map(() => userData));
+      }),
+      map((userData) => {
+        Object.entries(this.format.profileClassToDatabase(newProfile)).forEach(
+          ([key, value]) => {
+            userData[key] = value;
+          }
+        );
+
+        this.user.next(userData);
+      })
+    );
+  }
+
+  updateLatestSearchCriteriaOnDb(searchCriteria: SearchCriteria) {}
 
   /** Fetches info from database to update the User BehaviorSubject */
   fillStore(): Observable<{
