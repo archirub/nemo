@@ -6,13 +6,19 @@
     <div
       #cards
       class="swipe-cards"
-      *ngFor="let profile of profiles; index as i; first as isFirst; last as isLast"
+      *ngFor="
+        let profile of profiles$ | async as profiles;
+        index as i;
+        first as isFirst;
+        last as isLast
+      "
       [ngStyle]="{ zIndex: profiles.length - i }"
     >
       <app-profile-card
         #profileComponent
         (tapped)="cardTap$.next($event)"
         [profile]="profile"
+        [profilePictures]="profile.pictureUrls"
       >
       </app-profile-card>
     </div>

@@ -13,7 +13,16 @@ import {
   EventEmitter,
 } from "@angular/core";
 
-import { concat, forkJoin, fromEvent, Observable, of, Subject, Subscription } from "rxjs";
+import {
+  BehaviorSubject,
+  concat,
+  forkJoin,
+  fromEvent,
+  Observable,
+  of,
+  Subject,
+  Subscription,
+} from "rxjs";
 
 import { CurrentUserStore, SwipeOutcomeStore, SwipeStackStore } from "@stores/index";
 import { Profile, User } from "@classes/index";
@@ -25,16 +34,17 @@ import {
   NoBubbleAnimation,
 } from "@animations/index";
 import { swipeChoice } from "@interfaces/index";
-import { concatMap, exhaustMap, switchMap, tap } from "rxjs/operators";
+import { concatMap, exhaustMap, switchMap, take, withLatestFrom } from "rxjs/operators";
 
 @Component({
   selector: "app-swipe-card",
   templateUrl: "./swipe-card.component.html",
   styleUrls: ["./swipe-card.component.scss"],
 })
-export class SwipeCardComponent extends EventEmitter implements OnInit, OnDestroy {
-  @Input() profiles: Profile[];
+export class SwipeCardComponent implements OnInit, OnDestroy {
+  @Input() profiles$: Observable<Profile[]>;
   @Output() matched = new EventEmitter();
+
   @ViewChildren("cards", { read: ElementRef }) cards: QueryList<ElementRef>;
   @ViewChild("yesBubble", { read: ElementRef }) yesBubble: ElementRef;
   @ViewChild("noBubble", { read: ElementRef }) noBubble: ElementRef;
@@ -45,36 +55,27 @@ export class SwipeCardComponent extends EventEmitter implements OnInit, OnDestro
   noBubbleAnimation: Animation;
 
   cardTap$ = new Subject();
+  cardTapSub: Subscription;
 
   @HostListener("window:resize", ["$event"])
   onResize() {
     this.screenWidth = window.innerWidth;
   }
 
-  currentUserSub: Subscription;
   currentUser: User;
+  currentUserSub: Subscription;
 
   timeOfLatestCardTap = 0; // in millisecond; set to 0 when we want the diff with current time to be larger than threshold
   DOUBLE_TAP_THRESHOLD = 500;
   choiceOfLatestTap: swipeChoice = null;
-  cardTapSub: Subscription;
 
   constructor(
     private swipeOutcomeStore: SwipeOutcomeStore,
-    private swipeStackStore: SwipeStackStore,
-    private modalCtrl: ModalController,
-    private currentUserStore: CurrentUserStore
-  ) {
-    super();
-  }
+    private swipeStackStore: SwipeStackStore
+  ) {}
 
   ngOnInit() {
     this.screenWidth = window.innerWidth;
-
-    // Subscription for chat doc creation in case of match
-    this.currentUserSub = this.currentUserStore.user$.subscribe((profile) => {
-      this.currentUser = profile;
-    });
   }
 
   ngAfterViewInit() {
@@ -125,7 +126,7 @@ export class SwipeCardComponent extends EventEmitter implements OnInit, OnDestro
       this.swipeOutcomeStore.yesSwipe(profile),
       this.swipeOutcomeStore.getChoiceOf(profile.uid),
     ]).pipe(
-      exhaustMap(([dgaf1, dgaf2, choiceOfOtherUser]) => {
+      exhaustMap(([_, __, choiceOfOtherUser]) => {
         if (choiceOfOtherUser === "yes" || choiceOfOtherUser === "super")
           return this.onMatch(profile);
         return of();
@@ -158,16 +159,20 @@ export class SwipeCardComponent extends EventEmitter implements OnInit, OnDestro
 
   private doubleTapOnCard(choice: swipeChoice): Observable<void> {
     if (choice === "yes") {
-      return of(SwipeYesAnimation(this.cards.first, this.screenWidth)).pipe(
-        switchMap((swipeAnimation) =>
-          concat(swipeAnimation.play(), this.onYesSwipe(this.profiles[0]))
+      return this.profiles$.pipe(
+        take(1),
+        withLatestFrom(of(SwipeYesAnimation(this.cards.first, this.screenWidth))),
+        switchMap(([profiles, swipeAnimation]) =>
+          concat(swipeAnimation.play(), this.onYesSwipe(profiles[0]))
         )
       );
     }
     if (choice === "no") {
-      return of(SwipeNoAnimation(this.cards.first, this.screenWidth)).pipe(
-        switchMap((swipeAnimation) =>
-          concat(swipeAnimation.play(), this.onNoSwipe(this.profiles[0]))
+      return this.profiles$.pipe(
+        take(1),
+        withLatestFrom(of(SwipeNoAnimation(this.cards.first, this.screenWidth))),
+        switchMap(([profiles, swipeAnimation]) =>
+          concat(swipeAnimation.play(), this.onNoSwipe(profiles[0]))
         )
       );
     }

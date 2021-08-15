@@ -5,12 +5,10 @@
     <app-profile-card
       #profileCard
       [isOwnProfile]="true"
-      [profile]="profile"
+      [profile]="currentUserStore.user$ | async"
+      [profilePictures]="ownPicturesService.urls$ | async"
       [reportable]="false"
     ></app-profile-card>
-    <!--div class="container">
-            [User Profile]
-        </div-->
   </div>
 
   <div class="flexend">
@@ -22,9 +20,13 @@
     ></nemo-toggle>
   </div>
 
-  <div id="editing" style="display: flex">
+  <div
+    id="editing"
+    style="display: flex"
+    *ngIf="currentUserStore.user$ | async as userProfile"
+  >
     <div class="container">
-      <h1>{{profile?.firstName}}, {{profile?.dateOfBirth | age}}</h1>
+      <h1>{{userProfile?.firstName}}, {{userProfile?.dateOfBirth | age}}</h1>
 
       <div class="slide-button" (click)="goToSettings()">
         <p>Go to my settings</p>
@@ -33,93 +35,85 @@
       </div>
 
       <h2>My photos</h2>
-      <div class class="photos" *ngIf="ownPicturesService?.urls$ | async as pictureUrls">
-        <!-- One photos are sorted on the backend we can use some ngFor magic here -->
-        <app-profile-edit-photo [url]="pictureUrls[0]"></app-profile-edit-photo>
-        <app-profile-edit-photo [url]="pictureUrls[1]"></app-profile-edit-photo>
-        <app-profile-edit-photo [url]="pictureUrls[2]"></app-profile-edit-photo>
-        <app-profile-edit-photo [url]="pictureUrls[3]"></app-profile-edit-photo>
-        <app-profile-edit-photo [url]="pictureUrls[4]"></app-profile-edit-photo>
-        <app-profile-edit-photo [url]="pictureUrls[5]"></app-profile-edit-photo>
-        <!-- <add-photo></add-photo>
-        <add-photo></add-photo>
-
-        <add-photo></add-photo>
-
-        <add-photo></add-photo>
-
-        <add-photo></add-photo>
-
-        <add-photo></add-photo> -->
+      <div class="photos">
+        <app-profile-edit-photo
+          *ngFor="let pics of ['','','','','','']; index as i"
+          [url]="(ownPicturesService?.urls$ | async)[i]"
+        ></app-profile-edit-photo>
       </div>
-
-      <h2>My bio</h2>
-      <div>
-        <div #bioClose class="close-button" (click)="clearInput('bio')">
-          <ion-icon name="close-outline"></ion-icon>
-        </div>
-        <div class="bio">
-          <ion-textarea
-            #bioInput
-            value="{{profile?.biography}}"
-            autoGrow="true"
-            (ionInput)="displayExit('bio')"
-          ></ion-textarea>
-        </div>
-      </div>
-
-      <h2>My answers</h2>
-      <profile-answer
-        #answers
-        *ngFor="let q of profile?.questions"
-        [questions]="q"
-        [profile]="profile"
-        (questionChanged)="this.formatAllQuestions()"
-      ></profile-answer>
-
-      <ng-container *ngIf="this.answers">
-        <div
-          *ngIf="this.lastAnsRef?.addable === true && this.profile?.questions.length < 4"
-          class="flexcenter"
-        >
-          <ion-icon id="addQuestion" name="add-circle" (click)="addQuestion()"></ion-icon>
+      <form [formGroup]="form">
+        <h2>My bio</h2>
+        <div>
+          <div #bioClose class="close-button" (click)="clearInput('bio')">
+            <ion-icon name="close-outline"></ion-icon>
+          </div>
+          <div class="bio">
+            <ion-textarea
+              #bioInput
+              [value]="userProfile?.biography"
+              autoGrow="true"
+              (ionInput)="displayExit('bio')"
+            ></ion-textarea>
+          </div>
         </div>
 
-        <div class="noQuestions" *ngIf="this.profile?.questions.length >= 4">
-          <span>Sorry, there's no space for any more questions!</span>
-        </div>
+        <h2>My answers</h2>
+        <profile-answer
+          #answers
+          *ngFor="let q of userProfile?.questions"
+          [questions]="q"
+          [profile]="userProfile"
+          (questionChanged)="this.formatAllQuestions()"
+        ></profile-answer>
 
-        <div *ngIf="this.lastAnsRef?.addable === false" class="flexcenter">
-          <ion-icon
-            id="submitQuestion"
-            name="checkmark-outline"
-            (click)="submitQuestion()"
-          ></ion-icon>
-        </div>
-      </ng-container>
+        <ng-container *ngIf="this.answers">
+          <div
+            *ngIf="this.lastAnsRef?.addable === true && this.userProfile?.questions.length < 4"
+            class="flexcenter"
+          >
+            <ion-icon
+              id="addQuestion"
+              name="add-circle"
+              (click)="addQuestion()"
+            ></ion-icon>
+          </div>
 
-      <h2>My course</h2>
-      <profile-course
-        #depts
-        [departments]="profile?.course"
-        [type]="courses"
-        [profile]="profile"
-      ></profile-course>
+          <div class="noQuestions" *ngIf="this.userProfile?.questions.length >= 4">
+            <span>Sorry, there's no space for any more questions!</span>
+          </div>
 
-      <h2>My society</h2>
-      <profile-course
-        #socs
-        [departments]="profile?.society"
-        [type]="societies"
-        [profile]="profile"
-      ></profile-course>
+          <div *ngIf="this.lastAnsRef?.addable === false" class="flexcenter">
+            <ion-icon
+              id="submitQuestion"
+              name="checkmark-outline"
+              (click)="submitQuestion()"
+            ></ion-icon>
+          </div>
+        </ng-container>
 
-      <h2>My interests</h2>
-      <interests-slides
-        (interestsChange)="this.buildInterests()"
-        [interests]="profile?.interests"
-        [listed]="false"
-      ></interests-slides>
+        <h2>My course</h2>
+        <profile-course
+          #depts
+          [departments]="userProfile?.course"
+          [type]="courses"
+          [profile]="userProfile"
+        ></profile-course>
+
+        <h2>My society</h2>
+        <profile-course
+          #socs
+          [departments]="userProfile?.society"
+          [type]="societies"
+          [profile]="userProfile"
+        ></profile-course>
+
+        <h2>My interests</h2>
+        <interests-slides
+          (interestsChange)="profileCard.buildInterestSlides(userProfile)"
+          [interests]="userProfile?.interests"
+          [listed]="false"
+        ></interests-slides>
+      </form>
     </div>
   </div>
 </ion-content>
