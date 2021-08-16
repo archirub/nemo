@@ -10,6 +10,7 @@ import {
   ChangeDetectorRef,
   OnDestroy,
   Renderer2,
+  EventEmitter
 } from "@angular/core";
 import { Router } from "@angular/router";
 import { IonContent, ModalController } from "@ionic/angular";
@@ -33,6 +34,10 @@ import { ChatboardStore, OtherProfilesStore } from "@stores/index";
 })
 export class ChatBoardComponent implements OnInit {
   chatboardPictures$: Observable<pictureHolder>;
+  picsLoaded$: Subscription;
+  picsLoaded: boolean = false;
+
+  @Output() loaded = new EventEmitter();
 
   @Input() chats: Chat[];
   @Input() matches: Chat[];
@@ -65,6 +70,12 @@ export class ChatBoardComponent implements OnInit {
 
   ngOnInit() {
     this.chatboardPictures$ = this.chatboardPicturesService.holder$;
+    this.picsLoaded$ = this.chatboardPicturesService.allPicturesLoaded$.subscribe(res => {
+      this.picsLoaded = res;
+      if (this.picsLoaded === true) {
+        this.loaded.emit(this.picsLoaded);
+      };
+    });
   }
 
   async presentMatches(): Promise<void> {

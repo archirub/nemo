@@ -1,4 +1,10 @@
-<ion-content #profileContainer>
+<ng-container *ngIf="!picsLoaded">
+  <div class="fishAnim">
+    <img src="/assets/nemo.png" #fish/>
+  </div>
+</ng-container>
+
+<ion-content *ngIf="picsLoaded" #profileContainer>
   <div class="shadow"></div>
 
   <div id="profile" style="display: flex">
@@ -11,12 +17,21 @@
     ></app-profile-card>
   </div>
 
-  <div class="flexend">
+  <div #toggleDiv class="flexend">
     <nemo-toggle
+      *ngIf="!editingInProgress"
       (choice)="toggleChange($event)"
       [buttonWidth]="15"
       [fontSize]="4"
       [selections]="['edit', 'view']"
+    ></nemo-toggle>
+
+    <nemo-toggle
+      *ngIf="editingInProgress"
+      (choice)="profileChanges($event)"
+      [buttonWidth]="15"
+      [fontSize]="4"
+      [selections]="['save', 'cancel']"
     ></nemo-toggle>
   </div>
 
@@ -53,6 +68,7 @@
               [value]="userProfile?.biography"
               autoGrow="true"
               (ionInput)="displayExit('bio')"
+              (ionChange)="editingTriggered()"
             ></ion-textarea>
           </div>
         </div>
@@ -64,6 +80,7 @@
           [questions]="q"
           [profile]="userProfile"
           (questionChanged)="this.formatAllQuestions()"
+          (answerChanged)="this.editingTriggered()"
         ></profile-answer>
 
         <ng-container *ngIf="this.answers">
@@ -109,7 +126,7 @@
 
         <h2>My interests</h2>
         <interests-slides
-          (interestsChange)="profileCard.buildInterestSlides(userProfile)"
+          (interestsChange)="updateInterests(userProfile)"
           [interests]="userProfile?.interests"
           [listed]="false"
         ></interests-slides>

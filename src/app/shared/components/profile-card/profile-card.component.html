@@ -73,7 +73,7 @@
         >
           <!--INTERESTS IN THE DATABASE DON'T CURRENTLY MATCH LOCAL, THIS IS NOT WIRED UP FOR ICONS -->
           <div id="interests-container">
-            <ion-slides #intSlides class="interests-slides">
+            <ion-slides #intSlides class="interests-slides" *ngIf="this.interestsBuilt">
               <ion-slide *ngFor="let slide of interestSlideContent">
                 <div id="interests-box" *ngFor="let interest of slide">
                   <img
@@ -94,7 +94,7 @@
 
         <div *ngIf="profile?.biography?.length > 0" id="info-segment">
           <div id="bio">
-            "{{ profile?.biography }}" <br /><br />
+            "{{ profile?.biography }}"
             <span *ngFor="let sm of profile?.socialMediaLinks">
               <!-- dont delete this line, it is a safegaurd for missing links -->
               <!-- <div *ngIf="sm.link">{{sm.socialMedia | titlecase}}: {{sm.link}}<br/></div> -->
@@ -108,6 +108,10 @@
         <div id="info-segment">
           <div id="interests-container" class="centered">
             <div id="interests-box-soc">
+              <div class="interests-text">
+                <ion-label id="interests-label" *ngIf="profile.onCampus === true">On Campus</ion-label>
+                <ion-label id="interests-label" *ngIf="profile.onCampus === false">Off Campus</ion-label>
+              </div>
               <ion-icon
                 name="location"
                 id="bottom-icon"
@@ -120,6 +124,9 @@
             </div>
 
             <div id="interests-box-soc">
+              <div class="interests-text">
+                <ion-label id="interests-label">{{ profile?.society }}</ion-label>
+              </div>
               <ion-icon
                 name="people"
                 id="bottom-icon"
@@ -127,7 +134,7 @@
               ></ion-icon>
               <br />
               <div class="interests-text">
-                <ion-label id="interests-label">{{ profile?.society }}</ion-label>
+                <ion-label id="interests-label">[SOCIETY]</ion-label>
               </div>
             </div>
           </div>

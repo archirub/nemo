@@ -95,6 +95,8 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
     this.moreInfo = false;
+
+    this.buildInterestSlides(this.profile);
   }
 
   ngAfterViewInit() {
@@ -105,6 +107,8 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
     }, 2000);
 
     this.slides?.lockSwipeToPrev(true);
+
+    console.log(this.profile);
   }
 
   expandProfile() {

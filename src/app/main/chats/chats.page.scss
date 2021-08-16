@@ -2,6 +2,19 @@ ion-content {
   --overflow: hidden;
 }
 
+.fishAnim { 
+  display: flex;
+  width: 100vw;
+  justify-content: center;
+  position: absolute;
+  top: 35vh;
+  z-index: 2;
+
+  img {
+    height: 25vh;
+  }
+}
+
 .header-collapse-condense ion-toolbar:first-of-type {
   height: 15vh;
   width: 90%;

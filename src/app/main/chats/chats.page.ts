@@ -1,5 +1,5 @@
 import { chat } from "./../../shared/interfaces/chat.model";
-import { Component, OnDestroy, OnInit, ViewChild } from "@angular/core";
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from "@angular/core";
 
 import { combineLatest, Observable, Subscription } from "rxjs";
 
@@ -8,6 +8,7 @@ import { Chat, Profile } from "@classes/index";
 import { ChatBoardComponent } from "./chat-board/chat-board.component";
 import { Router } from "@angular/router";
 import { map, tap } from "rxjs/operators";
+import { FishSwimAnimation } from "@animations/fish.animation";
 
 @Component({
   selector: "app-chats",
@@ -16,6 +17,9 @@ import { map, tap } from "rxjs/operators";
 })
 export class ChatsPage {
   @ViewChild("chatboard") chatboard: ChatBoardComponent;
+  @ViewChild('fish', { read: ElementRef }) fish: ElementRef;
+
+  fishSwimAnimation;
 
   TOP_SCROLL_SPEED = 100;
 
@@ -33,6 +37,16 @@ export class ChatsPage {
     );
 
     this.numberOfChats$ = this.chats$.pipe(map((chats) => chats.length));
+  }
+
+  ngAfterViewInit() {
+    this.fishSwimAnimation = FishSwimAnimation(this.fish);
+
+    this.fishSwimAnimation.play();
+  }
+
+  stopAnimation() {
+    this.fishSwimAnimation.destroy();
   }
 
   scrollToTop() {

@@ -27,6 +27,7 @@ export class ProfileAnswerComponent implements OnInit {
   @Input() profile: User;
 
   @Output() questionChanged = new EventEmitter();
+  @Output() answerChanged = new EventEmitter();
 
   addable: boolean = true;
   questionsAvailable: Array<string> = [];
@@ -50,6 +51,7 @@ export class ProfileAnswerComponent implements OnInit {
       this.answerClose.nativeElement.style.display = "none";
     }
     this.questions.answer = this.answer.value;
+    this.answerChanged.emit();
   }
 
   /**
@@ -59,6 +61,14 @@ export class ProfileAnswerComponent implements OnInit {
     this.answer.value = "";
     this.answerClose.nativeElement.style.display = "none";
     this.questions.answer = "";
+    this.answerChanged.emit();
+  }
+
+  setValue(q, a) {
+    this.questions.question = q;
+    this.questions.answer = a;
+
+    this.answer.value = a;
   }
 
   /**

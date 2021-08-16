@@ -8,3 +8,4 @@ export * from "./catch.animation";
 export * from "./fish.animation";
 export * from "./waves.animation";
 export * from "./info.animation";
+export * from "./toggle.animation";

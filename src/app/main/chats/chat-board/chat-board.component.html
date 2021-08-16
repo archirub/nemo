@@ -1,4 +1,17 @@
-<ion-content #chatContainer>
+<ion-content *ngIf="picsLoaded" #chatContainer>
+  <div *ngIf="this.chats.length < 1" class="noChats">
+    <p>
+      Sorry, looks like you don't have any chats yet. Head to the catch tab to find
+      someone new!
+    </p>
+
+    <div class="fish" (click)="goToCatch()">
+      <img name="fish" src="/assets/singlefish-orange.png" />
+
+      <h1>Catch</h1>
+    </div>
+  </div>
+
   <ion-row>
     <ng-container *ngIf="matches">
       <ion-item detail="false" #matchesButton button (click)="presentMatches()">
@@ -50,7 +63,7 @@
     </ng-container>
   </ion-row>
 
-  <ion-list *ngIf="chats">
+  <ion-list *ngIf="this.chats.length > 0">
     <ion-item
       detail="true"
       button

@@ -2,15 +2,16 @@ import {
   ChangeDetectorRef,
   Component,
   ElementRef,
-  HostListener,
+  Output,
   OnInit,
   QueryList,
   ViewChild,
   ViewChildren,
+  EventEmitter
 } from "@angular/core";
 
 import { Observable, Subscription } from "rxjs";
-import { User } from "@classes/index";
+import { Profile, User } from "@classes/index";
 import { CurrentUserStore } from "@stores/index";
 import { AddPhotoComponent, ProfileCardComponent } from "@components/index";
 import { ProfileCourseComponent } from "./profile-course/profile-course.component";
@@ -19,6 +20,7 @@ import { Router } from "@angular/router";
 import { OwnPicturesStore } from "@stores/pictures-stores/own-pictures-store/own-pictures.service";
 import { ProfileAnswerComponent } from "./profile-answer/profile-answer.component";
 import { FormArray, FormControl, FormGroup } from "@angular/forms";
+import { FishSwimAnimation, ToggleAppearAnimation, ToggleDisappearAnimation } from "@animations/index";
 import {
   AreaOfStudy,
   Interests,
@@ -51,32 +53,31 @@ export class OwnProfilePage implements OnInit {
 
   @ViewChild("profileCard") profileCard: ProfileCardComponent;
   @ViewChild("profileContainer", { read: ElementRef }) profileContainer: ElementRef;
+  @ViewChild('fish', { read: ElementRef }) fish: ElementRef;
 
   @ViewChildren("answers") answers: QueryList<ProfileAnswerComponent>;
   lastAnsRef;
 
-  // screenHeight: number;
-  // screenWidth: number;
+  @ViewChild('toggleDiv', { read: ElementRef }) toggleDiv: ElementRef;
 
-  // @HostListener("window:resize", ["$event"])
-  // onResize() {
-  //   this.screenHeight = window.innerHeight;
-  //   this.screenWidth = window.innerWidth;
-  // }
-
-  // @HostListener("window:scroll", ["$event"])
-  // onScroll(): void {
-  //   console.log("load more");
-
-  //   // if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
-  //   //   console.log("load more");
-  //   // }
-  // }
+  @Output() loaded = new EventEmitter();
 
   profileSub: Subscription;
-  profile: User;
+  profile: User; //THIS IS CHANGED ON THE PAGE WHILE EDITING, SEE prevProfileEdit
 
   ownPicturesSub: Subscription;
+  picsLoaded$: Subscription;
+  picsLoaded: boolean = false;
+
+  fishSwimAnimation;
+
+  toggleDivEnterAnimation;
+  toggleDivLeaveAnimation;
+
+  editingInProgress: boolean = false;
+  prevProfileEdit: Profile; //THIS SHOULD ALWAYS BE MATCHING THE BACKEND
+  prevQuestions;
+  prevInterests;
 
   form = new FormGroup({
     biography: new FormControl(null),
@@ -101,15 +102,45 @@ export class OwnProfilePage implements OnInit {
   ) {}
 
   ngOnInit() {
-    // this.profileSub = this.currentUserStore.user$.subscribe(
-    //   (profile) => (this.profile = profile)
-    // );
+    this.profileSub = this.currentUserStore.user$.subscribe(res => {
+      this.profile = res;
+      this.prevProfileEdit = Object.assign({}, this.profile);
+      //Object.assign makes a deepcopy instead of a pointer
+    });
+    this.picsLoaded$ = this.ownPicturesService.allPicturesLoaded$.subscribe(res => {
+      this.picsLoaded = res;
+      if (this.picsLoaded === true) {
+        try {
+          this.stopAnimation();
+        } finally {
+          console.log('Animation not found.');
+        };
+      };
+    });
   }
 
   ngAfterViewInit() {
     this.depts?.type ? (this.depts.type = "courses") : null;
     this.socs?.type ? (this.socs.type = "societies") : null;
-    this.lastAnsRef = Array.from(this.answers)[this.answers.length - 1];
+
+    this.fishSwimAnimation = FishSwimAnimation(this.fish);
+    this.fishSwimAnimation.play();
+  }
+
+  stopAnimation() {
+    this.fishSwimAnimation.destroy();
+
+    setTimeout(() => {
+      // This is essentially a lifecycle hook for after the UI appears
+      this.toggleDivEnterAnimation = ToggleAppearAnimation(this.toggleDiv, -5, 9.5);
+      this.toggleDivLeaveAnimation = ToggleDisappearAnimation(this.toggleDiv, -5, 9.5);
+
+      this.lastAnsRef = Array.from(this.answers)[this.answers.length - 1];
+
+      //'snapshot' to retrieve if editing is cancelled
+      this.prevProfileEdit['_questions'] = [...this.profile.questions];
+      this.prevProfileEdit['_interests'] = [...this.profile.interests];
+    }, 50);
   }
 
   activateFlowUserToForm(currentUser: Observable<User>): Observable<void> {
@@ -157,16 +188,25 @@ export class OwnProfilePage implements OnInit {
     }
   }
 
+  updateInterests(targetProfile: Profile | User) {
+    this.profileCard.buildInterestSlides(targetProfile);
+    this.editingTriggered();
+  }
+
   formatAllQuestions() {
     this.answers.forEach((comp) => {
       comp.formAvailableQuestions();
     });
+
+    this.editingTriggered();
   }
 
   addQuestion() {
     this.lastAnsRef.addable = false; //Show input for new question on last profile answer component
     this.answers.last.chosenQuestion = undefined;
     this.answers.last.chosenAnswer = undefined;
+
+    this.editingTriggered();
   }
 
   submitQuestion() {
@@ -179,6 +219,80 @@ export class OwnProfilePage implements OnInit {
     this.lastAnsRef = Array.from(this.answers)[this.answers.length - 1]; //Check which is now last answer element
 
     this.formatAllQuestions();
+  }
+
+  editingTriggered() {
+    if (this.editingInProgress === false) {
+      this.toggleDivLeaveAnimation = ToggleDisappearAnimation(this.toggleDiv, -5, 9.5);
+      this.toggleDivLeaveAnimation.play();
+
+      setTimeout(() => {
+        this.editingInProgress = true;
+      }, 200);
+
+      setTimeout(() => {
+        this.toggleDivEnterAnimation = ToggleAppearAnimation(this.toggleDiv, -5, 9.5);
+        this.toggleDivEnterAnimation.play();
+      }, 250);
+    };
+
+    console.log(this.prevProfileEdit['_questions']);
+  }
+
+  /**
+   * Fills question components with previous answers
+   * Triggered by cancelling edits
+   **/
+  refillPrevAnswers() {
+    this.prevProfileEdit['_questions'].forEach((q, ind) => {
+      console.log(q, 'to', Array.from(this.answers)[ind]);
+      Array.from(this.answers)[ind].setValue(q.question, q.answer);
+      console.log(Array.from(this.answers)[ind].answer);
+    });
+  }
+
+
+  /** 
+   * Function for negotiating frontend/backend changes while editing
+   * Triggered by the nemo toggle that appears when editing
+   **/
+  profileChanges(option) {
+    if (option === 'save') {
+      //Save user changes to backend
+      //You want to send this.profile to backend as new changes, NOT PREVPROFILEEDIT 
+      //No frontend changes necessary afaik, profile seems to update anyway?
+      this.prevProfileEdit = Object.assign(this.prevProfileEdit, this.profile);
+      console.log('Lol!');
+
+    } else if (option === 'cancel') {
+      //Bio is not a custom component so is manually updated here
+      this.bio.value = this.prevProfileEdit['_biography'];
+      this.displayExit('bio');
+
+      this.profile.interests = this.prevProfileEdit['_interests'];
+
+      this.profile = Object.assign(this.profile, this.prevProfileEdit);
+      //Update last ans ref to add new questions
+      this.lastAnsRef = Array.from(this.answers)[this.answers.length - 1];
+      this.refillPrevAnswers();
+    };
+
+    //Copy profile interests and questions once again
+    this.prevProfileEdit['_questions'] = [...this.profile.questions];
+    this.prevProfileEdit['_interests'] = [...this.profile.interests];
+    this.profileCard.buildInterestSlides(this.profile);
+
+    this.toggleDivLeaveAnimation = ToggleDisappearAnimation(this.toggleDiv, -5, 9.5);
+    this.toggleDivLeaveAnimation.play();
+
+    setTimeout(() => {
+      this.editingInProgress = false;
+    }, 200);
+
+    setTimeout(() => {
+      this.toggleDivEnterAnimation = ToggleAppearAnimation(this.toggleDiv, -5, 9.5);
+      this.toggleDivEnterAnimation.play();
+    }, 250);
   }
 
   ngOnDestroy() {
