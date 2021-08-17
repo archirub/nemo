@@ -222,6 +222,6 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
     interest = interest.toLowerCase();
     interest = interest.replace(/\s/g, ""); //remove spaces
 
-    return `/assets/interests/${interest}.png`;
+    return `/assets/interests/${interest}.svg`;
   }
 }

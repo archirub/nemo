@@ -76,8 +76,6 @@ export class OwnProfilePage implements OnInit {
 
   editingInProgress: boolean = false;
   prevProfileEdit: Profile; //THIS SHOULD ALWAYS BE MATCHING THE BACKEND
-  prevQuestions;
-  prevInterests;
 
   form = new FormGroup({
     biography: new FormControl(null),
@@ -151,10 +149,6 @@ export class OwnProfilePage implements OnInit {
         });
       })
     );
-  }
-
-  goToSettings() {
-    this.router.navigateByUrl("/main/settings");
   }
 
   displayExit(section) {
@@ -235,8 +229,6 @@ export class OwnProfilePage implements OnInit {
         this.toggleDivEnterAnimation.play();
       }, 250);
     };
-
-    console.log(this.prevProfileEdit['_questions']);
   }
 
   /**
@@ -245,12 +237,9 @@ export class OwnProfilePage implements OnInit {
    **/
   refillPrevAnswers() {
     this.prevProfileEdit['_questions'].forEach((q, ind) => {
-      console.log(q, 'to', Array.from(this.answers)[ind]);
       Array.from(this.answers)[ind].setValue(q.question, q.answer);
-      console.log(Array.from(this.answers)[ind].answer);
     });
   }
-
 
   /** 
    * Function for negotiating frontend/backend changes while editing
@@ -293,6 +282,10 @@ export class OwnProfilePage implements OnInit {
       this.toggleDivEnterAnimation = ToggleAppearAnimation(this.toggleDiv, -5, 9.5);
       this.toggleDivEnterAnimation.play();
     }, 250);
+  }
+
+  goToSettings() {
+    this.router.navigateByUrl("/main/settings");
   }
 
   ngOnDestroy() {

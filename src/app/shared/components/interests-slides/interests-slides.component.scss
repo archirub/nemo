@@ -1,7 +1,7 @@
 ion-content#selector {
     color: #000;
     --padding-top: 10px;
-    height: 70vw;
+    height: 50vw;
     --overflow: hidden;
     text-rendering: optimizeLegibility;
 }
@@ -14,7 +14,7 @@ ion-content#cards {
 }
 
 ion-slides {
-    width: 55vw !important;
+    width: 45vw !important;
     text-rendering: optimizeLegibility;
     overflow: visible;
 }
@@ -22,20 +22,20 @@ ion-slides {
 ion-slide {
     display: flex;
     flex-direction: column;
-    width: 50vw !important;
-    height: 50vw;
+    width: 40vw !important;
+    height: 40vw;
     margin: 0 5.1vw 0 0;
     left: 2.5vw;
     text-rendering: optimizeLegibility;
-    border: solid 2px var(--ion-color-primary);
-    border-radius: 15px;
-    background-color: var(--ion-color-primary-contrast);
-    box-shadow: 0px 4px 12px -9px;
+    //border: solid 2px var(--ion-color-primary);
+    //border-radius: 15px;
+    //background-color: var(--ion-color-primary-contrast);
+    //box-shadow: 0px 4px 12px -9px;
 }
 
 .image-container {
     margin: 0 auto;
-    width: 27vw;
+    width: 23vw;
     //border: solid 1px var(--ion-color-primary);
     border-radius: 50%;
     //padding: 5vw;
@@ -55,4 +55,5 @@ h1 {
 
 h2 {
     font-size: 20px;
+    width: 200% //This is purely to fit Hopeless Romantic on one line
 }

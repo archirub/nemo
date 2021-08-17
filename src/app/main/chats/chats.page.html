@@ -1,6 +1,9 @@
 <ng-container *ngIf="!chatboard.picsLoaded">
   <div class="fishAnim">
-    <img src="/assets/nemo.png" #fish/>
+    <div class="flexcol">
+      <img src="/assets/nemo_load.svg" #fish/>
+      <h2 class="load">Loading your chats</h2>
+    </div>
   </div>
 </ng-container>
 

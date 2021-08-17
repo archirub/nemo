@@ -9,7 +9,6 @@ import { searchCriteriaOptions } from "@interfaces/search-criteria.model";
 import { SearchCriteria } from "@classes/index";
 
 import { AppToggleComponent } from "@components/index";
-import { FishSwimAnimation } from "@animations/index";
 
 @Component({
   selector: "app-search-criteria",
@@ -25,9 +24,6 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
   @ViewChild("modalSlides") modalSlides: IonSlides;
   @ViewChild("modalSlides", { read: ElementRef }) slidesRef: ElementRef;
   @ViewChild(IonContent) frame: IonContent;
-
-  @ViewChild("fish", { read: ElementRef }) fish: ElementRef;
-  fishSwimAnimation;
 
   searchCriteriaSub: Subscription;
   searchCriteria: SearchCriteria;
@@ -73,16 +69,8 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngAfterViewInit() {
-    this.fishSwimAnimation = FishSwimAnimation(this.fish);
-    
-    this.fishSwimAnimation.play();
-  }
-
   async ionViewDidEnter() {
     this.viewEntered = true;
-
-    this.fishSwimAnimation.destroy();
 
     /* Timeout as elements don't exist until viewEntered set to true */
     setTimeout(() => {

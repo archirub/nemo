@@ -34,9 +34,11 @@ export class InterestSlidesComponent implements OnInit {
     this.slideOpts = {
       speed: 200,
       resistanceRatio: 0.5,
+      freeMode: true,
+      freeModeSticky: true,
       coverflowEffect: {
         rotate: 0,
-        stretch: 50,
+        stretch: 20,
         depth: 150,
         modifier: 1,
         slideShadows: false,

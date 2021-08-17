@@ -12,7 +12,7 @@ ion-content {
     z-index: 2;
   
     img {
-      height: 25vh;
+      height: 18vh;
     }
 }
 
@@ -35,6 +35,11 @@ ion-content {
     top: 9.5vh;
     width: 90%;
     margin: 0 auto;
+}
+
+.flexcol {
+    display: flex;
+    flex-direction: column;
 }
 
 .noQuestions {

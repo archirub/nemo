@@ -58,26 +58,26 @@ export const searchCriteriaOptions = {
 
 // CANNOT BE PLACED IN searchCriteriaOptions
 export const assetsInterestsPath = [
-  "/assets/interests/herbfriendly.png",
-  "/assets/interests/bookworm.png",
-  "/assets/interests/lifesaver.png",
-  "/assets/interests/cafedweller.png",
-  "/assets/interests/astrologist.png",
-  "/assets/interests/chef.png",
-  "/assets/interests/model.png",
-  "/assets/interests/tiktoker.png",
-  "/assets/interests/libraryfiend.png",
-  "/assets/interests/pubcrawler.png",
-  "/assets/interests/mathgeek.png",
-  "/assets/interests/sportsknight.png",
-  "/assets/interests/clubgoer.png",
-  "/assets/interests/casualcupid.png",
-  "/assets/interests/spiritual.png",
-  "/assets/interests/activist.png",
-  "/assets/interests/hopelessromantic.png",
-  "/assets/interests/radical.png",
-  "/assets/interests/raver.png",
-  "/assets/interests/musicnerd.png",
+  "/assets/interests/herbfriendly.svg",
+  "/assets/interests/bookworm.svg",
+  "/assets/interests/lifesaver.svg",
+  "/assets/interests/cafedweller.svg",
+  "/assets/interests/astrologist.svg",
+  "/assets/interests/chef.svg",
+  "/assets/interests/model.svg",
+  "/assets/interests/tiktoker.svg",
+  "/assets/interests/libraryfiend.svg",
+  "/assets/interests/pubcrawler.svg",
+  "/assets/interests/mathgeek.svg",
+  "/assets/interests/sportsknight.svg",
+  "/assets/interests/clubgoer.svg",
+  "/assets/interests/casualcupid.svg",
+  "/assets/interests/spiritual.svg",
+  "/assets/interests/activist.svg",
+  "/assets/interests/hopelessromantic.svg",
+  "/assets/interests/radical.svg",
+  "/assets/interests/raver.svg",
+  "/assets/interests/musicnerd.svg",
 ] as const;
 
 export type searchCriteria = {
@@ -85,7 +85,7 @@ export type searchCriteria = {
 };
 
 export function interestToPath(interest: Interests): string {
-  return "/assets/interests/" + interest.toLowerCase().replace(/\s/g, "") + ".png";
+  return "/assets/interests/" + interest.toLowerCase().replace(/\s/g, "") + ".svg";
 }
 
 // Important for backend
