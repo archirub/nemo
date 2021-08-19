@@ -1,0 +1,44 @@
+ion-content {
+    width: calc(100% + 15px);
+    --padding-end: 15px;
+}
+
+//Remove scrollbars AT ALL COSTS
+::-webkit-scrollbar, *::-webkit-scrollbar {
+    display: none !important;
+}
+
+.flexeven {
+    display: flex;
+    justify-content: space-evenly;
+    width: 90%;
+    margin: 0 auto;
+}
+
+#closeButton {
+    display: flex;
+    justify-content: flex-end;
+    position: sticky;
+    top: 3vh;
+    padding: 0 3vh;
+    z-index: 3;
+
+    ion-icon {
+        font-size: 4vh;
+        color: var(--ion-color-dark-tint);
+    }
+}
+
+.interest-box {
+    width: 45%;
+    padding: 1vh;
+    text-align: center;
+
+    .icon img {
+        height: 11vh;
+    }
+}
+
+h2 {
+    font-size: 2.8vh;
+}

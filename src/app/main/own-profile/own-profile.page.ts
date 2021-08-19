@@ -15,12 +15,17 @@ import { Profile, User } from "@classes/index";
 import { CurrentUserStore } from "@stores/index";
 import { AddPhotoComponent, ProfileCardComponent } from "@components/index";
 import { ProfileCourseComponent } from "./profile-course/profile-course.component";
-import { IonTextarea } from "@ionic/angular";
+import { IonContent, IonTextarea, ModalController } from "@ionic/angular";
 import { Router } from "@angular/router";
 import { OwnPicturesStore } from "@stores/pictures-stores/own-pictures-store/own-pictures.service";
 import { ProfileAnswerComponent } from "./profile-answer/profile-answer.component";
 import { FormArray, FormControl, FormGroup } from "@angular/forms";
-import { FishSwimAnimation, ToggleAppearAnimation, ToggleDisappearAnimation } from "@animations/index";
+import { 
+  FishSwimAnimation, 
+  ToggleAppearAnimation, 
+  ToggleDisappearAnimation,
+  IntEnterAnimation,
+  IntLeaveAnimation } from "@animations/index";
 import {
   AreaOfStudy,
   Interests,
@@ -28,6 +33,8 @@ import {
 } from "@interfaces/search-criteria.model";
 import { QuestionAndAnswer } from "@interfaces/profile.model";
 import { map } from "rxjs/operators";
+import { TabElementRefService } from "../tab-menu/tab-element-ref.service";
+import { InterestsModalComponent } from "./interests-modal/interests-modal.component";
 
 interface editableProfileProperties {
   biography: string;
@@ -96,8 +103,14 @@ export class OwnProfilePage implements OnInit {
     private currentUserStore: CurrentUserStore,
     private router: Router,
     private ownPicturesService: OwnPicturesStore,
-    private detector: ChangeDetectorRef
+    private detector: ChangeDetectorRef,
+    private tabElementRef: TabElementRefService,
+    private modalCtrl: ModalController
   ) {}
+
+  modal: HTMLIonModalElement;
+  intEnterAnimation;
+  intLeaveAnimation;
 
   ngOnInit() {
     this.profileSub = this.currentUserStore.user$.subscribe(res => {
@@ -139,6 +152,50 @@ export class OwnProfilePage implements OnInit {
       this.prevProfileEdit['_questions'] = [...this.profile.questions];
       this.prevProfileEdit['_interests'] = [...this.profile.interests];
     }, 50);
+
+    //Build modal setup once UI has entered
+    setTimeout(() => {
+      this.intEnterAnimation = IntEnterAnimation(
+        this.tabElementRef.tabRef,
+        this.profileContainer
+      );
+      this.intLeaveAnimation = IntLeaveAnimation(
+        this.tabElementRef.tabRef,
+        this.profileContainer
+      );
+
+      this.modalCtrl
+        .create({
+          component: InterestsModalComponent,
+          enterAnimation: this.intEnterAnimation,
+          leaveAnimation: this.intLeaveAnimation,
+        })
+        .then((m) => {
+          this.modal = m;
+          this.onModalDismiss(this.modal);
+        });
+      }, 100);
+  }
+
+  async presentIntModal(): Promise<void> {
+    return await this.modal.present();
+  }
+
+  // Used to preload modal as soon as the previous SC window was dismissed
+  onModalDismiss(modal: HTMLIonModalElement) {
+    modal.onDidDismiss().then(() => {
+      this.modalCtrl
+        .create({
+          component: InterestsModalComponent,
+          enterAnimation: this.intEnterAnimation,
+          leaveAnimation: this.intLeaveAnimation,
+        })
+        .then((m) => {
+          this.modal = m;
+          return this.modal;
+        })
+        .then((m) => this.onModalDismiss(m));
+    });
   }
 
   activateFlowUserToForm(currentUser: Observable<User>): Observable<void> {

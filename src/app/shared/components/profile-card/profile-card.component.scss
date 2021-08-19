@@ -100,8 +100,7 @@ ion-slides {
 #completeInfo {
   z-index: 3;
   overflow-y: scroll;
-  border-bottom-left-radius: 30px;
-  border-bottom-right-radius: 30px;
+  border-radius: 30px;
   background-color: #FBFBFB;
   position: absolute;
   top: 18%;
@@ -291,7 +290,7 @@ ion-slides {
 .sticky {
   box-shadow: 0px 30px 10px -20px rgb(251 251 251);
   position: fixed;
-  width: 92vw; //this should be okay now
+  width: 92.8vw; //this should be okay now
   background-color: #FBFBFB;
   z-index: 100;
 }
@@ -438,8 +437,7 @@ ion-slides {
   #completeInfo {
     z-index: 3;
     overflow-y: scroll;
-    border-bottom-left-radius: 30px;
-    border-bottom-right-radius: 30px;
+    border-radius: 30px;
     background-color: #FBFBFB;
     position: absolute;
     top: 18%;

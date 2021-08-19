@@ -1,0 +1,21 @@
+<ion-content>
+  <ng-container *ngIf="viewReady">
+    <div id="closeButton">
+      <ion-icon name="close-outline" (click)="closeAndConfirmChoices()"></ion-icon>
+    </div>
+  
+    <div>
+      <div class="flexeven" *ngFor="let arr of interestGrid; index as i">
+  
+        <div class="interest-box" *ngFor="let interest of arr; index as j">
+          <div class="icon">
+            <img src='{{ this.pictureGrid[i][j] }}'/>
+          </div>
+  
+          <h2>{{ interest }}</h2>
+        </div>
+  
+      </div>
+    </div>
+  </ng-container>
+</ion-content>

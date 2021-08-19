@@ -16,6 +16,7 @@ import { ProfileCourseComponent } from "./profile-course/profile-course.componen
 import { InterestSlidesComponent, ProfileEditPhotoPage } from "@components/index";
 import { InterestSlidesModule } from "@components/interests-slides/interests-slides.component.module";
 import { ProfileEditPhotoPageModule } from "@components/profile-edit-photo/profile-edit-photo.module";
+import { InterestsModalComponent } from "./interests-modal/interests-modal.component";
 
 @NgModule({
   imports: [
@@ -32,6 +33,11 @@ import { ProfileEditPhotoPageModule } from "@components/profile-edit-photo/profi
     PipesModule,
     ProfileEditPhotoPageModule,
   ],
-  declarations: [OwnProfilePage, ProfileAnswerComponent, ProfileCourseComponent],
+  declarations: [
+    OwnProfilePage, 
+    ProfileAnswerComponent, 
+    ProfileCourseComponent,
+    InterestsModalComponent
+  ],
 })
 export class OwnProfilePageModule {}

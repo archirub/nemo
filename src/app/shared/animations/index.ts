@@ -9,3 +9,4 @@ export * from "./fish.animation";
 export * from "./waves.animation";
 export * from "./info.animation";
 export * from "./toggle.animation";
+export * from "./interest-modal.animation";

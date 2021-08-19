@@ -1,6 +1,7 @@
 ion-content {
     --overflow: hidden;
     position: relative;
+    transform: none;
 }
 
 .fishAnim { 
@@ -25,6 +26,8 @@ ion-content {
     top: 6.6%;
     border-radius: 30px;
     overflow: hidden;
+    z-index: 5;
+    pointer-events: none;
   }
 
 .flexend {
@@ -90,7 +93,7 @@ nemo-toggle {
     position: absolute;
     top: 4.5vh;
     margin: 10px 14px;
-    border-radius: 30px;
+    //border-radius: 30px;
     flex-direction: column;
     justify-content: space-evenly;
     overflow-y: scroll !important;

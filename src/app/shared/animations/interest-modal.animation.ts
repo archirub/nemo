@@ -2,9 +2,9 @@ import { ElementRef } from "@angular/core";
 import { AnimationController } from "@ionic/angular";
 // import * as anime from "animejs"
 
-export const SCenterAnimation = (
+export const IntEnterAnimation = (
   tabComponent: ElementRef<any>,
-  homeComponent: ElementRef<any>,
+  pageComponent: ElementRef<any>,
 ) => {
 
   const animation = (baseEl: any) => {
@@ -23,14 +23,14 @@ export const SCenterAnimation = (
       })
       .fromTo(
         "transform",
-        "translateY(-100vh)",
-        "translateY(0vh)"
+        "translate3d(0,100%,0)",
+        "translate3d(0,0,0)"
       );
 
     // ALL CONTENT BELOW MODAL
     const contentAnimation = new AnimationController()
       .create()
-      .addElement(homeComponent.nativeElement)
+      .addElement(pageComponent.nativeElement)
       .addElement(tabComponent.nativeElement)
       .fromTo("filter", "blur(0px)", "blur(20px)");
 
@@ -55,14 +55,14 @@ export const SCenterAnimation = (
   return animation;
 };
 
-export const SCleaveAnimation = (
+export const IntLeaveAnimation = (
   tabComponent: ElementRef<any>,
-  homeComponent: ElementRef<any>,
+  pageComponent: ElementRef<any>,
 ) => {
   const animation = (baseEl) => {
-    return SCenterAnimation(
+    return IntEnterAnimation(
       tabComponent,
-      homeComponent,
+      pageComponent,
     )(baseEl).direction("reverse");
   };
   return animation;
