@@ -12,7 +12,13 @@
             <img src='{{ this.pictureGrid[i][j] }}'/>
           </div>
   
-          <h2>{{ interest }}</h2>
+          <h2
+          (click)="selectInterest(interest)"
+          [style.color]="
+            this.interests?.includes(interest)
+              ? 'var(--ion-color-primary)'
+              : 'var(--ion-color-light-contrast)'
+          ">{{ interest }}</h2>
         </div>
   
       </div>

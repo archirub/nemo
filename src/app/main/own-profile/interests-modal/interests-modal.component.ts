@@ -19,7 +19,7 @@ import { ModalController } from '@ionic/angular';
 })
 export class InterestsModalComponent implements OnInit {
 
-  @Input() interests: Interests[];
+  interests: Interests[];
   @Output() interestsChange = new EventEmitter<Interests[]>();
 
   pictures = assetsInterestsPath; //Interest icons
@@ -73,8 +73,17 @@ export class InterestsModalComponent implements OnInit {
     };
   }
 
+  selectInterest(choice) {
+    if (this.interests.includes(choice)) {
+      var index = this.interests.indexOf(choice);
+      this.interests.splice(index, 1);
+    } else {
+      this.interests.push(choice);
+    }
+  }
+
 
   async closeAndConfirmChoices() {
-    return await this.modalCtrl.dismiss();
+    return await this.modalCtrl.dismiss(this.interests);
   }
 }

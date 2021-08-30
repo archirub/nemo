@@ -78,72 +78,72 @@
               ></ion-textarea>
             </div>
           </div>
+
+          <h2>My answers</h2>
+          <profile-answer
+            #answers
+            *ngFor="let q of editableFields.questions; let i = index"
+            [(questionAndAnswer)]="editableFields.questions[i]"
+            (questionAndAnswerChange)="editingTriggered()"
+            [questionsNotPicked]="questionsNotPicked | async"
+          ></profile-answer>
+
+          <ng-container *ngIf="this.answers">
+            <div *ngIf="!reachedMaxQuestionsCount" class="flexcenter">
+              <ion-icon
+                id="addQuestion"
+                name="add-circle"
+                (click)="addQuestion()"
+              ></ion-icon>
+            </div>
+
+            <div class="noQuestions" *ngIf="reachedMaxQuestionsCount">
+              <span>Sorry, there's no space for any more questions!</span>
+            </div>
+
+            <!-- <div *ngIf="reachedMaxQuestionsCount" class="flexcenter">
+              <ion-icon
+                id="submitQuestion"
+                name="checkmark-outline"
+                (click)="submitQuestion()"
+              ></ion-icon>
+            </div> -->
+          </ng-container>
+
+          <h2>My course</h2>
+          <profile-course
+            #depts
+            categoryPlaceHolder="Area of Study"
+            name="courseFields"
+            [categoryOptions]="areaOfStudyOptions"
+            [(categoryChoice)]="editableFields.areaOfStudy"
+            [(choice)]="editableFields.course"
+            (categoryChoiceChange)="editingTriggered()"
+            (choiceChange)="editingTriggered()"
+          ></profile-course>
+
+          <h2>My society</h2>
+          <profile-course
+            #socs
+            categoryPlaceHolder="Society Category"
+            name="societyFields"
+            [categoryOptions]="societyCategoryOptions"
+            [(categoryChoice)]="editableFields.societyCategory"
+            [(choice)]="editableFields.society"
+            (categoryChoiceChange)="editingTriggered()"
+            (choiceChange)="editingTriggered()"
+          ></profile-course>
+
+          <h2>My interests</h2>
+          <!--interests-slides
+            name="interests"
+            [interests]="editableFields?.interests"
+            (interestsChange)="editingTriggered()"
+            [listed]="false"
+          ></interests-slides-->
+
+          <ion-button (click)="presentIntModal()">Interests</ion-button>
         </div>
-
-        <h2>My answers</h2>
-        <profile-answer
-          #answers
-          *ngFor="let q of editableFields.questions; let i = index"
-          [(questionAndAnswer)]="editableFields.questions[i]"
-          (questionAndAnswerChange)="editingTriggered()"
-          [questionsNotPicked]="questionsNotPicked | async"
-        ></profile-answer>
-
-        <ng-container *ngIf="this.answers">
-          <div *ngIf="!reachedMaxQuestionsCount" class="flexcenter">
-            <ion-icon
-              id="addQuestion"
-              name="add-circle"
-              (click)="addQuestion()"
-            ></ion-icon>
-          </div>
-
-          <div class="noQuestions" *ngIf="reachedMaxQuestionsCount">
-            <span>Sorry, there's no space for any more questions!</span>
-          </div>
-
-          <!-- <div *ngIf="reachedMaxQuestionsCount" class="flexcenter">
-            <ion-icon
-              id="submitQuestion"
-              name="checkmark-outline"
-              (click)="submitQuestion()"
-            ></ion-icon>
-          </div> -->
-        </ng-container>
-
-        <h2>My course</h2>
-        <profile-course
-          #depts
-          categoryPlaceHolder="Area of Study"
-          name="courseFields"
-          [categoryOptions]="areaOfStudyOptions"
-          [(categoryChoice)]="editableFields.areaOfStudy"
-          [(choice)]="editableFields.course"
-          (categoryChoiceChange)="editingTriggered()"
-          (choiceChange)="editingTriggered()"
-        ></profile-course>
-
-        <h2>My society</h2>
-        <profile-course
-          #socs
-          categoryPlaceHolder="Society Category"
-          name="societyFields"
-          [categoryOptions]="societyCategoryOptions"
-          [(categoryChoice)]="editableFields.societyCategory"
-          [(choice)]="editableFields.society"
-          (categoryChoiceChange)="editingTriggered()"
-          (choiceChange)="editingTriggered()"
-        ></profile-course>
-
-        <h2>My interests</h2>
-        <interests-slides
-          name="interests"
-          [interests]="editableFields?.interests"
-          (interestsChange)="editingTriggered()"
-          [listed]="false"
-        ></interests-slides>
-
-        <ion-button (click)="presentIntModal()">Interests</ion-button>
       </div>
     </div>
   </form>

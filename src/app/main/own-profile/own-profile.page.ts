@@ -24,7 +24,6 @@ import { FormArray, FormControl, FormGroup } from "@angular/forms";
 import {
   FishSwimAnimation,
   ToggleAppearAnimation,
-  ToggleDisappearAnimation,
   IntEnterAnimation,
   IntLeaveAnimation,
 } from "@animations/index";
@@ -113,8 +112,6 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
       .pipe(map((user) => this.updateEditableFields(user)))
       .subscribe();
 
-    this.editingAnimationLogic().subscribe();
-
     this.picsLoaded$ = this.ownPicturesService.allPicturesLoaded$.pipe(
       tap((allPicturesLoaded) => (allPicturesLoaded ? this.stopAnimation() : null))
     );
@@ -130,9 +127,9 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
 
     setTimeout(() => {
       // This is essentially a lifecycle hook for after the UI appears
-      this.toggleDivEnterAnimation = ToggleAppearAnimation(this.toggleDiv, -5, 9.5);
-      this.toggleDivLeaveAnimation = ToggleDisappearAnimation(this.toggleDiv, -5, 9.5);
+      this.toggleDivEnterAnimation = ToggleAppearAnimation(this.toggleDiv);
 
+      this.editingAnimationLogic().subscribe();
       // this.lastAnsRef = Array.from(this.answers)[this.answers.length - 1];
 
       // //'snapshot' to retrieve if editing is cancelled
@@ -151,37 +148,43 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
         this.profileContainer
       );
 
-      this.modalCtrl
-        .create({
-          component: InterestsModalComponent,
-          enterAnimation: this.intEnterAnimation,
-          leaveAnimation: this.intLeaveAnimation,
-        })
-        .then((m) => {
-          this.modal = m;
-          this.onModalDismiss(this.modal);
-        });
+      this.buildIntModal();
     }, 100);
   }
 
+  async buildIntModal(): Promise<void> {
+    this.modalCtrl
+    .create({
+      component: InterestsModalComponent,
+      componentProps: {
+        interests: this.editableFields?.interests
+      }, 
+      enterAnimation: this.intEnterAnimation,
+      leaveAnimation: this.intLeaveAnimation,
+    })
+    .then((m) => {
+      this.modal = m;
+      this.onModalDismiss(this.modal);
+    });
+  }
+
   async presentIntModal(): Promise<void> {
-    return await this.modal.present();
+    if (!this.modal) {
+      this.buildIntModal();
+    }
+
+    setTimeout(() => {
+      return this.modal.present();
+    }, 50);
   }
 
   // Used to preload modal as soon as the previous SC window was dismissed
   onModalDismiss(modal: HTMLIonModalElement) {
     modal.onDidDismiss().then(() => {
-      this.modalCtrl
-        .create({
-          component: InterestsModalComponent,
-          enterAnimation: this.intEnterAnimation,
-          leaveAnimation: this.intLeaveAnimation,
-        })
-        .then((m) => {
-          this.modal = m;
-          return this.modal;
-        })
-        .then((m) => this.onModalDismiss(m));
+      this.editingTriggered();
+
+      console.log(this.editableFields?.interests);
+      this.modal = undefined;
     });
   }
 
@@ -227,7 +230,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     if (section === "bio") {
       this.bio.value = "";
       this.bioClose.nativeElement.style.display = "none";
-      this.profile.biography = "";
+      //this.profile.biography = "";
     }
   }
 
@@ -257,15 +260,18 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
         map(() => this.editingInProgress.next(false))
       )
       .toPromise();
+
+    this.displayExit('bio');
   }
 
   async confirmProfileEdit(): Promise<void> {
-    console.log("editbale fields", this.editableFields);
+    console.log("editable fields", this.editableFields);
     await this.currentUserStore
       .changeEditableFieldsValue(this.editableFields)
       .pipe(map((res) => this.editingInProgress.next(false)))
       .toPromise();
     console.log("confirmed edit");
+    this.profileCard.buildInterestSlides(this.profileCard.profile);
   }
 
   actOnProfileEditing($event: "cancel" | "save") {
@@ -277,7 +283,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     if (this.reachedMaxQuestionsCount) return;
 
     setTimeout(() => {
-      this.toggleDivEnterAnimation = ToggleAppearAnimation(this.toggleDiv, -5, 9.5);
+      this.toggleDivEnterAnimation = ToggleAppearAnimation(this.toggleDiv);
       this.toggleDivEnterAnimation.play();
     }, 250);
 
@@ -290,8 +296,10 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
       tap((a) => console.log("in progress", a)),
       switchMap((inProgress) =>
         inProgress
-          ? from(ToggleAppearAnimation(this.toggleDiv, -5, 9.5).play())
-          : from(ToggleDisappearAnimation(this.toggleDiv, -5, 9.5).play())
+          ? from(ToggleAppearAnimation(this.toggleDiv).play())
+          : from(ToggleAppearAnimation(this.toggleDiv).play())
+          //? from(ToggleAppearAnimation(this.toggleDiv, 9.5, -5).play())
+          //: from(ToggleAppearAnimation(this.toggleDiv, 9.5, -5).play())
       )
     );
   }

@@ -110,6 +110,31 @@ nemo-toggle {
     display: none;
 }
 
+//Deleting questions slide button
+/*ion-item-sliding {
+    margin: 0 -27px 0 -21px;
+    width: auto;
+
+    ion-item { 
+        --inner-border-width: 0;
+
+        profile-answer {
+            width: 95%;
+        }
+    }
+
+    //Styling of button when dragged across; colour is inline styled as "color = 'danger'"
+    ion-item-options {
+        height: 99%;
+        border: 0;
+
+        ion-item-option {
+            width: 20vw;
+            font-size: 4vh;
+        }
+    }
+}*/
+
 h2 {
     color: var(--ion-color-light);
     font-size: 2.6vh;

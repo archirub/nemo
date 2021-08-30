@@ -49,7 +49,7 @@
           >{{ profile?.firstName }}, {{ profile?.dateOfBirth | age }}</ion-card-title
         >
         <ion-card-subtitle #department id="department"
-          >{{ profile?.course }}, {{ profile?.degree | degrees }}</ion-card-subtitle
+          >{{ profile?.areaOfStudy}} - {{ profile?.course }}, {{ profile?.degree | degrees }}</ion-card-subtitle
         >
       </ion-card-header>
     </div>
@@ -59,7 +59,7 @@
           >{{ profile?.firstName }}, {{ profile?.dateOfBirth | age }}
         </ion-card-title>
         <ion-card-subtitle id="department"
-          >{{ profile?.course }}, {{ profile?.degree | degrees }}</ion-card-subtitle
+          >{{ profile?.areaOfStudy}} - {{ profile?.course }}, {{ profile?.degree | degrees }}</ion-card-subtitle
         >
       </ion-card-header>
       <div #content id="content">
@@ -78,7 +78,7 @@
             class="interests-slides" 
             *ngIf="this.interestsBuilt"
             (ionSlideTouchStart)='stopSlides()'
-            [options]="{autoplay: true, loop: true}">
+            [options]="{autoplay: true}">
               <ion-slide *ngFor="let slide of interestSlideContent">
                 <div id="interests-box" *ngFor="let interest of slide">
                   <img
@@ -130,7 +130,7 @@
 
             <div id="interests-box-soc">
               <div class="interests-text">
-                <ion-label id="interests-label">{{ profile?.society }}</ion-label>
+                <ion-label id="interests-label">{{ profile?.societyCategory }}</ion-label>
               </div>
               <ion-icon
                 name="people"
@@ -139,7 +139,7 @@
               ></ion-icon>
               <br />
               <div class="interests-text">
-                <ion-label id="interests-label">[SOCIETY]</ion-label>
+                <ion-label id="interests-label">{{ profile?.society }}</ion-label>
               </div>
             </div>
           </div>

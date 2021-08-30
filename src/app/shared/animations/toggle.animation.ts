@@ -3,20 +3,25 @@ import { AnimationController, Animation } from "@ionic/angular";
 
 export const ToggleAppearAnimation = (
   toggle: ElementRef,
-  initialTop: number,
-  finalTop: number
+  //initialTop: number,
+  //finalTop: number
 ): Animation => {
   //Moving on-screen
   const moveInAnimation = new AnimationController().create("appearAnimation");
   moveInAnimation
     .addElement(toggle.nativeElement)
     .easing("ease-in-out")
-    .duration(200)
-    .fromTo("top", `${initialTop}vh`, `${finalTop}vh`);
+    .duration(400)
+    .beforeStyles({
+      opacity: '0',
+    })
+    .fromTo("opacity", "0", "1")
+    //.fromTo('width', '0', `${initialWidth}vw`);
+    //.fromTo("top", `${initialTop}vh`, `${finalTop}vh`);
   return moveInAnimation;
 };
 
-export const ToggleDisappearAnimation = (
+/*export const ToggleDisappearAnimation = (
   toggle: ElementRef,
   initialTop: number,
   finalTop: number
@@ -33,4 +38,4 @@ export const ToggleDisappearAnimation = (
     });
 
   return moveOutAnimation;
-};
+};*/
