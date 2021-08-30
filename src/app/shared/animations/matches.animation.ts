@@ -29,7 +29,11 @@ export const MatchesEnterAnimation = (
           background: 'transparent',
           opacity: '1',
         })
-        .fromTo("transform", "scale(0.8,0.8)", "scale(1,1)");
+        .fromTo(
+          "transform",
+          "translateY(-100vh)",
+          "translateY(0vh)"
+        );
 
       // SHADOW IOS
       const shadowIOSAnimation = new AnimationController()

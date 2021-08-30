@@ -141,6 +141,8 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
       this.sizeSwipers();
       this.intSlides.update(); //Fixes broken swiper mechanism that ruins IonSlides snap-swiping
     }, 100);
+
+    this.startSlides();
   }
 
   async updatePager(currentIndex: number) {
@@ -216,6 +218,14 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
 
     this.interestSlideContent.push(pushArray); //pushes either last interests, or if less than three interests in total
     this.interestsBuilt = true;
+  }
+
+  startSlides() {
+    this.intSlides.startAutoplay();
+  }
+
+  stopSlides() {
+    this.intSlides.stopAutoplay();
   }
 
   findInterestIcon(interest: string) {
