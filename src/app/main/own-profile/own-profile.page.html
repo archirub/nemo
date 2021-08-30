@@ -86,7 +86,7 @@
           *ngFor="let q of editableFields.questions; let i = index"
           [(questionAndAnswer)]="editableFields.questions[i]"
           (questionAndAnswerChange)="editingTriggered()"
-          [questionsNotPicked]="questionsNotPicked | async"
+          [questionsNotPicked]="questionsNotPicked"
         ></profile-answer>
 
         <ng-container *ngIf="this.answers">
@@ -143,7 +143,7 @@
           [listed]="false"
         ></interests-slides>
 
-        <ion-button (click)="presentIntModal()">Interests</ion-button>
+        <ion-button (click)="presentInterestModal()">Interests</ion-button>
       </div>
     </div>
   </form>

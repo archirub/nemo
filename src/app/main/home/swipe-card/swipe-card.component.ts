@@ -26,7 +26,7 @@ import {
 
 import { CurrentUserStore, SwipeOutcomeStore, SwipeStackStore } from "@stores/index";
 import { Profile, User } from "@classes/index";
-import { MatchModalComponent, ProfileCardComponent } from "@components/index";
+import { ProfileCardComponent } from "@components/index";
 import {
   SwipeYesAnimation,
   SwipeNoAnimation,

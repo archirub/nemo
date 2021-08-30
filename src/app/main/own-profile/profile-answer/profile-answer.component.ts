@@ -39,9 +39,7 @@ export class ProfileAnswerComponent {
 
   @Input() questionsNotPicked: Question[];
 
-  constructor() {
-    this.questionAndAnswerChange.subscribe((a) => console.log("qanda", a));
-  }
+  constructor() {}
 
   /**
    * Updates UI to show cross icon to remove written answers
@@ -96,7 +94,6 @@ export class ProfileAnswerComponent {
    **/
   changeQuestion(q) {
     this.questionAndAnswer.question = q.target.value; //Get value of selected question
-    console.log("change question '" + this.questionAndAnswer.question);
 
     this.qHead.nativeElement.style.display = "block"; //Change UI from select to text
     this.qInput.nativeElement.style.display = "none";
@@ -118,7 +115,6 @@ export class ProfileAnswerComponent {
    **/
   answerQuestion(a) {
     this.questionAndAnswer.answer = a.target.value;
-    console.log("choose answer", this.questionAndAnswer.answer);
     this.questionAndAnswerChange.emit(this.questionAndAnswer);
   }
 }

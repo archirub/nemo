@@ -12,7 +12,6 @@
         id="replace"
         interface="action-sheet"
         placeholder="Choose a question"
-        [ngModel]="questionAndAnswer.question"
         (ngModelChange)="onQuestionChange($event)"
       >
         <ion-select-option *ngFor="let q of questionsNotPicked" [value]="q">
@@ -28,20 +27,3 @@
     ></ion-textarea>
   </div>
 </div>
-<!-- 
-<div class="add" *ngIf="!this.addable">
-  <ion-select
-    interface="action-sheet"
-    placeholder="Choose a question"
-    [ngModel]="questionAndAnswer?.question"
-    (changeNgModel)="onChangeQuestion($event)"
-    (ionCancel)="makeAddable()"
-  >
-    <ion-select-option *ngFor="let q of questionsNotPicked" [value]="q">
-      {{ q }}
-    </ion-select-option>
-  </ion-select>
-  <div class="text">
-    <ion-textarea autoGrow="true" (ionChange)="answerQuestion($event)"></ion-textarea>
-  </div>
-</div> -->

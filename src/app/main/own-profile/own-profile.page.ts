@@ -66,8 +66,6 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
 
   @ViewChild("toggleDiv", { read: ElementRef }) toggleDiv: ElementRef;
 
-  @Output() loaded = new EventEmitter();
-
   profileSub: Subscription;
   profile: User; //THIS IS CHANGED ON THE PAGE WHILE EDITING, SEE prevProfileEdit
 
@@ -104,7 +102,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     private modalCtrl: ModalController
   ) {}
 
-  modal: HTMLIonModalElement;
+  interestsModal: HTMLIonModalElement;
   intEnterAnimation;
   intLeaveAnimation;
 
@@ -158,18 +156,18 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
           leaveAnimation: this.intLeaveAnimation,
         })
         .then((m) => {
-          this.modal = m;
-          this.onModalDismiss(this.modal);
+          this.interestsModal = m;
+          this.onInterestsModalDismiss(this.interestsModal);
         });
     }, 100);
   }
 
-  async presentIntModal(): Promise<void> {
-    return await this.modal.present();
+  async presentInterestModal(): Promise<void> {
+    return await this.interestsModal.present();
   }
 
   // Used to preload modal as soon as the previous SC window was dismissed
-  onModalDismiss(modal: HTMLIonModalElement) {
+  onInterestsModalDismiss(modal: HTMLIonModalElement) {
     modal.onDidDismiss().then(() => {
       this.modalCtrl
         .create({
@@ -178,22 +176,16 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
           leaveAnimation: this.intLeaveAnimation,
         })
         .then((m) => {
-          this.modal = m;
-          return this.modal;
+          this.interestsModal = m;
+          return this.interestsModal;
         })
-        .then((m) => this.onModalDismiss(m));
+        .then((m) => this.onInterestsModalDismiss(m));
     });
   }
 
-  get questionsNotPicked(): Observable<string[]> {
-    return this.currentUserStore.user$.pipe(
-      filter((user) => !!user),
-      map((user) => user.questions.map((QandA) => QandA.question)),
-      map((questionsPicked) =>
-        questionsOptions.filter((option) => !questionsPicked.includes(option))
-      ),
-      distinctUntilChanged((prev, curr) => isEqual(prev, curr))
-    );
+  get questionsNotPicked(): string[] {
+    const questionsPicked = this.editableFields?.questions.map((QandA) => QandA.question);
+    return questionsOptions.filter((option) => !questionsPicked.includes(option));
   }
 
   updateEditableFields(data: User | Profile | editableProfileFields): void {
