@@ -40,10 +40,14 @@ export const createAccount = functions
   .https.onCall(async (data: createAccountRequest, context): Promise<successResponse> => {
     const MAX_UID_COUNT_PI_STORAGE = 2000;
 
+    if (!context.auth)
+      throw new functions.https.HttpsError("unauthenticated", "User not authenticated.");
+
+    const uid: string = context.auth.uid;
+
     const dataHolder: {
       [key in keyof createAccountRequest]: createAccountRequest[key] | null;
     } = {
-      uid: null,
       firstName: null,
       dateOfBirth: null,
       picturesCount: null,
@@ -127,12 +131,12 @@ export const createAccount = functions
         );
 
         // SET / UPDATE DOCUMENTS
-        addToProfile(transaction, checkedData);
-        addToPrivateProfile(transaction, checkedData);
-        addToMatchDataMain(transaction, checkedData);
-        addToMatchDataDating(transaction, checkedData);
-        addToPiStorage(transaction, piStorageDocument, checkedData);
-        addToUidDatingStorage(transaction, uidStorageDocuments, checkedData);
+        addToProfile(transaction, checkedData, uid);
+        addToPrivateProfile(transaction, uid);
+        addToMatchDataMain(transaction, checkedData, uid);
+        addToMatchDataDating(transaction, checkedData, uid);
+        addToPiStorage(transaction, piStorageDocument, checkedData, uid);
+        addToUidDatingStorage(transaction, uidStorageDocuments, uid);
       });
 
       // TO DO
@@ -149,7 +153,7 @@ export const createAccount = functions
 
       return { successful: true };
     } catch (e) {
-      console.warn(`uid: ${data.uid}, ${e}`);
+      console.warn(`uid: ${uid}, ${e}`);
       return { successful: false, message: "some shit went down: " + e };
     }
   });
@@ -290,12 +294,12 @@ function socialMediaLinksCheck(a: any, options: socialMedia[]): boolean {
 // of that particular property (case of sexualPref, interests, questions)
 
 const dataChecker: DataChecker = {
-  uid: {
-    typeCheck: stringCheck,
-    allowedValues: null,
-    isRequired: true,
-    valueIsObject: false,
-  },
+  // uid: {
+  //   typeCheck: stringCheck,
+  //   allowedValues: null,
+  //   isRequired: true,
+  //   valueIsObject: false,
+  // },
   firstName: {
     typeCheck: stringCheck,
     allowedValues: null,
@@ -415,7 +419,8 @@ interface demographicMap {
 function addToUidDatingStorage(
   transaction: admin.firestore.Transaction,
   uidStorageDocuments: FirebaseFirestore.QuerySnapshot<uidDatingStorage>[],
-  data: createAccountRequest
+  // data: createAccountRequest,
+  uid: string
 ) {
   // that step is the most complex, since the uidDatingStorage uid arrays are ordered
   // in percentile, and their may me multiple uidDatingStorage arrays, for which, if we add
@@ -453,7 +458,7 @@ function addToUidDatingStorage(
       // check if midIndex falls in that array
       if (totalUidsUpToIndex[index] - midIndex > 0) {
         const indexInArray = midIndex - (totalUidsUpToIndex[index - 1] || 0);
-        const newUidArray = doc.data().uids.splice(indexInArray, 0, data.uid);
+        const newUidArray = doc.data().uids.splice(indexInArray, 0, uid);
         modifiedUidArrays.push({ ref: doc.ref, uids: newUidArray });
         // break out since we found the array to add to
         break;
@@ -487,7 +492,8 @@ function getDemographics(data: createAccountRequest): demographicMap {
 
 function addToProfile(
   transaction: admin.firestore.Transaction,
-  data: createAccountRequest
+  data: createAccountRequest,
+  uid: string
 ) {
   const profile: profileFromDatabase = {
     firstName: data.firstName,
@@ -498,20 +504,19 @@ function addToProfile(
     degree: data.degree,
     course: data.course,
     society: data.society,
+    societyCategory: data.societyCategory,
+    areaOfStudy: data.areaOfStudy,
     interests: data.interests,
     questions: data.questions,
     onCampus: data.onCampus,
     socialMediaLinks: data.socialMediaLinks,
   };
-  const ref = admin.firestore().collection("profiles").doc(data.uid);
+  const ref = admin.firestore().collection("profiles").doc(uid);
 
   transaction.set(ref, profile);
 }
 
-function addToPrivateProfile(
-  transaction: admin.firestore.Transaction,
-  data: createAccountRequest
-) {
+function addToPrivateProfile(transaction: admin.firestore.Transaction, uid: string) {
   const privateProfile: privateProfileFromDatabase = {
     settings: {},
     latestSearchCriteria: {
@@ -526,7 +531,7 @@ function addToPrivateProfile(
   const ref = admin
     .firestore()
     .collection("profiles")
-    .doc(data.uid)
+    .doc(uid)
     .collection("private")
     .doc("private");
 
@@ -535,7 +540,8 @@ function addToPrivateProfile(
 
 function addToMatchDataMain(
   transaction: admin.firestore.Transaction,
-  data: createAccountRequest
+  data: createAccountRequest,
+  uid: string
 ) {
   const matchData: mdFromDatabase = {
     matchedUsers: {},
@@ -549,14 +555,15 @@ function addToMatchDataMain(
     // swipeMode: data.swipeMode,
     uidCount: 0,
   };
-  const ref = admin.firestore().collection("matchData").doc(data.uid);
+  const ref = admin.firestore().collection("matchData").doc(uid);
 
   transaction.set(ref, matchData);
 }
 
 function addToMatchDataDating(
   transaction: admin.firestore.Transaction,
-  data: createAccountRequest
+  data: createAccountRequest,
+  uid: string
 ) {
   const matchDataDating: mdDatingPickingFromDatabase = {
     searchFeatures: {
@@ -575,7 +582,7 @@ function addToMatchDataDating(
   const ref = admin
     .firestore()
     .collection("matchData")
-    .doc(data.uid)
+    .doc(uid)
     .collection("pickingData")
     .doc("dating");
 
@@ -585,7 +592,8 @@ function addToMatchDataDating(
 function addToPiStorage(
   transaction: admin.firestore.Transaction,
   piStorageDocument: FirebaseFirestore.QuerySnapshot<piStorage>,
-  data: createAccountRequest
+  data: createAccountRequest,
+  uid: string
 ) {
   const piStorageMap: SwipeUserInfo = {
     seenCount: 0,
@@ -601,17 +609,17 @@ function addToPiStorage(
 
   if (!piStorageDocument.empty) {
     transaction.update(piStorageDocument.docs[0].ref, {
-      uids: admin.firestore.FieldValue.arrayUnion(data.uid),
+      uids: admin.firestore.FieldValue.arrayUnion(uid),
       uidCount: admin.firestore.FieldValue.increment(1),
-      [`${data.uid}`]: piStorageMap,
+      [`${uid}`]: piStorageMap,
     });
   } else {
     const docRef = admin.firestore().collection("piStorage").doc();
 
     transaction.set(docRef, {
-      uids: [data.uid],
+      uids: [uid],
       uidCount: 1,
-      [`${data.uid}`]: piStorageMap,
+      [`${uid}`]: piStorageMap,
     });
   }
 }

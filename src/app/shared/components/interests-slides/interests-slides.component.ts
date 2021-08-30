@@ -1,14 +1,6 @@
-import { 
-  Component, 
-  Input,
-  OnInit, 
-  Output, 
-  EventEmitter } from "@angular/core";
+import { Component, Input, OnInit, Output, EventEmitter } from "@angular/core";
 
-import { 
-  assetsInterestsPath, 
-  Interests, 
-  searchCriteriaOptions } from "@interfaces/index";
+import { assetsInterestsPath, Interests, searchCriteriaOptions } from "@interfaces/index";
 
 @Component({
   selector: "interests-slides",
@@ -161,5 +153,10 @@ export class InterestSlidesComponent implements OnInit {
 
     this.interestsChange.emit(this.interests);
     console.log(this.interests);
+  }
+
+  getPicturePath(interestName: Interests): string {
+    const formattedName = interestName.replace(/\s/g, "").toLowerCase();
+    return "/assets/interests/" + formattedName + ".png";
   }
 }

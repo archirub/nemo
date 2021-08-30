@@ -1,4 +1,9 @@
-import { Degree, SearchFeatures } from "./search-criteria.model";
+import {
+  AreaOfStudy,
+  Degree,
+  SearchFeatures,
+  SocietyCategory,
+} from "./search-criteria.model";
 
 export interface UidDateMap {
   [uid: string]: dateMap;
@@ -47,6 +52,11 @@ export interface userInfoFromMatchData {
   gender: Gender;
   sexualPreference: SexualPreference;
   swipeMode: SwipeMode;
+}
+
+export interface userInfoFromPickingData {
+  societyCategory: SocietyCategory;
+  areaOfStudy: AreaOfStudy;
 }
 
 export interface uidDatingStorage {

@@ -15,3 +15,4 @@ export * from "./update-PI-system/main";
 export * from "./update-duplicate-data/index";
 // export * from "./increment-md-uid-count";
 export * from "./account-creation";
+export * from "./profile-editing-by-user";

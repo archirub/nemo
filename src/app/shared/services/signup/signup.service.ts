@@ -119,7 +119,6 @@ export class SignupService {
         }
 
         const creationRequestData: createAccountRequest = {
-          uid: user.uid,
           firstName: dataStored.firstName,
           picturesCount: dataStored?.pictures?.filter(Boolean).length ?? 0, // counts # of none empty elements
           sexualPreference: dataStored.sexualPreference,

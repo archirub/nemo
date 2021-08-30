@@ -1,17 +1,27 @@
 <div>
-    <ion-select 
-    #select 
-    placeholder={{departments}} 
+  <ion-select
+    #select
+    [placeholder]="categoryPlaceHolder"
     interface="action-sheet"
-    okText="Ok" 
-    cancelText="Cancel" 
-    (ionChange)="updateDept(type)">
-        <ion-select-option *ngFor="let selection of this.depts">{{ selection }}</ion-select-option>
-    </ion-select>
-    <div #close class="close-button" style="display: none" (click)="clearInput()">
-        <ion-icon name="close-outline"></ion-icon>
-    </div>
-    <div class="text">
-        <ion-input #input (ionInput)="displayExit()"></ion-input>
-    </div>
+    okText="Ok"
+    cancelText="Cancel"
+    [ngModel]="categoryChoice"
+    (ngModelChange)="onCategoryChange($event)"
+    [ngModelOptions]="{ standalone: true }"
+  >
+    <ion-select-option *ngFor="let selection of categoryOptions" [value]="selection">{{
+      selection
+    }}</ion-select-option>
+  </ion-select>
+  <div #close class="close-button" style="display: none" (click)="clearValueInput()">
+    <ion-icon name="close-outline"></ion-icon>
+  </div>
+  <div class="text">
+    <ion-input
+      #input
+      [ngModel]="choice"
+      (ngModelChange)="onChoiceChange($event)"
+      [ngModelOptions]="{ standalone: true }"
+    ></ion-input>
+  </div>
 </div>

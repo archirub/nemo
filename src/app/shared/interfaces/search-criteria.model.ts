@@ -31,12 +31,12 @@ export const searchCriteriaOptions = {
     "Sports" as const,
   ],
   interests: [
-    "Herb Friendly" as const,
     "Book Worm" as const,
     "Life Saver" as const,
     "Cafe Dweller" as const,
     "Astrologist" as const,
     "Chef" as const,
+    "Herb Friendly" as const,
     "Model" as const,
     "Tik Toker" as const,
     "Library Fiend" as const,

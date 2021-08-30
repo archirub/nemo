@@ -1,4 +1,10 @@
-import { Gender, SexualPreference, userInfoFromMatchData } from "./match-data.model";
+import {
+  Gender,
+  SexualPreference,
+  userInfoFromMatchData,
+  userInfoFromPickingData,
+} from "./match-data.model";
+import { editableProfileFields } from "./profile.model";
 import { searchCriteria, SearchFeatures } from "./search-criteria.model";
 import { SignupOptional, SignupRequired } from "./signup.model";
 import { swipeChoice, uidChoiceMap } from "./swipe-choice.model";
@@ -12,6 +18,9 @@ export interface generateSwipeStackResponse {
 
 export interface getMatchDataUserInfoRequest {}
 export type getMatchDataUserInfoResponse = userInfoFromMatchData;
+
+export interface getPickingDataUserInfoRequest {}
+export type getPickingDataUserInfoResponse = userInfoFromPickingData;
 
 export interface registerSwipeChoicesRequest {
   choices: uidChoiceMap[];
@@ -46,4 +55,8 @@ export interface updateGenderSexPrefRequest {
 }
 
 export type createAccountRequest = Omit<SignupRequired, "pictures" | "dateOfBirth"> &
-  SignupOptional & { uid: string; picturesCount: number; dateOfBirth: string };
+  SignupOptional & { picturesCount: number; dateOfBirth: string };
+
+export type profileEditingByUserRequest = {
+  data: editableProfileFields;
+};

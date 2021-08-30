@@ -165,7 +165,9 @@ export class OwnPicturesStore {
   getOwnPictureCount(): Observable<number> {
     return this.currentUser.user$.pipe(
       skipWhile((user) => user === null), // since behaviorSubject can hold null before it is initialised
-      map((user) => user?.pictureCount)
+      map((user) => user?.pictureCount),
+      filter((count) => !!count),
+      distinctUntilChanged()
     );
   }
 }

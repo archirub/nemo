@@ -7,11 +7,12 @@ import {
   QueryList,
   ViewChild,
   ViewChildren,
-  EventEmitter
+  EventEmitter,
+  AfterViewInit,
 } from "@angular/core";
 
-import { Observable, Subscription } from "rxjs";
-import { Profile, User } from "@classes/index";
+import { BehaviorSubject, from, interval, Observable, Subscription } from "rxjs";
+import { User, Profile } from "@classes/index";
 import { CurrentUserStore } from "@stores/index";
 import { AddPhotoComponent, ProfileCardComponent } from "@components/index";
 import { ProfileCourseComponent } from "./profile-course/profile-course.component";
@@ -20,38 +21,37 @@ import { Router } from "@angular/router";
 import { OwnPicturesStore } from "@stores/pictures-stores/own-pictures-store/own-pictures.service";
 import { ProfileAnswerComponent } from "./profile-answer/profile-answer.component";
 import { FormArray, FormControl, FormGroup } from "@angular/forms";
-import { 
-  FishSwimAnimation, 
-  ToggleAppearAnimation, 
+import {
+  FishSwimAnimation,
+  ToggleAppearAnimation,
   ToggleDisappearAnimation,
   IntEnterAnimation,
-  IntLeaveAnimation } from "@animations/index";
+  IntLeaveAnimation,
+} from "@animations/index";
 import {
   AreaOfStudy,
   Interests,
   SocietyCategory,
 } from "@interfaces/search-criteria.model";
 import { QuestionAndAnswer } from "@interfaces/profile.model";
-import { map } from "rxjs/operators";
 import { TabElementRefService } from "../tab-menu/tab-element-ref.service";
 import { InterestsModalComponent } from "./interests-modal/interests-modal.component";
 
-interface editableProfileProperties {
-  biography: string;
-  course: string;
-  areaOfStudy: AreaOfStudy;
-  society: string;
-  societyCategory: SocietyCategory;
-  interests: Interests[];
-  questions: QuestionAndAnswer[];
-}
+import { distinctUntilChanged, filter, map, switchMap, take, tap } from "rxjs/operators";
+import {
+  searchCriteriaOptions,
+  editableProfileFields,
+  MAX_PROFILE_QUESTIONS_COUNT,
+  questionsOptions,
+} from "@interfaces/index";
+import { isEqual } from "lodash";
 
 @Component({
   selector: "app-own-profile",
   templateUrl: "./own-profile.page.html",
   styleUrls: ["./own-profile.page.scss"],
 })
-export class OwnProfilePage implements OnInit {
+export class OwnProfilePage implements OnInit, AfterViewInit {
   @ViewChild(AddPhotoComponent) photo: AddPhotoComponent;
   @ViewChild("bioInput") bio: IonTextarea;
   @ViewChild("bioClose", { read: ElementRef }) bioClose: ElementRef;
@@ -60,12 +60,11 @@ export class OwnProfilePage implements OnInit {
 
   @ViewChild("profileCard") profileCard: ProfileCardComponent;
   @ViewChild("profileContainer", { read: ElementRef }) profileContainer: ElementRef;
-  @ViewChild('fish', { read: ElementRef }) fish: ElementRef;
+  @ViewChild("fish", { read: ElementRef }) fish: ElementRef;
 
   @ViewChildren("answers") answers: QueryList<ProfileAnswerComponent>;
-  lastAnsRef;
 
-  @ViewChild('toggleDiv', { read: ElementRef }) toggleDiv: ElementRef;
+  @ViewChild("toggleDiv", { read: ElementRef }) toggleDiv: ElementRef;
 
   @Output() loaded = new EventEmitter();
 
@@ -73,31 +72,28 @@ export class OwnProfilePage implements OnInit {
   profile: User; //THIS IS CHANGED ON THE PAGE WHILE EDITING, SEE prevProfileEdit
 
   ownPicturesSub: Subscription;
-  picsLoaded$: Subscription;
-  picsLoaded: boolean = false;
+  picsLoaded$: Observable<boolean>;
+
+  editingInProgress = new BehaviorSubject<boolean>(false);
+  editingInProgress$ = this.editingInProgress.pipe(distinctUntilChanged());
 
   fishSwimAnimation;
 
   toggleDivEnterAnimation;
   toggleDivLeaveAnimation;
 
-  editingInProgress: boolean = false;
-  prevProfileEdit: Profile; //THIS SHOULD ALWAYS BE MATCHING THE BACKEND
+  editableFields: editableProfileFields = {
+    biography: null,
+    course: null,
+    areaOfStudy: null,
+    society: null,
+    societyCategory: null,
+    interests: [],
+    questions: [],
+  };
 
-  form = new FormGroup({
-    biography: new FormControl(null),
-    course: new FormControl(null),
-    areaOfStudy: new FormControl(null),
-    society: new FormControl(null),
-    societyCategory: new FormControl(null),
-    interests: new FormArray([]),
-    questions: new FormArray([
-      new FormGroup({
-        q: new FormControl(""),
-        a: new FormControl(""),
-      }),
-    ]),
-  });
+  societyCategoryOptions = searchCriteriaOptions.societyCategory;
+  areaOfStudyOptions = searchCriteriaOptions.areaOfStudy;
 
   constructor(
     private currentUserStore: CurrentUserStore,
@@ -113,27 +109,18 @@ export class OwnProfilePage implements OnInit {
   intLeaveAnimation;
 
   ngOnInit() {
-    this.profileSub = this.currentUserStore.user$.subscribe(res => {
-      this.profile = res;
-      this.prevProfileEdit = Object.assign({}, this.profile);
-      //Object.assign makes a deepcopy instead of a pointer
-    });
-    this.picsLoaded$ = this.ownPicturesService.allPicturesLoaded$.subscribe(res => {
-      this.picsLoaded = res;
-      if (this.picsLoaded === true) {
-        try {
-          this.stopAnimation();
-        } finally {
-          console.log('Animation not found.');
-        };
-      };
-    });
+    this.currentUserStore.user$
+      .pipe(map((user) => this.updateEditableFields(user)))
+      .subscribe();
+
+    this.editingAnimationLogic().subscribe();
+
+    this.picsLoaded$ = this.ownPicturesService.allPicturesLoaded$.pipe(
+      tap((allPicturesLoaded) => (allPicturesLoaded ? this.stopAnimation() : null))
+    );
   }
 
   ngAfterViewInit() {
-    this.depts?.type ? (this.depts.type = "courses") : null;
-    this.socs?.type ? (this.socs.type = "societies") : null;
-
     this.fishSwimAnimation = FishSwimAnimation(this.fish);
     this.fishSwimAnimation.play();
   }
@@ -146,11 +133,11 @@ export class OwnProfilePage implements OnInit {
       this.toggleDivEnterAnimation = ToggleAppearAnimation(this.toggleDiv, -5, 9.5);
       this.toggleDivLeaveAnimation = ToggleDisappearAnimation(this.toggleDiv, -5, 9.5);
 
-      this.lastAnsRef = Array.from(this.answers)[this.answers.length - 1];
+      // this.lastAnsRef = Array.from(this.answers)[this.answers.length - 1];
 
-      //'snapshot' to retrieve if editing is cancelled
-      this.prevProfileEdit['_questions'] = [...this.profile.questions];
-      this.prevProfileEdit['_interests'] = [...this.profile.interests];
+      // //'snapshot' to retrieve if editing is cancelled
+      // this.prevProfileEdit['_questions'] = [...this.profile.questions];
+      // this.prevProfileEdit['_interests'] = [...this.profile.interests];
     }, 50);
 
     //Build modal setup once UI has entered
@@ -174,7 +161,7 @@ export class OwnProfilePage implements OnInit {
           this.modal = m;
           this.onModalDismiss(this.modal);
         });
-      }, 100);
+    }, 100);
   }
 
   async presentIntModal(): Promise<void> {
@@ -198,23 +185,42 @@ export class OwnProfilePage implements OnInit {
     });
   }
 
-  activateFlowUserToForm(currentUser: Observable<User>): Observable<void> {
-    return currentUser.pipe(
-      map((user) => {
-        Object.keys(this.form.controls).forEach((control) => {
-          user?.[control] ? this.form.get(control).setValue(user[control]) : null;
-        });
-      })
+  get questionsNotPicked(): Observable<string[]> {
+    return this.currentUserStore.user$.pipe(
+      filter((user) => !!user),
+      map((user) => user.questions.map((QandA) => QandA.question)),
+      map((questionsPicked) =>
+        questionsOptions.filter((option) => !questionsPicked.includes(option))
+      ),
+      distinctUntilChanged((prev, curr) => isEqual(prev, curr))
     );
+  }
+
+  updateEditableFields(data: User | Profile | editableProfileFields): void {
+    Object.keys(this.editableFields).forEach((field) => {
+      if (!data?.[field]) return;
+
+      if (typeof data[field] === "object") {
+        // for reference of user's objects and editableFields' objects to be different
+        this.editableFields[field] = JSON.parse(JSON.stringify(data[field]));
+      } else {
+        this.editableFields[field] = data[field];
+      }
+    });
+  }
+
+  goToSettings() {
+    this.router.navigateByUrl("/main/settings");
   }
 
   displayExit(section) {
     if (section === "bio" && this.bio.value !== "") {
+      console.log("display exit for bio");
+
       this.bioClose.nativeElement.style.display = "block";
     } else if (this.bio.value === "") {
       this.bioClose.nativeElement.style.display = "none";
     }
-    this.profile.biography = this.bio.value;
   }
 
   clearInput(section) {
@@ -239,110 +245,63 @@ export class OwnProfilePage implements OnInit {
     }
   }
 
-  updateInterests(targetProfile: Profile | User) {
-    this.profileCard.buildInterestSlides(targetProfile);
-    this.editingTriggered();
+  editingTriggered() {
+    this.editingInProgress.next(true);
   }
 
-  formatAllQuestions() {
-    this.answers.forEach((comp) => {
-      comp.formAvailableQuestions();
-    });
+  async cancelProfileEdit(): Promise<void> {
+    await this.currentUserStore.user$
+      .pipe(
+        take(1),
+        map((user) => this.updateEditableFields(user)),
+        map(() => this.editingInProgress.next(false))
+      )
+      .toPromise();
+  }
 
-    this.editingTriggered();
+  async confirmProfileEdit(): Promise<void> {
+    console.log("editbale fields", this.editableFields);
+    await this.currentUserStore
+      .changeEditableFieldsValue(this.editableFields)
+      .pipe(map((res) => this.editingInProgress.next(false)))
+      .toPromise();
+    console.log("confirmed edit");
+  }
+
+  actOnProfileEditing($event: "cancel" | "save") {
+    if ($event === "cancel") return this.cancelProfileEdit();
+    if ($event === "save") return this.confirmProfileEdit();
   }
 
   addQuestion() {
-    this.lastAnsRef.addable = false; //Show input for new question on last profile answer component
-    this.answers.last.chosenQuestion = undefined;
-    this.answers.last.chosenAnswer = undefined;
-
-    this.editingTriggered();
-  }
-
-  submitQuestion() {
-    this.lastAnsRef.submitQuestion();
-    Array.from(this.answers).forEach((q) => {
-      q.addable = true; //Remove all ion select options
-    });
-
-    this.detector.detectChanges(); //Detect template changes
-    this.lastAnsRef = Array.from(this.answers)[this.answers.length - 1]; //Check which is now last answer element
-
-    this.formatAllQuestions();
-  }
-
-  editingTriggered() {
-    if (this.editingInProgress === false) {
-      this.toggleDivLeaveAnimation = ToggleDisappearAnimation(this.toggleDiv, -5, 9.5);
-      this.toggleDivLeaveAnimation.play();
-
-      setTimeout(() => {
-        this.editingInProgress = true;
-      }, 200);
-
-      setTimeout(() => {
-        this.toggleDivEnterAnimation = ToggleAppearAnimation(this.toggleDiv, -5, 9.5);
-        this.toggleDivEnterAnimation.play();
-      }, 250);
-    };
-  }
-
-  /**
-   * Fills question components with previous answers
-   * Triggered by cancelling edits
-   **/
-  refillPrevAnswers() {
-    this.prevProfileEdit['_questions'].forEach((q, ind) => {
-      Array.from(this.answers)[ind].setValue(q.question, q.answer);
-    });
-  }
-
-  /** 
-   * Function for negotiating frontend/backend changes while editing
-   * Triggered by the nemo toggle that appears when editing
-   **/
-  profileChanges(option) {
-    if (option === 'save') {
-      //Save user changes to backend
-      //You want to send this.profile to backend as new changes, NOT PREVPROFILEEDIT 
-      //No frontend changes necessary afaik, profile seems to update anyway?
-      this.prevProfileEdit = Object.assign(this.prevProfileEdit, this.profile);
-      console.log('Lol!');
-
-    } else if (option === 'cancel') {
-      //Bio is not a custom component so is manually updated here
-      this.bio.value = this.prevProfileEdit['_biography'];
-      this.displayExit('bio');
-
-      this.profile.interests = this.prevProfileEdit['_interests'];
-
-      this.profile = Object.assign(this.profile, this.prevProfileEdit);
-      //Update last ans ref to add new questions
-      this.lastAnsRef = Array.from(this.answers)[this.answers.length - 1];
-      this.refillPrevAnswers();
-    };
-
-    //Copy profile interests and questions once again
-    this.prevProfileEdit['_questions'] = [...this.profile.questions];
-    this.prevProfileEdit['_interests'] = [...this.profile.interests];
-    this.profileCard.buildInterestSlides(this.profile);
-
-    this.toggleDivLeaveAnimation = ToggleDisappearAnimation(this.toggleDiv, -5, 9.5);
-    this.toggleDivLeaveAnimation.play();
-
-    setTimeout(() => {
-      this.editingInProgress = false;
-    }, 200);
+    if (this.reachedMaxQuestionsCount) return;
 
     setTimeout(() => {
       this.toggleDivEnterAnimation = ToggleAppearAnimation(this.toggleDiv, -5, 9.5);
       this.toggleDivEnterAnimation.play();
     }, 250);
+
+    this.editableFields.questions.push({ question: null, answer: null });
+    this.editingTriggered();
   }
 
-  goToSettings() {
-    this.router.navigateByUrl("/main/settings");
+  editingAnimationLogic(): Observable<any> {
+    return this.editingInProgress$.pipe(
+      tap((a) => console.log("in progress", a)),
+      switchMap((inProgress) =>
+        inProgress
+          ? from(ToggleAppearAnimation(this.toggleDiv, -5, 9.5).play())
+          : from(ToggleDisappearAnimation(this.toggleDiv, -5, 9.5).play())
+      )
+    );
+  }
+
+  get reachedMaxQuestionsCount(): boolean {
+    return this.questionsCount >= MAX_PROFILE_QUESTIONS_COUNT;
+  }
+
+  get questionsCount(): number {
+    return this.editableFields?.questions?.length ?? 0;
   }
 
   ngOnDestroy() {

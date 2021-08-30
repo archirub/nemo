@@ -5,12 +5,17 @@ import {
   OnCampus,
   Degree,
   Interests,
+  AreaOfStudy,
 } from "./search-criteria.model";
 
 // FOR CLOUD FUNCTION DEPLOYMENT, otherwise it doesn't recognize the type declaration below
 import * as firebase from "firebase";
 import { CameraPhoto } from "@capacitor/core";
 import { allowOptionalProp } from "./shared.model";
+import { Gender, SexualPreference, SwipeMode } from "./match-data.model";
+
+export const MAX_PROFILE_PICTURES_COUNT = 6;
+export const MAX_PROFILE_QUESTIONS_COUNT = 3;
 
 export interface profile {
   uid: string;
@@ -22,6 +27,8 @@ export interface profile {
   university: University;
   degree: Degree;
   course: string;
+  societyCategory: SocietyCategory;
+  areaOfStudy: AreaOfStudy;
   society: string;
   interests: Interests[];
   questions: QuestionAndAnswer[];
@@ -29,7 +36,22 @@ export interface profile {
   socialMediaLinks: SocialMediaLink[];
 }
 
+export interface editableProfileFields {
+  biography: string | null;
+  course: string | null;
+  areaOfStudy: AreaOfStudy | null;
+  society: string | null;
+  societyCategory: SocietyCategory | null;
+  interests: Interests[] | null;
+  questions: QuestionAndAnswer[] | null;
+}
+
 export interface user extends profile {
+  societyCategory: SocietyCategory;
+  areaOfStudy: AreaOfStudy;
+  sexualPreference: SexualPreference;
+  gender: Gender;
+  // swipeMode: SwipeMode;
   settings: Settings;
   latestSearchCriteria: allowOptionalProp<searchCriteria>;
 }
@@ -44,6 +66,8 @@ export interface profileFromDatabase {
   degree: Degree;
   course: string;
   society: string;
+  societyCategory: SocietyCategory;
+  areaOfStudy: AreaOfStudy;
 
   interests: Interests[]; // This needs to be changed in the database
   questions: QuestionAndAnswer[];

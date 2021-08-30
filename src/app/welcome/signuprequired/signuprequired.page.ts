@@ -18,6 +18,7 @@ import {
   searchCriteriaOptions,
   sexualPreferenceOptions,
   genderOptions,
+  MAX_PROFILE_PICTURES_COUNT,
 } from "@interfaces/index";
 import { SignupRequired } from "@interfaces/signup.model";
 
@@ -59,7 +60,7 @@ export class SignuprequiredPage {
   degreeOptions: Degree[] = searchCriteriaOptions.degree;
 
   maxPictureCount: number = 6; // defines the number of picture boxes in template, as well as is used in logic to save picture picks
-  picturesHolder: string[] = Array.from({ length: this.maxPictureCount }); // for storing pictures. Separate from rest of form, added to it on form submission
+  picturesHolder: string[] = Array.from({ length: MAX_PROFILE_PICTURES_COUNT }); // for storing pictures. Separate from rest of form, added to it on form submission
 
   slidesLeft: number;
 

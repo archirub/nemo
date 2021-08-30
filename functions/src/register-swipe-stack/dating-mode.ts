@@ -216,16 +216,10 @@ export async function createDatingChatDocuments(
           name: matchedUserData.firstName,
         },
       ];
-      const messages: [] = [];
-      const lastInteracted = admin.firestore.Timestamp.fromDate(new Date());
-      const batchVolume = 0;
 
       const chat: chatFromDatabase = {
         uids,
         userSnippets,
-        messages,
-        batchVolume,
-        lastInteracted,
       };
 
       await admin.firestore().collection("chats").add(chat);

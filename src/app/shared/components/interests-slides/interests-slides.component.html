@@ -20,9 +20,9 @@
           : 'var(--ion-color-primary-contrast)'
       "-->
       <div class="image-container">
-        <img src="{{ this.pictures[i] }}" />
+        <img [src]="getPicturePath(names[i])" />
       </div>
-      <h2>{{ this.names[i] }}</h2>
+      <h2>{{ names[i] }}</h2>
     </ion-slide>
   </ion-slides>
 </ion-content>

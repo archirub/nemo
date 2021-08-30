@@ -3,55 +3,72 @@ import {
   Component,
   ElementRef,
   Input,
-  OnInit,
   Output,
   ViewChild,
+  forwardRef,
 } from "@angular/core";
+import { NG_VALUE_ACCESSOR } from "@angular/forms";
 import { User } from "@classes/user.class";
-import { QuestionAndAnswer, questionsOptions } from "@interfaces/profile.model";
+import { Question, QuestionAndAnswer, questionsOptions } from "@interfaces/profile.model";
 import { IonSelect, IonTextarea } from "@ionic/angular";
+
+// change the "addable" system so that questions are added outside of the slides component,
+// within the own-profile, not within the custom component as that creates so many problems
 
 @Component({
   selector: "profile-answer",
   templateUrl: "./profile-answer.component.html",
   styleUrls: ["./profile-answer.component.scss"],
+  providers: [
+    // {
+    //   provide: NG_VALUE_ACCESSOR,
+    //   multi: true,
+    //   useExisting: forwardRef(() => ProfileAnswerComponent),
+    // },
+  ],
 })
-export class ProfileAnswerComponent implements OnInit {
+export class ProfileAnswerComponent {
   @ViewChild("answerInput") answer: IonTextarea;
   @ViewChild("answerClose", { read: ElementRef }) answerClose: ElementRef;
   @ViewChild("qHead", { read: ElementRef }) qHead: ElementRef;
   @ViewChild("qInput", { read: ElementRef }) qInput: ElementRef;
   @ViewChild("qInput") qSelect: IonSelect;
 
-  @Input() questions: QuestionAndAnswer;
-  @Input() profile: User;
+  @Input() questionAndAnswer: QuestionAndAnswer;
+  @Output() questionAndAnswerChange = new EventEmitter<QuestionAndAnswer>();
 
-  @Output() questionChanged = new EventEmitter();
-  @Output() answerChanged = new EventEmitter();
+  @Input() questionsNotPicked: Question[];
 
-  addable: boolean = true;
-  questionsAvailable: Array<string> = [];
-
-  chosenQuestion;
-  chosenAnswer;
-
-  constructor() {}
-
-  ngOnInit() {
-    this.formAvailableQuestions();
+  constructor() {
+    this.questionAndAnswerChange.subscribe((a) => console.log("qanda", a));
   }
 
   /**
    * Updates UI to show cross icon to remove written answers
    **/
-  displayExit() {
-    if (this.answer.value != "") {
+  // displayExit() {
+  //   if (this.answer.value != "") {
+  //     this.answerClose.nativeElement.style.display = "block";
+  //   } else {
+  //     this.answerClose.nativeElement.style.display = "none";
+  //   }
+  //   this.questionAndAnswer.answer = this.answer.value;
+  //   this.questionAndAnswerChange.emit(this.questionAndAnswer);
+  // }
+
+  onAnswerChange(value) {
+    if (value !== "") {
       this.answerClose.nativeElement.style.display = "block";
     } else {
       this.answerClose.nativeElement.style.display = "none";
     }
-    this.questions.answer = this.answer.value;
-    this.answerChanged.emit();
+    this.questionAndAnswer.answer = value;
+    this.questionAndAnswerChange.emit(this.questionAndAnswer);
+  }
+
+  onQuestionChange(value) {
+    this.questionAndAnswer.question = value;
+    this.questionAndAnswerChange.emit(this.questionAndAnswer);
   }
 
   /**
@@ -60,34 +77,9 @@ export class ProfileAnswerComponent implements OnInit {
   clearInput() {
     this.answer.value = "";
     this.answerClose.nativeElement.style.display = "none";
-    this.questions.answer = "";
-    this.answerChanged.emit();
-  }
 
-  setValue(q, a) {
-    this.questions.question = q;
-    this.questions.answer = a;
-
-    this.answer.value = a;
-  }
-
-  /**
-   * Checks the questions used on profile
-   * Updates available other questions to choose from using that array
-   **/
-  formAvailableQuestions() {
-    this.questionsAvailable = [...questionsOptions]; //Start with all available
-
-    this.profile.questions.forEach((qAndA) => {
-      //For each question on profile
-      Object.values(qAndA).forEach((str) => {
-        //For each value in each question
-        if (this.questionsAvailable.includes(str)) {
-          this.questionsAvailable.splice(this.questionsAvailable.indexOf(str), 1);
-          //If questionsAvailable includes one already in profile, remove it
-        }
-      });
-    });
+    this.questionAndAnswer.answer = "";
+    this.questionAndAnswerChange.emit(this.questionAndAnswer);
   }
 
   /**
@@ -103,14 +95,13 @@ export class ProfileAnswerComponent implements OnInit {
    * Changes the profile question based on selection
    **/
   changeQuestion(q) {
-    this.questions.question = q.target.value.slice(1, -1); //Get value of selected question
+    this.questionAndAnswer.question = q.target.value; //Get value of selected question
+    console.log("change question '" + this.questionAndAnswer.question);
 
     this.qHead.nativeElement.style.display = "block"; //Change UI from select to text
     this.qInput.nativeElement.style.display = "none";
 
-    this.questionChanged.emit(q.target.value.slice(1, -1));
-
-    this.formAvailableQuestions();
+    this.questionAndAnswerChange.emit(this.questionAndAnswer);
   }
 
   /**
@@ -123,38 +114,11 @@ export class ProfileAnswerComponent implements OnInit {
   }
 
   /**
-   * Choose question from select when adding new answer
-   **/
-  chooseQuestion(q) {
-    this.chosenQuestion = q.target.value.slice(1, -1);
-  }
-
-  /**
    * Update answer from textarea when adding new answer
    **/
   answerQuestion(a) {
-    this.chosenAnswer = a.target.value;
-  }
-
-  /**
-   * Saves new question to user profile on FRONTEND ONLY CURRENTLY
-   **/
-  submitQuestion() {
-    //Make sure they have actually selected a question and written an answer
-    if (this.chosenQuestion && this.chosenAnswer) {
-      this.profile.questions.push({
-        answer: this.chosenAnswer,
-        question: this.chosenQuestion, //Push new q/a to profile
-      });
-    }
-
-    this.addable = true; //Hides the new question UI
-  }
-
-  /**
-   * Sets addable property to true to hide input
-   **/
-  makeAddable() {
-    this.addable = true;
+    this.questionAndAnswer.answer = a.target.value;
+    console.log("choose answer", this.questionAndAnswer.answer);
+    this.questionAndAnswerChange.emit(this.questionAndAnswer);
   }
 }

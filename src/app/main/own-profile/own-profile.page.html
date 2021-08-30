@@ -1,96 +1,96 @@
-<ng-container *ngIf="!picsLoaded">
+<ng-container *ngIf="!(picsLoaded$ | async)">
   <div class="fishAnim">
     <div class="flexcol">
-      <img src="/assets/nemo_load.svg" #fish/>
+      <img src="/assets/nemo_load.svg" #fish />
       <h2>Loading your profile</h2>
     </div>
   </div>
 </ng-container>
 
-<ion-content *ngIf="picsLoaded" #profileContainer>
+<ion-content *ngIf="picsLoaded$ | async" #profileContainer>
   <div class="shadow"></div>
 
-  <div id="profile" style="display: flex">
-    <app-profile-card
-      #profileCard
-      [isOwnProfile]="true"
-      [profile]="currentUserStore.user$ | async"
-      [profilePictures]="ownPicturesService.urls$ | async"
-      [reportable]="false"
-    ></app-profile-card>
-  </div>
+  <form #editableFieldsForm="ngForm">
+    <div *ngIf="picsLoaded$ | async" #profileContainer>
+      <div class="shadow"></div>
 
-  <div #toggleDiv class="flexend">
-    <nemo-toggle
-      *ngIf="!editingInProgress"
-      (choice)="toggleChange($event)"
-      [buttonWidth]="15"
-      [fontSize]="4"
-      [selections]="['edit', 'view']"
-    ></nemo-toggle>
-
-    <nemo-toggle
-      *ngIf="editingInProgress"
-      (choice)="profileChanges($event)"
-      [buttonWidth]="15"
-      [fontSize]="4"
-      [selections]="['save', 'cancel']"
-    ></nemo-toggle>
-  </div>
-
-  <div
-    id="editing"
-    style="display: flex"
-    *ngIf="currentUserStore.user$ | async as userProfile"
-  >
-    <div class="container">
-      <h1>{{userProfile?.firstName}}, {{userProfile?.dateOfBirth | age}}</h1>
-
-      <div class="slide-button" (click)="goToSettings()">
-        <p>Go to my settings</p>
-
-        <ion-icon name="chevron-forward-outline"></ion-icon>
+      <div id="profile" style="display: flex">
+        <app-profile-card
+          #profileCard
+          [isOwnProfile]="true"
+          [profile]="currentUserStore.user$ | async"
+          [profilePictures]="ownPicturesService.urls$ | async"
+          [reportable]="false"
+        ></app-profile-card>
       </div>
 
-      <h2>My photos</h2>
-      <div class="photos">
-        <app-profile-edit-photo
-          *ngFor="let pics of ['','','','','','']; index as i"
-          [url]="(ownPicturesService?.urls$ | async)[i]"
-        ></app-profile-edit-photo>
+      <div #toggleDiv class="flexend">
+        <nemo-toggle
+          *ngIf="!(editingInProgress$ | async)"
+          (choice)="toggleChange($event)"
+          [buttonWidth]="15"
+          [fontSize]="4"
+          [selections]="['edit', 'view']"
+        ></nemo-toggle>
+
+        <nemo-toggle
+          *ngIf="editingInProgress$ | async"
+          (choice)="actOnProfileEditing($event)"
+          [buttonWidth]="15"
+          [fontSize]="4"
+          [selections]="['save', 'cancel']"
+        ></nemo-toggle>
       </div>
-      <form [formGroup]="form">
-        <h2>My bio</h2>
-        <div>
-          <div #bioClose class="close-button" (click)="clearInput('bio')">
-            <ion-icon name="close-outline"></ion-icon>
+      <div
+        id="editing"
+        style="display: flex"
+        *ngIf="currentUserStore.user$ | async as userProfile"
+      >
+        <div class="container">
+          <h1>{{userProfile?.firstName}}, {{userProfile?.dateOfBirth | age}}</h1>
+
+          <div class="slide-button" (click)="goToSettings()">
+            <p>Go to my settings</p>
+
+            <ion-icon name="chevron-forward-outline"></ion-icon>
           </div>
-          <div class="bio">
-            <ion-textarea
-              #bioInput
-              [value]="userProfile?.biography"
-              autoGrow="true"
-              (ionInput)="displayExit('bio')"
-              (ionChange)="editingTriggered()"
-            ></ion-textarea>
+
+          <h2>My photos</h2>
+          <div class="photos">
+            <app-profile-edit-photo
+              *ngFor="let pics of ['','','','','','']; index as i"
+              [url]="(ownPicturesService?.urls$ | async)[i]"
+            ></app-profile-edit-photo>
+          </div>
+          <h2>My bio</h2>
+          <div>
+            <div #bioClose class="close-button" (click)="clearInput('bio')">
+              <ion-icon name="close-outline"></ion-icon>
+            </div>
+            <div class="bio">
+              <ion-textarea
+                #bioInput
+                name="biography"
+                [(ngModel)]="editableFields.biography"
+                (ngModelChange)="editingTriggered()"
+                autoGrow="true"
+                (ionInput)="displayExit('bio')"
+              ></ion-textarea>
+            </div>
           </div>
         </div>
 
         <h2>My answers</h2>
         <profile-answer
           #answers
-          *ngFor="let q of userProfile?.questions"
-          [questions]="q"
-          [profile]="userProfile"
-          (questionChanged)="this.formatAllQuestions()"
-          (answerChanged)="this.editingTriggered()"
+          *ngFor="let q of editableFields.questions; let i = index"
+          [(questionAndAnswer)]="editableFields.questions[i]"
+          (questionAndAnswerChange)="editingTriggered()"
+          [questionsNotPicked]="questionsNotPicked | async"
         ></profile-answer>
 
         <ng-container *ngIf="this.answers">
-          <div
-            *ngIf="this.lastAnsRef?.addable === true && this.userProfile?.questions.length < 4"
-            class="flexcenter"
-          >
+          <div *ngIf="!reachedMaxQuestionsCount" class="flexcenter">
             <ion-icon
               id="addQuestion"
               name="add-circle"
@@ -98,44 +98,53 @@
             ></ion-icon>
           </div>
 
-          <div class="noQuestions" *ngIf="this.userProfile?.questions.length >= 4">
+          <div class="noQuestions" *ngIf="reachedMaxQuestionsCount">
             <span>Sorry, there's no space for any more questions!</span>
           </div>
 
-          <div *ngIf="this.lastAnsRef?.addable === false" class="flexcenter">
+          <!-- <div *ngIf="reachedMaxQuestionsCount" class="flexcenter">
             <ion-icon
               id="submitQuestion"
               name="checkmark-outline"
               (click)="submitQuestion()"
             ></ion-icon>
-          </div>
+          </div> -->
         </ng-container>
 
         <h2>My course</h2>
         <profile-course
           #depts
-          [departments]="userProfile?.course"
-          [type]="courses"
-          [profile]="userProfile"
+          categoryPlaceHolder="Area of Study"
+          name="courseFields"
+          [categoryOptions]="areaOfStudyOptions"
+          [(categoryChoice)]="editableFields.areaOfStudy"
+          [(choice)]="editableFields.course"
+          (categoryChoiceChange)="editingTriggered()"
+          (choiceChange)="editingTriggered()"
         ></profile-course>
 
         <h2>My society</h2>
         <profile-course
           #socs
-          [departments]="userProfile?.society"
-          [type]="societies"
-          [profile]="userProfile"
+          categoryPlaceHolder="Society Category"
+          name="societyFields"
+          [categoryOptions]="societyCategoryOptions"
+          [(categoryChoice)]="editableFields.societyCategory"
+          [(choice)]="editableFields.society"
+          (categoryChoiceChange)="editingTriggered()"
+          (choiceChange)="editingTriggered()"
         ></profile-course>
 
         <h2>My interests</h2>
         <interests-slides
-          (interestsChange)="updateInterests(userProfile)"
-          [interests]="userProfile?.interests"
+          name="interests"
+          [interests]="editableFields?.interests"
+          (interestsChange)="editingTriggered()"
           [listed]="false"
         ></interests-slides>
 
         <ion-button (click)="presentIntModal()">Interests</ion-button>
-      </form>
+      </div>
     </div>
-  </div>
+  </form>
 </ion-content>

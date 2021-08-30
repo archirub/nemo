@@ -11,6 +11,9 @@ import {
   privateProfileFromDatabase,
   profileFromDatabase,
   userInfoFromMatchData,
+  editableProfileFields,
+  profileEditingByUserRequest,
+  successResponse,
 } from "@interfaces/index";
 import { FormatService } from "@services/index";
 import { SearchCriteriaStore } from "../search-criteria-store/search-criteria-store.service";
@@ -116,6 +119,8 @@ export class CurrentUserStore {
           profile?.university,
           profile?.course,
           profile?.society,
+          profile?.societyCategory,
+          profile?.areaOfStudy,
           profile?.interests,
           profile?.questions,
           profile?.onCampus,
@@ -124,8 +129,8 @@ export class CurrentUserStore {
           privateProfile?.settings,
           latestSearchCriteria,
           infoFromMatchData?.gender,
-          infoFromMatchData?.sexualPreference,
-          infoFromMatchData?.swipeMode
+          infoFromMatchData?.sexualPreference
+          // infoFromMatchData?.swipeMode
         );
 
         this.user.next(user);
@@ -142,6 +147,29 @@ export class CurrentUserStore {
       }),
       share()
     );
+  }
+
+  changeEditableFieldsValue(
+    editableFields: editableProfileFields
+  ): Observable<successResponse> {
+    const requestData: profileEditingByUserRequest = { data: editableFields };
+    return this.afFunctions
+      .httpsCallable("profileEditingByUser")(requestData)
+      .pipe(
+        withLatestFrom(this.user$),
+        map(([response, currentUser]: [successResponse, User]) => {
+          if (response.successful) {
+            const newUser = {
+              ...JSON.parse(JSON.stringify(currentUser)),
+              ...JSON.parse(JSON.stringify(editableFields)),
+            };
+            this.user.next(newUser);
+          } else {
+            console.error("unsuccessful change of profile on db:", response?.message);
+          }
+          return response;
+        })
+      );
   }
 
   resetStore() {

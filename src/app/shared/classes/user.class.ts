@@ -11,6 +11,8 @@ import {
   Interests,
   searchCriteria,
   allowOptionalProp,
+  AreaOfStudy,
+  SocietyCategory,
 } from "@interfaces/index";
 
 export class User extends Profile implements user {
@@ -18,9 +20,8 @@ export class User extends Profile implements user {
   private _latestSearchCriteria: allowOptionalProp<searchCriteria>;
   private _gender: Gender;
   private _sexualPreference: SexualPreference;
-  private _swipeMode: SwipeMode;
-  private _token: string;
-  private _tokenExpirationDate: Date;
+
+  // private _swipeMode: SwipeMode;
 
   constructor(
     uid: string,
@@ -32,6 +33,8 @@ export class User extends Profile implements user {
     university: University,
     course: string,
     society: string,
+    societyCategory: SocietyCategory,
+    areaOfStudy: AreaOfStudy,
     interests: Interests[],
     questions: QuestionAndAnswer[],
     onCampus: OnCampus,
@@ -40,8 +43,8 @@ export class User extends Profile implements user {
     settings: Settings,
     latestSearchCriteria: allowOptionalProp<searchCriteria>,
     gender: Gender,
-    sexualPreference: SexualPreference,
-    swipeMode: SwipeMode
+    sexualPreference: SexualPreference
+    // swipeMode: SwipeMode
   ) {
     super(
       uid,
@@ -53,17 +56,21 @@ export class User extends Profile implements user {
       university,
       course,
       society,
+      societyCategory,
+      areaOfStudy,
       interests,
       questions,
       onCampus,
       degree,
       socialMediaLinks
     );
+    this.areaOfStudy = areaOfStudy;
+    this.societyCategory = societyCategory;
     this.settings = settings;
     this.latestSearchCriteria = latestSearchCriteria;
     this.gender = gender;
     this.sexualPreference = sexualPreference;
-    this.swipeMode = swipeMode;
+    // this.swipeMode = swipeMode;
   }
 
   public get latestSearchCriteria(): allowOptionalProp<searchCriteria> {
@@ -94,10 +101,10 @@ export class User extends Profile implements user {
     this._sexualPreference = value;
   }
 
-  public get swipeMode(): SwipeMode {
-    return this._swipeMode;
-  }
-  public set swipeMode(value: SwipeMode) {
-    this._swipeMode = value;
-  }
+  // public get swipeMode(): SwipeMode {
+  //   return this._swipeMode;
+  // }
+  // public set swipeMode(value: SwipeMode) {
+  //   this._swipeMode = value;
+  // }
 }

@@ -70,6 +70,8 @@ export class FormatService {
     const university = profile.university;
     const course = profile.course;
     const society = profile.society;
+    const societyCategory = profile.societyCategory;
+    const areaOfStudy = profile.areaOfStudy;
     const interests = profile.interests;
     const questions = profile.questions;
     const onCampus = profile.onCampus;
@@ -86,6 +88,8 @@ export class FormatService {
       university,
       course,
       society,
+      societyCategory,
+      areaOfStudy,
       interests,
       questions,
       onCampus,
@@ -102,6 +106,8 @@ export class FormatService {
     const university = profile.university;
     const course = profile.course;
     const society = profile.society;
+    const societyCategory = profile.societyCategory;
+    const areaOfStudy = profile.areaOfStudy;
     const interests = profile.interests;
     const questions = profile.questions;
     const onCampus = profile.onCampus;
@@ -117,6 +123,8 @@ export class FormatService {
       degree,
       course,
       society,
+      societyCategory,
+      areaOfStudy,
       interests,
       questions,
       onCampus,

@@ -7,6 +7,8 @@ import {
   OnCampus,
   Degree,
   Interests,
+  SocietyCategory,
+  AreaOfStudy,
 } from "@interfaces/index";
 
 export class Profile implements profile {
@@ -19,6 +21,8 @@ export class Profile implements profile {
   private _university: University;
   private _course: string;
   private _society: string;
+  private _societyCategory: SocietyCategory;
+  private _areaOfStudy: AreaOfStudy;
   private _interests: Interests[];
   private _questions: QuestionAndAnswer[];
   private _onCampus: OnCampus;
@@ -35,6 +39,8 @@ export class Profile implements profile {
     university: University,
     course: string,
     society: string,
+    societyCategory: SocietyCategory,
+    areaOfStudy: AreaOfStudy,
     interests: Interests[],
     questions: QuestionAndAnswer[],
     onCampus: OnCampus,
@@ -50,6 +56,8 @@ export class Profile implements profile {
     this.university = university;
     this.course = course;
     this.society = society;
+    this.societyCategory = societyCategory;
+    this.areaOfStudy = areaOfStudy;
     this.interests = interests;
     this.questions = questions;
     this.onCampus = onCampus;
@@ -117,6 +125,20 @@ export class Profile implements profile {
   }
   public set society(value: string) {
     this._society = value;
+  }
+
+  public get societyCategory(): SocietyCategory {
+    return this._societyCategory;
+  }
+  public set societyCategory(value: SocietyCategory) {
+    this._societyCategory = value;
+  }
+
+  public get areaOfStudy(): AreaOfStudy {
+    return this._areaOfStudy;
+  }
+  public set areaOfStudy(value: AreaOfStudy) {
+    this._areaOfStudy = value;
   }
 
   public get interests(): Interests[] {

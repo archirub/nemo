@@ -1,52 +1,64 @@
-import { Component, ElementRef, Input, OnInit, OnChanges, AfterViewInit, ViewChild } from "@angular/core";
+import {
+  Component,
+  ElementRef,
+  Input,
+  ViewChild,
+  EventEmitter,
+  OnInit,
+  Output,
+} from "@angular/core";
 import { IonInput, IonSelect } from "@ionic/angular";
 
-import { searchCriteriaOptions } from "@interfaces/search-criteria.model";
+import {
+  AreaOfStudy,
+  searchCriteriaOptions,
+  SocietyCategory,
+} from "@interfaces/search-criteria.model";
 import { Profile } from "@classes/profile.class";
+import { ControlContainer, NgForm } from "@angular/forms";
+import { interval } from "rxjs";
 
 @Component({
-selector: "profile-course",
-templateUrl: "./profile-course.component.html",
-styleUrls: ["./profile-course.component.scss"],
+  selector: "profile-course",
+  templateUrl: "./profile-course.component.html",
+  styleUrls: ["./profile-course.component.scss"],
+  viewProviders: [{ provide: ControlContainer, useExisting: NgForm }],
 })
-export class ProfileCourseComponent implements AfterViewInit {
-    @ViewChild('input') input: IonInput;
-    @ViewChild('select') select: IonSelect;
-    @ViewChild('close', { read: ElementRef }) close: ElementRef;
-    @Input() profile: Profile;
-    @Input() departments: string;
-    @Input() type: string;
+export class ProfileCourseComponent implements OnInit {
+  @ViewChild("input") input: IonInput;
+  @ViewChild("select") select: IonSelect;
+  @ViewChild("close", { read: ElementRef }) close: ElementRef;
 
-    scOptions = searchCriteriaOptions;
+  @Input() categoryPlaceHolder: string;
 
-    depts;
-    socs;
+  @Input() categoryOptions: string;
 
-    constructor() {}
+  @Input() choice: string;
+  @Output() choiceChange = new EventEmitter<string>();
 
-    ngAfterViewInit() {
-        setTimeout(() => { //setTimeout method, have to wait for this.type to be passed from parent
-            if (this.type === "courses") {
-                this.depts = this.scOptions.areaOfStudy;
-            } else if (this.type === "societies") {
-                this.depts = this.scOptions.societyCategory;
-            }}, 200);
-    }
+  @Input() categoryChoice: SocietyCategory | AreaOfStudy;
+  @Output() categoryChoiceChange = new EventEmitter<SocietyCategory | AreaOfStudy>();
 
-    clearInput() {
-        this.input.value = "";
-        this.close.nativeElement.style.display = "none";
-    }
+  ngOnInit() {
+    // interval(3000).subscribe(() => console.log(this.choice, this.categoryChoice));
+    // this.choiceChange.subscribe((a) => console.log("choice change", a));
+    // this.categoryChoiceChange.subscribe((a) => console.log("categoryChoiceChange", a));
+  }
 
-    displayExit() {
-        this.close.nativeElement.style.display = "block";
-    }
+  onChoiceChange(value: string) {
+    this.choice = value;
+    this.choiceChange.emit(this.choice);
+    this.close.nativeElement.style.display = "block";
+  }
 
-    updateDept(type) {
-        if (type === 'societies') {
-            this.profile.society = this.select.value;
-        } else if (type === 'courses') {
-            this.profile.course = this.select.value;
-        };
-    }
+  onCategoryChange(value: SocietyCategory | AreaOfStudy) {
+    this.categoryChoice = value;
+    this.categoryChoiceChange.emit(this.categoryChoice);
+  }
+
+  // clearValueInput() {
+  //   this.choice = "";
+  //   this.choiceChange.emit(this.choice);
+  //   this.close.nativeElement.style.display = "none";
+  // }
 }
