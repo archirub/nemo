@@ -152,7 +152,6 @@ export class InterestSlidesComponent implements OnInit {
     }
 
     this.interestsChange.emit(this.interests);
-    console.log(this.interests);
   }
 
   getPicturePath(interestName: Interests): string {

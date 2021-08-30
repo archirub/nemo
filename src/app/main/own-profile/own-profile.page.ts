@@ -65,8 +65,6 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
 
   @ViewChild("toggleDiv", { read: ElementRef }) toggleDiv: ElementRef;
 
-  @Output() loaded = new EventEmitter();
-
   profileSub: Subscription;
   profile: User; //THIS IS CHANGED ON THE PAGE WHILE EDITING, SEE prevProfileEdit
 
@@ -103,7 +101,8 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     private modalCtrl: ModalController
   ) {}
 
-  modal: HTMLIonModalElement;
+  interestsModal: HTMLIonModalElement;
+  modal;
   intEnterAnimation;
   intLeaveAnimation;
 
@@ -164,7 +163,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     })
     .then((m) => {
       this.modal = m;
-      this.onModalDismiss(this.modal);
+      this.onInterestsModalDismiss(this.modal);
     });
   }
 
@@ -179,7 +178,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
   }
 
   // Used to preload modal as soon as the previous SC window was dismissed
-  onModalDismiss(modal: HTMLIonModalElement) {
+  onInterestsModalDismiss(modal: HTMLIonModalElement) {
     modal.onDidDismiss().then(() => {
       this.editingTriggered();
 
@@ -188,15 +187,9 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     });
   }
 
-  get questionsNotPicked(): Observable<string[]> {
-    return this.currentUserStore.user$.pipe(
-      filter((user) => !!user),
-      map((user) => user.questions.map((QandA) => QandA.question)),
-      map((questionsPicked) =>
-        questionsOptions.filter((option) => !questionsPicked.includes(option))
-      ),
-      distinctUntilChanged((prev, curr) => isEqual(prev, curr))
-    );
+  get questionsNotPicked(): string[] {
+    const questionsPicked = this.editableFields?.questions.map((QandA) => QandA.question);
+    return questionsOptions.filter((option) => !questionsPicked.includes(option));
   }
 
   updateEditableFields(data: User | Profile | editableProfileFields): void {

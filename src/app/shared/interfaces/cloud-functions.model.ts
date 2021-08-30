@@ -60,3 +60,5 @@ export type createAccountRequest = Omit<SignupRequired, "pictures" | "dateOfBirt
 export type profileEditingByUserRequest = {
   data: editableProfileFields;
 };
+
+export type deleteAccountRequest = {};

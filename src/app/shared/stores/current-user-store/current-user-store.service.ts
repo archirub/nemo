@@ -157,13 +157,13 @@ export class CurrentUserStore {
       .httpsCallable("profileEditingByUser")(requestData)
       .pipe(
         withLatestFrom(this.user$),
-        map(([response, currentUser]: [successResponse, User]) => {
+        map(([response, user]: [successResponse, User]) => {
           if (response.successful) {
-            const newUser = {
-              ...JSON.parse(JSON.stringify(currentUser)),
-              ...JSON.parse(JSON.stringify(editableFields)),
-            };
-            this.user.next(newUser);
+            Object.keys(editableFields).forEach((field) => {
+              user[field] = JSON.parse(JSON.stringify(editableFields[field]));
+            });
+
+            this.user.next(user);
           } else {
             console.error("unsuccessful change of profile on db:", response?.message);
           }

@@ -14,5 +14,6 @@ export * from "./register-swipe-stack/main";
 export * from "./update-PI-system/main";
 export * from "./update-duplicate-data/index";
 // export * from "./increment-md-uid-count";
-export * from "./account-creation";
+export * from "./create-account";
 export * from "./profile-editing-by-user";
+export * from "./delete-account";

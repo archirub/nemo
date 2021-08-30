@@ -79,23 +79,23 @@
             </div>
           </div>
 
-          <h2>My answers</h2>
-          <profile-answer
-            #answers
-            *ngFor="let q of editableFields.questions; let i = index"
-            [(questionAndAnswer)]="editableFields.questions[i]"
-            (questionAndAnswerChange)="editingTriggered()"
-            [questionsNotPicked]="questionsNotPicked | async"
-          ></profile-answer>
+        <h2>My answers</h2>
+        <profile-answer
+          #answers
+          *ngFor="let q of editableFields.questions; let i = index"
+          [(questionAndAnswer)]="editableFields.questions[i]"
+          (questionAndAnswerChange)="editingTriggered()"
+          [questionsNotPicked]="questionsNotPicked"
+        ></profile-answer>
 
-          <ng-container *ngIf="this.answers">
-            <div *ngIf="!reachedMaxQuestionsCount" class="flexcenter">
-              <ion-icon
-                id="addQuestion"
-                name="add-circle"
-                (click)="addQuestion()"
-              ></ion-icon>
-            </div>
+        <ng-container *ngIf="this.answers">
+          <div *ngIf="!reachedMaxQuestionsCount" class="flexcenter">
+            <ion-icon
+              id="addQuestion"
+              name="add-circle"
+              (click)="addQuestion()"
+            ></ion-icon>
+          </div>
 
             <div class="noQuestions" *ngIf="reachedMaxQuestionsCount">
               <span>Sorry, there's no space for any more questions!</span>
