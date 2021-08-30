@@ -2,48 +2,41 @@ import {
   ChangeDetectorRef,
   Component,
   ElementRef,
-  Output,
   OnInit,
   QueryList,
   ViewChild,
   ViewChildren,
-  EventEmitter,
   AfterViewInit,
 } from "@angular/core";
 
-import { BehaviorSubject, from, interval, Observable, Subscription } from "rxjs";
+import { BehaviorSubject, from, Observable, Subscription } from "rxjs";
 import { User, Profile } from "@classes/index";
 import { CurrentUserStore } from "@stores/index";
 import { AddPhotoComponent, ProfileCardComponent } from "@components/index";
 import { ProfileCourseComponent } from "./profile-course/profile-course.component";
-import { IonContent, IonTextarea, ModalController } from "@ionic/angular";
+import { IonTextarea, ModalController } from "@ionic/angular";
 import { Router } from "@angular/router";
 import { OwnPicturesStore } from "@stores/pictures-stores/own-pictures-store/own-pictures.service";
 import { ProfileAnswerComponent } from "./profile-answer/profile-answer.component";
-import { FormArray, FormControl, FormGroup } from "@angular/forms";
 import {
   FishSwimAnimation,
   ToggleAppearAnimation,
   IntEnterAnimation,
   IntLeaveAnimation,
 } from "@animations/index";
-import {
-  AreaOfStudy,
-  Interests,
-  SocietyCategory,
-} from "@interfaces/search-criteria.model";
-import { QuestionAndAnswer } from "@interfaces/profile.model";
+
 import { TabElementRefService } from "../tab-menu/tab-element-ref.service";
 import { InterestsModalComponent } from "./interests-modal/interests-modal.component";
 
-import { distinctUntilChanged, filter, map, switchMap, take, tap } from "rxjs/operators";
+import { distinctUntilChanged, map, switchMap, take, tap } from "rxjs/operators";
 import {
   searchCriteriaOptions,
   editableProfileFields,
   MAX_PROFILE_QUESTIONS_COUNT,
   questionsOptions,
+  assetsInterestsPath,
+  Interests,
 } from "@interfaces/index";
-import { isEqual } from "lodash";
 
 @Component({
   selector: "app-own-profile",
@@ -89,6 +82,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     questions: [],
   };
 
+  pictures = assetsInterestsPath; //Interest icons
   societyCategoryOptions = searchCriteriaOptions.societyCategory;
   areaOfStudyOptions = searchCriteriaOptions.areaOfStudy;
 
@@ -185,6 +179,14 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
       console.log(this.editableFields?.interests);
       this.modal = undefined;
     });
+  }
+
+  /**
+   * Get interest icon path by parsing interest name
+   **/
+  getPicturePath(interestName: Interests): string {
+    const formattedName = interestName.replace(/\s/g, "").toLowerCase();
+    return "/assets/interests/" + formattedName + ".svg";
   }
 
   get questionsNotPicked(): string[] {

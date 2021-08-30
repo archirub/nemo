@@ -140,6 +140,29 @@ h2 {
     font-size: 2.6vh;
 }
 
+.flexgrid {
+    display: flex;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
+}
+
+.interest {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    width: 19vw;
+
+    img {
+        height: 70px;
+    };
+}
+
+.intModal {
+    color: var(--ion-color-primary);
+    --background: transparent;
+    --background-activated: transparent;
+}
+
 ;
 .slide-button {
     display: flex;

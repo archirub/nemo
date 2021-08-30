@@ -141,8 +141,17 @@
             (interestsChange)="editingTriggered()"
             [listed]="false"
           ></interests-slides-->
+          <div class="flexgrid">
+            <div 
+            class="interest"
+            *ngFor="let interest of editableFields?.interests">
+              <img [src]="getPicturePath(interest)"/>
+            </div>
+          </div>
 
-          <ion-button (click)="presentIntModal()">Interests</ion-button>
+          <div class="flexgrid">
+            <ion-button class="intModal" (click)="presentIntModal()">Change</ion-button>
+          </div>
         </div>
       </div>
     </div>
