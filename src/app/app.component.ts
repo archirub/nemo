@@ -7,7 +7,7 @@ import { ReplaySubject, Subscription } from "rxjs";
 
 import { GlobalStateManagementService } from "@services/global-state-management/global-state-management.service";
 import { Router } from "@angular/router";
-import { routerInitListenerService } from "@services/index";
+import { routerInitListenerService } from "@services/global-state-management/initial-url.service";
 
 @Component({
   selector: "app-root",
@@ -21,7 +21,7 @@ export class AppComponent implements OnDestroy, OnInit {
     private platform: Platform,
     private afAuth: AngularFireAuth,
     private GlobalStateManagement: GlobalStateManagementService,
-    private routerInitListener: routerInitListenerService
+    private routerInitListener: routerInitListenerService // don't remove, used in template
   ) {
     this.initializeApp();
   }

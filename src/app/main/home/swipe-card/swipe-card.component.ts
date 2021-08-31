@@ -202,7 +202,7 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.currentUserSub.unsubscribe();
-    this.cardTapSub.unsubscribe();
+    this.currentUserSub?.unsubscribe();
+    this.cardTapSub?.unsubscribe();
   }
 }

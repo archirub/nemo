@@ -1,13 +1,15 @@
-import { AlertController } from "@ionic/angular";
-import { Injectable } from "@angular/core";
+import { AlertController, NavController, LoadingController } from "@ionic/angular";
+import { Injectable, NgZone } from "@angular/core";
 import { Router } from "@angular/router";
 
 import { AngularFireAuth } from "@angular/fire/auth";
-
-import { from, Observable } from "rxjs";
-import { concatMap, map } from "rxjs/operators";
+import { Plugins } from "@capacitor/core";
 
 import firebase from "firebase";
+import { LoadingOptions, LoadingService } from "@services/loading/loading.service";
+import { AngularFireFunctions } from "@angular/fire/functions";
+import { deleteAccountRequest, successResponse } from "@interfaces/cloud-functions.model";
+import { EmptyStoresService } from "@services/global-state-management/empty-stores.service";
 
 @Injectable({
   providedIn: "root",
@@ -16,10 +18,124 @@ export class FirebaseAuthService {
   constructor(
     private router: Router,
     private alertCtrl: AlertController,
-    private afAuth: AngularFireAuth
+    private afAuth: AngularFireAuth,
+    private afFunctions: AngularFireFunctions,
+    private navCtrl: NavController,
+    private zone: NgZone,
+    private loadingService: LoadingService,
+    private loadingController: LoadingController,
+    private emptyStoresService: EmptyStoresService
   ) {}
 
-  async wrongPasswordPopup(folowUpPromise: Promise<any> | null): Promise<void> {
+  async logOut() {
+    // have to explicitely do it this way instead of using directly "this.navCtrl.navigateRoot"
+    // otherwise it causes an error
+    // calling ngZone.run() is necessary otherwise we will get into trouble with changeDecection
+    // back at the welcome page (it seems like it's then not active), which cases problem for example
+    // while trying to log back in where the "log in" button doesn't get enabled when the email-password form becomes valid
+    const navigateToWelcome = async () =>
+      this.zone.run(() => this.navCtrl.navigateRoot("/welcome"));
+    const clearLocalCache = () => Plugins.Storage.clear();
+    const clearStores = async () => this.emptyStoresService.emptyStores();
+    const logOut = () => this.afAuth.signOut();
+
+    await this.loadingService.presentLoader(
+      [
+        { promise: clearLocalCache, arguments: [] },
+        { promise: clearStores, arguments: [] },
+        { promise: logOut, arguments: [] },
+      ],
+      [{ promise: navigateToWelcome, arguments: [] }]
+    );
+  }
+
+  async deleteAccount() {
+    const user = await this.afAuth.currentUser;
+
+    if (!user) return;
+
+    const navigateToWelcome = async () =>
+      this.zone.run(() => this.navCtrl.navigateRoot("/welcome"));
+    const clearLocalCache = () => Plugins.Storage.clear();
+    const clearStores = async () => this.emptyStoresService.emptyStores();
+    const logOut = () => this.afAuth.signOut();
+    const deleteAccount = () =>
+      this.afFunctions
+        .httpsCallable("deleteAccount")({} as deleteAccountRequest)
+        .toPromise();
+
+    const loadingOptions: LoadingOptions = {
+      ...this.loadingService.defaultLoadingOptions,
+      message: "Deleting account...",
+    };
+    const accountDeletionLoading = await this.loadingController.create(loadingOptions);
+
+    const cancelUserConfirmationAlert = () => {};
+    const confirmUserConfirmationAlert = async () => {
+      const message = `Please provide a password to ${user.email}`;
+
+      const { outcome } = await this.reAuthenticationProcedure(
+        user,
+        message,
+        async () => {}
+      );
+
+      if (outcome !== "user-reauthenticated") return;
+
+      await accountDeletionLoading.present();
+
+      await Promise.all([clearLocalCache(), clearStores()]);
+
+      const successResponse: successResponse = await deleteAccount();
+
+      // must logout after deleteAccount, otherwise it fails (as delete account)
+      // requires the user to be authenticated
+      await Promise.all([logOut(), navigateToWelcome()]);
+
+      await accountDeletionLoading.dismiss();
+
+      if (!successResponse.successful) {
+        const accountDeletionFailedPopup = await this.alertCtrl.create({
+          header: "Account deletion failed",
+          message: `
+          An error occured while we were trying to delete your account. 
+          Please either log back in and try again, or contact support for assistance.
+          `,
+          backdropDismiss: false,
+          buttons: ["Ok"],
+        });
+        await accountDeletionFailedPopup.present();
+      }
+    };
+
+    const userConfirmationAlert = await this.alertCtrl.create({
+      header: "Are you sure you'd like to permanently delete your account?",
+      backdropDismiss: false,
+      message: `
+      <strong>This action is irreversible.</strong>
+      We will delete all traces of your time on Nemo, including your matches, chats, profile and email address.
+      We will first need you the reauthenticate to confirm your identity.
+    `,
+      buttons: [
+        {
+          text: "Cancel",
+          role: "cancel",
+          handler: cancelUserConfirmationAlert,
+        },
+        {
+          text: "Confirm",
+          handler: confirmUserConfirmationAlert,
+        },
+      ],
+    });
+
+    await userConfirmationAlert.present();
+  }
+
+  // returns whatever the followUpPromise returns so that it can be chained easily
+  async wrongPasswordPopup<T>(folowUpPromise: () => Promise<T> | null): Promise<T> {
+    let promiseReturn: T;
+
     const passAlert = await this.alertCtrl.create({
       header: "Incorrect Password",
       backdropDismiss: false,
@@ -27,11 +143,19 @@ export class FirebaseAuthService {
       buttons: ["OK"],
     });
 
-    passAlert.onDidDismiss().then(() => {
-      if (folowUpPromise) return folowUpPromise;
-    });
+    passAlert
+      .onWillDismiss()
+      .then(() => {
+        if (folowUpPromise) return folowUpPromise();
+      })
+      .then((r) => {
+        console.log("promise return", r);
+        promiseReturn = r;
+      });
 
     await passAlert.present();
+
+    return promiseReturn;
   }
 
   async wrongPasswordMaxAttemptsPopup(
@@ -52,11 +176,14 @@ export class FirebaseAuthService {
     await attemptsAlert.present();
   }
 
-  async unknownErrorPopup(): Promise<void> {
+  async unknownErrorPopup(message: string = null): Promise<void> {
+    message =
+      message ??
+      "An unknown error occurred. Please check your connection, or try again later.";
+
     const unknownAlert = await this.alertCtrl.create({
       header: "Something went wrong",
-      message:
-        "An unknown error occurred. Please check your connection, or try again later.",
+      message,
       buttons: ["OK"],
     });
 
@@ -84,9 +211,34 @@ export class FirebaseAuthService {
     await disabledAlert.present();
   }
 
-  async reAuthenticationProcedure(user: firebase.User): Promise<firebase.User> {
-    const cancelProcedure = () =>
-      this.afAuth.signOut().then(() => this.router.navigateByUrl("/welcome"));
+  async reAuthenticationProcedure(
+    user: firebase.User,
+    message: string = null,
+    cancelProcedureChosen: () => Promise<any> = null
+  ): Promise<{
+    user: firebase.User;
+    outcome: "user-reauthenticated" | "user-cancelled" | "auth-failed";
+  }> {
+    let outcome: "user-reauthenticated" | "user-cancelled" | "auth-failed";
+
+    const defaultCancelProcedure = () =>
+      this.afAuth.signOut().then(() => {
+        return this.router.navigateByUrl("/welcome");
+      });
+
+    const cancelProcedure = () => {
+      outcome = "auth-failed";
+      return cancelProcedureChosen ? cancelProcedureChosen() : defaultCancelProcedure();
+    };
+
+    message =
+      message ??
+      `
+      The account was signed in too long ago. Please provide a password
+      to <strong>${user.email}</strong>. 
+      It is recommended you do not cancel. It will sign you out and get you back 
+      to the login page.
+    `;
 
     const OkProcedure = async (data) => {
       const credentials = firebase.auth.EmailAuthProvider.credential(
@@ -95,23 +247,27 @@ export class FirebaseAuthService {
       );
       try {
         await user.reauthenticateWithCredential(credentials);
+        outcome = "user-reauthenticated";
       } catch (err) {
+        console.log("error is", err);
         if (err?.code === "auth/wrong-password") {
-          return this.wrongPasswordPopup(this.reAuthenticationProcedure(user));
-        } else if (err?.code === "auth/too-many-requests")
-          return this.wrongPasswordMaxAttemptsPopup(this.afAuth.signOut());
+          outcome = "auth-failed";
+          const nestedReauthReturn = await this.wrongPasswordPopup(() =>
+            this.reAuthenticationProcedure(user, message, cancelProcedure)
+          );
+          // console.log("outcome", nestedReauthReturn);
+          // outcome = nestedReauthReturn?.outcome;
+        } else if (err?.code === "auth/too-many-requests") {
+          outcome = "auth-failed";
+          await this.wrongPasswordMaxAttemptsPopup(this.afAuth.signOut());
+        }
       }
     };
 
     const alert = await this.alertCtrl.create({
       header: "Reauthentication required",
       backdropDismiss: false,
-      message: `
-      The account was signed in too long ago. Please provide a password
-      to <strong>${user.email}</strong>. 
-      It is recommended you do not cancel. It will sign you out and get you back 
-      to the login page.
-    `,
+      message,
       inputs: [{ name: "password", type: "password" }],
       buttons: [
         {
@@ -128,7 +284,17 @@ export class FirebaseAuthService {
 
     await alert.present();
 
-    return user;
+    // format used to make sure function waits for outcome to have a value
+    // before returning, otherwise the functions of the OkProcedure don't have
+    // time to complete and outcome is just undefined
+    return new Promise((resolve) => {
+      const interval = setInterval(() => {
+        if (outcome) {
+          clearInterval(interval);
+          resolve({ user, outcome });
+        }
+      }, 250);
+    });
   }
 
   async changePasswordProcedure(user: firebase.User): Promise<firebase.User> {

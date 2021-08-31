@@ -16,7 +16,7 @@ import {
   withLatestFrom,
 } from "rxjs/operators";
 
-import { FormatService } from "@services/index";
+import { FormatService } from "@services/format/format.service";
 import { Profile, SearchCriteria } from "@classes/index";
 // store imports written this way to avoid circular dependency
 import { SwipeOutcomeStore } from "@stores/swipe-outcome-store/swipe-outcome-store.service";

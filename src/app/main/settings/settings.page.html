@@ -1,7 +1,7 @@
 <ion-content class="noScroll">
   <form [formGroup]="form">
-  <ion-slides pager="false" options="{pagination: false, onlyExternal: false}" #slide>
-    <ion-slide>
+    <ion-slides pager="false" options="{pagination: false, onlyExternal: false}" #slide>
+      <ion-slide>
         <div #container class="container">
           <div class="flexbetween-row">
             <h1>Your settings</h1>
@@ -49,18 +49,18 @@
               <p>Logout</p>
             </div>
 
-            <div class="slide-button delete">
+            <div class="slide-button delete" (click)="deleteAccount()">
               <p>Delete Account</p>
             </div>
           </div>
         </div>
-    </ion-slide>
+      </ion-slide>
 
-    <!-- Necessary in order to allow swipes to specific slides,
+      <!-- Necessary in order to allow swipes to specific slides,
       one other slide has to have display != none in order for this.slides.slideNext() to work -->
-    <ion-slide id="placeholder"></ion-slide>
+      <ion-slide id="placeholder"></ion-slide>
 
-    <ion-slide id="legal" class="noScroll">
+      <ion-slide id="legal" class="noScroll">
         <div class="container">
           <div class="flexbetween-row">
             <h1>Legal</h1>
@@ -84,9 +84,9 @@
             </div>
           </div>
         </div>
-    </ion-slide>
+      </ion-slide>
 
-    <ion-slide id="preferences" class="noScroll">
+      <ion-slide id="preferences" class="noScroll">
         <div class="container">
           <div class="flexbetween-row">
             <h1>Your Preferences</h1>
@@ -98,94 +98,100 @@
             <p class="return">Return to Settings</p>
           </div>
 
-            <div class="flexstart-col">
-              <p>
-                Here, you can change the preferences you set when you signed up. This
-                will affect how others on the app can reach you using <span style="color: var(--ion-color-primary)">
-                nemo</span>search.
-              </p>
-              <div class="slide-button preferences">
-                <p>I am looking for</p>
-                <ion-select formControlName="swipeMode" interface="action-sheet">
-                  <ion-select-option 
-                  *ngFor="let swipeMode of swipeModeOptions" 
-                  value="{{swipeMode}}">
-                    {{ swipeMode }}
-                  </ion-select-option>
-                </ion-select>
-              </div>
-
-              <div class="slide-button preferences">
-                <p>I am interested in</p>
-                <ion-select formControlName="sexualPreference" interface="action-sheet">
-                  <ion-select-option
-                    *ngFor="let sexPref of sexualPreferenceOptions"
-                    value="{{sexPref}}">
-                    {{ sexPref }}
-                    </ion-select-option>
-                </ion-select>
-              </div>
-
-              <div class="slide-button preferences">
-                <p>I identify as</p>
-                <ion-select formControlName="gender" interface="action-sheet">
-                  <ion-select-option 
-                  *ngFor="let gender of genderOptions" 
-                  value="{{gender}}">
-                    {{ gender }}
-                  </ion-select-option>
-                </ion-select>
-              </div>
-
-              <div class="slide-button preferences">
-                <p>I am currently on campus</p>
-                <ion-select formControlName="onCampus" interface="action-sheet">
-                  <ion-select-option 
-                  *ngFor="let onCampus of onCampusOptions" 
-                  value="{{onCampus}}">
-                    {{ onCampus }}
-                  </ion-select-option>
-                </ion-select>
-              </div>
+          <div class="flexstart-col">
+            <p>
+              Here, you can change the preferences you set when you signed up. This will
+              affect how others on the app can reach you using
+              <span style="color: var(--ion-color-primary)"> nemo</span>search.
+            </p>
+            <div class="slide-button preferences">
+              <p>I am looking for</p>
+              <ion-select formControlName="swipeMode" interface="action-sheet">
+                <ion-select-option
+                  *ngFor="let swipeMode of swipeModeOptions"
+                  value="{{swipeMode}}"
+                >
+                  {{ swipeMode }}
+                </ion-select-option>
+              </ion-select>
             </div>
+
+            <div class="slide-button preferences">
+              <p>I am interested in</p>
+              <ion-select formControlName="sexualPreference" interface="action-sheet">
+                <ion-select-option
+                  *ngFor="let sexPref of sexualPreferenceOptions"
+                  value="{{sexPref}}"
+                >
+                  {{ sexPref }}
+                </ion-select-option>
+              </ion-select>
+            </div>
+
+            <div class="slide-button preferences">
+              <p>I identify as</p>
+              <ion-select formControlName="gender" interface="action-sheet">
+                <ion-select-option
+                  *ngFor="let gender of genderOptions"
+                  value="{{gender}}"
+                >
+                  {{ gender }}
+                </ion-select-option>
+              </ion-select>
+            </div>
+
+            <div class="slide-button preferences">
+              <p>I am currently on campus</p>
+              <ion-select formControlName="onCampus" interface="action-sheet">
+                <ion-select-option
+                  *ngFor="let onCampus of onCampusOptions"
+                  value="{{onCampus}}"
+                >
+                  {{ onCampus }}
+                </ion-select-option>
+              </ion-select>
+            </div>
+          </div>
         </div>
-    </ion-slide>
+      </ion-slide>
 
-    <ion-slide id="support" class="noScroll">
-      <div class="container">
-        <div class="flexbetween-row">
-          <h1>Help & Support</h1>
-          <a (click)="goBack()"><ion-icon name="close-outline"></ion-icon></a>
+      <ion-slide id="support" class="noScroll">
+        <div class="container">
+          <div class="flexbetween-row">
+            <h1>Help & Support</h1>
+            <a (click)="goBack()"><ion-icon name="close-outline"></ion-icon></a>
+          </div>
+
+          <div class="flexstart-row" (click)="returnToSettings()">
+            <ion-icon id="back" name="chevron-back-outline"></ion-icon>
+            <p class="return">Return to Settings</p>
+          </div>
+
+          <div class="flexstart-col">
+            <p>
+              We've tried our best to provide a safe and engaging platform to meet new
+              people, but we understand that sometimes not everything goes right.
+            </p>
+            <p>
+              If you're encountering issues with the app, or would like some support
+              regarding the
+              <span style="color: var(--ion-color-primary)">nemo</span> community, then
+              you can reach our support team by tapping on the email below.
+            </p>
+
+            <span class="email">
+              <a (click)="openEmail()"><u>customersupport@nemodating.com</u></a>
+            </span>
+
+            <p>
+              We will make sure to get back to you as soon as possible to swiftly resolve
+              any problems you encounter. This makes
+              <span style="color: var(--ion-color-primary)">nemo</span>
+              a better place for everyone!
+            </p>
+          </div>
         </div>
-
-        <div class="flexstart-row" (click)="returnToSettings()">
-          <ion-icon id="back" name="chevron-back-outline"></ion-icon>
-          <p class="return">Return to Settings</p>
-        </div>
-
-        <div class="flexstart-col">
-          <p>
-            We've tried our best to provide a safe and engaging platform to meet new people,
-            but we understand that sometimes not everything goes right.
-          </p>
-          <p>
-            If you're encountering issues with the app, or would like some support regarding
-            the <span style="color: var(--ion-color-primary)">nemo</span> community, then you
-            can reach our support team by tapping on the email below.
-          </p>
-
-          <span class="email">
-            <a (click)="openEmail()"><u>customersupport@nemodating.com</u></a>
-          </span>
-
-          <p>
-            We will make sure to get back to you as soon as possible to swiftly resolve any
-            problems you encounter. This makes <span style="color: var(--ion-color-primary)">nemo</span>
-            a better place for everyone!
-          </p>
-        </div>
-      </div>
-    </ion-slide>
-  </ion-slides>
+      </ion-slide>
+    </ion-slides>
   </form>
 </ion-content>

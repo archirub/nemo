@@ -31,7 +31,7 @@ import { OtherProfilesStore } from "@stores/other-profiles-store/other-profiles-
 import { ChatboardPicturesStore } from "@stores/pictures-stores/chatboard-pictures-store/chatboard-pictures.service";
 import { AngularFirestore, QuerySnapshot } from "@angular/fire/firestore";
 import { messageFromDatabase } from "@interfaces/message.model";
-import { FormatService } from "@services/index";
+import { FormatService } from "@services/format/format.service";
 
 import firebase from "firebase";
 @Component({

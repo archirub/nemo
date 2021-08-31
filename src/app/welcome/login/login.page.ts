@@ -4,7 +4,7 @@ import { FormControl, FormGroup, Validators } from "@angular/forms";
 
 import { AngularFireAuth } from "@angular/fire/auth";
 
-import { FirebaseAuthService } from "@services/index";
+import { FirebaseAuthService } from "@services/firebase-auth/firebase-auth.service";
 
 import { FishSwimAnimation } from "@animations/index";
 
@@ -26,11 +26,11 @@ export class LoginPage {
     password: new FormControl("", [Validators.required]),
   });
 
-  constructor (
-    private alertCtrl: AlertController, 
+  constructor(
+    private alertCtrl: AlertController,
     private afAuth: AngularFireAuth,
     private authService: FirebaseAuthService
-    ) {}
+  ) {}
 
   ionViewDidEnter() {
     //Initialise animations
@@ -40,33 +40,33 @@ export class LoginPage {
     this.fishSwimAnimation.play();
   }
 
-  onSubmit() {
+  async onSubmit() {
     if (!this.loginForm.valid) {
       return this.showAlert("Your email address or password is incorrectly formatted!");
     }
 
     const email: string = this.loginForm.get("email").value;
     const password: string = this.loginForm.get("password").value;
-
-    this.afAuth.signInWithEmailAndPassword(email, password)
-      .catch((error) => {
-        if (error.code === 'auth/wrong-password') {
-          this.authService.wrongPasswordPopup(null);
-        } else if (error.code === 'auth/user-not-found') {
-          this.authService.unknownUserPopup();
-        } else if (error.code === 'auth/user-disabled') {
-          this.authService.userDisabledPopup();
-        } else if (error.code === 'auth/too-many-requests') {
-          this.authService.wrongPasswordMaxAttemptsPopup(null);
-        } else {
-            this.authService.unknownErrorPopup();
-        };
-      });
+    try {
+      await this.afAuth.signInWithEmailAndPassword(email, password);
+    } catch (e) {
+      if (e.code === "auth/wrong-password") {
+        await this.authService.wrongPasswordPopup(null);
+      } else if (e.code === "auth/user-not-found") {
+        await this.authService.unknownUserPopup();
+      } else if (e.code === "auth/user-disabled") {
+        await this.authService.userDisabledPopup();
+      } else if (e.code === "auth/too-many-requests") {
+        await this.authService.wrongPasswordMaxAttemptsPopup(null);
+      } else {
+        await this.authService.unknownErrorPopup();
+      }
+    }
   }
 
-  enterSubmit(event) {
+  async enterSubmit(event) {
     if (event.keyCode === 13) {
-      this.onSubmit();
+      await this.onSubmit();
     }
   }
 

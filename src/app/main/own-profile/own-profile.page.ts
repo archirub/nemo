@@ -9,7 +9,7 @@ import {
   AfterViewInit,
 } from "@angular/core";
 
-import { BehaviorSubject, from, Observable, Subscription } from "rxjs";
+import { BehaviorSubject, from, Observable, of, Subscription } from "rxjs";
 import { User, Profile } from "@classes/index";
 import { CurrentUserStore } from "@stores/index";
 import { AddPhotoComponent, ProfileCardComponent } from "@components/index";
@@ -108,6 +108,8 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     this.picsLoaded$ = this.ownPicturesService.allPicturesLoaded$.pipe(
       tap((allPicturesLoaded) => (allPicturesLoaded ? this.stopAnimation() : null))
     );
+
+    this.editingAnimationLogic().subscribe();
   }
 
   ngAfterViewInit() {
@@ -116,13 +118,12 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
   }
 
   stopAnimation() {
-    this.fishSwimAnimation.destroy();
+    this.fishSwimAnimation?.destroy();
 
     setTimeout(() => {
       // This is essentially a lifecycle hook for after the UI appears
       this.toggleDivEnterAnimation = ToggleAppearAnimation(this.toggleDiv);
 
-      this.editingAnimationLogic().subscribe();
       // this.lastAnsRef = Array.from(this.answers)[this.answers.length - 1];
 
       // //'snapshot' to retrieve if editing is cancelled
@@ -147,18 +148,18 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
 
   async buildIntModal(): Promise<void> {
     this.modalCtrl
-    .create({
-      component: InterestsModalComponent,
-      componentProps: {
-        interests: this.editableFields?.interests
-      }, 
-      enterAnimation: this.intEnterAnimation,
-      leaveAnimation: this.intLeaveAnimation,
-    })
-    .then((m) => {
-      this.modal = m;
-      this.onInterestsModalDismiss(this.modal);
-    });
+      .create({
+        component: InterestsModalComponent,
+        componentProps: {
+          interests: this.editableFields?.interests,
+        },
+        enterAnimation: this.intEnterAnimation,
+        leaveAnimation: this.intLeaveAnimation,
+      })
+      .then((m) => {
+        this.modal = m;
+        this.onInterestsModalDismiss(this.modal);
+      });
   }
 
   async presentIntModal(): Promise<void> {
@@ -256,7 +257,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
       )
       .toPromise();
 
-    this.displayExit('bio');
+    this.displayExit("bio");
   }
 
   async confirmProfileEdit(): Promise<void> {
@@ -290,11 +291,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     return this.editingInProgress$.pipe(
       tap((a) => console.log("in progress", a)),
       switchMap((inProgress) =>
-        inProgress
-          ? from(ToggleAppearAnimation(this.toggleDiv).play())
-          : from(ToggleAppearAnimation(this.toggleDiv).play())
-          //? from(ToggleAppearAnimation(this.toggleDiv, 9.5, -5).play())
-          //: from(ToggleAppearAnimation(this.toggleDiv, 9.5, -5).play())
+        this.toggleDiv ? ToggleAppearAnimation(this.toggleDiv).play() : of()
       )
     );
   }
@@ -308,7 +305,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
   }
 
   ngOnDestroy() {
-    this.ownPicturesSub.unsubscribe();
-    this.profileSub.unsubscribe();
+    this.ownPicturesSub?.unsubscribe();
+    this.profileSub?.unsubscribe();
   }
 }

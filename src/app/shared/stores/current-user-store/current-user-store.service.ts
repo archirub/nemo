@@ -15,7 +15,7 @@ import {
   profileEditingByUserRequest,
   successResponse,
 } from "@interfaces/index";
-import { FormatService } from "@services/index";
+import { FormatService } from "@services/format/format.service";
 import { SearchCriteriaStore } from "../search-criteria-store/search-criteria-store.service";
 import { catchError, map, share, switchMap, take, withLatestFrom } from "rxjs/operators";
 

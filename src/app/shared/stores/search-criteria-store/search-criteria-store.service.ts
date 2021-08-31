@@ -6,7 +6,7 @@ import { BehaviorSubject, Observable } from "rxjs";
 import { searchCriteria, Criterion } from "@interfaces/search-criteria.model";
 import { SearchCriteria, copyClassInstance } from "@classes/index";
 import { privateProfileFromDatabase, profileFromDatabase } from "@interfaces/index";
-import { FormatService } from "@services/index";
+import { FormatService } from "@services/format/format.service";
 
 @Injectable({
   providedIn: "root",

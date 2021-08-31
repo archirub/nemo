@@ -1,4 +1,4 @@
-import { OwnPicturesStore } from "@stores/pictures-stores/own-pictures-store/own-pictures.service";
+import { EmptyStoresService } from "./empty-stores.service";
 import { Injectable } from "@angular/core";
 import { AlertController } from "@ionic/angular";
 import { ActivatedRoute, NavigationStart, ParamMap, Router } from "@angular/router";
@@ -30,19 +30,19 @@ import {
   tap,
 } from "rxjs/operators";
 
-import {
-  CurrentUserStore,
-  SearchCriteriaStore,
-  SwipeOutcomeStore,
-  OtherProfilesStore,
-  SwipeStackStore,
-  SettingsStore,
-  ChatboardStore,
-} from "@stores/index";
+import { OwnPicturesStore } from "@stores/pictures-stores/own-pictures-store/own-pictures.service";
+import { ChatboardStore } from "@stores/chatboard-store/chatboard-store.service";
+import { SearchCriteriaStore } from "@stores/search-criteria-store/search-criteria-store.service";
+import { OtherProfilesStore } from "@stores/other-profiles-store/other-profiles-store.service";
+import { SwipeOutcomeStore } from "@stores/swipe-outcome-store/swipe-outcome-store.service";
+import { SwipeStackStore } from "@stores/swipe-stack-store/swipe-stack-store.service";
+import { SettingsStore } from "@stores/settings-store/settings-store.service";
+import { CurrentUserStore } from "@stores/current-user-store/current-user-store.service";
 import { ChatboardPicturesStore } from "@stores/pictures-stores/chatboard-pictures-store/chatboard-pictures.service";
+
 import { SignupService } from "@services/signup/signup.service";
-import { routerInitListenerService } from "./initial-url.service";
 import { FirebaseAuthService } from "@services/firebase-auth/firebase-auth.service";
+import { routerInitListenerService } from "./initial-url.service";
 
 import firebase from "firebase";
 
@@ -73,17 +73,17 @@ export class GlobalStateManagementService {
     private signupService: SignupService,
     private firebaseAuthService: FirebaseAuthService,
     private routerInitListener: routerInitListenerService,
+    private emptyStoresService: EmptyStoresService,
 
     private userStore: CurrentUserStore,
     private chatboardStore: ChatboardStore,
     private chatboardPicturesStore: ChatboardPicturesStore,
-    private searchCriteriaStore: SearchCriteriaStore,
-    private otherProfilesStore: OtherProfilesStore,
-    private swipeOutcomeStore: SwipeOutcomeStore,
-    private swipeStackStore: SwipeStackStore,
-    private settingsStore: SettingsStore,
-    private OwnPicturesStore: OwnPicturesStore,
-    private CurrentUserStore: CurrentUserStore
+    // private searchCriteriaStore: SearchCriteriaStore,
+    // private otherProfilesStore: OtherProfilesStore,
+    // private swipeOutcomeStore: SwipeOutcomeStore,
+    // private swipeStackStore: SwipeStackStore,
+    // private settingsStore: SettingsStore,
+    private OwnPicturesStore: OwnPicturesStore
   ) {
     // format allows for this.auth$ to be a BehaviorSubject version of the Firebase.User observable
     this.afAuth.user.subscribe(this.auth$);
@@ -142,7 +142,7 @@ export class GlobalStateManagementService {
     if (page === "own-profile" || page === "settings")
       return forkJoin([
         this.OwnPicturesStore.activateStore(),
-        this.CurrentUserStore.fillStore(),
+        this.userStore.fillStore(),
       ]);
 
     return of();
@@ -158,7 +158,6 @@ export class GlobalStateManagementService {
         if (userSigningUp) return of(); // if user is signing up, then do nothing
         // otherwise, continue the procedure
         return this.doesProfileDocExist(user.uid).pipe(
-          take(1),
           concatMap((profileDocExists) => {
             if (!profileDocExists) return this.noDocumentsRoutine(user);
             return this.hasDocumentsRoutine();
@@ -194,11 +193,11 @@ export class GlobalStateManagementService {
    */
   private noDocumentsRoutine(user: firebase.User): Observable<void> {
     const finishProfileProcedure = () => {
-      this.emptyStores(); // to be safe
+      this.emptyStoresService.emptyStores(); // to be safe
       return this.signupService.checkAndRedirect();
     };
     const abortProfileProcedure = async () => {
-      this.emptyStores(); // to be safe
+      this.emptyStoresService.emptyStores(); // to be safe
 
       try {
         await user.delete();
@@ -283,18 +282,6 @@ export class GlobalStateManagementService {
    * Resets the content of the stores and clears the local storage
    */
   private resetAppState() {
-    return forkJoin([of(this.emptyStores()), Storage.clear()]);
-  }
-
-  emptyStores() {
-    console.log("stores emptied");
-    this.userStore.resetStore();
-    // this.chatboardStore.resetStore();
-    this.searchCriteriaStore.resetStore();
-    this.swipeOutcomeStore.resetStore();
-    this.swipeStackStore.resetStore();
-    this.otherProfilesStore.resetStore();
-    this.settingsStore.resetStore();
-    // ANY OTHERS / NEW ONES ? Add them here
+    return forkJoin([of(this.emptyStoresService.emptyStores()), Storage.clear()]);
   }
 }

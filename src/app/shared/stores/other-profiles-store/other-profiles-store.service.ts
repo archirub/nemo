@@ -7,7 +7,7 @@ import { exhaustMap, filter, map, take, tap } from "rxjs/operators";
 import { Profile } from "@classes/index";
 import { AngularFirestore, DocumentSnapshot } from "@angular/fire/firestore";
 import { profileFromDatabase } from "@interfaces/index";
-import { FormatService } from "@services/index";
+import { FormatService } from "@services/format/format.service";
 
 interface ProfileHolder {
   [uid: string]: Profile;

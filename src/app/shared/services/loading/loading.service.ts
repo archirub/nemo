@@ -1,11 +1,42 @@
 import { Injectable } from "@angular/core";
-import { LoadingController } from "@ionic/angular";
+import { AnimationBuilder, IonicSafeString, LoadingController } from "@ionic/angular";
+
+// imported manually as couldn't find how to import this type directly
+type Mode = "ios" | "md";
+type SpinnerTypes =
+  | "bubbles"
+  | "circles"
+  | "circular"
+  | "crescent"
+  | "dots"
+  | "lines"
+  | "lines-small";
+export interface LoadingOptions {
+  spinner?: SpinnerTypes | null;
+  message?: string | IonicSafeString;
+  cssClass?: string | string[];
+  showBackdrop?: boolean;
+  duration?: number;
+  translucent?: boolean;
+  animated?: boolean;
+  backdropDismiss?: boolean;
+  mode?: Mode;
+  keyboardClose?: boolean;
+  id?: string;
+  enterAnimation?: AnimationBuilder;
+  leaveAnimation?: AnimationBuilder;
+}
 
 @Injectable({
   providedIn: "root",
 })
 export class LoadingService {
   constructor(public loadingController: LoadingController) {}
+
+  defaultLoadingOptions: LoadingOptions = {
+    spinner: "bubbles",
+    translucent: true,
+  };
 
   /**
    * Presents a loader until the promises in "events" complete (in series),
@@ -23,10 +54,8 @@ export class LoadingService {
     message: string = "Loading..."
   ): Promise<void> {
     const loading = await this.loadingController.create({
-      // cssClass: "my-custom-class",
-      spinner: "bubbles",
       message,
-      translucent: true,
+      ...this.defaultLoadingOptions,
     });
     await loading.present();
 

@@ -11,7 +11,8 @@ import { AngularFireAuth } from "@angular/fire/auth";
 
 import { Plugins } from "@capacitor/core";
 
-import { LoadingService } from "@services/index";
+import { FirebaseAuthService } from "@services/firebase-auth/firebase-auth.service";
+
 import { Router } from "@angular/router";
 import { Subscription } from "rxjs";
 import { CurrentUserStore } from "@stores/index";
@@ -29,6 +30,7 @@ import {
 } from "@interfaces/index";
 import { GlobalStateManagementService } from "@services/global-state-management/global-state-management.service";
 import { Profile } from "@classes/profile.class";
+import { User } from "@classes/user.class";
 
 @Component({
   selector: "app-settings",
@@ -40,7 +42,7 @@ export class SettingsPage implements AfterViewInit {
   @ViewChild("goUnder") goUnder: ElementRef;
 
   profileSub: Subscription;
-  profile: Profile;
+  profile: User;
 
   // FORM
   form = new FormGroup({
@@ -59,11 +61,11 @@ export class SettingsPage implements AfterViewInit {
   constructor(
     private navCtrl: NavController,
     private afAuth: AngularFireAuth,
-    private loadingService: LoadingService,
     private currentUserStore: CurrentUserStore,
     private router: Router,
     private zone: NgZone,
-    private initService: GlobalStateManagementService
+    private GlobalStateManagement: GlobalStateManagementService,
+    private firebaseAuth: FirebaseAuthService
   ) {}
 
   ngAfterViewInit() {
@@ -90,37 +92,12 @@ export class SettingsPage implements AfterViewInit {
   }
 
   async logOut() {
-    // have to explicitely do it this way instead of using directly "this.navCtrl.navigateRoot"
-    // otherwise it causes an error
-    // calling ngZone.run() is necessary otherwise we will get into trouble with changeDecection
-    // back at the welcome page (it seems like it's then not active), which cases problem for example
-    // while trying to log back in where the "log in" button doesn't get enabled when the email-password form becomes valid
-    const navigateToWelcome = async (url: string) => {
-      return this.zone.run(() => {
-        return this.navCtrl.navigateRoot(url);
-      });
-    };
+    await this.firebaseAuth.logOut();
+  }
 
-    const clearLocalCache = () => {
-      return Plugins.Storage.clear();
-    };
-
-    const clearStores = async () => {
-      return this.initService.emptyStores();
-    };
-
-    const logOut = () => {
-      return this.afAuth.signOut();
-    };
-
-    await this.loadingService.presentLoader(
-      [
-        { promise: clearLocalCache, arguments: [] },
-        { promise: clearStores, arguments: [] },
-        { promise: logOut, arguments: [] },
-      ],
-      [{ promise: navigateToWelcome, arguments: ["/welcome"] }]
-    );
+  async deleteAccount() {
+    console.log("asdas");
+    await this.firebaseAuth.deleteAccount();
   }
 
   /* Styles gone 'under' tab on toggle */
@@ -192,10 +169,10 @@ export class SettingsPage implements AfterViewInit {
   fillPreferences() {
     //This is designed in such a way that in future we can add more controls in the same fashion
     let controls = [
-      { swipeMode: this.profile["swipeMode"] },
-      { sexualPreference: this.profile["sexualPreference"] },
-      { gender: this.profile["gender"] },
-      { onCampus: this.profile["onCampus"] },
+      // { swipeMode: this.profile.swipeMode },
+      { sexualPreference: this.profile?.sexualPreference },
+      { gender: this.profile?.gender },
+      { onCampus: this.profile?.onCampus },
     ];
 
     //Matches control name from objects above to profile's value and sets FormControl value

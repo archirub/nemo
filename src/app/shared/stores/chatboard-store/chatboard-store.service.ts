@@ -4,7 +4,7 @@ import { AngularFirestore, QueryDocumentSnapshot } from "@angular/fire/firestore
 import { BehaviorSubject, ReplaySubject, Observable, combineLatest, of } from "rxjs";
 
 import { Chat } from "@classes/index";
-import { FormatService } from "@services/index";
+import { FormatService } from "@services/format/format.service";
 import {
   map,
   take,

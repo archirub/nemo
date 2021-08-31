@@ -1,3 +1,4 @@
+import { FirebaseAuthService } from "@services/firebase-auth/firebase-auth.service";
 import {
   Component,
   ElementRef,
@@ -25,7 +26,6 @@ import {
   FishEnterAnimation,
 } from "@animations/index";
 
-import { FormatService } from "@services/index";
 import { TabElementRefService } from "src/app/main/tab-menu/tab-element-ref.service";
 import { SwipeCardComponent } from "./swipe-card/swipe-card.component";
 import { AngularFireStorage } from "@angular/fire/storage";
@@ -67,7 +67,8 @@ export class HomePage implements OnInit, OnDestroy {
     private swipeStackStore: SwipeStackStore,
     private currentUserStore: CurrentUserStore,
     private modalCtrl: ModalController,
-    private tabElementRef: TabElementRefService
+    private tabElementRef: TabElementRefService,
+    private firebaseAuth: FirebaseAuthService
   ) {
     this.onResize();
   }
@@ -92,6 +93,7 @@ export class HomePage implements OnInit, OnDestroy {
    */
   activateSwipeStack() {
     this.swipeStackSub = this.swipeStackStore.activateStore().subscribe();
+    // this.firebaseAuth.logOut();
   }
 
   ionViewDidEnter() {
