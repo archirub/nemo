@@ -7,6 +7,7 @@ import { IonicModule } from "@ionic/angular";
 import { SignupauthPageRoutingModule } from "./signupauth-routing.module";
 
 import { SignupauthPage } from "./signupauth.page";
+import { DirectivesModule } from "../../shared/directives/directives.module";
 
 @NgModule({
   imports: [
@@ -15,6 +16,7 @@ import { SignupauthPage } from "./signupauth.page";
     CommonModule,
     IonicModule,
     SignupauthPageRoutingModule,
+    DirectivesModule,
   ],
   declarations: [SignupauthPage],
 })

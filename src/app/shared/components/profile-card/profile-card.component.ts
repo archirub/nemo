@@ -199,12 +199,13 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
   }
 
   buildInterestSlides(profile: Profile): void {
+    if (!profile) return;
     this.interestSlideContent = []; //clear any previous slides, mainly for own profile changes
 
     let count = 0;
     let pushArray = [];
 
-    profile.interests?.forEach((int) => {
+    profile?.interests?.forEach((int) => {
       count++;
 
       if (count < 4) {

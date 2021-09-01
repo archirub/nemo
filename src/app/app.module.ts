@@ -20,6 +20,7 @@ import { environment } from "src/environments/environment";
 
 import { pageTransition } from "./shared/animations/page-transition.animation";
 import { PipesModule } from "@pipes/pipes.module";
+import { DirectivesModule } from "./shared/directives/directives.module";
 
 @NgModule({
   declarations: [AppComponent],
@@ -35,6 +36,7 @@ import { PipesModule } from "@pipes/pipes.module";
     AngularFireFunctionsModule,
     AngularFireStorageModule,
     PipesModule,
+    DirectivesModule,
   ],
   providers: [
     StatusBar,

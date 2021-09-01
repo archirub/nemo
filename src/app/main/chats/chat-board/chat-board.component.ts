@@ -1,3 +1,4 @@
+import { DomSanitizer } from "@angular/platform-browser";
 import {
   Component,
   Input,
@@ -10,7 +11,7 @@ import {
   ChangeDetectorRef,
   OnDestroy,
   Renderer2,
-  EventEmitter
+  EventEmitter,
 } from "@angular/core";
 import { Router } from "@angular/router";
 import { IonContent, ModalController } from "@ionic/angular";
@@ -62,7 +63,8 @@ export class ChatBoardComponent implements OnInit {
     private router: Router,
     private modalCtrl: ModalController,
     private tabElementRef: TabElementRefService,
-    private chatboardPicturesService: ChatboardPicturesStore // used in template
+    private chatboardPicturesService: ChatboardPicturesStore, // used in template
+    private domSanitizer: DomSanitizer
   ) {
     this.onResize();
   }
@@ -72,13 +74,25 @@ export class ChatBoardComponent implements OnInit {
   MatchesLeaveAnimation;
 
   ngOnInit() {
-    this.chatboardPictures$ = this.chatboardPicturesService.holder$;
-    this.picsLoaded$ = this.chatboardPicturesService.allPicturesLoaded$.subscribe(res => {
-      this.picsLoaded = res;
-      if (this.picsLoaded === true) {
-        this.loaded.emit(this.picsLoaded);
-      };
-    });
+    this.chatboardPictures$ = this.chatboardPicturesService.holder$.pipe(
+      map((holder) => {
+        // const sanitisedHolder = [];
+        // Object.keys(holder).forEach((uid) =>
+        //   sanitisedHolder.push([holder[uid], this.domSanitizer.sanitize(4, holder[uid])])
+        // );
+        // console.log("comparison:" + JSON.stringify(sanitisedHolder));
+        // return sanitisedHolder;
+        return holder;
+      })
+    );
+    this.picsLoaded$ = this.chatboardPicturesService.allPicturesLoaded$.subscribe(
+      (res) => {
+        this.picsLoaded = res;
+        if (this.picsLoaded === true) {
+          this.loaded.emit(this.picsLoaded);
+        }
+      }
+    );
   }
 
   async presentMatches(): Promise<void> {

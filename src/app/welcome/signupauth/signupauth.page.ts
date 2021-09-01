@@ -1,19 +1,32 @@
 import { Component, OnInit, ViewChild, ElementRef } from "@angular/core";
 import { AngularFireAuth } from "@angular/fire/auth";
-import { FormControl, FormGroup, Validators } from "@angular/forms";
+import { FormBuilder, FormControl, FormGroup, Validators } from "@angular/forms";
 import { Router } from "@angular/router";
 import { FlyingLetterAnimation } from "@animations/letter.animation";
 import { AuthResponseData } from "@interfaces/auth-response.model";
 import { AlertController, IonIcon, IonSlides } from "@ionic/angular";
 import { SignupService } from "@services/signup/signup.service";
-import { Subscription } from "rxjs";
+import { BehaviorSubject, concat, from, Observable, of, Subscription, timer } from "rxjs";
+import {
+  auditTime,
+  catchError,
+  distinctUntilChanged,
+  exhaustMap,
+  filter,
+  map,
+  switchMap,
+  take,
+  takeUntil,
+  tap,
+} from "rxjs/operators";
 
+type EmailVerificationState = "not-sent" | "sent" | "resent" | "verified";
 @Component({
   selector: "app-signupauth",
   templateUrl: "./signupauth.page.html",
   styleUrls: ["../welcome.page.scss"],
 })
-export class SignupauthPage {
+export class SignupauthPage implements OnInit {
   @ViewChild("slides") slides: IonSlides;
   @ViewChild("email", { read: ElementRef }) email: ElementRef;
 
@@ -25,14 +38,31 @@ export class SignupauthPage {
   awaitingConfirm: boolean = true;
   confirmed: boolean = false;
 
-  authForm = new FormGroup({
-    email: new FormControl("", [
-      Validators.required,
-      Validators.email,
-      Validators.pattern("[a-zA-Z]*@[a-zA-Z]*.ac.uk"),
-    ]),
-    password: new FormControl("", [Validators.required, Validators.min(8)]),
-  });
+  private emailVerificationState = new BehaviorSubject<EmailVerificationState>(
+    "not-sent"
+  );
+  public emailVerificationState$ = this.emailVerificationState.asObservable().pipe(
+    distinctUntilChanged((prev, curr) => {
+      // since there can be multiple resend of the email verification, we don't want to filter these out
+      if (prev === "resent" && curr === "resent") return false;
+      // however, any repeating "sent", "verified" or "not-sent" in a row will be filtered out
+      else return prev === curr;
+    })
+  );
+
+  // has shape of a getter (more generally of a function) to get a different object ref everytime
+  get emptyAuthForm() {
+    return new FormGroup({
+      email: new FormControl("", [
+        Validators.required,
+        Validators.email,
+        Validators.pattern("[a-zA-Z]*@[a-zA-Z]*.ac.uk"),
+      ]),
+      password: new FormControl("", [Validators.required, Validators.min(8)]),
+    });
+  }
+
+  authForm: FormGroup;
 
   signupSub: Subscription;
 
@@ -40,8 +70,17 @@ export class SignupauthPage {
     private alertCtrl: AlertController,
     private router: Router,
     private signup: SignupService,
-    private afAuth: AngularFireAuth
-  ) {}
+    private afAuth: AngularFireAuth,
+    private formBuilder: FormBuilder
+  ) {
+    this.authForm = this.emptyAuthForm;
+  }
+
+  ngOnInit() {
+    this.emailVerificationState$.subscribe((a) =>
+      console.log("email verification state:", a)
+    );
+  }
 
   ionViewDidEnter() {
     this.slides.lockSwipes(true);
@@ -54,31 +93,50 @@ export class SignupauthPage {
     };
   }
 
+  public async onSubmitAuthData(): Promise<void> {
+    await this.requestAccountCreation()
+      .pipe(
+        filter((val) => !!val),
+        switchMap(() =>
+          concat(
+            this.unlockAndSlideTo(1),
+            this.sendEmailVerification("sent"),
+            this.listenToEmailVerification()
+          )
+        )
+      )
+      .toPromise();
+  }
+
+  public async resendEmailVerification() {
+    return this.sendEmailVerification("resent").toPromise();
+  }
+
   /**
    * Checks whether the field on the current slide has valid value, allows continuing if true, input
    * entry (string): the field of the form to check validator for, e.g. email, password
    * If on the final validator, password, submits form instead of sliding to next slide
    * THIS SHOULD BE USED ON THE NEXT SLIDE BUTTONS
    **/
-  validateAndSlide(entry) {
-    var validity = this.authForm.get(entry).valid; // Check validator
+  // validateAndSlide(entry) {
+  //   var validity = this.authForm.get(entry).valid; // Check validator
 
-    if (validity === true) {
-      Object.values(this.validatorChecks).forEach(
-        (element) => (element.style.display = "none")
-      ); // Hide all "invalid" UI
+  //   if (validity === true) {
+  //     Object.values(this.validatorChecks).forEach(
+  //       (element) => (element.style.display = "none")
+  //     ); // Hide all "invalid" UI
 
-      if (entry === "password") {
-        // If password valid, submit form
-        this.onSubmit();
-      } else {
-        this.unlockAndSlideToNext(); // If others valid, slide next
-      }
-    } else {
-      this.validatorChecks[entry].style.display = "flex"; // Show "invalid" UI for invalid validator
-      console.log("Not valid, don't slide");
-    }
-  }
+  //     if (entry === "password") {
+  //       // If password valid, submit form
+  //       this.requestAccountCreation();
+  //     } else {
+  //       this.unlockAndSlideToNext(); // If others valid, slide next
+  //     }
+  //   } else {
+  //     this.validatorChecks[entry].style.display = "flex"; // Show "invalid" UI for invalid validator
+  //     console.log("Not valid, don't slide");
+  //   }
+  // }
 
   async updatePager() {
     var email = document.getElementById("email");
@@ -144,7 +202,28 @@ export class SignupauthPage {
     await this.slides.lockSwipes(true);
   }
 
-  resendConfirmation() {
+  // 1. Start with we sent you an email verification
+  // Have a button that allows to resend the email after 20 seconds of wait (count down visible and
+  // then possibility to click)
+  // 2. Watch for email verification, once it has been verified change UI to "email successfully verified"
+  // and display a button that allows the user to continue the process (go to next slide)
+  // Double check in the ts file that the email has actually been verified before allowing for navigation
+
+  //
+
+  // - Check that email has been verified systematically before allowing the user to
+  // redirect to further parts of the signup process
+  // - Put an expiry time on the account, so that it deletes if the email hasn't been verified
+  // after x amount of time
+
+  // In global state management - check if user is authed, then check if user has email verified, if
+  // no then go to verification page, if yes then check whether the user has documents, handle cases
+  // where document hasn't actually been fetched (like slow connection or no connection), if document has
+  // been fetched and there are none, then show prompt to continue account creation, if it hasn't been fetched
+  // for some reason (especially if it is slow connection, retry, and then show error message which says error occured try again later).
+  // if it has been fetched and there are documents, then just redirect to app etc.
+
+  async resendConfirmation() {
     //Resend email here
 
     var text = document.getElementById("sentEmail");
@@ -169,42 +248,77 @@ export class SignupauthPage {
     this.confirmed = true;
   }
 
-  onSubmit() {
-    if (!this.authForm.valid) {
-      return console.error("Invalid form");
-    }
-    const email: string = this.authForm.get("email").value;
-    const password: string = this.authForm.get("password").value;
-
-    this.signupSub = this.signup.createFirebaseAccount(email, password).subscribe(
-      (a) => {
-        console.log(a);
-        this.router.navigateByUrl("welcome/signuprequired");
-      },
-      (errRes) => {
-        console.log(errRes);
-        const code = errRes.error.error.message;
-        let message = "Could not sign you up. Please try again.";
-        if (code === "EMAIL_EXISTS") {
-          let message = "The email address is already in use by another account.";
-        }
-        if (code === "TOO_MANY_ATTEMPTS_TRY_LATER") {
-          let message =
-            "We have blocked all requests from this device due to unusual activity. Try again later.";
-        }
-        this.showAlert(message);
-      }
+  private listenToEmailVerification(
+    timeToExpiry = 60000,
+    intervalBetweenChecks = 1000
+  ): Observable<void> {
+    return this.afAuth.user.pipe(
+      // in case email has been resent and there are multiple listenToEmailVerification()
+      // observables being listened to
+      // takeUntil(this.emailVerificationState.pipe(filter((state)=> state === "verified"))),
+      takeUntil(timer(timeToExpiry)),
+      auditTime(intervalBetweenChecks),
+      tap(async (user) => {
+        await this.afAuth.updateCurrentUser(user);
+        await user?.reload();
+        console.log("checking if email is verified:", user?.emailVerified);
+      }),
+      filter((user) => !!user?.emailVerified),
+      take(1),
+      map(() => this.emailVerificationState.next("verified"))
     );
   }
 
-  private showAlert(message: string) {
-    this.alertCtrl
-      .create({
-        header: "Signup Failed",
-        message: message,
-        buttons: ["Okay"],
+  /**
+   * Select state = "sent" if it is the first time we are sending an email verification,
+   * select state = "resent" if we are resending
+   */
+  private sendEmailVerification(state: "sent" | "resent"): Observable<void> {
+    return this.afAuth.user.pipe(
+      take(1),
+      switchMap((user) =>
+        user.sendEmailVerification().then(() => this.emailVerificationState.next(state))
+      )
+    );
+  }
+
+  private requestAccountCreation(): Observable<void | firebase.auth.UserCredential> {
+    const email: string = this.authForm.get("email").value;
+    const password: string = this.authForm.get("password").value;
+
+    if (!this.authForm.valid || !email || !password) return of();
+
+    return this.signup.createFirebaseAccount(email, password).pipe(
+      catchError((error) => {
+        console.log("error at signup", error);
+        let messageToDisplay = "Could not sign you up. Please try again.";
+        if (error?.message) messageToDisplay = error?.message;
+        // if (error.code === "auth/email-already-in-use") {
+        //   messageToDisplay = "The email address is already in use by another account.";
+        // }
+        // if (error.code === "auth/weak-password") {
+
+        // }
+        // if (error.code === "TOO_MANY_ATTEMPTS_TRY_LATER") {
+        //   messageToDisplay =
+        //     "We have blocked all requests from this device due to unusual activity. Try again later.";
+        // }
+        return concat(
+          this.displaySignupFailedAlert(messageToDisplay),
+          of(this.authForm.reset(this.emptyAuthForm))
+        );
       })
-      .then((alertEl) => alertEl.present());
+    );
+  }
+
+  private async displaySignupFailedAlert(message: string): Promise<void> {
+    const alert = await this.alertCtrl.create({
+      header: "Signup Failed",
+      message: message,
+      buttons: ["Okay"],
+    });
+
+    return alert.present();
   }
 
   ngOnDestroy() {

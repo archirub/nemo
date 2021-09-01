@@ -25,6 +25,7 @@ import { urlToBase64, Base64ToUrl } from "../common-pictures-functions";
 import { Plugins } from "@capacitor/core";
 import { ChatboardStore } from "@stores/index";
 const { Storage } = Plugins;
+import { DomSanitizer, SafeUrl } from "@angular/platform-browser";
 
 export interface pictureHolder {
   [uid: string]: string;
@@ -57,7 +58,10 @@ export class ChatboardPicturesStore {
   private allPicturesLoaded = new BehaviorSubject<boolean>(false);
   allPicturesLoaded$ = this.allPicturesLoaded.asObservable().pipe(distinctUntilChanged());
 
-  constructor(private afStorage: AngularFireStorage) {}
+  constructor(
+    private afStorage: AngularFireStorage,
+    private DomSanitizer: DomSanitizer
+  ) {}
 
   /**
    * Gotta subscribe to this to activate the chain of logic that fills the store etc.
@@ -77,7 +81,9 @@ export class ChatboardPicturesStore {
     return urlToBase64(pictureUrl).pipe(
       take(1),
       concatMap((base64Picture) =>
-        iif(() => setQuality, this.setPictureQuality(base64Picture), of(base64Picture))
+        // UNTIL SETPICTUREQUALITY IS FUNCTIONAL
+        // iif(() => setQuality, this.setPictureQuality(base64Picture), of(base64Picture))
+        of(base64Picture)
       ),
       concatMap((pic) => {
         const storePicture$ = from(
@@ -96,6 +102,10 @@ export class ChatboardPicturesStore {
   public addToHolder(obj: { uids: string[]; urls: string[] }): Observable<string[][]> {
     return this.holder$.pipe(
       take(1),
+      // tap(() => {
+      //   obj.urls = this.getTrustedUrl(obj.urls as string[]);
+      //   console.log("trusted urls", obj.urls);
+      // }),
       map((holder) => {
         Array(obj.uids.length)
           .fill(null)
@@ -108,6 +118,14 @@ export class ChatboardPicturesStore {
       })
     );
   }
+
+  // private getTrustedUrl(urls: string[]): SafeUrl[] {
+  //   return urls.map(
+  //     (url) =>
+  //       (this.DomSanitizer.bypassSecurityTrustUrl(url) as any)
+  //         .changingThisBreaksApplicationSecurity
+  //   );
+  // }
 
   private activateLoadingListener(
     chats: Observable<{ [chatID: string]: Chat }>
@@ -163,7 +181,8 @@ export class ChatboardPicturesStore {
             concatMap(([pictureUrl, pictureHolder]) => {
               pictureHolder[uid] = pictureUrl;
               this.holder.next(pictureHolder);
-              return this.storeInLocal(uid, pictureUrl, true);
+              return of(uid); // for testing without storage
+              // return this.storeInLocal(uid, pictureUrl, true);
             })
           )
         );
@@ -177,7 +196,7 @@ export class ChatboardPicturesStore {
     return "chatboard_picture_" + uid;
   }
 
-  private getAllPicturesFromLocalToHolder(): Observable<string[][]> {
+  private getAllPicturesFromLocalToHolder(): Observable<SafeUrl[][]> {
     return this.getUidsLocal().pipe(
       switchMap((uids: string[]) => {
         // must do so so that we have a stream with both the uids and the urls,
@@ -205,13 +224,42 @@ export class ChatboardPicturesStore {
 
       img.src = base64Picture;
       img.onload = function () {
-        context.scale(width / img.width, height / img.height);
+        // context.scale(width / img.width, width / img.height);
         context.drawImage(img, 0, 0);
         resolve(canvas.toDataURL());
       };
     });
 
     return from(promise as Promise<string>);
+
+    // console.log('width: ' + loadedData.width + ' height: ' + loadedData.height);
+
+    // var result_image = document.getElementById('result_compress_image');
+    // var quality = parseInt(encodeQuality.value);
+    // console.log("Quality >>" + quality);
+
+    // console.log("process start...");
+    // var time_start = new Date().getTime();
+
+    // var mime_type = "image/jpeg";
+    // if (typeof output_format !== "undefined" && output_format == "png") {
+    //   mime_type = "image/png";
+    // }
+
+    // var cvs = document.createElement('canvas');
+    // cvs.width = loadedData.width;
+    // cvs.height = loadedData.height;
+    // var ctx = cvs.getContext("2d").drawImage(loadedData, 0, 0);
+    // var newImageData = cvs.toDataURL(mime_type, quality / 100);
+    // var result_image_obj = new Image();
+    // result_image_obj.src = newImageData;
+    // result_image.src = result_image_obj.src;
+
+    // result_image.onload = function() {}
+    // var duration = new Date().getTime() - time_start;
+
+    // console.log("process finished...");
+    // console.log('Processed in: ' + duration + 'ms');
   }
 
   private getPictureLocal(uid: string): Observable<string> {
