@@ -271,6 +271,7 @@ export class SignupauthPage implements OnInit {
     // timeToExpiry = 60000,
     intervalBetweenChecks = 1000
   ): Observable<void> {
+    // yoo
     return this.afAuth.user.pipe(
       // in case email has been resent and there are multiple listenToEmailVerification()
       // observables being listened to
