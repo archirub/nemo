@@ -61,7 +61,7 @@ export class SwipeStackStore {
   }
 
   public managePictures(profiles: Profile[]): Observable<void> {
-    const pictureDownloads$ = profiles.reverse().map((p) => this.downloadPictures(p));
+    const pictureDownloads$ = profiles.map((p) => this.downloadPictures(p));
     return concat(...pictureDownloads$).pipe(last());
   }
 
@@ -71,7 +71,7 @@ export class SwipeStackStore {
     const pictureUrls$ = Array.from({ length: profile.pictureCount }).map((v, index) =>
       this.getUrl(profile.uid, index)
     );
-
+    0;
     return forkJoin(pictureUrls$).pipe(
       concatMap((pictureUrls) => this.addUrls(pictureUrls, profile.uid))
     );

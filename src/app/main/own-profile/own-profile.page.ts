@@ -66,6 +66,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
 
   editingInProgress = new BehaviorSubject<boolean>(false);
   editingInProgress$ = this.editingInProgress.pipe(distinctUntilChanged());
+  editingAnimationLogicSub: Subscription;
 
   fishSwimAnimation;
 
@@ -109,7 +110,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
       tap((allPicturesLoaded) => (allPicturesLoaded ? this.stopAnimation() : null))
     );
 
-    this.editingAnimationLogic().subscribe();
+    this.editingAnimationLogicSub = this.editingAnimationLogic().subscribe();
   }
 
   ngAfterViewInit() {
@@ -309,5 +310,6 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
   ngOnDestroy() {
     this.ownPicturesSub?.unsubscribe();
     this.profileSub?.unsubscribe();
+    this.editingAnimationLogicSub?.unsubscribe();
   }
 }

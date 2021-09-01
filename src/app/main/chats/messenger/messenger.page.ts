@@ -11,7 +11,7 @@ import { NavController, IonContent, IonSlides } from "@ionic/angular";
 import { AngularFireAuth } from "@angular/fire/auth";
 import { ActivatedRoute, ParamMap } from "@angular/router";
 
-import { BehaviorSubject, forkJoin, from, Observable, Subscription } from "rxjs";
+import { BehaviorSubject, forkJoin, from, Observable, of, Subscription } from "rxjs";
 import {
   delay,
   distinct,
@@ -34,6 +34,7 @@ import { messageFromDatabase } from "@interfaces/message.model";
 import { FormatService } from "@services/format/format.service";
 
 import firebase from "firebase";
+import { SafeUrl } from "@angular/platform-browser";
 @Component({
   selector: "app-messenger",
   templateUrl: "./messenger.page.html",
@@ -55,7 +56,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
   profilesSub: Subscription;
   profileHandlingSub: Subscription;
 
-  bubblePicture$: Observable<string>;
+  bubblePicture$: Observable<SafeUrl>;
 
   chatProfiles: Profile[];
   recipientProfile$: Observable<Profile>;
@@ -115,6 +116,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
         map((chat) => chat.recipient.uid),
         switchMap((recipientUID) => this.profilesStore.checkAndSave(recipientUID)),
         switchMap(({ uid, pictures }) => {
+          return of();
           return forkJoin([
             this.chatboardPictures.storeInLocal(uid, pictures[0], true),
             this.chatboardPictures.addToHolder({ uids: [uid], urls: [pictures[0]] }),

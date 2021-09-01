@@ -1,17 +1,16 @@
 <ion-content>
-    <div class="text">
-        <div class="exit" (click)="closeModal()">
-            <ion-icon name="close-outline"></ion-icon>
-        </div>
+  <div class="text">
+    <div class="exit" (click)="closeModal()">
+      <ion-icon name="close-outline"></ion-icon>
     </div>
-    <ion-row>
-        <div class="profile"
-        *ngFor="let match of matches; index as j" >
-            <img [src]="(chatboardPictures$ | async)[match?.recipient?.uid]"/>
-            <div class="data">
-                <ion-label>{{ match?.recipient?.name }}</ion-label>
-                <ion-icon name="chatbubbles-outline"></ion-icon>
-            </div>
-        </div>
-    </ion-row>
+  </div>
+  <ion-row>
+    <div class="profile" *ngFor="let match of matches; index as j">
+      <img [src]="(chatboardPictures$ | async)[match?.recipient?.uid]" />
+      <div class="data">
+        <ion-label>{{ match?.recipient?.name }}</ion-label>
+        <ion-icon name="chatbubbles-outline"></ion-icon>
+      </div>
+    </div>
+  </ion-row>
 </ion-content>

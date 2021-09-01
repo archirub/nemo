@@ -7,14 +7,17 @@ import { IonicModule } from "@ionic/angular";
 import { MessengerPageRoutingModule } from "./messenger-routing.module";
 import { MessengerPage } from "./messenger.page";
 import { ProfileCardModule } from "@components/profile-card/profile-card.component.module";
+import { PipesModule } from "@pipes/pipes.module";
 
 @NgModule({
   imports: [
-    CommonModule, 
-    FormsModule, 
-    IonicModule, 
+    CommonModule,
+    FormsModule,
+    IonicModule,
     MessengerPageRoutingModule,
-    ProfileCardModule],
+    ProfileCardModule,
+    PipesModule,
+  ],
   declarations: [MessengerPage],
 })
 export class MessengerPageModule {}

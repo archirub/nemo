@@ -57,33 +57,30 @@
           10+ new catches!
         </div>
 
-        <img class="fish-back" src="/assets/nemo.png">
+        <img class="fish-back" src="/assets/nemo.png" />
       </ion-item>
     </ng-container>
   </ion-row>
 
   <ion-list *ngIf="this.chats.length > 0">
     <ion-item-sliding class="parent" *ngFor="let chat of chats; index as i">
-      <ion-item
-        detail="true"
-        button
-        (click)="goToMessenger(chat.id)"
-      >
+      <ion-item detail="true" button (click)="goToMessenger(chat.id)">
         <ion-avatar slot="start">
-          <img [src]="(chatboardPictures$ | async)[chat?.recipient?.uid]"/>
+          <img [src]="(chatboardPictures$ | async)[chat?.recipient?.uid]" />
         </ion-avatar>
         <div class="text-container">
-          <ion-label 
-          color="primary" 
-          class="text-container name"
-          [style.fontWeight]=
-              "chat?.recentMessage?.senderID === chat?.recipient?.uid 
-              ? 'bold'
-              : 'normal'"
-          [style.color]=
-              "chat?.recentMessage?.senderID === chat?.recipient?.uid 
-              ? 'var(--ion-color-primary)'
-              : 'var(--ion-color-primary-tint)'">
+          <ion-label
+            color="primary"
+            class="text-container name"
+            [style.fontWeight]="
+              chat?.recentMessage?.senderID === chat?.recipient?.uid ? 'bold' : 'normal'
+            "
+            [style.color]="
+              chat?.recentMessage?.senderID === chat?.recipient?.uid
+                ? 'var(--ion-color-primary)'
+                : 'var(--ion-color-primary-tint)'
+            "
+          >
             {{ chat?.recipient?.name }}</ion-label
           >
           <ion-label

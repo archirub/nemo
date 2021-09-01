@@ -136,7 +136,7 @@ export class GlobalStateManagementService {
         this.chatboardPicturesStore.activateStore(this.chatboardStore.allChats$),
       ]);
 
-    // temporarily commented out -  to not fetch a swipe stack every time
+    // TEMPORARILY commented out -  to not fetch a swipe stack every time
     // if (page === "home") return this.swipeStackStore.activateStore();
 
     if (page === "own-profile" || page === "settings")
@@ -175,7 +175,8 @@ export class GlobalStateManagementService {
   }
 
   private hasDocumentsRoutine(): Observable<any> {
-    return concat(this.resetAppState(), this.initMainStores()).pipe(
+    return this.initMainStores().pipe(
+      // return concat(this.resetAppState(), this.initMainStores()).pipe(
       concatMap(() => {
         // makes it such that we only navigate to home if the user is not in main
         // such that it doesn't infringe on the user experience
