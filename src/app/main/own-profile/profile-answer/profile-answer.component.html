@@ -12,7 +12,7 @@
         id="replace"
         interface="action-sheet"
         placeholder="Choose a question"
-        (ngModelChange)="onQuestionChange($event)"
+        (ionChange)="onQuestionChange($event)"
       >
         <ion-select-option *ngFor="let q of questionsNotPicked" [value]="q">
           {{ q }}

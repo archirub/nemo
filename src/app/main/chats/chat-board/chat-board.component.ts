@@ -26,6 +26,7 @@ import {
 import { forkJoin, fromEvent, Observable, of, Subject, Subscription } from "rxjs";
 import { concatMap, exhaustMap, map, tap } from "rxjs/operators";
 import { ChatboardStore, OtherProfilesStore } from "@stores/index";
+import { FadeOutAnimation } from "@animations/fade-out.animation";
 
 @Component({
   selector: "app-chat-board",
@@ -36,6 +37,8 @@ export class ChatBoardComponent implements OnInit {
   chatboardPictures$: Observable<pictureHolder>;
   picsLoaded$: Subscription;
   picsLoaded: boolean = false;
+
+  fadeOutAnimation;
 
   @Output() loaded = new EventEmitter();
 
@@ -141,6 +144,35 @@ export class ChatBoardComponent implements OnInit {
     let month = date.getMonth();
     let day = date.getDay();
     return day.toString() + "/" + month.toString;
+  }
+
+  deleteChat(event, chat: Chat) {
+    console.log('deleting chat with', chat.recipient.name);
+
+    let target: HTMLElement = event.target; //Get list item where click occurred
+
+    while (!target.classList.contains('parent')) { //Checks parent until it finds full list box
+      target = target.parentElement;
+    }
+
+    //Gets index of chat
+    let index = this.chats.findIndex(c => c === chat);
+    let name = chat.recipient.name;
+
+    //Fades out list element
+    this.fadeOutAnimation = FadeOutAnimation(target, 300);
+    this.fadeOutAnimation.play()
+
+    //Gets rid of chat from local DOM
+    setTimeout(() => {
+      this.chats.splice(index, 1);
+
+      /** HERE IS WHERE YOU WANT TO SEND DELETION TO BACKEND
+       * I SUGGEST BRINGING UP A POPUP INCLUDING THE CHAT RECIPIENT NAME
+       * NAME IS STORED IN A VARIABLE IN FUNCTION IF NECESSARY
+       * TIMEOUT IS FOR ANIMATION TO PLAY
+       **/
+    }, 400);
   }
 
   scroll(speed) {

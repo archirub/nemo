@@ -64,9 +64,10 @@ export class ProfileAnswerComponent {
     this.questionAndAnswerChange.emit(this.questionAndAnswer);
   }
 
-  onQuestionChange(value) {
-    this.questionAndAnswer.question = value;
+  onQuestionChange(event) {
+    this.questionAndAnswer.question = event.target.value;
     this.questionAndAnswerChange.emit(this.questionAndAnswer);
+    this.hideInput();
   }
 
   /**
@@ -87,6 +88,14 @@ export class ProfileAnswerComponent {
     this.qHead.nativeElement.style.display = "none"; //Hide text
     this.qInput.nativeElement.style.display = "flex"; //Show question select
     this.qSelect.open(); //Open ionSelect immediately
+  }
+
+  /**
+   * Hides select once again so question is just text
+   **/
+  hideInput() {
+    this.qHead.nativeElement.style.display = "flex";
+    this.qInput.nativeElement.style.display = "none";
   }
 
   /**

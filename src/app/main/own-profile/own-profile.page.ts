@@ -209,7 +209,9 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
   }
 
   goToSettings() {
-    this.router.navigateByUrl("/main/settings");
+    if (!this.editingInProgress.value) { //Just check the observable (BehaviorSubject)
+      this.router.navigateByUrl("/main/settings");
+    };
   }
 
   displayExit(section) {

@@ -8,7 +8,6 @@ ion-content {
 ion-item {
   --inner-border-width: 0px;
   border-bottom: solid 1px var(--ion-color-primary-tint);
-  margin: 0 15px;
   --background: rgb(255, 255, 255);
   --min-height: 13vh;
   --background-activated: var(--ion-color-primary-tint);
@@ -59,6 +58,12 @@ ion-row {
     --color: var(--ion-color-primary-shade);
     max-height: 13vh;
   }
+}
+
+ion-item-options {
+  --inner-border-width: 0;
+  border: 0px;
+  height: 99%;
 }
 
 #notifications-badge {
