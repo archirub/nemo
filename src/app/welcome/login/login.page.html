@@ -40,22 +40,27 @@
         ></ion-col>
       </ion-row>
 
-      <ion-row>
-        <ion-col size="12">
-          <div class="scroll flexstart-col">
-            <div class="flexend-row">
-              <ion-button
-                expand="block"
-                fill="clear"
-                shape="round"
-                type="submit"
-                [disabled]="(loginForm.statusChanges | async) !== 'VALID'"
-                >Enter Nemo</ion-button
-              >
-            </div>
-          </div>
-        </ion-col>
-      </ion-row>
+      <div class="flexstart-col">
+        <div class="flexend-row">
+          <ion-button
+            expand="block"
+            fill="clear"
+            shape="round"
+            type="submit"
+            [disabled]="(loginForm.statusChanges | async) !== 'VALID'"
+            >Enter Nemo</ion-button
+          >
+        </div>
+        <div class="flexend-row">
+          <ion-button
+            expand="block"
+            fill="clear"
+            shape="round"
+            (click)="returnToLanding()"
+            >Go back</ion-button
+          >
+        </div>
+      </div>
     </ion-grid>
   </form>
 </ion-content>

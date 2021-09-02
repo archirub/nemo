@@ -62,7 +62,7 @@ interests-slides {
   margin-top: 10vh;
 }
 
-#sentEmail {
+#sentEmail, #wait {
   margin: 0 auto;
   text-align: center;
   color: var(--ion-color-primary);
@@ -99,7 +99,6 @@ interests-slides {
   position: absolute;
 
   &-icon {
-    display: none;
     border: solid 3px var(--ion-color-primary-tint);
     border-radius: 50%;
     color: var(--ion-color-primary);
@@ -108,12 +107,17 @@ interests-slides {
   }
 
   &-dot {
-    //display: none;
+    display: none;
     padding: 2.5vh 2.5vw;
     font-size: 1.5vh;
     color: var(--ion-color-light-shade);
   }
 }
+
+#tick {
+  display: block;
+}
+
 
 ion-item {
   position: absolute;

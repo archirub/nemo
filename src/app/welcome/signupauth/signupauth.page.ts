@@ -34,6 +34,8 @@ export class SignupauthPage implements OnInit {
   slidesLeft: number;
   flyingLetterAnimation;
 
+  prevReqTime: number = undefined;
+
   validatorChecks: object;
 
   awaitingConfirm: boolean = true;
@@ -59,7 +61,10 @@ export class SignupauthPage implements OnInit {
         Validators.email,
         Validators.pattern("[a-zA-Z]*@[a-zA-Z]*.ac.uk"),
       ]),
-      password: new FormControl("", [Validators.required, Validators.min(8)]),
+      password: new FormControl("", [
+        Validators.required, 
+        Validators.minLength(8)
+      ]),
     });
   }
 
@@ -96,13 +101,20 @@ export class SignupauthPage implements OnInit {
     };
   }
 
+  returnToLanding() {
+    this.router.navigateByUrl("/welcome");
+  }
+
+  moveToOptional() {
+    this.router.navigateByUrl("/welcome/signuprequired");
+  }
+
   public async onSubmitAuthData(): Promise<void> {
     await this.requestAccountCreation()
       .pipe(
         filter((val) => !!val),
         switchMap(() =>
           concat(
-            this.unlockAndSlideTo(1),
             this.sendEmailVerification("sent"),
             this.listenToEmailVerification()
           )
@@ -125,11 +137,51 @@ export class SignupauthPage implements OnInit {
     );
   }
 
-  private async sendEmailVerificationAnimation() {}
+  private async sendEmailVerificationAnimation() {
+    //N/A
+  }
 
-  private async resendEmailVerificationAnimation() {}
+  private async resendEmailVerificationAnimation() {
+    const waitEl = document.getElementById('wait');
 
-  private async verifiedEmailVerificationAnimation() {}
+    if (!this.prevReqTime) {
+      this.prevReqTime = new Date().getTime();
+      console.log("First resend request.");
+      this.resendConfirmationUI();
+      this.resendEmailVerification();
+
+    } else {
+      let timeWaited = new Date().getTime() - this.prevReqTime;
+
+      if (timeWaited < 20000) { //20 seconds between requests
+
+        let timeLeft = Math.ceil(20 - (timeWaited/1000))
+        if (timeLeft > 1) {
+          waitEl.innerHTML = `Please wait ${timeLeft} seconds to send another conformation email.`
+        } else {
+          waitEl.innerHTML = `Please wait ${timeLeft} second to send another conformation email.`
+        }
+
+        if (waitEl.style.display != "block") {
+          waitEl.style.display = "block";
+        }
+        setTimeout(() => {
+          waitEl.style.display = "none";
+        }, 1400);
+
+        console.log("Too early to resend request.");
+
+      } else {
+        this.prevReqTime = new Date().getTime();
+        this.resendConfirmationUI();
+        this.resendEmailVerification();
+      };
+    };
+  }
+
+  private async verifiedEmailVerificationAnimation() {
+    this.updatePager();
+  }
 
   /**
    * Checks whether the field on the current slide has valid value, allows continuing if true, input
@@ -137,64 +189,59 @@ export class SignupauthPage implements OnInit {
    * If on the final validator, password, submits form instead of sliding to next slide
    * THIS SHOULD BE USED ON THE NEXT SLIDE BUTTONS
    **/
-  // validateAndSlide(entry) {
-  //   var validity = this.authForm.get(entry).valid; // Check validator
+  validateAndSlide(entry) {
+    var validity = this.authForm.get(entry).valid; // Check validator
 
-  //   if (validity === true) {
-  //     Object.values(this.validatorChecks).forEach(
-  //       (element) => (element.style.display = "none")
-  //     ); // Hide all "invalid" UI
+    if (validity === true) {
+      Object.values(this.validatorChecks).forEach(
+        (element) => (element.style.display = "none")
+      ); // Hide all "invalid" UI
 
-  //     if (entry === "password") {
-  //       // If password valid, submit form
-  //       this.requestAccountCreation();
-  //     } else {
-  //       this.unlockAndSlideToNext(); // If others valid, slide next
-  //     }
-  //   } else {
-  //     this.validatorChecks[entry].style.display = "flex"; // Show "invalid" UI for invalid validator
-  //     console.log("Not valid, don't slide");
-  //   }
-  // }
+      if (entry === "password") {
+        // If password valid, submit form
+        console.log("Submitting auth data...");
+        this.onSubmitAuthData();
+      };
+
+      this.unlockAndSlideToNext(); // If others valid, slide next
+
+    } else {
+      this.validatorChecks[entry].style.display = "flex"; // Show "invalid" UI for invalid validator
+      console.log("Not valid, don't slide");
+    }
+   }
 
   async updatePager() {
     var email = document.getElementById("email");
     var hourglass = document.getElementById("hourglass");
     var pass = document.getElementById("pass");
-    var tick = document.getElementById("tick");
 
+    //Map to use slide index to get correct pager icon
     var map = {
       0: email,
-      1: {
-        true: hourglass,
-        false: tick,
-      },
-      2: pass,
+      1: pass,
+      2: hourglass
     };
 
     for (let i = 0; i < 3; i++) {
-      if (i != 1) {
-        map[i].style.display = "none";
-      } else {
-        Object.values(map[i]).forEach((element) => (element.style.display = "none"));
-      }
-    }
+      map[i].style.display = "none"; //Display none of the pager icons
+    };
 
+    //Hide all pager dots
     var dots: HTMLCollectionOf<any> = document.getElementsByClassName("pager-dot");
-    Array.from(dots).forEach((element) => (element.style.display = "none")); //ignore this error, it works fine
+    Array.from(dots).forEach((element) => (element.style.display = "none")); 
 
+    //Get current slide, calculate slides left
     var l = await this.slides.length();
     var current = await this.slides.getActiveIndex();
     this.slidesLeft = l - current - 1;
 
+    //Show only the necessary number of pager dots equal to this.slidesLeft
     var slice = Array.from(dots).slice(0, this.slidesLeft);
-    slice.forEach((element) => (element.style.display = "block")); //ignore this error, it works fine
+    slice.forEach((element) => (element.style.display = "block"));
 
-    if (current != 1) {
-      map[current].style.display = "block";
-    } else {
-      map[current][`${this.awaitingConfirm}`].style.display = "block";
-    }
+    //Display pager icon for current slide
+    map[current].style.display = "block";
   }
 
   async unlockAndSlideToNext() {
@@ -242,8 +289,7 @@ export class SignupauthPage implements OnInit {
   // for some reason (especially if it is slow connection, retry, and then show error message which says error occured try again later).
   // if it has been fetched and there are documents, then just redirect to app etc.
 
-  async resendConfirmation() {
-    //Resend email here
+  async resendConfirmationUI() {
 
     var text = document.getElementById("sentEmail");
 
@@ -254,17 +300,6 @@ export class SignupauthPage implements OnInit {
     setTimeout(() => {
       text.style.display = "none";
     }, 2200);
-    setTimeout(() => {
-      this.awaitingConfirm = false;
-      this.confirmed = true;
-      this.updatePager();
-    }, 4200);
-  }
-
-  onConfirmation() {
-    //Change UI by triggering this function on confirmation
-    this.awaitingConfirm = false;
-    this.confirmed = true;
   }
 
   private listenToEmailVerification(
@@ -342,6 +377,6 @@ export class SignupauthPage implements OnInit {
   }
 
   ngOnDestroy() {
-    this.signupSub.unsubscribe();
+    //this.signupSub.unsubscribe();
   }
 }

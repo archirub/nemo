@@ -1,8 +1,22 @@
 <div class="pager">
   <ion-icon id="email" class="pager-icon" name="at-outline"></ion-icon>
-  <ion-icon id="hourglass" class="pager-icon" name="hourglass-outline"></ion-icon>
-  <ion-icon id="tick" class="pager-icon" name="checkmark-outline"></ion-icon>
   <ion-icon id="pass" class="pager-icon" name="ellipsis-horizontal"></ion-icon>
+  
+  <ion-icon 
+  id="hourglass" 
+  class="pager-icon" 
+  name="hourglass-outline"
+  *ngIf="(emailVerificationState.value === 'not-sent' 
+  || emailVerificationState.value === 'sent' 
+  || emailVerificationState.value === 'resent')"></ion-icon>
+  
+  <ion-icon 
+  id="tick" 
+  class="pager-icon" 
+  name="checkmark-outline"
+  [style.display]="block"
+  *ngIf="emailVerificationState.value === 'verified'"></ion-icon>
+  
   <ion-icon class="pager-dot" name="ellipse"></ion-icon>
   <ion-icon class="pager-dot" name="ellipse"></ion-icon>
 </div>
@@ -43,8 +57,20 @@
             <ion-icon name="alert-circle-outline"></ion-icon>
             <p>Please enter a valid email address</p>
           </div>
-        </div>
 
+          <div class="buttons">
+            <ion-button class="next-slide scroll" (click)="returnToLanding()">
+              <ion-icon name="chevron-back-outline"></ion-icon>
+            </ion-button>
+
+            <ion-button class="next-slide scroll" (click)="validateAndSlide('email')">
+              <ion-icon name="chevron-forward-outline"></ion-icon>
+            </ion-button>
+          </div>
+        </div>
+      </ion-slide>
+
+      <ion-slide>
         <div class="personal-pref">
           <div class="question">
             <ion-label position="stacked"> Choose a password for your account </ion-label>
@@ -57,7 +83,7 @@
           </div>
 
           <div class="flexstart-col">
-            <p class="tip">Your password must be at least 10 characters long.</p>
+            <p class="tip">Your password must be at least 8 characters long.</p>
           </div>
 
           <div id="passCheck">
@@ -66,7 +92,11 @@
           </div>
 
           <div class="buttons">
-            <ion-button class="next-slide scroll" (click)="onClick()">
+            <ion-button class="next-slide scroll" (click)="unlockAndSlideToPrev()">
+              <ion-icon name="chevron-back-outline"></ion-icon>
+            </ion-button>
+
+            <ion-button class="next-slide scroll" (click)="validateAndSlide('password')">
               <ion-icon name="chevron-forward-outline"></ion-icon>
             </ion-button>
           </div>
@@ -75,42 +105,41 @@
 
       <ion-slide>
         <div class="personal-pref">
-          <div class="question" *ngIf="this.awaitingConfirm">
+          <div class="question" *ngIf="emailVerificationState.value === 'not-sent'">
+            <ion-label position="stacked"> We are sending you an email </ion-label>
+          </div>
+
+          <div class="question" *ngIf="emailVerificationState.value === ('sent' || 'resent')">
             <ion-label position="stacked"> An email has been sent </ion-label>
           </div>
 
-          <h2 style="margin-top: 20vh" *ngIf="this.awaitingConfirm">
+          <h2 style="margin-top: 20vh" *ngIf="emailVerificationState.value === ('sent' || 'resent')">
             Click
             <a (click)="resendEmailVerification()">here</a>
             if you would like us to send another confirmation email.
           </h2>
 
-          <div class="buttons flexstart" *ngIf="this.awaitingConfirm">
-            <ion-button class="next-slide scroll" (click)="unlockAndSlideToPrev()">
-              <ion-icon name="chevron-back-outline"></ion-icon>
-            </ion-button>
-          </div>
-
           <ion-icon
             id="letter"
             #email
             name="mail-outline"
-            *ngIf="this.awaitingConfirm"
           ></ion-icon>
-          <p id="sentEmail" *ngIf="this.awaitingConfirm">Email sent!</p>
+
+          <p id="sentEmail" *ngIf="emailVerificationState.value === ('sent' || 'resent')">Email sent!</p>
+          <p id="wait">Please wait seconds to send another conformation email.</p>
 
           <!--SWITCHES TO BELOW ONCE EMAIL IS CONFIRMED-->
 
-          <div class="question" *ngIf="this.confirmed">
+          <div class="question" *ngIf="emailVerificationState.value === 'verified'">
             <ion-label position="stacked"> Email confirmed! </ion-label>
           </div>
 
-          <h2 style="margin-top: 20vh" *ngIf="this.confirmed">
+          <h2 style="margin-top: 20vh" *ngIf="emailVerificationState.value === 'verified'">
             Click the button to go to the next slide and continue your sign up.
           </h2>
 
-          <div class="buttons first" *ngIf="this.confirmed">
-            <ion-button class="next-slide scroll" (click)="unlockAndSlideToNext()">
+          <div class="buttons first" *ngIf="emailVerificationState.value === 'verified'">
+            <ion-button class="next-slide scroll" (click)="moveToOptional()">
               <ion-icon name="chevron-forward-outline"></ion-icon>
             </ion-button>
           </div>

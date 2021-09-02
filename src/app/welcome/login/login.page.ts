@@ -7,6 +7,7 @@ import { AngularFireAuth } from "@angular/fire/auth";
 import { FirebaseAuthService } from "@services/firebase-auth/firebase-auth.service";
 
 import { FishSwimAnimation } from "@animations/index";
+import { Router } from "@angular/router";
 
 @Component({
   selector: "app-login",
@@ -29,7 +30,8 @@ export class LoginPage {
   constructor(
     private alertCtrl: AlertController,
     private afAuth: AngularFireAuth,
-    private authService: FirebaseAuthService
+    private authService: FirebaseAuthService,
+    private router: Router
   ) {}
 
   ionViewDidEnter() {
@@ -82,5 +84,9 @@ export class LoginPage {
         buttons: ["Okay"],
       })
       .then((alertEl) => alertEl.present());
+  }
+
+  returnToLanding() {
+    this.router.navigateByUrl("/welcome");
   }
 }
