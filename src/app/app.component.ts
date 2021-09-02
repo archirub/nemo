@@ -6,8 +6,8 @@ import { Plugins, Capacitor } from "@capacitor/core";
 import { ReplaySubject, Subscription } from "rxjs";
 
 import { GlobalStateManagementService } from "@services/global-state-management/global-state-management.service";
-import { Router } from "@angular/router";
 import { routerInitListenerService } from "@services/global-state-management/initial-url.service";
+import { ConnectionService } from "@services/connection/connection.service";
 
 @Component({
   selector: "app-root",
@@ -21,13 +21,24 @@ export class AppComponent implements OnDestroy, OnInit {
     private platform: Platform,
     private afAuth: AngularFireAuth,
     private GlobalStateManagement: GlobalStateManagementService,
-    private routerInitListener: routerInitListenerService // don't remove, used in template
+    private routerInitListener: routerInitListenerService, // don't remove, used in template
+    private connectionService: ConnectionService
   ) {
     this.initializeApp();
   }
 
   ngOnInit() {
     this.afAuth.authState.subscribe((a) => console.log("change in authstate: ", a));
+    // this.connectionService
+    //   .monitor()
+    //   .subscribe((a) => console.log("is connection up ? " + a));
+    setTimeout(
+      () =>
+        this.connectionService
+          .monitor()
+          .subscribe((a) => console.log("is connection up ! " + a)),
+      3000
+    );
   }
   ngOnDestroy(): void {
     this.appGlobalStateManagementSub?.unsubscribe();

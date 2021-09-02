@@ -16,14 +16,20 @@ import {
   merge,
   Observable,
   of,
+  timer,
 } from "rxjs";
 import {
+  catchError,
   concatMap,
+  delayWhen,
   filter,
   first,
   last,
   map,
+  delay,
   mergeMap,
+  retry,
+  retryWhen,
   startWith,
   switchMap,
   take,
@@ -45,6 +51,8 @@ import { FirebaseAuthService } from "@services/firebase-auth/firebase-auth.servi
 import { routerInitListenerService } from "./initial-url.service";
 
 import firebase from "firebase";
+import { SignupAuthMethodSharer } from "../../../welcome/signupauth/signupauth-method-sharer.service";
+import { ConnectionService } from "@services/connection/connection.service";
 
 type pageName =
   | "chats"
@@ -74,6 +82,9 @@ export class GlobalStateManagementService {
     private firebaseAuthService: FirebaseAuthService,
     private routerInitListener: routerInitListenerService,
     private emptyStoresService: EmptyStoresService,
+    private connectionService: ConnectionService,
+
+    private signupauthMethodSharer: SignupAuthMethodSharer,
 
     private userStore: CurrentUserStore,
     private chatboardStore: ChatboardStore,
@@ -81,7 +92,7 @@ export class GlobalStateManagementService {
     // private searchCriteriaStore: SearchCriteriaStore,
     // private otherProfilesStore: OtherProfilesStore,
     // private swipeOutcomeStore: SwipeOutcomeStore,
-    // private swipeStackStore: SwipeStackStore,
+    private swipeStackStore: SwipeStackStore,
     // private settingsStore: SettingsStore,
     private OwnPicturesStore: OwnPicturesStore
   ) {
@@ -90,7 +101,9 @@ export class GlobalStateManagementService {
   }
 
   activate(): Observable<any> {
-    return merge(this.authStateManagement(), this.storesManagement());
+    return this.connectionService
+      .emitWhenConnected()
+      .pipe(switchMap(() => merge(this.authStateManagement(), this.storesManagement())));
   }
 
   private authStateManagement() {
@@ -136,7 +149,7 @@ export class GlobalStateManagementService {
         this.chatboardPicturesStore.activateStore(this.chatboardStore.allChats$),
       ]);
 
-    // TEMPORARILY commented out -  to not fetch a swipe stack every time
+    // COMMENTED OUT FOR DEVELOPMENT ONLY -  to not fetch a swipe stack every time
     // if (page === "home") return this.swipeStackStore.activateStore();
 
     if (page === "own-profile" || page === "settings")
@@ -153,13 +166,22 @@ export class GlobalStateManagementService {
   }
 
   private somebodyAuthenticatedRoutine(user: firebase.User) {
-    return this.isUserSigningUp().pipe(
-      concatMap((userSigningUp) => {
-        if (userSigningUp) return of(); // if user is signing up, then do nothing
+    return forkJoin([this.isUserEmailVerified(user), this.isUserSigningUp()]).pipe(
+      concatMap(([emailIsVerified, userIsSigningUp]) => {
+        // COMMENTED OUT FOR DEVELOPMENT ONLY
+        // if user hasn't verified his email yet, go to email verification
+        // if (!emailIsVerified) return this.requiresEmailVerificationRoutine();
+
+        // if user is signing up, then do nothing
+        if (userIsSigningUp) return of();
+
         // otherwise, continue the procedure
         return this.doesProfileDocExist(user.uid).pipe(
           concatMap((profileDocExists) => {
-            if (!profileDocExists) return this.noDocumentsRoutine(user);
+            // "null" implies there has been an error and we couldn't get an answer on whether
+            // it exists. Hence take no action
+            if (profileDocExists === null) return of();
+            if (profileDocExists === false) return this.noDocumentsRoutine(user);
             return this.hasDocumentsRoutine();
           })
         );
@@ -167,11 +189,33 @@ export class GlobalStateManagementService {
     );
   }
 
+  private requiresEmailVerificationRoutine(): Observable<any> {
+    return of(this.router.url).pipe(
+      concatMap((url) =>
+        url !== "/welcome/signupauth"
+          ? this.router.navigateByUrl("/welcome/signupauth")
+          : of()
+      ),
+      concatMap(() =>
+        !!this.signupauthMethodSharer.goStraightToEmailVerification
+          ? this.signupauthMethodSharer.goStraightToEmailVerification()
+          : of()
+      )
+    );
+  }
+
   /**
    * Procedure followed when there is no one authenticated
    */
   private nobodyAuthenticatedRoutine(): Observable<any> {
-    return concat(this.resetAppState(), this.router.navigateByUrl("/welcome"));
+    return of(this.router.url).pipe(
+      concatMap((url) => {
+        if (["/welcome/login", "/welcome/signupauth", "/welcome"].includes(url))
+          return of(); // do nothing of user is in login, signupauth or welcome page,
+        // as no auth is required for these three pages
+        return concat(this.resetAppState(), this.router.navigateByUrl("/welcome"));
+      })
+    );
   }
 
   private hasDocumentsRoutine(): Observable<any> {
@@ -236,6 +280,10 @@ export class GlobalStateManagementService {
     );
   }
 
+  private isUserEmailVerified(user: firebase.User): Observable<boolean> {
+    return of(user).pipe(map((user) => !!user?.emailVerified));
+  }
+
   /**
    * This is a pretty poor check to see if the user is in the process is signing up, but seems to work
    * okay!
@@ -261,14 +309,21 @@ export class GlobalStateManagementService {
     );
   }
 
-  private doesProfileDocExist(uid: string): Observable<boolean> {
-    return this.firestore
-      .doc("profiles/" + uid)
-      .valueChanges()
-      .pipe(
-        first(),
-        map((doc) => !!doc)
-      );
+  /**
+   * If it returns null, then this means we couldn't get an answer on
+   * whether the profile doc exists due to an error, most likely a connectivity error.
+   * Hence that must be handled properly where this is used (instead of counting it as false)
+   */
+  private doesProfileDocExist(uid: string): Observable<boolean | null> {
+    return this.connectionService.emitWhenConnected().pipe(
+      switchMap(() => this.firestore.collection("profiles").doc(uid).get()),
+      first(),
+      map((doc) => doc.exists),
+      // arbitrary, just so that I don't put infinity, but theoretically it shouldn't
+      // require any limit nor any retry at all in the first place.
+      // It is just in case you lose connectivity exactly after having regained it
+      retry(3)
+    );
   }
 
   private initMainStores() {

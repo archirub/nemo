@@ -12,7 +12,7 @@ import {
 import { BehaviorSubject, from, Observable, of, Subscription } from "rxjs";
 import { User, Profile } from "@classes/index";
 import { CurrentUserStore } from "@stores/index";
-import { AddPhotoComponent, ProfileCardComponent } from "@components/index";
+import { ProfileCardComponent } from "@components/index";
 import { ProfileCourseComponent } from "./profile-course/profile-course.component";
 import { IonTextarea, ModalController } from "@ionic/angular";
 import { Router } from "@angular/router";
@@ -44,7 +44,7 @@ import {
   styleUrls: ["./own-profile.page.scss"],
 })
 export class OwnProfilePage implements OnInit, AfterViewInit {
-  @ViewChild(AddPhotoComponent) photo: AddPhotoComponent;
+  // @ViewChild(AddPhotoComponent) photo: AddPhotoComponent;
   @ViewChild("bioInput") bio: IonTextarea;
   @ViewChild("bioClose", { read: ElementRef }) bioClose: ElementRef;
   @ViewChild("depts") depts: ProfileCourseComponent;
@@ -102,6 +102,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
   intLeaveAnimation;
 
   ngOnInit() {
+    this.ownPicturesService.urls$.subscribe((a) => console.log("own urls", a));
     this.currentUserStore.user$
       .pipe(map((user) => this.updateEditableFields(user)))
       .subscribe();
@@ -210,9 +211,10 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
   }
 
   goToSettings() {
-    if (!this.editingInProgress.value) { //Just check the observable (BehaviorSubject)
+    if (!this.editingInProgress.value) {
+      //Just check the observable (BehaviorSubject)
       this.router.navigateByUrl("/main/settings");
-    };
+    }
   }
 
   displayExit(section) {
@@ -305,6 +307,13 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
 
   get questionsCount(): number {
     return this.editableFields?.questions?.length ?? 0;
+  }
+
+  async onPicturePicked($event: { photoUrl: string; index: number }) {
+    console.log("picture picked", $event);
+    await this.ownPicturesService
+      .addOrUpdatePicture($event.photoUrl, $event.index)
+      .toPromise();
   }
 
   ngOnDestroy() {

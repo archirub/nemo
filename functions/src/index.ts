@@ -17,3 +17,4 @@ export * from "./update-duplicate-data/index";
 export * from "./create-account";
 export * from "./profile-editing-by-user";
 export * from "./delete-account";
+export * from "./unverified-account-deletion-scheduler";
