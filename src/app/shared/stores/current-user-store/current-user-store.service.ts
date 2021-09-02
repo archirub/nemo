@@ -17,7 +17,15 @@ import {
 } from "@interfaces/index";
 import { FormatService } from "@services/format/format.service";
 import { SearchCriteriaStore } from "../search-criteria-store/search-criteria-store.service";
-import { catchError, map, share, switchMap, take, withLatestFrom } from "rxjs/operators";
+import {
+  catchError,
+  map,
+  share,
+  switchMap,
+  take,
+  tap,
+  withLatestFrom,
+} from "rxjs/operators";
 
 @Injectable({
   providedIn: "root",
@@ -76,7 +84,7 @@ export class CurrentUserStore {
         const profileParts$ = [
           this.fetchProfile(user.uid),
           this.fetchPrivateProfile(user.uid),
-          this.fetchMatchDataInfo(user.uid),
+          this.fetchMatchDataInfo(),
         ] as [
           Observable<Profile>,
           Observable<privateProfileFromDatabase>,
@@ -146,6 +154,7 @@ export class CurrentUserStore {
           });
       }),
       share()
+      // tap(() => console.log("activating current user store"))
     );
   }
 
@@ -216,7 +225,7 @@ export class CurrentUserStore {
   /**
    * Fetches data relevant to user object creation in matchData document
    */
-  private fetchMatchDataInfo(uid: string): Observable<userInfoFromMatchData | null> {
+  private fetchMatchDataInfo(): Observable<userInfoFromMatchData | null> {
     return this.afFunctions
       .httpsCallable("getMatchDataUserInfo")({})
       .pipe(
@@ -230,5 +239,24 @@ export class CurrentUserStore {
           }
         })
       );
+  }
+
+  updatePictureCount(newCount: number): Observable<any> {
+    return this.afAuth.user.pipe(
+      withLatestFrom(this.user$),
+      take(1),
+      switchMap(([authUser, storeUser]) => {
+        if (!authUser) return of();
+
+        storeUser.pictureCount = newCount;
+
+        return from(
+          this.fs
+            .collection("profiles")
+            .doc(authUser.uid)
+            .update({ pictureCount: newCount })
+        ).pipe(map(() => this.user.next(storeUser)));
+      })
+    );
   }
 }

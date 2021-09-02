@@ -6,6 +6,7 @@ import { FlyingLetterAnimation } from "@animations/letter.animation";
 import { AuthResponseData } from "@interfaces/auth-response.model";
 import { AlertController, IonIcon, IonSlides } from "@ionic/angular";
 import { SignupService } from "@services/signup/signup.service";
+import { SignupAuthMethodSharer } from "./signupauth-method-sharer.service";
 import { BehaviorSubject, concat, from, Observable, of, Subscription, timer } from "rxjs";
 import {
   auditTime,
@@ -45,7 +46,11 @@ export class SignupauthPage implements OnInit {
   public emailVerificationState$ = this.emailVerificationState.asObservable().pipe(
     distinctUntilChanged((prev, curr) => {
       // since there can be multiple resend of the email verification, we don't want to filter these out
-      if (prev === "resent" && curr === "resent") return false;
+      if (
+        (prev === "resent" && curr === "resent") ||
+        (prev === "sent" && curr === "sent")
+      )
+        return false;
       // however, any repeating "sent", "verified" or "not-sent" in a row will be filtered out
       else return prev === curr;
     })
@@ -72,12 +77,17 @@ export class SignupauthPage implements OnInit {
     private router: Router,
     private signup: SignupService,
     private afAuth: AngularFireAuth,
-    private formBuilder: FormBuilder
+    private SignupAuthMethodSharer: SignupAuthMethodSharer
   ) {
     this.authForm = this.emptyAuthForm;
   }
 
   ngOnInit() {
+    // for use in global-state-management service
+    this.SignupAuthMethodSharer.defineGoStraightToEmailVerification(
+      this.goStraightToEmailVerification.bind(this)
+    );
+
     this.emailVerificationAnimationLogic().subscribe();
 
     this.emailVerificationState$.subscribe((a) =>
@@ -121,6 +131,7 @@ export class SignupauthPage implements OnInit {
         if (state === "sent") return this.sendEmailVerificationAnimation();
         if (state === "resent") return this.resendEmailVerificationAnimation();
         if (state === "verified") return this.verifiedEmailVerificationAnimation();
+        return of();
       })
     );
   }
@@ -339,6 +350,34 @@ export class SignupauthPage implements OnInit {
     });
 
     return alert.present();
+  }
+
+  /**
+   * Meant to be used only in the global-state-management service,
+   * whenever a new user object enters the Firebase auth state but doesn't have a verified email.
+   * This is meant to work in sync with the "unverifiedAccountDeletionScheduler" cloud function
+   * which will delete any account that isn't verified after a certain threshold of time.
+   * This better guarantees a user that is found to be authed but isn't verified was indeed
+   * in the middle of signing up
+   */
+  public async goStraightToEmailVerification(): Promise<void> {
+    const user = await this.afAuth.currentUser;
+    console.log("user", user);
+    if (!user) return;
+    if (this.router.url !== "/welcome/signupauth") {
+      const alert = await this.alertCtrl.create({
+        header: "Email Verification Required",
+        message: `
+        We have detected that your account doesn't have its email verified yet.
+        We will now redirect you to the email verification page for you to finish the procedure.
+        `,
+        buttons: ["Okay"],
+      });
+      alert.onDidDismiss().then(() => this.router.navigateByUrl("/welcome/signupauth"));
+      return alert.present();
+    }
+    await this.unlockAndSlideTo(1);
+    await this.sendEmailVerification("sent").toPromise();
   }
 
   ngOnDestroy() {

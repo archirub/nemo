@@ -13,6 +13,7 @@ import {
   distinctUntilChanged,
   shareReplay,
   share,
+  tap,
 } from "rxjs/operators";
 import { chatFromDatabase, messageFromDatabase } from "@interfaces/index";
 
@@ -74,7 +75,10 @@ export class ChatboardStore {
       this.activateRecentMessageListening(),
       this.activateRecentMessagePreprocessing(),
       this.activateMsgAndChatDocumentsProcessing(),
-    ]).pipe(share());
+    ]).pipe(
+      share()
+      // tap(() => console.log("activating chatboard store"))
+    );
   }
 
   public resetStore() {

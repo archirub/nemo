@@ -49,10 +49,10 @@
         <div class="container">
           <h1>{{userProfile?.firstName}}, {{userProfile?.dateOfBirth | age}}</h1>
 
-          <div 
-          class="slide-button" 
-          (click)="goToSettings()"
-          [style.color]="(editingInProgress$ | async) 
+          <div
+            class="slide-button"
+            (click)="goToSettings()"
+            [style.color]="(editingInProgress$ | async) 
             ? 'var(--ion-color-light-shade)'
             : 'var(--ion-color-light-contrast)'"
           >
@@ -63,10 +63,12 @@
 
           <h2>My photos</h2>
           <div class="photos">
-            <app-profile-edit-photo
+            <add-photo
               *ngFor="let pics of ['','','','','','']; index as i"
-              [url]="(ownPicturesService?.urls$ | async)[i]"
-            ></app-profile-edit-photo>
+              (onPhotoPicked)="onPicturePicked($event)"
+              [photoIndex]="i"
+              [photoDisplayedUrl]="(ownPicturesService?.urls$ | async)[i]"
+            ></add-photo>
           </div>
           <h2>My bio</h2>
           <div>
@@ -85,23 +87,23 @@
             </div>
           </div>
 
-        <h2>My answers</h2>
-        <profile-answer
-          #answers
-          *ngFor="let q of editableFields.questions; let i = index"
-          [(questionAndAnswer)]="editableFields.questions[i]"
-          (questionAndAnswerChange)="editingTriggered()"
-          [questionsNotPicked]="questionsNotPicked"
-        ></profile-answer>
+          <h2>My answers</h2>
+          <profile-answer
+            #answers
+            *ngFor="let q of editableFields.questions; let i = index"
+            [(questionAndAnswer)]="editableFields.questions[i]"
+            (questionAndAnswerChange)="editingTriggered()"
+            [questionsNotPicked]="questionsNotPicked"
+          ></profile-answer>
 
-        <ng-container *ngIf="this.answers">
-          <div *ngIf="!reachedMaxQuestionsCount" class="flexcenter">
-            <ion-icon
-              id="addQuestion"
-              name="add-circle"
-              (click)="addQuestion()"
-            ></ion-icon>
-          </div>
+          <ng-container *ngIf="this.answers">
+            <div *ngIf="!reachedMaxQuestionsCount" class="flexcenter">
+              <ion-icon
+                id="addQuestion"
+                name="add-circle"
+                (click)="addQuestion()"
+              ></ion-icon>
+            </div>
 
             <div class="noQuestions" *ngIf="reachedMaxQuestionsCount">
               <span>Sorry, there's no space for any more questions!</span>
@@ -148,10 +150,8 @@
             [listed]="false"
           ></interests-slides-->
           <div class="flexgrid">
-            <div 
-            class="interest"
-            *ngFor="let interest of editableFields?.interests">
-              <img [src]="getPicturePath(interest)"/>
+            <div class="interest" *ngFor="let interest of editableFields?.interests">
+              <img [src]="getPicturePath(interest)" />
             </div>
           </div>
 

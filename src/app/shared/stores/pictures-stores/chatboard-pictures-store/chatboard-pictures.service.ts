@@ -70,7 +70,10 @@ export class ChatboardPicturesStore {
     return combineLatest([
       this.activateHolderFillingLogic(chats),
       this.activateLoadingListener(chats),
-    ]).pipe(share());
+    ]).pipe(
+      // tap(() => console.log("activating chatboard pictures store")),
+      share()
+    );
   }
 
   public storeInLocal(

@@ -14,6 +14,7 @@ import {
   switchMap,
   take,
   tap,
+  withLatestFrom,
 } from "rxjs/operators";
 
 import {
@@ -22,6 +23,7 @@ import {
   urlToBase64,
 } from "../common-pictures-functions";
 import { CurrentUserStore } from "@stores/index";
+import { AngularFirestore } from "@angular/fire/firestore";
 
 interface ownPicturesStorage {
   [position: number]: string;
@@ -42,7 +44,8 @@ export class OwnPicturesStore {
   constructor(
     private afStorage: AngularFireStorage,
     private afAuth: AngularFireAuth,
-    private currentUser: CurrentUserStore
+    private currentUser: CurrentUserStore,
+    private firestore: AngularFirestore
   ) {}
 
   /**
@@ -52,7 +55,10 @@ export class OwnPicturesStore {
     return combineLatest([
       this.activateHolderFillingLogic(),
       this.activateLoadingListener(),
-    ]).pipe(share());
+    ]).pipe(
+      // tap(() => console.log("activating own pictures store")),
+      share()
+    );
   }
 
   activateHolderFillingLogic() {
@@ -168,6 +174,86 @@ export class OwnPicturesStore {
       map((user) => user?.pictureCount),
       filter((count) => !!count),
       distinctUntilChanged()
+    );
+  }
+
+  removePicture(index: number): Observable<void> {
+    return this.afAuth.user.pipe(
+      take(1),
+      switchMap(async (user) => {
+        if (!user) return;
+        const filePath = `profilePictures/${user.uid}/${index}`;
+        const ref = this.afStorage.ref(filePath);
+        return ref.delete();
+      }),
+      withLatestFrom(this.urls$),
+      switchMap(([_, urls]) => {
+        urls.splice(index, 1);
+
+        const newPictureCount = urls.filter(Boolean).length;
+
+        return this.currentUser
+          .updatePictureCount(newPictureCount)
+          .pipe(map(() => this.urls.next(urls)));
+      })
+    );
+  }
+
+  addOrUpdatePicture(photoUrl: string, index: number): Observable<void> {
+    return this.afAuth.user.pipe(
+      take(1),
+      switchMap(async (user) => {
+        if (!user) return;
+
+        const filePath = `profilePictures/${user.uid}/${index}`;
+        const ref = this.afStorage.ref(filePath);
+
+        return fetch(photoUrl)
+          .then((res) => res.blob())
+          .then((blob) => ref.put(blob));
+      }),
+      withLatestFrom(this.urls$),
+      switchMap(([_, urls]) => {
+        urls[index] = photoUrl;
+
+        const newPictureCount = urls.filter(Boolean).length;
+
+        return this.currentUser
+          .updatePictureCount(newPictureCount)
+          .pipe(map(() => this.urls.next(urls)));
+      })
+    );
+  }
+
+  switchPicturesOrder(index1: number, index2: number): Observable<void> {
+    return this.afAuth.user.pipe(
+      withLatestFrom(this.urls$),
+      take(1),
+      switchMap(async ([user, urls]) => {
+        if (!user || !index1 || !index2) return;
+
+        const filePath1 = `profilePictures/${user.uid}/${index1}`;
+        const ref1 = this.afStorage.ref(filePath1);
+
+        const filePath2 = `profilePictures/${user.uid}/${index2}`;
+        const ref2 = this.afStorage.ref(filePath2);
+
+        const upload1 = fetch(urls[index2])
+          .then((res) => res.blob())
+          .then((blob) => ref1.put(blob));
+
+        const upload2 = fetch(urls[index1])
+          .then((res) => res.blob())
+          .then((blob) => ref2.put(blob));
+
+        await Promise.all([upload1, upload2]);
+
+        return urls;
+      }),
+      map((urls) => {
+        [urls[index1], urls[index2]] = [urls[index2], urls[index1]];
+        this.urls.next(urls);
+      })
     );
   }
 }

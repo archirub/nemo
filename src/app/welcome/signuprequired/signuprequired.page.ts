@@ -281,7 +281,7 @@ export class SignuprequiredPage {
    * may therefore change its validity.
    */
   getFirstInvalidSlideIndex(): number | null {
-    const fieldValues = this.getFormValues();
+    const fieldValues = this.formValues;
     const initIndex = 100;
     let slideIndex: number = initIndex;
 
@@ -331,10 +331,10 @@ export class SignuprequiredPage {
     const validData = {};
 
     // MIGHT HAVE TO PASS THE PICTURES AS BASE64STRINGS HERE IF YOU WANT TO STORE THEM
-    return this.signup.addToDataHolders(this.getFormValues());
+    return this.signup.addToDataHolders(this.formValues);
   }
 
-  getFormValues(): SignupRequired {
+  get formValues(): SignupRequired {
     const firstName: string = this.form.get("firstName").value;
 
     let dateOfBirth: Date = new Date(this.form.get("dateOfBirth").value);
