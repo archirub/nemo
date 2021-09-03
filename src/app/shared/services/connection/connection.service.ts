@@ -68,7 +68,7 @@ export class ConnectionService {
     if (this.connectionToast) {
       await this.connectionToast.dismiss();
     }
-
+    //
     this.connectionToast = await this.toastCtrl.create({
       message: "Back online!",
       duration: 2000,
