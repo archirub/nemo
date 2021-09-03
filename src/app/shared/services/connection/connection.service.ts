@@ -14,6 +14,7 @@ import {
   take,
   withLatestFrom,
 } from "rxjs/operators";
+import { ToastController } from "@ionic/angular";
 
 @Injectable({
   providedIn: "root",
@@ -21,7 +22,9 @@ import {
 export class ConnectionService {
   private connectionMonitor: Observable<boolean>;
 
-  constructor(@Inject(PLATFORM_ID) platform) {
+  private connectionToast: HTMLIonToastElement;
+
+  constructor(@Inject(PLATFORM_ID) platform, private toastCtrl: ToastController) {
     if (isPlatformBrowser(platform)) {
       const offline$ = fromEvent(window, "offline").pipe(mapTo(false));
       const online$ = fromEvent(window, "online").pipe(mapTo(true));
@@ -59,5 +62,32 @@ export class ConnectionService {
       take(1),
       map(() => null)
     );
+  }
+
+  async displayBackOnlineToast() {
+    if (this.connectionToast) {
+      await this.connectionToast.dismiss();
+    }
+
+    this.connectionToast = await this.toastCtrl.create({
+      message: "Back online!",
+      duration: 10000,
+      position: "top",
+    });
+    return this.connectionToast.present();
+  }
+
+  async displayOfflineToast() {
+    if (this.connectionToast) {
+      await this.connectionToast.dismiss();
+    }
+
+    this.connectionToast = await this.toastCtrl.create({
+      message: "Lost internet connection...",
+      duration: 10000,
+      position: "top",
+    });
+
+    return this.connectionToast.present();
   }
 }

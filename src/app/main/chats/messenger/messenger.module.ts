@@ -8,6 +8,7 @@ import { MessengerPageRoutingModule } from "./messenger-routing.module";
 import { MessengerPage } from "./messenger.page";
 import { ProfileCardModule } from "@components/profile-card/profile-card.component.module";
 import { PipesModule } from "@pipes/pipes.module";
+import { ReportUserComponent } from "../report-user/report-user.component";
 
 @NgModule({
   imports: [
@@ -18,6 +19,6 @@ import { PipesModule } from "@pipes/pipes.module";
     ProfileCardModule,
     PipesModule,
   ],
-  declarations: [MessengerPage],
+  declarations: [MessengerPage, ReportUserComponent],
 })
 export class MessengerPageModule {}
