@@ -56,20 +56,26 @@ export class ChatboardPicturesStore {
   holder$: Observable<pictureHolder> = this.holder.asObservable();
 
   private allPicturesLoaded = new BehaviorSubject<boolean>(false);
-  allPicturesLoaded$ = this.allPicturesLoaded.asObservable().pipe(distinctUntilChanged());
+  allPicturesLoaded$ = this.allPicturesLoaded.asObservable().pipe(
+    distinctUntilChanged(),
+    map((val) => (this.hasNoChats ? true : val))
+  );
 
-  constructor(
-    private afStorage: AngularFireStorage,
-    private DomSanitizer: DomSanitizer
-  ) {}
+  private hasNoChats: boolean = false;
+
+  constructor(private afStorage: AngularFireStorage) {}
 
   /**
    * Gotta subscribe to this to activate the chain of logic that fills the store etc.
    */
-  public activateStore(chats: Observable<{ [chatID: string]: Chat }>): Observable<any> {
+  public activateStore(
+    chats: Observable<{ [chatID: string]: Chat }>,
+    hasNoChats: Observable<boolean>
+  ): Observable<any> {
     return combineLatest([
       this.activateHolderFillingLogic(chats),
       this.activateLoadingListener(chats),
+      this.activateHasNoChatsListener(hasNoChats),
     ]).pipe(
       // tap(() => console.log("activating chatboard pictures store")),
       share()
@@ -129,6 +135,17 @@ export class ChatboardPicturesStore {
   //         .changingThisBreaksApplicationSecurity
   //   );
   // }
+
+  private activateHasNoChatsListener(hasNoChats: Observable<boolean>): Observable<void> {
+    return hasNoChats.pipe(
+      map((noChats) => {
+        if (noChats) {
+          this.hasNoChats = true;
+          this.allPicturesLoaded.next(true);
+        }
+      })
+    );
+  }
 
   private activateLoadingListener(
     chats: Observable<{ [chatID: string]: Chat }>

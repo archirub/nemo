@@ -24,7 +24,12 @@ import {
   Subscription,
 } from "rxjs";
 
-import { CurrentUserStore, SwipeOutcomeStore, SwipeStackStore } from "@stores/index";
+import {
+  CurrentUserStore,
+  OtherProfilesStore,
+  SwipeOutcomeStore,
+  SwipeStackStore,
+} from "@stores/index";
 import { Profile, User } from "@classes/index";
 import { ProfileCardComponent } from "@components/index";
 import {
@@ -71,7 +76,8 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
 
   constructor(
     private swipeOutcomeStore: SwipeOutcomeStore,
-    private swipeStackStore: SwipeStackStore
+    private swipeStackStore: SwipeStackStore,
+    private otherProfilesStore: OtherProfilesStore
   ) {}
 
   ngOnInit() {
@@ -153,6 +159,7 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
   private onMatch(profile: Profile) {
     return concat(
       of(this.matched.emit([profile.firstName, profile.pictureUrls[0]])),
+      this.otherProfilesStore.saveProfile(profile.uid, profile),
       this.swipeOutcomeStore.registerSwipeChoices()
     );
   }

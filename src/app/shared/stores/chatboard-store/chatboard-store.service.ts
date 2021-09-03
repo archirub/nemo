@@ -1,7 +1,14 @@
 import { Injectable } from "@angular/core";
 import { AngularFireAuth } from "@angular/fire/auth";
 import { AngularFirestore, QueryDocumentSnapshot } from "@angular/fire/firestore";
-import { BehaviorSubject, ReplaySubject, Observable, combineLatest, of } from "rxjs";
+import {
+  BehaviorSubject,
+  ReplaySubject,
+  Observable,
+  combineLatest,
+  of,
+  Subject,
+} from "rxjs";
 
 import { Chat } from "@classes/index";
 import { FormatService } from "@services/format/format.service";
@@ -41,10 +48,12 @@ interface chatNatureMap {
 })
 export class ChatboardStore {
   private allChats = new BehaviorSubject<chatNatureMap>({});
+  private hasNoChats = new Subject<boolean>();
 
   public allChats$ = this.allChatsWithoutNatureProp();
   public chats$ = this.filterBasedOnNature("chat"); // chats where conversation hasn been initiated
   public matches$ = this.filterBasedOnNature("match"); // chats where conversation hasn't been initiated
+  public hasNoChats$ = this.hasNoChats.asObservable().pipe(distinctUntilChanged());
 
   private chatsFromDatabase = new BehaviorSubject<
     QueryDocumentSnapshot<chatFromDatabase>[]
@@ -101,7 +110,11 @@ export class ChatboardStore {
           .where("uids", "array-contains", user.uid)
           .onSnapshot({
             next: (snapshot) => {
+              console.log("is empty", snapshot.empty);
+              snapshot.empty ? this.hasNoChats.next(true) : this.hasNoChats.next(false);
+
               const docs = snapshot.docs;
+
               this.chatsFromDatabase.next(
                 snapshot.docs as QueryDocumentSnapshot<chatFromDatabase>[]
               );

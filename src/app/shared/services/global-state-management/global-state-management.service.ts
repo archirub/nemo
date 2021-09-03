@@ -146,7 +146,10 @@ export class GlobalStateManagementService {
     if (page === "chats" || page === "messenger")
       return forkJoin([
         this.chatboardStore.activateStore(),
-        this.chatboardPicturesStore.activateStore(this.chatboardStore.allChats$),
+        this.chatboardPicturesStore.activateStore(
+          this.chatboardStore.allChats$,
+          this.chatboardStore.hasNoChats$
+        ),
       ]);
 
     // COMMENTED OUT FOR DEVELOPMENT ONLY -  to not fetch a swipe stack every time

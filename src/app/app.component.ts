@@ -8,6 +8,7 @@ import { ReplaySubject, Subscription } from "rxjs";
 import { GlobalStateManagementService } from "@services/global-state-management/global-state-management.service";
 import { routerInitListenerService } from "@services/global-state-management/initial-url.service";
 import { ConnectionService } from "@services/connection/connection.service";
+import { OtherProfilesStore } from "@stores/index";
 
 @Component({
   selector: "app-root",
@@ -22,12 +23,16 @@ export class AppComponent implements OnDestroy, OnInit {
     private afAuth: AngularFireAuth,
     private GlobalStateManagement: GlobalStateManagementService,
     private routerInitListener: routerInitListenerService, // don't remove, used in template
-    private connectionService: ConnectionService
+    private connectionService: ConnectionService,
+    private otherProfileStore: OtherProfilesStore
   ) {
     this.initializeApp();
   }
 
   ngOnInit() {
+    this.otherProfileStore.profiles$.subscribe((a) =>
+      console.log("other profiles store", a)
+    );
     this.afAuth.authState.subscribe((a) => console.log("change in authstate: ", a));
     // this.connectionService
     //   .monitor()

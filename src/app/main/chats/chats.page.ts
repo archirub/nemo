@@ -1,5 +1,6 @@
 import { chat } from "./../../shared/interfaces/chat.model";
 import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from "@angular/core";
+import { Animation } from "@ionic/angular";
 
 import { combineLatest, Observable, Subscription } from "rxjs";
 
@@ -17,9 +18,9 @@ import { FishSwimAnimation } from "@animations/fish.animation";
 })
 export class ChatsPage {
   @ViewChild("chatboard") chatboard: ChatBoardComponent;
-  @ViewChild('fish', { read: ElementRef }) fish: ElementRef;
+  @ViewChild("fish", { read: ElementRef }) fish: ElementRef;
 
-  fishSwimAnimation;
+  fishSwimAnimation: Animation;
 
   TOP_SCROLL_SPEED = 100;
 
@@ -41,7 +42,6 @@ export class ChatsPage {
 
   ngAfterViewInit() {
     this.fishSwimAnimation = FishSwimAnimation(this.fish);
-
     this.fishSwimAnimation.play();
   }
 
