@@ -19,6 +19,7 @@ import { FormatService } from "@services/format/format.service";
 import { SearchCriteriaStore } from "../search-criteria-store/search-criteria-store.service";
 import {
   catchError,
+  filter,
   map,
   share,
   switchMap,
@@ -26,6 +27,7 @@ import {
   tap,
   withLatestFrom,
 } from "rxjs/operators";
+import { isEqual } from "lodash";
 
 @Injectable({
   providedIn: "root",
@@ -158,27 +160,46 @@ export class CurrentUserStore {
     );
   }
 
-  changeEditableFieldsValue(
+  updateFieldsOnDatabase(
     editableFields: editableProfileFields
-  ): Observable<successResponse> {
+  ): Observable<successResponse | {}> {
     const requestData: profileEditingByUserRequest = { data: editableFields };
-    return this.afFunctions
-      .httpsCallable("profileEditingByUser")(requestData)
-      .pipe(
-        withLatestFrom(this.user$),
-        map(([response, user]: [successResponse, User]) => {
-          if (response.successful) {
-            Object.keys(editableFields).forEach((field) => {
-              user[field] = JSON.parse(JSON.stringify(editableFields[field]));
-            });
 
-            this.user.next(user);
-          } else {
-            console.error("unsuccessful change of profile on db:", response?.message);
-          }
-          return response;
-        })
-      );
+    return this.user$.pipe(
+      filter((user) => !!user),
+      take(1),
+      switchMap((user) => {
+        // such that a modification only occurs if objects are different
+        const editableFieldsOfStore: editableProfileFields = {
+          biography: user.biography,
+          course: user.course,
+          areaOfStudy: user.areaOfStudy,
+          society: user.society,
+          societyCategory: user.societyCategory,
+          interests: user.interests,
+          questions: user.questions,
+        };
+
+        if (isEqual(editableFieldsOfStore, editableFields)) return of({});
+
+        return this.afFunctions
+          .httpsCallable("profileEditingByUser")(requestData)
+          .pipe(
+            map((response: successResponse) => {
+              if (response.successful) {
+                Object.keys(editableFields).forEach((field) => {
+                  user[field] = JSON.parse(JSON.stringify(editableFields[field]));
+                });
+
+                this.user.next(user);
+              } else {
+                console.error("unsuccessful change of profile on db:", response?.message);
+              }
+              return response;
+            })
+          );
+      })
+    );
   }
 
   resetStore() {

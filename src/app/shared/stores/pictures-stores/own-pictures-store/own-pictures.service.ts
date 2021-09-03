@@ -7,6 +7,7 @@ const { Storage } = Plugins;
 import { BehaviorSubject, combineLatest, forkJoin, from, Observable, of } from "rxjs";
 import {
   distinctUntilChanged,
+  exhaustMap,
   filter,
   map,
   share,
@@ -177,83 +178,110 @@ export class OwnPicturesStore {
     );
   }
 
-  removePicture(index: number): Observable<void> {
-    return this.afAuth.user.pipe(
+  updatePictures(newPicturesArray: string[]) {
+    return this.urls$.pipe(
       take(1),
-      switchMap(async (user) => {
-        if (!user) return;
-        const filePath = `profilePictures/${user.uid}/${index}`;
-        const ref = this.afStorage.ref(filePath);
-        return ref.delete();
-      }),
-      withLatestFrom(this.urls$),
-      switchMap(([_, urls]) => {
-        urls.splice(index, 1);
-
-        const newPictureCount = urls.filter(Boolean).length;
-
-        return this.currentUser
-          .updatePictureCount(newPictureCount)
-          .pipe(map(() => this.urls.next(urls)));
-      })
-    );
-  }
-
-  addOrUpdatePicture(photoUrl: string, index: number): Observable<void> {
-    return this.afAuth.user.pipe(
-      take(1),
-      switchMap(async (user) => {
-        if (!user) return;
-
-        const filePath = `profilePictures/${user.uid}/${index}`;
-        const ref = this.afStorage.ref(filePath);
-
-        return fetch(photoUrl)
-          .then((res) => res.blob())
-          .then((blob) => ref.put(blob));
-      }),
-      withLatestFrom(this.urls$),
-      switchMap(([_, urls]) => {
-        urls[index] = photoUrl;
-
-        const newPictureCount = urls.filter(Boolean).length;
-
-        return this.currentUser
-          .updatePictureCount(newPictureCount)
-          .pipe(map(() => this.urls.next(urls)));
-      })
-    );
-  }
-
-  switchPicturesOrder(index1: number, index2: number): Observable<void> {
-    return this.afAuth.user.pipe(
-      withLatestFrom(this.urls$),
-      take(1),
-      switchMap(async ([user, urls]) => {
-        if (!user || !index1 || !index2) return;
-
-        const filePath1 = `profilePictures/${user.uid}/${index1}`;
-        const ref1 = this.afStorage.ref(filePath1);
-
-        const filePath2 = `profilePictures/${user.uid}/${index2}`;
-        const ref2 = this.afStorage.ref(filePath2);
-
-        const upload1 = fetch(urls[index2])
-          .then((res) => res.blob())
-          .then((blob) => ref1.put(blob));
-
-        const upload2 = fetch(urls[index1])
-          .then((res) => res.blob())
-          .then((blob) => ref2.put(blob));
-
-        await Promise.all([upload1, upload2]);
-
-        return urls;
-      }),
       map((urls) => {
-        [urls[index1], urls[index2]] = [urls[index2], urls[index1]];
-        this.urls.next(urls);
+        const currentArray = urls.filter(Boolean);
+        const newArray = newPicturesArray.filter(Boolean);
+
+        const tasks: Observable<void>[] = [];
+        // addition tasks
+        newArray.forEach((newUrl, index) => {
+          const currentUrl = currentArray[index];
+
+          if (newUrl === currentUrl) return;
+
+          tasks.push(this.updatePictureInDatabase(newUrl, index));
+        });
+
+        // deleting tasks
+        if (currentArray.length > newArray.length) {
+          const startIndex = newArray.length;
+          const deletesToDo = currentArray.length - newArray.length;
+          const endIndex = startIndex + deletesToDo;
+          const indexes = Array.from({ length: endIndex - startIndex + 1 }).map(
+            (_, idx) => startIndex + idx
+          );
+
+          indexes.forEach((i) => tasks.push(this.removePictureInDatabase(i)));
+        }
+
+        return tasks;
+      }),
+      exhaustMap((tasks) => {
+        if (tasks.length > 0)
+          return forkJoin(tasks).pipe(
+            exhaustMap(() =>
+              this.currentUser.updatePictureCount(newPicturesArray.filter(Boolean).length)
+            ),
+            map(() => this.urls.next(newPicturesArray.filter(Boolean)))
+          );
+        return of(""); // needs to be none null otherwise forkJoin doesn't get it
       })
     );
   }
+
+  private removePictureInDatabase(index: number): Observable<void> {
+    return this.afAuth.user.pipe(
+      take(1),
+      switchMap((user) => {
+        if (!user) return;
+        const filePath = `profilePictures/${user.uid}/${index}`;
+        const ref = this.afStorage.ref(filePath);
+
+        return ref.delete();
+      })
+    );
+  }
+
+  private updatePictureInDatabase(photoUrl: string, index: number): Observable<void> {
+    console.log("picture data", photoUrl, index);
+    return this.afAuth.user.pipe(
+      take(1),
+      switchMap(async (user) => {
+        if (!user) return;
+
+        const filePath = `profilePictures/${user.uid}/${index}`;
+        const ref = this.afStorage.ref(filePath);
+        console.log("cdq?", filePath);
+
+        const response = await fetch(photoUrl);
+        const blob = await response.blob();
+        await ref.put(blob);
+      })
+    );
+  }
+
+  // switchPicturesOrder(index1: number, index2: number): Observable<void> {
+  //   return this.afAuth.user.pipe(
+  //     withLatestFrom(this.urls$),
+  //     take(1),
+  //     switchMap(async ([user, urls]) => {
+  //       if (!user || !index1 || !index2) return;
+
+  //       const filePath1 = `profilePictures/${user.uid}/${index1}`;
+  //       const ref1 = this.afStorage.ref(filePath1);
+
+  //       const filePath2 = `profilePictures/${user.uid}/${index2}`;
+  //       const ref2 = this.afStorage.ref(filePath2);
+
+  //       const upload1 = fetch(urls[index2])
+  //         .then((res) => res.blob())
+  //         .then((blob) => ref1.put(blob));
+
+  //       const upload2 = fetch(urls[index1])
+  //         .then((res) => res.blob())
+  //         .then((blob) => ref2.put(blob));
+
+  //       await Promise.all([upload1, upload2]);
+
+  //       return urls;
+  //     }),
+  //     map((urls) => {
+  //       [urls[index1], urls[index2]] = [urls[index2], urls[index1]];
+  //       this.urls.next(urls);
+  //     })
+  //   );
+  // }
 }

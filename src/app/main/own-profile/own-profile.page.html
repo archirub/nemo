@@ -19,7 +19,7 @@
           #profileCard
           [isOwnProfile]="true"
           [profile]="currentUserStore.user$ | async"
-          [profilePictures]="ownPicturesService.urls$ | async"
+          [profilePictures]="profilePictures"
           [reportable]="false"
         ></app-profile-card>
       </div>
@@ -67,7 +67,7 @@
               *ngFor="let pics of ['','','','','','']; index as i"
               (onPhotoPicked)="onPicturePicked($event)"
               [photoIndex]="i"
-              [photoDisplayedUrl]="(ownPicturesService?.urls$ | async)[i]"
+              [photoDisplayedUrl]="profilePictures[i]"
             ></add-photo>
           </div>
           <h2>My bio</h2>

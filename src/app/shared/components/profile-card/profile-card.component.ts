@@ -96,7 +96,7 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
   ngOnInit() {
     this.moreInfo = false;
 
-    this.buildInterestSlides(this.profile);
+    // this.buildInterestSlides(this.profile);
   }
 
   ngAfterViewInit() {

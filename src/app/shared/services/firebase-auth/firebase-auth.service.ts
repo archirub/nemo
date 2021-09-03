@@ -190,6 +190,18 @@ export class FirebaseAuthService {
     await unknownAlert.present();
   }
 
+  async successPopup(message: string = null): Promise<void> {
+    message = message ?? "The operation was successful!";
+
+    const unknownAlert = await this.alertCtrl.create({
+      header: "Successful Operation",
+      message,
+      buttons: ["OK"],
+    });
+
+    await unknownAlert.present();
+  }
+
   async unknownUserPopup(): Promise<void> {
     const userAlert = await this.alertCtrl.create({
       header: "User not found",
@@ -303,10 +315,12 @@ export class FirebaseAuthService {
       pswrd = data.password;
       try {
         await user.updatePassword(pswrd);
+        await this.successPopup("Your password was successfully updated.");
       } catch (err) {
         if (err?.code === "auth/requires-recent-login") {
           return this.reAuthenticationProcedure(user)
             .then(() => user.updatePassword(pswrd))
+            .then(() => this.successPopup("Your password was successfully updated."))
             .catch(() => this.unknownErrorPopup());
         } else {
           return this.unknownErrorPopup();
