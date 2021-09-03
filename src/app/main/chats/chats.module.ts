@@ -10,6 +10,7 @@ import { ChatsPage } from "./chats.page";
 import { ChatBoardComponent } from "./chat-board/chat-board.component";
 import { MatchesComponent } from "./matches/matches.component";
 import { InfiniteScrollComponent } from "@components/infinite-scroll/infinite-scroll.component";
+import { ReportUserComponent } from "./report-user/report-user.component";
 
 @NgModule({
   imports: [CommonModule, FormsModule, IonicModule, ChatsPageRoutingModule],
@@ -18,6 +19,7 @@ import { InfiniteScrollComponent } from "@components/infinite-scroll/infinite-sc
     ChatBoardComponent,
     MatchesComponent,
     InfiniteScrollComponent,
+    ReportUserComponent,
   ],
 })
 export class ChatsPageModule {}

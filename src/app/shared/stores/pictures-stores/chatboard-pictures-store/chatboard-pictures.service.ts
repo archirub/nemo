@@ -1,47 +1,24 @@
 import { Chat } from "../../../classes/chat.class";
 import { Injectable } from "@angular/core";
 import { AngularFireStorage } from "@angular/fire/storage";
-import {
-  BehaviorSubject,
-  combineLatest,
-  forkJoin,
-  from,
-  iif,
-  Observable,
-  of,
-} from "rxjs";
+import { BehaviorSubject, combineLatest, forkJoin, from, Observable, of } from "rxjs";
 import {
   concatMap,
   distinctUntilChanged,
-  exhaustMap,
   map,
   share,
   switchMap,
   take,
-  tap,
   withLatestFrom,
 } from "rxjs/operators";
 import { urlToBase64, Base64ToUrl } from "../common-pictures-functions";
 import { Plugins } from "@capacitor/core";
-import { ChatboardStore } from "@stores/index";
 const { Storage } = Plugins;
-import { DomSanitizer, SafeUrl } from "@angular/platform-browser";
+import { SafeUrl } from "@angular/platform-browser";
 
 export interface pictureHolder {
   [uid: string]: string;
 }
-
-// next to do:
-// - link up this system to the chatboard pictures (by simply subscribing to the holder there)
-// - design a system such that, if some pictures are not in "getAllPicturesFromLocalToHolder", then they are fetched
-// and put in the local storage and displayed. In this case, we will only be fetching the first picture
-// (most likely, the user will not click on the profile so only the first picture is necessary. In this case,
-// I believe it is *not* even worth *storing* it in the others-pictures store, it will make the logic too complex
-// as not all url arrays will contain all of the pictures of each user.
-// - for the others-pictures, not only we need the pictures but also to store their profile! So might as well
-// just have a store for profiles instead of just pictures. There will be logic to fetch pictures, but they will only be
-// going to the pictureUrls array of each profile. Hence this step is about developing a store for storing others profiles,
-// the profile store.
 
 @Injectable({
   providedIn: "root",

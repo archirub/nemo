@@ -12,16 +12,7 @@ import {
 
 import { Chat } from "@classes/index";
 import { FormatService } from "@services/format/format.service";
-import {
-  map,
-  take,
-  withLatestFrom,
-  startWith,
-  distinctUntilChanged,
-  shareReplay,
-  share,
-  tap,
-} from "rxjs/operators";
+import { map, take, withLatestFrom, distinctUntilChanged, share } from "rxjs/operators";
 import { chatFromDatabase, messageFromDatabase } from "@interfaces/index";
 
 // the store has this weird shape because of the Firestore's onSnapshot function which

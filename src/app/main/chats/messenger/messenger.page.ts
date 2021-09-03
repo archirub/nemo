@@ -11,6 +11,8 @@ import { NavController, IonContent, IonSlides } from "@ionic/angular";
 import { AngularFireAuth } from "@angular/fire/auth";
 import { ActivatedRoute, ParamMap } from "@angular/router";
 
+import { ReportUserComponent } from "../report-user/report-user.component";
+
 import { BehaviorSubject, forkJoin, from, Observable, of, Subscription } from "rxjs";
 import {
   delay,
@@ -35,6 +37,7 @@ import { FormatService } from "@services/format/format.service";
 
 import firebase from "firebase";
 import { SafeUrl } from "@angular/platform-browser";
+import { UserReportingService } from "@services/user-reporting/user-reporting.service";
 @Component({
   selector: "app-messenger",
   templateUrl: "./messenger.page.html",
@@ -86,7 +89,9 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
     private firestore: AngularFirestore,
     private profilesStore: OtherProfilesStore,
     private chatboardPictures: ChatboardPicturesStore,
-    private format: FormatService
+    private format: FormatService,
+    private userReporting: UserReportingService,
+    private afAuth: AngularFireAuth
   ) {}
 
   ngOnInit() {
@@ -140,6 +145,41 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
     // });
     this.slides.lockSwipes(true);
     this.tabColor();
+  }
+
+  async openUserReportModal() {
+    let userReportedID: string;
+    let userReportedName: string;
+    let userReportingID: string;
+
+    const getReportedInfo = this.recipientProfile$
+      .pipe(
+        take(1),
+        map((profile) => {
+          userReportedID = profile.uid;
+          userReportedName = profile.firstName;
+        })
+      )
+      .toPromise();
+
+    const getReportingInfo = this.afAuth.user
+      .pipe(
+        filter((user) => !!user),
+        take(1),
+        map((user) => (userReportingID = user.uid))
+      )
+      .toPromise();
+
+    await Promise.all([getReportedInfo, getReportingInfo]);
+
+    if (!userReportedID || !userReportingID || !userReportedName) return;
+
+    await this.userReporting.displayReportModal(
+      ReportUserComponent,
+      userReportingID,
+      userReportedID,
+      userReportedName
+    );
   }
 
   /** Subscribes to chatStore's Chats osbervable using chatID

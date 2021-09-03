@@ -30,21 +30,9 @@ export class AppComponent implements OnDestroy, OnInit {
   }
 
   ngOnInit() {
-    this.otherProfileStore.profiles$.subscribe((a) =>
-      console.log("other profiles store", a)
-    );
     this.afAuth.authState.subscribe((a) => console.log("change in authstate: ", a));
-    // this.connectionService
-    //   .monitor()
-    //   .subscribe((a) => console.log("is connection up ? " + a));
-    setTimeout(
-      () =>
-        this.connectionService
-          .monitor()
-          .subscribe((a) => console.log("is connection up ! " + a)),
-      3000
-    );
   }
+
   ngOnDestroy(): void {
     this.appGlobalStateManagementSub?.unsubscribe();
   }

@@ -70,6 +70,8 @@ type pageName =
 export class GlobalStateManagementService {
   auth$ = new BehaviorSubject<firebase.User>(null);
 
+  alreadyConnectedOnce: boolean = false;
+
   constructor(
     private router: Router,
     private activatedRoute: ActivatedRoute,
@@ -101,9 +103,20 @@ export class GlobalStateManagementService {
   }
 
   activate(): Observable<any> {
-    return this.connectionService
-      .emitWhenConnected()
-      .pipe(switchMap(() => merge(this.authStateManagement(), this.storesManagement())));
+    return this.connectionService.monitor().pipe(
+      switchMap((isConnected) => {
+        if (isConnected && !this.alreadyConnectedOnce) {
+          this.alreadyConnectedOnce = true;
+          return merge(this.authStateManagement(), this.storesManagement());
+        } else if (isConnected && this.alreadyConnectedOnce) {
+          return from(this.connectionService.displayBackOnlineToast()).pipe(
+            switchMap(() => merge(this.authStateManagement(), this.storesManagement()))
+          );
+        } else {
+          return this.connectionService.displayOfflineToast();
+        }
+      })
+    );
   }
 
   private authStateManagement() {
