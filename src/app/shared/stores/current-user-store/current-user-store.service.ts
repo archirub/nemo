@@ -158,7 +158,7 @@ export class CurrentUserStore {
     );
   }
 
-  changeEditableFieldsValue(
+  updateFieldsOnDatabase(
     editableFields: editableProfileFields
   ): Observable<successResponse> {
     const requestData: profileEditingByUserRequest = { data: editableFields };

@@ -9,7 +9,7 @@ import {
   AfterViewInit,
 } from "@angular/core";
 
-import { BehaviorSubject, from, Observable, of, Subscription } from "rxjs";
+import { BehaviorSubject, forkJoin, from, Observable, of, Subscription } from "rxjs";
 import { User, Profile } from "@classes/index";
 import { CurrentUserStore } from "@stores/index";
 import { ProfileCardComponent } from "@components/index";
@@ -28,7 +28,14 @@ import {
 import { TabElementRefService } from "../tab-menu/tab-element-ref.service";
 import { InterestsModalComponent } from "./interests-modal/interests-modal.component";
 
-import { distinctUntilChanged, map, switchMap, take, tap } from "rxjs/operators";
+import {
+  distinctUntilChanged,
+  map,
+  switchMap,
+  take,
+  tap,
+  withLatestFrom,
+} from "rxjs/operators";
 import {
   searchCriteriaOptions,
   editableProfileFields,
@@ -58,21 +65,16 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
 
   @ViewChild("toggleDiv", { read: ElementRef }) toggleDiv: ElementRef;
 
-  profileSub: Subscription;
-  profile: User; //THIS IS CHANGED ON THE PAGE WHILE EDITING, SEE prevProfileEdit
-
-  ownPicturesSub: Subscription;
+  private ownPicturesSub: Subscription;
   picsLoaded$: Observable<boolean>;
 
-  editingInProgress = new BehaviorSubject<boolean>(false);
+  private editingInProgress = new BehaviorSubject<boolean>(false);
   editingInProgress$ = this.editingInProgress.pipe(distinctUntilChanged());
-  editingAnimationLogicSub: Subscription;
+  private editingAnimationLogicSub: Subscription;
 
-  fishSwimAnimation;
-
-  toggleDivEnterAnimation;
-  toggleDivLeaveAnimation;
-
+  // these intermediate values (editableFields and profilePictures) are required
+  // to allow the user to modify these fields without the backend being affected right away,
+  // but only once he/she clicks confirm
   editableFields: editableProfileFields = {
     biography: null,
     course: null,
@@ -82,8 +84,13 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     interests: [],
     questions: [],
   };
+  profilePictures: string[] = [];
 
-  pictures = assetsInterestsPath; //Interest icons
+  fishSwimAnimation;
+  toggleDivEnterAnimation;
+  toggleDivLeaveAnimation;
+
+  interestIcons = assetsInterestsPath; //Interest icons
   societyCategoryOptions = searchCriteriaOptions.societyCategory;
   areaOfStudyOptions = searchCriteriaOptions.areaOfStudy;
 
@@ -96,13 +103,16 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     private modalCtrl: ModalController
   ) {}
 
-  interestsModal: HTMLIonModalElement;
-  modal;
+  interestModal: HTMLIonModalElement;
   intEnterAnimation;
   intLeaveAnimation;
 
   ngOnInit() {
-    this.ownPicturesService.urls$.subscribe((a) => console.log("own urls", a));
+    this.editingInProgress$.subscribe((a) => console.log("editing in progress", a));
+
+    this.ownPicturesService.urls$
+      .pipe(map((urls) => this.updateProfilePictures(urls)))
+      .subscribe();
     this.currentUserStore.user$
       .pipe(map((user) => this.updateEditableFields(user)))
       .subscribe();
@@ -125,12 +135,6 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     setTimeout(() => {
       // This is essentially a lifecycle hook for after the UI appears
       this.toggleDivEnterAnimation = ToggleAppearAnimation(this.toggleDiv);
-
-      // this.lastAnsRef = Array.from(this.answers)[this.answers.length - 1];
-
-      // //'snapshot' to retrieve if editing is cancelled
-      // this.prevProfileEdit['_questions'] = [...this.profile.questions];
-      // this.prevProfileEdit['_interests'] = [...this.profile.interests];
     }, 50);
 
     //Build modal setup once UI has entered
@@ -159,18 +163,18 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
         leaveAnimation: this.intLeaveAnimation,
       })
       .then((m) => {
-        this.modal = m;
-        this.onInterestsModalDismiss(this.modal);
+        this.interestModal = m;
+        this.onInterestsModalDismiss(this.interestModal);
       });
   }
 
   async presentIntModal(): Promise<void> {
-    if (!this.modal) {
+    if (!this.interestModal) {
       this.buildIntModal();
     }
 
     setTimeout(() => {
-      return this.modal.present();
+      return this.interestModal.present();
     }, 50);
   }
 
@@ -180,7 +184,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
       this.editingTriggered();
 
       console.log(this.editableFields?.interests);
-      this.modal = undefined;
+      this.interestModal = undefined;
     });
   }
 
@@ -208,6 +212,10 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
         this.editableFields[field] = data[field];
       }
     });
+  }
+
+  updateProfilePictures(urls: string[]) {
+    this.profilePictures = JSON.parse(JSON.stringify(urls));
   }
 
   goToSettings() {
@@ -256,8 +264,12 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
   async cancelProfileEdit(): Promise<void> {
     await this.currentUserStore.user$
       .pipe(
+        withLatestFrom(this.ownPicturesService.urls$),
         take(1),
-        map((user) => this.updateEditableFields(user)),
+        map(([user, urls]) => {
+          this.updateEditableFields(user);
+          this.updateProfilePictures(urls);
+        }),
         map(() => this.editingInProgress.next(false))
       )
       .toPromise();
@@ -267,15 +279,18 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
 
   async confirmProfileEdit(): Promise<void> {
     console.log("editable fields", this.editableFields);
-    await this.currentUserStore
-      .changeEditableFieldsValue(this.editableFields)
+    await forkJoin([
+      this.currentUserStore.updateFieldsOnDatabase(this.editableFields),
+      this.ownPicturesService.updatePictures(this.profilePictures),
+    ])
       .pipe(map((res) => this.editingInProgress.next(false)))
       .toPromise();
     console.log("confirmed edit");
     this.profileCard.buildInterestSlides(this.profileCard.profile);
   }
 
-  actOnProfileEditing($event: "cancel" | "save") {
+  async actOnProfileEditing($event: "cancel" | "save") {
+    console.log("event", $event);
     if ($event === "cancel") return this.cancelProfileEdit();
     if ($event === "save") return this.confirmProfileEdit();
   }
@@ -309,16 +324,14 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     return this.editableFields?.questions?.length ?? 0;
   }
 
-  async onPicturePicked($event: { photoUrl: string; index: number }) {
-    console.log("picture picked", $event);
-    await this.ownPicturesService
-      .addOrUpdatePicture($event.photoUrl, $event.index)
-      .toPromise();
+  onPicturePicked($event: { photoUrl: string; index: number }) {
+    this.profilePictures[$event.index] = $event.photoUrl;
+    this.editingInProgress.next(true);
+    this.detector.detectChanges();
   }
 
   ngOnDestroy() {
     this.ownPicturesSub?.unsubscribe();
-    this.profileSub?.unsubscribe();
     this.editingAnimationLogicSub?.unsubscribe();
   }
 }
