@@ -229,6 +229,7 @@ export class OwnPicturesStore {
         if (!user) return;
         const filePath = `profilePictures/${user.uid}/${index}`;
         const ref = this.afStorage.ref(filePath);
+        console.log("cdq?", filePath);
 
         return ref.delete();
       })
@@ -252,7 +253,7 @@ export class OwnPicturesStore {
       })
     );
   }
-
+  //
   // switchPicturesOrder(index1: number, index2: number): Observable<void> {
   //   return this.afAuth.user.pipe(
   //     withLatestFrom(this.urls$),
