@@ -19,8 +19,8 @@ import {
 import { FormatService } from "@services/format/format.service";
 import { Profile, SearchCriteria } from "@classes/index";
 // store imports written this way to avoid circular dependency
-import { SwipeOutcomeStore } from "@stores/swipe-outcome-store/swipe-outcome-store.service";
-import { SearchCriteriaStore } from "@stores/search-criteria-store/search-criteria-store.service";
+import { SwipeOutcomeStore } from "@stores/swipe-outcome/swipe-outcome-store.service";
+import { SearchCriteriaStore } from "@stores/search-criteria/search-criteria-store.service";
 import { generateSwipeStackResponse, profileFromDatabase } from "@interfaces/index";
 import { AngularFireStorage } from "@angular/fire/storage";
 // import { StackPicturesService } from "@services/pictures/stack-pictures/stack-pictures.service";

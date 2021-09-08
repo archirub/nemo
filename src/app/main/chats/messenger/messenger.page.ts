@@ -29,8 +29,8 @@ import {
 import { Chat, Message, Profile } from "@classes/index";
 import { ChatboardStore, CurrentUserStore } from "@stores/index";
 import { ProfileCardComponent } from "@components/index";
-import { OtherProfilesStore } from "@stores/other-profiles-store/other-profiles-store.service";
-import { ChatboardPicturesStore } from "@stores/pictures-stores/chatboard-pictures-store/chatboard-pictures.service";
+import { OtherProfilesStore } from "@stores/other-profiles/other-profiles-store.service";
+import { ChatboardPicturesStore } from "@stores/pictures/chatboard-pictures-store/chatboard-pictures.service";
 import { AngularFirestore, QuerySnapshot } from "@angular/fire/firestore";
 import { messageFromDatabase } from "@interfaces/message.model";
 import { FormatService } from "@services/format/format.service";

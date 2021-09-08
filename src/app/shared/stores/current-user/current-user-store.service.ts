@@ -16,7 +16,7 @@ import {
   successResponse,
 } from "@interfaces/index";
 import { FormatService } from "@services/format/format.service";
-import { SearchCriteriaStore } from "../search-criteria-store/search-criteria-store.service";
+import { SearchCriteriaStore } from "../search-criteria/search-criteria-store.service";
 import {
   catchError,
   filter,

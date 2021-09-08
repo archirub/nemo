@@ -1,13 +1,13 @@
 import { Injectable } from "@angular/core";
-import { ChatboardStore } from "@stores/chatboard-store/chatboard-store.service";
-import { SearchCriteriaStore } from "@stores/search-criteria-store/search-criteria-store.service";
-import { OtherProfilesStore } from "@stores/other-profiles-store/other-profiles-store.service";
-import { SwipeOutcomeStore } from "@stores/swipe-outcome-store/swipe-outcome-store.service";
-import { SwipeStackStore } from "@stores/swipe-stack-store/swipe-stack-store.service";
-import { SettingsStore } from "@stores/settings-store/settings-store.service";
-import { CurrentUserStore } from "@stores/current-user-store/current-user-store.service";
-import { ChatboardPicturesStore } from "@stores/pictures-stores/chatboard-pictures-store/chatboard-pictures.service";
-import { OwnPicturesStore } from "@stores/pictures-stores/own-pictures-store/own-pictures.service";
+import { ChatboardStore } from "@stores/chatboard/chatboard-store.service";
+import { SearchCriteriaStore } from "@stores/search-criteria/search-criteria-store.service";
+import { OtherProfilesStore } from "@stores/other-profiles/other-profiles-store.service";
+import { SwipeOutcomeStore } from "@stores/swipe-outcome/swipe-outcome-store.service";
+import { SwipeStackStore } from "@stores/swipe-stack/swipe-stack-store.service";
+import { SettingsStore } from "@stores/settings/settings-store.service";
+import { CurrentUserStore } from "@stores/current-user/current-user-store.service";
+import { ChatboardPicturesStore } from "@stores/pictures/chatboard-pictures-store/chatboard-pictures.service";
+import { OwnPicturesStore } from "@stores/pictures/own-pictures-store/own-pictures.service";
 
 // service created to solve a circular dependency between global-state-management service and
 // firebase-auth service, where the latter only imported the former to use the emptyStores functionality
