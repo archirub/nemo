@@ -1,0 +1,34 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      allow read, write: if isGod()
+    }
+     
+    match /profilePictures/{uid}/{pictureNumber} {
+      allow read: if isAuthenticated();
+      allow create, delete, update: if isPictureOwner(uid) && pictureNumberIsAllowed(pictureNumber);
+    }
+
+  }
+}
+
+function isAuthenticated() {
+  return request.auth != null
+  }
+
+function isPictureOwner(folderName) {
+  return request.auth.uid == folderName
+}
+
+// ONLY ACCEPTS UP TO 6 PICTURES RIGHT NOW
+function pictureNumberIsAllowed(value) {
+  return value.matches("^[0-5]$")
+}
+
+function isGod() {
+  return request.auth.uid in ["oY6HiUHmUvcKbFQQnb88t3U4Zew1"]
+}
+
+// solve storage problem where nothing gets through (check the actual request you're making see if it has to do with that)
+// add chats to the security rules of firestore

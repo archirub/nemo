@@ -27,7 +27,7 @@ import {
 } from "rxjs/operators";
 
 import { Chat, Message, Profile } from "@classes/index";
-import { ChatboardStore } from "@stores/index";
+import { ChatboardStore, CurrentUserStore } from "@stores/index";
 import { ProfileCardComponent } from "@components/index";
 import { OtherProfilesStore } from "@stores/other-profiles-store/other-profiles-store.service";
 import { ChatboardPicturesStore } from "@stores/pictures-stores/chatboard-pictures-store/chatboard-pictures.service";
@@ -38,6 +38,11 @@ import { FormatService } from "@services/format/format.service";
 import firebase from "firebase";
 import { SafeUrl } from "@angular/platform-browser";
 import { UserReportingService } from "@services/user-reporting/user-reporting.service";
+
+function sortUIDs(uids: string[]): string[] {
+  return uids.sort((a, b) => ("" + a).localeCompare(b));
+}
+
 @Component({
   selector: "app-messenger",
   templateUrl: "./messenger.page.html",
@@ -91,7 +96,8 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
     private chatboardPictures: ChatboardPicturesStore,
     private format: FormatService,
     private userReporting: UserReportingService,
-    private afAuth: AngularFireAuth
+    private afAuth: AngularFireAuth,
+    private currentUser: CurrentUserStore
   ) {}
 
   ngOnInit() {
@@ -191,19 +197,23 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
 
     return this.chatboardStore.chats$.pipe(
       filter((chats) => !!chats?.[this.chatID]),
+      withLatestFrom(this.currentUser.user$),
       take(1),
-      map((chats) => {
+      map(([chats, user]) => {
         // Fills the chat subject with the data from the chatboard store
         this.thisChat$.next(chats[this.chatID]);
         this.latestChatInput = chats[this.chatID].latestChatInput;
+
+        return user.uid;
       }),
-      map(() => {
+      map((uid) => {
         // Activates the listener for this chat's messages and fills the messages subject
         // when something changes in the messages collection
         this.messagesDatabaseSub = this.firestore.firestore
           .collection("chats")
           .doc(this.chatID)
           .collection("messages")
+          .where("uids", "array-contains", uid)
           .orderBy("time", "desc")
           .limit(this.MSG_BATCH_SIZE)
           .onSnapshot({
@@ -214,6 +224,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
                 )
               );
             },
+            error: (err) => console.error("error in database message listening", err),
           });
       })
     );
@@ -225,13 +236,15 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
 
     return this.afauth.user.pipe(
       tap((a) => console.log("auth$", a)),
+      withLatestFrom(this.thisChat$.pipe(filter((c) => !!c))),
       take(1),
       filter(() => !!this.latestChatInput), // prevents user from sending empty messages
-      switchMap((user) => {
+      switchMap(([user, thisChat]) => {
         console.log("a");
         if (!user) throw "no user authenticated";
 
         const message: messageFromDatabase = {
+          uids: sortUIDs([thisChat.recipient.uid, user.uid]),
           senderID: user.uid,
           time: firebase.firestore.Timestamp.fromDate(messageTime),
           content: this.latestChatInput,

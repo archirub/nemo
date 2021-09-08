@@ -1,0 +1,52 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{allPaths=**} {
+      allow read, write: if isGod()
+    }
+
+    match /profiles/{profileID} {
+      allow read: if isAuthenticated();
+      allow update: if isAuthenticated() 
+                    && isDocumentOwner(profileID) 
+                    && onlyPropertiesModifiedAre(["pictureCount"])
+                    && request.resource.data.pictureCount is number;
+
+      match /private/{documentName} {
+        allow read, write: if documentName == "private" 
+                            && isDocumentOwner(profileID);
+      }
+    }
+
+    match /chats/{chatID} {
+      allow read: if isAuthenticated() 
+                  // && isPartOfChat()
+
+      match /messages/{messageID} {
+        allow read, create: if isAuthenticated() 
+                            && isPartOfChat()
+      }
+    }
+  }
+}
+
+function onlyPropertiesModifiedAre(keys) {
+  return request.resource.data.diff(resource.data).changedKeys().hasOnly(keys)
+  }
+
+function isAuthenticated() {
+  return request.auth != null
+  }
+
+function isDocumentOwner(docID) {
+  return request.auth.uid == docID
+  }
+
+function isPartOfChat() {
+  return request.auth.uid in resource.data.uids 
+}
+
+function isGod() {
+  return request.auth.uid in ["oY6HiUHmUvcKbFQQnb88t3U4Zew1"]
+}
+

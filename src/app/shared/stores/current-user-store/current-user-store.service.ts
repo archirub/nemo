@@ -44,31 +44,31 @@ export class CurrentUserStore {
     private SCstore: SearchCriteriaStore
   ) {}
 
-  updateProfile(newProfile: Profile): Observable<void> {
-    return this.afAuth.user.pipe(
-      take(1),
-      withLatestFrom(this.user$),
-      switchMap(([userAuth, userData]) => {
-        if (!userAuth) throw "no user authenticated";
+  // updateProfile(newProfile: Profile): Observable<void> {
+  //   return this.afAuth.user.pipe(
+  //     take(1),
+  //     withLatestFrom(this.user$),
+  //     switchMap(([userAuth, userData]) => {
+  //       if (!userAuth) throw "no user authenticated";
 
-        return from(
-          this.fs
-            .collection("profiles")
-            .doc(userAuth.uid)
-            .set(this.format.profileClassToDatabase(newProfile))
-        ).pipe(map(() => userData));
-      }),
-      map((userData) => {
-        Object.entries(this.format.profileClassToDatabase(newProfile)).forEach(
-          ([key, value]) => {
-            userData[key] = value;
-          }
-        );
+  //       return from(
+  //         this.fs
+  //           .collection("profiles")
+  //           .doc(userAuth.uid)
+  //           .set(this.format.profileClassToDatabase(newProfile))
+  //       ).pipe(map(() => userData));
+  //     }),
+  //     map((userData) => {
+  //       Object.entries(this.format.profileClassToDatabase(newProfile)).forEach(
+  //         ([key, value]) => {
+  //           userData[key] = value;
+  //         }
+  //       );
 
-        this.user.next(userData);
-      })
-    );
-  }
+  //       this.user.next(userData);
+  //     })
+  //   );
+  // }
 
   updateLatestSearchCriteriaOnDb(searchCriteria: SearchCriteria) {}
 
@@ -196,6 +196,10 @@ export class CurrentUserStore {
                 console.error("unsuccessful change of profile on db:", response?.message);
               }
               return response;
+            }),
+            catchError((err) => {
+              console.log("profile editing by user error");
+              return of(null);
             })
           );
       })
@@ -213,10 +217,16 @@ export class CurrentUserStore {
     const query = this.fs.firestore.collection("profiles").doc(uid);
     return from(query.get()).pipe(
       map((snapshot) => {
+        console.log("profile snapshot");
         if (snapshot.exists) {
           const data = snapshot.data() as profileFromDatabase;
           return this.format.profileDatabaseToClass(snapshot.id, data);
         }
+      }),
+
+      catchError((err) => {
+        console.log("error profile", err);
+        return of(null);
       })
     );
   }
@@ -235,10 +245,16 @@ export class CurrentUserStore {
 
     return from(query.get()).pipe(
       map((snapshot) => {
+        console.log("private profile snapshot");
         if (snapshot.exists) {
           const data = snapshot.data() as privateProfileFromDatabase;
           return data;
         }
+      }),
+
+      catchError((err) => {
+        console.log("error private ", err);
+        return of(null);
       })
     );
   }
@@ -251,6 +267,8 @@ export class CurrentUserStore {
       .httpsCallable("getMatchDataUserInfo")({})
       .pipe(
         map((res: getMatchDataUserInfoResponse) => {
+          console.log("match data info ");
+
           if (res) {
             const gender = res?.gender;
             const sexualPreference = res?.sexualPreference;
@@ -258,6 +276,11 @@ export class CurrentUserStore {
 
             return { gender, sexualPreference, swipeMode };
           }
+        }),
+
+        catchError((err) => {
+          console.log("error match data info", err);
+          return of(null);
         })
       );
   }

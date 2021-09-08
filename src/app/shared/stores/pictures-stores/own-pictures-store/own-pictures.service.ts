@@ -84,7 +84,8 @@ export class OwnPicturesStore {
             return this.nextFromLocal(localStorageContent);
         }
 
-        return this.nextFromFirebase().pipe(switchMap((urls) => this.storeInLocal(urls)));
+        return this.nextFromFirebase();
+        // .pipe(switchMap((urls) => this.storeInLocal(urls)));
       })
     );
   }
@@ -146,15 +147,20 @@ export class OwnPicturesStore {
   }
 
   nextFromFirebase(): Observable<string[]> {
-    const uid$: Observable<string> = this.afAuth.user.pipe(map((user) => user?.uid));
+    const uid$: Observable<string> = this.afAuth.user.pipe(
+      map((user) => user?.uid),
+      filter((uid) => !!uid),
+      take(1)
+    );
     const pictureCount$: Observable<number> = this.getOwnPictureCount();
+
+    console.log("getting next from firebase");
 
     // here we are using the switchMap operator (instead of concatMap or mergeMap for ex) as it allows
     // to, if either uid$ or pictureCount$ gets a new value, cancel the current profile picture fetching
     // right away and start a new fetch with the new value. THis is also why take(1) comes after switchMap,
     // that way, we only take(1) after we got the profilePictures
     return combineLatest([uid$, pictureCount$]).pipe(
-      filter(([uid, pictureCount]) => !!uid),
       switchMap(([uid, pictureCount]) => this.fetchProfilePictures(uid, pictureCount)),
       take(1),
       tap((urls) => this.urls.next(urls))
@@ -166,6 +172,7 @@ export class OwnPicturesStore {
       (v, index) =>
         this.afStorage.ref(firebaseStoragePath(uid, index)).getDownloadURL().pipe(take(1)) // ensures it completes
     );
+    console.log("fetching profile pictures:", uid, pictureCount);
     return forkJoin(urlArray$);
   }
 
@@ -209,12 +216,16 @@ export class OwnPicturesStore {
 
         return tasks;
       }),
-      exhaustMap((tasks) => {
+      withLatestFrom(this.currentUser.user$),
+      exhaustMap(([tasks, user]) => {
         if (tasks.length > 0)
           return forkJoin(tasks).pipe(
-            exhaustMap(() =>
-              this.currentUser.updatePictureCount(newPicturesArray.filter(Boolean).length)
-            ),
+            exhaustMap(() => {
+              const newPictureCount = newPicturesArray.filter(Boolean).length;
+              if (user.pictureCount !== newPictureCount)
+                return this.currentUser.updatePictureCount(newPictureCount);
+              return of("");
+            }),
             map(() => this.urls.next(newPicturesArray.filter(Boolean)))
           );
         return of(""); // needs to be none null otherwise forkJoin doesn't get it

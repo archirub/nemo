@@ -110,6 +110,7 @@ export class ChatboardStore {
                 snapshot.docs as QueryDocumentSnapshot<chatFromDatabase>[]
               );
             },
+            error: (err) => console.error("error in database chats listening", err),
           });
       })
     );
@@ -131,6 +132,10 @@ export class ChatboardStore {
 
           this.recentMsgDocSubs[recipientID] = chatDoc.ref
             .collection("messages")
+            // though useless wrt query content, necessary to pass security rules
+            // (as in queries, security rules aren't checked against each doc, they're checked
+            // against the nature of the query)
+            .where("uids", "array-contains", user.uid)
             .orderBy("time", "desc")
             .limit(1)
             .onSnapshot({

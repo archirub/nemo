@@ -14,6 +14,7 @@ import { CameraPhoto } from "@capacitor/core";
 import { allowOptionalProp } from "./shared.model";
 import { Gender, SexualPreference, SwipeMode } from "./match-data.model";
 
+// IF SUCH CONSTANTS ARE CHANGED, MAKE SURE TO CHANGE THE SECURITY RULES ACCORDINGLY
 export const MAX_PROFILE_PICTURES_COUNT = 6;
 export const MAX_PROFILE_QUESTIONS_COUNT = 3;
 
