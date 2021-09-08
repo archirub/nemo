@@ -29,7 +29,7 @@ import {
 import { TabElementRefService } from "src/app/main/tab-menu/tab-element-ref.service";
 import { SwipeCardComponent } from "./swipe-card/swipe-card.component";
 import { AngularFireStorage } from "@angular/fire/storage";
-import { OwnPicturesStore } from "@stores/pictures-stores/own-pictures-store/own-pictures.service";
+import { OwnPicturesStore } from "@stores/pictures/own-pictures/own-pictures.service";
 
 @Component({
   selector: "app-home",

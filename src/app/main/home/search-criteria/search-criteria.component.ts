@@ -4,7 +4,7 @@ import { FormControl, FormGroup } from "@angular/forms";
 
 import { Subscription } from "rxjs";
 
-import { SearchCriteriaStore } from "@stores/search-criteria-store/search-criteria-store.service";
+import { SearchCriteriaStore } from "@stores/search-criteria/search-criteria-store.service";
 import { searchCriteriaOptions } from "@interfaces/search-criteria.model";
 import { SearchCriteria } from "@classes/index";
 

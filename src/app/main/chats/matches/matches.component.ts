@@ -6,7 +6,7 @@ import { Chat } from "@classes/index";
 import {
   ChatboardPicturesStore,
   pictureHolder,
-} from "@stores/pictures-stores/chatboard-pictures-store/chatboard-pictures.service";
+} from "@stores/pictures/chatboard-pictures/chatboard-pictures.service";
 import { Observable, Subscription } from "rxjs";
 
 @Component({

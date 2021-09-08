@@ -36,15 +36,15 @@ import {
   tap,
 } from "rxjs/operators";
 
-import { OwnPicturesStore } from "@stores/pictures-stores/own-pictures-store/own-pictures.service";
-import { ChatboardStore } from "@stores/chatboard-store/chatboard-store.service";
-import { SearchCriteriaStore } from "@stores/search-criteria-store/search-criteria-store.service";
-import { OtherProfilesStore } from "@stores/other-profiles-store/other-profiles-store.service";
-import { SwipeOutcomeStore } from "@stores/swipe-outcome-store/swipe-outcome-store.service";
-import { SwipeStackStore } from "@stores/swipe-stack-store/swipe-stack-store.service";
-import { SettingsStore } from "@stores/settings-store/settings-store.service";
-import { CurrentUserStore } from "@stores/current-user-store/current-user-store.service";
-import { ChatboardPicturesStore } from "@stores/pictures-stores/chatboard-pictures-store/chatboard-pictures.service";
+import { OwnPicturesStore } from "@stores/pictures/own-pictures/own-pictures.service";
+import { ChatboardStore } from "@stores/chatboard/chatboard-store.service";
+import { SearchCriteriaStore } from "@stores/search-criteria/search-criteria-store.service";
+import { OtherProfilesStore } from "@stores/other-profiles/other-profiles-store.service";
+import { SwipeOutcomeStore } from "@stores/swipe-outcome/swipe-outcome-store.service";
+import { SwipeStackStore } from "@stores/swipe-stack/swipe-stack-store.service";
+import { SettingsStore } from "@stores/settings/settings-store.service";
+import { CurrentUserStore } from "@stores/current-user/current-user-store.service";
+import { ChatboardPicturesStore } from "@stores/pictures/chatboard-pictures/chatboard-pictures.service";
 
 import { SignupService } from "@services/signup/signup.service";
 import { FirebaseAuthService } from "@services/firebase-auth/firebase-auth.service";

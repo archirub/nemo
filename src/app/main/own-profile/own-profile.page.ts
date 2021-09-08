@@ -16,7 +16,7 @@ import { ProfileCardComponent } from "@components/index";
 import { ProfileCourseComponent } from "./profile-course/profile-course.component";
 import { IonTextarea, LoadingController, ModalController } from "@ionic/angular";
 import { Router } from "@angular/router";
-import { OwnPicturesStore } from "@stores/pictures-stores/own-pictures-store/own-pictures.service";
+import { OwnPicturesStore } from "@stores/pictures/own-pictures/own-pictures.service";
 import { ProfileAnswerComponent } from "./profile-answer/profile-answer.component";
 import {
   FishSwimAnimation,

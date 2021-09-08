@@ -23,7 +23,7 @@ import { TabElementRefService } from "src/app/main/tab-menu/tab-element-ref.serv
 import {
   ChatboardPicturesStore,
   pictureHolder,
-} from "@stores/pictures-stores/chatboard-pictures-store/chatboard-pictures.service";
+} from "@stores/pictures/chatboard-pictures/chatboard-pictures.service";
 import { forkJoin, fromEvent, Observable, of, Subject, Subscription } from "rxjs";
 import { concatMap, exhaustMap, map, tap } from "rxjs/operators";
 import { ChatboardStore, OtherProfilesStore } from "@stores/index";
@@ -161,21 +161,22 @@ export class ChatBoardComponent implements OnInit {
   }
 
   deleteChat(event, chat: Chat) {
-    console.log('deleting chat with', chat.recipient.name);
+    console.log("deleting chat with", chat.recipient.name);
 
     let target: HTMLElement = event.target; //Get list item where click occurred
 
-    while (!target.classList.contains('parent')) { //Checks parent until it finds full list box
+    while (!target.classList.contains("parent")) {
+      //Checks parent until it finds full list box
       target = target.parentElement;
     }
 
     //Gets index of chat
-    let index = this.chats.findIndex(c => c === chat);
+    let index = this.chats.findIndex((c) => c === chat);
     let name = chat.recipient.name;
 
     //Fades out list element
     this.fadeOutAnimation = FadeOutAnimation(target, 300);
-    this.fadeOutAnimation.play()
+    this.fadeOutAnimation.play();
 
     //Gets rid of chat from local DOM
     setTimeout(() => {

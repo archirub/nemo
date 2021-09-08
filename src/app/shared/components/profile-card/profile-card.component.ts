@@ -17,7 +17,7 @@ import {
 import { LessInfoAnimation, MoreInfoAnimation } from "@animations/info.animation";
 import { Profile } from "@classes/index";
 import { IonContent, IonSlides } from "@ionic/angular";
-import { OwnPicturesStore } from "@stores/pictures-stores/own-pictures-store/own-pictures.service";
+import { OwnPicturesStore } from "@stores/pictures/own-pictures/own-pictures.service";
 import { BehaviorSubject, Observable, Subscription } from "rxjs";
 import { filter, map, tap } from "rxjs/operators";
 
