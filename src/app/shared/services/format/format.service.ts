@@ -158,20 +158,23 @@ export class FormatService {
     return new Message(senderID, time, content, "sent");
   }
 
-  public messagesClassToDatabase(messages: Message[]): messageFromDatabase[] {
+  public messagesClassToDatabase(
+    messages: Message[],
+    uids: string[]
+  ): messageFromDatabase[] {
     if (!messages) return;
 
     return messages.map((msg) => {
-      return this.messageClassToDatabase(msg);
+      return this.messageClassToDatabase(msg, uids);
     });
   }
 
-  private messageClassToDatabase(msg: Message): messageFromDatabase {
+  private messageClassToDatabase(msg: Message, uids: string[]): messageFromDatabase {
     if (!msg) return;
     const content = msg.content;
     const senderID = msg.senderID;
     const time = firebase.firestore.Timestamp.fromDate(msg.time);
 
-    return { senderID, time, content };
+    return { senderID, time, content, uids };
   }
 }
