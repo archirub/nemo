@@ -1,16 +1,16 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { IonicModule } from '@ionic/angular';
+import { async, ComponentFixture, TestBed } from "@angular/core/testing";
+import { IonicModule } from "@ionic/angular";
 
-import { SignuprequiredPage } from './signuprequired.page';
+import { SignuprequiredPage } from "./signuprequired.page";
 
-describe('SignuprequiredPage', () => {
+describe("SignuprequiredPage", () => {
   let component: SignuprequiredPage;
   let fixture: ComponentFixture<SignuprequiredPage>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ SignuprequiredPage ],
-      imports: [IonicModule.forRoot()]
+      declarations: [SignuprequiredPage],
+      imports: [IonicModule.forRoot()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(SignuprequiredPage);
@@ -18,7 +18,7 @@ describe('SignuprequiredPage', () => {
     fixture.detectChanges();
   }));
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

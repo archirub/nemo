@@ -5,17 +5,8 @@ import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { AddPhotoComponent } from "./add-photo.component";
 
 @NgModule({
-  imports: [
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    IonicModule,
-  ],
-  declarations: [
-    AddPhotoComponent
-  ],
-  exports: [
-    AddPhotoComponent
-  ],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, IonicModule],
+  declarations: [AddPhotoComponent],
+  exports: [AddPhotoComponent],
 })
 export class AddPhotoModule {}

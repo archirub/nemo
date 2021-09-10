@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
-import { AngularFirestore, DocumentSnapshot } from "@angular/fire/firestore";
-import { AngularFireFunctions } from "@angular/fire/functions";
+import { AngularFirestore, DocumentSnapshot } from "@angular/fire/compat/firestore";
+import { AngularFireFunctions } from "@angular/fire/compat/functions";
 
 import { BehaviorSubject, combineLatest, concat, forkJoin, Observable, of } from "rxjs";
 import {
@@ -22,7 +22,7 @@ import { Profile, SearchCriteria } from "@classes/index";
 import { SwipeOutcomeStore } from "@stores/swipe-outcome/swipe-outcome-store.service";
 import { SearchCriteriaStore } from "@stores/search-criteria/search-criteria-store.service";
 import { generateSwipeStackResponse, profileFromDatabase } from "@interfaces/index";
-import { AngularFireStorage } from "@angular/fire/storage";
+import { AngularFireStorage } from "@angular/fire/compat/storage";
 // import { StackPicturesService } from "@services/pictures/stack-pictures/stack-pictures.service";
 
 @Injectable({

@@ -8,14 +8,14 @@ import {
   Output,
 } from "@angular/core";
 import { Subject, Subscription } from "rxjs";
-import { debounceTime } from "rxjs/operators";
+import { debounceTime, map, throttle, throttleTime } from "rxjs/operators";
 
 @Directive({
-  selector: "[appDebounceClick]",
+  selector: "[debounceClick]",
 })
 export class DebounceClickDirective implements OnInit, OnDestroy {
   @Input()
-  debounceTime = 500;
+  debounceTime = 1000;
 
   @Output()
   debounceClick = new EventEmitter();
@@ -27,8 +27,11 @@ export class DebounceClickDirective implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.subscription = this.clicks
-      .pipe(debounceTime(this.debounceTime))
-      .subscribe((e) => this.debounceClick.emit(e));
+      .pipe(
+        throttleTime(this.debounceTime),
+        map((e) => this.debounceClick.emit(e))
+      )
+      .subscribe((e) => console.log("debounced click"));
   }
 
   ngOnDestroy() {
@@ -37,7 +40,6 @@ export class DebounceClickDirective implements OnInit, OnDestroy {
 
   @HostListener("click", ["$event"])
   clickEvent(event) {
-    console.log("click event", event);
     event.preventDefault();
     event.stopPropagation();
     this.clicks.next(event);

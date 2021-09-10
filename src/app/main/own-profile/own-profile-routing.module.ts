@@ -1,13 +1,13 @@
-import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
+import { NgModule } from "@angular/core";
+import { Routes, RouterModule } from "@angular/router";
 
-import { OwnProfilePage } from './own-profile.page';
+import { OwnProfilePage } from "./own-profile.page";
 
 const routes: Routes = [
   {
-    path: '',
-    component: OwnProfilePage
-  }
+    path: "",
+    component: OwnProfilePage,
+  },
 ];
 
 @NgModule({

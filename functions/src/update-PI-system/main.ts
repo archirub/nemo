@@ -54,10 +54,8 @@ export const updatePISystem = functions
     ]);
 
     // MERGING UIDSTORAGE ARRAYS THAT HAVE SAME COMBINATION DEGREE/GENDER/SEXPREF
-    const uidStorageArrays: Omit<
-      uidDatingStorage,
-      "volume"
-    >[] = concatSameDemographicDocs(currentUidStorageDocs.docs.map((doc) => doc.data()));
+    const uidStorageArrays: Omit<uidDatingStorage, "volume">[] =
+      concatSameDemographicDocs(currentUidStorageDocs.docs.map((doc) => doc.data()));
 
     // CALCULATE MEAN AND VARIANCE OF PI DISTRIBUTIONS
     // (removed those who don't want to show their profiles or that are not in dating mode)
@@ -99,24 +97,23 @@ export const updatePISystem = functions
       const peopleCount =
         newDemographicScoreMaps[demographic as keyof demographicMap<any>].length;
 
-      newUIDStorageArrays[
-        demographic as keyof demographicMap<any>
-      ] = newDemographicScoreMaps[demographic as keyof demographicMap<any>]
-        .sort((a, b) => a.score - b.score)
-        .map((user, index) => {
-          const i = swipeUserInfo.findIndex((map) => map.hasOwnProperty(user.uid));
-          if (i !== -1) {
-            swipeUserInfo[i][user.uid].percentile = (index + 1) / peopleCount;
-            swipeUserInfo[i][user.uid].seenCount = 0;
-            swipeUserInfo[i][user.uid].likeCount = 0;
-          } else {
-            functions.logger.warn(
-              `User with id ${user.uid} was not found in the uidStorageDocuments`
-            );
-          }
+      newUIDStorageArrays[demographic as keyof demographicMap<any>] =
+        newDemographicScoreMaps[demographic as keyof demographicMap<any>]
+          .sort((a, b) => a.score - b.score)
+          .map((user, index) => {
+            const i = swipeUserInfo.findIndex((map) => map.hasOwnProperty(user.uid));
+            if (i !== -1) {
+              swipeUserInfo[i][user.uid].percentile = (index + 1) / peopleCount;
+              swipeUserInfo[i][user.uid].seenCount = 0;
+              swipeUserInfo[i][user.uid].likeCount = 0;
+            } else {
+              functions.logger.warn(
+                `User with id ${user.uid} was not found in the uidStorageDocuments`
+              );
+            }
 
-          return user.uid;
-        });
+            return user.uid;
+          });
     }
 
     // FORMATS DEMOGRAPHIC ARRAYS TO DATABASE DOC FORMAT
@@ -302,11 +299,8 @@ function updateDistributionParameters(
     const PI = computePI(likeCount, seenCount);
     if (PI == null) return;
 
-    const demographicPropName: keyof demographicMap<distributionParameters> = demographicCombineString(
-      degree,
-      gender,
-      sexualPreference
-    );
+    const demographicPropName: keyof demographicMap<distributionParameters> =
+      demographicCombineString(degree, gender, sexualPreference);
 
     // CASE WHERE MEAN/VARIANCE HAVEN'T BEEN INITIALIZED YET
     if (
@@ -380,7 +374,8 @@ function demographicCombineString(
   gender: "male" | "female",
   sexualPreference: "male" | "female"
 ): keyof demographicMap<distributionParameters> {
-  const a = `${degree}_${gender}_${sexualPreference}` as keyof demographicMap<distributionParameters>;
+  const a =
+    `${degree}_${gender}_${sexualPreference}` as keyof demographicMap<distributionParameters>;
   return a;
 }
 

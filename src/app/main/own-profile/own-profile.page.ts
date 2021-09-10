@@ -10,7 +10,7 @@ import {
 } from "@angular/core";
 
 import { BehaviorSubject, forkJoin, from, Observable, of, Subscription } from "rxjs";
-import { User, Profile } from "@classes/index";
+import { AppUser, Profile } from "@classes/index";
 import { CurrentUserStore } from "@stores/index";
 import { ProfileCardComponent } from "@components/index";
 import { ProfileCourseComponent } from "./profile-course/profile-course.component";
@@ -65,6 +65,8 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
 
   @ViewChild("toggleDiv", { read: ElementRef }) toggleDiv: ElementRef;
 
+  appUser$: Observable<AppUser>;
+
   private ownPicturesSub: Subscription;
   picsLoaded$: Observable<boolean>;
 
@@ -102,7 +104,9 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     private tabElementRef: TabElementRefService,
     private modalCtrl: ModalController,
     private loadingCtrl: LoadingController
-  ) {}
+  ) {
+    this.appUser$ = this.currentUserStore.user$;
+  }
 
   interestModal: HTMLIonModalElement;
   intEnterAnimation;
@@ -202,7 +206,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     return questionsOptions.filter((option) => !questionsPicked.includes(option));
   }
 
-  updateEditableFields(data: User | Profile | editableProfileFields): void {
+  updateEditableFields(data: AppUser | Profile | editableProfileFields): void {
     Object.keys(this.editableFields).forEach((field) => {
       if (!data?.[field]) return;
 

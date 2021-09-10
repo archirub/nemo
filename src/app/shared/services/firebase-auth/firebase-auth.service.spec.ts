@@ -1,8 +1,8 @@
-import { TestBed } from '@angular/core/testing';
+import { TestBed } from "@angular/core/testing";
 
-import { FirebaseAuthService } from './firebase-auth.service';
+import { FirebaseAuthService } from "./firebase-auth.service";
 
-describe('FirebaseAuthService', () => {
+describe("FirebaseAuthService", () => {
   let service: FirebaseAuthService;
 
   beforeEach(() => {
@@ -10,7 +10,7 @@ describe('FirebaseAuthService', () => {
     service = TestBed.inject(FirebaseAuthService);
   });
 
-  it('should be created', () => {
+  it("should be created", () => {
     expect(service).toBeTruthy();
   });
 });

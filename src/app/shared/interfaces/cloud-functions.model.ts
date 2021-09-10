@@ -62,3 +62,5 @@ export type profileEditingByUserRequest = {
 };
 
 export type deleteAccountRequest = {};
+
+export type checkEmailValidityRequest = { email: string };

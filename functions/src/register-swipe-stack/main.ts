@@ -90,9 +90,11 @@ export const registerSwipeChoices = functions
     }
   });
 
-function separateChoices(
-  choices: uidChoiceMap[]
-): { yes: string[]; no: string[]; superLike: string[] } {
+function separateChoices(choices: uidChoiceMap[]): {
+  yes: string[];
+  no: string[];
+  superLike: string[];
+} {
   if (!choices) return { yes: [], no: [], superLike: [] };
 
   const yes: string[] = [];

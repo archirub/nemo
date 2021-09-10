@@ -10,79 +10,81 @@ import {
 // NEED TO BE ADDED THERE IF "ADD", AND A PROPERTY OF THE DOC SUCH AS active SHOULD BE TURNED
 // TO FALSE IF IT SAYS "REMOVE"
 
-export const addOrRemoveReported = functions.region("europe-west2").https.onCall(
-  async (data: addOrRemoveReportedRequest, context): Promise<successResponse> => {
-    const action = data.action;
-    const uid = data.uid;
-    const reporteduid = data.reporteduid;
-    const description = data.description;
+export const addOrRemoveReported = functions
+  .region("europe-west2")
+  .https.onCall(
+    async (data: addOrRemoveReportedRequest, context): Promise<successResponse> => {
+      const action = data.action;
+      const uid = data.uid;
+      const reporteduid = data.reporteduid;
+      const description = data.description;
 
-    if (!["add", "remove"].includes(action)) return { successful: false };
-    try {
-      const user = await admin.auth().getUser(uid).catch();
-      const reporteduser = await admin.auth().getUser(reporteduid);
-    } catch (e) {
-      console.error(
-        `one of these uids doesn't correspond to any account: ${uid} ${reporteduid}, ${e}`
-      );
-      return { successful: false };
-    }
+      if (!["add", "remove"].includes(action)) return { successful: false };
+      try {
+        const user = await admin.auth().getUser(uid).catch();
+        const reporteduser = await admin.auth().getUser(reporteduid);
+      } catch (e) {
+        console.error(
+          `one of these uids doesn't correspond to any account: ${uid} ${reporteduid}, ${e}`
+        );
+        return { successful: false };
+      }
 
-    const mdMainRef = admin.firestore().collection("matchData").doc(uid);
-    const mdDatingRef = admin
-      .firestore()
-      .collection("matchData")
-      .doc(uid)
-      .collection("pickingData")
-      .doc("dating");
-
-    // uncomment once friend feature is implemented
-    // const mdFriendRef = admin
-    //   .firestore()
-    //   .collection("matchData")
-    //   .doc(uid)
-    //   .collection("pickingData")
-    //   .doc("friend");
-
-    const batch = admin.firestore().batch();
-
-    if (action === "add") {
-      const reportedDateMap: dateMap = {
-        exists: true,
-        date: admin.firestore.Timestamp.fromDate(new Date()),
-      };
-
-      batch.update(mdMainRef, {
-        [`reportedUsers.${reporteduid}`]: reportedDateMap,
-      });
-
-      batch.update(mdDatingRef, {
-        [`reportedUsers.${reporteduid}`]: reportedDateMap,
-      });
+      const mdMainRef = admin.firestore().collection("matchData").doc(uid);
+      const mdDatingRef = admin
+        .firestore()
+        .collection("matchData")
+        .doc(uid)
+        .collection("pickingData")
+        .doc("dating");
 
       // uncomment once friend feature is implemented
-      // batch.update(mdFriendRef, {
-      //   [`reportedUsers.${reporteduid}`]: reportedDateMap,
-      // });
-    } else if (action === "remove") {
-      batch.update(mdMainRef, {
-        [`reportedUsers.${reporteduid}`]: admin.firestore.FieldValue.delete(),
-      });
+      // const mdFriendRef = admin
+      //   .firestore()
+      //   .collection("matchData")
+      //   .doc(uid)
+      //   .collection("pickingData")
+      //   .doc("friend");
 
-      batch.update(mdDatingRef, {
-        [`reportedUsers.${reporteduid}`]: admin.firestore.FieldValue.delete(),
-      });
+      const batch = admin.firestore().batch();
 
-      // uncomment once friend feature is implemented
-      // batch.update(mdFriendRef, {
-      //   [`reportedUsers.${reporteduid}`]: admin.firestore.FieldValue.delete(),
-      // });
+      if (action === "add") {
+        const reportedDateMap: dateMap = {
+          exists: true,
+          date: admin.firestore.Timestamp.fromDate(new Date()) as any,
+        };
+
+        batch.update(mdMainRef, {
+          [`reportedUsers.${reporteduid}`]: reportedDateMap,
+        });
+
+        batch.update(mdDatingRef, {
+          [`reportedUsers.${reporteduid}`]: reportedDateMap,
+        });
+
+        // uncomment once friend feature is implemented
+        // batch.update(mdFriendRef, {
+        //   [`reportedUsers.${reporteduid}`]: reportedDateMap,
+        // });
+      } else if (action === "remove") {
+        batch.update(mdMainRef, {
+          [`reportedUsers.${reporteduid}`]: admin.firestore.FieldValue.delete(),
+        });
+
+        batch.update(mdDatingRef, {
+          [`reportedUsers.${reporteduid}`]: admin.firestore.FieldValue.delete(),
+        });
+
+        // uncomment once friend feature is implemented
+        // batch.update(mdFriendRef, {
+        //   [`reportedUsers.${reporteduid}`]: admin.firestore.FieldValue.delete(),
+        // });
+      }
+      try {
+        await batch.commit();
+        return { successful: true };
+      } catch (e) {
+        return { successful: false };
+      }
     }
-    try {
-      await batch.commit();
-      return { successful: true };
-    } catch (e) {
-      return { successful: false };
-    }
-  }
-);
+  );

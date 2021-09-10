@@ -138,9 +138,10 @@
               <ion-label position="stacked"> Add some questions </ion-label>
             </div>
             <question-slides
-            #qSlides
-            (questionDeleted)="this.removeQuestion($event)"
-            formArrayName="questions">
+              #qSlides
+              (questionDeleted)="this.removeQuestion($event)"
+              formArrayName="questions"
+            >
             </question-slides>
           </div>
 
@@ -172,11 +173,13 @@
               <ion-label position="stacked"> Got any interests? </ion-label>
             </div>
 
-            <interests-slides
+            <!-- TO FIX BY LINKING TO TEMPLATE -->
+            <interests-slides #interestSlides [listed]="false"></interests-slides>
+            <!-- <interests-slides
               #interestSlides
-              [(interests)]="form.get('interests').value"
               [listed]="false"
-            ></interests-slides>
+              [(interests)]="form.get('interests').value"
+            ></interests-slides> -->
 
             <div class="skipdiv-multiple">
               <p class="tip-center">You can choose a maximum of three interests.</p>
@@ -210,17 +213,20 @@
             </div>
 
             <div class="bio input">
-              <ion-textarea 
-              maxlength="150" 
-              formControlName="biography" 
-              autoGrow="true"
-              placeholder="Write about yourself!">
-            </ion-textarea>
+              <ion-textarea
+                maxlength="150"
+                formControlName="biography"
+                autoGrow="true"
+                placeholder="Write about yourself!"
+              >
+              </ion-textarea>
             </div>
 
             <div class="skipdiv">
               <p class="tip-center">Maximum 150 characters.</p>
-              <p class="tip-center">These details are optional and can be changed later.</p>
+              <p class="tip-center">
+                These details are optional and can be changed later.
+              </p>
             </div>
 
             <div class="buttons">

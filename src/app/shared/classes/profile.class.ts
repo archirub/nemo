@@ -3,7 +3,7 @@ import {
   profilePicturePaths,
   SocialMediaLink,
   QuestionAndAnswer,
-  University,
+  UniversityName,
   OnCampus,
   Degree,
   Interests,
@@ -18,7 +18,7 @@ export class Profile implements profile {
   private _pictureCount: number;
   private _pictureUrls: string[];
   private _biography: string;
-  private _university: University;
+  private _university: UniversityName;
   private _course: string;
   private _society: string;
   private _societyCategory: SocietyCategory;
@@ -36,7 +36,7 @@ export class Profile implements profile {
     pictureCount: number,
     pictureUrls: string[],
     biography: string,
-    university: University,
+    university: UniversityName,
     course: string,
     society: string,
     societyCategory: SocietyCategory,
@@ -106,10 +106,10 @@ export class Profile implements profile {
     this._biography = value;
   }
 
-  public get university(): University {
+  public get university(): UniversityName {
     return this._university;
   }
-  public set university(value: University) {
+  public set university(value: UniversityName) {
     this._university = value;
   }
 

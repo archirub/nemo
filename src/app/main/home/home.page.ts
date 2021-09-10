@@ -28,7 +28,7 @@ import {
 
 import { TabElementRefService } from "src/app/main/tab-menu/tab-element-ref.service";
 import { SwipeCardComponent } from "./swipe-card/swipe-card.component";
-import { AngularFireStorage } from "@angular/fire/storage";
+import { AngularFireStorage } from "@angular/fire/compat/storage";
 import { OwnPicturesStore } from "@stores/pictures/own-pictures/own-pictures.service";
 
 @Component({
@@ -37,7 +37,10 @@ import { OwnPicturesStore } from "@stores/pictures/own-pictures/own-pictures.ser
   styleUrls: ["home.page.scss"],
 })
 export class HomePage implements OnInit, OnDestroy {
-  swipeProfiles: Observable<Profile[]>;
+  log() {
+    console.log("click fam");
+  }
+  swipeProfiles$: Observable<Profile[]>;
 
   private swipeStackSub: Subscription;
 
@@ -86,7 +89,9 @@ export class HomePage implements OnInit, OnDestroy {
   currentUser; //profile
   currentUserSub; //subscription
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.swipeProfiles$ = this.swipeStackStore.profiles$;
+  }
 
   /**
    * Temporary, just for development, to avoid fetching the stack on each reload / document save

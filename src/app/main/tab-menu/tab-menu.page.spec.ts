@@ -1,16 +1,16 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { IonicModule } from '@ionic/angular';
+import { async, ComponentFixture, TestBed } from "@angular/core/testing";
+import { IonicModule } from "@ionic/angular";
 
-import { TabMenuPage } from './tab-menu.page';
+import { TabMenuPage } from "./tab-menu.page";
 
-describe('TabMenuPage', () => {
+describe("TabMenuPage", () => {
   let component: TabMenuPage;
   let fixture: ComponentFixture<TabMenuPage>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ TabMenuPage ],
-      imports: [IonicModule.forRoot()]
+      declarations: [TabMenuPage],
+      imports: [IonicModule.forRoot()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(TabMenuPage);
@@ -18,7 +18,7 @@ describe('TabMenuPage', () => {
     fixture.detectChanges();
   }));
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

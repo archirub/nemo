@@ -1,11 +1,11 @@
-import { AngularFireFunctions } from "@angular/fire/functions";
+import { AngularFireFunctions } from "@angular/fire/compat/functions";
 import { Injectable } from "@angular/core";
-import { AngularFireAuth } from "@angular/fire/auth";
-import { AngularFirestore } from "@angular/fire/firestore";
+import { AngularFireAuth } from "@angular/fire/compat/auth";
+import { AngularFirestore } from "@angular/fire/compat/firestore";
 
 import { BehaviorSubject, forkJoin, from, Observable, of } from "rxjs";
 
-import { Profile, SearchCriteria, User } from "@classes/index";
+import { Profile, SearchCriteria, AppUser } from "@classes/index";
 import {
   getMatchDataUserInfoResponse,
   privateProfileFromDatabase,
@@ -33,8 +33,8 @@ import { isEqual } from "lodash";
   providedIn: "root",
 })
 export class CurrentUserStore {
-  private user: BehaviorSubject<User> = new BehaviorSubject<User>(null);
-  public readonly user$: Observable<User> = this.user.asObservable();
+  private user: BehaviorSubject<AppUser> = new BehaviorSubject<AppUser>(null);
+  public readonly user$: Observable<AppUser> = this.user.asObservable();
 
   constructor(
     private afAuth: AngularFireAuth,
@@ -44,36 +44,10 @@ export class CurrentUserStore {
     private SCstore: SearchCriteriaStore
   ) {}
 
-  // updateProfile(newProfile: Profile): Observable<void> {
-  //   return this.afAuth.user.pipe(
-  //     take(1),
-  //     withLatestFrom(this.user$),
-  //     switchMap(([userAuth, userData]) => {
-  //       if (!userAuth) throw "no user authenticated";
-
-  //       return from(
-  //         this.fs
-  //           .collection("profiles")
-  //           .doc(userAuth.uid)
-  //           .set(this.format.profileClassToDatabase(newProfile))
-  //       ).pipe(map(() => userData));
-  //     }),
-  //     map((userData) => {
-  //       Object.entries(this.format.profileClassToDatabase(newProfile)).forEach(
-  //         ([key, value]) => {
-  //           userData[key] = value;
-  //         }
-  //       );
-
-  //       this.user.next(userData);
-  //     })
-  //   );
-  // }
-
   updateLatestSearchCriteriaOnDb(searchCriteria: SearchCriteria) {}
 
   /** Fetches info from database to update the User BehaviorSubject */
-  fillStore(): Observable<{
+  public fillStore(): Observable<{
     profileSuccess: boolean;
     privateProfileSuccess: boolean;
     matchDataSuccess: boolean;
@@ -119,7 +93,7 @@ export class CurrentUserStore {
 
         this.SCstore.initalizeThroughCurrentUserStore(latestSearchCriteria);
 
-        const user: User = new User(
+        const user: AppUser = new AppUser(
           profile?.uid,
           profile?.firstName,
           profile?.dateOfBirth,
@@ -160,7 +134,7 @@ export class CurrentUserStore {
     );
   }
 
-  updateFieldsOnDatabase(
+  public updateFieldsOnDatabase(
     editableFields: editableProfileFields
   ): Observable<successResponse | {}> {
     const requestData: profileEditingByUserRequest = { data: editableFields };
@@ -206,8 +180,30 @@ export class CurrentUserStore {
     );
   }
 
-  resetStore() {
+  public resetStore() {
     this.user.next(null);
+  }
+
+  /**
+   * Used in own-pictures store when updating pictures
+   */
+  public updatePictureCount(newCount: number): Observable<any> {
+    return this.afAuth.user.pipe(
+      withLatestFrom(this.user$),
+      take(1),
+      switchMap(([authUser, storeUser]) => {
+        if (!authUser) return of();
+
+        storeUser.pictureCount = newCount;
+
+        return from(
+          this.fs
+            .collection("profiles")
+            .doc(authUser.uid)
+            .update({ pictureCount: newCount })
+        ).pipe(map(() => this.user.next(storeUser)));
+      })
+    );
   }
 
   /** From the user's id, returns a Profile object containing info from
@@ -283,24 +279,5 @@ export class CurrentUserStore {
           return of(null);
         })
       );
-  }
-
-  updatePictureCount(newCount: number): Observable<any> {
-    return this.afAuth.user.pipe(
-      withLatestFrom(this.user$),
-      take(1),
-      switchMap(([authUser, storeUser]) => {
-        if (!authUser) return of();
-
-        storeUser.pictureCount = newCount;
-
-        return from(
-          this.fs
-            .collection("profiles")
-            .doc(authUser.uid)
-            .update({ pictureCount: newCount })
-        ).pipe(map(() => this.user.next(storeUser)));
-      })
-    );
   }
 }

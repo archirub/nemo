@@ -15,7 +15,7 @@ import {
   SocialMediaLink,
   SocietyCategory,
   SwipeMode,
-  University,
+  UniversityName,
 } from "@interfaces/index";
 
 export class SignupDataHolder implements signupDataHolder {
@@ -28,7 +28,7 @@ export class SignupDataHolder implements signupDataHolder {
   gender: Gender | null;
   sexualPreference: SexualPreference | null;
   degree: Degree | null;
-  university: University | null;
+  university: UniversityName | null;
   pictures: string[] | null;
   biography: string | null;
   course: string | null;
@@ -140,7 +140,7 @@ export class BaselineUser extends AuthenticatedUser implements SignupRequired {
   private _gender: Gender;
   private _sexualPreference: SexualPreference;
   private _pictures: string[];
-  private _university: University;
+  private _university: UniversityName;
   private _degree: Degree;
   //   private _swipeMode: SwipeMode;
 
@@ -179,10 +179,10 @@ export class BaselineUser extends AuthenticatedUser implements SignupRequired {
     this._pictures = value;
   }
 
-  public get university(): University {
+  public get university(): UniversityName {
     return this._university;
   }
-  public set university(value: University) {
+  public set university(value: UniversityName) {
     this._university = value;
   }
 

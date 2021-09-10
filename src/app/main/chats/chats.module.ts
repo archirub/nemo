@@ -11,15 +11,21 @@ import { ChatBoardComponent } from "./chat-board/chat-board.component";
 import { MatchesComponent } from "./matches/matches.component";
 import { InfiniteScrollComponent } from "@components/infinite-scroll/infinite-scroll.component";
 import { ReportUserComponent } from "./report-user/report-user.component";
+import { ReportUserModule } from "./report-user/report-user.module";
 
 @NgModule({
-  imports: [CommonModule, FormsModule, IonicModule, ChatsPageRoutingModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    IonicModule,
+    ChatsPageRoutingModule,
+    ReportUserModule,
+  ],
   declarations: [
     ChatsPage,
     ChatBoardComponent,
     MatchesComponent,
     InfiniteScrollComponent,
-    ReportUserComponent,
   ],
 })
 export class ChatsPageModule {}

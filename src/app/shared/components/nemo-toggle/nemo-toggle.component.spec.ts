@@ -1,16 +1,16 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { IonicModule } from '@ionic/angular';
+import { async, ComponentFixture, TestBed } from "@angular/core/testing";
+import { IonicModule } from "@ionic/angular";
 
-import { AppToggleComponent } from './nemo-toggle.component';
+import { AppToggleComponent } from "./nemo-toggle.component";
 
-describe('AppToggleComponent', () => {
+describe("AppToggleComponent", () => {
   let component: AppToggleComponent;
   let fixture: ComponentFixture<AppToggleComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ AppToggleComponent ],
-      imports: [IonicModule.forRoot()]
+      declarations: [AppToggleComponent],
+      imports: [IonicModule.forRoot()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(AppToggleComponent);
@@ -18,7 +18,7 @@ describe('AppToggleComponent', () => {
     fixture.detectChanges();
   }));
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

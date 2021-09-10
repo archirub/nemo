@@ -4,28 +4,23 @@ import { AnimationController } from "@ionic/angular";
 
 export const IntEnterAnimation = (
   tabComponent: ElementRef<any>,
-  pageComponent: ElementRef<any>,
+  pageComponent: ElementRef<any>
 ) => {
-
   const animation = (baseEl: any) => {
     // MODAL
     const wrapperAnimation = new AnimationController()
       .create()
       .addElement(baseEl.querySelector(".modal-wrapper")!)
       .duration(350)
-      .easing('ease-in-out')
+      .easing("ease-in-out")
       .beforeStyles({
         height: "90vh",
         width: "90vw",
-        '--border-radius': '20px',
-        opacity: '1',
-        overflow: 'inherit'
+        "--border-radius": "20px",
+        opacity: "1",
+        overflow: "inherit",
       })
-      .fromTo(
-        "transform",
-        "translate3d(0,100%,0)",
-        "translate3d(0,0,0)"
-      );
+      .fromTo("transform", "translate3d(0,100%,0)", "translate3d(0,0,0)");
 
     // ALL CONTENT BELOW MODAL
     const contentAnimation = new AnimationController()
@@ -46,24 +41,17 @@ export const IntEnterAnimation = (
       .addElement(baseEl)
       .easing("ease-out")
       .duration(200)
-      .addAnimation([
-        backdropAnimation,
-        wrapperAnimation,
-        contentAnimation,
-      ]);
+      .addAnimation([backdropAnimation, wrapperAnimation, contentAnimation]);
   };
   return animation;
 };
 
 export const IntLeaveAnimation = (
   tabComponent: ElementRef<any>,
-  pageComponent: ElementRef<any>,
+  pageComponent: ElementRef<any>
 ) => {
   const animation = (baseEl) => {
-    return IntEnterAnimation(
-      tabComponent,
-      pageComponent,
-    )(baseEl).direction("reverse");
+    return IntEnterAnimation(tabComponent, pageComponent)(baseEl).direction("reverse");
   };
   return animation;
 };

@@ -30,7 +30,7 @@ import {
   SwipeOutcomeStore,
   SwipeStackStore,
 } from "@stores/index";
-import { Profile, User } from "@classes/index";
+import { Profile, AppUser } from "@classes/index";
 import { ProfileCardComponent } from "@components/index";
 import {
   SwipeYesAnimation,
@@ -67,7 +67,7 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
     this.screenWidth = window.innerWidth;
   }
 
-  currentUser: User;
+  currentUser: AppUser;
   currentUserSub: Subscription;
 
   timeOfLatestCardTap = 0; // in millisecond; set to 0 when we want the diff with current time to be larger than threshold

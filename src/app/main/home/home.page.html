@@ -1,4 +1,8 @@
-<ion-button style="z-index: 100; position: absolute" (click)="activateSwipeStack()"
+<ion-button
+  style="z-index: 100; position: absolute"
+  debounceClick
+  (debounceClick)="activateSwipeStack()"
+  debounceTime="5000"
   >Activate swipe stack (dev)</ion-button
 >
 
@@ -31,7 +35,7 @@
       </ion-button>
     </div>
     <app-swipe-card
-      [profiles$]="swipeStackStore.profiles$"
+      [profiles$]="swipeProfiles$"
       (matched)="playCatch($event)"
     ></app-swipe-card>
   </div>

@@ -37,9 +37,7 @@ export function pageTransition(_: HTMLElement, opts: TransitionOptions) {
     .beforeRemoveClass("ion-page-invisible");
 
   // create animation for the leaving page
-  const leavingPage = createAnimation().addElement(
-    getIonPageElement(opts.leavingEl)
-  );
+  const leavingPage = createAnimation().addElement(getIonPageElement(opts.leavingEl));
 
   // actual customized animation
   if (opts.direction === "forward") {

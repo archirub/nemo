@@ -1,6 +1,8 @@
+import { universityList } from "./universities.model";
+
 // DO NOT ADD ANY FIELDS
 export const searchCriteriaOptions = {
-  university: ["UCL" as const, "KCL" as const],
+  university: universityList,
 
   // DO NOT CHANGE
   degree: ["undergrad" as const, "postgrad" as const],
@@ -104,7 +106,6 @@ export type SearchFeatures = Omit<searchCriteria, "interests"> & {
   interests: typeof searchCriteriaOptions["interests"][number][];
 };
 
-export type University = typeof searchCriteriaOptions.university[number];
 export type AreaOfStudy = typeof searchCriteriaOptions.areaOfStudy[number]; //MOCK DATA
 export type Degree = typeof searchCriteriaOptions.degree[number];
 export type SocietyCategory = typeof searchCriteriaOptions.societyCategory[number];

@@ -3,9 +3,9 @@ import { Profile } from "./profile.class";
 import {
   SocialMediaLink,
   QuestionAndAnswer,
-  University,
+  UniversityName,
   OnCampus,
-  user,
+  appUser,
   Settings,
   Degree,
   Interests,
@@ -15,7 +15,7 @@ import {
   SocietyCategory,
 } from "@interfaces/index";
 
-export class User extends Profile implements user {
+export class AppUser extends Profile implements appUser {
   private _settings: Settings;
   private _latestSearchCriteria: allowOptionalProp<searchCriteria>;
   private _gender: Gender;
@@ -30,7 +30,7 @@ export class User extends Profile implements user {
     pictureCount: number,
     pictureUrls: string[],
     biography: string,
-    university: University,
+    university: UniversityName,
     course: string,
     society: string,
     societyCategory: SocietyCategory,

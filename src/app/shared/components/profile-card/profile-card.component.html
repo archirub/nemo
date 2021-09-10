@@ -43,7 +43,7 @@
   </div> -->
   <!-- <div id="photo-shadow"></div> -->
   <div id="info" button>
-    <div #snippet id="snippetInfo" [hidden]="moreInfo" (click)="expandProfile($event)">
+    <div #snippet id="snippetInfo" [hidden]="moreInfo" (click)="expandProfile()">
       <ion-card-header class="name-age">
         <ion-card-title #name
           >{{ profile?.firstName }}, {{ profile?.dateOfBirth | age }}</ion-card-title
@@ -54,7 +54,7 @@
       </ion-card-header>
     </div>
     <div #complete id="completeInfo" [hidden]="!moreInfo">
-      <ion-card-header #header class="name-age sticky" (click)="expandProfile($event)">
+      <ion-card-header #header class="name-age sticky" (click)="expandProfile()">
         <ion-card-title
           >{{ profile?.firstName }}, {{ profile?.dateOfBirth | age }}
         </ion-card-title>
@@ -73,12 +73,13 @@
         >
           <!--INTERESTS IN THE DATABASE DON'T CURRENTLY MATCH LOCAL, THIS IS NOT WIRED UP FOR ICONS -->
           <div id="interests-container">
-            <ion-slides 
-            #intSlides 
-            class="interests-slides" 
-            *ngIf="this.interestsBuilt"
-            (ionSlideTouchStart)='stopSlides()'
-            [options]="{autoplay: true}">
+            <ion-slides
+              #intSlides
+              class="interests-slides"
+              *ngIf="this.interestsBuilt"
+              (ionSlideTouchStart)="stopSlides()"
+              [options]="{ autoplay: true }"
+            >
               <ion-slide *ngFor="let slide of interestSlideContent">
                 <div id="interests-box" *ngFor="let interest of slide">
                   <img
@@ -114,8 +115,12 @@
           <div id="interests-container" class="centered">
             <div id="interests-box-soc">
               <div class="interests-text">
-                <ion-label id="interests-label" *ngIf="profile.onCampus === true">On Campus</ion-label>
-                <ion-label id="interests-label" *ngIf="profile.onCampus === false">Off Campus</ion-label>
+                <ion-label id="interests-label" *ngIf="profile.onCampus === true"
+                  >On Campus</ion-label
+                >
+                <ion-label id="interests-label" *ngIf="profile.onCampus === false"
+                  >Off Campus</ion-label
+                >
               </div>
               <ion-icon
                 name="location"

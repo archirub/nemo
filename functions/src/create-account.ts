@@ -1,4 +1,5 @@
 import {
+  additionalEmailsAllowedDocument,
   createAccountRequest,
   genderOptions,
   Interests,
@@ -18,9 +19,11 @@ import {
   swipeModeOptions,
   SwipeUserInfo,
   uidDatingStorage,
+  universitiesAllowedDocument,
 } from "./../../src/app/shared/interfaces/index";
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
+import { emailIsAllowed } from "./check-email-validity";
 
 type DataChecker = {
   [key in keyof createAccountRequest]: {
@@ -41,7 +44,26 @@ export const createAccount = functions
     const MAX_UID_COUNT_PI_STORAGE = 2000;
 
     if (!context.auth)
-      throw new functions.https.HttpsError("unauthenticated", "User not authenticated.");
+      throw new functions.https.HttpsError(
+        "unauthenticated",
+        "User is not authenticated."
+      );
+
+    const emailAllowed = context.auth.token?.email
+      ? await checkEmailIsAllowed(context.auth.token?.email)
+      : false;
+
+    if (!emailAllowed)
+      throw new functions.https.HttpsError(
+        "permission-denied",
+        "User email is not allowed"
+      );
+
+    if (!context.auth.token?.email_verified)
+      throw new functions.https.HttpsError(
+        "permission-denied",
+        "User email is not verified"
+      );
 
     const uid: string = context.auth.uid;
 
@@ -416,6 +438,32 @@ interface demographicMap {
   degree: "undergrad" | "postgrad";
 }
 
+async function checkEmailIsAllowed(emailToCheck: string): Promise<boolean> {
+  const additionalEmailsAllowed = (
+    (
+      await admin.firestore().collection("admin").doc("additionalEmailsAllowed").get()
+    ).data() as additionalEmailsAllowedDocument
+  ).list;
+
+  const universitiesAllowed = (
+    (
+      await admin.firestore().collection("admin").doc("universitiesAllowed").get()
+    ).data() as universitiesAllowedDocument
+  ).list;
+
+  const universityDomains = universitiesAllowed.map((info) => info.emailDomain);
+
+  const isAllowed = emailIsAllowed(
+    emailToCheck,
+    universityDomains,
+    additionalEmailsAllowed
+  );
+
+  if (!isAllowed) return false;
+
+  return true;
+}
+
 function addToUidDatingStorage(
   transaction: admin.firestore.Transaction,
   uidStorageDocuments: FirebaseFirestore.QuerySnapshot<uidDatingStorage>[],
@@ -497,7 +545,7 @@ function addToProfile(
 ) {
   const profile: profileFromDatabase = {
     firstName: data.firstName,
-    dateOfBirth: admin.firestore.Timestamp.fromDate(new Date(data.dateOfBirth)),
+    dateOfBirth: admin.firestore.Timestamp.fromDate(new Date(data.dateOfBirth)) as any,
     pictureCount: data.picturesCount,
     biography: data.biography,
     university: data.university,

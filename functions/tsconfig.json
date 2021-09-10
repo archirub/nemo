@@ -31,5 +31,7 @@
   "include": [
     "src"
   ],
-
+  "types": [
+    "firebase"
+ ],
 }

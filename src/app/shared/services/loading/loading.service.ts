@@ -36,6 +36,7 @@ export class LoadingService {
   defaultLoadingOptions: LoadingOptions = {
     spinner: "bubbles",
     translucent: true,
+    backdropDismiss: false,
   };
 
   /**

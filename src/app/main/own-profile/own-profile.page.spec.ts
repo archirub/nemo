@@ -1,16 +1,16 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { IonicModule } from '@ionic/angular';
+import { async, ComponentFixture, TestBed } from "@angular/core/testing";
+import { IonicModule } from "@ionic/angular";
 
-import { OwnProfilePage } from './own-profile.page';
+import { OwnProfilePage } from "./own-profile.page";
 
-describe('OwnProfilePage', () => {
+describe("OwnProfilePage", () => {
   let component: OwnProfilePage;
   let fixture: ComponentFixture<OwnProfilePage>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ OwnProfilePage ],
-      imports: [IonicModule.forRoot()]
+      declarations: [OwnProfilePage],
+      imports: [IonicModule.forRoot()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(OwnProfilePage);
@@ -18,7 +18,7 @@ describe('OwnProfilePage', () => {
     fixture.detectChanges();
   }));
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

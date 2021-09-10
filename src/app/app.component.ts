@@ -1,7 +1,7 @@
 import { Platform } from "@ionic/angular";
 import { Component, OnInit, OnDestroy } from "@angular/core";
 
-import { AngularFireAuth } from "@angular/fire/auth";
+import { AngularFireAuth } from "@angular/fire/compat/auth";
 import { Plugins, Capacitor } from "@capacitor/core";
 import { ReplaySubject, Subscription } from "rxjs";
 
@@ -45,5 +45,9 @@ export class AppComponent implements OnDestroy, OnInit {
     }
 
     this.appGlobalStateManagementSub = this.GlobalStateManagement.activate().subscribe();
+  }
+
+  onRouterOutletActivation() {
+    this.routerInitListener.onRouterOutletActivation();
   }
 }

@@ -27,5 +27,8 @@
   "angularCompilerOptions": {
     "fullTemplateTypeCheck": true,
     "strictInjectionParameters": true
-  }
+  },
+  "types": [
+    "firebase"
+ ],
 }

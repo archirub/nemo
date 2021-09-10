@@ -1,9 +1,9 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Router } from "@angular/router";
-import { AngularFireStorage } from "@angular/fire/storage";
-import { AngularFireFunctions } from "@angular/fire/functions";
-import { AngularFireAuth } from "@angular/fire/auth";
+import { AngularFireStorage } from "@angular/fire/compat/storage";
+import { AngularFireFunctions } from "@angular/fire/compat/functions";
+import { AngularFireAuth } from "@angular/fire/compat/auth";
 
 import { Plugins } from "@capacitor/core";
 import {
@@ -42,8 +42,9 @@ import {
   successResponse,
 } from "@interfaces/index";
 import { SignupDataHolder } from "@classes/index";
-import { UploadTaskSnapshot } from "@angular/fire/storage/interfaces";
 import { SignupoptionalPage } from "src/app/welcome/signupoptional/signupoptional.page";
+import { UploadTaskSnapshot } from "@angular/fire/compat/storage/interfaces";
+import { Auth, UserCredential } from "@angular/fire/auth";
 
 @Injectable({
   providedIn: "root",
@@ -67,10 +68,7 @@ export class SignupService {
    * @param password
    * @returns
    */
-  createFirebaseAccount(
-    email: string,
-    password: string
-  ): Observable<firebase.auth.UserCredential> {
+  createFirebaseAccount(email: string, password: string): Observable<UserCredential> {
     // return this.http
     //   .post<AuthResponseData>(
     //     `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${environment.firebase.apiKey}`,
@@ -78,7 +76,13 @@ export class SignupService {
     //   )
     return from(this.afAuth.createUserWithEmailAndPassword(email, password)).pipe(
       // tap(this.initializeLocalStorage.bind(this)),
-      switchMap(() => this.afAuth.signInWithEmailAndPassword(email, password))
+      switchMap(
+        () =>
+          this.afAuth.signInWithEmailAndPassword(
+            email,
+            password
+          ) as unknown as Promise<UserCredential>
+      )
     );
   }
 

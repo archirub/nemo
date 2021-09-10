@@ -2,9 +2,7 @@ import { ElementRef } from "@angular/core";
 import { AnimationController } from "@ionic/angular";
 // import * as anime from "animejs"
 
-export const FlyingLetterAnimation = (
-  letter: ElementRef,
-) => {
+export const FlyingLetterAnimation = (letter: ElementRef) => {
   const startXPosition = -15;
   //const startYPosition = 20;
   const endXPosition = 105;
@@ -12,7 +10,7 @@ export const FlyingLetterAnimation = (
   //const ROTATION = -15;
 
   // Moving off-screen
-  const moveAnimation = new AnimationController().create('moveAnimation')
+  const moveAnimation = new AnimationController().create("moveAnimation");
   moveAnimation
     .addElement(letter.nativeElement)
     .easing("ease-out")
@@ -23,8 +21,8 @@ export const FlyingLetterAnimation = (
       `translateX(${endXPosition}vw)`
     )
     .beforeStyles({
-        display: 'block',
-    })
+      display: "block",
+    });
 
   return moveAnimation;
 };

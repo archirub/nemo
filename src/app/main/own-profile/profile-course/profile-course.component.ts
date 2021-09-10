@@ -56,9 +56,9 @@ export class ProfileCourseComponent implements OnInit {
     this.categoryChoiceChange.emit(this.categoryChoice);
   }
 
-  // clearValueInput() {
-  //   this.choice = "";
-  //   this.choiceChange.emit(this.choice);
-  //   this.close.nativeElement.style.display = "none";
-  // }
+  clearValueInput() {
+    this.choice = "";
+    this.choiceChange.emit(this.choice);
+    this.close.nativeElement.style.display = "none";
+  }
 }

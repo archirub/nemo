@@ -1,14 +1,14 @@
-import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
-import { SignupoptionalPage } from '../signupoptional/signupoptional.page';
+import { NgModule } from "@angular/core";
+import { Routes, RouterModule } from "@angular/router";
+import { SignupoptionalPage } from "../signupoptional/signupoptional.page";
 
-import { SignuprequiredPage } from './signuprequired.page';
+import { SignuprequiredPage } from "./signuprequired.page";
 
 const routes: Routes = [
   {
-    path: '',
-    component: SignuprequiredPage
-  }
+    path: "",
+    component: SignuprequiredPage,
+  },
 ];
 
 @NgModule({

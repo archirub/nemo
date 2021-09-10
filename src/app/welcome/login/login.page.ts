@@ -1,13 +1,14 @@
-import { AlertController } from "@ionic/angular";
+import { AlertController, LoadingController, NavController } from "@ionic/angular";
 import { Component, ElementRef, ViewChild } from "@angular/core";
 import { FormControl, FormGroup, Validators } from "@angular/forms";
 
-import { AngularFireAuth } from "@angular/fire/auth";
+import { AngularFireAuth } from "@angular/fire/compat/auth";
 
 import { FirebaseAuthService } from "@services/firebase-auth/firebase-auth.service";
 
 import { FishSwimAnimation } from "@animations/index";
 import { Router } from "@angular/router";
+import { LoadingService } from "@services/loading/loading.service";
 
 @Component({
   selector: "app-login",
@@ -31,7 +32,9 @@ export class LoginPage {
     private alertCtrl: AlertController,
     private afAuth: AngularFireAuth,
     private authService: FirebaseAuthService,
-    private router: Router
+    private navCtrl: NavController,
+    private loadingCtrl: LoadingController,
+    private loadingService: LoadingService
   ) {}
 
   ionViewDidEnter() {
@@ -42,16 +45,23 @@ export class LoginPage {
     this.fishSwimAnimation.play();
   }
 
-  async onSubmit() {
+  async onLogin() {
     if (!this.loginForm.valid) {
       return this.showAlert("Your email address or password is incorrectly formatted!");
     }
+
+    const loader = await this.loadingCtrl.create(
+      this.loadingService.defaultLoadingOptions
+    );
+    await loader.present();
 
     const email: string = this.loginForm.get("email").value;
     const password: string = this.loginForm.get("password").value;
     try {
       await this.afAuth.signInWithEmailAndPassword(email, password);
+      await loader.dismiss();
     } catch (e) {
+      await loader.dismiss();
       if (e.code === "auth/wrong-password") {
         await this.authService.wrongPasswordPopup(null);
       } else if (e.code === "auth/user-not-found") {
@@ -63,12 +73,6 @@ export class LoginPage {
       } else {
         await this.authService.unknownErrorPopup();
       }
-    }
-  }
-
-  async enterSubmit(event) {
-    if (event.keyCode === 13) {
-      await this.onSubmit();
     }
   }
 
@@ -87,6 +91,6 @@ export class LoginPage {
   }
 
   returnToLanding() {
-    this.router.navigateByUrl("/welcome");
+    this.navCtrl.navigateBack("/welcome");
   }
 }
