@@ -2,7 +2,7 @@ import { mdFriendPickingFromDatabase } from "./../../../src/app/shared/interface
 import {
   mdFromDatabase,
   searchCriteria,
-  University,
+  UniversityName,
   AreaOfStudy,
   SocietyCategory,
   Interests,
@@ -120,7 +120,10 @@ function orderBySC(
   );
 }
 
-function universityMatchCheck(criteria: University, feature: University): boolean {
+function universityMatchCheck(
+  criteria: UniversityName,
+  feature: UniversityName
+): boolean {
   if (!criteria || !feature) return false;
   return criteria === feature;
 }

@@ -3,46 +3,25 @@ import { Injectable } from "@angular/core";
 import { AlertController } from "@ionic/angular";
 import { ActivatedRoute, NavigationStart, ParamMap, Router } from "@angular/router";
 
-import { AngularFireAuth } from "@angular/fire/auth";
-import { AngularFirestore } from "@angular/fire/firestore";
+import { AngularFireAuth } from "@angular/fire/compat/auth";
+import { AngularFirestore } from "@angular/fire/compat/firestore";
 import { Storage } from "@capacitor/core";
 
+import { BehaviorSubject, concat, forkJoin, from, merge, Observable, of } from "rxjs";
 import {
-  BehaviorSubject,
-  combineLatest,
-  concat,
-  forkJoin,
-  from,
-  merge,
-  Observable,
-  of,
-  timer,
-} from "rxjs";
-import {
-  catchError,
   concatMap,
-  delayWhen,
   filter,
   first,
-  last,
   map,
-  delay,
   mergeMap,
   retry,
-  retryWhen,
-  startWith,
   switchMap,
-  take,
-  tap,
 } from "rxjs/operators";
 
 import { OwnPicturesStore } from "@stores/pictures/own-pictures/own-pictures.service";
 import { ChatboardStore } from "@stores/chatboard/chatboard-store.service";
-import { SearchCriteriaStore } from "@stores/search-criteria/search-criteria-store.service";
-import { OtherProfilesStore } from "@stores/other-profiles/other-profiles-store.service";
-import { SwipeOutcomeStore } from "@stores/swipe-outcome/swipe-outcome-store.service";
+
 import { SwipeStackStore } from "@stores/swipe-stack/swipe-stack-store.service";
-import { SettingsStore } from "@stores/settings/settings-store.service";
 import { CurrentUserStore } from "@stores/current-user/current-user-store.service";
 import { ChatboardPicturesStore } from "@stores/pictures/chatboard-pictures/chatboard-pictures.service";
 
@@ -50,9 +29,9 @@ import { SignupService } from "@services/signup/signup.service";
 import { FirebaseAuthService } from "@services/firebase-auth/firebase-auth.service";
 import { routerInitListenerService } from "./initial-url.service";
 
-import firebase from "firebase";
 import { SignupAuthMethodSharer } from "../../../welcome/signupauth/signupauth-method-sharer.service";
 import { ConnectionService } from "@services/connection/connection.service";
+import { User } from "@angular/fire/auth";
 
 type pageName =
   | "chats"
@@ -68,7 +47,7 @@ type pageName =
   providedIn: "root",
 })
 export class GlobalStateManagementService {
-  auth$ = new BehaviorSubject<firebase.User>(null);
+  auth$ = new BehaviorSubject<User>(null);
 
   alreadyConnectedOnce: boolean = false;
 
@@ -91,11 +70,7 @@ export class GlobalStateManagementService {
     private userStore: CurrentUserStore,
     private chatboardStore: ChatboardStore,
     private chatboardPicturesStore: ChatboardPicturesStore,
-    // private searchCriteriaStore: SearchCriteriaStore,
-    // private otherProfilesStore: OtherProfilesStore,
-    // private swipeOutcomeStore: SwipeOutcomeStore,
     private swipeStackStore: SwipeStackStore,
-    // private settingsStore: SettingsStore,
     private OwnPicturesStore: OwnPicturesStore
   ) {
     // format allows for this.auth$ to be a BehaviorSubject version of the Firebase.User observable
@@ -155,33 +130,54 @@ export class GlobalStateManagementService {
     return null;
   }
 
+  private pageIsMain(page: pageName): boolean {
+    const mainPages: pageName[] = [
+      "home",
+      "own-profile",
+      "chats",
+      "settings",
+      "messenger",
+    ];
+    if (mainPages.includes(page)) return true;
+    return false;
+  }
+
+  private pageIsWelcome(page: pageName): boolean {
+    const welcomePages: pageName[] = ["welcome", "login", "signup"];
+    if (welcomePages.includes(page)) return true;
+    return false;
+  }
+
   private activateCorrespondingStores(page: pageName): Observable<any> {
-    if (page === "chats" || page === "messenger")
-      return forkJoin([
-        this.chatboardStore.activateStore(),
+    const storesToActivate$: Observable<any>[] = [];
+
+    if (this.pageIsMain(page)) storesToActivate$.push(this.userStore.fillStore());
+
+    if (page === "chats" || page === "messenger") {
+      storesToActivate$.push(this.chatboardStore.activateStore());
+      storesToActivate$.push(
         this.chatboardPicturesStore.activateStore(
           this.chatboardStore.allChats$,
           this.chatboardStore.hasNoChats$
-        ),
-      ]);
+        )
+      );
+    }
 
     // COMMENTED OUT FOR DEVELOPMENT ONLY -  to not fetch a swipe stack every time
-    // if (page === "home") return this.swipeStackStore.activateStore();
+    // if (page === "home") storesToActivate$.push(this.swipeStackStore.activateStore());
 
-    if (page === "own-profile" || page === "settings")
-      return forkJoin([
-        this.OwnPicturesStore.activateStore(),
-        this.userStore.fillStore(),
-      ]);
+    if (page === "own-profile" || page === "settings") {
+      storesToActivate$.push(this.OwnPicturesStore.activateStore());
+    }
 
-    return of();
+    return storesToActivate$.length > 0 ? forkJoin(storesToActivate$) : of("");
   }
 
-  private getFirebaseUser(): Observable<firebase.User | null> {
+  private getFirebaseUser(): Observable<User | null> {
     return this.afAuth.authState;
   }
 
-  private somebodyAuthenticatedRoutine(user: firebase.User) {
+  private somebodyAuthenticatedRoutine(user: User) {
     return forkJoin([this.isUserEmailVerified(user), this.isUserSigningUp()]).pipe(
       concatMap(([emailIsVerified, userIsSigningUp]) => {
         // COMMENTED OUT FOR DEVELOPMENT ONLY
@@ -189,14 +185,14 @@ export class GlobalStateManagementService {
         // if (!emailIsVerified) return this.requiresEmailVerificationRoutine();
 
         // if user is signing up, then do nothing
-        if (userIsSigningUp) return of();
+        if (userIsSigningUp) return of("");
 
         // otherwise, continue the procedure
         return this.doesProfileDocExist(user.uid).pipe(
           concatMap((profileDocExists) => {
             // "null" implies there has been an error and we couldn't get an answer on whether
             // it exists. Hence take no action
-            if (profileDocExists === null) return of();
+            if (profileDocExists === null) return of("");
             if (profileDocExists === false) return this.noDocumentsRoutine(user);
             return this.hasDocumentsRoutine();
           })
@@ -210,12 +206,12 @@ export class GlobalStateManagementService {
       concatMap((url) =>
         url !== "/welcome/signupauth"
           ? this.router.navigateByUrl("/welcome/signupauth")
-          : of()
+          : of("")
       ),
       concatMap(() =>
         !!this.signupauthMethodSharer.goStraightToEmailVerification
           ? this.signupauthMethodSharer.goStraightToEmailVerification()
-          : of()
+          : of("")
       )
     );
   }
@@ -240,8 +236,7 @@ export class GlobalStateManagementService {
       concatMap(() => {
         // makes it such that we only navigate to home if the user is not in main
         // such that it doesn't infringe on the user experience
-        const currentPath = this.router.url;
-        if (currentPath.startsWith("/main")) return of();
+        if (this.pageIsMain(this.getPageFromUrl(this.router.url))) return of("");
         return this.router.navigateByUrl("main/tabs/home");
       })
     );
@@ -252,7 +247,7 @@ export class GlobalStateManagementService {
    * that account on the database. We check whether that user has documents on the db by attempting
    * to fetch that person's profile
    */
-  private noDocumentsRoutine(user: firebase.User): Observable<void> {
+  private noDocumentsRoutine(user: User): Observable<void> {
     const finishProfileProcedure = () => {
       this.emptyStoresService.emptyStores(); // to be safe
       return this.signupService.checkAndRedirect();
@@ -296,7 +291,7 @@ export class GlobalStateManagementService {
     );
   }
 
-  private isUserEmailVerified(user: firebase.User): Observable<boolean> {
+  private isUserEmailVerified(user: User): Observable<boolean> {
     return of(user).pipe(map((user) => !!user?.emailVerified));
   }
 

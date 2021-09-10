@@ -18,7 +18,7 @@
         <app-profile-card
           #profileCard
           [isOwnProfile]="true"
-          [profile]="currentUserStore.user$ | async"
+          [profile]="appUser$ | async"
           [profilePictures]="profilePictures"
           [reportable]="false"
         ></app-profile-card>
@@ -41,11 +41,7 @@
           [selections]="['save', 'cancel']"
         ></nemo-toggle>
       </div>
-      <div
-        id="editing"
-        style="display: flex"
-        *ngIf="currentUserStore.user$ | async as userProfile"
-      >
+      <div id="editing" style="display: flex" *ngIf="appUser$ | async as userProfile">
         <div class="container">
           <h1>{{userProfile?.firstName}}, {{userProfile?.dateOfBirth | age}}</h1>
 

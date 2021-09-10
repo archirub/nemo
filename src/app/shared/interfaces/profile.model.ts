@@ -1,6 +1,5 @@
 import {
   SocietyCategory,
-  University,
   searchCriteria,
   OnCampus,
   Degree,
@@ -9,10 +8,11 @@ import {
 } from "./search-criteria.model";
 
 // FOR CLOUD FUNCTION DEPLOYMENT, otherwise it doesn't recognize the type declaration below
-import * as firebase from "firebase";
 import { CameraPhoto } from "@capacitor/core";
 import { allowOptionalProp } from "./shared.model";
 import { Gender, SexualPreference, SwipeMode } from "./match-data.model";
+import { UniversityName } from "./universities.model";
+import { DocumentData, QueryDocumentSnapshot, Timestamp } from "@angular/fire/firestore";
 
 // IF SUCH CONSTANTS ARE CHANGED, MAKE SURE TO CHANGE THE SECURITY RULES ACCORDINGLY
 export const MAX_PROFILE_PICTURES_COUNT = 6;
@@ -25,7 +25,7 @@ export interface profile {
   pictureCount: number;
   pictureUrls: string[];
   biography: string;
-  university: University;
+  university: UniversityName;
   degree: Degree;
   course: string;
   societyCategory: SocietyCategory;
@@ -47,7 +47,7 @@ export interface editableProfileFields {
   questions: QuestionAndAnswer[] | null;
 }
 
-export interface user extends profile {
+export interface appUser extends profile {
   societyCategory: SocietyCategory;
   areaOfStudy: AreaOfStudy;
   sexualPreference: SexualPreference;
@@ -59,11 +59,11 @@ export interface user extends profile {
 
 export interface profileFromDatabase {
   firstName: string;
-  dateOfBirth: firebase.firestore.Timestamp;
+  dateOfBirth: Timestamp;
   pictureCount: number;
   biography: string;
 
-  university: University;
+  university: UniversityName;
   degree: Degree;
   course: string;
   society: string;
@@ -144,5 +144,4 @@ export interface profileObject {
   profileSnapshot: profileSnapshot;
 }
 
-export type profileSnapshot =
-  firebase.firestore.QueryDocumentSnapshot<firebase.firestore.DocumentData>;
+export type profileSnapshot = QueryDocumentSnapshot<DocumentData>;

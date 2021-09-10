@@ -14,7 +14,7 @@ import {
   Degree,
   Gender,
   SexualPreference,
-  University,
+  UniversityName,
   searchCriteriaOptions,
   sexualPreferenceOptions,
   genderOptions,
@@ -56,7 +56,7 @@ export class SignuprequiredPage {
   // OPTIONS
   genderOptions: Gender[] = genderOptions;
   sexualPreferenceOptions: SexualPreference[] = sexualPreferenceOptions;
-  universityOptions: University[] = searchCriteriaOptions.university;
+  universityOptions: UniversityName[] = searchCriteriaOptions.university;
   degreeOptions: Degree[] = searchCriteriaOptions.degree;
 
   maxPictureCount: number = 6; // defines the number of picture boxes in template, as well as is used in logic to save picture picks
@@ -350,7 +350,7 @@ export class SignuprequiredPage {
 
     const gender: Gender = this.form.get("gender").value;
 
-    const university: University = this.form.get("university").value;
+    const university: UniversityName = this.form.get("university").value;
 
     const degree: Degree = this.form.get("degree").value;
 

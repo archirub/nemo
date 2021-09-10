@@ -1,10 +1,10 @@
 import { Component, OnInit, ViewChild, ElementRef } from "@angular/core";
-import { AngularFireAuth } from "@angular/fire/auth";
+import { AngularFireAuth } from "@angular/fire/compat/auth";
 import { FormBuilder, FormControl, FormGroup, Validators } from "@angular/forms";
 import { Router } from "@angular/router";
 import { FlyingLetterAnimation } from "@animations/letter.animation";
 import { AuthResponseData } from "@interfaces/auth-response.model";
-import { AlertController, IonIcon, IonSlides } from "@ionic/angular";
+import { AlertController, IonIcon, IonSlides, NavController } from "@ionic/angular";
 import { SignupService } from "@services/signup/signup.service";
 import { SignupAuthMethodSharer } from "./signupauth-method-sharer.service";
 import { BehaviorSubject, concat, from, Observable, of, Subscription, timer } from "rxjs";
@@ -21,6 +21,7 @@ import {
   takeUntil,
   tap,
 } from "rxjs/operators";
+import { UserCredential } from "@angular/fire/auth";
 
 type EmailVerificationState = "not-sent" | "sent" | "resent" | "verified";
 @Component({
@@ -58,7 +59,7 @@ export class SignupauthPage implements OnInit {
     })
   );
 
-  // has shape of a getter (more generally of a function) to get a different object ref everytime
+  // is a getter function to get a different object ref everytime
   get emptyAuthForm() {
     return new FormGroup({
       email: new FormControl("", [
@@ -66,10 +67,7 @@ export class SignupauthPage implements OnInit {
         Validators.email,
         Validators.pattern("[a-zA-Z]*@[a-zA-Z]*.ac.uk"),
       ]),
-      password: new FormControl("", [
-        Validators.required, 
-        Validators.minLength(8)
-      ]),
+      password: new FormControl("", [Validators.required, Validators.minLength(8)]),
     });
   }
 
@@ -82,7 +80,8 @@ export class SignupauthPage implements OnInit {
     private router: Router,
     private signup: SignupService,
     private afAuth: AngularFireAuth,
-    private SignupAuthMethodSharer: SignupAuthMethodSharer
+    private SignupAuthMethodSharer: SignupAuthMethodSharer,
+    private navCtrl: NavController
   ) {
     this.authForm = this.emptyAuthForm;
   }
@@ -112,11 +111,11 @@ export class SignupauthPage implements OnInit {
   }
 
   returnToLanding() {
-    this.router.navigateByUrl("/welcome");
+    this.navCtrl.navigateBack("/welcome");
   }
 
   moveToOptional() {
-    this.router.navigateByUrl("/welcome/signuprequired");
+    this.navCtrl.navigateForward("/welcome/signuprequired");
   }
 
   public async onSubmitAuthData(): Promise<void> {
@@ -124,10 +123,7 @@ export class SignupauthPage implements OnInit {
       .pipe(
         filter((val) => !!val),
         switchMap(() =>
-          concat(
-            this.sendEmailVerification("sent"),
-            this.listenToEmailVerification()
-          )
+          concat(this.sendEmailVerification("sent"), this.listenToEmailVerification())
         )
       )
       .toPromise();
@@ -153,24 +149,24 @@ export class SignupauthPage implements OnInit {
   }
 
   private async resendEmailVerificationAnimation() {
-    const waitEl = document.getElementById('wait');
+    const waitEl = document.getElementById("wait");
 
     if (!this.prevReqTime) {
       this.prevReqTime = new Date().getTime();
       console.log("First resend request.");
       this.resendConfirmationUI();
       this.resendEmailVerification();
-
     } else {
       let timeWaited = new Date().getTime() - this.prevReqTime;
 
-      if (timeWaited < 20000) { //20 seconds between requests
+      if (timeWaited < 20000) {
+        //20 seconds between requests
 
-        let timeLeft = Math.ceil(20 - (timeWaited/1000))
+        let timeLeft = Math.ceil(20 - timeWaited / 1000);
         if (timeLeft > 1) {
-          waitEl.innerHTML = `Please wait ${timeLeft} seconds to send another conformation email.`
+          waitEl.innerHTML = `Please wait ${timeLeft} seconds to send another conformation email.`;
         } else {
-          waitEl.innerHTML = `Please wait ${timeLeft} second to send another conformation email.`
+          waitEl.innerHTML = `Please wait ${timeLeft} second to send another conformation email.`;
         }
 
         if (waitEl.style.display != "block") {
@@ -181,13 +177,12 @@ export class SignupauthPage implements OnInit {
         }, 1400);
 
         console.log("Too early to resend request.");
-
       } else {
         this.prevReqTime = new Date().getTime();
         this.resendConfirmationUI();
         this.resendEmailVerification();
-      };
-    };
+      }
+    }
   }
 
   private async verifiedEmailVerificationAnimation() {
@@ -212,15 +207,14 @@ export class SignupauthPage implements OnInit {
         // If password valid, submit form
         console.log("Submitting auth data...");
         this.onSubmitAuthData();
-      };
+      }
 
       this.unlockAndSlideToNext(); // If others valid, slide next
-
     } else {
       this.validatorChecks[entry].style.display = "flex"; // Show "invalid" UI for invalid validator
       console.log("Not valid, don't slide");
     }
-   }
+  }
 
   async updatePager() {
     var email = document.getElementById("email");
@@ -231,16 +225,16 @@ export class SignupauthPage implements OnInit {
     var map = {
       0: email,
       1: pass,
-      2: hourglass
+      2: hourglass,
     };
 
     for (let i = 0; i < 3; i++) {
       map[i].style.display = "none"; //Display none of the pager icons
-    };
+    }
 
     //Hide all pager dots
     var dots: HTMLCollectionOf<any> = document.getElementsByClassName("pager-dot");
-    Array.from(dots).forEach((element) => (element.style.display = "none")); 
+    Array.from(dots).forEach((element) => (element.style.display = "none"));
 
     //Get current slide, calculate slides left
     var l = await this.slides.length();
@@ -301,7 +295,6 @@ export class SignupauthPage implements OnInit {
   // if it has been fetched and there are documents, then just redirect to app etc.
 
   async resendConfirmationUI() {
-
     var text = document.getElementById("sentEmail");
 
     this.flyingLetterAnimation.play();
@@ -348,7 +341,7 @@ export class SignupauthPage implements OnInit {
     );
   }
 
-  private requestAccountCreation(): Observable<void | firebase.auth.UserCredential> {
+  private requestAccountCreation(): Observable<void | UserCredential> {
     const email: string = this.authForm.get("email").value;
     const password: string = this.authForm.get("password").value;
 

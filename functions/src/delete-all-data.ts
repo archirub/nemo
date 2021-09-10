@@ -16,19 +16,26 @@ export const deleteAllData = functions
       );
       return { succesful: false };
     }
+
+    const collectionsToKeep = ["admin"];
+
     const flatten = (ary) =>
       ary.reduce((a, b) => a.concat(Array.isArray(b) ? flatten(b) : b), []);
 
     try {
-      const collections = await admin.firestore().listCollections();
+      let collections = await admin.firestore().listCollections();
+
+      collections = collections.filter((c) => !collectionsToKeep.includes(c.id));
 
       const rootDocuments = flatten(
         await Promise.all(collections.map(async (c) => c.listDocuments()))
       ) as FirebaseFirestore.DocumentReference<FirebaseFirestore.DocumentData>[];
 
-      const subCollections = flatten(
+      let subCollections = flatten(
         await Promise.all(rootDocuments.map((doc) => doc.listCollections()))
       ) as FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>[];
+
+      subCollections = subCollections.filter((c) => !collectionsToKeep.includes(c.id));
 
       const docsFromSubcollections = flatten(
         await Promise.all(subCollections.map(async (c) => c.listDocuments()))

@@ -2,14 +2,21 @@ import { AlertController, NavController, LoadingController } from "@ionic/angula
 import { Injectable, NgZone } from "@angular/core";
 import { Router } from "@angular/router";
 
-import { AngularFireAuth } from "@angular/fire/auth";
+import { AngularFireAuth } from "@angular/fire/compat/auth";
 import { Plugins } from "@capacitor/core";
 
-import firebase from "firebase";
 import { LoadingOptions, LoadingService } from "@services/loading/loading.service";
-import { AngularFireFunctions } from "@angular/fire/functions";
+import { AngularFireFunctions } from "@angular/fire/compat/functions";
 import { deleteAccountRequest, successResponse } from "@interfaces/cloud-functions.model";
 import { EmptyStoresService } from "@services/global-state-management/empty-stores.service";
+import { from, of } from "rxjs";
+import { delay, switchMap } from "rxjs/operators";
+import {
+  EmailAuthProvider,
+  updatePassword,
+  User,
+  reauthenticateWithCredential,
+} from "@angular/fire/auth";
 
 @Injectable({
   providedIn: "root",
@@ -33,18 +40,18 @@ export class FirebaseAuthService {
     // calling ngZone.run() is necessary otherwise we will get into trouble with changeDecection
     // back at the welcome page (it seems like it's then not active), which cases problem for example
     // while trying to log back in where the "log in" button doesn't get enabled when the email-password form becomes valid
-    const navigateToWelcome = async () =>
-      this.zone.run(() => this.navCtrl.navigateRoot("/welcome"));
     const clearLocalCache = () => Plugins.Storage.clear();
     const clearStores = async () => this.emptyStoresService.emptyStores();
     const logOut = () => this.afAuth.signOut();
 
+    const duringLoadingPromise = () =>
+      Promise.all([clearLocalCache(), clearStores()]).then(() => logOut());
+
+    const navigateToWelcome = async () =>
+      this.zone.run(() => this.navCtrl.navigateRoot("/welcome"));
+
     await this.loadingService.presentLoader(
-      [
-        { promise: clearLocalCache, arguments: [] },
-        { promise: clearStores, arguments: [] },
-        { promise: logOut, arguments: [] },
-      ],
+      [{ promise: duringLoadingPromise, arguments: [] }],
       [{ promise: navigateToWelcome, arguments: [] }]
     );
   }
@@ -224,11 +231,11 @@ export class FirebaseAuthService {
   }
 
   async reAuthenticationProcedure(
-    user: firebase.User,
+    user: User,
     message: string = null,
     cancelProcedureChosen: () => Promise<any> = null
   ): Promise<{
-    user: firebase.User;
+    user: User;
     outcome: "user-reauthenticated" | "user-cancelled" | "auth-failed";
   }> {
     let outcome: "user-reauthenticated" | "user-cancelled" | "auth-failed";
@@ -253,12 +260,9 @@ export class FirebaseAuthService {
     `;
 
     const OkProcedure = async (data) => {
-      const credentials = firebase.auth.EmailAuthProvider.credential(
-        user.email,
-        data.password
-      );
+      const credentials = EmailAuthProvider.credential(user.email, data.password);
       try {
-        await user.reauthenticateWithCredential(credentials);
+        await reauthenticateWithCredential(user, credentials);
         outcome = "user-reauthenticated";
       } catch (err) {
         console.log("error is", err);
@@ -309,17 +313,17 @@ export class FirebaseAuthService {
     });
   }
 
-  async changePasswordProcedure(user: firebase.User): Promise<firebase.User> {
+  async changePasswordProcedure(user: User): Promise<User> {
     let pswrd: string;
     const OkProcedure = async (data) => {
       pswrd = data.password;
       try {
-        await user.updatePassword(pswrd);
+        await updatePassword(user, pswrd);
         await this.successPopup("Your password was successfully updated.");
       } catch (err) {
         if (err?.code === "auth/requires-recent-login") {
           return this.reAuthenticationProcedure(user)
-            .then(() => user.updatePassword(pswrd))
+            .then(() => updatePassword(user, pswrd))
             .then(() => this.successPopup("Your password was successfully updated."))
             .catch(() => this.unknownErrorPopup());
         } else {

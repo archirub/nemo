@@ -27,6 +27,10 @@ service cloud.firestore {
                             && isPartOfChat()
       }
     }
+
+    match /admin/universitiesAllowed {
+      allow read;
+    }
   }
 }
 

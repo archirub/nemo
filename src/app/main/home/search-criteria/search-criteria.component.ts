@@ -81,11 +81,11 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
 
       if (!this.searchCriteriaForm.value.degree) {
         this.degreeHandle.selectOption("undergrad");
-      };
+      }
 
       if (!this.searchCriteriaForm.value.onCampus) {
         this.locationHandle.selectOption("Everyone");
-      };
+      }
 
       this.modalSlides.lockSwipes(true);
       this.optionsOriginalPos = this.options.nativeElement.getBoundingClientRect().y;
@@ -135,12 +135,12 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
     if (this.locationHandle.selections.includes(this.searchCriteriaForm.value.onCampus)) {
       switch (this.searchCriteriaForm.value.onCampus) {
         case true:
-          this.locationHandle.selectOption('On Campus');
+          this.locationHandle.selectOption("On Campus");
           break;
         case false:
-          this.locationHandle.selectOption('Everyone');
+          this.locationHandle.selectOption("Everyone");
           break;
-      };
+      }
     }
 
     if (this.degreeHandle.selections.includes(this.searchCriteriaForm.value.degree)) {
@@ -151,7 +151,11 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
       this.selectReplace(this.searchCriteriaForm.value.areaOfStudy, "areaOfStudy");
     }
 
-    if (this.scOptions.societyCategory.includes(this.searchCriteriaForm.value.societyCategory)) {
+    if (
+      this.scOptions.societyCategory.includes(
+        this.searchCriteriaForm.value.societyCategory
+      )
+    ) {
       this.selectReplace(this.searchCriteriaForm.value.societyCategory, "society");
     }
 
@@ -239,9 +243,8 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
       } else {
         this.studySelection = option;
         this.newFormat(label);
-      };
+      }
       this.searchCriteriaForm.value.areaOfStudy = this.studySelection;
-
     } else if (label === "society") {
       if (this.societySelection === option) {
         this.societySelection = undefined;
@@ -251,7 +254,6 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
         this.newFormat(label);
       }
       this.searchCriteriaForm.value.societyCategory = this.societySelection;
-
     } else if (label === "interests") {
       if (this.interestSelection === option) {
         this.interestSelection = undefined;

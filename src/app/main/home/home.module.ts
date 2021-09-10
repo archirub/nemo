@@ -1,3 +1,4 @@
+import { DirectivesModule } from "./../../shared/directives/directives.module";
 import { NgModule } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { IonicModule } from "@ionic/angular";
@@ -18,14 +19,11 @@ import { AppToggleModule } from "@components/nemo-toggle/nemo-toggle.component.m
     IonicModule,
     HomePageRoutingModule,
     ProfileCardModule,
-    AppToggleModule
+    AppToggleModule,
+    DirectivesModule,
   ],
-  declarations: [
-    HomePage,
-    SwipeCardComponent,
-    SearchCriteriaComponent,
-  ],
-  providers: [ SwipeCardComponent ],
+  declarations: [HomePage, SwipeCardComponent, SearchCriteriaComponent],
+  providers: [SwipeCardComponent],
   // Seems to make sure the search criteria modal opening is much faster on the first try
   bootstrap: [SearchCriteriaComponent],
 })

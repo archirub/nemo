@@ -65,7 +65,7 @@ export async function handleFriendYesChoices(
           uid,
           dateMap: {
             exists: true,
-            date,
+            date: date as any,
           },
           friendRef: matchDataFriendDoc.ref,
           mainRef: matchDataMainRef,

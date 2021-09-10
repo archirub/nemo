@@ -124,7 +124,7 @@ export const generateSwipeStack = functions
         // SENDING RESPONSE
         return { users: pickedUsers } as generateSwipeStackResponse;
       } catch (e) {
-        throw new functions.https.HttpsError("unknown", e);
+        throw new functions.https.HttpsError("unknown", String(e));
       }
     }
   );

@@ -1,16 +1,16 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { IonicModule } from '@ionic/angular';
+import { async, ComponentFixture, TestBed } from "@angular/core/testing";
+import { IonicModule } from "@ionic/angular";
 
-import { SearchCriteriaComponent } from './search-criteria.component';
+import { SearchCriteriaComponent } from "./search-criteria.component";
 
-describe('SearchCriteriaComponent', () => {
+describe("SearchCriteriaComponent", () => {
   let component: SearchCriteriaComponent;
   let fixture: ComponentFixture<SearchCriteriaComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ SearchCriteriaComponent ],
-      imports: [IonicModule.forRoot()]
+      declarations: [SearchCriteriaComponent],
+      imports: [IonicModule.forRoot()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(SearchCriteriaComponent);
@@ -18,7 +18,7 @@ describe('SearchCriteriaComponent', () => {
     fixture.detectChanges();
   }));
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

@@ -4,14 +4,14 @@ import {
   Interests,
   searchCriteria,
   searchCriteriaOptions,
-  University,
+  UniversityName,
   OnCampus,
   Degree,
   allowOptionalProp,
 } from "@interfaces/index";
 
 export class SearchCriteria implements allowOptionalProp<searchCriteria> {
-  _university: University | null;
+  _university: UniversityName | null;
   _areaOfStudy: AreaOfStudy | null;
   _degree: Degree | null;
   _societyCategory: SocietyCategory | null;
@@ -36,10 +36,10 @@ export class SearchCriteria implements allowOptionalProp<searchCriteria> {
     this.onCampus = onCampus;
   }
 
-  public set university(v: University | null) {
+  public set university(v: UniversityName | null) {
     this._university = v;
   }
-  public get university(): University | null {
+  public get university(): UniversityName | null {
     return this._university;
   }
 

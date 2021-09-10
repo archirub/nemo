@@ -1,11 +1,13 @@
+import { isEqual } from "lodash";
 import { Injectable } from "@angular/core";
-import { AngularFireStorage } from "@angular/fire/storage";
-import { AngularFireAuth } from "@angular/fire/auth";
+import { AngularFireStorage } from "@angular/fire/compat/storage";
+import { AngularFireAuth } from "@angular/fire/compat/auth";
 import { Plugins } from "@capacitor/core";
 const { Storage } = Plugins;
 
 import { BehaviorSubject, combineLatest, forkJoin, from, Observable, of } from "rxjs";
 import {
+  concatMap,
   distinctUntilChanged,
   exhaustMap,
   filter,
@@ -24,7 +26,7 @@ import {
   urlToBase64,
 } from "../common-pictures-functions";
 import { CurrentUserStore } from "@stores/index";
-import { AngularFirestore } from "@angular/fire/firestore";
+import { AngularFirestore } from "@angular/fire/compat/firestore";
 
 interface ownPicturesStorage {
   [position: number]: string;
@@ -56,13 +58,66 @@ export class OwnPicturesStore {
     return combineLatest([
       this.activateHolderFillingLogic(),
       this.activateLoadingListener(),
+      this.activateLocalStorer(),
     ]).pipe(
       // tap(() => console.log("activating own pictures store")),
       share()
     );
   }
 
-  activateHolderFillingLogic() {
+  updatePictures(newPicturesArray: string[]) {
+    return this.urls$.pipe(
+      take(1),
+      map((urls) => {
+        const currentArray = urls.filter(Boolean);
+        const newArray = newPicturesArray.filter(Boolean);
+
+        const tasks$: Observable<void>[] = [];
+        // addition tasks
+        newArray.forEach((newUrl, index) => {
+          const currentUrl = currentArray[index];
+
+          if (newUrl === currentUrl) return;
+
+          tasks$.push(this.updatePictureInDatabase(newUrl, index));
+        });
+
+        // deleting tasks
+        if (currentArray.length > newArray.length) {
+          const startIndex = newArray.length;
+          const deletesToDo = currentArray.length - newArray.length;
+          const endIndex = startIndex + deletesToDo;
+          const indexes = Array.from({ length: endIndex - startIndex + 1 }).map(
+            (_, idx) => startIndex + idx
+          );
+
+          indexes.forEach((i) => tasks$.push(this.removePictureInDatabase(i)));
+        }
+
+        return tasks$;
+      }),
+      withLatestFrom(this.currentUser.user$),
+      exhaustMap(([tasks, user]) => {
+        if (tasks.length > 0)
+          return forkJoin(tasks).pipe(
+            exhaustMap(() => {
+              const newPictureCount = newPicturesArray.filter(Boolean).length;
+              if (user.pictureCount !== newPictureCount)
+                return this.currentUser.updatePictureCount(newPictureCount);
+              return of("");
+            }),
+            map(() => this.urls.next(newPicturesArray.filter(Boolean)))
+          );
+        return of(""); // needs to be none null otherwise forkJoin doesn't get it
+      })
+    );
+  }
+
+  /**
+   * Main logic of the store - fills the holder with picture from the local storage if
+   * it isn't empty, and pictures from firebase if it is
+   */
+  private activateHolderFillingLogic() {
     return combineLatest([this.urls$, this.getOwnPictureCount()]).pipe(
       filter(([currentUrls, pictureCount]) => {
         const currentUrlCount = currentUrls.filter(
@@ -83,14 +138,16 @@ export class OwnPicturesStore {
           if (localPictureCount === pictureCount)
             return this.nextFromLocal(localStorageContent);
         }
-
         return this.nextFromFirebase();
-        // .pipe(switchMap((urls) => this.storeInLocal(urls)));
       })
     );
   }
 
-  activateLoadingListener() {
+  /**
+   * Looks at whether the number of urls equals to the user's pictureCount
+   * To update the `allPicturesLoaded` BehaviorSubject
+   */
+  private activateLoadingListener() {
     return combineLatest([this.urls$, this.getOwnPictureCount()]).pipe(
       map(([urls, pictureCount]) => {
         if (urls.filter(Boolean).length === pictureCount)
@@ -100,14 +157,25 @@ export class OwnPicturesStore {
     );
   }
 
-  checkLocal(): Observable<ownPicturesStorage | null> {
+  /**
+   * Listens on the urls obserable and stores the urls lcoally if they change
+   */
+  private activateLocalStorer(): Observable<void> {
+    return this.urls$.pipe(
+      filter((urls) => !!urls),
+      distinctUntilChanged((x, y) => isEqual(x, y)),
+      concatMap((urls) => this.storeInLocal(urls))
+    );
+  }
+
+  private checkLocal(): Observable<ownPicturesStorage | null> {
     return from(Storage.get({ key: this.localStorageKey })).pipe(
       take(1),
       map((v) => JSON.parse(v.value))
     );
   }
 
-  storeInLocal(urls: string[]): Observable<void> {
+  private storeInLocal(urls: string[]): Observable<void> {
     // format based on the assumption that the urlToBase64() function doesn't get executed right away
     // as "base64Pictures" gets defined (as that would then happen one after the other), but that it does
     // if forkJoin below (as that would then happen in parallel)
@@ -133,7 +201,7 @@ export class OwnPicturesStore {
     );
   }
 
-  nextFromLocal(storedObject: ownPicturesStorage): Observable<string[]> {
+  private nextFromLocal(storedObject: ownPicturesStorage): Observable<string[]> {
     const pictureCount = Object.keys(storedObject).length;
 
     let urlArray$: Observable<string>[] = Object.keys(storedObject).map((key) =>
@@ -146,7 +214,7 @@ export class OwnPicturesStore {
     );
   }
 
-  nextFromFirebase(): Observable<string[]> {
+  private nextFromFirebase(): Observable<string[]> {
     const uid$: Observable<string> = this.afAuth.user.pipe(
       map((user) => user?.uid),
       filter((uid) => !!uid),
@@ -167,69 +235,20 @@ export class OwnPicturesStore {
     );
   }
 
-  fetchProfilePictures(uid: string, pictureCount: number): Observable<string[]> {
+  private fetchProfilePictures(uid: string, pictureCount: number): Observable<string[]> {
     let urlArray$: Observable<string>[] = Array.from({ length: pictureCount }).map(
       (v, index) =>
         this.afStorage.ref(firebaseStoragePath(uid, index)).getDownloadURL().pipe(take(1)) // ensures it completes
     );
-    console.log("fetching profile pictures:", uid, pictureCount);
     return forkJoin(urlArray$);
   }
 
-  getOwnPictureCount(): Observable<number> {
+  private getOwnPictureCount(): Observable<number> {
     return this.currentUser.user$.pipe(
       skipWhile((user) => user === null), // since behaviorSubject can hold null before it is initialised
       map((user) => user?.pictureCount),
       filter((count) => !!count),
       distinctUntilChanged()
-    );
-  }
-
-  updatePictures(newPicturesArray: string[]) {
-    return this.urls$.pipe(
-      take(1),
-      map((urls) => {
-        const currentArray = urls.filter(Boolean);
-        const newArray = newPicturesArray.filter(Boolean);
-
-        const tasks: Observable<void>[] = [];
-        // addition tasks
-        newArray.forEach((newUrl, index) => {
-          const currentUrl = currentArray[index];
-
-          if (newUrl === currentUrl) return;
-
-          tasks.push(this.updatePictureInDatabase(newUrl, index));
-        });
-
-        // deleting tasks
-        if (currentArray.length > newArray.length) {
-          const startIndex = newArray.length;
-          const deletesToDo = currentArray.length - newArray.length;
-          const endIndex = startIndex + deletesToDo;
-          const indexes = Array.from({ length: endIndex - startIndex + 1 }).map(
-            (_, idx) => startIndex + idx
-          );
-
-          indexes.forEach((i) => tasks.push(this.removePictureInDatabase(i)));
-        }
-
-        return tasks;
-      }),
-      withLatestFrom(this.currentUser.user$),
-      exhaustMap(([tasks, user]) => {
-        if (tasks.length > 0)
-          return forkJoin(tasks).pipe(
-            exhaustMap(() => {
-              const newPictureCount = newPicturesArray.filter(Boolean).length;
-              if (user.pictureCount !== newPictureCount)
-                return this.currentUser.updatePictureCount(newPictureCount);
-              return of("");
-            }),
-            map(() => this.urls.next(newPicturesArray.filter(Boolean)))
-          );
-        return of(""); // needs to be none null otherwise forkJoin doesn't get it
-      })
     );
   }
 
@@ -240,7 +259,6 @@ export class OwnPicturesStore {
         if (!user) return;
         const filePath = `profilePictures/${user.uid}/${index}`;
         const ref = this.afStorage.ref(filePath);
-        console.log("cdq?", filePath);
 
         return ref.delete();
       })
@@ -248,7 +266,6 @@ export class OwnPicturesStore {
   }
 
   private updatePictureInDatabase(photoUrl: string, index: number): Observable<void> {
-    console.log("picture data", photoUrl, index);
     return this.afAuth.user.pipe(
       take(1),
       switchMap(async (user) => {
@@ -256,7 +273,6 @@ export class OwnPicturesStore {
 
         const filePath = `profilePictures/${user.uid}/${index}`;
         const ref = this.afStorage.ref(filePath);
-        console.log("cdq?", filePath);
 
         const response = await fetch(photoUrl);
         const blob = await response.blob();
@@ -264,36 +280,4 @@ export class OwnPicturesStore {
       })
     );
   }
-  //
-  // switchPicturesOrder(index1: number, index2: number): Observable<void> {
-  //   return this.afAuth.user.pipe(
-  //     withLatestFrom(this.urls$),
-  //     take(1),
-  //     switchMap(async ([user, urls]) => {
-  //       if (!user || !index1 || !index2) return;
-
-  //       const filePath1 = `profilePictures/${user.uid}/${index1}`;
-  //       const ref1 = this.afStorage.ref(filePath1);
-
-  //       const filePath2 = `profilePictures/${user.uid}/${index2}`;
-  //       const ref2 = this.afStorage.ref(filePath2);
-
-  //       const upload1 = fetch(urls[index2])
-  //         .then((res) => res.blob())
-  //         .then((blob) => ref1.put(blob));
-
-  //       const upload2 = fetch(urls[index1])
-  //         .then((res) => res.blob())
-  //         .then((blob) => ref2.put(blob));
-
-  //       await Promise.all([upload1, upload2]);
-
-  //       return urls;
-  //     }),
-  //     map((urls) => {
-  //       [urls[index1], urls[index2]] = [urls[index2], urls[index1]];
-  //       this.urls.next(urls);
-  //     })
-  //   );
-  // }
 }

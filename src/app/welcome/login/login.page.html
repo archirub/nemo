@@ -1,8 +1,7 @@
 <ion-content>
-
   <div class="center">
-    <img #fish src="/assets/nemo.png" class="fish"/>
-    <img src="/assets/signup/nemo-icon-orange.png" class="logo"/>
+    <img #fish src="/assets/nemo.png" class="fish" />
+    <img src="/assets/signup/nemo-icon-orange.png" class="logo" />
   </div>
 
   <!--div class="center">
@@ -10,10 +9,7 @@
     <img #wavesSlow src="/assets/signup/waves-2.png" class="wavesSlow"/>
   </div-->
 
-  <form 
-  [formGroup]="loginForm" 
-  (ngSubmit)="onSubmit()"
-  (keydown)="enterSubmit($event)">
+  <form [formGroup]="loginForm">
     <ion-grid>
       <ion-row>
         <ion-col size="12">
@@ -46,7 +42,8 @@
             expand="block"
             fill="clear"
             shape="round"
-            type="submit"
+            debounceClick
+            (debounceClick)="onLogin()"
             [disabled]="(loginForm.statusChanges | async) !== 'VALID'"
             >Enter Nemo</ion-button
           >

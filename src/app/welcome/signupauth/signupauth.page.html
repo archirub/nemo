@@ -1,28 +1,28 @@
 <div class="pager">
   <ion-icon id="email" class="pager-icon" name="at-outline"></ion-icon>
   <ion-icon id="pass" class="pager-icon" name="ellipsis-horizontal"></ion-icon>
-  
-  <ion-icon 
-  id="hourglass" 
-  class="pager-icon" 
-  name="hourglass-outline"
-  *ngIf="(emailVerificationState.value === 'not-sent' 
-  || emailVerificationState.value === 'sent' 
-  || emailVerificationState.value === 'resent')"></ion-icon>
-  
-  <ion-icon 
-  id="tick" 
-  class="pager-icon" 
-  name="checkmark-outline"
-  [style.display]="block"
-  *ngIf="emailVerificationState.value === 'verified'"></ion-icon>
-  
+
+  <ion-icon
+    id="hourglass"
+    class="pager-icon"
+    name="hourglass-outline"
+    *ngIf="(emailVerificationState$ | async) !== 'verified'"
+  ></ion-icon>
+
+  <ion-icon
+    id="tick"
+    class="pager-icon"
+    name="checkmark-outline"
+    style.display="block"
+    *ngIf="(emailVerificationState$ | async) === 'verified'"
+  ></ion-icon>
+
   <ion-icon class="pager-dot" name="ellipse"></ion-icon>
   <ion-icon class="pager-dot" name="ellipse"></ion-icon>
 </div>
 
 <ion-content>
-  <form [formGroup]="authForm" (ngSubmit)="onSubmit()">
+  <form [formGroup]="authForm" (ngSubmit)="onSubmitAuthData()">
     <ion-slides pager="false" #slides>
       <!-- BELOW IS FOR TESTING -->
       <!-- <ion-slide>
@@ -105,40 +105,53 @@
 
       <ion-slide>
         <div class="personal-pref">
-          <div class="question" *ngIf="emailVerificationState.value === 'not-sent'">
+          <div class="question" *ngIf="(emailVerificationState$ | async) === 'not-sent'">
             <ion-label position="stacked"> We are sending you an email </ion-label>
           </div>
 
-          <div class="question" *ngIf="emailVerificationState.value === ('sent' || 'resent')">
+          <div
+            class="question"
+            *ngIf="(emailVerificationState$ | async) === ('sent' || 'resent')"
+          >
             <ion-label position="stacked"> An email has been sent </ion-label>
           </div>
 
-          <h2 style="margin-top: 20vh" *ngIf="emailVerificationState.value === ('sent' || 'resent')">
+          <h2
+            style="margin-top: 20vh"
+            *ngIf="(emailVerificationState$ | async) === ('sent' || 'resent')"
+          >
             Click
             <a (click)="resendEmailVerification()">here</a>
             if you would like us to send another confirmation email.
           </h2>
 
-          <ion-icon
-            id="letter"
-            #email
-            name="mail-outline"
-          ></ion-icon>
+          <ion-icon id="letter" #email name="mail-outline"></ion-icon>
 
-          <p id="sentEmail" *ngIf="emailVerificationState.value === ('sent' || 'resent')">Email sent!</p>
+          <p
+            id="sentEmail"
+            *ngIf="(emailVerificationState$ | async) === ('sent' || 'resent')"
+          >
+            Email sent!
+          </p>
           <p id="wait">Please wait seconds to send another conformation email.</p>
 
           <!--SWITCHES TO BELOW ONCE EMAIL IS CONFIRMED-->
 
-          <div class="question" *ngIf="emailVerificationState.value === 'verified'">
+          <div class="question" *ngIf="(emailVerificationState$ | async) === 'verified'">
             <ion-label position="stacked"> Email confirmed! </ion-label>
           </div>
 
-          <h2 style="margin-top: 20vh" *ngIf="emailVerificationState.value === 'verified'">
+          <h2
+            style="margin-top: 20vh"
+            *ngIf="(emailVerificationState$ | async) === 'verified'"
+          >
             Click the button to go to the next slide and continue your sign up.
           </h2>
 
-          <div class="buttons first" *ngIf="emailVerificationState.value === 'verified'">
+          <div
+            class="buttons first"
+            *ngIf="(emailVerificationState$ | async) === 'verified'"
+          >
             <ion-button class="next-slide scroll" (click)="moveToOptional()">
               <ion-icon name="chevron-forward-outline"></ion-icon>
             </ion-button>

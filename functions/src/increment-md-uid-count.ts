@@ -20,13 +20,15 @@ const updateUidCountMatchData = functions
     let totalCount = 0;
 
     // loops through fields of the document that have shape "{[uid: string]: dateMap}""
-    ([
-      "reportedUsers",
-      "dislikedUsers",
-      "fdislikedUsers",
-      "fmatchedUsers",
-      "matchedUsers",
-    ] as const).forEach((propName) => {
+    (
+      [
+        "reportedUsers",
+        "dislikedUsers",
+        "fdislikedUsers",
+        "fmatchedUsers",
+        "matchedUsers",
+      ] as const
+    ).forEach((propName) => {
       // gets number of uids from length of object
       let count = Object.keys(v[propName]).length;
 

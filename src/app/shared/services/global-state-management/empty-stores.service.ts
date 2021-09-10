@@ -18,8 +18,8 @@ import { OwnPicturesStore } from "@stores/pictures/own-pictures/own-pictures.ser
 export class EmptyStoresService {
   constructor(
     private userStore: CurrentUserStore,
-    // private chatboardStore: ChatboardStore,
-    // private chatboardPicturesStore: ChatboardPicturesStore,
+    private chatboardStore: ChatboardStore,
+    private chatboardPicturesStore: ChatboardPicturesStore,
     private searchCriteriaStore: SearchCriteriaStore,
     private otherProfilesStore: OtherProfilesStore,
     private swipeOutcomeStore: SwipeOutcomeStore,
@@ -29,12 +29,13 @@ export class EmptyStoresService {
 
   emptyStores() {
     this.userStore.resetStore();
-    // this.chatboardStore.resetStore();
+    this.chatboardStore.resetStore();
     this.searchCriteriaStore.resetStore();
     this.swipeOutcomeStore.resetStore();
     this.swipeStackStore.resetStore();
     this.otherProfilesStore.resetStore();
     this.settingsStore.resetStore();
+
     console.log("stores emptied");
     // ANY OTHERS / NEW ONES ? Add them here
   }

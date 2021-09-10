@@ -67,7 +67,7 @@ export async function handleDatingYesChoices(
           uid,
           dateMap: {
             exists: true,
-            date,
+            date: date as any,
           },
           datingRef: matchDataDatingDoc.ref,
           mainRef: matchDataMainRef,

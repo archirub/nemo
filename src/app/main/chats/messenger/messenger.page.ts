@@ -8,7 +8,7 @@ import {
 } from "@angular/core";
 
 import { NavController, IonContent, IonSlides } from "@ionic/angular";
-import { AngularFireAuth } from "@angular/fire/auth";
+import { AngularFireAuth } from "@angular/fire/compat/auth";
 import { ActivatedRoute, ParamMap } from "@angular/router";
 
 import { ReportUserComponent } from "../report-user/report-user.component";
@@ -31,13 +31,13 @@ import { ChatboardStore, CurrentUserStore } from "@stores/index";
 import { ProfileCardComponent } from "@components/index";
 import { OtherProfilesStore } from "@stores/other-profiles/other-profiles-store.service";
 import { ChatboardPicturesStore } from "@stores/pictures/chatboard-pictures/chatboard-pictures.service";
-import { AngularFirestore, QuerySnapshot } from "@angular/fire/firestore";
+import { QuerySnapshot, Timestamp } from "@angular/fire/firestore";
 import { messageFromDatabase } from "@interfaces/message.model";
 import { FormatService } from "@services/format/format.service";
 
-import firebase from "firebase";
 import { SafeUrl } from "@angular/platform-browser";
 import { UserReportingService } from "@services/user-reporting/user-reporting.service";
+import { AngularFirestore } from "@angular/fire/compat/firestore";
 
 function sortUIDs(uids: string[]): string[] {
   return uids.sort((a, b) => ("" + a).localeCompare(b));
@@ -197,19 +197,19 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
 
     return this.chatboardStore.chats$.pipe(
       filter((chats) => !!chats?.[this.chatID]),
-      withLatestFrom(this.currentUser.user$),
+      withLatestFrom(this.currentUser.user$.pipe(filter((u) => !!u))),
       take(1),
       map(([chats, user]) => {
         // Fills the chat subject with the data from the chatboard store
         this.thisChat$.next(chats[this.chatID]);
         this.latestChatInput = chats[this.chatID].latestChatInput;
-
+        console.log("user is ", user);
         return user.uid;
       }),
       map((uid) => {
         // Activates the listener for this chat's messages and fills the messages subject
         // when something changes in the messages collection
-        this.messagesDatabaseSub = this.firestore.firestore
+        this.firestore.firestore
           .collection("chats")
           .doc(this.chatID)
           .collection("messages")
@@ -217,10 +217,10 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
           .orderBy("time", "desc")
           .limit(this.MSG_BATCH_SIZE)
           .onSnapshot({
-            next: (snapshot: QuerySnapshot<messageFromDatabase>) => {
+            next: (snapshot) => {
               this.messages$.next(
                 this.format.messagesDatabaseToClass(
-                  snapshot.docs.map((d) => d.data()).reverse()
+                  snapshot.docs.map((d) => d.data()).reverse() as messageFromDatabase[]
                 )
               );
             },
@@ -246,7 +246,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
         const message: messageFromDatabase = {
           uids: sortUIDs([thisChat.recipient.uid, user.uid]),
           senderID: user.uid,
-          time: firebase.firestore.Timestamp.fromDate(messageTime),
+          time: Timestamp.fromDate(messageTime),
           content: this.latestChatInput,
         };
 

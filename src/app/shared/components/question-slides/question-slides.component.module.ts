@@ -5,17 +5,8 @@ import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { QuestionSlidesComponent } from "./question-slides.component";
 
 @NgModule({
-  imports: [
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    IonicModule,
-  ],
-  declarations: [
-    QuestionSlidesComponent
-  ],
-  exports: [
-    QuestionSlidesComponent
-  ],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, IonicModule],
+  declarations: [QuestionSlidesComponent],
+  exports: [QuestionSlidesComponent],
 })
 export class QuestionSlidesModule {}

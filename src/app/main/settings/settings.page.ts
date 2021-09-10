@@ -7,7 +7,7 @@ import {
   ApplicationRef,
 } from "@angular/core";
 import { IonSlides, NavController } from "@ionic/angular";
-import { AngularFireAuth } from "@angular/fire/auth";
+import { AngularFireAuth } from "@angular/fire/compat/auth";
 
 import { Plugins } from "@capacitor/core";
 
@@ -30,7 +30,7 @@ import {
 } from "@interfaces/index";
 import { GlobalStateManagementService } from "@services/global-state-management/global-state-management.service";
 import { Profile } from "@classes/profile.class";
-import { User } from "@classes/user.class";
+import { AppUser } from "@classes/user.class";
 
 @Component({
   selector: "app-settings",
@@ -42,7 +42,7 @@ export class SettingsPage implements AfterViewInit {
   @ViewChild("goUnder") goUnder: ElementRef;
 
   profileSub: Subscription;
-  profile: User;
+  profile: AppUser;
 
   // FORM
   form = new FormGroup({

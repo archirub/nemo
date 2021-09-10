@@ -1,3 +1,4 @@
+import { DirectivesModule } from "./../../shared/directives/directives.module";
 import { NgModule } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
@@ -15,6 +16,7 @@ import { LoginPage } from "./login.page";
     ReactiveFormsModule,
     IonicModule,
     LoginPageRoutingModule,
+    DirectivesModule,
   ],
   declarations: [LoginPage],
 })

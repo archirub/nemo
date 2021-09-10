@@ -1,4 +1,5 @@
 import { Injectable } from "@angular/core";
+import { Timestamp } from "@angular/fire/firestore";
 
 import { Chat, Message, Profile, SearchCriteria } from "@classes/index";
 import {
@@ -9,7 +10,6 @@ import {
   searchCriteria,
   userSnippet,
 } from "@interfaces/index";
-import firebase from "firebase";
 
 @Injectable({
   providedIn: "root",
@@ -100,7 +100,7 @@ export class FormatService {
 
   public profileClassToDatabase(profile: Profile): profileFromDatabase {
     const firstName = profile.firstName;
-    const dateOfBirth = firebase.firestore.Timestamp.fromDate(profile.dateOfBirth);
+    const dateOfBirth = Timestamp.fromDate(profile.dateOfBirth);
     const pictureCount = profile.pictureCount;
     const biography = profile.biography;
     const university = profile.university;
@@ -173,7 +173,7 @@ export class FormatService {
     if (!msg) return;
     const content = msg.content;
     const senderID = msg.senderID;
-    const time = firebase.firestore.Timestamp.fromDate(msg.time);
+    const time = Timestamp.fromDate(msg.time);
 
     return { senderID, time, content, uids };
   }

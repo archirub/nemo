@@ -24,7 +24,7 @@ const routes: Routes = [
           import("../../main/own-profile/own-profile.module").then(
             (m) => m.OwnProfilePageModule
           ),
-      }
+      },
     ],
   },
   {

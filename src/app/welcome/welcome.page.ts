@@ -1,5 +1,5 @@
-import { Component, ElementRef, OnInit, ViewChild } from "@angular/core";
-import { Router } from "@angular/router";
+import { Component, OnInit } from "@angular/core";
+import { NavController } from "@ionic/angular";
 
 @Component({
   selector: "app-welcome",
@@ -7,16 +7,15 @@ import { Router } from "@angular/router";
   styleUrls: ["./welcome.page.scss"],
 })
 export class WelcomePage implements OnInit {
-  
-  constructor(private router: Router) {}
+  constructor(private navCtrl: NavController) {}
 
   ngOnInit() {}
 
   goToSignup() {
-    this.router.navigateByUrl("welcome/signupauth");
+    this.navCtrl.navigateForward("welcome/signupauth");
   }
 
   goToLogin() {
-    this.router.navigateByUrl("welcome/login");
+    this.navCtrl.navigateForward("welcome/login");
   }
 }

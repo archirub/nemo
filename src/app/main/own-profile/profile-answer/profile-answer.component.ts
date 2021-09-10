@@ -8,7 +8,7 @@ import {
   forwardRef,
 } from "@angular/core";
 import { NG_VALUE_ACCESSOR } from "@angular/forms";
-import { User } from "@classes/user.class";
+import { AppUser } from "@classes/user.class";
 import { Question, QuestionAndAnswer, questionsOptions } from "@interfaces/profile.model";
 import { IonSelect, IonTextarea } from "@ionic/angular";
 

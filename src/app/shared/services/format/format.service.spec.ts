@@ -1,8 +1,8 @@
-import { TestBed } from '@angular/core/testing';
+import { TestBed } from "@angular/core/testing";
 
-import { FormatService } from './format.service';
+import { FormatService } from "./format.service";
 
-describe('FormatService', () => {
+describe("FormatService", () => {
   let service: FormatService;
 
   beforeEach(() => {
@@ -10,7 +10,7 @@ describe('FormatService', () => {
     service = TestBed.inject(FormatService);
   });
 
-  it('should be created', () => {
+  it("should be created", () => {
     expect(service).toBeTruthy();
   });
 });

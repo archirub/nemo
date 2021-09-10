@@ -28,11 +28,11 @@ export class TabMenuPage implements OnInit {
     this.inactive.nativeElement.style.display = "none";
 
     var selected = this.tabs.getSelected();
-    
+
     if (selected === "home") {
       this.active.nativeElement.style.display = "block";
     } else {
       this.inactive.nativeElement.style.display = "block";
-    };
+    }
   }
 }

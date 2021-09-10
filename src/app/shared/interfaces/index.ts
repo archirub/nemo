@@ -8,3 +8,4 @@ export * from "./swipe-choice.model";
 export * from "./signup.model";
 export * from "./auth-response.model";
 export * from "./shared.model";
+export * from "./universities.model";

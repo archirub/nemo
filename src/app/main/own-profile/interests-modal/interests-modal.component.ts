@@ -10,7 +10,6 @@ import { ModalController } from "@ionic/angular";
   styleUrls: ["./interests-modal.component.scss"],
 })
 export class InterestsModalComponent implements OnInit {
-
   interests: Interests[];
   @Output() interestsChange = new EventEmitter<Interests[]>();
 
@@ -73,7 +72,6 @@ export class InterestsModalComponent implements OnInit {
       this.interests.push(choice);
     }
   }
-
 
   async closeAndConfirmChoices() {
     return await this.modalCtrl.dismiss(this.interests);
