@@ -96,19 +96,11 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
   ngOnInit() {
     this.moreInfo = false;
 
-    // this.buildInterestSlides(this.profile);
+    this.buildInterestSlides(this.profile);
   }
 
   ngAfterViewInit() {
-    //Animations for profile info sliding up and down
-    setTimeout(() => {
-      this.expandAnimation = MoreInfoAnimation(this.complete, 18, 85);
-      this.collapseAnimation = LessInfoAnimation(this.complete, 18, 85);
-    }, 2000);
-
     this.slides?.lockSwipeToPrev(true);
-
-    console.log(this.profile);
   }
 
   expandProfile() {

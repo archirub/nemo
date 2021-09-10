@@ -219,6 +219,9 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     this.profilePictures = JSON.parse(JSON.stringify(urls));
   }
 
+  sortPics() {
+  }
+
   goToSettings() {
     if (!this.editingInProgress.value) {
       //Just check the observable (BehaviorSubject)

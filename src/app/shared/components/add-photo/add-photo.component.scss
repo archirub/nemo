@@ -7,9 +7,14 @@
     border-radius: 15px;
     text-align: center;
     padding: 2vh; 
-  };
+}
 
-  p {
-      margin: 5px;
-    }
+p {
+    margin: 5px;
+}
 
+ion-content {
+  height: 11vh;
+  width: 11vh;
+  --overflow: hidden;
+}

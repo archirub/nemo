@@ -7,13 +7,15 @@
     <div>
       <div class="flexeven" *ngFor="let arr of interestGrid; index as i">
   
-        <div class="interest-box" *ngFor="let interest of arr; index as j">
+        <div 
+        (click)="selectInterest(interest)"
+        class="interest-box" 
+        *ngFor="let interest of arr; index as j">
           <div class="icon">
             <img src='{{ this.pictureGrid[i][j] }}'/>
           </div>
   
           <h2
-          (click)="selectInterest(interest)"
           [style.color]="
             this.interests?.includes(interest)
               ? 'var(--ion-color-primary)'

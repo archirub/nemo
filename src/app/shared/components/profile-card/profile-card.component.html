@@ -113,25 +113,19 @@
         <div id="info-segment">
           <div id="interests-container" class="centered">
             <div id="interests-box-soc">
-              <div class="interests-text">
-                <ion-label id="interests-label" *ngIf="profile.onCampus === true">On Campus</ion-label>
-                <ion-label id="interests-label" *ngIf="profile.onCampus === false">Off Campus</ion-label>
-              </div>
               <ion-icon
-                name="location"
+                name="school"
                 id="bottom-icon"
                 style="color: var(--ion-color-primary)"
               ></ion-icon>
               <br />
               <div class="interests-text">
-                <ion-label id="interests-label">[LOCATION]</ion-label>
+                <ion-label *ngIf="profile?.areaOfStudy != 'Maths and Physical Sciences'" id="interests-label">{{ profile?.areaOfStudy }}</ion-label>
+                <ion-label *ngIf="profile?.areaOfStudy === 'Maths and Physical Sciences'" id="interests-label">MAPS</ion-label>
               </div>
             </div>
 
             <div id="interests-box-soc">
-              <div class="interests-text">
-                <ion-label id="interests-label">{{ profile?.societyCategory }}</ion-label>
-              </div>
               <ion-icon
                 name="people"
                 id="bottom-icon"
@@ -149,15 +143,17 @@
           <!-- INSTA API CONTENT HERE -->
         </div>
 
-        <div id="info-segment" *ngIf="reportable">
+        <div *ngIf="reportable">
           <div id="interests-container" class="centered">
             <div class="reportButton">
               <ion-icon name="shield" style="color: var(--ion-color-danger)"></ion-icon>
               <br />
-              <ion-label>Report this user</ion-label>
+              <ion-label>Report {{ profile?.firstName }}</ion-label>
             </div>
           </div>
         </div>
+
+        <br>
 
         <!--div id="bio-bubble"></div-->
       </div>
