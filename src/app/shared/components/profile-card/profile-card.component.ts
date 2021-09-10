@@ -110,6 +110,13 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
         this.expandAnimation.destroy(); //Destroy previous animations to avoid buildup
       }
 
+      /*let heightInVH = 100*(this.content.nativeElement.getBoundingClientRect().height/window.innerHeight); //height of content in %/vh
+      let top = Math.ceil(85 - heightInVH);
+
+      if (top < 18) {
+        top = 18; //Max height to show content
+      };*/
+
       this.collapseAnimation = LessInfoAnimation(this.complete, 85, 18); //Have to reinitialise animation every time
 
       this.collapseAnimation.play();
@@ -121,6 +128,15 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
       if (this.collapseAnimation) {
         this.collapseAnimation.destroy(); //Destroy previous animations to avoid buildup
       }
+
+      /*let heightInVH = 100*(this.content.nativeElement.getBoundingClientRect().height/window.innerHeight); //height of content in %/vh
+      let top = Math.ceil(85 - heightInVH);
+
+      if (top < 18) {
+        top = 18; //Max height to show content
+      };*/
+      
+      console.log(top);
 
       this.expandAnimation = MoreInfoAnimation(this.complete, 85, 18); //Have to reinitialise animation every time
 

@@ -100,6 +100,10 @@ export class SettingsPage implements AfterViewInit {
     await this.firebaseAuth.deleteAccount();
   }
 
+  async changePassword() {
+    console.log("Change paswsword function here");
+  }
+
   /* Styles gone 'under' tab on toggle */
   goneUnder(option) {
     // Fetch gone under tab

@@ -140,6 +140,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     setTimeout(() => {
       // This is essentially a lifecycle hook for after the UI appears
       this.toggleDivEnterAnimation = ToggleAppearAnimation(this.toggleDiv);
+      this.profileCard.updatePager(0);
     }, 50);
 
     //Build modal setup once UI has entered
@@ -299,7 +300,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
       )
       .toPromise();
 
-    // this.profileCard.buildInterestSlides(this.profileCard.profile);
+    this.profileCard.buildInterestSlides(this.profileCard.profile);
   }
 
   async actOnProfileEditing($event: "cancel" | "save") {

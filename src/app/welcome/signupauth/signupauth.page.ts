@@ -24,6 +24,7 @@ import {
 import { UserCredential } from "@angular/fire/auth";
 
 type EmailVerificationState = "not-sent" | "sent" | "resent" | "verified";
+type ResendVerificationState = "available" | "not-available";
 @Component({
   selector: "app-signupauth",
   templateUrl: "./signupauth.page.html",
@@ -58,6 +59,11 @@ export class SignupauthPage implements OnInit {
       else return prev === curr;
     })
   );
+
+  private resendVerificationState = new BehaviorSubject<ResendVerificationState>(
+    "available"
+  );
+  public resendVerificationState$ = this.resendVerificationState.asObservable();
 
   // is a getter function to get a different object ref everytime
   get emptyAuthForm() {
@@ -102,6 +108,7 @@ export class SignupauthPage implements OnInit {
   ionViewDidEnter() {
     this.slides.lockSwipes(true);
     this.updatePager();
+
     this.flyingLetterAnimation = FlyingLetterAnimation(this.email);
 
     this.validatorChecks = {
@@ -130,6 +137,7 @@ export class SignupauthPage implements OnInit {
   }
 
   public async resendEmailVerification() {
+    this.resendEmailVerificationAnimation();
     return this.sendEmailVerification("resent").toPromise();
   }
 
@@ -149,40 +157,15 @@ export class SignupauthPage implements OnInit {
   }
 
   private async resendEmailVerificationAnimation() {
-    const waitEl = document.getElementById("wait");
 
-    if (!this.prevReqTime) {
-      this.prevReqTime = new Date().getTime();
-      console.log("First resend request.");
-      this.resendConfirmationUI();
-      this.resendEmailVerification();
-    } else {
-      let timeWaited = new Date().getTime() - this.prevReqTime;
+    this.flyingLetterAnimation.play(); //Play send email animation
 
-      if (timeWaited < 20000) {
-        //20 seconds between requests
+    this.resendVerificationState.next('not-available'); //Changing state disables the button
 
-        let timeLeft = Math.ceil(20 - timeWaited / 1000);
-        if (timeLeft > 1) {
-          waitEl.innerHTML = `Please wait ${timeLeft} seconds to send another conformation email.`;
-        } else {
-          waitEl.innerHTML = `Please wait ${timeLeft} second to send another conformation email.`;
-        }
-
-        if (waitEl.style.display != "block") {
-          waitEl.style.display = "block";
-        }
-        setTimeout(() => {
-          waitEl.style.display = "none";
-        }, 1400);
-
-        console.log("Too early to resend request.");
-      } else {
-        this.prevReqTime = new Date().getTime();
-        this.resendConfirmationUI();
-        this.resendEmailVerification();
-      }
-    }
+    const waitTime = timer(20000);
+    waitTime.subscribe(() => {
+      this.resendVerificationState.next('available'); //After 20 seconds, revert state to available
+    });
   }
 
   private async verifiedEmailVerificationAnimation() {
@@ -293,18 +276,6 @@ export class SignupauthPage implements OnInit {
   // been fetched and there are none, then show prompt to continue account creation, if it hasn't been fetched
   // for some reason (especially if it is slow connection, retry, and then show error message which says error occured try again later).
   // if it has been fetched and there are documents, then just redirect to app etc.
-
-  async resendConfirmationUI() {
-    var text = document.getElementById("sentEmail");
-
-    this.flyingLetterAnimation.play();
-    setTimeout(() => {
-      text.style.display = "block";
-    }, 800);
-    setTimeout(() => {
-      text.style.display = "none";
-    }, 2200);
-  }
 
   private listenToEmailVerification(
     // timeToExpiry = 60000,

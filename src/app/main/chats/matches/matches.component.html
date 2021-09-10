@@ -1,9 +1,13 @@
-<ion-content>
-  <div class="text">
-    <div class="exit" (click)="closeModal()">
-      <ion-icon name="close-outline"></ion-icon>
-    </div>
+<div class="text">
+  <div class="exit" (click)="closeModal()">
+    <ion-icon name="close-outline"></ion-icon>
   </div>
+</div>
+
+<div class="fade-overlay-bottom">
+</div>
+
+<ion-content>
   <ion-row>
     <div class="profile" *ngFor="let match of matches; index as j">
       <img [src]="(chatboardPictures$ | async)[match?.recipient?.uid]" />
