@@ -22,6 +22,8 @@
           'background-position': 'center'
         }"
       >
+      <div class="yesSwipe" (click)="this.tapped.emit('yes')"></div>
+      <div class="noSwipe" (click)="this.tapped.emit('no')"></div>
         <div *ngIf="profile?.questions[i]" #QandA class="question" [hidden]="moreInfo">
           <ion-card-title #question>{{ profile?.questions[i].question }}</ion-card-title>
           <ion-card-subtitle #answer>{{
@@ -30,8 +32,6 @@
         </div>
         <div #shadow class="img-shadow"></div>
       </ion-slide>
-      <div class="yesSwipe" (click)="this.tapped.emit('yes')"></div>
-      <div class="noSwipe" (click)="this.tapped.emit('no')"></div>
     </ion-slides>
     <!--div #QandA class="question" [hidden]="moreInfo">
       <ion-card-title #question>{{ profile?.questions[0].question }}</ion-card-title>
@@ -43,7 +43,8 @@
   </div> -->
   <!-- <div id="photo-shadow"></div> -->
   <div id="info" button>
-    <div #snippet id="snippetInfo" [hidden]="moreInfo" (click)="expandProfile()">
+
+    <!--div #snippet id="snippetInfo" [style.display]="moreInfo ? 'hidden' : 'block'" (click)="expandProfile()">
       <ion-card-header class="name-age">
         <ion-card-title #name
           >{{ profile?.firstName }}, {{ profile?.dateOfBirth | age }}</ion-card-title
@@ -52,8 +53,10 @@
           >{{ profile?.course }}, {{ profile?.degree | degrees }}</ion-card-subtitle
         >
       </ion-card-header>
-    </div>
-    <div #complete id="completeInfo" [hidden]="!moreInfo">
+    </div-->
+
+    <div #complete id="completeInfo">
+    <!--[hidden]="!moreInfo"-->
       <ion-card-header #header class="name-age sticky" (click)="expandProfile()">
         <ion-card-title
           >{{ profile?.firstName }}, {{ profile?.dateOfBirth | age }}

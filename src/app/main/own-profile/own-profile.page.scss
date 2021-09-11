@@ -161,6 +161,7 @@ h2 {
     color: var(--ion-color-primary);
     --background: transparent;
     --background-activated: transparent;
+    margin-bottom: 1.5vh;
 }
 
 ;
@@ -259,4 +260,10 @@ a {
 
 add-photo {
     margin-top: 1vh;
+}
+
+.no-interests {
+    font-size: 2vh;
+    text-align: center;
+    color: var(--ion-color-light-contrast);
 }

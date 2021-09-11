@@ -26,7 +26,7 @@
   <app-chat-board
     #chatboard
     [chats]="chats$ | async"
-    [matches]="chats$ | async"
+    [matches]="matches$ | async"
     (loaded)="stopAnimation()"
   ></app-chat-board>
 </ion-content>

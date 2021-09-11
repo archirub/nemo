@@ -4,16 +4,13 @@
   </div>
 </div>
 
-<div class="fade-overlay-bottom">
-</div>
-
 <ion-content>
   <ion-row>
     <div class="profile" *ngFor="let match of matches; index as j">
       <img [src]="(chatboardPictures$ | async)[match?.recipient?.uid]" />
       <div class="data">
+        <ion-icon name="person"></ion-icon>
         <ion-label>{{ match?.recipient?.name }}</ion-label>
-        <ion-icon name="chatbubbles-outline"></ion-icon>
       </div>
     </div>
   </ion-row>
