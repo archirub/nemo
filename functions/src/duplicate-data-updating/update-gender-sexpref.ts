@@ -6,7 +6,7 @@ import {
   sexualPreferenceOptions,
   successResponse,
   updateGenderSexPrefRequest,
-} from "./../../../src/app/shared/interfaces/index";
+} from "../../../src/app/shared/interfaces/index";
 
 export const updateGenderSexPref = functions
   .region("europe-west2")

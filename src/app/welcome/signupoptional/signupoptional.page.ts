@@ -7,11 +7,16 @@ import {
   ElementRef,
   QueryList,
 } from "@angular/core";
-import { IonSlides } from "@ionic/angular";
+import {
+  AlertController,
+  IonSlides,
+  LoadingController,
+  NavController,
+} from "@ionic/angular";
 import { Router } from "@angular/router";
 import { FormGroup, FormControl, FormArray, FormBuilder } from "@angular/forms";
 
-import { concat, from } from "rxjs";
+import { concat, from, of } from "rxjs";
 import { catchError, concatMap, switchMap } from "rxjs/operators";
 
 import {
@@ -27,6 +32,7 @@ import {
 import { allowOptionalProp } from "@interfaces/index";
 import { SignupService } from "@services/signup/signup.service";
 import { QuestionSlidesComponent } from "@components/index";
+import { LoadingService } from "@services/loading/loading.service";
 
 @Component({
   selector: "app-signupoptional",
@@ -91,9 +97,12 @@ export class SignupoptionalPage implements OnInit {
 
   constructor(
     private signup: SignupService,
-    private router: Router,
     private changeDetectorRef: ChangeDetectorRef,
-    private formBuilder: FormBuilder
+    private formBuilder: FormBuilder,
+    private loadingCtrl: LoadingController,
+    private loading: LoadingService,
+    private alertCtrl: AlertController,
+    private navCtrl: NavController
   ) {}
 
   ngOnInit() {
@@ -394,57 +403,52 @@ export class SignupoptionalPage implements OnInit {
    * Checks whether all the data is valid, if it isn't redirect to slide of unvalid data,
    * if it is, then save the data and direct to signupoptional
    */
-  onSubmit() {
-    let invalidSlide: number;
+  async onSubmit() {
+    const loader = await this.loadingCtrl.create({
+      ...this.loading.defaultLoadingOptions,
+      message: "Setting up your account...",
+    });
+    await loader.present();
 
-    return from(this.slides.length())
-      .pipe(
-        concatMap((slideCount) => {
-          // if invalidSlide is non-null, then there is a slide with invalid data
-          // cannot just use if (invalidSlide) {} syntax as number 0 is falsy
+    const slideCount = await this.slides.length();
+    const invalidSlide = this.getFirstInvalidSlideIndex();
+    console.log("a");
+    // go to slide if invalidSlide is non null and that it isn't the last slide
+    if (invalidSlide && invalidSlide + 1 !== slideCount) {
+      const alert = await this.alertCtrl.create({
+        backdropDismiss: false,
+        header: "We found some invalid data",
+        buttons: ["Go to field"],
+      });
+      console.log("b");
 
-          invalidSlide = this.getFirstInvalidSlideIndex();
-          console.log("inv", invalidSlide);
+      await loader.dismiss();
+      alert.onDidDismiss().then(() => this.unlockAndSlideTo(invalidSlide));
+      return alert.present();
+    }
+    try {
+      console.log("c");
 
-          // go to slide if invalidSlide is non null and that it isn't the last slide
-          if (invalidSlide && invalidSlide + 1 !== slideCount)
-            return this.unlockAndSlideTo(invalidSlide);
+      await this.updateData();
 
-          // alternative if it isn't a number (i.e. all is gucci, create account & co)
-          return concat(
-            this.updateData(), // to make sure data is up to date
+      console.log("d");
 
-            this.signup
-              .createFirestoreAccount() // create firestore account
-              .pipe(
-                switchMap((res) =>
-                  // based on success of both account creation and picture storage, either
-                  {
-                    // erase traces of signing up, and initialize the user, and navigate to home
-                    return this.signup.initialiseUser();
-                  }
-                ),
-                catchError(
-                  (
-                    err // or do some other shit that needs to be more clearly defined
-                  ) =>
-                    (() => {
-                      console.error("Signup was unsuccessful. HANDLE: ", err);
+      const response = await this.signup.createFirestoreAccount().toPromise();
+      console.log("e");
 
-                      // FOR DEVELOPMENT, in real life, you need to retry based on which one fucked up and handle it
-                      // properly. You'd need to at least display an error message saying which one fucked up, and
-                      // absolutely create a system which sends us a log so that we are alerted of when that happens
-                      this.signup.resetDataHolder();
-                      return concat(
-                        this.signup.removeLocalStorage(),
-                        this.router.navigateByUrl("/welcome/signupoptional")
-                      );
-                    })()
-                )
-              )
-          );
-        })
-      )
-      .toPromise();
+      console.log(response);
+
+      await this.signup.initialiseUser().toPromise();
+      console.log("f");
+
+      await loader.dismiss();
+
+      return this.navCtrl.navigateForward("/main/home");
+    } catch (e) {
+      console.log("g");
+
+      await loader?.dismiss();
+      console.log("error", JSON.stringify(e));
+    }
   }
 }

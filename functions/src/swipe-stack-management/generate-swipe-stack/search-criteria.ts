@@ -1,4 +1,4 @@
-import { mdFriendPickingFromDatabase } from "./../../../src/app/shared/interfaces/match-data.model";
+import { mdFriendPickingFromDatabase } from "./../../../../src/app/shared/interfaces/match-data.model";
 import {
   mdFromDatabase,
   searchCriteria,
@@ -10,7 +10,7 @@ import {
   OnCampus,
   Degree,
   mdDatingPickingFromDatabase,
-} from "../../../src/app/shared/interfaces/index";
+} from "../../../../src/app/shared/interfaces/index";
 
 type datingPickingSnapshots =
   | FirebaseFirestore.DocumentSnapshot<mdDatingPickingFromDatabase>
@@ -103,7 +103,7 @@ function orderBySC(
     const profileData = profile_.data();
 
     // Checks how many SC match with the search features
-    if (profileData) {
+    if (profile_.exists && profileData) {
       for (const SC of SC_keys) {
         if (SC_Checker[SC](searchCriteria[SC], profileData.searchFeatures[SC])) {
           numberOfMatching++;
@@ -145,7 +145,7 @@ function societyCategoryMatchCheck(
 function interestMatchCheck(criteria: Interests, feature: Interests[]): boolean {
   if (!criteria || !feature) return false;
   for (const f of feature) {
-    return criteria === f;
+    if (criteria === f) return true;
   }
   return false;
 }

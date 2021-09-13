@@ -5,7 +5,7 @@ import {
   searchCriteria,
   uidChoiceMap,
   uidFriendStorage,
-} from "../../../src/app/shared/interfaces/index";
+} from "../../../../src/app/shared/interfaces/index";
 import { pickFromSCArray, randomWeightedPick } from "./picking";
 import { PickingWeights } from "./main";
 import { searchCriteriaGrouping } from "./search-criteria";

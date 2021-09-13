@@ -7,6 +7,7 @@ import { searchCriteria, Criterion } from "@interfaces/search-criteria.model";
 import { SearchCriteria, copyClassInstance } from "@classes/index";
 import { privateProfileFromDatabase, profileFromDatabase } from "@interfaces/index";
 import { FormatService } from "@services/format/format.service";
+import { map } from "rxjs/operators";
 
 @Injectable({
   providedIn: "root",
@@ -15,14 +16,14 @@ export class SearchCriteriaStore {
   private searchCriteria: BehaviorSubject<SearchCriteria>;
   public readonly searchCriteria$: Observable<SearchCriteria>;
 
-  constructor(private fs: AngularFirestore, private format: FormatService) {
+  constructor(private firestore: AngularFirestore, private format: FormatService) {
     this.searchCriteria = new BehaviorSubject<SearchCriteria>(this.emptySearchCriteria());
     this.searchCriteria$ = this.searchCriteria.asObservable();
   }
 
   public async initializeStore(uid: string) {
     if (!uid) return console.error("No uid provided.");
-    await this.fetchCriteria(uid);
+    await this.fetchCriteria(uid).toPromise();
   }
 
   resetStore() {
@@ -55,28 +56,24 @@ export class SearchCriteriaStore {
   // }
 
   /** Fetches the lastly saved search criteria from the database */
-  private async fetchCriteria(uid: string) {
-    if (!uid) return console.error("No uid provided.");
-    try {
-      const snapshot = await this.fs.firestore
-        .collection("profiles")
-        .doc(uid)
-        .collection("private")
-        .doc("private")
-        .get();
-
-      if (snapshot.exists) {
-        const data = snapshot.data() as privateProfileFromDatabase;
-        const latestSearchCriteria = this.format.searchCriteriaDatabaseToClass(
-          data.latestSearchCriteria
-        );
-        this.searchCriteria.next(latestSearchCriteria);
-      } else {
-        console.error();
-      }
-    } catch {
-      console.error("tff");
-    }
+  private fetchCriteria(uid: string): Observable<void> {
+    return this.firestore
+      .collection("profiles")
+      .doc(uid)
+      .collection("private")
+      .doc("private")
+      .get()
+      .pipe(
+        map((snapshot) => {
+          if (snapshot.exists) {
+            const data = snapshot.data() as privateProfileFromDatabase;
+            const latestSearchCriteria = this.format.searchCriteriaDatabaseToClass(
+              data.latestSearchCriteria
+            );
+            this.searchCriteria.next(latestSearchCriteria);
+          }
+        })
+      );
   }
 
   private emptySearchCriteria() {

@@ -7,7 +7,7 @@ import {
   chatFromDatabase,
   mdDatingPickingFromDatabase,
   dateMap,
-} from "../../../src/app/shared/interfaces/index";
+} from "../../../../src/app/shared/interfaces/index";
 import { sortUIDs } from "./main";
 interface uidDocRefMap {
   uid: string;

@@ -31,6 +31,7 @@ export class AppComponent implements OnDestroy, OnInit {
 
   ngOnInit() {
     this.afAuth.authState.subscribe((a) => console.log("change in authstate: ", a));
+    console.log("array", [][0]);
   }
 
   ngOnDestroy(): void {

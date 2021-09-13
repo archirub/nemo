@@ -3,7 +3,7 @@ import {
   checkEmailValidityRequest,
   successResponse,
   universitiesAllowedDocument,
-} from "../../src/app/shared/interfaces/index";
+} from "../../../src/app/shared/interfaces/index";
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 
@@ -55,7 +55,7 @@ export const emailIsAllowed = (
   universityDomains: string[],
   additionalEmailsAllowed: string[]
 ): boolean => {
-  const simpleEmailRegEx = new RegExp("/^[^s@]+@[^s@]+.[^s@]+$/");
+  const simpleEmailRegEx = new RegExp(/^[^\s@]+@[^\s@]+.[^\s@]+$/);
 
   const isEmail = simpleEmailRegEx.test(emailToCheck);
 

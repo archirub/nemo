@@ -1,7 +1,7 @@
 import {
   deleteAccountRequest,
   successResponse,
-} from "../../src/app/shared/interfaces/index";
+} from "../../../src/app/shared/interfaces/index";
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 

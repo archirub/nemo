@@ -2,7 +2,7 @@ import {
   mdDatingPickingFromDatabase,
   mdFriendPickingFromDatabase,
   uidChoiceMap,
-} from "../../../src/app/shared/interfaces/index";
+} from "../../../../src/app/shared/interfaces/index";
 import * as functions from "firebase-functions";
 
 /**
@@ -256,6 +256,7 @@ export function pickFromSCArray(
       upperBound,
       variance
     );
+
     // temporary fix
     if (indexPicked !== -1) {
       // Saves index to object

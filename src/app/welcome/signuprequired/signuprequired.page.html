@@ -214,8 +214,8 @@
               <h3>My university is</h3>
               <ion-select required formControlName="university">
                 <ion-select-option
-                  *ngFor="let university of universityOptions"
-                  value="{{university}}"
+                  *ngFor="let university of universityOptions$ | async"
+                  [value]="university"
                   >{{ university }}</ion-select-option
                 >
               </ion-select>
@@ -229,7 +229,7 @@
             <div class="preferences">
               <h3>My level of study is</h3>
               <ion-select required formControlName="degree">
-                <ion-select-option *ngFor="let degree of degreeOptions" value="{{degree}}"
+                <ion-select-option *ngFor="let degree of degreeOptions" [value]="degree"
                   >{{ degree }}</ion-select-option
                 >
               </ion-select>

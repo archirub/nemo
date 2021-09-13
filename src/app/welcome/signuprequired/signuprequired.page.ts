@@ -5,6 +5,7 @@ import {
   ViewChild,
   ViewChildren,
   QueryList,
+  OnInit,
 } from "@angular/core";
 import { FormGroup, FormControl, Validators } from "@angular/forms";
 import { IonSlides } from "@ionic/angular";
@@ -25,13 +26,17 @@ import { SignupRequired } from "@interfaces/signup.model";
 import { SignupService } from "@services/signup/signup.service";
 import { allowOptionalProp } from "@interfaces/index";
 import { AppDatetimeComponent } from "@components/index";
+import { UniversitiesStore } from "@stores/universities/universities.service";
+import { AngularFireAuth } from "@angular/fire/compat/auth";
+import { concatMap, filter, map, switchMap } from "rxjs/operators";
+import { Observable } from "rxjs";
 
 @Component({
   selector: "app-signuprequired",
   templateUrl: "./signuprequired.page.html",
   styleUrls: ["../welcome.page.scss"],
 })
-export class SignuprequiredPage {
+export class SignuprequiredPage implements OnInit {
   @ViewChild("slides") slides: IonSlides;
   @ViewChild("date") date: AppDatetimeComponent;
   @ViewChildren("pagerDots", { read: ElementRef }) dots: QueryList<ElementRef>;
@@ -56,7 +61,7 @@ export class SignuprequiredPage {
   // OPTIONS
   genderOptions: Gender[] = genderOptions;
   sexualPreferenceOptions: SexualPreference[] = sexualPreferenceOptions;
-  universityOptions: UniversityName[] = searchCriteriaOptions.university;
+  universityOptions$: Observable<UniversityName[]>;
   degreeOptions: Degree[] = searchCriteriaOptions.degree;
 
   maxPictureCount: number = 6; // defines the number of picture boxes in template, as well as is used in logic to save picture picks
@@ -80,8 +85,15 @@ export class SignuprequiredPage {
   constructor(
     private router: Router,
     private signup: SignupService,
-    private changeDetectorRef: ChangeDetectorRef
+    private changeDetectorRef: ChangeDetectorRef,
+    private universitiesStore: UniversitiesStore,
+    private afAuth: AngularFireAuth
   ) {}
+
+  ngOnInit() {
+    this.universityLogic().subscribe();
+    this.universityOptions$ = this.universitiesStore.optionsList$;
+  }
 
   async ionViewWillEnter() {
     // UI elements map to show on invalid checks when trying to move slide, see validateAndSlide()
@@ -128,7 +140,10 @@ export class SignuprequiredPage {
       var falseCount = 0; // Count how many are invalid
 
       entry.forEach((element) => {
-        var validity = this.form.get(element).valid;
+        // IMPORTANT that this is !invalid instead of valid
+        // This is because setting a FormControl to disabled makes valid = false but
+        // invalid = true (see https://github.com/angular/angular/issues/18678)
+        var validity = !this.form.get(element).invalid;
 
         if (validity === false) {
           // If invalid, increase falseCount and display "invalid" UI
@@ -151,7 +166,10 @@ export class SignuprequiredPage {
         this.unlockAndSlideToNext();
       }
     } else {
-      var validity = this.form.get(entry).valid;
+      // IMPORTANT that this is !invalid instead of valid
+      // This is because setting a FormControl to disabled makes valid = false but
+      // invalid = true (see https://github.com/angular/angular/issues/18678)
+      var validity = !this.form.get(entry).invalid;
 
       if (validity === true) {
         Object.values(this.reqValidatorChecks).forEach(
@@ -387,5 +405,27 @@ export class SignuprequiredPage {
   savePhoto(e: { photoUrl: string; index: number }) {
     this.picturesHolder[e.index] = e.photoUrl;
     this.changeDetectorRef.detectChanges(); // forces Angular to check updates in the template
+  }
+
+  universityLogic() {
+    return this.afAuth.user.pipe(
+      filter((u) => !!u),
+      concatMap((user) => this.universitiesStore.getUniversityFromEmail(user.email)),
+      map((universityName) => {
+        const uniFormControl = this.form.get("university");
+
+        if (universityName) {
+          console.log("disabling");
+          uniFormControl.disable();
+          uniFormControl.setValue(universityName);
+        } else {
+          console.log("enabling");
+
+          uniFormControl.enable();
+        }
+      })
+    );
+
+    // return this.universitiesStore.universities$.pipe(map)
   }
 }

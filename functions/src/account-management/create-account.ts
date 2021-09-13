@@ -20,7 +20,7 @@ import {
   SwipeUserInfo,
   uidDatingStorage,
   universitiesAllowedDocument,
-} from "./../../src/app/shared/interfaces/index";
+} from "./../../../src/app/shared/interfaces/index";
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import { emailIsAllowed } from "./check-email-validity";

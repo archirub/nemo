@@ -7,17 +7,11 @@ admin.initializeApp();
 //   databaseURL: "https://nemo-dev-1b0bc.firebaseio.com",
 // });
 
-export * from "./generate-swipe-stack/main";
-export * from "./get-uids";
 export * from "./get-match-data-user-info.function";
-export * from "./register-swipe-stack/main";
-export * from "./update-PI-system/main";
-export * from "./update-duplicate-data/index";
 // export * from "./increment-md-uid-count";
-export * from "./create-account";
 export * from "./profile-editing-by-user";
-export * from "./delete-account";
-export * from "./unverified-account-deletion-scheduler";
-export * from "./delete-all-users";
-export * from "./delete-all-data";
-export * from "./delete-all-storage";
+
+export * from "./duplicate-data-updating/index";
+export * from "./account-management/index";
+export * from "./app-development/index";
+export * from "./swipe-stack-management/index";

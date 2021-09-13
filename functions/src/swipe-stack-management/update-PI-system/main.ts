@@ -4,7 +4,7 @@ import {
   piStorage,
   SwipeUserInfo,
   uidDatingStorage,
-} from "../../../src/app/shared/interfaces/index";
+} from "../../../../src/app/shared/interfaces/index";
 
 interface SwipeUserInfoMap {
   [uid: string]: SwipeUserInfo;

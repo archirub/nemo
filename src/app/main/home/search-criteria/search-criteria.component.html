@@ -6,7 +6,7 @@
 
     <div class="image" *ngIf="!viewEntered">
       <div class="flex loading">
-        <img #fish src="/assets/nemo_load.svg" class="fish"/>
+        <img #fish src="/assets/nemo_load.svg" class="fish" />
       </div>
     </div>
 
@@ -62,9 +62,9 @@
                     #degreeslider
                     [buttonWidth]="17"
                     [fontSize]="3"
-                    [selections]="this.scOptions.degree.reverse()"
+                    [selections]="degreeOptions.reverse()"
                     (choice)="checkClear()"
-                    formControlName='degree'
+                    formControlName="degree"
                   ></nemo-toggle>
                 </div>
               </ion-col>
@@ -80,7 +80,7 @@
                     [fontSize]="3"
                     [selections]="['On Campus', 'Everyone']"
                     (choice)="checkClear()"
-                    formControlName='onCampus'
+                    formControlName="onCampus"
                   ></nemo-toggle>
                 </div>
               </ion-col>
@@ -177,7 +177,7 @@
             <ion-item
               (click)="selectReplace(option, 'areaOfStudy')"
               lines="none"
-              *ngFor="let option of this.scOptions.areaOfStudy"
+              *ngFor="let option of areaOfStudyOptions"
               [style.--background]="
                 this.studySelection === option
                   ? 'var(--ion-color-primary)'
@@ -205,7 +205,7 @@
             <ion-item
               (click)="selectReplace(option, 'society')"
               lines="none"
-              *ngFor="let option of this.scOptions.societyCategory"
+              *ngFor="let option of societyCategoryOptions"
               [style.--background]="
                 this.societySelection === option
                   ? 'var(--ion-color-primary)'
@@ -233,7 +233,7 @@
             <ion-item
               (click)="selectReplace(option, 'interests')"
               lines="none"
-              *ngFor="let option of this.scOptions.interests"
+              *ngFor="let option of interestsOptions"
               [style.--background]="
                 this.interestSelection === option
                   ? 'var(--ion-color-primary)'

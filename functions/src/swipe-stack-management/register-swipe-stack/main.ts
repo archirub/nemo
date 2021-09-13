@@ -7,7 +7,7 @@ import {
   SwipeMode,
   piStorage,
   SwipeUserInfo,
-} from "../../../src/app/shared/interfaces/index";
+} from "../../../../src/app/shared/interfaces/index";
 import { createDatingChatDocuments, handleDatingYesChoices } from "./dating-mode";
 import { createFriendChatDocuments, handleFriendYesChoices } from "./friend-mode";
 

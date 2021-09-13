@@ -14,15 +14,18 @@ import {
   of,
   throwError,
   concat,
+  combineLatest,
 } from "rxjs";
 import {
   catchError,
   concatMap,
+  filter,
   map,
   publish,
   publishReplay,
   share,
   shareReplay,
+  startWith,
   switchMap,
   take,
   tap,
@@ -44,7 +47,7 @@ import {
 import { SignupDataHolder } from "@classes/index";
 import { SignupoptionalPage } from "src/app/welcome/signupoptional/signupoptional.page";
 import { UploadTaskSnapshot } from "@angular/fire/compat/storage/interfaces";
-import { Auth, UserCredential } from "@angular/fire/auth";
+import { Auth, User, UserCredential } from "@angular/fire/auth";
 
 @Injectable({
   providedIn: "root",
@@ -59,7 +62,9 @@ export class SignupService {
     private afStorage: AngularFireStorage,
     private router: Router,
     private currentUserStore: CurrentUserStore // private signupOptionalPage: SignupOptionalPage, // private signupRequiredPage: SignupRequiredPage
-  ) {}
+  ) {
+    this.signupData.subscribe((a) => console.log("signup data ", a));
+  }
 
   /**
    * Creates the account in Firebase authentification, initializes
@@ -112,16 +117,15 @@ export class SignupService {
    * and stores its pictures in Firebase storage
    * @param data object containing all of the data from all parts of the signup process
    */
-  createFirestoreAccount(): Observable<void> {
-    return this.signupData.pipe(
-      withLatestFrom(this.afAuth.authState),
+  createFirestoreAccount(): Observable<any> {
+    return combineLatest([this.signupData, this.afAuth.user]).pipe(
       take(1),
       switchMap(([dataStored, user]) => {
         if (!user) {
           console.error("Big mistake right here");
           return of(null);
         }
-
+        console.log("tsup");
         const creationRequestData: createAccountRequest = {
           firstName: dataStored.firstName,
           picturesCount: dataStored?.pictures?.filter(Boolean).length ?? 0, // counts # of none empty elements
@@ -142,7 +146,7 @@ export class SignupService {
         };
 
         return forkJoin([
-          of({ pictures: dataStored.pictures, uid: user.uid }),
+          of({ pictures: dataStored.pictures, uid: (user as User).uid }),
           this.afFunctions.httpsCallable("createAccount")(creationRequestData),
         ]);
       }),
@@ -152,7 +156,7 @@ export class SignupService {
         else throwError("DATABASE DOCUMENT STORAGE FAILED");
       }),
       switchMap((pictureStoringRes) => {
-        if ((pictureStoringRes[0].state = "success")) return of(null);
+        if ((pictureStoringRes[0].state = "success")) return of("");
 
         return throwError("PICTURE STORAGE FAILED");
       })
@@ -176,11 +180,8 @@ export class SignupService {
           console.error("That's a big no no");
           return of();
         }
-        return concat(
-          this.currentUserStore.fillStore(),
-          this.removeLocalStorage(),
-          this.router.navigateByUrl("/main/home")
-        );
+        console.log("we out here fam");
+        return concat(this.removeLocalStorage(), this.currentUserStore.fillStore());
       })
     );
   }
@@ -193,7 +194,7 @@ export class SignupService {
     uid: string
   ): Observable<UploadTaskSnapshot[]> {
     if (!uid) return;
-
+    console.log("storing pictures");
     const pictureStorers$ = pictures.map((picture, index) => {
       const filePath = `profilePictures/${uid}/${index}`;
       // const filePath = `profile_pictures/${uid}/${index}.${picture.format}`;
@@ -299,6 +300,12 @@ export class SignupService {
    * redirects to the correct signup stage
    */
   async checkAndRedirect() {
+    const user = await this.afAuth.currentUser;
+
+    if (!user) {
+      return this.router.navigateByUrl("welcome/signupauth");
+    }
+
     // get the information stored on local storage to signupData observable (if there is any)
     await this.getLocalStorage();
 
@@ -308,7 +315,7 @@ export class SignupService {
     // this check of whether stage is not falsy is to make sure that we are only
     // redirected to a stage if the signup process has been initialized
     if (stage) {
-      this.router.navigateByUrl(`welcome/signup${stage}`);
+      return this.router.navigateByUrl(`welcome/signup${stage}`);
     }
   }
 

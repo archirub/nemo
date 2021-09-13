@@ -41,7 +41,7 @@
           <div class="input flexend-col">
             <div>
               <ion-input
-                placeholder="email@ucl.ac.uk"
+                placeholder="My university email"
                 formControlName="email"
               ></ion-input>
             </div>
@@ -49,7 +49,14 @@
 
           <div class="flexstart-col">
             <p class="tip">
-              Only UCL or KCL email addresses will allow for verification.
+              The only university domains currently allowed on the app are:
+            </p>
+            <ion-spinner
+              name="bubbles"
+              *ngIf="!(universityOptions$ | async)"
+            ></ion-spinner>
+            <p *ngIf="universityOptions$ | async as universityOptions">
+              {{ universityOptions.join(", ") }}
             </p>
           </div>
 
@@ -59,11 +66,11 @@
           </div>
 
           <div class="buttons">
-            <ion-button class="next-slide scroll" (click)="returnToLanding()">
+            <ion-button class="next-slide scroll" (click)="navigateToWelcome()">
               <ion-icon name="chevron-back-outline"></ion-icon>
             </ion-button>
 
-            <ion-button class="next-slide scroll" (click)="validateAndSlide('email')">
+            <ion-button class="next-slide scroll" (click)="onSlideFromEmail()">
               <ion-icon name="chevron-forward-outline"></ion-icon>
             </ion-button>
           </div>
@@ -92,11 +99,11 @@
           </div>
 
           <div class="buttons">
-            <ion-button class="next-slide scroll" (click)="unlockAndSlideToPrev()">
+            <ion-button class="next-slide scroll" (click)="slideToPrevious()">
               <ion-icon name="chevron-back-outline"></ion-icon>
             </ion-button>
 
-            <ion-button class="next-slide scroll" (click)="validateAndSlide('password')">
+            <ion-button class="next-slide scroll" (click)="onSlideFromPassword()">
               <ion-icon name="chevron-forward-outline"></ion-icon>
             </ion-button>
           </div>
@@ -105,6 +112,13 @@
 
       <ion-slide>
         <div class="personal-pref">
+          <ion-button
+            style="z-index: 100; position: absolute"
+            debounceClick
+            (debounceClick)="devVerifyEmail()"
+            debounceTime="5000"
+            >Make email verified (dev)</ion-button
+          >
           <div class="question" *ngIf="(emailVerificationState$ | async) === 'not-sent'">
             <ion-label position="stacked"> We are sending you an email </ion-label>
           </div>
@@ -121,7 +135,7 @@
             *ngIf="(emailVerificationState$ | async) === ('sent' || 'resent')"
           >
             Click
-            <a (click)="resendEmailVerification()">here</a>
+            <a (click)="resendVerificationEmail()">here</a>
             if you would like us to send another confirmation email.
           </h2>
 
@@ -133,7 +147,7 @@
           >
             Email sent!
           </p>
-          <p id="wait">Please wait seconds to send another conformation email.</p>
+          <p id="wait">Please wait seconds to send another confirmation email.</p>
 
           <!--SWITCHES TO BELOW ONCE EMAIL IS CONFIRMED-->
 
@@ -147,12 +161,13 @@
           >
             Click the button to go to the next slide and continue your sign up.
           </h2>
+          <p>{{ emailVerificationState$ | async}}</p>
 
           <div
             class="buttons first"
             *ngIf="(emailVerificationState$ | async) === 'verified'"
           >
-            <ion-button class="next-slide scroll" (click)="moveToOptional()">
+            <ion-button class="next-slide scroll" (click)="onSlideFromVerification()">
               <ion-icon name="chevron-forward-outline"></ion-icon>
             </ion-button>
           </div>

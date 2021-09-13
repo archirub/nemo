@@ -1,14 +1,16 @@
+import { UniversitiesStore } from "@stores/universities/universities.service";
 import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from "@angular/core";
 import { IonSlides, IonContent, ModalController } from "@ionic/angular";
 import { FormControl, FormGroup } from "@angular/forms";
 
-import { Subscription } from "rxjs";
+import { Observable, Subscription } from "rxjs";
 
 import { SearchCriteriaStore } from "@stores/search-criteria/search-criteria-store.service";
 import { searchCriteriaOptions } from "@interfaces/search-criteria.model";
 import { SearchCriteria } from "@classes/index";
 
 import { AppToggleComponent } from "@components/index";
+import { UniversityName } from "@interfaces/universities.model";
 
 @Component({
   selector: "app-search-criteria",
@@ -27,7 +29,13 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
 
   searchCriteriaSub: Subscription;
   searchCriteria: SearchCriteria;
-  scOptions = searchCriteriaOptions;
+
+  universityOptions$: Observable<UniversityName[]>;
+  degreeOptions = searchCriteriaOptions.degree;
+  areaOfStudyOptions = searchCriteriaOptions.areaOfStudy;
+  societyCategoryOptions = searchCriteriaOptions.societyCategory;
+  interestsOptions = searchCriteriaOptions.interests;
+  // onCampus = searchCriteriaOptions.onCampus
 
   degreeSelection: string;
   studySelection: string;
@@ -40,16 +48,27 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
 
   viewEntered: boolean = false;
 
-  searchCriteriaForm = new FormGroup({
-    // university: new FormControl(" "),
-    onCampus: new FormControl(null),
-    degree: new FormControl(null),
-    areaOfStudy: new FormControl(null),
-    societyCategory: new FormControl(null),
-    interests: new FormControl(null),
-  });
+  searchCriteriaForm: FormGroup;
 
-  constructor(private SCstore: SearchCriteriaStore, private modalCtrl: ModalController) {}
+  get emptyForm() {
+    return new FormGroup({
+      university: new FormControl(null),
+      onCampus: new FormControl(null),
+      degree: new FormControl(null),
+      areaOfStudy: new FormControl(null),
+      societyCategory: new FormControl(null),
+      interests: new FormControl(null),
+    });
+  }
+
+  constructor(
+    private SCstore: SearchCriteriaStore,
+    private modalCtrl: ModalController,
+    private universitiesStore: UniversitiesStore
+  ) {
+    this.searchCriteriaForm = this.emptyForm;
+    this.universityOptions$ = this.universitiesStore.optionsList$;
+  }
 
   ngOnInit() {
     /*this.fishSwimAnimation = FishSwimAnimation(this.fish);
@@ -147,19 +166,17 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
       this.degreeHandle.selectOption(this.searchCriteriaForm.value.degree);
     }
 
-    if (this.scOptions.areaOfStudy.includes(this.searchCriteriaForm.value.areaOfStudy)) {
+    if (this.areaOfStudyOptions.includes(this.searchCriteriaForm.value.areaOfStudy)) {
       this.selectReplace(this.searchCriteriaForm.value.areaOfStudy, "areaOfStudy");
     }
 
     if (
-      this.scOptions.societyCategory.includes(
-        this.searchCriteriaForm.value.societyCategory
-      )
+      this.societyCategoryOptions.includes(this.searchCriteriaForm.value.societyCategory)
     ) {
       this.selectReplace(this.searchCriteriaForm.value.societyCategory, "society");
     }
 
-    if (this.scOptions.interests.includes(this.searchCriteriaForm.value.interests)) {
+    if (this.interestsOptions.includes(this.searchCriteriaForm.value.interests)) {
       this.selectReplace(this.searchCriteriaForm.value.interests, "interests");
     }
 

@@ -7,7 +7,7 @@ import {
   piStorage,
   searchCriteriaOptions,
   SearchFeatures,
-} from "./../../../src/app/shared/interfaces/index";
+} from "../../../src/app/shared/interfaces/index";
 
 export const updateSearchFeature = functions
   .region("europe-west2")

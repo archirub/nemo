@@ -32,6 +32,7 @@ import { routerInitListenerService } from "./initial-url.service";
 import { SignupAuthMethodSharer } from "../../../welcome/signupauth/signupauth-method-sharer.service";
 import { ConnectionService } from "@services/connection/connection.service";
 import { User } from "@angular/fire/auth";
+import { UniversitiesStore } from "@stores/universities/universities.service";
 
 type pageName =
   | "chats"
@@ -71,7 +72,8 @@ export class GlobalStateManagementService {
     private chatboardStore: ChatboardStore,
     private chatboardPicturesStore: ChatboardPicturesStore,
     private swipeStackStore: SwipeStackStore,
-    private OwnPicturesStore: OwnPicturesStore
+    private OwnPicturesStore: OwnPicturesStore,
+    private universitiesStore: UniversitiesStore
   ) {
     // format allows for this.auth$ to be a BehaviorSubject version of the Firebase.User observable
     this.afAuth.user.subscribe(this.auth$);
@@ -151,6 +153,8 @@ export class GlobalStateManagementService {
   private activateCorrespondingStores(page: pageName): Observable<any> {
     const storesToActivate$: Observable<any>[] = [];
 
+    storesToActivate$.push(this.universitiesStore.fetchUniversities());
+
     if (this.pageIsMain(page)) storesToActivate$.push(this.userStore.fillStore());
 
     if (page === "chats" || page === "messenger") {
@@ -182,10 +186,10 @@ export class GlobalStateManagementService {
       concatMap(([emailIsVerified, userIsSigningUp]) => {
         // COMMENTED OUT FOR DEVELOPMENT ONLY
         // if user hasn't verified his email yet, go to email verification
-        // if (!emailIsVerified) return this.requiresEmailVerificationRoutine();
+        if (!emailIsVerified) return this.requiresEmailVerificationRoutine();
 
         // if user is signing up, then do nothing
-        if (userIsSigningUp) return of("");
+        if (userIsSigningUp) return this.signupService.checkAndRedirect();
 
         // otherwise, continue the procedure
         return this.doesProfileDocExist(user.uid).pipe(
