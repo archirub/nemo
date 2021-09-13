@@ -12,54 +12,50 @@
     </div>
   </div>
 
-  <ion-row>
-    <ng-container *ngIf="matches">
-      <ion-item detail="false" #matchesButton button (click)="presentMatches()">
-        <ion-avatar slot="start">
-          <img
-            *ngFor="let match of matches.slice(0, 3); index as j"
-            [ngStyle]="{
-              zIndex: j,
-              'margin-left': 3 * j + 'vh',
-              position: 'absolute',
-              width: 9 + 'vh',
-              height: 9 + 'vh'
-            }"
-            [src]="(chatboardPictures$ | async)[match?.recipient?.uid]"
-            class="match-image"
-          />
-        </ion-avatar>
+  <ion-row *ngIf="matches.length > 0">
+    <ion-item detail="false" #matchesButton button (click)="presentMatches()">
+      <ion-avatar slot="start">
+        <img
+          *ngFor="let match of matches.slice(0, 3); index as j"
+          [ngStyle]="{
+            zIndex: j,
+            'margin-left': 3 * j + 'vh',
+            position: 'absolute',
+            width: 9 + 'vh',
+            height: 9 + 'vh'
+          }"
+          [src]="(chatboardPictures$ | async)[match?.recipient?.uid]"
+          class="match-image"
+        />
+      </ion-avatar>
 
-        <div
-          *ngIf="matches.length > 1 && matches.length < 10"
-          class="text-container"
-          id="match-text"
-          [ngStyle]="styleFromMatches()"
-        >
-          {{ matches.length }} new catches!
-        </div>
+      <div
+        *ngIf="matches.length > 1 && matches.length < 10"
+        class="text-container"
+        id="match-text"
+        [ngStyle]="styleFromMatches()"
+      >
+        {{ matches.length }} new catches!
+      </div>
 
-        <div
-          *ngIf="matches.length === 1"
-          class="text-container"
-          id="match-text"
-          [ngStyle]="styleFromMatches()"
-        >
-          {{ matches.length }} new catch!
-        </div>
+      <div
+        *ngIf="matches.length === 1"
+        class="text-container"
+        id="match-text"
+        [ngStyle]="styleFromMatches()"
+      >
+        {{ matches.length }} new catch!
+      </div>
 
-        <div
-          *ngIf="matches.length >= 10"
-          class="text-container"
-          id="match-text"
-          [ngStyle]="styleFromMatches()"
-        >
-          10+ new catches!
-        </div>
-
-        <img class="fish-back" src="/assets/nemo.png" />
-      </ion-item>
-    </ng-container>
+      <div
+        *ngIf="matches.length >= 10"
+        class="text-container"
+        id="match-text"
+        [ngStyle]="styleFromMatches()"
+      >
+        10+ new catches!
+      </div>
+    </ion-item>
   </ion-row>
 
   <ion-list *ngIf="this.chats.length > 0">
@@ -72,20 +68,12 @@
           <ion-label
             color="primary"
             class="text-container name"
-            [style.fontWeight]="
-              chat?.recentMessage?.senderID === chat?.recipient?.uid ? 'bold' : 'normal'
-            "
-            [style.color]="
-              chat?.recentMessage?.senderID === chat?.recipient?.uid
-                ? 'var(--ion-color-primary)'
-                : 'var(--ion-color-primary-tint)'
-            "
           >
             {{ chat?.recipient?.name }}</ion-label
           >
           <ion-label
             color="black"
-            class="text-container chat"
+            class="text-container chat read"
             id="lastMessage"
             *ngIf="chat?.recentMessage?.senderID === chat?.recipient?.uid"
           >
@@ -95,7 +83,7 @@
           >
           <ion-label
             color="black"
-            class="text-container chat"
+            class="text-container chat unread"
             id="lastMessage"
             *ngIf="chat?.recentMessage?.senderID !== chat?.recipient?.uid"
           >

@@ -38,7 +38,7 @@ ion-content.welcome {
 .signin {
   --background: transparent;
   --box-shadow: none;
-  color: var(--ion-color-secondary);
+  color: var(--ion-color-primary-contrast);
 }
 
 $button-width: 6.25vh;
@@ -62,11 +62,8 @@ interests-slides {
   margin-top: 10vh;
 }
 
-#sentEmail, #wait {
-  margin: 0 auto;
-  text-align: center;
-  color: var(--ion-color-primary);
-  display: none;
+#wait {
+  color: var(--ion-color-light-shade);
 }
 
 #emailCheck, #passCheck, #nameCheck, #dateCheck, #uniCheck, #sexCheck, #degreeCheck, #genderCheck {

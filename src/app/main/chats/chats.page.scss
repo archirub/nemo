@@ -105,37 +105,3 @@ ion-title {
 ::-webkit-scrollbar, *::-webkit-scrollbar {
   display: none !important;
 }
-
-.noChats {
-  position: absolute;
-  display: flex;
-  justify-content: center;
-  width: 100vw;
-  z-index: 5;
-  top: 20vh;
-
-  p {
-    font-size: 2.7vh;
-    width: 70vw;
-    text-align: center;
-  }
-}
-
-.fish {
-  display: flex;
-  flex-direction: column;
-  position: absolute;
-  top: 20vh;
-
-  h1 {
-    margin-top: 0;
-    color: var(--ion-color-primary);
-    font-size: 3vh;
-    text-align: center;
-  }
-
-  img[name=fish] {
-    height: 12vh;
-    transform: rotate(-190deg);
-  }
-}

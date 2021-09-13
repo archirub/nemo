@@ -28,14 +28,6 @@ ion-list {
   padding-top: 0;
 }
 
-.fish-back {
-  height: 15vh;
-  opacity: 0.5;
-  overflow: hidden;
-  position: absolute;
-  right: 0;
-}
-
 ion-badge {
   position: absolute;
   right: 10vw;
@@ -54,7 +46,7 @@ ion-row {
     font-weight: bold;
     border: solid var(--ion-color-primary-shade) 1px;
     border-radius: 10px;
-    //--background: rgba(243, 161, 136, 0.1);
+    box-shadow: 0px 1px 3px;
     --color: var(--ion-color-primary-shade);
     max-height: 13vh;
   }
@@ -88,4 +80,46 @@ ion-item-options {
 
 ::-webkit-scrollbar, *::-webkit-scrollbar {
   display: none !important;
+}
+
+.unread {
+  color: var(--ion-color-light);
+}
+
+.read {
+  color: black;
+}
+
+.noChats {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  width: 100vw;
+  z-index: 5;
+  top: 20vh;
+
+  p {
+    font-size: 2.7vh;
+    width: 70vw;
+    text-align: center;
+  }
+}
+
+.fish {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  top: 20vh;
+
+  h1 {
+    margin-top: 0;
+    color: var(--ion-color-primary);
+    font-size: 3vh;
+    text-align: center;
+  }
+
+  img[name=fish] {
+    height: 12vh;
+    transform: rotate(-190deg);
+  }
 }

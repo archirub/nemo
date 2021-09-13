@@ -18,7 +18,7 @@ import { AngularFireAuth } from "@angular/fire/compat/auth";
 import { UserCredential } from "@angular/fire/auth";
 import { AngularFireFunctions } from "@angular/fire/compat/functions";
 
-import { concat, from, Observable, of, Subscription } from "rxjs";
+import { BehaviorSubject, concat, from, Observable, of, Subscription, timer } from "rxjs";
 import {
   catchError,
   concatMap,
@@ -41,6 +41,7 @@ import { LoadingService } from "@services/loading/loading.service";
 import { UniversityName } from "@interfaces/universities.model";
 import { UniversitiesStore } from "@stores/universities/universities.service";
 
+type ResendVerificationState = "available" | "not-available";
 @Component({
   selector: "app-signupauth",
   templateUrl: "./signupauth.page.html",
@@ -62,6 +63,11 @@ export class SignupauthPage implements OnInit {
   emailVerificationState$: Observable<EmailVerificationState>;
 
   universityOptions$: Observable<UniversityName[]>;
+
+  private resendVerificationState = new BehaviorSubject<ResendVerificationState>(
+    "available"
+  );
+  public resendVerificationState$ = this.resendVerificationState.asObservable();
 
   // is a getter function to get a different object ref everytime
   get emptyAuthForm() {
@@ -106,6 +112,7 @@ export class SignupauthPage implements OnInit {
   ionViewDidEnter() {
     this.slidesRef.lockSwipes(true);
     this.updatePager();
+
     this.validatorChecks = {
       email: document.getElementById("emailCheck"),
       password: document.getElementById("passCheck"),
@@ -124,6 +131,11 @@ export class SignupauthPage implements OnInit {
         )
       )
       .toPromise();
+  }
+
+  public async resendEmailVerification() {
+    this.emailResentAnimation();
+    return this.emailService.sendVerificationToUser("resent").toPromise();
   }
 
   public emailAnimations(): Observable<any> {
@@ -245,44 +257,14 @@ export class SignupauthPage implements OnInit {
   }
 
   private async emailResentAnimation() {
-    const waitEl = document.getElementById("wait");
+    FlyingLetterAnimation(this.emailRef).play(); //Play send email animation
 
-    if (!this.prevReqTime) {
-      this.prevReqTime = new Date().getTime();
-      console.log("First resend request.");
-      await Promise.all([
-        this.resendConfirmationUI(),
-        this.emailService.sendVerificationToUser("resent").toPromise(),
-      ]);
-    } else {
-      let timeWaited = new Date().getTime() - this.prevReqTime;
+    this.resendVerificationState.next("not-available"); //Changing state disables the button
 
-      if (timeWaited < 20000) {
-        //20 seconds between requests
-
-        let timeLeft = Math.ceil(20 - timeWaited / 1000);
-        if (timeLeft > 1) {
-          waitEl.innerHTML = `Please wait ${timeLeft} seconds to send another confirmation email.`;
-        } else {
-          waitEl.innerHTML = `Please wait ${timeLeft} second to send another confirmation email.`;
-        }
-
-        if (waitEl.style.display != "block") {
-          waitEl.style.display = "block";
-        }
-        setTimeout(() => {
-          waitEl.style.display = "none";
-        }, 1400);
-
-        console.log("Too early to resend request.");
-      } else {
-        this.prevReqTime = new Date().getTime();
-        await Promise.all([
-          this.resendConfirmationUI(),
-          this.emailService.sendVerificationToUser("resent").toPromise(),
-        ]);
-      }
-    }
+    const waitTime = timer(20000);
+    waitTime.subscribe(() => {
+      this.resendVerificationState.next("available"); //After 20 seconds, revert state to available
+    });
   }
 
   private async emailVerifiedAnimation() {

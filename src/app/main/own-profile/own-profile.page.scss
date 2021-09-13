@@ -161,6 +161,7 @@ h2 {
     color: var(--ion-color-primary);
     --background: transparent;
     --background-activated: transparent;
+    margin-bottom: 1.5vh;
 }
 
 ;
@@ -196,6 +197,7 @@ h2 {
     display: flex;
     justify-content: space-evenly;
     flex-wrap: wrap;
+
     app-profile-edit-photo {
         width: 11vh;
         height: 14vh;
@@ -257,6 +259,11 @@ a {
 }
 
 add-photo {
-    height: 16vh;
-    width: 16vh;
-    }
+    margin-top: 1vh;
+}
+
+.no-interests {
+    font-size: 2vh;
+    text-align: center;
+    color: var(--ion-color-light-contrast);
+}

@@ -165,7 +165,6 @@ export class AppDatetimeComponent implements OnInit, ControlValueAccessor {
       this.age = dy;
     }
 
-    console.log("Selected:", this.value);
     this.ageChange.emit(this.age);
   }
 

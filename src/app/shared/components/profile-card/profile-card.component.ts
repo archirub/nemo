@@ -96,19 +96,19 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
   ngOnInit() {
     this.moreInfo = false;
 
-    // this.buildInterestSlides(this.profile);
+    this.buildInterestSlides(this.profile);
   }
 
   ngAfterViewInit() {
-    //Animations for profile info sliding up and down
-    setTimeout(() => {
-      this.expandAnimation = MoreInfoAnimation(this.complete, 18, 85);
-      this.collapseAnimation = LessInfoAnimation(this.complete, 18, 85);
-    }, 2000);
-
     this.slides?.lockSwipeToPrev(true);
+  }
 
-    console.log(this.profile);
+  getContentHeight(): number {
+    let height = 16 + Math.ceil(100*(this.content.nativeElement.getBoundingClientRect().height/window.innerHeight));
+    //height of moreInfo content in %/vh
+    //16 = 14% offset of the header + 2% bottom
+
+    return height;
   }
 
   expandProfile() {
@@ -118,9 +118,10 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
         this.expandAnimation.destroy(); //Destroy previous animations to avoid buildup
       }
 
-      this.collapseAnimation = LessInfoAnimation(this.complete, 85, 18); //Have to reinitialise animation every time
-
+      this.collapseAnimation = LessInfoAnimation(this.complete, 14, this.getContentHeight()); //Have to reinitialise animation every time
       this.collapseAnimation.play();
+
+      this.header.nativeElement.style.boxShadow = 'none'; //Remove box shadow from header
 
       setTimeout(() => {
         this.moreInfo = false; //Allow animation to play before hiding element
@@ -130,19 +131,29 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
         this.collapseAnimation.destroy(); //Destroy previous animations to avoid buildup
       }
 
-      this.expandAnimation = MoreInfoAnimation(this.complete, 85, 18); //Have to reinitialise animation every time
+      this.expandAnimation = MoreInfoAnimation(this.complete, 14, this.getContentHeight()); //Have to reinitialise animation every time
+      this.expandAnimation.play();
 
       this.moreInfo = true; //show element and play animation
-      this.expandAnimation.play();
+      this.header.nativeElement.style.boxShadow = '0px 30px 10px -20px rgb(251 251 251)'; //Add box shadow to header
     }
     this.expanded.emit(this.moreInfo);
 
     setTimeout(() => {
       this.sizeSwipers();
-      this.intSlides.update(); //Fixes broken swiper mechanism that ruins IonSlides snap-swiping
+
+      try {
+        this.intSlides.update(); //Fixes broken swiper mechanism that ruins IonSlides snap-swiping
+      } catch (TypeError) {
+        console.log('No interest slides found.'); //No interests selected on profile
+      };
     }, 100);
 
-    this.startSlides();
+    try {
+      this.startSlides();
+    } catch (TypeError) {
+      console.log("No interest slides to autoplay.");
+    };
   }
 
   async updatePager(currentIndex: number) {

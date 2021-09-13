@@ -135,19 +135,26 @@
             *ngIf="(emailVerificationState$ | async) === ('sent' || 'resent')"
           >
             Click
-            <a (click)="resendVerificationEmail()">here</a>
+
+            <a
+              *ngIf="(resendVerificationState$ | async) === 'available'"
+              (click)="resendEmailVerification()"
+              >here</a
+            >
+            <a *ngIf="(resendVerificationState$ | async) === 'not-available'" id="wait"
+              >here</a
+            >
+
             if you would like us to send another confirmation email.
           </h2>
 
           <ion-icon id="letter" #email name="mail-outline"></ion-icon>
 
-          <p
+          <!--p
             id="sentEmail"
-            *ngIf="(emailVerificationState$ | async) === ('sent' || 'resent')"
-          >
+            *ngIf="(emailVerificationState$ | async) === ('sent' || 'resent')">
             Email sent!
-          </p>
-          <p id="wait">Please wait seconds to send another confirmation email.</p>
+          </p-->
 
           <!--SWITCHES TO BELOW ONCE EMAIL IS CONFIRMED-->
 
