@@ -22,7 +22,7 @@
 </div>
 
 <ion-content>
-  <form [formGroup]="authForm" (ngSubmit)="onSubmitAuthData()">
+  <form [formGroup]="authForm">
     <ion-slides pager="false" #slides>
       <!-- BELOW IS FOR TESTING -->
       <!-- <ion-slide>
@@ -136,17 +136,14 @@
           >
             Click
 
-            <a
-              *ngIf="(resendVerificationState$ | async) === 'available'"
-              (click)="resendEmailVerification()"
+            <a *ngIf="resendingIsAvailable$ | async" (click)="onSendingEmail('resent')"
               >here</a
             >
-            <a *ngIf="(resendVerificationState$ | async) === 'not-available'" id="wait"
-              >here</a
-            >
+            <a *ngIf="!(resendingIsAvailable$ | async)" id="wait">here</a>
 
             if you would like us to send another confirmation email.
           </h2>
+          <h2>Time left is {{ timeToResendingAvailable$ | async }} seconds</h2>
 
           <ion-icon id="letter" #email name="mail-outline"></ion-icon>
 

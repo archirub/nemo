@@ -18,7 +18,16 @@ import { AngularFireAuth } from "@angular/fire/compat/auth";
 import { UserCredential } from "@angular/fire/auth";
 import { AngularFireFunctions } from "@angular/fire/compat/functions";
 
-import { BehaviorSubject, concat, from, Observable, of, Subscription, timer } from "rxjs";
+import {
+  BehaviorSubject,
+  concat,
+  from,
+  interval,
+  Observable,
+  of,
+  Subscription,
+  timer,
+} from "rxjs";
 import {
   catchError,
   concatMap,
@@ -26,7 +35,9 @@ import {
   filter,
   map,
   switchMap,
+  take,
   tap,
+  withLatestFrom,
 } from "rxjs/operators";
 
 import { FlyingLetterAnimation } from "@animations/letter.animation";
@@ -40,8 +51,8 @@ import { successResponse } from "@interfaces/cloud-functions.model";
 import { LoadingService } from "@services/loading/loading.service";
 import { UniversityName } from "@interfaces/universities.model";
 import { UniversitiesStore } from "@stores/universities/universities.service";
+import { takeWhile } from "lodash";
 
-type ResendVerificationState = "available" | "not-available";
 @Component({
   selector: "app-signupauth",
   templateUrl: "./signupauth.page.html",
@@ -51,23 +62,23 @@ export class SignupauthPage implements OnInit {
   @ViewChild("slides") slidesRef: IonSlides;
   @ViewChild("email", { read: ElementRef }) emailRef: ElementRef;
 
-  slidesLeft: number;
+  EMAIL_SENDING_INTERVAL = 10; // in seconds
 
-  prevReqTime: number = undefined;
+  slidesLeft: number;
 
   validatorChecks: object;
 
-  awaitingConfirm: boolean = true;
-  confirmed: boolean = false;
+  public emailVerificationState$: Observable<EmailVerificationState>;
 
-  emailVerificationState$: Observable<EmailVerificationState>;
+  public universityOptions$: Observable<UniversityName[]>;
 
-  universityOptions$: Observable<UniversityName[]>;
+  private resendingIsAvailable = new BehaviorSubject<boolean>(true);
+  public resendingIsAvailable$ = this.resendingIsAvailable.asObservable();
 
-  private resendVerificationState = new BehaviorSubject<ResendVerificationState>(
-    "available"
+  private timeToResendingAvailable = new BehaviorSubject<number>(
+    this.EMAIL_SENDING_INTERVAL
   );
-  public resendVerificationState$ = this.resendVerificationState.asObservable();
+  public timeToResendingAvailable$ = this.timeToResendingAvailable.asObservable();
 
   // is a getter function to get a different object ref everytime
   get emptyAuthForm() {
@@ -79,7 +90,7 @@ export class SignupauthPage implements OnInit {
 
   authForm: FormGroup;
 
-  signupSub: Subscription;
+  subs: Subscription;
 
   constructor(
     private alertCtrl: AlertController,
@@ -92,7 +103,8 @@ export class SignupauthPage implements OnInit {
     private afFunctions: AngularFireFunctions,
     private loadingCtrl: LoadingController,
     private loading: LoadingService,
-    private universitiesStore: UniversitiesStore
+    private universitiesStore: UniversitiesStore,
+    private changeDetector: ChangeDetectorRef
   ) {
     this.authForm = this.emptyAuthForm;
   }
@@ -106,7 +118,13 @@ export class SignupauthPage implements OnInit {
       this.goStraightToEmailVerification.bind(this)
     );
 
-    this.emailAnimations().subscribe();
+    this.subs.add(this.emailAnimations().subscribe());
+    this.subs.add(this.timerResendingLogic().subscribe());
+
+    this.resendingIsAvailable$.subscribe((a) => console.log("resending is available", a));
+    this.timeToResendingAvailable$.subscribe((a) =>
+      console.log("time to resending is available", a)
+    );
   }
 
   ionViewDidEnter() {
@@ -119,16 +137,35 @@ export class SignupauthPage implements OnInit {
     };
   }
 
-  public async onSubmitAuthData(): Promise<void> {
-    await this.requestAccountCreation()
-      .pipe(
-        filter((val) => !!val),
-        switchMap(() =>
-          concat(
-            this.emailService.sendVerificationToUser("sent"),
-            this.emailService.listenForVerification()
-          )
+  private timerResendingLogic(): Observable<void> {
+    return this.emailService.emailVerificationState$.pipe(
+      filter((state) => state === "sent" || state === "resent"),
+      concatMap(() => this.resendingIsAvailable$),
+      take(1),
+      filter((canResend) => canResend),
+      tap(() => console.log("dalsdaks")),
+      map(() => this.resendingIsAvailable.next(false)),
+      exhaustMap(() =>
+        interval(1000).pipe(
+          take(this.EMAIL_SENDING_INTERVAL + 1),
+          map((count) => {
+            console.log("count is ", count);
+            const timeLeftUntilAvailable = this.EMAIL_SENDING_INTERVAL - count;
+            this.timeToResendingAvailable.next(timeLeftUntilAvailable);
+            this.changeDetector.detectChanges();
+            if (timeLeftUntilAvailable === 0) this.resendingIsAvailable.next(true);
+          })
         )
+      )
+    );
+  }
+
+  public async onSendingEmail(state: "sent" | "resent") {
+    return this.resendingIsAvailable$
+      .pipe(
+        take(1),
+        filter((canResend) => canResend),
+        switchMap(() => this.emailService.sendVerificationToUser(state))
       )
       .toPromise();
   }
@@ -190,9 +227,11 @@ export class SignupauthPage implements OnInit {
       alert.onDidDismiss().then(() => this.router.navigateByUrl("/welcome/signupauth"));
       return alert.present();
     }
+    console.log("going straight to email verification");
 
     await this.goToSlide(2);
     await this.emailService.sendVerificationToUser("sent").toPromise();
+    await this.emailService.listenForVerification().toPromise();
   }
 
   public navigateToWelcome() {
@@ -257,14 +296,7 @@ export class SignupauthPage implements OnInit {
   }
 
   private async emailResentAnimation() {
-    FlyingLetterAnimation(this.emailRef).play(); //Play send email animation
-
-    this.resendVerificationState.next("not-available"); //Changing state disables the button
-
-    const waitTime = timer(20000);
-    waitTime.subscribe(() => {
-      this.resendVerificationState.next("available"); //After 20 seconds, revert state to available
-    });
+    return FlyingLetterAnimation(this.emailRef).play(); //Play send email animation
   }
 
   private async emailVerifiedAnimation() {
@@ -337,16 +369,16 @@ export class SignupauthPage implements OnInit {
       await this.requestAccountCreation().toPromise();
       await loader.dismiss();
       await this.slideToNext();
-      // await this.emailService.sendVerificationToUser("sent").toPromise();
+      await this.emailService.sendVerificationToUser("sent").toPromise();
       await this.emailService.listenForVerification().toPromise();
     } catch (e) {
+      console.error(String(e));
       await loader?.dismiss();
       await alert?.dismiss();
       return this.alertCtrl
         .create({
           header: "An unknown error occured",
-          // message: "Please try again or come back later.",
-          message: String(e),
+          message: "Please try again or come back later.",
           buttons: ["Okay"],
         })
         .then((a) => a.present());
@@ -356,7 +388,7 @@ export class SignupauthPage implements OnInit {
   async onSlideFromVerification() {
     const user = await this.afAuth.currentUser;
     await user.reload();
-    await user.getIdToken(true);
+    await user.getIdToken(true); // to refresh the token
 
     if (!user || !user.emailVerified) return;
 
@@ -368,33 +400,6 @@ export class SignupauthPage implements OnInit {
       .httpsCallable("makeEmailVerified")({})
       .pipe(tap((res) => console.log(res)))
       .toPromise();
-  }
-
-  /**
-   * Checks whether the field on the current slide has valid value, allows continuing if true, input
-   * entry (string): the field of the form to check validator for, e.g. email, password
-   * If on the final validator, password, submits form instead of sliding to next slide
-   * THIS SHOULD BE USED ON THE NEXT SLIDE BUTTONS
-   **/
-  public async validateAndSlide(entry) {
-    var validity = this.authForm.get(entry).valid; // Check validator
-
-    if (validity === true) {
-      Object.values(this.validatorChecks).forEach(
-        (element) => (element.style.display = "none")
-      ); // Hide all "invalid" UI
-
-      if (entry === "password") {
-        // If password valid, submit form
-        console.log("Submitting auth data...");
-        await this.onSubmitAuthData();
-      }
-
-      await this.slideToNext(); // If others valid, slide next
-    } else {
-      this.validatorChecks[entry].style.display = "flex"; // Show "invalid" UI for invalid validator
-      console.log("Not valid, don't slide");
-    }
   }
 
   private async updatePager() {
@@ -430,39 +435,6 @@ export class SignupauthPage implements OnInit {
     map[current].style.display = "block";
   }
 
-  // 1. Start with we sent you an email verification
-  // Have a button that allows to resend the email after 20 seconds of wait (count down visible and
-  // then possibility to click)
-  // 2. Watch for email verification, once it has been verified change UI to "email successfully verified"
-  // and display a button that allows the user to continue the process (go to next slide)
-  // Double check in the ts file that the email has actually been verified before allowing for navigation
-
-  //
-
-  // - Check that email has been verified systematically before allowing the user to
-  // redirect to further parts of the signup process
-  // - Put an expiry time on the account, so that it deletes if the email hasn't been verified
-  // after x amount of time
-
-  // In global state management - check if user is authed, then check if user has email verified, if
-  // no then go to verification page, if yes then check whether the user has documents, handle cases
-  // where document hasn't actually been fetched (like slow connection or no connection), if document has
-  // been fetched and there are none, then show prompt to continue account creation, if it hasn't been fetched
-  // for some reason (especially if it is slow connection, retry, and then show error message which says error occured try again later).
-  // if it has been fetched and there are documents, then just redirect to app etc.
-
-  private async resendConfirmationUI() {
-    var text = document.getElementById("sentEmail");
-
-    await FlyingLetterAnimation(this.emailRef).play();
-    setTimeout(() => {
-      text.style.display = "block";
-    }, 800);
-    setTimeout(() => {
-      text.style.display = "none";
-    }, 2200);
-  }
-
   private async displaySignupFailedAlert(message: string): Promise<void> {
     const alert = await this.alertCtrl.create({
       header: "Signup Failed",
@@ -474,6 +446,6 @@ export class SignupauthPage implements OnInit {
   }
 
   ngOnDestroy() {
-    //this.signupSub.unsubscribe();
+    this.subs.unsubscribe();
   }
 }

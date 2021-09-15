@@ -280,12 +280,12 @@ export class GlobalStateManagementService {
 
       buttons: [
         {
-          text: "Finish profile",
-          handler: finishProfileProcedure,
-        },
-        {
           text: "Abort profile",
           handler: abortProfileProcedure,
+        },
+        {
+          text: "Finish profile",
+          handler: finishProfileProcedure,
         },
       ],
     };
