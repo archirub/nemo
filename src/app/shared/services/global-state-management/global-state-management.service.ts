@@ -54,7 +54,6 @@ export class GlobalStateManagementService {
 
   constructor(
     private router: Router,
-    private activatedRoute: ActivatedRoute,
     private alertCtrl: AlertController,
 
     private afAuth: AngularFireAuth,
@@ -84,10 +83,10 @@ export class GlobalStateManagementService {
       switchMap((isConnected) => {
         if (isConnected && !this.alreadyConnectedOnce) {
           this.alreadyConnectedOnce = true;
-          return merge(this.authStateManagement(), this.storesManagement());
+          return this.globalManagement();
         } else if (isConnected && this.alreadyConnectedOnce) {
           return from(this.connectionService.displayBackOnlineToast()).pipe(
-            switchMap(() => merge(this.authStateManagement(), this.storesManagement()))
+            switchMap(() => this.globalManagement())
           );
         } else {
           return this.connectionService.displayOfflineToast();
@@ -96,13 +95,128 @@ export class GlobalStateManagementService {
     );
   }
 
-  private authStateManagement() {
+  private globalManagement(): Observable<"activate-stores" | "don't-activate-stores"> {
     return this.getFirebaseUser().pipe(
-      concatMap((user) => {
+      concatMap((user) => forkJoin([of(user), this.isUserEmailVerified(user)])),
+      concatMap(([user, emailIsVerified]) => {
+        // if user isn't authenticated, do the corresponding routine
         if (!user) return this.nobodyAuthenticatedRoutine();
-        return this.somebodyAuthenticatedRoutine(user);
+
+        // if user hasn't verified his email yet, go to email verification
+        if (user && !emailIsVerified) return this.requiresEmailVerificationRoutine();
+
+        // is user is authenticated and his email is verified, then go on son
+        if (user && emailIsVerified) return this.userIsValidRoutine(user);
       })
     );
+  }
+
+  /**
+   * Procedure followed when there is no one authenticated
+   */
+  private nobodyAuthenticatedRoutine(): Observable<any> {
+    return of(this.router.url).pipe(
+      concatMap((url) => {
+        if (["/welcome/login", "/welcome/signupauth", "/welcome"].includes(url))
+          return of(); // do nothing of user is in login, signupauth or welcome page,
+        // as no auth is required for these three pages
+        return concat(this.resetAppState(), this.router.navigateByUrl("/welcome"));
+      })
+    );
+  }
+
+  private requiresEmailVerificationRoutine(): Observable<any> {
+    return of(this.router.url).pipe(
+      concatMap((url) =>
+        url !== "/welcome/signupauth"
+          ? this.router.navigateByUrl("/welcome/signupauth")
+          : of("")
+      ),
+      concatMap(() =>
+        !!this.signupauthMethodSharer.goStraightToEmailVerification
+          ? this.signupauthMethodSharer.goStraightToEmailVerification()
+          : of("")
+      )
+    );
+  }
+
+  private userIsValidRoutine(user: User) {
+    return this.isUserSigningUp().pipe(
+      concatMap((userIsSigningUp) => {
+        // COMMENTED OUT FOR DEVELOPMENT ONLY
+
+        // if user is signing up, then do nothing
+        if (userIsSigningUp) return this.signupService.checkAndRedirect();
+
+        // otherwise, continue the procedure
+        return this.doesProfileDocExist(user.uid).pipe(
+          concatMap((profileDocExists) => {
+            // "null" implies there has been an error and we couldn't get an answer on whether
+            // it exists. Hence take no action
+            if (profileDocExists === null) return of("");
+            if (profileDocExists === false) return this.noDocumentsRoutine(user);
+            return this.hasDocumentsRoutine();
+          })
+        );
+      })
+    );
+  }
+
+  /**
+   * Procedure followed when there is someone authenticated but no documents associated with
+   * that account on the database. We check whether that user has documents on the db by attempting
+   * to fetch that person's profile
+   */
+  private noDocumentsRoutine(user: User): Observable<void> {
+    const finishProfileProcedure = () => {
+      this.emptyStoresService.emptyStores(); // to be safe
+      return this.signupService.checkAndRedirect();
+    };
+    const abortProfileProcedure = async () => {
+      this.emptyStoresService.emptyStores(); // to be safe
+
+      try {
+        await user.delete();
+        await this.router.navigateByUrl("/welcome");
+      } catch (err) {
+        if (err?.code === "auth/requires-recent-login") {
+          await this.firebaseAuthService.reAuthenticationProcedure(user);
+          await user.delete();
+          await this.router.navigateByUrl("/welcome");
+        }
+      }
+    };
+
+    const alertOptions = {
+      header: "We found an incomplete account",
+      message: `
+      The account with which you're signed in is incomplete, you can choose to
+      finish signing up or abort and be taken back to the welcome page. 
+      `,
+
+      buttons: [
+        {
+          text: "Abort profile",
+          handler: abortProfileProcedure,
+        },
+        {
+          text: "Finish profile",
+          handler: finishProfileProcedure,
+        },
+      ],
+    };
+
+    return from(this.alertCtrl.create(alertOptions)).pipe(
+      switchMap((alert) => alert.present())
+    );
+  }
+
+  private hasDocumentsRoutine() {
+    // makes it such that we only navigate to home if the user is not in main
+    // such that it doesn't infringe on the user experience
+    if (this.pageIsMain(this.getPageFromUrl(this.router.url)))
+      return this.storesManagement();
+    return merge(this.storesManagement(), this.router.navigateByUrl("main/tabs/home"));
   }
 
   private storesManagement(): Observable<void> {
@@ -181,120 +295,6 @@ export class GlobalStateManagementService {
     return this.afAuth.authState;
   }
 
-  private somebodyAuthenticatedRoutine(user: User) {
-    return forkJoin([this.isUserEmailVerified(user), this.isUserSigningUp()]).pipe(
-      concatMap(([emailIsVerified, userIsSigningUp]) => {
-        // COMMENTED OUT FOR DEVELOPMENT ONLY
-        // if user hasn't verified his email yet, go to email verification
-        if (!emailIsVerified) return this.requiresEmailVerificationRoutine();
-
-        // if user is signing up, then do nothing
-        if (userIsSigningUp) return this.signupService.checkAndRedirect();
-
-        // otherwise, continue the procedure
-        return this.doesProfileDocExist(user.uid).pipe(
-          concatMap((profileDocExists) => {
-            // "null" implies there has been an error and we couldn't get an answer on whether
-            // it exists. Hence take no action
-            if (profileDocExists === null) return of("");
-            if (profileDocExists === false) return this.noDocumentsRoutine(user);
-            return this.hasDocumentsRoutine();
-          })
-        );
-      })
-    );
-  }
-
-  private requiresEmailVerificationRoutine(): Observable<any> {
-    return of(this.router.url).pipe(
-      concatMap((url) =>
-        url !== "/welcome/signupauth"
-          ? this.router.navigateByUrl("/welcome/signupauth")
-          : of("")
-      ),
-      concatMap(() =>
-        !!this.signupauthMethodSharer.goStraightToEmailVerification
-          ? this.signupauthMethodSharer.goStraightToEmailVerification()
-          : of("")
-      )
-    );
-  }
-
-  /**
-   * Procedure followed when there is no one authenticated
-   */
-  private nobodyAuthenticatedRoutine(): Observable<any> {
-    return of(this.router.url).pipe(
-      concatMap((url) => {
-        if (["/welcome/login", "/welcome/signupauth", "/welcome"].includes(url))
-          return of(); // do nothing of user is in login, signupauth or welcome page,
-        // as no auth is required for these three pages
-        return concat(this.resetAppState(), this.router.navigateByUrl("/welcome"));
-      })
-    );
-  }
-
-  private hasDocumentsRoutine(): Observable<any> {
-    return this.initMainStores().pipe(
-      // return concat(this.resetAppState(), this.initMainStores()).pipe(
-      concatMap(() => {
-        // makes it such that we only navigate to home if the user is not in main
-        // such that it doesn't infringe on the user experience
-        if (this.pageIsMain(this.getPageFromUrl(this.router.url))) return of("");
-        return this.router.navigateByUrl("main/tabs/home");
-      })
-    );
-  }
-
-  /**
-   * Procedure followed when there is someone authenticated but no documents associated with
-   * that account on the database. We check whether that user has documents on the db by attempting
-   * to fetch that person's profile
-   */
-  private noDocumentsRoutine(user: User): Observable<void> {
-    const finishProfileProcedure = () => {
-      this.emptyStoresService.emptyStores(); // to be safe
-      return this.signupService.checkAndRedirect();
-    };
-    const abortProfileProcedure = async () => {
-      this.emptyStoresService.emptyStores(); // to be safe
-
-      try {
-        await user.delete();
-        await this.router.navigateByUrl("/welcome");
-      } catch (err) {
-        if (err?.code === "auth/requires-recent-login") {
-          await this.firebaseAuthService.reAuthenticationProcedure(user);
-          await user.delete();
-          await this.router.navigateByUrl("/welcome");
-        }
-      }
-    };
-
-    const alertOptions = {
-      header: "We found an incomplete account",
-      message: `
-      The account with which you're signed in is incomplete, you can choose to
-      finish signing up or abort and be taken back to the welcome page. 
-      `,
-
-      buttons: [
-        {
-          text: "Abort profile",
-          handler: abortProfileProcedure,
-        },
-        {
-          text: "Finish profile",
-          handler: finishProfileProcedure,
-        },
-      ],
-    };
-
-    return from(this.alertCtrl.create(alertOptions)).pipe(
-      switchMap((alert) => alert.present())
-    );
-  }
-
   private isUserEmailVerified(user: User): Observable<boolean> {
     return of(user).pipe(map((user) => !!user?.emailVerified));
   }
@@ -338,14 +338,6 @@ export class GlobalStateManagementService {
       // require any limit nor any retry at all in the first place.
       // It is just in case you lose connectivity exactly after having regained it
       retry(3)
-    );
-  }
-
-  private initMainStores() {
-    console.log("initinit");
-    return concat(
-      this.userStore.fillStore()
-      // this.chatStore.activateStore()
     );
   }
 

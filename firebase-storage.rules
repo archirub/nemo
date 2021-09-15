@@ -6,16 +6,15 @@ service firebase.storage {
     }
      
     match /profilePictures/{uid}/{pictureNumber} {
-      allow read: if isAuthenticated();
-      allow create, delete, update: if isPictureOwner(uid) && pictureNumberIsAllowed(pictureNumber);
+      allow read: if userIsValid();
+      allow create, delete, update: if 
+      userIsValid() 
+      && isPictureOwner(uid) 
+      && pictureNumberIsAllowed(pictureNumber);
     }
 
   }
 }
-
-function isAuthenticated() {
-  return request.auth != null
-  }
 
 function isPictureOwner(folderName) {
   return request.auth.uid == folderName
@@ -27,8 +26,26 @@ function pictureNumberIsAllowed(value) {
 }
 
 function isGod() {
-  return request.auth.uid in ["oY6HiUHmUvcKbFQQnb88t3U4Zew1"]
+  return request.auth.email in ["oY6HiUHmUvcKbFQQnb88t3U4Zew1"]
 }
 
-// solve storage problem where nothing gets through (check the actual request you're making see if it has to do with that)
-// add chats to the security rules of firestore
+function userIsValid() {
+  return isAuthenticated() && emailIsAllowed() && emailIsVerified()
+}
+
+// not used directly, for userIsValid()
+function isAuthenticated() {
+  return request.auth != null
+  }
+
+// not used directly, for userIsValid()
+function emailIsAllowed() {
+  return request.auth.token.email.matches("^[A-Za-z0-9._%+-]+@ucl.ac.uk$") 
+  || request.auth.token.email.matches("^[A-Za-z0-9._%+-]+@kcl.ac.uk$")
+  || request.auth.token.email in ["archibald.ruban@gmail.com"]
+}
+
+// not used directly, for userIsValid()
+function emailIsVerified() {
+  return request.auth.token.email_verified == true
+}

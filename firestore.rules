@@ -6,8 +6,8 @@ service cloud.firestore {
     }
 
     match /profiles/{profileID} {
-      allow read: if isAuthenticated();
-      allow update: if isAuthenticated() 
+      allow read: if userIsValid();
+      allow update: if userIsValid() 
                     && isDocumentOwner(profileID) 
                     && onlyPropertiesModifiedAre(["pictureCount"])
                     && request.resource.data.pictureCount is number;
@@ -19,11 +19,11 @@ service cloud.firestore {
     }
 
     match /chats/{chatID} {
-      allow read: if isAuthenticated() 
+      allow read: if userIsValid() 
                   // && isPartOfChat()
 
       match /messages/{messageID} {
-        allow read, create: if isAuthenticated() 
+        allow read, create: if userIsValid() 
                             && isPartOfChat()
       }
     }
@@ -38,10 +38,6 @@ function onlyPropertiesModifiedAre(keys) {
   return request.resource.data.diff(resource.data).changedKeys().hasOnly(keys)
   }
 
-function isAuthenticated() {
-  return request.auth != null
-  }
-
 function isDocumentOwner(docID) {
   return request.auth.uid == docID
   }
@@ -52,5 +48,26 @@ function isPartOfChat() {
 
 function isGod() {
   return request.auth.uid in ["oY6HiUHmUvcKbFQQnb88t3U4Zew1"]
+}
+
+function userIsValid() {
+  return isAuthenticated() && emailIsAllowed() && emailIsVerified()
+}
+
+// not used directly, for userIsValid()
+function isAuthenticated() {
+  return request.auth != null
+  }
+
+// not used directly, for userIsValid()
+function emailIsAllowed() {
+  return request.auth.token.email.matches("^[A-Za-z0-9._%+-]+@ucl.ac.uk$") 
+  || request.auth.token.email.matches("^[A-Za-z0-9._%+-]+@kcl.ac.uk$")
+  || request.auth.token.email in ["archibald.ruban@gmail.com"]
+}
+
+// not used directly, for userIsValid()
+function emailIsVerified() {
+  return request.auth.token.email_verified == true
 }
 
