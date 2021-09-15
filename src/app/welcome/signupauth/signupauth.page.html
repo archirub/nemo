@@ -48,14 +48,14 @@
           </div>
 
           <div class="flexstart-col">
-            <p class="tip">
+            <p class="tip" style="margin-bottom: 1vh">
               The only university domains currently allowed on the app are:
             </p>
             <ion-spinner
               name="bubbles"
               *ngIf="!(universityOptions$ | async)"
             ></ion-spinner>
-            <p *ngIf="universityOptions$ | async as universityOptions">
+            <p class="tip" *ngIf="universityOptions$ | async as universityOptions">
               {{ universityOptions.join(", ") }}
             </p>
           </div>
@@ -113,7 +113,7 @@
       <ion-slide>
         <div class="personal-pref">
           <ion-button
-            style="z-index: 100; position: absolute"
+            style="z-index: 100; position: absolute; bottom: 10vh;"
             debounceClick
             (debounceClick)="devVerifyEmail()"
             debounceTime="5000"
@@ -130,6 +130,17 @@
             <ion-label position="stacked"> An email has been sent </ion-label>
           </div>
 
+          <div class="question" *ngIf="(emailVerificationState$ | async) === 'verified'">
+            <ion-label position="stacked"> Email confirmed! </ion-label>
+          </div>
+
+          <h2
+            style="margin-top: 20vh"
+            *ngIf="(emailVerificationState$ | async) === 'verified'"
+          >
+            Click the button to go to the next slide and continue your sign up.
+          </h2>
+
           <h2
             style="margin-top: 20vh"
             *ngIf="(emailVerificationState$ | async) === ('sent' || 'resent')"
@@ -143,7 +154,12 @@
 
             if you would like us to send another confirmation email.
           </h2>
-          <h2>Time left is {{ timeToResendingAvailable$ | async }} seconds</h2>
+
+          <ng-container *ngIf="(emailVerificationState$ | async) === ('sent' || 'resent')">
+            <h3 class="resend" *ngIf="( timeToResendingAvailable$ | async ) != 0">
+              You can resend another email in {{ timeToResendingAvailable$ | async }} seconds.
+            </h3>
+          </ng-container>
 
           <ion-icon id="letter" #email name="mail-outline"></ion-icon>
 
@@ -154,18 +170,6 @@
           </p-->
 
           <!--SWITCHES TO BELOW ONCE EMAIL IS CONFIRMED-->
-
-          <div class="question" *ngIf="(emailVerificationState$ | async) === 'verified'">
-            <ion-label position="stacked"> Email confirmed! </ion-label>
-          </div>
-
-          <h2
-            style="margin-top: 20vh"
-            *ngIf="(emailVerificationState$ | async) === 'verified'"
-          >
-            Click the button to go to the next slide and continue your sign up.
-          </h2>
-          <p>{{ emailVerificationState$ | async}}</p>
 
           <div
             class="buttons first"

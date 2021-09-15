@@ -79,6 +79,6 @@ export class InterestsModalComponent implements OnInit {
 
   getPicturePath(interestName: Interests): string {
     const formattedName = interestName.replace(/\s/g, "").toLowerCase();
-    return "/assets/interests/" + formattedName + ".png";
+    return "/assets/interests/" + formattedName + ".svg";
   }
 }

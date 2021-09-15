@@ -161,6 +161,9 @@ h2 {
     color: var(--ion-color-primary);
     --background: transparent;
     --background-activated: transparent;
+    --box-shadow: none;
+    text-transform: none;
+    --ripple-color: transparent;
     margin-bottom: 1.5vh;
 }
 
@@ -186,11 +189,17 @@ h2 {
     background: var(--ion-color-medium);
     border-radius: 50%;
     height: 4vh;
+    width: 4vh;
     margin-top: -1vh;
     ion-icon {
-        font-size: 20px;
+        font-size: 3vh;
         padding: 0.5vh;
+        margin: auto;
     }
+}
+
+app-profile-card {
+    box-shadow: 0px 0px 20px -12px;
 }
 
 .photos {
@@ -198,12 +207,6 @@ h2 {
     justify-content: space-evenly;
     flex-wrap: wrap;
 
-    app-profile-edit-photo {
-        width: 11vh;
-        height: 14vh;
-        margin-top: 1vh;
-    }
-    ;
     p {
         margin: 5px;
     }
@@ -226,10 +229,21 @@ a {
     color: var(--ion-color-light-contrast);
 }
 
+add-photo {
+    margin-top: 1vh;
+    flex-basis: 26%; //Keeps max three to a line
+}
+
+.no-interests {
+    font-size: 2vh;
+    text-align: center;
+    color: var(--ion-color-light-contrast);
+}
+
 @media only screen and (max-device-height: 650px) {
     #profile {
         position: fixed;
-        left: 0;
+        left: 3px;
         height: 94%;
         top: 4.5vh;
         overflow: hidden;
@@ -256,14 +270,4 @@ a {
             height: 97.5%;
         }
     } 
-}
-
-add-photo {
-    margin-top: 1vh;
-}
-
-.no-interests {
-    font-size: 2vh;
-    text-align: center;
-    color: var(--ion-color-light-contrast);
 }

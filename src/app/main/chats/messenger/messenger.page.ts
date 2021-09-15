@@ -7,7 +7,7 @@ import {
   ElementRef,
 } from "@angular/core";
 
-import { NavController, IonContent, IonSlides } from "@ionic/angular";
+import { NavController, IonContent, IonSlides, IonSearchbar } from "@ionic/angular";
 import { AngularFireAuth } from "@angular/fire/compat/auth";
 import { ActivatedRoute, ParamMap } from "@angular/router";
 
@@ -60,6 +60,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild("profCard", { read: ElementRef, static: false }) profCard: ElementRef;
   //  profCard: ElementRef; //for styling
   @ViewChild("profCard") grandchildren: ProfileCardComponent; //for access to grandchildren
+  @ViewChild('searchBar') searchBar: IonSearchbar;
 
   profilesSub: Subscription;
   profileHandlingSub: Subscription;
@@ -144,11 +145,23 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
     this.recipientProfile$.subscribe((a) => console.log("recipient profile", a));
   }
 
-  ngAfterViewInit() {
+  async ngAfterViewInit() {
     // this.profCardView.changes.subscribe((p) => {
     //   console.log("profCardViewChildren: ", p);
     //   this.profCard = p;
     // });
+    let el = await this.searchBar.getInputElement();
+    let styles = {
+      border: 'solid 1px var(--ion-color-light-shade)',
+      borderRadius: '25px',
+      paddingInlineStart: '10px',
+      paddingInlineEnd: '35px'
+    };
+    
+    Object.keys(styles).forEach(key => {
+      el.style[key] = styles[key];
+    });
+
     this.slides.lockSwipes(true);
     this.tabColor();
   }

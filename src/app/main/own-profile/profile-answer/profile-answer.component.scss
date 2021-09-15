@@ -22,11 +22,12 @@
   background: var(--ion-color-medium);
   border-radius: 50%;
   height: 4vh;
+  width: 4vh;
   margin-top: 5.5vh;
-
   ion-icon {
-    font-size: 20px;
-    padding: 0.5vh;
+      font-size: 3vh;
+      padding: 0.5vh;
+      margin: auto;
   }
 }
 
