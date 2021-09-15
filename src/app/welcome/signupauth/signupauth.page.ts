@@ -90,7 +90,7 @@ export class SignupauthPage implements OnInit {
 
   authForm: FormGroup;
 
-  subs: Subscription;
+  subs: Subscription = new Subscription();
 
   constructor(
     private alertCtrl: AlertController,

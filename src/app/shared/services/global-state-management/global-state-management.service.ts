@@ -54,7 +54,6 @@ export class GlobalStateManagementService {
 
   constructor(
     private router: Router,
-    private activatedRoute: ActivatedRoute,
     private alertCtrl: AlertController,
 
     private afAuth: AngularFireAuth,
@@ -84,10 +83,10 @@ export class GlobalStateManagementService {
       switchMap((isConnected) => {
         if (isConnected && !this.alreadyConnectedOnce) {
           this.alreadyConnectedOnce = true;
-          return merge(this.authStateManagement(), this.storesManagement());
+          return this.globalManagement();
         } else if (isConnected && this.alreadyConnectedOnce) {
           return from(this.connectionService.displayBackOnlineToast()).pipe(
-            switchMap(() => merge(this.authStateManagement(), this.storesManagement()))
+            switchMap(() => this.globalManagement())
           );
         } else {
           return this.connectionService.displayOfflineToast();
@@ -96,111 +95,49 @@ export class GlobalStateManagementService {
     );
   }
 
-  private authStateManagement() {
+  private globalManagement(): Observable<void> {
     return this.getFirebaseUser().pipe(
-      concatMap((user) => {
-        if (!user) return this.nobodyAuthenticatedRoutine();
-        return this.somebodyAuthenticatedRoutine(user);
+      concatMap((user) => forkJoin([of(user), this.isUserEmailVerified(user)])),
+      concatMap(([user, emailIsVerified]) => {
+        const observables$: Observable<any>[] = [];
+
+        // to always activate
+        observables$.push(this.activateDefaultStores());
+
+        if (!user) {
+          // if user isn't authenticated, do the corresponding routine
+          observables$.push(this.nobodyAuthenticatedRoutine());
+        } else if (!emailIsVerified) {
+          // if user hasn't verified his email yet, go to email verification
+          observables$.push(this.requiresEmailVerificationRoutine());
+        } else {
+          // is user is authenticated and his email is verified, then go on
+          observables$.push(this.userIsValidRoutine(user));
+        }
+
+        return merge(...observables$);
       })
     );
   }
 
-  private storesManagement(): Observable<void> {
-    // serves as notification for when the router has been initialised
-    const initialUrl$ = this.routerInitListener.routerHasInit$.pipe(
-      map(() => this.router.url)
-    );
-
-    return concat(initialUrl$, this.router.events).pipe(
-      filter((event) => event instanceof NavigationStart || typeof event === "string"),
-      map((event: NavigationStart) =>
-        this.getPageFromUrl(event instanceof NavigationStart ? event.url : event)
-      ),
-      mergeMap((page) => this.activateCorrespondingStores(page))
-    );
-  }
-
-  private getPageFromUrl(url: string): pageName {
-    if (url.includes("chats")) return "chats";
-    if (url.includes("home")) return "home";
-    if (url.includes("own-profile")) return "own-profile";
-    if (url.includes("settings")) return "settings";
-    if (url.includes("messenger")) return "messenger";
-    if (url.includes("login")) return "login";
-    if (url.includes("signup")) return "signup";
-    if (url === "/welcome") return "welcome";
-    return null;
-  }
-
-  private pageIsMain(page: pageName): boolean {
-    const mainPages: pageName[] = [
-      "home",
-      "own-profile",
-      "chats",
-      "settings",
-      "messenger",
-    ];
-    if (mainPages.includes(page)) return true;
-    return false;
-  }
-
-  private pageIsWelcome(page: pageName): boolean {
-    const welcomePages: pageName[] = ["welcome", "login", "signup"];
-    if (welcomePages.includes(page)) return true;
-    return false;
-  }
-
-  private activateCorrespondingStores(page: pageName): Observable<any> {
+  private activateDefaultStores() {
     const storesToActivate$: Observable<any>[] = [];
 
     storesToActivate$.push(this.universitiesStore.fetchUniversities());
 
-    if (this.pageIsMain(page)) storesToActivate$.push(this.userStore.fillStore());
-
-    if (page === "chats" || page === "messenger") {
-      storesToActivate$.push(this.chatboardStore.activateStore());
-      storesToActivate$.push(
-        this.chatboardPicturesStore.activateStore(
-          this.chatboardStore.allChats$,
-          this.chatboardStore.hasNoChats$
-        )
-      );
-    }
-
-    // COMMENTED OUT FOR DEVELOPMENT ONLY -  to not fetch a swipe stack every time
-    // if (page === "home") storesToActivate$.push(this.swipeStackStore.activateStore());
-
-    if (page === "own-profile" || page === "settings") {
-      storesToActivate$.push(this.OwnPicturesStore.activateStore());
-    }
-
-    return storesToActivate$.length > 0 ? forkJoin(storesToActivate$) : of("");
+    return merge(...storesToActivate$);
   }
 
-  private getFirebaseUser(): Observable<User | null> {
-    return this.afAuth.authState;
-  }
-
-  private somebodyAuthenticatedRoutine(user: User) {
-    return forkJoin([this.isUserEmailVerified(user), this.isUserSigningUp()]).pipe(
-      concatMap(([emailIsVerified, userIsSigningUp]) => {
-        // COMMENTED OUT FOR DEVELOPMENT ONLY
-        // if user hasn't verified his email yet, go to email verification
-        if (!emailIsVerified) return this.requiresEmailVerificationRoutine();
-
-        // if user is signing up, then do nothing
-        if (userIsSigningUp) return this.signupService.checkAndRedirect();
-
-        // otherwise, continue the procedure
-        return this.doesProfileDocExist(user.uid).pipe(
-          concatMap((profileDocExists) => {
-            // "null" implies there has been an error and we couldn't get an answer on whether
-            // it exists. Hence take no action
-            if (profileDocExists === null) return of("");
-            if (profileDocExists === false) return this.noDocumentsRoutine(user);
-            return this.hasDocumentsRoutine();
-          })
-        );
+  /**
+   * Procedure followed when there is no one authenticated
+   */
+  private nobodyAuthenticatedRoutine(): Observable<any> {
+    return of(this.router.url).pipe(
+      concatMap((url) => {
+        if (["/welcome/login", "/welcome/signupauth", "/welcome"].includes(url))
+          return of(); // do nothing of user is in login, signupauth or welcome page,
+        // as no auth is required for these three pages
+        return concat(this.resetAppState(), this.router.navigateByUrl("/welcome"));
       })
     );
   }
@@ -220,28 +157,24 @@ export class GlobalStateManagementService {
     );
   }
 
-  /**
-   * Procedure followed when there is no one authenticated
-   */
-  private nobodyAuthenticatedRoutine(): Observable<any> {
-    return of(this.router.url).pipe(
-      concatMap((url) => {
-        if (["/welcome/login", "/welcome/signupauth", "/welcome"].includes(url))
-          return of(); // do nothing of user is in login, signupauth or welcome page,
-        // as no auth is required for these three pages
-        return concat(this.resetAppState(), this.router.navigateByUrl("/welcome"));
-      })
-    );
-  }
+  private userIsValidRoutine(user: User) {
+    return this.isUserSigningUp().pipe(
+      concatMap((userIsSigningUp) => {
+        // COMMENTED OUT FOR DEVELOPMENT ONLY
 
-  private hasDocumentsRoutine(): Observable<any> {
-    return this.initMainStores().pipe(
-      // return concat(this.resetAppState(), this.initMainStores()).pipe(
-      concatMap(() => {
-        // makes it such that we only navigate to home if the user is not in main
-        // such that it doesn't infringe on the user experience
-        if (this.pageIsMain(this.getPageFromUrl(this.router.url))) return of("");
-        return this.router.navigateByUrl("main/tabs/home");
+        // if user is signing up, then do nothing
+        if (userIsSigningUp) return this.signupService.checkAndRedirect();
+
+        // otherwise, continue the procedure
+        return this.doesProfileDocExist(user.uid).pipe(
+          concatMap((profileDocExists) => {
+            // "null" implies there has been an error and we couldn't get an answer on whether
+            // it exists. Hence take no action
+            if (profileDocExists === null) return of("");
+            if (profileDocExists === false) return this.noDocumentsRoutine(user);
+            return this.hasDocumentsRoutine();
+          })
+        );
       })
     );
   }
@@ -295,6 +228,88 @@ export class GlobalStateManagementService {
     );
   }
 
+  private hasDocumentsRoutine() {
+    // makes it such that we only navigate to home if the user is not in main
+    // such that it doesn't infringe on the user experience
+    if (this.pageIsMain(this.getPageFromUrl(this.router.url)))
+      return this.storesManagement();
+    return merge(this.storesManagement(), this.router.navigateByUrl("main/tabs/home"));
+  }
+
+  private storesManagement(): Observable<void> {
+    // serves as notification for when the router has been initialised
+    const initialUrl$ = this.routerInitListener.routerHasInit$.pipe(
+      map(() => this.router.url)
+    );
+
+    return concat(initialUrl$, this.router.events).pipe(
+      filter((event) => event instanceof NavigationStart || typeof event === "string"),
+      map((event: NavigationStart) =>
+        this.getPageFromUrl(event instanceof NavigationStart ? event.url : event)
+      ),
+      mergeMap((page) => this.activateCorrespondingStores(page))
+    );
+  }
+
+  private getPageFromUrl(url: string): pageName {
+    if (url.includes("chats")) return "chats";
+    if (url.includes("home")) return "home";
+    if (url.includes("own-profile")) return "own-profile";
+    if (url.includes("settings")) return "settings";
+    if (url.includes("messenger")) return "messenger";
+    if (url.includes("login")) return "login";
+    if (url.includes("signup")) return "signup";
+    if (url === "/welcome") return "welcome";
+    return null;
+  }
+
+  private pageIsMain(page: pageName): boolean {
+    const mainPages: pageName[] = [
+      "home",
+      "own-profile",
+      "chats",
+      "settings",
+      "messenger",
+    ];
+    if (mainPages.includes(page)) return true;
+    return false;
+  }
+
+  private pageIsWelcome(page: pageName): boolean {
+    const welcomePages: pageName[] = ["welcome", "login", "signup"];
+    if (welcomePages.includes(page)) return true;
+    return false;
+  }
+
+  private activateCorrespondingStores(page: pageName): Observable<any> {
+    const storesToActivate$: Observable<any>[] = [];
+
+    if (this.pageIsMain(page)) storesToActivate$.push(this.userStore.fillStore());
+
+    if (page === "chats" || page === "messenger") {
+      storesToActivate$.push(this.chatboardStore.activateStore());
+      storesToActivate$.push(
+        this.chatboardPicturesStore.activateStore(
+          this.chatboardStore.allChats$,
+          this.chatboardStore.hasNoChats$
+        )
+      );
+    }
+
+    // COMMENTED OUT FOR DEVELOPMENT ONLY -  to not fetch a swipe stack every time
+    // if (page === "home") storesToActivate$.push(this.swipeStackStore.activateStore());
+
+    if (page === "own-profile" || page === "settings") {
+      storesToActivate$.push(this.OwnPicturesStore.activateStore());
+    }
+
+    return storesToActivate$.length > 0 ? merge(...storesToActivate$) : of("");
+  }
+
+  private getFirebaseUser(): Observable<User | null> {
+    return this.afAuth.authState;
+  }
+
   private isUserEmailVerified(user: User): Observable<boolean> {
     return of(user).pipe(map((user) => !!user?.emailVerified));
   }
@@ -338,14 +353,6 @@ export class GlobalStateManagementService {
       // require any limit nor any retry at all in the first place.
       // It is just in case you lose connectivity exactly after having regained it
       retry(3)
-    );
-  }
-
-  private initMainStores() {
-    console.log("initinit");
-    return concat(
-      this.userStore.fillStore()
-      // this.chatStore.activateStore()
     );
   }
 

@@ -6,7 +6,7 @@ import {
   UniversityName,
 } from "@interfaces/universities.model";
 import { BehaviorSubject, Observable, of } from "rxjs";
-import { filter, map } from "rxjs/operators";
+import { filter, map, switchMap, take } from "rxjs/operators";
 
 @Injectable({
   providedIn: "root",
@@ -18,21 +18,26 @@ export class UniversitiesStore {
   constructor(private firestore: AngularFirestore) {}
 
   fetchUniversities(): Observable<any> {
-    if (this.universities.getValue() !== null) return of("");
+    return this.universities$.pipe(
+      take(1),
+      switchMap((universities) => {
+        if (Array.isArray(universities)) return of("");
 
-    return this.firestore
-      .collection("admin")
-      .doc("universitiesAllowed")
-      .get()
-      .pipe(
-        map((snapshot) => (snapshot.exists ? snapshot.data() : null)),
-        map((data: universitiesAllowedDocument) => {
-          console.log("universities fetched");
-          if (!data) return console.error("Document does not exist.");
+        return this.firestore
+          .collection("admin")
+          .doc("universitiesAllowed")
+          .get()
+          .pipe(
+            map((snapshot) => (snapshot.exists ? snapshot.data() : null)),
+            map((data: universitiesAllowedDocument) => {
+              console.log("universities fetched");
+              if (!data) return console.error("Document does not exist.");
 
-          this.universities.next(data.list);
-        })
-      );
+              this.universities.next(data.list);
+            })
+          );
+      })
+    );
   }
 
   /**
