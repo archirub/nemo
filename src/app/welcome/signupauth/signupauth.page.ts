@@ -92,6 +92,8 @@ export class SignupauthPage implements OnInit {
 
   subs: Subscription = new Subscription();
 
+  flyingLetterAnimation;
+
   constructor(
     private alertCtrl: AlertController,
     private router: Router,
@@ -135,6 +137,9 @@ export class SignupauthPage implements OnInit {
       email: document.getElementById("emailCheck"),
       password: document.getElementById("passCheck"),
     };
+
+    this.flyingLetterAnimation = FlyingLetterAnimation(this.emailRef); 
+    this.flyingLetterAnimation.play(); //Play send email animation
   }
 
   private timerResendingLogic(): Observable<void> {
@@ -161,6 +166,7 @@ export class SignupauthPage implements OnInit {
   }
 
   public async onSendingEmail(state: "sent" | "resent") {
+    this.flyingLetterAnimation.play();
     return this.resendingIsAvailable$
       .pipe(
         take(1),

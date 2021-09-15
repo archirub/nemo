@@ -66,7 +66,7 @@ interests-slides {
   color: var(--ion-color-light-shade);
 }
 
-#emailCheck, #passCheck, #nameCheck, #dateCheck, #uniCheck, #sexCheck, #degreeCheck, #genderCheck {
+#emailCheck, #passCheck, #nameCheck, #dateCheck, #uniCheck, #sexCheck, #degreeCheck, #genderCheck, #policiesCheck {
   margin-top: 10px;
   display: none;
   color: var(--ion-color-danger-shade);
@@ -400,6 +400,12 @@ question-slides {
   }
 }
 
+h3.resend {
+  text-align: center;
+  font-size: 2vh;
+  color: var(--ion-color-primary);
+}
+
 .preferences {
   display: flex;
   justify-content: flex-end;
@@ -546,6 +552,7 @@ ion-content {
     ion-checkbox {
       margin-top: 3vh;
       width: 9vw;
+      height: 9vw;
       --background: var(--ion-color-primary-contrast);
       --background-checked: var(--ion-color-primary-contrast);
       --checkmark-color: var(--ion-color-primary);

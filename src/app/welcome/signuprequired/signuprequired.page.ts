@@ -8,7 +8,7 @@ import {
   OnInit,
 } from "@angular/core";
 import { FormGroup, FormControl, Validators } from "@angular/forms";
-import { IonSlides } from "@ionic/angular";
+import { IonCheckbox, IonSlides } from "@ionic/angular";
 import { Router } from "@angular/router";
 
 import {
@@ -40,6 +40,8 @@ export class SignuprequiredPage implements OnInit {
   @ViewChild("slides") slides: IonSlides;
   @ViewChild("date") date: AppDatetimeComponent;
   @ViewChildren("pagerDots", { read: ElementRef }) dots: QueryList<ElementRef>;
+  @ViewChild("tcbox") tcbox: IonCheckbox;
+  @ViewChild("ppbox") ppbox: IonCheckbox;
 
   // UI MAP TO CHECK VALIDATORS, BUILD ON ionViewDidEnter() HOOK
   reqValidatorChecks: object;
@@ -124,20 +126,40 @@ export class SignuprequiredPage implements OnInit {
     this.changeDetectorRef.detectChanges();
   }
 
-  validateAndSlide(entry) {
+  validateAndSlide(entry: string | string[]) {
     /**
      * Checks whether the field on the current slide has valid value, allows continuing if true, input
      * entry (string): the field of the form to check validator for, e.g. email, password
      * If on the final validator, password, submits form instead of sliding to next slide
      * THIS SHOULD BE USED ON THE NEXT SLIDE BUTTONS
      **/
+
+     const policyCheckMsg = document.getElementById("policiesCheck");
+
     Object.values(this.reqValidatorChecks).forEach(
       (element) => (element.style.display = "none")
     ); // Clear any UI already up
+    policyCheckMsg.style.display = "none";
 
     if (typeof entry === "object") {
       // Checking multiple validators
       var falseCount = 0; // Count how many are invalid
+
+      //Check for policy boxes, these are not checked against form
+      if (entry.includes('policies')) {
+
+        let checks = [
+          this.tcbox.checked,
+          this.ppbox.checked
+        ];
+        
+        console.log('Policy boxes:', checks);
+
+        if (checks.includes(false)) {
+          policyCheckMsg.style.display = "flex"
+          falseCount++;
+        };
+      };
 
       entry.forEach((element) => {
         // IMPORTANT that this is !invalid instead of valid
@@ -152,36 +174,24 @@ export class SignuprequiredPage implements OnInit {
         }
       });
 
-      if (falseCount === 0 && entry.includes("degree")) {
-        // All valid, last entry means submit
-        Object.values(this.reqValidatorChecks).forEach(
-          (element) => (element.style.display = "none")
-        ); // Hide all "invalid" UI
-        this.onSubmit();
-      } else if (falseCount === 0) {
+      if (falseCount === 0) {
         // All valid, not last entry so slide next
         Object.values(this.reqValidatorChecks).forEach(
           (element) => (element.style.display = "none")
         ); // Hide all "invalid" UI
         this.unlockAndSlideToNext();
-      }
+      };
+
     } else {
       // IMPORTANT that this is !invalid instead of valid
-      // This is because setting a FormControl to disabled makes valid = false but
-      // invalid = true (see https://github.com/angular/angular/issues/18678)
       var validity = !this.form.get(entry).invalid;
 
       if (validity === true) {
         Object.values(this.reqValidatorChecks).forEach(
           (element) => (element.style.display = "none")
         ); // Hide all "invalid" UI
-
-        if (entry === "password") {
-          // If password valid, submit form
-          this.onSubmit();
-        } else {
-          this.unlockAndSlideToNext(); // If others valid, slide next
-        }
+        
+        this.unlockAndSlideToNext(); // If others valid, slide next
       } else {
         this.reqValidatorChecks[entry].style.display = "flex"; // Show "invalid" UI for invalid validator
         console.log("Not valid, don't slide");

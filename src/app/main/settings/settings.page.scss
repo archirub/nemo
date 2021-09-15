@@ -147,3 +147,11 @@ ion-toggle {
     font-size: 3vh;
     color: var(--ion-color-primary);
 }
+
+@media only screen and (max-device-width: 380px) {
+    .email {
+        text-align: center;
+        font-size: 2.5vh;
+        color: var(--ion-color-primary);
+    }
+}

@@ -157,9 +157,6 @@ ion-content {
   };
 }
 
-//@for $i from 1 through 8 {
- // .swipe-stack app-swipe-card:nth-of-type(#{$i}) {
- //   transform: rotate(random(10)-5 + deg);
- //   z-index: $i;
- // }
-//}
+.ion-page {
+  border-radius: 20px;
+}

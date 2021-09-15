@@ -6,7 +6,6 @@ import {
   OnInit,
   ViewChild,
   HostListener,
-  ApplicationRef,
 } from "@angular/core";
 import { ModalController } from "@ionic/angular";
 
@@ -23,13 +22,10 @@ import {
   OpenCatchAnimation,
   CloseCatchAnimation,
   FishSwimAnimation,
-  FishEnterAnimation,
 } from "@animations/index";
 
 import { TabElementRefService } from "src/app/main/tab-menu/tab-element-ref.service";
 import { SwipeCardComponent } from "./swipe-card/swipe-card.component";
-import { AngularFireStorage } from "@angular/fire/compat/storage";
-import { OwnPicturesStore } from "@stores/pictures/own-pictures/own-pictures.service";
 
 @Component({
   selector: "app-home",

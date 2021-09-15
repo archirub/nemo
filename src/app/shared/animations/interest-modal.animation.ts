@@ -18,10 +18,24 @@ export const IntEnterAnimation = (
         width: "90vw",
         "--border-radius": "20px",
         opacity: "1",
-        overflow: "inherit",
+        overflow: 'inherit'
       })
       .fromTo("transform", "translate3d(0,100%,0)", "translate3d(0,0,0)");
 
+    // SHADOW IOS
+    const shadowIOSAnimation = new AnimationController()
+      .create()
+      .addElement(baseEl.querySelector(".modal-shadow")!)
+      .fromTo("background", "transparent", "var(--ion-color-dark)")
+      .fromTo("opacity", "0", "0.2");
+
+    // SHADOW ANDROID
+    const shadowAndroidAnimation = new AnimationController()
+      .create()
+      .addElement(baseEl.querySelector(".sc-ion-modal-md")!)
+      .fromTo("background", "transparent", "var(--ion-color-dark)")
+      .fromTo("opacity", "0", "0.2");
+      
     // ALL CONTENT BELOW MODAL
     const contentAnimation = new AnimationController()
       .create()
@@ -41,7 +55,13 @@ export const IntEnterAnimation = (
       .addElement(baseEl)
       .easing("ease-out")
       .duration(200)
-      .addAnimation([backdropAnimation, wrapperAnimation, contentAnimation]);
+      .addAnimation([
+        backdropAnimation, 
+        shadowIOSAnimation,
+        shadowAndroidAnimation,
+        wrapperAnimation, 
+        contentAnimation
+      ]);
   };
   return animation;
 };

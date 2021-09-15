@@ -5,7 +5,11 @@ ion-content {
 ion-grid {
     position: absolute;
     top: 40.5vh;
-    left: -4vw
+    width: 100%;
+}
+
+ion-item {
+    --padding-start: 0;
 }
 
 .center {
@@ -31,6 +35,10 @@ ion-grid {
 .flexstart-col {
     position: absolute;
     margin-top: 2vh;
-    left: 4vw;
     width: 100vw;
+}
+
+ion-button {
+    --ripple-color: transparent;
+    text-transform: none;
 }
