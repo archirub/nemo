@@ -58,8 +58,14 @@
           </div>
 
           <h2>My photos</h2>
-          <div class="photos">
+          <div 
+          class="photos" 
+          cdkDropList
+          [cdkDropListData]="profilePictures"
+          (cdkDropListDropped)="dragAndDropPhotos($event)"
+          >
             <add-photo
+              cdkDrag
               *ngFor="let pics of ['','','','','','']; index as i"
               (onPhotoPicked)="onPicturePicked($event)"
               [photoIndex]="i"
@@ -88,11 +94,16 @@
             #answers
             *ngFor="let q of editableFields.questions; let i = index"
             [(questionAndAnswer)]="editableFields.questions[i]"
-            (questionAndAnswerChange)="editingTriggered()"
+            (questionAndAnswerChange)="questionsEdit($event)"
             [questionsNotPicked]="questionsNotPicked"
           ></profile-answer>
 
           <ng-container *ngIf="this.answers">
+            
+            <div class="noQuestions" *ngIf="editableFields.questions.length < 1">
+              <span>Click the button below to answer some questions!</span>
+            </div>
+
             <div *ngIf="!reachedMaxQuestionsCount" class="flexcenter">
               <ion-icon
                 id="addQuestion"

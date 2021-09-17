@@ -35,7 +35,7 @@ export class ProfileAnswerComponent {
   @ViewChild("qInput") qSelect: IonSelect;
 
   @Input() questionAndAnswer: QuestionAndAnswer;
-  @Output() questionAndAnswerChange = new EventEmitter<QuestionAndAnswer>();
+  @Output() questionAndAnswerChange = new EventEmitter<QuestionAndAnswer | (Array<string | QuestionAndAnswer>)>();
 
   @Input() questionsNotPicked: Question[];
 
@@ -55,11 +55,6 @@ export class ProfileAnswerComponent {
   // }
 
   onAnswerChange(value) {
-    if (value !== "") {
-      this.answerClose.nativeElement.style.display = "block";
-    } else {
-      this.answerClose.nativeElement.style.display = "none";
-    }
     this.questionAndAnswer.answer = value;
     this.questionAndAnswerChange.emit(this.questionAndAnswer);
   }
@@ -71,14 +66,10 @@ export class ProfileAnswerComponent {
   }
 
   /**
-   * Removes written answer on click of cross, updates question
+   * Removes question on click of cross
    **/
   clearInput() {
-    this.answer.value = "";
-    this.answerClose.nativeElement.style.display = "none";
-
-    this.questionAndAnswer.answer = "";
-    this.questionAndAnswerChange.emit(this.questionAndAnswer);
+    this.questionAndAnswerChange.emit(['delete', this.questionAndAnswer]);
   }
 
   /**

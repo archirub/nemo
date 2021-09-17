@@ -6,6 +6,7 @@ ion-slides {
 ion-slide {
   width: 100vw !important;
   text-align: left;
+  display: block;
 }
 
 ion-buttons {
@@ -25,6 +26,8 @@ ion-toolbar {
 
 ion-header {
   padding-top: 50px;
+  background: white;
+  position: absolute;
 
   ion-col {
     padding: 0;
@@ -32,8 +35,45 @@ ion-header {
   }
 }
 
+ion-content {
+  position: absolute;
+  bottom: 5px;
+  height: calc(100% - 135px);
+}
+
 app-profile-card {
   font-family: var(--ion-font-family);
+}
+
+.profile-container {
+  left: 3px;
+  height: 88%;
+  bottom: 3vh;
+  --overflow: hidden;
+}
+
+.shadow {
+  position: absolute;
+  box-shadow: 0 0 20px -12px;
+  width: 92.1%;
+  height: 84.8%;
+  left: 4.3%;
+  top: 10.7%;
+  border-radius: 30px;
+  overflow: hidden;
+  z-index: 5;
+  pointer-events: none;
+}
+
+ion-button.chat-slide {
+  --background: transparent;
+  color: var(--ion-color-primary);
+  top: 2vh;
+  position: absolute;
+  --box-shadow: none;
+  --ripple-color: transparent;
+  --background-activated: transparent;
+  text-transform: none;
 }
 
 .flexcolumn {
@@ -53,6 +93,18 @@ ion-icon[name="shield"] {
   font-size: 4.3vh;
   color: var(--ion-color-primary);
   padding: 4vw;
+}
+
+ion-button.back-button {
+  --background: transparent;
+  --background-activated: transparent;
+  --box-shadow: none;
+  --ripple-color: transparent;
+
+
+  ion-icon {
+    color: var(--ion-color-primary);
+  };
 }
 
 #chat-toolbar {

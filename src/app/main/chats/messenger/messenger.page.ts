@@ -9,7 +9,7 @@ import {
 
 import { NavController, IonContent, IonSlides, IonSearchbar } from "@ionic/angular";
 import { AngularFireAuth } from "@angular/fire/compat/auth";
-import { ActivatedRoute, ParamMap } from "@angular/router";
+import { ActivatedRoute, ParamMap, Router } from "@angular/router";
 
 import { ReportUserComponent } from "../report-user/report-user.component";
 
@@ -98,7 +98,8 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
     private format: FormatService,
     private userReporting: UserReportingService,
     private afAuth: AngularFireAuth,
-    private currentUser: CurrentUserStore
+    private currentUser: CurrentUserStore,
+    private router: Router
   ) {}
 
   ngOnInit() {
@@ -146,10 +147,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
   }
 
   async ngAfterViewInit() {
-    // this.profCardView.changes.subscribe((p) => {
-    //   console.log("profCardViewChildren: ", p);
-    //   this.profCard = p;
-    // });
+    //Add styles to the message bar (it is inaccessible in shadowDOM)
     let el = await this.searchBar.getInputElement();
     let styles = {
       border: 'solid 1px var(--ion-color-light-shade)',
@@ -163,7 +161,6 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
     });
 
     this.slides.lockSwipes(true);
-    this.tabColor();
   }
 
   async openUserReportModal() {
@@ -396,117 +393,15 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
 
     if (page === "profile") {
       this.slides.slideNext();
-      this.scaleProfile();
     } else if (page === "messenger") {
       this.slides.slidePrev();
     }
 
     this.slides.lockSwipes(true);
-
-    await this.tabColor();
   }
 
-  async tabColor() {
-    var chat = document.getElementById("chat-head");
-    var prof = document.getElementById("prof-head");
-
-    var current = await this.slides.getActiveIndex();
-
-    if (current == 0) {
-      chat.style.color = "var(--ion-color-primary)";
-      prof.style.color = "var(--ion-color-light-contrast)";
-    } else {
-      chat.style.color = "var(--ion-color-light-contrast)";
-      prof.style.color = "var(--ion-color-primary)";
-    }
-  }
-
-  scaleProfile() {
-    setTimeout(() => {
-      //get space available on slide for profile
-      const aspectRatio = 0.583;
-      const headerHeight = this.header.nativeElement.getBoundingClientRect().height;
-      const profileHeight = Math.floor(
-        this.profSlide.nativeElement.getBoundingClientRect().height - 20
-      );
-      const profileWidth = aspectRatio * profileHeight;
-      const fullHeight = headerHeight + profileHeight + 20;
-      const slideWidth = this.profSlide.nativeElement.getBoundingClientRect().width;
-      const textRatio = profileHeight / fullHeight;
-      console.log("profCard ElementRef", this.profCard);
-      var profileCard = this.profCard.nativeElement; //full card element
-      var swipeCard = this.grandchildren.swipe.nativeElement; //full card container element
-      var snippet = this.grandchildren.snippet.nativeElement; //info before expand
-      var title = this.grandchildren.name.nativeElement; //name text
-      var subtitle = this.grandchildren.department.nativeElement; //department text
-      console.log("grandChilder", this.grandchildren);
-      var qcont = this.grandchildren.QandA.nativeElement; //question container
-      var question = this.grandchildren.question.nativeElement; //question text
-      var answer = this.grandchildren.answer.nativeElement; //answer text
-      var shadow = this.grandchildren.shadow.nativeElement; //photo shadow gradient div
-
-      //size card appropriately
-      profileCard.style.height = `${profileHeight}px`;
-      swipeCard.style.height = `${profileHeight}px`;
-      swipeCard.style.margin = "0";
-      profileCard.style.width = `${profileWidth}px`;
-
-      //shape and place image shadow gradient
-      shadow.style.width = `${profileWidth}px`;
-      shadow.style.height = `${(20 / 85) * profileHeight}px`;
-      shadow.style.top = `${(55 / 85) * profileHeight}px`;
-
-      //get width of image
-      var imageSlides = this.grandchildren.picture.nativeElement;
-      var images: any = this.grandchildren.pictures;
-      imageSlides.style.width = `${Math.round(profileWidth)}px`;
-      images.forEach((img: ElementRef) => {
-        img.nativeElement.style.width = `${profileWidth}px`;
-      });
-
-      //size and position info appropriately
-      snippet.style.width = `${Math.round(profileWidth) + 2}px`;
-      snippet.style.margin = "0 auto";
-      snippet.style.maxHeight = "none";
-      snippet.style.height = "none";
-      snippet.style.left = "0";
-      snippet.style.right = "0";
-
-      //size and position q and a appropriately
-      qcont.style.left = `${(slideWidth - profileWidth) / 2 + 10}px`;
-      qcont.style.width = `${profileWidth - 15}px`;
-      qcont.style.bottom = `${headerHeight - 45}px`;
-
-      //size text
-      title.style.fontSize = `${textRatio * 3.25}vh`;
-      subtitle.style.fontSize = `${textRatio * 2.25}vh`;
-      question.style.fontSize = `${textRatio * 2.75}vh`;
-      answer.style.fontSize = `${textRatio * 2.5}vh`;
-
-      //change slide transition to fit width
-      this.grandchildren.slides.options = `{ 'spaceBetween': '${profileWidth}px' }`;
-      this.grandchildren.bullets.forEach((bullet: ElementRef) => {
-        bullet.nativeElement.style.display = "none";
-      });
-    }, 1000);
-  }
-
-  scaleInfo(event) {
-    if (event === true) {
-      const slideWidth = this.profSlide.nativeElement.getBoundingClientRect().width;
-
-      var image = this.grandchildren.picture.nativeElement;
-      const imageWidth = image.getBoundingClientRect().width;
-
-      var complete = this.grandchildren.complete.nativeElement;
-      var header = this.grandchildren.header.nativeElement;
-
-      complete.style.width = `${imageWidth}px`;
-      complete.style.left = `${(slideWidth - imageWidth) / 2}px`;
-      header.style.width = `${imageWidth}px`;
-    } else {
-      this.scaleProfile();
-    }
+  backToChatboard(): void {
+    this.router.navigateByUrl("/main/tabs/chats");
   }
 
   ngOnDestroy() {

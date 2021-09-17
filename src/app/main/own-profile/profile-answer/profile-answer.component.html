@@ -1,11 +1,11 @@
 <div>
-  <div #answerClose class="close-button" (click)="clearInput()">
-    <ion-icon name="close-outline"></ion-icon>
-  </div>
   <div class="text">
     <div class="flex">
       <ion-icon class="edit" name="pencil" (click)="showInput()"></ion-icon>
       <h2 #qHead id="question">{{ questionAndAnswer?.question }}</h2>
+      <div #answerClose class="close-button" (click)="clearInput()">
+        <ion-icon name="close-outline"></ion-icon>
+      </div>
 
       <ion-select
         #qInput

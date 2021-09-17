@@ -21,6 +21,7 @@ import { environment } from "src/environments/environment";
 import { pageTransition } from "./shared/animations/page-transition.animation";
 import { PipesModule } from "@pipes/pipes.module";
 import { DirectivesModule } from "./shared/directives/directives.module";
+import { DragDropModule } from "@angular/cdk/drag-drop";
 
 @NgModule({
   declarations: [AppComponent],
@@ -37,6 +38,7 @@ import { DirectivesModule } from "./shared/directives/directives.module";
     AngularFireStorageModule,
     PipesModule,
     DirectivesModule,
+    DragDropModule
   ],
   providers: [
     StatusBar,

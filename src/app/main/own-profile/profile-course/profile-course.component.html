@@ -19,6 +19,7 @@
   <div class="text">
     <ion-input
       #input
+      maxLength="15"
       [ngModel]="choice"
       (ngModelChange)="onChoiceChange($event)"
       [ngModelOptions]="{ standalone: true }"

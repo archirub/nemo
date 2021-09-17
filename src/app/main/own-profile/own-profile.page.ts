@@ -12,7 +12,7 @@ import {
 import { BehaviorSubject, forkJoin, from, Observable, of, Subscription } from "rxjs";
 import { AppUser, Profile } from "@classes/index";
 import { CurrentUserStore } from "@stores/index";
-import { ProfileCardComponent } from "@components/index";
+import { AddPhotoComponent, ProfileCardComponent } from "@components/index";
 import { ProfileCourseComponent } from "./profile-course/profile-course.component";
 import { IonTextarea, LoadingController, ModalController } from "@ionic/angular";
 import { Router } from "@angular/router";
@@ -43,7 +43,9 @@ import {
   questionsOptions,
   assetsInterestsPath,
   Interests,
+  QuestionAndAnswer
 } from "@interfaces/index";
+import { CdkDragDrop, transferArrayItem } from "@angular/cdk/drag-drop";
 
 @Component({
   selector: "app-own-profile",
@@ -224,7 +226,17 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     this.profilePictures = JSON.parse(JSON.stringify(urls));
   }
 
-  sortPics() {
+  dragAndDropPhotos(event: CdkDragDrop<string[]>) {
+    console.log(event);
+    //event.item.element.nativeElement.style.backgroundImage = this.profilePictures[event.previousIndex];
+    transferArrayItem(
+      this.profilePictures, 
+      event.previousContainer.data, 
+      event.previousIndex, 
+      event.currentIndex
+    );
+
+    let newPhotoArray = event.previousContainer.data;
   }
 
   goToSettings() {
@@ -306,6 +318,20 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
   async actOnProfileEditing($event: "cancel" | "save") {
     if ($event === "cancel") return this.cancelProfileEdit();
     if ($event === "save") return this.confirmProfileEdit();
+  }
+
+  /**
+   * Triggered by profile-answer change
+   * If receives an array with 'delete' as first entry, deletes question
+   * Either way triggers editing
+  **/
+  questionsEdit(emitted: any) {
+    if (emitted[0] === 'delete') { //Event signifies delete question
+      let loc = this.editableFields.questions.indexOf(emitted);
+      this.editableFields.questions.splice(loc, 1); //Remove from question array
+    } 
+
+    this.editingTriggered();
   }
 
   addQuestion() {

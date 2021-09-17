@@ -263,7 +263,7 @@
 
               <ion-button
                 class="next-slide scroll"
-                (click)="validateAndSlide(['degree','policies'])"
+                (click)="validateAndSlide(['university','degree','policies'])"
               >
                 <ion-icon name="chevron-forward-outline"></ion-icon>
               </ion-button>
@@ -273,41 +273,7 @@
       </ion-slide>
 
       <ion-slide>
-        <div class="wave-background">
-          <img
-            style="opacity: 1"
-            class="waves front"
-            src="../../../assets/signup/waves.png"
-            alt="Waves"
-          />
-          <img
-            class="waves behind"
-            src="../../../assets/signup/waves_2.png"
-            alt="Waves"
-          />
-        </div>
-
-        <div class="container-wave flexstart-col">
-          <div class="scroll flexend-row">
-            <ion-button class="exit">
-              <ion-icon name="close-outline">Fix, doesn't go to main</ion-icon>
-            </ion-button>
-          </div>
-
-          <div style="opacity: 1" class="flexstart-col blow-up front">
-            <h1>You're all set! Feel free to dive straight in...</h1>
-          </div>
-
-          <div class="flexend-col blow-up behind">
-            <h1>Enter some basic info so you can catch more fish!</h1>
-          </div>
-
-          <div class="flexend-col">
-            <!-- <ion-button class="add-info" (click)="unlockAndSlideToNext(7)"> -->
-            <!-- <ion-button [routerLink]="['../signupoptional']" routerLinkActive="router-link-active" type ="submit"> -->
-            <ion-button type="submit"> Enter Basic Information </ion-button>
-          </div>
-        </div>
+        You made it!
       </ion-slide>
     </ion-slides>
   </form>
