@@ -9,6 +9,8 @@ import { isEqual } from "lodash";
 
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
+import { runWeakUserIdentityCheck } from "./supporting-functions/user-validation/user.checker";
+import { sanitizeData } from "./supporting-functions/data-validation/main";
 
 export const profileEditingByUser = functions
   .region("europe-west2")
@@ -17,35 +19,14 @@ export const profileEditingByUser = functions
       requestData: profileEditingByUserRequest,
       context
     ): Promise<successResponse> => {
-      if (!context.auth)
-        throw new functions.https.HttpsError(
-          "unauthenticated",
-          "User not authenticated."
-        );
+      runWeakUserIdentityCheck(context);
 
-      const uid: string = context.auth.uid;
+      const uid = context?.auth?.uid as string;
 
-      // done this way so that Typescript will let me know in case "editableProfileFields"
-      // changes and hence these aren't all the properties anymore
-      const sanitizedEditableProfileMap: editableProfileFields = {
-        biography: null,
-        course: null,
-        areaOfStudy: null,
-        society: null,
-        societyCategory: null,
-        interests: null,
-        questions: null,
-      };
-
-      (
-        Object.keys(sanitizedEditableProfileMap) as (keyof editableProfileFields)[]
-      ).forEach((prop) => {
-        if (typeof requestData.data[prop] === "undefined") {
-          delete sanitizedEditableProfileMap[prop];
-        } else {
-          sanitizedEditableProfileMap[prop] = requestData.data[prop] as any;
-        }
-      });
+      const sanitizedRequest = sanitizeData(
+        "profileEditingByUser",
+        requestData
+      ) as profileEditingByUserRequest;
 
       const profileRef = admin.firestore().collection("profiles").doc(uid);
       const matchDataRef = admin
@@ -63,23 +44,25 @@ export const profileEditingByUser = functions
 
       const matchDataUpdateData = {};
       try {
-        const currentProfile = (await profileRef.get()).data() as profileFromDatabase;
+        const profileSnapshot = await profileRef.get();
+        if (!profileSnapshot.exists) throw new Error();
+
+        const currentProfile = profileSnapshot.data() as profileFromDatabase;
 
         const batch = admin.firestore().batch();
 
-        batch.update(profileRef, sanitizedEditableProfileMap);
+        batch.update(profileRef, sanitizedRequest);
 
         mdUpdateNeeded = matchDataUpdateNeeded(
-          sanitizedEditableProfileMap,
+          sanitizedRequest.data,
           currentProfile,
           propertiesInMatchData
         );
 
         if (mdUpdateNeeded) {
           propertiesInMatchData.forEach((prop) => {
-            if (prop && sanitizedEditableProfileMap[prop]) {
-              matchDataUpdateData["searchFeatures." + prop] =
-                sanitizedEditableProfileMap[prop];
+            if (prop && sanitizedRequest[prop]) {
+              matchDataUpdateData["searchFeatures." + prop] = sanitizedRequest[prop];
             }
           });
 
@@ -95,7 +78,7 @@ export const profileEditingByUser = functions
             "error message: " +
             e +
             " editableProfileMap:" +
-            JSON.stringify(sanitizedEditableProfileMap) +
+            JSON.stringify(sanitizedRequest) +
             " matchDataUpdateData:" +
             JSON.stringify(matchDataUpdateData) +
             " updateNeeded:" +

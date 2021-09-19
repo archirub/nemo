@@ -55,7 +55,7 @@ export const searchCriteriaOptions = {
     "Music Nerd" as const,
   ],
 
-  onCampus: [true as const, false as const],
+  // onCampus: [true as const, false as const],
 };
 
 // CANNOT BE PLACED IN searchCriteriaOptions
@@ -97,8 +97,10 @@ export const searchCriteriaNames: (keyof searchCriteria)[] = [
   "degree",
   "societyCategory",
   "interests",
-  "onCampus",
+  // "onCampus",
 ];
+
+export const searchFeatureNames = searchCriteriaNames;
 
 // same as searchCriteria but some SC can be multiple i.e. for interests where
 // we have an array of interests
@@ -112,6 +114,6 @@ export type SocietyCategory = typeof searchCriteriaOptions.societyCategory[numbe
 export type Interests = typeof searchCriteriaOptions.interests[number];
 // export type InterestPath = typeof assetsInterestsPath[number];
 // export type InterestAndPath = { name: Interests; path: InterestPath };
-export type OnCampus = typeof searchCriteriaOptions.onCampus[number];
+// export type OnCampus = typeof searchCriteriaOptions.onCampus[number];
 
 export type Criterion = keyof typeof searchCriteriaOptions;

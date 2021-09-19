@@ -9,8 +9,6 @@ import { LoadingOptions, LoadingService } from "@services/loading/loading.servic
 import { AngularFireFunctions } from "@angular/fire/compat/functions";
 import { deleteAccountRequest, successResponse } from "@interfaces/cloud-functions.model";
 import { EmptyStoresService } from "@services/global-state-management/empty-stores.service";
-import { from, of } from "rxjs";
-import { delay, switchMap } from "rxjs/operators";
 import {
   EmailAuthProvider,
   updatePassword,
@@ -156,7 +154,6 @@ export class FirebaseAuthService {
         if (folowUpPromise) return folowUpPromise();
       })
       .then((r) => {
-        console.log("promise return", r);
         promiseReturn = r;
       });
 

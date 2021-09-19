@@ -30,7 +30,7 @@ export class FormatService {
     const degree = searchCriteria.degree;
     const societyCategory = searchCriteria.societyCategory;
     const interests = searchCriteria.interests;
-    const onCampus = searchCriteria.onCampus;
+    // const onCampus = searchCriteria.onCampus;
 
     return new SearchCriteria({
       university,
@@ -38,7 +38,7 @@ export class FormatService {
       degree,
       societyCategory,
       interests,
-      onCampus,
+      // onCampus,
     });
   }
 
@@ -49,7 +49,7 @@ export class FormatService {
     const degree = searchCriteria.degree;
     const societyCategory = searchCriteria.societyCategory;
     const interests = searchCriteria.interests;
-    const onCampus = searchCriteria.onCampus;
+    // const onCampus = searchCriteria.onCampus;
 
     return {
       university,
@@ -57,7 +57,7 @@ export class FormatService {
       degree,
       societyCategory,
       interests,
-      onCampus,
+      // onCampus,
     };
   }
 
@@ -74,7 +74,7 @@ export class FormatService {
     const areaOfStudy = profile.areaOfStudy;
     const interests = profile.interests;
     const questions = profile.questions;
-    const onCampus = profile.onCampus;
+    // const onCampus = profile.onCampus;
     const degree = profile.degree;
     const socialMediaLinks = profile.socialMediaLinks;
 
@@ -92,7 +92,7 @@ export class FormatService {
       areaOfStudy,
       interests,
       questions,
-      onCampus,
+      // onCampus,
       degree,
       socialMediaLinks
     );
@@ -110,7 +110,7 @@ export class FormatService {
     const areaOfStudy = profile.areaOfStudy;
     const interests = profile.interests;
     const questions = profile.questions;
-    const onCampus = profile.onCampus;
+    // const onCampus = profile.onCampus;
     const degree = profile.degree;
     const socialMediaLinks = profile.socialMediaLinks;
 
@@ -127,7 +127,7 @@ export class FormatService {
       areaOfStudy,
       interests,
       questions,
-      onCampus,
+      // onCampus,
       socialMediaLinks,
     };
   }

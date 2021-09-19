@@ -132,8 +132,8 @@ export async function datingMode(
     // REMOVE USERS WITH TARGET IN THEIR REPORTED
     if (doc.data()?.reportedUsers[uid]?.exists) return false;
     // REMOVE IF onCampus only is activated, and user isn't on campus
-    if (searchCriteria.onCampus === true && doc.data()?.searchFeatures.onCampus !== true)
-      return false;
+    // if (searchCriteria.onCampus === true && doc.data()?.searchFeatures.onCampus !== true)
+    //   return false;
     return true;
   });
 

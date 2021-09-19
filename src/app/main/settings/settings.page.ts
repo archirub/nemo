@@ -7,7 +7,6 @@ import {
   ApplicationRef,
 } from "@angular/core";
 import { IonSlides, NavController } from "@ionic/angular";
-import { AngularFireAuth } from "@angular/fire/compat/auth";
 
 import { Plugins } from "@capacitor/core";
 
@@ -60,7 +59,6 @@ export class SettingsPage implements AfterViewInit {
 
   constructor(
     private navCtrl: NavController,
-    private afAuth: AngularFireAuth,
     private currentUserStore: CurrentUserStore,
     private router: Router,
     private zone: NgZone,

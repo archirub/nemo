@@ -97,8 +97,8 @@ export class GlobalStateManagementService {
 
   private globalManagement(): Observable<void> {
     return this.getFirebaseUser().pipe(
-      concatMap((user) => forkJoin([of(user), this.isUserEmailVerified(user)])),
-      concatMap(([user, emailIsVerified]) => {
+      switchMap((user) => forkJoin([of(user), this.isUserEmailVerified(user)])),
+      switchMap(([user, emailIsVerified]) => {
         const observables$: Observable<any>[] = [];
 
         // to always activate

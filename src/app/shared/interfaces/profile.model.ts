@@ -1,7 +1,6 @@
 import {
   SocietyCategory,
   searchCriteria,
-  OnCampus,
   Degree,
   Interests,
   AreaOfStudy,
@@ -33,7 +32,7 @@ export interface profile {
   society: string;
   interests: Interests[];
   questions: QuestionAndAnswer[];
-  onCampus: OnCampus;
+  // onCampus: OnCampus;
   socialMediaLinks: SocialMediaLink[];
 }
 
@@ -72,7 +71,7 @@ export interface profileFromDatabase {
 
   interests: Interests[]; // This needs to be changed in the database
   questions: QuestionAndAnswer[];
-  onCampus: OnCampus;
+  // onCampus: OnCampus;
 
   socialMediaLinks: SocialMediaLink[];
 }

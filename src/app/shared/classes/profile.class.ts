@@ -4,7 +4,7 @@ import {
   SocialMediaLink,
   QuestionAndAnswer,
   UniversityName,
-  OnCampus,
+  // OnCampus,
   Degree,
   Interests,
   SocietyCategory,
@@ -25,7 +25,7 @@ export class Profile implements profile {
   private _areaOfStudy: AreaOfStudy;
   private _interests: Interests[];
   private _questions: QuestionAndAnswer[];
-  private _onCampus: OnCampus;
+  // private _onCampus: OnCampus;
   private _degree: Degree;
   private _socialMediaLinks: SocialMediaLink[];
 
@@ -43,7 +43,7 @@ export class Profile implements profile {
     areaOfStudy: AreaOfStudy,
     interests: Interests[],
     questions: QuestionAndAnswer[],
-    onCampus: OnCampus,
+    // onCampus: OnCampus,
     degree: Degree,
     socialMediaLinks: SocialMediaLink[]
   ) {
@@ -60,7 +60,7 @@ export class Profile implements profile {
     this.areaOfStudy = areaOfStudy;
     this.interests = interests;
     this.questions = questions;
-    this.onCampus = onCampus;
+    // this.onCampus = onCampus;
     this.degree = degree;
     this.socialMediaLinks = socialMediaLinks;
   }
@@ -155,12 +155,12 @@ export class Profile implements profile {
     this._questions = value;
   }
 
-  public get onCampus(): OnCampus {
-    return this._onCampus;
-  }
-  public set onCampus(value: OnCampus) {
-    this._onCampus = value;
-  }
+  // public get onCampus(): OnCampus {
+  //   return this._onCampus;
+  // }
+  // public set onCampus(value: OnCampus) {
+  //   this._onCampus = value;
+  // }
 
   public get degree(): Degree {
     return this._degree;

@@ -1,17 +1,19 @@
 import {
+  additionalEmailsAllowedDocument,
   deleteAccountRequest,
   successResponse,
+  universitiesAllowedDocument,
 } from "../../../src/app/shared/interfaces/index";
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
+import { runStrongUserIdentityCheck } from "../supporting-functions/user-validation/user.checker";
 
 export const deleteAccount = functions
   .region("europe-west2")
   .https.onCall(async (data: deleteAccountRequest, context): Promise<successResponse> => {
-    if (!context.auth)
-      throw new functions.https.HttpsError("unauthenticated", "User not authenticated.");
+    await runStrongUserIdentityCheck(context);
 
-    const uid: string = context.auth.uid;
+    const uid = context?.auth?.uid as string;
 
     try {
       await admin.firestore().runTransaction(async (transaction) => {

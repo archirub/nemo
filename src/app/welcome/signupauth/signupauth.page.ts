@@ -62,7 +62,7 @@ export class SignupauthPage implements OnInit {
   @ViewChild("slides") slidesRef: IonSlides;
   @ViewChild("email", { read: ElementRef }) emailRef: ElementRef;
 
-  EMAIL_SENDING_INTERVAL = 10; // in seconds
+  EMAIL_SENDING_INTERVAL = 30; // in seconds
 
   slidesLeft: number;
 

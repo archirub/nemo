@@ -1,4 +1,9 @@
-import { AlertController, LoadingController, NavController } from "@ionic/angular";
+import {
+  AlertController,
+  Animation,
+  LoadingController,
+  NavController,
+} from "@ionic/angular";
 import { Component, ElementRef, ViewChild } from "@angular/core";
 import { FormControl, FormGroup, Validators } from "@angular/forms";
 
@@ -17,7 +22,7 @@ import { LoadingService } from "@services/loading/loading.service";
 })
 export class LoginPage {
   @ViewChild("fish", { read: ElementRef }) fish: ElementRef;
-  fishSwimAnimation;
+  fishSwimAnimation: Animation;
 
   loginForm = new FormGroup({
     email: new FormControl("", [
@@ -77,7 +82,7 @@ export class LoginPage {
   }
 
   ionViewWillLeave() {
-    this.fishSwimAnimation.pause();
+    this.fishSwimAnimation.destroy();
   }
 
   private showAlert(message: string) {

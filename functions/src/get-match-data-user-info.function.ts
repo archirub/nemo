@@ -5,6 +5,7 @@ import {
   getMatchDataUserInfoResponse,
   mdFromDatabase,
 } from "../../src/app/shared/interfaces/index";
+import { runWeakUserIdentityCheck } from "./supporting-functions/user-validation/user.checker";
 
 export const getMatchDataUserInfo = functions
   .region("europe-west2")
@@ -13,13 +14,9 @@ export const getMatchDataUserInfo = functions
       requestData: getMatchDataUserInfoRequest,
       context
     ): Promise<getMatchDataUserInfoResponse> => {
-      if (!context.auth)
-        throw new functions.https.HttpsError(
-          "unauthenticated",
-          "User not authenticated."
-        );
+      runWeakUserIdentityCheck(context);
 
-      const uid: string = context.auth.uid;
+      const uid = context?.auth?.uid as string;
 
       const snapshot = await admin.firestore().collection("matchData").doc(uid).get();
 

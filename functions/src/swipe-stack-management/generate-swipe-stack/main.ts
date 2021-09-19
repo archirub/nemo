@@ -11,6 +11,8 @@ import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import { datingMode } from "./dating-mode";
 import { friendMode } from "./friend-mode";
+import { runWeakUserIdentityCheck } from "../../supporting-functions/user-validation/user.checker";
+import { sanitizeData } from "../../supporting-functions/data-validation/main";
 
 // to test function locally:
 // 1. convert functions to javascript using "npm run build" in the "functions" folder
@@ -44,16 +46,20 @@ export const generateSwipeStack = functions
   .region("europe-west2")
   .https.onCall(
     async (
-      data: generateSwipeStackRequest,
+      request: generateSwipeStackRequest,
       context
     ): Promise<generateSwipeStackResponse> => {
-      if (!context.auth)
-        throw new functions.https.HttpsError("unauthenticated", "User not autenticated.");
+      runWeakUserIdentityCheck(context);
 
-      // DATA FROM REQUEST
-      const uid: string = context.auth.uid;
+      const uid = context?.auth?.uid as string;
+
+      const sanitizedRequest = sanitizeData(
+        "generateSwipeStack",
+        request
+      ) as generateSwipeStackRequest;
+
       // eslint-disable-next-line no-shadow
-      const searchCriteria: searchCriteria = data.searchCriteria || {};
+      const searchCriteria: searchCriteria = sanitizedRequest.searchCriteria || {};
 
       // DATA FOR TESTING <-> UNCOMMENT BELOW AND COMMENT ABOVE
       // const targetuid: string = "oY6HiUHmUvcKbFQQnb88t3U4Zew1";
