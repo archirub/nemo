@@ -1,29 +1,18 @@
 import {
-  additionalEmailsAllowedDocument,
   createAccountRequest,
-  genderOptions,
-  Interests,
   mdDatingPickingFromDatabase,
   mdFromDatabase,
   piStorage,
   privateProfileFromDatabase,
   profileFromDatabase,
-  Question,
-  questionsOptions,
-  searchCriteriaOptions,
-  SexualPreference,
-  sexualPreferenceOptions,
-  socialMedia,
-  socialMediaOptions,
   successResponse,
-  swipeModeOptions,
   SwipeUserInfo,
   uidDatingStorage,
-  universitiesAllowedDocument,
 } from "./../../../src/app/shared/interfaces/index";
+import { runStrongUserIdentityCheck } from "../supporting-functions/user-validation/user.checker";
+import { sanitizeData } from "../supporting-functions/data-validation/main";
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
-import { emailIsAllowed } from "./check-email-validity";
 
 type DataChecker = {
   [key in keyof createAccountRequest]: {
@@ -40,428 +29,94 @@ type DataChecker = {
 
 export const createAccount = functions
   .region("europe-west2")
-  .https.onCall(async (data: createAccountRequest, context): Promise<successResponse> => {
-    const MAX_UID_COUNT_PI_STORAGE = 2000;
+  .https.onCall(
+    async (request: createAccountRequest, context): Promise<successResponse> => {
+      const MAX_UID_COUNT_PI_STORAGE = 2000;
 
-    if (!context.auth)
-      throw new functions.https.HttpsError(
-        "unauthenticated",
-        "User is not authenticated."
-      );
+      await runStrongUserIdentityCheck(context);
 
-    const emailAllowed = context.auth.token?.email
-      ? await checkEmailIsAllowed(context.auth.token?.email)
-      : false;
+      const uid = context?.auth?.uid as string;
 
-    if (!emailAllowed)
-      throw new functions.https.HttpsError(
-        "permission-denied",
-        "User email is not allowed"
-      );
+      const sanitizedRequest = sanitizeData(
+        "createAccount",
+        request
+      ) as createAccountRequest;
 
-    if (!context.auth.token?.email_verified)
-      throw new functions.https.HttpsError(
-        "permission-denied",
-        "User email is not verified"
-      );
+      // GET DEMOGRAPHICS OF USER
+      const demographics = getDemographics(sanitizedRequest);
 
-    const uid: string = context.auth.uid;
+      try {
+        // START THE TRANSACTION
+        await admin.firestore().runTransaction(async (transaction) => {
+          // FETCH DATA REQUIRED FROM DATABASE
+          const databaseFetchingPromises: Promise<
+            FirebaseFirestore.QuerySnapshot<any | uidDatingStorage>
+          >[] = [];
 
-    const dataHolder: {
-      [key in keyof createAccountRequest]: createAccountRequest[key] | null;
-    } = {
-      firstName: null,
-      dateOfBirth: null,
-      picturesCount: null,
-      university: null,
-      gender: null,
-      sexualPreference: null,
-      // swipeMode: null,
-      biography: null,
-      course: null,
-      society: null,
-      areaOfStudy: null,
-      degree: null,
-      societyCategory: null,
-      interests: null,
-      questions: null,
-      onCampus: null,
-      socialMediaLinks: null,
-    };
+          // data needed for PI storage
+          // (case where no document matches the condition is handled in (addToPiStorage))
+          databaseFetchingPromises.push(
+            transaction.get(
+              admin
+                .firestore()
+                .collection("piStorage")
+                .where("uidCount", "<", MAX_UID_COUNT_PI_STORAGE)
+                .limit(1)
+            )
+          );
 
-    // if allowedValues is null, then there are no default values,
-    // if property can be null (i.e. is optional), then add "null" to array (if that doesn't work, add property canBeNull: boolean)
-    // for arrays, the logic is slightly different, allowedValues are the elements that can be in that array (not what
-    // the property must be, but what it must contain), so have a function arrayCheck which takes the property and
-    // the content of allowedValues and checks if all members of the array are in allowedValues
-    // special function for questions
-
-    // CHECK DATA VALIDITY
-    const checkDataObject = checkData(dataHolder, data, dataChecker);
-
-    if (!checkDataObject.allGood)
-      return {
-        successful: false,
-        message: checkDataObject.property + "   " + checkDataObject.value,
-      };
-
-    // Renaming for Typescript
-    const checkedData = dataHolder as {
-      [key in keyof createAccountRequest]: createAccountRequest[key];
-    };
-
-    // GET DEMOGRAPHICS OF USER
-    const demographics = getDemographics(checkedData);
-
-    try {
-      // START THE TRANSACTION
-      await admin.firestore().runTransaction(async (transaction) => {
-        // FETCH DATA REQUIRED FROM DATABASE
-        const databaseFetchingPromises: Promise<
-          FirebaseFirestore.QuerySnapshot<any | uidDatingStorage>
-        >[] = [];
-
-        // data needed for PI storage
-        // (case where no document matches the condition is handled in (addToPiStorage))
-        databaseFetchingPromises.push(
-          transaction.get(
-            admin
-              .firestore()
-              .collection("piStorage")
-              .where("uidCount", "<", MAX_UID_COUNT_PI_STORAGE)
-              .limit(1)
-          )
-        );
-
-        // data needed for uid storage
-        for (const gender of demographics.gender) {
-          for (const sexPref of demographics.sexualPreference) {
-            databaseFetchingPromises.push(
-              transaction.get(
-                admin
-                  .firestore()
-                  .collection("uidDatingStorage")
-                  .where("degree", "==", demographics.degree)
-                  .where("gender", "==", gender)
-                  .where("sexualPreference", "==", sexPref)
-              ) as Promise<FirebaseFirestore.QuerySnapshot<uidDatingStorage>>
-            );
+          // data needed for uid storage
+          for (const gender of demographics.gender) {
+            for (const sexPref of demographics.sexualPreference) {
+              databaseFetchingPromises.push(
+                transaction.get(
+                  admin
+                    .firestore()
+                    .collection("uidDatingStorage")
+                    .where("degree", "==", demographics.degree)
+                    .where("gender", "==", gender)
+                    .where("sexualPreference", "==", sexPref)
+                ) as Promise<FirebaseFirestore.QuerySnapshot<uidDatingStorage>>
+              );
+            }
           }
-        }
-        const [piStorageDocument, ...uidStorageDocuments] = await Promise.all(
-          databaseFetchingPromises
-        );
+          const [piStorageDocument, ...uidStorageDocuments] = await Promise.all(
+            databaseFetchingPromises
+          );
 
-        // SET / UPDATE DOCUMENTS
-        addToProfile(transaction, checkedData, uid);
-        addToPrivateProfile(transaction, uid);
-        addToMatchDataMain(transaction, checkedData, uid);
-        addToMatchDataDating(transaction, checkedData, uid);
-        addToPiStorage(transaction, piStorageDocument, checkedData, uid);
-        addToUidDatingStorage(transaction, uidStorageDocuments, uid);
-      });
+          // SET / UPDATE DOCUMENTS
+          addToProfile(transaction, sanitizedRequest, uid);
+          addToPrivateProfile(transaction, uid);
+          addToMatchDataMain(transaction, sanitizedRequest, uid);
+          addToMatchDataDating(transaction, sanitizedRequest, uid);
+          addToPiStorage(transaction, piStorageDocument, sanitizedRequest, uid);
+          addToUidDatingStorage(transaction, uidStorageDocuments, uid);
+        });
 
-      // TO DO
-      // DEGREE NEEDS TO BE PART OF REQUIRED FOR BACKEND, otherwise we put them in both categories
-      // NEED TO FINALISE ALL DATA FORMAT INCLUDING PICTURES TO FINISH THIS PART
+        // TO DO
+        // DEGREE NEEDS TO BE PART OF REQUIRED FOR BACKEND, otherwise we put them in both categories
+        // NEED TO FINALISE ALL DATA FORMAT INCLUDING PICTURES TO FINISH THIS PART
 
-      // pictures: profilePictureUrls;
-      // REST TO DO:  CONVERT TO TRANSACTION (absolutely necessary here)
+        // pictures: profilePictureUrls;
+        // REST TO DO:  CONVERT TO TRANSACTION (absolutely necessary here)
 
-      // USE TRANSACTION INSTEAD SO THAT, let's imagine multiple people are creating an account while
-      // the pi storage is at its limit, well multiple new piStorage documents could be created,
-      // same thing if we are close to it, multiple people could be added to the document and exceed the limit
-      // since the limit is low, it isn't really a problem, but might be a good opportunity to learn this stuff
+        // USE TRANSACTION INSTEAD SO THAT, let's imagine multiple people are creating an account while
+        // the pi storage is at its limit, well multiple new piStorage documents could be created,
+        // same thing if we are close to it, multiple people could be added to the document and exceed the limit
+        // since the limit is low, it isn't really a problem, but might be a good opportunity to learn this stuff
 
-      return { successful: true };
-    } catch (e) {
-      console.warn(`uid: ${uid}, ${e}`);
-      return { successful: false, message: "some shit went down: " + e };
+        return { successful: true };
+      } catch (e) {
+        console.warn(`uid: ${uid}, ${e}`);
+        return { successful: false, message: "some shit went down: " + e };
+      }
     }
-  });
-
-function checkData(
-  checkedData: {
-    [key in keyof createAccountRequest]: createAccountRequest[key] | null;
-  },
-  incData: createAccountRequest,
-  dataChecker_: DataChecker
-): { allGood: boolean; property?: string; value?: string } {
-  const propertiesList = Object.values(incData);
-  const propertiesChecked: Array<[string, any]> = [];
-
-  for (const [property, value] of Object.entries(incData)) {
-    const checks = dataChecker_[property as keyof createAccountRequest];
-
-    // check if key is an allowed property
-    if (!checkedData.hasOwnProperty(property))
-      return {
-        allGood: false,
-        property: JSON.stringify(property),
-        value: JSON.stringify(value),
-      };
-
-    // if the property isn't a required one and its value is null, then no need for the additional checks
-    if (!checks.isRequired && value == null) {
-      continue;
-    }
-
-    if (!checks.typeCheck(value, checks.allowedValues))
-      // check if property's value has right type
-      // // if options are not required for checking the type (a.k.a it's checking for a string,
-      // // a.k.a it's not interests or questions), they are just not used by the function
-      return {
-        allGood: false,
-        property: JSON.stringify(property),
-        value: JSON.stringify(value),
-      };
-
-    // checks against the default value options, if there is one and if the value isn't an object,
-    if (
-      !checks.valueIsObject &&
-      checks.allowedValues !== null &&
-      !checks.allowedValues.includes(value)
-    )
-      return {
-        allGood: false,
-        property: JSON.stringify(property),
-        value: JSON.stringify(value),
-      };
-
-    // add property value to checkedData object
-    checkedData[property as keyof createAccountRequest] = value;
-
-    propertiesChecked.push([property, value]);
-  }
-
-  return {
-    allGood: true,
-  };
-}
-
-function stringCheck(a: any, options: unknown): a is string {
-  return typeof a === "string";
-}
-function interestsCheck(a: any, options: Interests[]): boolean {
-  if (!Array.isArray(a)) return false;
-
-  for (const el of a) {
-    if (!options.includes(el)) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-function questionsCheck(a: any, options: Question[]): boolean {
-  if (!Array.isArray(a)) return false;
-
-  for (const el of a) {
-    for (const key in el) {
-      if (!["question", "answer"].includes(key)) return false;
-      if (typeof el[key] !== "string") return false;
-      if (key === "question" && !options.includes(el[key])) return false;
-    }
-  }
-
-  return true;
-}
-
-function sexualPreferenceCheck(a: any, options: SexualPreference[]): boolean {
-  if (!Array.isArray(a)) return false;
-
-  let found = false;
-  for (const option of options) {
-    if (JSON.stringify(option) === JSON.stringify(a)) {
-      found = true;
-    }
-  }
-  if (!found) return false;
-  return true;
-}
-
-function socialMediaLinksCheck(a: any, options: socialMedia[]): boolean {
-  if (!Array.isArray(a)) return false;
-
-  for (const el of a) {
-    for (const key in el) {
-      if (!["socialMedia", "link"].includes(key)) return false;
-      if (key === "socialMedia" && !options.includes(el[key])) return false;
-    }
-  }
-  return true;
-}
-
-// function picturesCheck(a: any, options: unknown): boolean {
-//   if (!Array.isArray(a)) return false;
-
-//   for (const el of a) {
-//     // Checks whether pictures are in base64 format by attempting to decode them
-//     try {
-//       window.atob(el);
-//     } catch {
-//       return false;
-//     }
-//   }
-
-//   return true;
-// }
-
-// allowedValues is an array of the default values that the property can have, if there are default values
-// isRequired
-// the isStrange property serves to tell me whether the data's value can be checked against
-// allowedValues. It can't if the value is an object (array, or wtv), and then I already check for the
-// validity of the values of typeCheck, where I will have built a special function for checking the type
-// of that particular property (case of sexualPref, interests, questions)
-
-const dataChecker: DataChecker = {
-  // uid: {
-  //   typeCheck: stringCheck,
-  //   allowedValues: null,
-  //   isRequired: true,
-  //   valueIsObject: false,
-  // },
-  firstName: {
-    typeCheck: stringCheck,
-    allowedValues: null,
-    isRequired: true,
-    valueIsObject: false,
-  },
-  dateOfBirth: {
-    typeCheck: (a) => !isNaN(Date.parse(a)),
-    allowedValues: null,
-    isRequired: true,
-    valueIsObject: false,
-  },
-  picturesCount: {
-    typeCheck: (a) => typeof a === "number",
-    allowedValues: null,
-    isRequired: true,
-    valueIsObject: false,
-  },
-  university: {
-    typeCheck: stringCheck,
-    allowedValues: searchCriteriaOptions.university,
-    isRequired: true,
-    valueIsObject: false,
-  },
-  gender: {
-    typeCheck: stringCheck,
-    allowedValues: genderOptions,
-    isRequired: true,
-    valueIsObject: false,
-  },
-  sexualPreference: {
-    typeCheck: sexualPreferenceCheck,
-    allowedValues: sexualPreferenceOptions,
-    isRequired: true,
-    valueIsObject: true,
-  },
-  // swipeMode: {
-  //   typeCheck: stringCheck,
-  //   allowedValues: swipeModeOptions,
-  //   isRequired: true,
-  //   valueIsObject: false,
-  // },
-  // pictures: {
-  //   typeCheck: picturesCheck,
-  //   allowedValues: null,
-  //   isRequired: true,
-  //   valueIsObject: true,
-  // },
-  biography: {
-    typeCheck: stringCheck,
-    allowedValues: null,
-    isRequired: false,
-    valueIsObject: false,
-  },
-  course: {
-    typeCheck: stringCheck,
-    allowedValues: null,
-    isRequired: false,
-    valueIsObject: false,
-  },
-  society: {
-    typeCheck: stringCheck,
-    allowedValues: null,
-    isRequired: false,
-    valueIsObject: false,
-  },
-  areaOfStudy: {
-    typeCheck: stringCheck,
-    allowedValues: searchCriteriaOptions.areaOfStudy,
-    isRequired: false,
-    valueIsObject: false,
-  },
-  degree: {
-    typeCheck: stringCheck,
-    allowedValues: searchCriteriaOptions.degree,
-    isRequired: true,
-    valueIsObject: false,
-  },
-  societyCategory: {
-    typeCheck: stringCheck,
-    allowedValues: searchCriteriaOptions.societyCategory,
-    isRequired: false,
-    valueIsObject: false,
-  },
-  interests: {
-    typeCheck: interestsCheck,
-    allowedValues: searchCriteriaOptions.interests,
-    isRequired: false,
-    valueIsObject: true,
-  },
-  questions: {
-    typeCheck: questionsCheck,
-    allowedValues: questionsOptions,
-    isRequired: true,
-    valueIsObject: true,
-  },
-  onCampus: {
-    typeCheck: stringCheck,
-    allowedValues: searchCriteriaOptions.onCampus,
-    isRequired: false,
-    valueIsObject: false,
-  },
-  socialMediaLinks: {
-    typeCheck: socialMediaLinksCheck,
-    allowedValues: socialMediaOptions,
-    isRequired: false,
-    valueIsObject: true,
-  },
-};
+  );
 
 interface demographicMap {
   sexualPreference: ("male" | "female")[];
   gender: ("male" | "female")[];
   degree: "undergrad" | "postgrad";
-}
-
-async function checkEmailIsAllowed(emailToCheck: string): Promise<boolean> {
-  const additionalEmailsAllowed = (
-    (
-      await admin.firestore().collection("admin").doc("additionalEmailsAllowed").get()
-    ).data() as additionalEmailsAllowedDocument
-  ).list;
-
-  const universitiesAllowed = (
-    (
-      await admin.firestore().collection("admin").doc("universitiesAllowed").get()
-    ).data() as universitiesAllowedDocument
-  ).list;
-
-  const universityDomains = universitiesAllowed.map((info) => info.emailDomain);
-
-  const isAllowed = emailIsAllowed(
-    emailToCheck,
-    universityDomains,
-    additionalEmailsAllowed
-  );
-
-  if (!isAllowed) return false;
-
-  return true;
 }
 
 function addToUidDatingStorage(
@@ -556,7 +211,7 @@ function addToProfile(
     areaOfStudy: data.areaOfStudy,
     interests: data.interests,
     questions: data.questions,
-    onCampus: data.onCampus,
+    // onCampus: data.onCampus,
     socialMediaLinks: data.socialMediaLinks,
   };
   const ref = admin.firestore().collection("profiles").doc(uid);
@@ -573,7 +228,7 @@ function addToPrivateProfile(transaction: admin.firestore.Transaction, uid: stri
       degree: null,
       societyCategory: null,
       interests: null,
-      onCampus: null,
+      // onCampus: null,
     },
   };
   const ref = admin
@@ -620,7 +275,7 @@ function addToMatchDataDating(
       degree: data.degree,
       societyCategory: data.societyCategory,
       interests: data.interests,
-      onCampus: data.onCampus,
+      // onCampus: data.onCampus,
     },
     reportedUsers: {},
     superLikedUsers: {},

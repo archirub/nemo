@@ -5,23 +5,34 @@ import {
   successResponse,
   dateMap,
 } from "../../../src/app/shared/interfaces/index";
+import { runWeakUserIdentityCheck } from "../supporting-functions/user-validation/user.checker";
+import { sanitizeData } from "../supporting-functions/data-validation/main";
 
 // REQUIES MODIFICATION ONCE WE HAVE A COLLECTION WHERE REPORTED USERS GO, IT WILL SIMPLY
 // NEED TO BE ADDED THERE IF "ADD", AND A PROPERTY OF THE DOC SUCH AS active SHOULD BE TURNED
 // TO FALSE IF IT SAYS "REMOVE"
 
+// To call when the user reports someone.
+
 export const addOrRemoveReported = functions
   .region("europe-west2")
   .https.onCall(
-    async (data: addOrRemoveReportedRequest, context): Promise<successResponse> => {
-      const action = data.action;
-      const uid = data.uid;
-      const reporteduid = data.reporteduid;
-      const description = data.description;
+    async (request: addOrRemoveReportedRequest, context): Promise<successResponse> => {
+      runWeakUserIdentityCheck(context);
+
+      const uid = context?.auth?.uid as string;
+
+      const sanitizedRequest = sanitizeData(
+        "addOrRemoveReported",
+        request
+      ) as addOrRemoveReportedRequest;
+
+      const action = sanitizedRequest.action;
+      const reporteduid = sanitizedRequest.reporteduid;
 
       if (!["add", "remove"].includes(action)) return { successful: false };
       try {
-        const user = await admin.auth().getUser(uid).catch();
+        const user = await admin.auth().getUser(uid);
         const reporteduser = await admin.auth().getUser(reporteduid);
       } catch (e) {
         console.error(

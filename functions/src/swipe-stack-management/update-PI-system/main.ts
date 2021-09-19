@@ -39,7 +39,10 @@ interface uid_score {
 
 export const updatePISystem = functions
   .region("europe-west2")
+
+  // FOR DEVELOPMENT
   .https.onCall(async (dataRequest, context) => {
+    // FOR PRODUCTION
     // functions.pubsub
     //   .schedule("every day 05:00")
     //   .onRun(async (context) => {

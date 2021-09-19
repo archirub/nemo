@@ -6,14 +6,18 @@ import {
 } from "../../../src/app/shared/interfaces/index";
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
+import { sanitizeData } from "../supporting-functions/data-validation/main";
 
 export const checkEmailValidity = functions
   .region("europe-west2")
   .https.onCall(
-    async (data: checkEmailValidityRequest, context): Promise<successResponse> => {
-      if (typeof data?.email !== "string") return { successful: false };
+    async (request: checkEmailValidityRequest, context): Promise<successResponse> => {
+      const sanitizedRequest = sanitizeData(
+        "checkEmailValidity",
+        request
+      ) as checkEmailValidityRequest;
 
-      const emailToCheck = data.email;
+      const emailToCheck = sanitizedRequest.email;
 
       try {
         const additionalEmailsAllowed = (
@@ -61,12 +65,15 @@ export const emailIsAllowed = (
 
   const isAllowedEmail = additionalEmailsAllowed.includes(emailToCheck);
 
-  const isFromAllowedDomain = universityDomains
-    .map((domain) => emailToCheck.endsWith(domain))
-    .reduce((x, y) => {
-      if (x === true) return x;
-      return y;
-    });
+  const isFromAllowedDomain =
+    universityDomains.length === 0
+      ? false
+      : universityDomains
+          .map((domain) => emailToCheck.endsWith(domain))
+          .reduce((x, y) => {
+            if (x === true) return x;
+            return y;
+          });
 
   if (!isEmail) return false;
 

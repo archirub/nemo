@@ -26,7 +26,6 @@ import {
   urlToBase64,
 } from "../common-pictures-functions";
 import { CurrentUserStore } from "@stores/index";
-import { AngularFirestore } from "@angular/fire/compat/firestore";
 
 interface ownPicturesStorage {
   [position: number]: string;
@@ -47,8 +46,7 @@ export class OwnPicturesStore {
   constructor(
     private afStorage: AngularFireStorage,
     private afAuth: AngularFireAuth,
-    private currentUser: CurrentUserStore,
-    private firestore: AngularFirestore
+    private currentUser: CurrentUserStore
   ) {}
 
   /**

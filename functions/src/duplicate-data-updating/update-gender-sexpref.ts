@@ -7,14 +7,24 @@ import {
   successResponse,
   updateGenderSexPrefRequest,
 } from "../../../src/app/shared/interfaces/index";
+import { runWeakUserIdentityCheck } from "../supporting-functions/user-validation/user.checker";
+import { sanitizeData } from "../supporting-functions/data-validation/main";
 
 export const updateGenderSexPref = functions
   .region("europe-west2")
   .https.onCall(
-    async (data: updateGenderSexPrefRequest, context): Promise<successResponse> => {
-      const uid = data.uid;
-      const propertyName = data.name;
-      const propertyValue = data.value;
+    async (request: updateGenderSexPrefRequest, context): Promise<successResponse> => {
+      runWeakUserIdentityCheck(context);
+
+      const uid = context?.auth?.uid as string;
+
+      const sanitizedRequest = sanitizeData(
+        "updateGenderSexPref",
+        request
+      ) as updateGenderSexPrefRequest;
+
+      const propertyName = sanitizedRequest.name;
+      const propertyValue = sanitizedRequest.value;
 
       // const uid = "oY6HiUHmUvcKbFQQnb88t3U4Zew1";
       // updateGenderSexPref({uid: "oY6HiUHmUvcKbFQQnb88t3U4Zew1", name: "sexualPreference", value: ["female"]})

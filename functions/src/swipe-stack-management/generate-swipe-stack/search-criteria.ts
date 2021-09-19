@@ -7,7 +7,7 @@ import {
   SocietyCategory,
   Interests,
   profile,
-  OnCampus,
+  // OnCampus,
   Degree,
   mdDatingPickingFromDatabase,
 } from "../../../../src/app/shared/interfaces/index";
@@ -62,9 +62,9 @@ export function searchCriteriaGrouping(
       case "interests":
         SC_Checker[SC] = interestMatchCheck;
         break;
-      case "onCampus":
-        SC_Checker[SC] = onCampusMatchCheck;
-        break;
+      // case "onCampus":
+      //   SC_Checker[SC] = onCampusMatchCheck;
+      //   break;
     }
   });
 
@@ -149,7 +149,7 @@ function interestMatchCheck(criteria: Interests, feature: Interests[]): boolean 
   }
   return false;
 }
-function onCampusMatchCheck(criteria: OnCampus, feature: OnCampus): boolean {
-  if (!criteria || !feature) return false;
-  return criteria === feature;
-}
+// function onCampusMatchCheck(criteria: OnCampus, feature: OnCampus): boolean {
+//   if (!criteria || !feature) return false;
+//   return criteria === feature;
+// }

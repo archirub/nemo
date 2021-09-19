@@ -6,7 +6,7 @@ import {
   AreaOfStudy,
   Degree,
   Interests,
-  OnCampus,
+  // OnCampus,
   SocietyCategory,
 } from "./search-criteria.model";
 
@@ -33,7 +33,7 @@ export interface SignupOptional {
   course: string;
   society: string;
   areaOfStudy: AreaOfStudy;
-  onCampus: OnCampus;
+  // onCampus: OnCampus;
   societyCategory: SocietyCategory;
   interests: Interests[];
   questions: QuestionAndAnswer[];

@@ -91,8 +91,8 @@ export class SignupoptionalPage implements OnInit {
     questions: 2,
     interests: 3,
     biography: 4,
-    onCampus: 5,
-    socialMediaLinks: 6,
+    // onCampus: 5,
+    socialMediaLinks: 5,
   };
 
   constructor(
@@ -382,7 +382,7 @@ export class SignupoptionalPage implements OnInit {
     const biography: string = this.form.get("biography").value;
 
     // TEMPORARY AND WRONG (need to ask for geolocalisation and shit, should probably create a store for this shit)
-    const onCampus: boolean = this.form.get("onCampus").value;
+    // const onCampus: boolean = this.form.get("onCampus").value;
 
     const socialMediaLinks: SocialMediaLink[] = this.form.get("socialMediaLinks").value;
 
@@ -394,7 +394,7 @@ export class SignupoptionalPage implements OnInit {
       societyCategory,
       questions,
       biography,
-      onCampus,
+      // onCampus,
       socialMediaLinks,
     };
   }

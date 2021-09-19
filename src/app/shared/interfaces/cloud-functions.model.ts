@@ -38,18 +38,17 @@ export interface changeShowProfileRequest {
 
 export interface addOrRemoveReportedRequest {
   action: "add" | "remove";
-  uid: string;
   reporteduid: string;
-  description: string | null;
 }
 
-export interface updateSearchFeatureRequest {
-  name: keyof SearchFeatures;
-  value: SearchFeatures[keyof SearchFeatures];
+export interface updateSearchFeaturesRequest {
+  features: {
+    name: keyof SearchFeatures;
+    value: SearchFeatures[keyof SearchFeatures];
+  }[];
 }
 
 export interface updateGenderSexPrefRequest {
-  uid: string;
   name: "gender" | "sexualPreference";
   value: Gender | SexualPreference;
 }

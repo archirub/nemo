@@ -1,41 +1,29 @@
+import { searchFeatureNames } from "./../../../src/app/shared/interfaces/search-criteria.model";
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import {
   successResponse,
-  updateSearchFeatureRequest,
+  updateSearchFeaturesRequest,
   searchCriteriaNames,
   piStorage,
   searchCriteriaOptions,
   SearchFeatures,
 } from "../../../src/app/shared/interfaces/index";
+import { runWeakUserIdentityCheck } from "../supporting-functions/user-validation/user.checker";
+import { sanitizeData } from "../supporting-functions/data-validation/main";
 
-export const updateSearchFeature = functions
+export const updateSearchFeatures = functions
   .region("europe-west2")
   .https.onCall(
-    async (data: updateSearchFeatureRequest, context): Promise<successResponse> => {
-      if (!context.auth)
-        throw new functions.https.HttpsError(
-          "unauthenticated",
-          "User not authenticated."
-        );
+    async (data: updateSearchFeaturesRequest, context): Promise<successResponse> => {
+      runWeakUserIdentityCheck(context);
 
-      const uid: string = context.auth.uid;
+      const uid = context?.auth?.uid as string;
 
-      // for testing
-      // const uid = "oY6HiUHmUvcKbFQQnb88t3U4Zew1";
-
-      const sfName: keyof SearchFeatures = data.name;
-      const sfValue: SearchFeatures[keyof SearchFeatures] = data.value;
-
-      // Veryfing name of search feature
-      if (!searchCriteriaNames.includes(sfName)) {
-        return { successful: false };
-      }
-
-      // veryfing value of search feature
-      if (!(searchCriteriaOptions[sfName] as unknown as any[]).includes(sfValue)) {
-        return { successful: false };
-      }
+      const sanitizedData = sanitizeData(
+        "updateSearchFeatures",
+        data
+      ) as updateSearchFeaturesRequest;
 
       // for all: matchDataDating, matchDataFriend (only these for areaOfStudy, societyCategory)
       // for onCampus, interests, university: profiles
@@ -43,21 +31,27 @@ export const updateSearchFeature = functions
 
       const batch = admin.firestore().batch();
 
-      // All search features are in matchdata, so add to matchdata regardless
-      addToMatchData(batch, uid, sfName, sfValue);
+      let failedAddToPiStorage = false;
 
-      // only these are in profile
-      if (["onCampus", "interests", "university", "degree"].includes(sfName)) {
-        addToProfileDocument(batch, uid, sfName, sfValue);
-      }
+      await Promise.all(
+        sanitizedData.features.map(async (feature) => {
+          // All search features are in matchdata, so add to matchdata regardless
+          addToMatchData(batch, uid, feature.name, feature.value);
 
-      // Only degree of the search features is in piStorage
-      if (["degree"].includes(sfName)) {
-        const e = await addToPiStorage(batch, uid, sfName, sfValue);
-        if (e === "failed") {
-          return { successful: false };
-        }
-      }
+          // only these are in profile
+          if (["onCampus", "interests", "university", "degree"].includes(feature.name)) {
+            addToProfileDocument(batch, uid, feature.name, feature.value);
+          }
+
+          // Only degree of the search features is in piStorage
+          if (["degree"].includes(feature.name)) {
+            const e = await addToPiStorage(batch, uid, feature.name, feature.value);
+            if (e === "failed") failedAddToPiStorage = true;
+          }
+        })
+      );
+
+      if (failedAddToPiStorage) return { successful: false };
 
       try {
         await batch.commit();

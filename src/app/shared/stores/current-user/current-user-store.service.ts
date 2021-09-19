@@ -107,7 +107,7 @@ export class CurrentUserStore {
           profile?.areaOfStudy,
           profile?.interests,
           profile?.questions,
-          profile?.onCampus,
+          // profile?.onCampus,
           profile?.degree,
           profile?.socialMediaLinks,
           privateProfile?.settings,

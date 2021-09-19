@@ -7,7 +7,6 @@ import {
   ApplicationRef,
 } from "@angular/core";
 import { IonSlides, NavController } from "@ionic/angular";
-import { AngularFireAuth } from "@angular/fire/compat/auth";
 
 import { Plugins } from "@capacitor/core";
 
@@ -21,7 +20,7 @@ import { FormControl, FormGroup, Validators } from "@angular/forms";
 import {
   Gender,
   SexualPreference,
-  OnCampus,
+  // OnCampus,
   searchCriteriaOptions,
   genderOptions,
   sexualPreferenceOptions,
@@ -56,11 +55,10 @@ export class SettingsPage implements AfterViewInit {
   swipeModeOptions: SwipeMode[] = swipeModeOptions;
   sexualPreferenceOptions: SexualPreference[] = sexualPreferenceOptions;
   genderOptions: Gender[] = genderOptions;
-  onCampusOptions: OnCampus[] = searchCriteriaOptions.onCampus;
+  // onCampusOptions: OnCampus[] = searchCriteriaOptions.onCampus;
 
   constructor(
     private navCtrl: NavController,
-    private afAuth: AngularFireAuth,
     private currentUserStore: CurrentUserStore,
     private router: Router,
     private zone: NgZone,
@@ -176,7 +174,7 @@ export class SettingsPage implements AfterViewInit {
       // { swipeMode: this.profile.swipeMode },
       { sexualPreference: this.profile?.sexualPreference },
       { gender: this.profile?.gender },
-      { onCampus: this.profile?.onCampus },
+      // { onCampus: this.profile?.onCampus },
     ];
 
     //Matches control name from objects above to profile's value and sets FormControl value

@@ -5,18 +5,23 @@ import {
   successResponse,
   piStorage,
 } from "../../../src/app/shared/interfaces/index";
+import { runWeakUserIdentityCheck } from "../supporting-functions/user-validation/user.checker";
+import { sanitizeData } from "../supporting-functions/data-validation/main";
 
 export const changeShowProfile = functions
   .region("europe-west2")
   .https.onCall(
-    async (data: changeShowProfileRequest, context): Promise<successResponse> => {
-      if (!context.auth)
-        throw new functions.https.HttpsError("unauthenticated", "User not autenticated.");
+    async (request: changeShowProfileRequest, context): Promise<successResponse> => {
+      runWeakUserIdentityCheck(context);
 
-      const uid: string = context.auth.uid;
-      const showProfile: boolean = data.showProfile;
+      const uid = context?.auth?.uid as string;
 
-      // const uid = "oY6HiUHmUvcKbFQQnb88t3U4Zew1";
+      const sanitizedRequest = sanitizeData(
+        "changeShowProfile",
+        request
+      ) as changeShowProfileRequest;
+
+      const showProfile: boolean = sanitizedRequest.showProfile;
 
       if ([true, false].includes(showProfile)) {
         return { successful: false };

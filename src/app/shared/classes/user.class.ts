@@ -4,7 +4,7 @@ import {
   SocialMediaLink,
   QuestionAndAnswer,
   UniversityName,
-  OnCampus,
+  // OnCampus,
   appUser,
   Settings,
   Degree,
@@ -37,7 +37,7 @@ export class AppUser extends Profile implements appUser {
     areaOfStudy: AreaOfStudy,
     interests: Interests[],
     questions: QuestionAndAnswer[],
-    onCampus: OnCampus,
+    // onCampus: OnCampus,
     degree: Degree,
     socialMediaLinks: SocialMediaLink[],
     settings: Settings,
@@ -60,7 +60,7 @@ export class AppUser extends Profile implements appUser {
       areaOfStudy,
       interests,
       questions,
-      onCampus,
+      // onCampus,
       degree,
       socialMediaLinks
     );

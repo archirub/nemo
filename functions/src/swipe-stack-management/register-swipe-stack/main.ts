@@ -10,14 +10,23 @@ import {
 } from "../../../../src/app/shared/interfaces/index";
 import { createDatingChatDocuments, handleDatingYesChoices } from "./dating-mode";
 import { createFriendChatDocuments, handleFriendYesChoices } from "./friend-mode";
+import { runWeakUserIdentityCheck } from "../../supporting-functions/user-validation/user.checker";
+import { sanitizeData } from "../../supporting-functions/data-validation/main";
 
 export const registerSwipeChoices = functions
   .region("europe-west2")
-  .https.onCall(async (dataRequest: registerSwipeChoicesRequest, context) => {
-    if (!context.auth)
-      throw new functions.https.HttpsError("unauthenticated", "User no autenticated.");
-    const currentUserID: string = context.auth.uid;
-    const choices: uidChoiceMap[] = dataRequest.choices;
+  .https.onCall(async (request: registerSwipeChoicesRequest, context) => {
+    runWeakUserIdentityCheck(context);
+
+    const currentUserID = context?.auth?.uid as string;
+
+    const sanitizedRequest = sanitizeData(
+      "registerSwipeChoices",
+      request
+    ) as registerSwipeChoicesRequest;
+
+    const choices: uidChoiceMap[] = sanitizedRequest.choices;
+
     const targetMatchData = (await admin
       .firestore()
       .collection("matchData")

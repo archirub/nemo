@@ -36,7 +36,6 @@ import { environment } from "src/environments/environment";
 
 import { CurrentUserStore } from "@stores/index";
 import {
-  AuthResponseData,
   SignupRequired,
   createAccountRequest,
   SignupOptional,
@@ -138,7 +137,7 @@ export class SignupService {
           course: dataStored.course,
           society: dataStored.society,
           areaOfStudy: dataStored.areaOfStudy,
-          onCampus: dataStored.onCampus,
+          // onCampus: dataStored.onCampus,
           societyCategory: dataStored.societyCategory,
           interests: dataStored.interests,
           questions: dataStored.questions,

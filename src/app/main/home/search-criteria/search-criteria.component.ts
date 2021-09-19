@@ -78,7 +78,7 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
     this.searchCriteriaSub = this.SCstore.searchCriteria$.subscribe({
       next: (sc) => {
         this.searchCriteriaForm.patchValue({
-          onCampus: sc.onCampus,
+          // onCampus: sc.onCampus,
           degree: sc.degree,
           areaOfStudy: sc.areaOfStudy,
           societyCategory: sc.societyCategory,

@@ -31,7 +31,7 @@ import { ChatboardStore, CurrentUserStore } from "@stores/index";
 import { ProfileCardComponent } from "@components/index";
 import { OtherProfilesStore } from "@stores/other-profiles/other-profiles-store.service";
 import { ChatboardPicturesStore } from "@stores/pictures/chatboard-pictures/chatboard-pictures.service";
-import { QuerySnapshot, Timestamp } from "@angular/fire/firestore";
+import { Timestamp } from "@angular/fire/firestore";
 import { messageFromDatabase } from "@interfaces/message.model";
 import { FormatService } from "@services/format/format.service";
 
@@ -60,7 +60,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild("profCard", { read: ElementRef, static: false }) profCard: ElementRef;
   //  profCard: ElementRef; //for styling
   @ViewChild("profCard") grandchildren: ProfileCardComponent; //for access to grandchildren
-  @ViewChild('searchBar') searchBar: IonSearchbar;
+  @ViewChild("searchBar") searchBar: IonSearchbar;
 
   profilesSub: Subscription;
   profileHandlingSub: Subscription;
@@ -150,13 +150,13 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
     //Add styles to the message bar (it is inaccessible in shadowDOM)
     let el = await this.searchBar.getInputElement();
     let styles = {
-      border: 'solid 1px var(--ion-color-light-shade)',
-      borderRadius: '25px',
-      paddingInlineStart: '10px',
-      paddingInlineEnd: '35px'
+      border: "solid 1px var(--ion-color-light-shade)",
+      borderRadius: "25px",
+      paddingInlineStart: "10px",
+      paddingInlineEnd: "35px",
     };
-    
-    Object.keys(styles).forEach(key => {
+
+    Object.keys(styles).forEach((key) => {
       el.style[key] = styles[key];
     });
 
