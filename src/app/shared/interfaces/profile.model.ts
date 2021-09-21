@@ -84,7 +84,7 @@ export interface privateProfileFromDatabase {
 // TO DEFINE BUT SHOWPROFILE MUST BE IN THERE
 const settingNameOption = ["showProfile"] as const;
 export type settingName = typeof settingNameOption[number];
-export type Settings = { [settingName: string]: any };
+export type Settings = { showProfile: boolean };
 
 export const questionsOptions = [
   "The best place for coffee is" as const,

@@ -220,8 +220,6 @@ export class OwnPicturesStore {
     );
     const pictureCount$: Observable<number> = this.getOwnPictureCount();
 
-    console.log("getting next from firebase");
-
     // here we are using the switchMap operator (instead of concatMap or mergeMap for ex) as it allows
     // to, if either uid$ or pictureCount$ gets a new value, cancel the current profile picture fetching
     // right away and start a new fetch with the new value. THis is also why take(1) comes after switchMap,

@@ -221,7 +221,7 @@ function addToProfile(
 
 function addToPrivateProfile(transaction: admin.firestore.Transaction, uid: string) {
   const privateProfile: privateProfileFromDatabase = {
-    settings: {},
+    settings: { showProfile: true },
     latestSearchCriteria: {
       university: null,
       areaOfStudy: null,

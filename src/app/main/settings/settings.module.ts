@@ -1,3 +1,4 @@
+import { PipesModule } from "./../../shared/pipes/pipes.module";
 import { NgModule } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
@@ -17,6 +18,7 @@ import { AppToggleModule } from "@components/nemo-toggle/nemo-toggle.component.m
     IonicModule,
     SettingsPageRoutingModule,
     AppToggleModule,
+    PipesModule,
   ],
   declarations: [SettingsPage],
 })

@@ -10,10 +10,9 @@ import {
 
 @Component({
   selector: "app-infinite-scroll",
-  template: `<ng-content *ngIf="location === 'above'"></ng-content>
-    <div #anchor></div>
-    <ng-content *ngIf="location === 'below'"></ng-content>`,
-  styles: ["div { height: 1px }"],
+  template: `<div #anchor></div>
+    <ng-content></ng-content>`,
+  styles: ["#anchor { height: 1px }"],
 })
 export class InfiniteScrollComponent {
   @Input() location: "above" | "below" = "above";

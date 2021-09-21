@@ -47,7 +47,7 @@ function isPartOfChat() {
 }
 
 function isGod() {
-  return request.auth.uid in ["oY6HiUHmUvcKbFQQnb88t3U4Zew1"]
+  return request.auth.token.email in ["archibald.ruban@gmail.com"]
 }
 
 function userIsValid() {

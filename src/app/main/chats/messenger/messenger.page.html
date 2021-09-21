@@ -1,108 +1,129 @@
-<ion-slides #slides>
-  <ion-slide>
-    <ion-header #header>
-      <ion-toolbar id="chat-toolbar">
-        <ion-grid id="header-grid">
-          <ion-row>
-            <ion-col size="2">
-              <ion-button (click)="backToChatboard()" class="back-button">
-                <ion-icon name="chevron-back-outline"></ion-icon>
-              </ion-button>
-            </ion-col>
-    
-            <ion-col size="8">
-              <ion-text color="dark">
-                <div class="flexcolumn">
-                  <ion-avatar>
-                    <img (click)="slideTo('profile')" [src]="bubblePicture$ | async" />
-                  </ion-avatar>
-                  <h3 class="messenger-header" (click)="slideTo('profile')">
-                    {{(thisChat$ | async)?.recipient?.name}}
-                  </h3>
-                </div>
-              </ion-text>
-            </ion-col>
-    
-            <ion-col size="2">
-              <ion-icon name="shield" (click)="openUserReportModal()"></ion-icon>
-            </ion-col>
-          </ion-row>
-        </ion-grid>
-      </ion-toolbar>
-    </ion-header>
+<div #messageContainer>
+  <ion-slides #slides>
+    <ion-slide>
+      <ion-header #header>
+        <ion-toolbar id="chat-toolbar">
+          <ion-grid id="header-grid">
+            <ion-row>
+              <ion-col size="2">
+                <ion-button (click)="backToChatboard()" class="back-button">
+                  <ion-icon name="chevron-back-outline"></ion-icon>
+                </ion-button>
+              </ion-col>
 
-    <ion-content>
-      <ion-row *ngFor="let message of messages$ | async; index as i; let last='last'">
-        {{last ? fastScroll() : ""}}
-        <ion-col
-          size="8"
-          *ngIf="message?.senderID === (thisChat$ | async)?.recipient?.uid"
-          class="message-col col-recieved"
-        >
-          <div
-            class="message notOwnMessage"
-            [ngClass]="{'failedToSend': hasFailed(message), 'isSending': isSending(message) }"
-          >
-            {{message?.content}}
-          </div>
-        </ion-col>
+              <ion-col size="8">
+                <ion-text color="dark">
+                  <div class="flexcolumn">
+                    <ion-avatar>
+                      <img (click)="slideTo('profile')" [src]="bubblePicture$ | async" />
+                    </ion-avatar>
+                    <h3 class="messenger-header" (click)="slideTo('profile')">
+                      {{(chat$ | async)?.recipient?.name}}
+                    </h3>
+                  </div>
+                </ion-text>
+              </ion-col>
 
-        <ion-col
-          size="8"
-          offset="4"
-          *ngIf="message?.senderID !== (thisChat$ | async)?.recipient?.uid"
-          class="message-col col-sent"
-        >
-          <div
-            class="message ownMessage"
-            [ngClass]="{'failedToSend': hasFailed(message), 'isSending': isSending(message) }"
-          >
-            {{message?.content}}
-          </div>
-        </ion-col>
-      </ion-row>
-
-      <div id="boxBelowInput"></div>
-
-      <div id="messageInputContainer">
-        <ion-toolbar>
-          <ion-searchbar
-            [(ngModel)]="latestChatInput"
-            #searchBar
-            animated
-            showCancelButton="never"
-            searchIcon="none"
-            placeholder=""
-            type="text"
-            id="messageInput"
-          >
-            <ion-button
-              icon-only
-              fill="clear"
-              id="sendButton"
-              (click)="sendMessage().subscribe()"
-            >
-              <ion-icon name="send"></ion-icon>
-            </ion-button>
-          </ion-searchbar>
+              <ion-col size="2">
+                <ion-icon name="shield" (click)="openUserReportModal()"></ion-icon>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
         </ion-toolbar>
-      </div>
-    </ion-content>
-  </ion-slide>
+      </ion-header>
 
-  <ion-slide #profSlide>
-    <ion-button class="chat-slide" (click)="slideTo('messenger')">
-      <ion-icon name="chevron-back-outline"></ion-icon>
-      <p>Back to chat</p>
-    </ion-button>
+      <ion-content>
+        <div #loadingTrigger>
+          <ion-spinner name="bubbles" *ngIf="!(firstBatchArrived$ | async)">
+          </ion-spinner>
+        </div>
+        <!-- <ion-refresher
+        slot="fixed"
+        pullFactor="1"
+        pullMin="100"
+        pullMax="200"
+        (ionRefresh)="refreshing($event)"
+      ></ion-refresher>
+      <ion-refresher-content
+        pullingIcon="chevron-down-circle-outline"
+        pullingText="Pull to refresh"
+        refreshingSpinner="circles"
+        refreshingText="Refreshing..."
+      > -->
+        <ion-row
+          *ngFor="let message of messages$ | async; index as i; let last='last'; trackBy: trackMessage"
+        >
+          <ion-col
+            size="8"
+            *ngIf="message?.senderID === (chat$ | async)?.recipient?.uid"
+            class="message-col col-recieved"
+          >
+            <div
+              class="message notOwnMessage"
+              [ngClass]="{'failedToSend': hasFailed(message), 'isSending': isSending(message) }"
+            >
+              {{message?.content}}
+            </div>
+          </ion-col>
 
-    <div class="shadow"></div>
-    
-    <ion-content class="profile-container">
-      <app-profile-card
-        [profile]="recipientProfile$ | async"
-        [profilePictures]="(recipientProfile$ | async)?.pictureUrls"
-      ></app-profile-card>
-    </ion-content>
-  </ion-slide>
-</ion-slides>
+          <ion-col
+            size="8"
+            offset="4"
+            *ngIf="message?.senderID !== (chat$ | async)?.recipient?.uid"
+            class="message-col col-sent"
+          >
+            <div
+              class="message ownMessage"
+              [ngClass]="{'failedToSend': hasFailed(message), 'isSending': isSending(message) }"
+            >
+              {{message?.content}}
+            </div>
+          </ion-col>
+        </ion-row>
+
+        <div id="boxBelowInput"></div>
+
+        <div id="messageInputContainer">
+          <ion-toolbar>
+            <ion-searchbar
+              [(ngModel)]="latestChatInput"
+              #searchBar
+              animated
+              showCancelButton="never"
+              searchIcon="none"
+              placeholder=""
+              type="text"
+              id="messageInput"
+            >
+              <ion-button
+                icon-only
+                fill="clear"
+                id="sendButton"
+                (click)="sendMessage().subscribe()"
+              >
+                <ion-icon name="send"></ion-icon>
+              </ion-button>
+            </ion-searchbar>
+          </ion-toolbar>
+        </div>
+        <!-- </ion-refresher-content> -->
+      </ion-content>
+    </ion-slide>
+
+    <ion-slide #profSlide>
+      <ion-button class="chat-slide" (click)="slideTo('messenger')">
+        <ion-icon name="chevron-back-outline"></ion-icon>
+        <p>Back to chat</p>
+      </ion-button>
+
+      <div class="shadow"></div>
+
+      <ion-content class="profile-container">
+        <app-profile-card
+          [profile]="recipientProfile$ | async"
+          [profilePictures]="(recipientProfile$ | async)?.pictureUrls"
+        ></app-profile-card>
+      </ion-content>
+    </ion-slide>
+  </ion-slides>
+</div>

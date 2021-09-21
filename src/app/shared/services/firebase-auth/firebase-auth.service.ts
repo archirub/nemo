@@ -32,7 +32,7 @@ export class FirebaseAuthService {
     private emptyStoresService: EmptyStoresService
   ) {}
 
-  async logOut() {
+  public async logOut() {
     // have to explicitely do it this way instead of using directly "this.navCtrl.navigateRoot"
     // otherwise it causes an error
     // calling ngZone.run() is necessary otherwise we will get into trouble with changeDecection
@@ -54,7 +54,7 @@ export class FirebaseAuthService {
     );
   }
 
-  async deleteAccount() {
+  public async deleteAccount() {
     const user = await this.afAuth.currentUser;
 
     if (!user) return;
@@ -137,97 +137,52 @@ export class FirebaseAuthService {
     await userConfirmationAlert.present();
   }
 
-  // returns whatever the followUpPromise returns so that it can be chained easily
-  async wrongPasswordPopup<T>(folowUpPromise: () => Promise<T> | null): Promise<T> {
-    let promiseReturn: T;
+  public async changePasswordProcedure(): Promise<User> {
+    const user = await this.afAuth.currentUser;
 
-    const passAlert = await this.alertCtrl.create({
-      header: "Incorrect Password",
+    if (!user) return;
+
+    let pswrd: string;
+    const OkProcedure = async (data) => {
+      pswrd = data.password;
+      try {
+        await updatePassword(user, pswrd);
+        await this.successPopup("Your password was successfully updated.");
+      } catch (err) {
+        if (err?.code === "auth/requires-recent-login") {
+          return this.reAuthenticationProcedure(user)
+            .then(() => updatePassword(user, pswrd))
+            .then(() => this.successPopup("Your password was successfully updated."))
+            .catch(() => this.unknownErrorPopup());
+        } else {
+          return this.unknownErrorPopup();
+        }
+      }
+    };
+
+    const alert = await this.alertCtrl.create({
+      header: "Password Modification",
       backdropDismiss: false,
-      message: "The password you have entered is incorrect, please try again.",
-      buttons: ["OK"],
+      message: "Enter a new password below",
+      inputs: [{ name: "password", type: "password" }],
+      buttons: [
+        {
+          text: "Cancel",
+          role: "cancel",
+        },
+        {
+          text: "OK",
+          handler: OkProcedure,
+        },
+      ],
     });
 
-    passAlert
-      .onWillDismiss()
-      .then(() => {
-        if (folowUpPromise) return folowUpPromise();
-      })
-      .then((r) => {
-        promiseReturn = r;
-      });
+    await alert.present();
 
-    await passAlert.present();
-
-    return promiseReturn;
+    return user;
   }
 
-  async wrongPasswordMaxAttemptsPopup(
-    followUpPromise: Promise<any> | null
-  ): Promise<void> {
-    const attemptsAlert = await this.alertCtrl.create({
-      header: "Maximum Number of Attempts",
-      backdropDismiss: false,
-      message:
-        "You have entered an incorrect password too many times. The account has been temporarily disabled, please try again later.",
-      buttons: ["OK"],
-    });
-
-    attemptsAlert.onDidDismiss().then(() => {
-      if (followUpPromise) return followUpPromise;
-    });
-
-    await attemptsAlert.present();
-  }
-
-  async unknownErrorPopup(message: string = null): Promise<void> {
-    message =
-      message ??
-      "An unknown error occurred. Please check your connection, or try again later.";
-
-    const unknownAlert = await this.alertCtrl.create({
-      header: "Something went wrong",
-      message,
-      buttons: ["OK"],
-    });
-
-    await unknownAlert.present();
-  }
-
-  async successPopup(message: string = null): Promise<void> {
-    message = message ?? "The operation was successful!";
-
-    const unknownAlert = await this.alertCtrl.create({
-      header: "Successful Operation",
-      message,
-      buttons: ["OK"],
-    });
-
-    await unknownAlert.present();
-  }
-
-  async unknownUserPopup(): Promise<void> {
-    const userAlert = await this.alertCtrl.create({
-      header: "User not found",
-      message: "Sorry, we can't find a user for that account, please try again.",
-      buttons: ["OK"],
-    });
-
-    await userAlert.present();
-  }
-
-  async userDisabledPopup(): Promise<void> {
-    const disabledAlert = await this.alertCtrl.create({
-      header: "User disabled",
-      message:
-        "This account has been disabled. If you think this is an error, please contact support.",
-      buttons: ["OK"],
-    });
-
-    await disabledAlert.present();
-  }
-
-  async reAuthenticationProcedure(
+  public async reAuthenticationProcedure(
     user: User,
     message: string = null,
     cancelProcedureChosen: () => Promise<any> = null
@@ -310,44 +265,95 @@ export class FirebaseAuthService {
     });
   }
 
-  async changePasswordProcedure(user: User): Promise<User> {
-    let pswrd: string;
-    const OkProcedure = async (data) => {
-      pswrd = data.password;
-      try {
-        await updatePassword(user, pswrd);
-        await this.successPopup("Your password was successfully updated.");
-      } catch (err) {
-        if (err?.code === "auth/requires-recent-login") {
-          return this.reAuthenticationProcedure(user)
-            .then(() => updatePassword(user, pswrd))
-            .then(() => this.successPopup("Your password was successfully updated."))
-            .catch(() => this.unknownErrorPopup());
-        } else {
-          return this.unknownErrorPopup();
-        }
-      }
-    };
+  // returns whatever the followUpPromise returns so that it can be chained easily
+  public async wrongPasswordPopup<T>(
+    folowUpPromise: () => Promise<T> | null
+  ): Promise<T> {
+    let promiseReturn: T;
 
-    const alert = await this.alertCtrl.create({
-      header: "Password Modification",
+    const passAlert = await this.alertCtrl.create({
+      header: "Incorrect Password",
       backdropDismiss: false,
-      message: "Enter a new password below",
-      inputs: [{ name: "password", type: "password" }],
-      buttons: [
-        {
-          text: "Cancel",
-          role: "cancel",
-        },
-        {
-          text: "OK",
-          handler: OkProcedure,
-        },
-      ],
+      message: "The password you have entered is incorrect, please try again.",
+      buttons: ["OK"],
     });
 
-    await alert.present();
+    passAlert
+      .onWillDismiss()
+      .then(() => {
+        if (folowUpPromise) return folowUpPromise();
+      })
+      .then((r) => {
+        promiseReturn = r;
+      });
 
-    return user;
+    await passAlert.present();
+
+    return promiseReturn;
+  }
+
+  public async wrongPasswordMaxAttemptsPopup(
+    followUpPromise: Promise<any> | null
+  ): Promise<void> {
+    const attemptsAlert = await this.alertCtrl.create({
+      header: "Maximum Number of Attempts",
+      backdropDismiss: false,
+      message:
+        "You have entered an incorrect password too many times. The account has been temporarily disabled, please try again later.",
+      buttons: ["OK"],
+    });
+
+    attemptsAlert.onDidDismiss().then(() => {
+      if (followUpPromise) return followUpPromise;
+    });
+
+    await attemptsAlert.present();
+  }
+
+  public async unknownErrorPopup(message: string = null): Promise<void> {
+    message =
+      message ??
+      "An unknown error occurred. Please check your connection, or try again later.";
+
+    const unknownAlert = await this.alertCtrl.create({
+      header: "Something went wrong",
+      message,
+      buttons: ["OK"],
+    });
+
+    await unknownAlert.present();
+  }
+
+  public async successPopup(message: string = null): Promise<void> {
+    message = message ?? "The operation was successful!";
+
+    const unknownAlert = await this.alertCtrl.create({
+      header: "Successful Operation",
+      message,
+      buttons: ["OK"],
+    });
+
+    await unknownAlert.present();
+  }
+
+  public async unknownUserPopup(): Promise<void> {
+    const userAlert = await this.alertCtrl.create({
+      header: "User not found",
+      message: "Sorry, we can't find a user for that account, please try again.",
+      buttons: ["OK"],
+    });
+
+    await userAlert.present();
+  }
+
+  public async userDisabledPopup(): Promise<void> {
+    const disabledAlert = await this.alertCtrl.create({
+      header: "User disabled",
+      message:
+        "This account has been disabled. If you think this is an error, please contact support.",
+      buttons: ["OK"],
+    });
+
+    await disabledAlert.present();
   }
 }

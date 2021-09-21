@@ -6,6 +6,7 @@ import {
   allowOptionalProp,
   chatFromDatabase,
   messageFromDatabase,
+  messageMap,
   profileFromDatabase,
   searchCriteria,
   userSnippet,
@@ -145,17 +146,18 @@ export class FormatService {
     return new Chat(chatID, recipient, recentMessage, null);
   }
 
-  public messagesDatabaseToClass(messages: messageFromDatabase[]): Message[] {
-    return messages.map((msg) => this.messageDatabaseToClass(msg));
+  public messagesDatabaseToClass(messages: messageMap[]): Message[] {
+    return messages.map((msgMap) => this.messageDatabaseToClass(msgMap));
   }
 
-  public messageDatabaseToClass(message: messageFromDatabase): Message {
-    const content = message.content;
-    const senderID = message.senderID;
-    const time = message.time.toDate();
+  public messageDatabaseToClass(messageMap: messageMap): Message {
+    const messageID = messageMap.id;
+    const content = messageMap.message.content;
+    const senderID = messageMap.message.senderID;
+    const time = messageMap.message.time.toDate();
 
     // assuming the message has been sent and that it comes from the database
-    return new Message(senderID, time, content, "sent");
+    return new Message(messageID, senderID, time, content, "sent");
   }
 
   public messagesClassToDatabase(

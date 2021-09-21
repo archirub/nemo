@@ -11,6 +11,7 @@ import { SearchCriteria } from "@classes/index";
 
 import { AppToggleComponent } from "@components/index";
 import { UniversityName } from "@interfaces/universities.model";
+import { map } from "rxjs/operators";
 
 @Component({
   selector: "app-search-criteria",
@@ -21,7 +22,7 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
   @ViewChild("options", { read: ElementRef }) options: ElementRef;
   @ViewChild("clear", { read: ElementRef }) clear: ElementRef;
   @ViewChild("grid", { read: ElementRef }) grid: ElementRef;
-  @ViewChild("locationslider") locationHandle: AppToggleComponent;
+  // @ViewChild("locationslider") locationHandle: AppToggleComponent;
   @ViewChild("degreeslider") degreeHandle: AppToggleComponent;
   @ViewChild("modalSlides") modalSlides: IonSlides;
   @ViewChild("modalSlides", { read: ElementRef }) slidesRef: ElementRef;
@@ -30,8 +31,10 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
   searchCriteriaSub: Subscription;
   searchCriteria: SearchCriteria;
 
+  nameOfUnselected = "none";
+
   universityOptions$: Observable<UniversityName[]>;
-  degreeOptions = searchCriteriaOptions.degree;
+  degreeOptions = searchCriteriaOptions.degree.concat(null);
   areaOfStudyOptions = searchCriteriaOptions.areaOfStudy;
   societyCategoryOptions = searchCriteriaOptions.societyCategory;
   interestsOptions = searchCriteriaOptions.interests;
@@ -53,7 +56,7 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
   get emptyForm() {
     return new FormGroup({
       university: new FormControl(null),
-      onCampus: new FormControl(null),
+      // onCampus: new FormControl(null),
       degree: new FormControl(null),
       areaOfStudy: new FormControl(null),
       societyCategory: new FormControl(null),
@@ -67,7 +70,9 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
     private universitiesStore: UniversitiesStore
   ) {
     this.searchCriteriaForm = this.emptyForm;
-    this.universityOptions$ = this.universitiesStore.optionsList$;
+    this.universityOptions$ = this.universitiesStore.optionsList$.pipe(
+      map((options) => options.concat(null))
+    );
   }
 
   ngOnInit() {
@@ -79,6 +84,7 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
       next: (sc) => {
         this.searchCriteriaForm.patchValue({
           // onCampus: sc.onCampus,
+          university: sc.university,
           degree: sc.degree,
           areaOfStudy: sc.areaOfStudy,
           societyCategory: sc.societyCategory,
@@ -95,16 +101,16 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
     setTimeout(() => {
       //This initialises slide heights, for some unknown reason
       //USER DOESN'T SEE THIS, KEEP IT HERE
-      this.moveTo("studies");
-      this.returnTo();
+      this.moveTo("studies").then(() => this.returnTo());
+      // this.returnTo();
 
-      if (!this.searchCriteriaForm.value.degree) {
-        this.degreeHandle.selectOption("undergrad");
-      }
+      // if (!this.searchCriteriaForm.value.degree) {
+      //   this.degreeHandle.selectOption("undergrad");
+      // }
 
-      if (!this.searchCriteriaForm.value.onCampus) {
-        this.locationHandle.selectOption("Everyone");
-      }
+      // if (!this.searchCriteriaForm.value.onCampus) {
+      //   this.locationHandle.selectOption("Everyone");
+      // }
 
       this.modalSlides.lockSwipes(true);
       this.optionsOriginalPos = this.options.nativeElement.getBoundingClientRect().y;
@@ -132,7 +138,7 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
     this.clearButtonHeight = this.clear.nativeElement.getBoundingClientRect().height;
 
     if (
-      this.locationHandle.value != "Everyone" ||
+      // this.locationHandle.value != "Everyone" ||
       this.degreeHandle.value != "undergrad"
     ) {
       this.slideDown();
@@ -146,21 +152,21 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
       this.slideUp();
     }
 
-    this.searchCriteriaForm.value.onCampus = this.locationHandle.value;
+    // this.searchCriteriaForm.value.onCampus = this.locationHandle.value;
     this.searchCriteriaForm.value.degree = this.degreeHandle.value;
   }
 
   updateCriteria() {
-    if (this.locationHandle.selections.includes(this.searchCriteriaForm.value.onCampus)) {
-      switch (this.searchCriteriaForm.value.onCampus) {
-        case true:
-          this.locationHandle.selectOption("On Campus");
-          break;
-        case false:
-          this.locationHandle.selectOption("Everyone");
-          break;
-      }
-    }
+    // if (this.locationHandle.selections.includes(this.searchCriteriaForm.value.onCampus)) {
+    //   switch (this.searchCriteriaForm.value.onCampus) {
+    //     case true:
+    //       this.locationHandle.selectOption("On Campus");
+    //       break;
+    //     case false:
+    //       this.locationHandle.selectOption("Everyone");
+    //       break;
+    //   }
+    // }
 
     if (this.degreeHandle.selections.includes(this.searchCriteriaForm.value.degree)) {
       this.degreeHandle.selectOption(this.searchCriteriaForm.value.degree);
@@ -303,7 +309,7 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
     }
 
     this.degreeHandle.selectOption("undergrad");
-    this.locationHandle.selectOption("Everyone");
+    // this.locationHandle.selectOption("Everyone");
 
     this.slideUp();
   }

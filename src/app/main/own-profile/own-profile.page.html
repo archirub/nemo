@@ -27,7 +27,7 @@
       <div #toggleDiv class="flexend">
         <nemo-toggle
           *ngIf="!(editingInProgress$ | async)"
-          (choice)="toggleChange($event)"
+          (valueChange)="toggleChange($event)"
           [buttonWidth]="15"
           [fontSize]="4"
           [selections]="['edit', 'view']"
@@ -35,7 +35,7 @@
 
         <nemo-toggle
           *ngIf="editingInProgress$ | async"
-          (choice)="actOnProfileEditing($event)"
+          (valueChange)="actOnProfileEditing($event)"
           [buttonWidth]="15"
           [fontSize]="4"
           [selections]="['save', 'cancel']"
@@ -58,11 +58,11 @@
           </div>
 
           <h2>My photos</h2>
-          <div 
-          class="photos" 
-          cdkDropList
-          [cdkDropListData]="profilePictures"
-          (cdkDropListDropped)="dragAndDropPhotos($event)"
+          <div
+            class="photos"
+            cdkDropList
+            [cdkDropListData]="profilePictures"
+            (cdkDropListDropped)="dragAndDropPhotos($event)"
           >
             <add-photo
               cdkDrag
@@ -99,7 +99,6 @@
           ></profile-answer>
 
           <ng-container *ngIf="this.answers">
-            
             <div class="noQuestions" *ngIf="editableFields.questions.length < 1">
               <span>Click the button below to answer some questions!</span>
             </div>

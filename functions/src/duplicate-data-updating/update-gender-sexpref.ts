@@ -1,9 +1,7 @@
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import {
-  genderOptions,
   piStorage,
-  sexualPreferenceOptions,
   successResponse,
   updateGenderSexPrefRequest,
 } from "../../../src/app/shared/interfaces/index";
@@ -28,31 +26,6 @@ export const updateGenderSexPref = functions
 
       // const uid = "oY6HiUHmUvcKbFQQnb88t3U4Zew1";
       // updateGenderSexPref({uid: "oY6HiUHmUvcKbFQQnb88t3U4Zew1", name: "sexualPreference", value: ["female"]})
-
-      if (!["gender", "sexualPreference"].includes(propertyName)) {
-        return { successful: false };
-      }
-      if (propertyName === "gender") {
-        if (!["male", "female", "other"].includes(propertyValue as string)) {
-          return { successful: false };
-        }
-      } else if (propertyName === "sexualPreference") {
-        // Check if corresponding value is an array
-        if (!Array.isArray(propertyValue)) {
-          return { successful: false };
-        }
-        // check if property is one of these allowed arrays
-        let found = false;
-        for (const array of [["male"], ["female"], ["male", "female"]]) {
-          if (sameArrays(array, propertyValue as string[])) {
-            found = true;
-            break;
-          }
-        }
-        if (found === false) {
-          return { successful: false };
-        }
-      }
 
       const matchDataRef = admin.firestore().collection("matchData").doc(uid);
       const pistorage = (await admin

@@ -1,3 +1,4 @@
+import { PipesModule } from "@pipes/pipes.module";
 import { DirectivesModule } from "./../../shared/directives/directives.module";
 import { NgModule } from "@angular/core";
 import { CommonModule } from "@angular/common";
@@ -21,6 +22,7 @@ import { AppToggleModule } from "@components/nemo-toggle/nemo-toggle.component.m
     ProfileCardModule,
     AppToggleModule,
     DirectivesModule,
+    PipesModule,
   ],
   declarations: [HomePage, SwipeCardComponent, SearchCriteriaComponent],
   providers: [SwipeCardComponent],

@@ -54,7 +54,7 @@ export class SignupoptionalPage implements OnInit {
   blankForm = new FormGroup({
     course: new FormControl(null),
     areaOfStudy: new FormControl(null),
-    interests: new FormArray([]),
+    interests: new FormControl([]),
     society: new FormControl(null),
     societyCategory: new FormControl(null),
     questions: new FormArray([
@@ -341,9 +341,9 @@ export class SignupoptionalPage implements OnInit {
    */
   fillFields(data: allowOptionalProp<SignupOptional>): void {
     Object.keys(data).forEach((field: keyof SignupOptional) => {
-      if (field === "interests") {
-        this.form.setControl(field, this.formBuilder.array(data[field] || []));
-      } else if (field === "questions") {
+      // if (field === "interests") {
+      //   this.form.setControl(field, this.formBuilder.array(data[field] || []));
+      if (field === "questions") {
         const questionFormGroups = ((data[field] as QuestionAndAnswer[]) || []).map(
           (QandA) => this.formBuilder.group({ q: QandA.question, a: QandA.answer })
         );

@@ -1,16 +1,30 @@
 import { message, messageReaction, messageState } from "@interfaces/index";
 
 export class Message implements message {
+  private _messageID: string;
   private _senderID: string;
   private _time: Date;
   private _content: string;
   private _state: messageState;
 
-  constructor(senderID: string, time: Date, content: string, state: messageState) {
+  constructor(
+    messageID: string,
+    senderID: string,
+    time: Date,
+    content: string,
+    state: messageState
+  ) {
+    this.messageID = messageID;
     this.senderID = senderID;
     this.time = time;
     this.content = content;
     this.state = state;
+  }
+  public get messageID(): string {
+    return this._messageID;
+  }
+  public set messageID(value: string) {
+    this._messageID = value;
   }
 
   public get senderID(): string {

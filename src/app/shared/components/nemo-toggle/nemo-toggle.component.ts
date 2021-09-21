@@ -37,13 +37,12 @@ export class AppToggleComponent
   onChange: any = () => {};
   onTouched: any = () => {};
 
+  @Input() value: string | number;
   // Emits option selected from this child component to be accessed by parents
-  @Output() choice = new EventEmitter();
+  @Output() valueChange = new EventEmitter();
 
   @ViewChild("handle") handle: any;
   @ViewChildren(IonButton) buttons: QueryList<IonButton>;
-
-  value: string | number;
 
   constructor() {
     super();
@@ -62,7 +61,7 @@ export class AppToggleComponent
     }
 
     //Emit choice
-    this.choice.emit(option);
+    this.valueChange.emit(option);
     this.value = option;
 
     //option variable is the selection directly from the interfaces array

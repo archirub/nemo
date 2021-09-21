@@ -10,12 +10,19 @@ export interface messageFromDatabase {
 }
 
 export interface message {
+  messageID: string;
   senderID: string;
   time: Date;
   content: string;
   // reaction: messageReaction;
   state: messageState;
   // seen: boolean;
+}
+
+// map used when processing a message from database format to app format
+export interface messageMap {
+  id: string;
+  message: messageFromDatabase;
 }
 
 export const messageReactionOptions = [

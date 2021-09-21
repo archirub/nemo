@@ -13,7 +13,7 @@ import {
 import { Chat } from "@classes/index";
 import { FormatService } from "@services/format/format.service";
 import { map, take, withLatestFrom, distinctUntilChanged, share } from "rxjs/operators";
-import { chatFromDatabase, messageFromDatabase } from "@interfaces/index";
+import { chatFromDatabase, messageFromDatabase, messageMap } from "@interfaces/index";
 import { User } from "@angular/fire/auth";
 
 // the store has this weird shape because of the Firestore's onSnapshot function which
@@ -51,11 +51,11 @@ export class ChatboardStore {
     QueryDocumentSnapshot<chatFromDatabase>[]
   >([]);
   private recentMsgsFromDatabase = new BehaviorSubject<{
-    [chatID: string]: messageFromDatabase | "no message documents";
+    [chatID: string]: messageMap | "no message documents";
   }>({});
   private recentMsgToBeProcessed = new ReplaySubject<{
     chatID: string;
-    data: messageFromDatabase | "no message documents";
+    data: messageMap | "no message documents";
   }>();
 
   private chatDocsSub: () => void = null; // calling this function unsubscribes to the listener
@@ -142,7 +142,7 @@ export class ChatboardStore {
             .limit(1)
             .onSnapshot({
               next: (snapshot) => {
-                let data: messageFromDatabase | "no message documents";
+                let msgData: messageMap | "no message documents";
 
                 if (snapshot.empty) {
                   // this is a way of marking that the listening has activated, and that
@@ -151,11 +151,14 @@ export class ChatboardStore {
                   // If we didn't do that, there is no way to tell whether a chat has no
                   // recent message because it hasn't been loaded from the database yet,
                   // or whether there is simply no recent message to be loaded
-                  data = "no message documents";
+                  msgData = "no message documents";
                 } else {
-                  data = snapshot.docs[0].data() as messageFromDatabase;
+                  msgData = {
+                    id: snapshot.docs[0].id,
+                    message: snapshot.docs[0].data(),
+                  } as messageMap;
                 }
-                const doc = { data, chatID: chatDoc.id };
+                const doc = { data: msgData, chatID: chatDoc.id };
                 this.recentMsgToBeProcessed.next(doc);
               },
               error: (err) =>

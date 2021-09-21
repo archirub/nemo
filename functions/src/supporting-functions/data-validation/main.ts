@@ -239,8 +239,8 @@ function sanitizeUpdateGenderSexPref(request: updateGenderSexPrefRequest): {
   if (!isString(request?.name) || !["gender", "sexualPreference"].includes(request?.name))
     return { isValid: false };
 
-  if (request?.name === "gender" && !isGender(!request?.value)) return { isValid: false };
-  if (request?.name === "sexualPreference" && !isSexualPreference(!request?.value))
+  if (request?.name === "gender" && !isGender(request?.value)) return { isValid: false };
+  if (request?.name === "sexualPreference" && !isSexualPreference(request?.value))
     return { isValid: false };
 
   return {

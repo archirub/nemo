@@ -5,39 +5,63 @@ import {
   OnInit,
   ViewChild,
   ElementRef,
+  ChangeDetectorRef,
 } from "@angular/core";
 
-import { NavController, IonContent, IonSlides, IonSearchbar } from "@ionic/angular";
+import {
+  NavController,
+  IonContent,
+  IonSlides,
+  IonSearchbar,
+  LoadingController,
+} from "@ionic/angular";
 import { AngularFireAuth } from "@angular/fire/compat/auth";
 import { ActivatedRoute, ParamMap, Router } from "@angular/router";
 
 import { ReportUserComponent } from "../report-user/report-user.component";
 
-import { BehaviorSubject, forkJoin, from, Observable, of, Subscription } from "rxjs";
 import {
+  BehaviorSubject,
+  concat,
+  forkJoin,
+  from,
+  Observable,
+  of,
+  Subject,
+  Subscription,
+  timer,
+} from "rxjs";
+import {
+  concatMap,
   delay,
   distinct,
+  distinctUntilChanged,
+  exhaustMap,
   filter,
   first,
   map,
+  share,
+  shareReplay,
+  startWith,
   switchMap,
   take,
   tap,
   withLatestFrom,
 } from "rxjs/operators";
 
-import { Chat, Message, Profile } from "@classes/index";
+import { AppUser, Chat, Message, Profile } from "@classes/index";
 import { ChatboardStore, CurrentUserStore } from "@stores/index";
 import { ProfileCardComponent } from "@components/index";
 import { OtherProfilesStore } from "@stores/other-profiles/other-profiles-store.service";
 import { ChatboardPicturesStore } from "@stores/pictures/chatboard-pictures/chatboard-pictures.service";
 import { Timestamp } from "@angular/fire/firestore";
-import { messageFromDatabase } from "@interfaces/message.model";
+import { messageFromDatabase, messageMap } from "@interfaces/message.model";
 import { FormatService } from "@services/format/format.service";
 
 import { SafeUrl } from "@angular/platform-browser";
 import { UserReportingService } from "@services/user-reporting/user-reporting.service";
 import { AngularFirestore } from "@angular/fire/compat/firestore";
+import { isEqual } from "lodash";
 
 function sortUIDs(uids: string[]): string[] {
   return uids.sort((a, b) => ("" + a).localeCompare(b));
@@ -50,42 +74,59 @@ function sortUIDs(uids: string[]): string[] {
   providers: [],
 })
 export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
+  // Constants
+  private SCROLL_SPEED: number = 100;
+  private CHAT_ID: string;
+  private MSG_BATCH_SIZE: number = 20;
+
+  @ViewChild("messageContainer", { read: ElementRef }) messageContainer: ElementRef;
   @ViewChild(IonContent) ionContent: IonContent;
   @ViewChild("slides") slides: IonSlides;
   @ViewChild("profSlide", { read: ElementRef }) profSlide: ElementRef;
   @ViewChild("header", { read: ElementRef }) header: ElementRef;
-
-  // profCard: ElementRef;
-  // @ViewChildren("profCard", { read: ElementRef }) profCardView: QueryList<ElementRef>;
   @ViewChild("profCard", { read: ElementRef, static: false }) profCard: ElementRef;
-  //  profCard: ElementRef; //for styling
   @ViewChild("profCard") grandchildren: ProfileCardComponent; //for access to grandchildren
   @ViewChild("searchBar") searchBar: IonSearchbar;
+  @ViewChild("loadingTrigger") loadingTrigger: ElementRef<HTMLElement>;
 
-  profilesSub: Subscription;
-  profileHandlingSub: Subscription;
+  private subs = new Subscription();
+  private messagesDatabaseSub: () => void = null;
 
-  bubblePicture$: Observable<SafeUrl>;
+  private loadingObserver: IntersectionObserver;
 
-  chatProfiles: Profile[];
-  recipientProfile$: Observable<Profile>;
+  public latestChatInput: string; // Storing latest chat input functionality
 
-  messages$ = new BehaviorSubject<Message[]>([]);
-  messagesDatabaseSub: () => void = null;
+  private hasFullyScrolled = new Subject<"">();
+  private hasFullyScrolled$ = this.hasFullyScrolled.asObservable();
 
-  // Constants
-  private SCROLL_SPEED: number = 100;
-  private chatID: string;
-  private MSG_BATCH_SIZE: number = 20;
+  public messages$ = new BehaviorSubject<Message[]>([]);
+  public chat$ = new BehaviorSubject<Chat>(null);
 
-  // Storing latest chat input functionality
-  public latestChatInput: string;
+  private pageIsReady = new BehaviorSubject<boolean>(false);
+  public pageIsReady$ = this.pageIsReady.asObservable().pipe(distinctUntilChanged());
 
-  // Scroll functionality
-  private scrollSub: Subscription;
-  private timeOfNewestMsg: Date;
+  get firstBatchArrived$() {
+    return this.messages$.pipe(
+      map((msgs) => msgs.length > 1),
+      distinctUntilChanged(),
+      delay(400),
+      shareReplay()
+    );
+  }
 
-  public thisChat$ = new BehaviorSubject<Chat>(null);
+  get bubblePicture$(): Observable<SafeUrl> {
+    return this.chatboardPictures.holder$.pipe(
+      withLatestFrom(this.chat$),
+      map(([pictureHolder, chat]) => pictureHolder?.[chat?.recipient?.uid])
+    );
+  }
+
+  get recipientProfile$(): Observable<Profile> {
+    return this.profilesStore.profiles$.pipe(
+      withLatestFrom(this.chat$),
+      map(([profiles, chat]) => profiles?.[chat?.recipient?.uid])
+    );
+  }
 
   constructor(
     private route: ActivatedRoute,
@@ -99,54 +140,94 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
     private userReporting: UserReportingService,
     private afAuth: AngularFireAuth,
     private currentUser: CurrentUserStore,
-    private router: Router
+    private router: Router,
+    private host: ElementRef,
+    private loadingCtrl: LoadingController,
+    private changeDetectionRef: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
-    this.route.paramMap
-      .pipe(
-        first(),
-        switchMap((param) => {
-          console.log("param Map", param);
-          return this.initialiseMessenger(param);
-        })
-      )
-      .subscribe();
-
-    this.timeOfNewestMsg = this.lastInteracted();
-    this.scrollSub = this.scrollHandler().subscribe();
-
-    this.bubblePicture$ = this.chatboardPictures.holder$.pipe(
-      withLatestFrom(this.thisChat$),
-      map(([pictureHolder, chat]) => pictureHolder?.[chat?.recipient?.uid])
-    );
-
-    // this logic is for updating the locally stored chatboard picture whenever that person's
-    // profile is loaded. It is how we update this locally stored picture.
-    this.profileHandlingSub = this.thisChat$
-      .pipe(
-        filter((chat) => !!chat),
-        map((chat) => chat.recipient.uid),
-        switchMap((recipientUID) => this.profilesStore.checkAndSave(recipientUID)),
-        switchMap(({ uid, pictures }) => {
-          return of();
-          return forkJoin([
-            this.chatboardPictures.storeInLocal(uid, pictures[0], true),
-            this.chatboardPictures.addToHolder({ uids: [uid], urls: [pictures[0]] }),
-          ]);
-        })
-      )
-      .subscribe();
-
-    this.recipientProfile$ = this.profilesStore.profiles$.pipe(
-      withLatestFrom(this.thisChat$),
-      map(([profiles, chat]) => profiles?.[chat?.recipient?.uid])
-    );
-
-    this.recipientProfile$.subscribe((a) => console.log("recipient profile", a));
+    this.pageIsReady$.subscribe((a) => console.log("page is ready: " + a));
+    this.firstBatchArrived$.subscribe((a) => console.log("first batch arrived " + a));
+    this.pageInitialization();
+    this.subs.add(this.scrollHandler$.subscribe());
+    this.subs.add(this.otherProfileHandler$.subscribe());
   }
 
-  async ngAfterViewInit() {
+  ngAfterViewInit() {
+    this.subs.add(this.moreMessagesLoadingHandler$.subscribe());
+    this.styleMessageBar();
+    this.slides.lockSwipes(true);
+  }
+
+  async pageInitialization() {
+    console.log("a");
+    const paramMap = await this.route.paramMap.pipe(first()).toPromise();
+    console.log("b");
+
+    if (!paramMap.has("chatID")) {
+      return this.navCtrl.navigateBack("/tabs/chats");
+    }
+
+    this.CHAT_ID = paramMap.get("chatID");
+
+    await this.initializeMessenger().toPromise();
+    console.log("c");
+    await this.ionContent.scrollToBottom();
+    console.log("d");
+
+    setTimeout(() => this.pageIsReady.next(true), 500);
+  }
+
+  /** Handles scrolling to bottom of messenger when there a new message is sent (on either side).
+   * We assume a change in the time of the newest message means a new message appeared.
+   */
+  private get scrollHandler$() {
+    return this.messages$.pipe(
+      filter((messages) => messages.length > 0),
+      distinctUntilChanged((oldMessages, newMessages) =>
+        isEqual(this.getMostRecent(oldMessages), this.getMostRecent(newMessages))
+      ),
+      delay(300),
+      exhaustMap(() => this.ionContent.scrollToBottom(this.SCROLL_SPEED))
+    );
+  }
+
+  get otherProfileHandler$() {
+    return this.chat$.pipe(
+      filter((chat) => !!chat),
+      map((chat) => chat.recipient.uid),
+      switchMap((recipientUID) => this.profilesStore.checkAndSave(recipientUID)),
+      switchMap(({ uid, pictures }) => {
+        return of();
+        return forkJoin([
+          this.chatboardPictures.storeInLocal(uid, pictures[0], true),
+          this.chatboardPictures.addToHolder({ uids: [uid], urls: [pictures[0]] }),
+        ]);
+      })
+    );
+  }
+
+  get moreMessagesLoadingHandler$() {
+    this.loadingObserver?.disconnect();
+
+    this.loadingObserver = new IntersectionObserver(
+      ([entry]) => {
+        entry.isIntersecting && this.hasFullyScrolled.next("");
+      },
+      { root: this.host.nativeElement }
+    );
+
+    this.loadingObserver.observe(this.loadingTrigger.nativeElement);
+
+    return this.hasFullyScrolled$.pipe(
+      withLatestFrom(this.firstBatchArrived$),
+      tap(() => console.log("asdasd")),
+      exhaustMap(() => concat(timer(500), this.listenOnMoreMessages()))
+    );
+  }
+
+  async styleMessageBar() {
     //Add styles to the message bar (it is inaccessible in shadowDOM)
     let el = await this.searchBar.getInputElement();
     let styles = {
@@ -159,8 +240,10 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
     Object.keys(styles).forEach((key) => {
       el.style[key] = styles[key];
     });
+  }
 
-    this.slides.lockSwipes(true);
+  trackMessage(index: number, message: Message) {
+    return message.messageID;
   }
 
   async openUserReportModal() {
@@ -200,37 +283,58 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
 
   /** Subscribes to chatStore's Chats osbervable using chatID
    * from paramMap */
-  private initialiseMessenger(parameter: ParamMap): Observable<any> {
-    if (!parameter.has("chatID")) return from(this.navCtrl.navigateBack("/tabs/chats"));
-
-    this.chatID = parameter.get("chatID");
-
+  private initializeMessenger(): Observable<any> {
     return this.chatboardStore.chats$.pipe(
-      filter((chats) => !!chats?.[this.chatID]),
+      filter((chats) => !!chats?.[this.CHAT_ID]),
+      tap((a) => console.log("the chat right now is" + a)),
       withLatestFrom(this.currentUser.user$.pipe(filter((u) => !!u))),
       take(1),
       map(([chats, user]) => {
+        console.log("we got here ");
         // Fills the chat subject with the data from the chatboard store
-        this.thisChat$.next(chats[this.chatID]);
-        this.latestChatInput = chats[this.chatID].latestChatInput;
-        console.log("user is ", user);
+        this.chat$.next(chats[this.CHAT_ID]);
+        this.latestChatInput = chats[this.CHAT_ID].latestChatInput;
         return user.uid;
       }),
-      map((uid) => {
-        // Activates the listener for this chat's messages and fills the messages subject
-        // when something changes in the messages collection
-        this.firestore.firestore
+      concatMap(() => this.listenOnMoreMessages())
+    );
+  }
+
+  /**
+   * Activates the listener for this chat's messages and fills the messages subject
+   * when something changes in the messages collection
+   */
+  listenOnMoreMessages() {
+    return this.messages$.pipe(
+      withLatestFrom(this.currentUser.user$.pipe(filter((u) => !!u))),
+      take(1),
+      map(([msgs, user]) => [msgs.length, user] as [number, AppUser]),
+      map(([msgCount, user]) => {
+        this.messagesDatabaseSub?.();
+
+        const newMsgCount = msgCount + this.MSG_BATCH_SIZE;
+
+        console.log("listening on more messages", msgCount);
+
+        this.messagesDatabaseSub = this.firestore.firestore
           .collection("chats")
-          .doc(this.chatID)
+          .doc(this.CHAT_ID)
           .collection("messages")
-          .where("uids", "array-contains", uid)
+          .where("uids", "array-contains", user.uid)
           .orderBy("time", "desc")
-          .limit(this.MSG_BATCH_SIZE)
+          .limit(newMsgCount)
           .onSnapshot({
             next: (snapshot) => {
+              // this is necessary because on updating the batch size,
+              // we sometimes only get 1 message at first for some reason,
+              // and that makes the messages rerender weirdly in ngFor loop
+              if (msgCount >= snapshot.docs.length) return;
+
               this.messages$.next(
                 this.format.messagesDatabaseToClass(
-                  snapshot.docs.map((d) => d.data()).reverse() as messageFromDatabase[]
+                  snapshot.docs
+                    .map((d) => ({ id: d.id, message: d.data() }))
+                    .reverse() as messageMap[]
                 )
               );
             },
@@ -245,12 +349,10 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
     console.log(this.latestChatInput);
 
     return this.afauth.user.pipe(
-      tap((a) => console.log("auth$", a)),
-      withLatestFrom(this.thisChat$.pipe(filter((c) => !!c))),
+      withLatestFrom(this.chat$.pipe(filter((c) => !!c))),
       take(1),
       filter(() => !!this.latestChatInput), // prevents user from sending empty messages
       switchMap(([user, thisChat]) => {
-        console.log("a");
         if (!user) throw "no user authenticated";
 
         const message: messageFromDatabase = {
@@ -265,7 +367,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
         return from(
           this.firestore.firestore
             .collection("chats")
-            .doc(this.chatID)
+            .doc(this.CHAT_ID)
             .collection("messages")
             .doc()
             .set(message)
@@ -273,7 +375,6 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
       }),
       switchMap(() =>
         this.messages$.pipe(
-          tap(() => console.log("b")),
           filter(
             (msgs) => !!msgs.find((msg) => msg.time.getTime() === messageTime.getTime()) // filters out
           ),
@@ -284,77 +385,9 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
     );
   }
 
-  /** Updates Chats object of chatStore,
-   * subsequently updates chat on database */
-  // async senddMessage(): Promise<void> {
-  //   const messageContent: string = this.latestChatInput;
-
-  //   if (!messageContent) return;
-
-  //   const chat: Chat = this.thisChat$.getValue();
-  //   if (!chat) return console.error("Chat object is empty");
-
-  //   const user = await this.afauth.currentUser;
-  //   if (!user) return console.error("User isn't logged in.");
-
-  //   const time: Date = new Date();
-
-  //   const newMessage: Message = new Message(user.uid, time, messageContent, null);
-
-  //   this.latestChatInput = "";
-  //   this.chatStore.localMessageAddition(newMessage, chat);
-  //   this.chatStore.updateLastInteracted(chat, time);
-
-  //   try {
-  //     await this.chatStore.databaseUpdateMessages(chat);
-  //     this.chatStore.updateMessageState(chat, newMessage, "sent");
-  //   } catch (e) {
-  //     console.error(`Message to ${chat.recipient.name} failed to send: ${e}`);
-  //     this.chatStore.updateMessageState(chat, newMessage, "failed");
-  //   }
-  // }
-
-  /** Makes an attempt to change db version of chat's messages from local version */
-  // async retryUpdateMessage(message: Message) {
-  //   if (!message || message.state !== "failed") return;
-
-  //   const chat: Chat = this.thisChat$.getValue();
-  //   if (!chat) return console.error("Chat object is empty");
-
-  //   try {
-  //     await this.chatStore.databaseUpdateMessages(chat);
-  //     this.chatStore.updateMessageState(chat, message, "sent");
-  //   } catch (e) {
-  //     console.error(`Message to ${chat.recipient.name} failed to send: ${e}`);
-  //   }
-  // }
-
-  /** Handles scrolling to bottom of messenger when there a new message is sent (on either side).
-   * We assume a change in the time of the newest message means a new message appeared.
-   */
-  private scrollHandler() {
-    return this.messages$.pipe(
-      filter((messages) => messages.length > 0),
-      distinct((messages) => this.getMostRecent(messages)),
-      delay(300),
-      map(() => this.ionContent.scrollToBottom(this.SCROLL_SPEED))
-    );
-    // if (!chat?.recentMessage) return;
-
-    if (this.lastInteracted() > this.timeOfNewestMsg) {
-      this.timeOfNewestMsg = this.lastInteracted();
-      setTimeout(() => this.ionContent.scrollToBottom(this.SCROLL_SPEED), 100);
-    }
-  }
-
-  /** Called in html, teleports to bottom of page when content is rendered */
-  fastScroll() {
-    this.ionContent?.scrollToBottom(0);
-  }
-
   /** Returns the time of the newest message */
   private lastInteracted(): Date {
-    const chat = this.thisChat$.getValue();
+    const chat = this.chat$.getValue();
     if (!chat) return;
     return new Date(Math.max.apply(null, chat.recentMessage.time));
   }
@@ -383,7 +416,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
 
   isOwnMessage(message: Message): boolean {
     if (!message) return;
-    const chat: Chat = this.thisChat$.getValue();
+    const chat: Chat = this.chat$.getValue();
     if (message.senderID === chat.recipient.uid) return false;
     return true;
   }
@@ -405,8 +438,8 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.profileHandlingSub?.unsubscribe();
-    this.scrollSub?.unsubscribe();
-    this.messagesDatabaseSub ? this.messagesDatabaseSub() : null;
+    this.subs.unsubscribe();
+    this.loadingObserver?.disconnect();
+    this.messagesDatabaseSub?.();
   }
 }

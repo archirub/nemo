@@ -31,7 +31,7 @@ import { InterestsModalComponent } from "./interests-modal/interests-modal.compo
     AppToggleModule,
     InterestSlidesModule,
     PipesModule,
-    DragDropModule
+    DragDropModule,
   ],
   declarations: [
     OwnProfilePage,

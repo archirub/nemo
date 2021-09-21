@@ -1,114 +1,123 @@
 <ion-content class="noScroll">
-  <form [formGroup]="form">
-    <ion-slides pager="false" options="{pagination: false, onlyExternal: false}" #slide>
-      <ion-slide>
-        <div #container class="container">
-          <div class="flexbetween-row">
-            <h1>Your settings</h1>
-            <a (click)="goBack()"><ion-icon name="close-outline"></ion-icon></a>
+  <ion-slides pager="false" options="{pagination: false, onlyExternal: false}" #slide>
+    <ion-slide>
+      <div #container class="container">
+        <div class="flexbetween-row">
+          <h1>Your settings</h1>
+          <a (click)="goBack()"><ion-icon name="close-outline"></ion-icon></a>
+        </div>
+        <div class="flexeven-col">
+          <div class="slide-button" (click)="selectSlide('preferences')">
+            <p>Preferences</p>
+            <ion-icon name="chevron-forward-outline"></ion-icon>
           </div>
-          <div class="flexeven-col">
-            <div class="slide-button" (click)="selectSlide('preferences')">
-              <p>Preferences</p>
-              <ion-icon name="chevron-forward-outline"></ion-icon>
-            </div>
 
-            <div class="slide-button go-under" #goUnder>
-              <div class="flexbetween-row">
-                <p>Go 'under'</p>
-                <nemo-toggle
-                  (choice)="goneUnder($event)"
-                  [buttonWidth]="15"
-                  [fontSize]="3.5"
-                  [selections]="['off','on']"
-                ></nemo-toggle>
-              </div>
-              <h3 #goUnderH3>
-                Going under allows you to chat with existing catches, but your profile
-                will not be shown in other people's catch-stack and you will not be able
-                to swipe on new users.
-              </h3>
+          <div class="slide-button go-under" #goUnder>
+            <div class="flexbetween-row">
+              <p>Go 'under'</p>
+              <nemo-toggle
+                #goUnderToggle
+                [(value)]="showProfile"
+                (valueChange)="actOnGoUnder($event)"
+                [buttonWidth]="15"
+                [fontSize]="3.5"
+                [selections]="['off','on']"
+              ></nemo-toggle>
             </div>
+            <h3 #goUnderH3>
+              Going under allows you to chat with existing catches, but your profile will
+              not be shown in other people's catch-stack and you will not be able to swipe
+              on new users.
+            </h3>
+          </div>
 
-            <div class="slide-button" (click)="selectSlide('legal')">
-              <p>Legal</p>
-              <ion-icon name="chevron-forward-outline"></ion-icon>
-            </div>
+          <div class="slide-button" (click)="selectSlide('legal')">
+            <p>Legal</p>
+            <ion-icon name="chevron-forward-outline"></ion-icon>
+          </div>
 
-            <div class="slide-button" (click)="selectSlide('support')">
-              <p>Support</p>
-              <ion-icon name="chevron-forward-outline"></ion-icon>
-            </div>
+          <div class="slide-button" (click)="selectSlide('support')">
+            <p>Support</p>
+            <ion-icon name="chevron-forward-outline"></ion-icon>
+          </div>
 
-            <div class="slide-button">
-              <p>Licenses</p>
-              <ion-icon name="chevron-forward-outline"></ion-icon>
-            </div>
+          <div class="slide-button">
+            <p>Licenses</p>
+            <ion-icon name="chevron-forward-outline"></ion-icon>
+          </div>
 
-            <div class="slide-button logout" (click)="logOut()">
-              <p>Logout</p>
-            </div>
+          <div class="slide-button logout" (click)="logOut()">
+            <p>Logout</p>
+          </div>
 
-            <div class="slide-button logout" (click)="changePassword()">
-              <p>Change Password</p>
-            </div>
+          <div class="slide-button logout" (click)="changePassword()">
+            <p>Change Password</p>
+          </div>
 
-            <div class="slide-button delete" (click)="deleteAccount()">
-              <p>Delete Account</p>
-            </div>
+          <div class="slide-button delete" (click)="deleteAccount()">
+            <p>Delete Account</p>
           </div>
         </div>
-      </ion-slide>
+      </div>
+    </ion-slide>
 
-      <!-- Necessary in order to allow swipes to specific slides,
+    <!-- Necessary in order to allow swipes to specific slides,
       one other slide has to have display != none in order for this.slides.slideNext() to work -->
-      <ion-slide id="placeholder"></ion-slide>
+    <ion-slide id="placeholder"></ion-slide>
 
-      <ion-slide id="legal" class="noScroll">
-        <div class="container">
-          <div class="flexbetween-row">
-            <h1>Legal</h1>
-            <a (click)="goBack()"><ion-icon name="close-outline"></ion-icon></a>
+    <ion-slide id="legal" class="noScroll">
+      <div class="container">
+        <div class="flexbetween-row">
+          <h1>Legal</h1>
+          <a (click)="goBack()"><ion-icon name="close-outline"></ion-icon></a>
+        </div>
+
+        <div class="flexstart-row" (click)="returnToSettings()">
+          <ion-icon id="back" name="chevron-back-outline"></ion-icon>
+          <p class="return">Return to Settings</p>
+        </div>
+
+        <div class="flexstart-col">
+          <div class="slide-button">
+            <p>Privacy Policy</p>
+            <ion-icon name="chevron-forward-outline"></ion-icon>
           </div>
 
-          <div class="flexstart-row" (click)="returnToSettings()">
-            <ion-icon id="back" name="chevron-back-outline"></ion-icon>
-            <p class="return">Return to Settings</p>
-          </div>
-
-          <div class="flexstart-col">
-            <div class="slide-button">
-              <p>Privacy Policy</p>
-              <ion-icon name="chevron-forward-outline"></ion-icon>
-            </div>
-
-            <div class="slide-button">
-              <p>Terms & Conditions</p>
-              <ion-icon name="chevron-forward-outline"></ion-icon>
-            </div>
+          <div class="slide-button">
+            <p>Terms & Conditions</p>
+            <ion-icon name="chevron-forward-outline"></ion-icon>
           </div>
         </div>
-      </ion-slide>
+      </div>
+    </ion-slide>
 
-      <ion-slide id="preferences" class="noScroll">
-        <div class="container">
-          <div class="flexbetween-row">
-            <h1>Preferences</h1>
-            <a (click)="goBack()"><ion-icon name="close-outline"></ion-icon></a>
-          </div>
+    <ion-slide id="preferences" class="noScroll">
+      <div class="container">
+        <div class="flexbetween-row">
+          <h1>Preferences</h1>
+          <a (click)="goBack()"><ion-icon name="close-outline"></ion-icon></a>
+        </div>
 
-          <div class="flexstart-row" (click)="returnToSettings()">
-            <ion-icon id="back" name="chevron-back-outline"></ion-icon>
-            <p class="return">Return to Settings</p>
-          </div>
+        <nemo-toggle
+          *ngIf="editingInProgress$ | async"
+          (valueChange)="actOnEditing($event)"
+          [buttonWidth]="15"
+          [fontSize]="4"
+          [selections]="['cancel', 'confirm']"
+        ></nemo-toggle>
 
-          <div class="flexstart-col">
-            <p>
-              Here, you can change the preferences you set when you signed up. This will
-              affect how others on the app can reach you using
-              <span style="color: var(--ion-color-primary)"> nemo</span>search.
-            </p>
-            <div class="slide-button preferences">
+        <div class="flexstart-row" (click)="returnToSettings()">
+          <ion-icon id="back" name="chevron-back-outline"></ion-icon>
+          <p class="return">Return to Settings</p>
+        </div>
+
+        <div class="flexstart-col">
+          <p>
+            Here, you can change the preferences you set when you signed up. This will
+            affect how others on the app can reach you using
+            <span style="color: var(--ion-color-primary)"> nemo</span>search.
+          </p>
+          <!-- <div class="slide-button preferences">
               <p>I am looking for</p>
               <ion-select formControlName="swipeMode" interface="action-sheet">
                 <ion-select-option
@@ -118,33 +127,41 @@
                   {{ swipeMode }}
                 </ion-select-option>
               </ion-select>
-            </div>
+            </div> -->
 
-            <div class="slide-button preferences">
-              <p>I am interested in</p>
-              <ion-select formControlName="sexualPreference" interface="action-sheet">
-                <ion-select-option
-                  *ngFor="let sexPref of sexualPreferenceOptions"
-                  value="{{sexPref}}"
-                >
-                  {{ sexPref }}
-                </ion-select-option>
-              </ion-select>
-            </div>
+          <div class="slide-button preferences">
+            <p>I am interested in</p>
+            <ion-select
+              [(ngModel)]="sexualPreference"
+              (ngModelChange)="editingTriggered()"
+              interface="action-sheet"
+            >
+              <ion-select-option
+                *ngFor="let selection of sexualPreferenceOptions"
+                [value]="selection | formatSexPref"
+              >
+                {{ selection | formatSexPref }}
+              </ion-select-option>
+            </ion-select>
+          </div>
 
-            <div class="slide-button preferences">
-              <p>I identify as</p>
-              <ion-select formControlName="gender" interface="action-sheet">
-                <ion-select-option
-                  *ngFor="let gender of genderOptions"
-                  value="{{gender}}"
-                >
-                  {{ gender }}
-                </ion-select-option>
-              </ion-select>
-            </div>
+          <div class="slide-button preferences">
+            <p>I identify as</p>
+            <ion-select
+              [(ngModel)]="gender"
+              (ngModelChange)="editingTriggered()"
+              interface="action-sheet"
+            >
+              <ion-select-option
+                *ngFor="let selection of genderOptions"
+                [value]="selection"
+              >
+                {{ selection }}
+              </ion-select-option>
+            </ion-select>
+          </div>
 
-            <!-- <div class="slide-button preferences">
+          <!-- <div class="slide-button preferences">
               <p>I am currently on campus</p>
               <ion-select formControlName="onCampus" interface="action-sheet">
                 <ion-select-option
@@ -155,47 +172,46 @@
                 </ion-select-option>
               </ion-select>
             </div> -->
-          </div>
         </div>
-      </ion-slide>
+      </div>
+    </ion-slide>
 
-      <ion-slide id="support" class="noScroll">
-        <div class="container">
-          <div class="flexbetween-row">
-            <h1>Support</h1>
-            <a (click)="goBack()"><ion-icon name="close-outline"></ion-icon></a>
-          </div>
-
-          <div class="flexstart-row" (click)="returnToSettings()">
-            <ion-icon id="back" name="chevron-back-outline"></ion-icon>
-            <p class="return">Return to Settings</p>
-          </div>
-
-          <div class="flexstart-col">
-            <p>
-              We've tried our best to provide a safe and engaging platform to meet new
-              people, but we understand that sometimes not everything goes right.
-            </p>
-            <p>
-              If you're encountering issues with the app, or would like some support
-              regarding the
-              <span style="color: var(--ion-color-primary)">nemo</span> community, then
-              you can reach our support team by tapping on the email below.
-            </p>
-
-            <span class="email">
-              <a (click)="openEmail()"><u>customersupport@nemodating.com</u></a>
-            </span>
-
-            <p>
-              We will make sure to get back to you as soon as possible to swiftly resolve
-              any problems you encounter. This makes
-              <span style="color: var(--ion-color-primary)">nemo</span>
-              a better place for everyone!
-            </p>
-          </div>
+    <ion-slide id="support" class="noScroll">
+      <div class="container">
+        <div class="flexbetween-row">
+          <h1>Support</h1>
+          <a (click)="goBack()"><ion-icon name="close-outline"></ion-icon></a>
         </div>
-      </ion-slide>
-    </ion-slides>
-  </form>
+
+        <div class="flexstart-row" (click)="returnToSettings()">
+          <ion-icon id="back" name="chevron-back-outline"></ion-icon>
+          <p class="return">Return to Settings</p>
+        </div>
+
+        <div class="flexstart-col">
+          <p>
+            We've tried our best to provide a safe and engaging platform to meet new
+            people, but we understand that sometimes not everything goes right.
+          </p>
+          <p>
+            If you're encountering issues with the app, or would like some support
+            regarding the
+            <span style="color: var(--ion-color-primary)">nemo</span> community, then you
+            can reach our support team by tapping on the email below.
+          </p>
+
+          <span class="email">
+            <a (click)="openEmail()"><u>customersupport@nemodating.com</u></a>
+          </span>
+
+          <p>
+            We will make sure to get back to you as soon as possible to swiftly resolve
+            any problems you encounter. This makes
+            <span style="color: var(--ion-color-primary)">nemo</span>
+            a better place for everyone!
+          </p>
+        </div>
+      </div>
+    </ion-slide>
+  </ion-slides>
 </ion-content>

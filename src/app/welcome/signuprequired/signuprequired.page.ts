@@ -113,12 +113,12 @@ export class SignuprequiredPage implements OnInit {
     await this.signup.getLocalStorage();
     await this.fillFieldsAndGoToSlide();
 
-    this.date.getWrittenValue();
-    this.date.getDate();
+    await this.date.getWrittenValue();
+    await this.date.getDate();
 
     await this.slides.lockSwipes(true);
 
-    this.updatePager();
+    await this.updatePager();
   }
 
   updateAge(age: number) {
@@ -126,15 +126,14 @@ export class SignuprequiredPage implements OnInit {
     this.changeDetectorRef.detectChanges();
   }
 
+  /**
+   * Checks whether the field on the current slide has valid value, allows continuing if true, input
+   * entry (string): the field of the form to check validator for, e.g. email, password
+   * If on the final validator, password, submits form instead of sliding to next slide
+   * THIS SHOULD BE USED ON THE NEXT SLIDE BUTTONS
+   **/
   validateAndSlide(entry: string | string[]) {
-    /**
-     * Checks whether the field on the current slide has valid value, allows continuing if true, input
-     * entry (string): the field of the form to check validator for, e.g. email, password
-     * If on the final validator, password, submits form instead of sliding to next slide
-     * THIS SHOULD BE USED ON THE NEXT SLIDE BUTTONS
-     **/
-
-     const policyCheckMsg = document.getElementById("policiesCheck");
+    const policyCheckMsg = document.getElementById("policiesCheck");
 
     Object.values(this.reqValidatorChecks).forEach(
       (element) => (element.style.display = "none")
@@ -143,29 +142,27 @@ export class SignuprequiredPage implements OnInit {
 
     if (typeof entry === "object") {
       // Checking multiple validators
-      var falseCount = 0; // Count how many are invalid
+      let falseCount = 0; // Count how many are invalid
 
       //Check for policy boxes, these are not checked against form
-      if (entry.includes('policies')) {
+      if (entry.includes("policies")) {
+        const checks = [this.tcbox.checked, this.ppbox.checked];
 
-        let checks = [
-          this.tcbox.checked,
-          this.ppbox.checked
-        ];
-        
-        console.log('Policy boxes:', checks);
+        console.log("Policy boxes:", checks);
 
         if (checks.includes(false)) {
-          policyCheckMsg.style.display = "flex"
+          policyCheckMsg.style.display = "flex";
           falseCount++;
-        };
-      };
+        }
+      }
 
       entry.forEach((element) => {
         // IMPORTANT that this is !invalid instead of valid
         // This is because setting a FormControl to disabled makes valid = false but
         // invalid = true (see https://github.com/angular/angular/issues/18678)
-        var validity = !this.form.get(element).invalid;
+        console.log("entry is " + entry + "    element is " + element);
+        if (element === "policies") return;
+        const validity = !this.form.get(element).invalid;
 
         if (validity === false) {
           // If invalid, increase falseCount and display "invalid" UI
@@ -180,8 +177,7 @@ export class SignuprequiredPage implements OnInit {
           (element) => (element.style.display = "none")
         ); // Hide all "invalid" UI
         this.unlockAndSlideToNext();
-      };
-
+      }
     } else {
       // IMPORTANT that this is !invalid instead of valid
       var validity = !this.form.get(entry).invalid;
@@ -190,7 +186,7 @@ export class SignuprequiredPage implements OnInit {
         Object.values(this.reqValidatorChecks).forEach(
           (element) => (element.style.display = "none")
         ); // Hide all "invalid" UI
-        
+
         this.unlockAndSlideToNext(); // If others valid, slide next
       } else {
         this.reqValidatorChecks[entry].style.display = "flex"; // Show "invalid" UI for invalid validator
@@ -323,7 +319,7 @@ export class SignuprequiredPage implements OnInit {
         }
       } else {
         // checks whether element exists / is non null & whether its value is valid
-        if (!(fieldValues[field] && this.form.get(field).valid)) {
+        if (!(fieldValues[field] && !this.form.get(field).invalid)) {
           slideIndex = Math.min(slideIndex, this.slideIndexes[field]);
         }
       }
@@ -404,12 +400,10 @@ export class SignuprequiredPage implements OnInit {
 
     // if invalidSlide is non-null, then there is a slide with invalid data
     // cannot just use if (invalidSlide) {} syntax as number 0 is falsy
-    if (typeof invalidSlide === "number") {
-      await this.unlockAndSlideTo(invalidSlide);
-    } else {
-      await this.updateData(); // may not be necessary, but last check to make sure data we have in logic exactly reflects that in the UI
-      this.router.navigateByUrl("/welcome/signupoptional");
-    }
+    if (typeof invalidSlide === "number") return this.unlockAndSlideTo(invalidSlide);
+
+    await this.updateData(); // may not be necessary, but last check to make sure data we have in logic exactly reflects that in the UI
+    return this.router.navigateByUrl("/welcome/signupoptional");
   }
 
   savePhoto(e: { photoUrl: string; index: number }) {

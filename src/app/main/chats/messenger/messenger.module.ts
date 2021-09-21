@@ -10,6 +10,7 @@ import { ProfileCardModule } from "@components/profile-card/profile-card.compone
 import { PipesModule } from "@pipes/pipes.module";
 import { ReportUserComponent } from "../report-user/report-user.component";
 import { ReportUserModule } from "../report-user/report-user.module";
+import { InfiniteScrollModule } from "@components/infinite-scroll/infinite-scroll.component.module";
 
 @NgModule({
   imports: [
@@ -20,6 +21,7 @@ import { ReportUserModule } from "../report-user/report-user.module";
     ProfileCardModule,
     PipesModule,
     ReportUserModule,
+    // InfiniteScrollModule,
   ],
   declarations: [MessengerPage],
 })

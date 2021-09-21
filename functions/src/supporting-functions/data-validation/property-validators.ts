@@ -103,8 +103,7 @@ export function isSexualPreference(a: any): a is SexualPreference {
       found = true;
     }
   }
-  if (!found) return false;
-  return true;
+  return found;
 }
 
 export function isSocialMediaLinks(a: any): a is SocialMediaLink[] {

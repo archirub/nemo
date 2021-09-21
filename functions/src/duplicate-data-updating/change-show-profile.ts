@@ -23,9 +23,6 @@ export const changeShowProfile = functions
 
       const showProfile: boolean = sanitizedRequest.showProfile;
 
-      if ([true, false].includes(showProfile)) {
-        return { successful: false };
-      }
       const pistorage = (await admin
         .firestore()
         .collection("piStorage")
@@ -47,8 +44,9 @@ export const changeShowProfile = functions
       });
 
       if (pistorage.empty) {
-        functions.logger.error(`user seems to be in no piStorage doc. id: ${uid}`);
-        return { successful: false };
+        functions.logger.error(`user is in no piStorage doc. uid: ${uid}`);
+        // since pistorage is the only other location where there is a showProfile property,
+        // then it's okay if only we don't abort the update
       }
 
       batch.update(pistorage.docs[0].ref, {

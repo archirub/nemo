@@ -30,7 +30,6 @@ export const addOrRemoveReported = functions
       const action = sanitizedRequest.action;
       const reporteduid = sanitizedRequest.reporteduid;
 
-      if (!["add", "remove"].includes(action)) return { successful: false };
       try {
         const user = await admin.auth().getUser(uid);
         const reporteduser = await admin.auth().getUser(reporteduid);

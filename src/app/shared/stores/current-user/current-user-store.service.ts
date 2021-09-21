@@ -1,3 +1,4 @@
+import { Gender, SexualPreference } from "./../../interfaces/match-data.model";
 import { AngularFireFunctions } from "@angular/fire/compat/functions";
 import { Injectable } from "@angular/core";
 import { AngularFireAuth } from "@angular/fire/compat/auth";
@@ -178,6 +179,36 @@ export class CurrentUserStore {
           );
       })
     );
+  }
+
+  public async updateGenderSexPrefInStore(
+    newGender: Gender | null,
+    newSexualPreference: SexualPreference | null
+  ) {
+    return this.user$
+      .pipe(
+        take(1),
+        map((u) => {
+          if (newGender == null && newSexualPreference == null) return;
+          if (newGender != null) u.gender = newGender;
+          if (newSexualPreference != null) u.sexualPreference = newSexualPreference;
+          this.user.next(u);
+        })
+      )
+      .toPromise();
+  }
+
+  public async updateShowProfileInStore(newShowProfile: boolean) {
+    return this.user$
+      .pipe(
+        take(1),
+        map((u) => {
+          if (newShowProfile == null || u?.settings?.showProfile == null) return;
+          u.settings.showProfile = newShowProfile;
+          this.user.next(u);
+        })
+      )
+      .toPromise();
   }
 
   public resetStore() {

@@ -8,6 +8,7 @@ export class FormatSexPrefPipe implements PipeTransform {
   transform(value: SexualPreference): string {
     if (JSON.stringify(value) === JSON.stringify(["male"])) return "male";
     if (JSON.stringify(value) === JSON.stringify(["female"])) return "female";
-    if (JSON.stringify(value) === JSON.stringify(["male", "female"])) return "both";
+    if (JSON.stringify(value.sort()) === JSON.stringify(["male", "female"].sort()))
+      return "both";
   }
 }

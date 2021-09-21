@@ -1,4 +1,12 @@
-import { Component, Input, OnInit, Output, EventEmitter } from "@angular/core";
+import {
+  Component,
+  Input,
+  OnInit,
+  Output,
+  EventEmitter,
+  forwardRef,
+} from "@angular/core";
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 
 import { assetsInterestsPath, Interests, searchCriteriaOptions } from "@interfaces/index";
 
@@ -6,8 +14,15 @@ import { assetsInterestsPath, Interests, searchCriteriaOptions } from "@interfac
   selector: "interests-slides",
   templateUrl: "./interests-slides.component.html",
   styleUrls: ["./interests-slides.component.scss"],
+  providers: [
+    {
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => InterestSlidesComponent),
+      multi: true,
+    },
+  ],
 })
-export class InterestSlidesComponent implements OnInit {
+export class InterestSlidesComponent implements OnInit, ControlValueAccessor {
   @Input() listed: boolean = true; //Option to hide the listed interests, automatically shown (false = hidden)
   @Input() interests: Interests[];
   @Output() interestsChange = new EventEmitter<Interests[]>();
@@ -144,18 +159,39 @@ export class InterestSlidesComponent implements OnInit {
 
   selectInterest(choice) {
     if (this.interests.includes(choice)) {
-      // console.log("In interests, removing");
       var index = this.interests.indexOf(choice);
       this.interests.splice(index, 1);
     } else {
       this.interests.push(choice);
     }
-
     this.interestsChange.emit(this.interests);
+    this.onChange(this.interests);
+    this.onTouched();
   }
 
   getPicturePath(interestName: Interests): string {
     const formattedName = interestName.replace(/\s/g, "").toLowerCase();
     return "/assets/interests/" + formattedName + ".svg";
+  }
+
+  // ControlValueAccessor Implementation
+  onChange: any = () => {};
+  onTouched: any = () => {};
+
+  registerOnChange(fn: any) {
+    this.onChange = fn;
+  }
+
+  registerOnTouched(fn: any) {
+    this.onTouched = fn;
+  }
+
+  writeValue(value: Interests[]) {
+    this.interests = value;
+    this.interestsChange.emit(this.interests);
+  }
+
+  setDisabledState(isDisabled: boolean) {
+    //this.disabled = isDisabled;
   }
 }

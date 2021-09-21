@@ -253,7 +253,9 @@
 
             <div id="policiesCheck">
               <ion-icon name="alert-circle-outline"></ion-icon>
-              <p>Please agree to both the terms and conditions and the privacy policies</p>
+              <p>
+                Please agree to both the terms and conditions and the privacy policies
+              </p>
             </div>
 
             <div class="buttons">
@@ -261,19 +263,13 @@
                 <ion-icon name="chevron-back-outline"></ion-icon>
               </ion-button>
 
-              <ion-button
-                class="next-slide scroll"
-                (click)="validateAndSlide(['university','degree','policies'])"
-              >
+              <ion-button class="next-slide scroll" (click)="onSubmit()">
+                <!-- (click)="validateAndSlide(['university','degree','policies'])" -->
                 <ion-icon name="chevron-forward-outline"></ion-icon>
               </ion-button>
             </div>
           </div>
         </div>
-      </ion-slide>
-
-      <ion-slide>
-        You made it!
       </ion-slide>
     </ion-slides>
   </form>

@@ -42,6 +42,24 @@
             <ion-row>
               <ion-col>
                 <div class="criterion">
+                  <h3 id="university">University</h3>
+
+                  <nemo-toggle
+                    #universityslider
+                    [buttonWidth]="17"
+                    [fontSize]="3"
+                    [selections]="
+                      universityOptions$ | async | nullElementTo: nameOfUnselected
+                    "
+                    (valueChange)="checkClear()"
+                    formControlName="university"
+                  ></nemo-toggle>
+                </div>
+              </ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col>
+                <div class="criterion">
                   <h3 id="degree">Degree</h3>
                   <!--ion-select
                     [(ngModel)] = "degreeSelection"
@@ -62,15 +80,15 @@
                     #degreeslider
                     [buttonWidth]="17"
                     [fontSize]="3"
-                    [selections]="degreeOptions.reverse()"
-                    (choice)="checkClear()"
+                    [selections]="degreeOptions | nullElementTo: nameOfUnselected"
+                    (valueChange)="checkClear()"
                     formControlName="degree"
                   ></nemo-toggle>
                 </div>
               </ion-col>
             </ion-row>
 
-            <ion-row>
+            <!-- <ion-row>
               <ion-col>
                 <div class="criterion">
                   <h3>Location</h3>
@@ -79,12 +97,12 @@
                     [buttonWidth]="17"
                     [fontSize]="3"
                     [selections]="['On Campus', 'Everyone']"
-                    (choice)="checkClear()"
+                    (valueChange)="checkClear()"
                     formControlName="onCampus"
                   ></nemo-toggle>
                 </div>
               </ion-col>
-            </ion-row>
+            </ion-row> -->
 
             <ion-row>
               <ion-col>

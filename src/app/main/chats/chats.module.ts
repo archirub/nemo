@@ -9,9 +9,8 @@ import { ChatsPageRoutingModule } from "./chats-routing.module";
 import { ChatsPage } from "./chats.page";
 import { ChatBoardComponent } from "./chat-board/chat-board.component";
 import { MatchesComponent } from "./matches/matches.component";
-import { InfiniteScrollComponent } from "@components/infinite-scroll/infinite-scroll.component";
-import { ReportUserComponent } from "./report-user/report-user.component";
 import { ReportUserModule } from "./report-user/report-user.module";
+// import { InfiniteScrollModule } from "@components/infinite-scroll/infinite-scroll.component.module";
 
 @NgModule({
   imports: [
@@ -20,12 +19,8 @@ import { ReportUserModule } from "./report-user/report-user.module";
     IonicModule,
     ChatsPageRoutingModule,
     ReportUserModule,
+    // InfiniteScrollModule,
   ],
-  declarations: [
-    ChatsPage,
-    ChatBoardComponent,
-    MatchesComponent,
-    InfiniteScrollComponent,
-  ],
+  declarations: [ChatsPage, ChatBoardComponent, MatchesComponent],
 })
 export class ChatsPageModule {}
