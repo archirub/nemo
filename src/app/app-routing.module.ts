@@ -22,7 +22,7 @@ const routes: Routes = [
       import("./welcome/welcome.module").then((m) => m.WelcomePageModule),
   },
   {
-    path: "",
+    path: "**",
     loadChildren: () =>
       import("./welcome/welcome.module").then((m) => m.WelcomePageModule),
   },

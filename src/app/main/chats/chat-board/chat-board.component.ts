@@ -113,7 +113,7 @@ export class ChatBoardComponent implements OnInit {
 
     this.modal = await this.modalCtrl.create({
       component: MatchesComponent,
-      componentProps: { matches: this.matches },
+      componentProps: { chats: this.matches },
       enterAnimation: this.MatchesEnterAnimation,
       leaveAnimation: this.MatchesLeaveAnimation,
     });

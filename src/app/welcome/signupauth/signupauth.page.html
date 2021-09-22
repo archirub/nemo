@@ -113,7 +113,7 @@
       <ion-slide>
         <div class="personal-pref">
           <ion-button
-            style="z-index: 100; position: absolute; bottom: 10vh;"
+            style="z-index: 100; position: absolute; bottom: 10vh"
             debounceClick
             (debounceClick)="devVerifyEmail()"
             debounceTime="5000"
@@ -155,9 +155,12 @@
             if you would like us to send another confirmation email.
           </h2>
 
-          <ng-container *ngIf="(emailVerificationState$ | async) === ('sent' || 'resent')">
+          <ng-container
+            *ngIf="(emailVerificationState$ | async) === ('sent' || 'resent')"
+          >
             <h3 class="resend" *ngIf="( timeToResendingAvailable$ | async ) != 0">
-              You can resend another email in {{ timeToResendingAvailable$ | async }} seconds.
+              You can resend another email in {{ timeToResendingAvailable$ | async }}
+              seconds.
             </h3>
           </ng-container>
 

@@ -187,9 +187,9 @@ function sanitizeCreateAccount(request: createAccountRequest): {
   if (!isDateOfBirth(request?.dateOfBirth)) return { isValid: false };
   if (!isNumber(request?.picturesCount)) return { isValid: false };
   if (!isUniversity(request?.university)) return { isValid: false };
-  if (!isString(request?.gender)) return { isValid: false };
-  if (!isString(request?.sexualPreference)) return { isValid: false };
-  if (!isString(request?.degree)) return { isValid: false };
+  if (!isGender(request?.gender)) return { isValid: false };
+  if (!isSexualPreference(request?.sexualPreference)) return { isValid: false };
+  if (!isDegree(request?.degree)) return { isValid: false };
 
   // optional properties
   if (!isNull(request?.biography) && !isString(request?.biography))

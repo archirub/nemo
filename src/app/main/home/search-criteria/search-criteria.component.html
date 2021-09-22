@@ -1,5 +1,5 @@
 <ion-content>
-  <form class="criteria-container" [formGroup]="searchCriteriaForm">
+  <form class="criteria-container" [formGroup]="form">
     <div id="closeButton" class="exit" (click)="closeAndConfirmChoices()">
       <ion-icon name="close-outline"></ion-icon>
     </div>
@@ -45,7 +45,7 @@
                   <h3 id="university">University</h3>
 
                   <nemo-toggle
-                    #universityslider
+                    #universitySlider
                     [buttonWidth]="17"
                     [fontSize]="3"
                     [selections]="
@@ -77,7 +77,7 @@
                     </ion-select-option>
                   </ion-select-->
                   <nemo-toggle
-                    #degreeslider
+                    #degreeSlider
                     [buttonWidth]="17"
                     [fontSize]="3"
                     [selections]="degreeOptions | nullElementTo: nameOfUnselected"

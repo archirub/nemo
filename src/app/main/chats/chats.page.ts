@@ -31,6 +31,7 @@ export class ChatsPage {
   }
 
   get matches$() {
+    return this.chats$;
     return this.chatboardStore.matches$.pipe(
       map((chatsObject) => this.sortChats(chatsObject))
     );

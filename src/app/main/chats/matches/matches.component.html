@@ -6,11 +6,15 @@
 
 <ion-content>
   <ion-row>
-    <div class="profile" *ngFor="let match of matches; index as j">
-      <img [src]="(chatboardPictures$ | async)[match?.recipient?.uid]" />
+    <div
+      class="profile"
+      *ngFor="let chat of chats; index as j"
+      (click)="goToMessenger(chat?.id)"
+    >
+      <img [src]="(chatboardPictures$ | async)[chat?.recipient?.uid]" />
       <div class="data">
         <ion-icon name="person"></ion-icon>
-        <ion-label>{{ match?.recipient?.name }}</ion-label>
+        <ion-label>{{ chat?.recipient?.name }}</ion-label>
       </div>
     </div>
   </ion-row>

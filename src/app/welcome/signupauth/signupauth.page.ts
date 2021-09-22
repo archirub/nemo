@@ -215,26 +215,34 @@ export class SignupauthPage implements OnInit {
    */
   public async goStraightToEmailVerification(): Promise<void> {
     const user = await this.afAuth.currentUser;
+    const slideIndex = await this.slidesRef.getActiveIndex();
 
     if (!user) return;
 
-    if (this.router.url !== "/welcome/signupauth") {
-      const alert = await this.alertCtrl.create({
-        header: "Email Verification Required",
-        message: `
+    if (this.router.url === "/welcome/signupauth") {
+      if (slideIndex === 2) {
+        console.log("user already on right slide and page for email verification");
+        return;
+      }
+
+      console.log("user on right page but wrong slide for email verification");
+      await this.goToSlide(2);
+      await this.emailService.sendVerificationToUser("sent").toPromise();
+      return this.emailService.listenForVerification().toPromise();
+    }
+
+    console.log("user on wrong page and wrong slide for email verification");
+    const alert = await this.alertCtrl.create({
+      header: "Email Verification Required",
+      message: `
         We have detected that your account doesn't have its email verified yet.
         We will now redirect you to the email verification page for you to finish the procedure.
         `,
-        buttons: ["Okay"],
-      });
-      alert.onDidDismiss().then(() => this.router.navigateByUrl("/welcome/signupauth"));
-      return alert.present();
-    }
-    console.log("going straight to email verification");
+      buttons: ["Okay"],
+    });
+    alert.onDidDismiss().then(() => this.router.navigateByUrl("/welcome/signupauth"));
 
-    await this.goToSlide(2);
-    await this.emailService.sendVerificationToUser("sent").toPromise();
-    await this.emailService.listenForVerification().toPromise();
+    return alert.present();
   }
 
   public navigateToWelcome() {

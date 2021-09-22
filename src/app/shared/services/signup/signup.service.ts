@@ -119,12 +119,16 @@ export class SignupService {
   createFirestoreAccount(): Observable<any> {
     return combineLatest([this.signupData, this.afAuth.user]).pipe(
       take(1),
+      switchMap(async ([dataStored, user]) => {
+        await user?.reload();
+        await user.getIdToken(true); // to refresh the token
+        return [dataStored, user] as [SignupDataHolder, User];
+      }),
       switchMap(([dataStored, user]) => {
         if (!user) {
           console.error("Big mistake right here");
           return of(null);
         }
-        console.log("tsup");
         const creationRequestData: createAccountRequest = {
           firstName: dataStored.firstName,
           picturesCount: dataStored?.pictures?.filter(Boolean).length ?? 0, // counts # of none empty elements
@@ -143,6 +147,8 @@ export class SignupService {
           questions: dataStored.questions,
           socialMediaLinks: dataStored.socialMediaLinks,
         };
+
+        console.log("create account request:", creationRequestData);
 
         return forkJoin([
           of({ pictures: dataStored.pictures, uid: (user as User).uid }),

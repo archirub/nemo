@@ -3,7 +3,7 @@ import { Injectable, NgZone } from "@angular/core";
 import { Router } from "@angular/router";
 
 import { AngularFireAuth } from "@angular/fire/compat/auth";
-import { Plugins } from "@capacitor/core";
+import { Storage } from "@capacitor/core";
 
 import { LoadingOptions, LoadingService } from "@services/loading/loading.service";
 import { AngularFireFunctions } from "@angular/fire/compat/functions";
@@ -38,7 +38,7 @@ export class FirebaseAuthService {
     // calling ngZone.run() is necessary otherwise we will get into trouble with changeDecection
     // back at the welcome page (it seems like it's then not active), which cases problem for example
     // while trying to log back in where the "log in" button doesn't get enabled when the email-password form becomes valid
-    const clearLocalCache = () => Plugins.Storage.clear();
+    const clearLocalCache = () => Storage.clear();
     const clearStores = async () => this.emptyStoresService.emptyStores();
     const logOut = () => this.afAuth.signOut();
 
@@ -61,7 +61,7 @@ export class FirebaseAuthService {
 
     const navigateToWelcome = async () =>
       this.zone.run(() => this.navCtrl.navigateRoot("/welcome"));
-    const clearLocalCache = () => Plugins.Storage.clear();
+    const clearLocalCache = () => Storage.clear();
     const clearStores = async () => this.emptyStoresService.emptyStores();
     const logOut = () => this.afAuth.signOut();
     const deleteAccount = () =>
@@ -188,9 +188,9 @@ export class FirebaseAuthService {
     cancelProcedureChosen: () => Promise<any> = null
   ): Promise<{
     user: User;
-    outcome: "user-reauthenticated" | "user-cancelled" | "auth-failed";
+    outcome: "user-reauthenticated" | "user-canceled" | "auth-failed";
   }> {
-    let outcome: "user-reauthenticated" | "user-cancelled" | "auth-failed";
+    let outcome: "user-reauthenticated" | "user-canceled" | "auth-failed";
 
     const defaultCancelProcedure = () =>
       this.afAuth.signOut().then(() => {

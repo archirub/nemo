@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, Input } from "@angular/core";
-import { ModalController } from "@ionic/angular";
+import { ModalController, NavController } from "@ionic/angular";
 
 import { ChatboardStore } from "@stores/index";
 import { Chat } from "@classes/index";
@@ -17,16 +17,22 @@ import { Observable, Subscription } from "rxjs";
 export class MatchesComponent implements OnInit {
   chatboardPictures$: Observable<pictureHolder>;
 
-  @Input() matches: Chat[];
+  @Input() chats: Chat[];
 
   constructor(
     private modalCtrl: ModalController,
     private chatboardStore: ChatboardStore,
-    private chatboardPicturesService: ChatboardPicturesStore // used in template
+    private chatboardPicturesService: ChatboardPicturesStore, // used in template
+    private navCtrl: NavController
   ) {}
 
   ngOnInit() {
     this.chatboardPictures$ = this.chatboardPicturesService.holder$;
+  }
+
+  async goToMessenger(chatID: String) {
+    await this.modalCtrl.dismiss();
+    return this.navCtrl.navigateForward("main/messenger/" + chatID);
   }
 
   async closeModal() {

@@ -23,7 +23,8 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
   @ViewChild("clear", { read: ElementRef }) clear: ElementRef;
   @ViewChild("grid", { read: ElementRef }) grid: ElementRef;
   // @ViewChild("locationslider") locationHandle: AppToggleComponent;
-  @ViewChild("degreeslider") degreeHandle: AppToggleComponent;
+  @ViewChild("degreeSlider") degreeHandle: AppToggleComponent;
+  @ViewChild("universitySlider") universityHandle: AppToggleComponent;
   @ViewChild("modalSlides") modalSlides: IonSlides;
   @ViewChild("modalSlides", { read: ElementRef }) slidesRef: ElementRef;
   @ViewChild(IonContent) frame: IonContent;
@@ -33,14 +34,17 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
 
   nameOfUnselected = "none";
 
-  universityOptions$: Observable<UniversityName[]>;
   degreeOptions = searchCriteriaOptions.degree.concat(null);
   areaOfStudyOptions = searchCriteriaOptions.areaOfStudy;
   societyCategoryOptions = searchCriteriaOptions.societyCategory;
   interestsOptions = searchCriteriaOptions.interests;
+  get universityOptions$() {
+    return this.universitiesStore.optionsList$.pipe(
+      map((options) => options.concat(null))
+    );
+  }
   // onCampus = searchCriteriaOptions.onCampus
 
-  degreeSelection: string;
   studySelection: string;
   societySelection: string;
   interestSelection: string;
@@ -51,7 +55,7 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
 
   viewEntered: boolean = false;
 
-  searchCriteriaForm: FormGroup;
+  form: FormGroup;
 
   get emptyForm() {
     return new FormGroup({
@@ -69,10 +73,7 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
     private modalCtrl: ModalController,
     private universitiesStore: UniversitiesStore
   ) {
-    this.searchCriteriaForm = this.emptyForm;
-    this.universityOptions$ = this.universitiesStore.optionsList$.pipe(
-      map((options) => options.concat(null))
-    );
+    this.form = this.emptyForm;
   }
 
   ngOnInit() {
@@ -82,7 +83,7 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
 
     this.searchCriteriaSub = this.SCstore.searchCriteria$.subscribe({
       next: (sc) => {
-        this.searchCriteriaForm.patchValue(
+        this.form.patchValue(
           this.searchCriteriaToTemplateFormatting({
             // onCampus: sc.onCampus,
             university: sc.university,
@@ -154,8 +155,10 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
       this.slideUp();
     }
 
+    console.log("uni value is ", this.universityHandle.value);
     // this.searchCriteriaForm.value.onCampus = this.locationHandle.value;
-    this.searchCriteriaForm.value.degree = this.degreeHandle.value;
+    this.form.value.degree = this.degreeHandle.value;
+    this.form.value.university = this.universityHandle.value;
   }
 
   updateCriteria() {
@@ -170,22 +173,24 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
     //   }
     // }
 
-    if (this.degreeHandle.selections.includes(this.searchCriteriaForm.value.degree)) {
-      this.degreeHandle.selectOption(this.searchCriteriaForm.value.degree);
+    if (this.degreeHandle.selections.includes(this.form.value.degree)) {
+      this.degreeHandle.selectOption(this.form.value.degree);
     }
 
-    if (this.areaOfStudyOptions.includes(this.searchCriteriaForm.value.areaOfStudy)) {
-      this.selectReplace(this.searchCriteriaForm.value.areaOfStudy, "areaOfStudy");
+    if (this.universityHandle.selections.includes(this.form.value.university)) {
+      this.universityHandle.selectOption(this.form.value.university);
     }
 
-    if (
-      this.societyCategoryOptions.includes(this.searchCriteriaForm.value.societyCategory)
-    ) {
-      this.selectReplace(this.searchCriteriaForm.value.societyCategory, "society");
+    if (this.areaOfStudyOptions.includes(this.form.value.areaOfStudy)) {
+      this.selectReplace(this.form.value.areaOfStudy, "areaOfStudy");
     }
 
-    if (this.interestsOptions.includes(this.searchCriteriaForm.value.interests)) {
-      this.selectReplace(this.searchCriteriaForm.value.interests, "interests");
+    if (this.societyCategoryOptions.includes(this.form.value.societyCategory)) {
+      this.selectReplace(this.form.value.societyCategory, "society");
+    }
+
+    if (this.interestsOptions.includes(this.form.value.interests)) {
+      this.selectReplace(this.form.value.interests, "interests");
     }
 
     this.checkClear();
@@ -269,7 +274,7 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
         this.studySelection = option;
         this.newFormat(label);
       }
-      this.searchCriteriaForm.value.areaOfStudy = this.studySelection;
+      this.form.value.areaOfStudy = this.studySelection;
     } else if (label === "society") {
       if (this.societySelection === option) {
         this.societySelection = undefined;
@@ -278,7 +283,7 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
         this.societySelection = option;
         this.newFormat(label);
       }
-      this.searchCriteriaForm.value.societyCategory = this.societySelection;
+      this.form.value.societyCategory = this.societySelection;
     } else if (label === "interests") {
       if (this.interestSelection === option) {
         this.interestSelection = undefined;
@@ -287,22 +292,21 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
         this.interestSelection = option;
         this.newFormat(label);
       }
-      this.searchCriteriaForm.value.interests = this.interestSelection;
+      this.form.value.interests = this.interestSelection;
     }
   }
 
   clearSelect() {
     // Clear ion-selects
-    this.degreeSelection = undefined;
 
     this.studySelection = undefined;
-    this.searchCriteriaForm.value.areaOfStudy = undefined;
+    this.form.value.areaOfStudy = undefined;
 
     this.societySelection = undefined;
-    this.searchCriteriaForm.value.societyCategory = undefined;
+    this.form.value.societyCategory = undefined;
 
     this.interestSelection = undefined;
-    this.searchCriteriaForm.value.interests = undefined;
+    this.form.value.interests = undefined;
 
     //Reset formatting of placeholders
     var names = ["areaOfStudy", "society", "interests"];
@@ -310,8 +314,8 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
       this.resetFormat(names[i]);
     }
 
-    this.degreeHandle.selectOption("undergrad");
-    // this.locationHandle.selectOption("Everyone");
+    this.degreeHandle.selectOption(this.nameOfUnselected);
+    this.universityHandle.selectOption(this.nameOfUnselected); // this.locationHandle.selectOption("Everyone");
 
     this.slideUp();
   }
@@ -360,9 +364,9 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
   }
 
   async closeAndConfirmChoices() {
-    console.log(this.searchCriteriaForm.value);
+    console.log(this.form.value);
     await this.SCstore.updateCriteriaStore(
-      this.searchCriteriaToStoreFormatting(this.searchCriteriaForm.value)
+      this.searchCriteriaToStoreFormatting(this.form.value)
     );
     console.log("as;ldkasd");
     await this.SCstore.updateCriteriaOnDatabase();
@@ -372,17 +376,15 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
   searchCriteriaToStoreFormatting(SCForm: FormGroup): SearchCriteria {
     const formattedSC = {};
 
-    Object.entries(this.searchCriteriaForm.value as searchCriteria).forEach(
-      ([key, value]) => {
-        if (value === this.nameOfUnselected) {
-          formattedSC[key] = null;
-        } else if (value === undefined) {
-          formattedSC[key] = null;
-        } else {
-          formattedSC[key] = value;
-        }
+    Object.entries(this.form.value as searchCriteria).forEach(([key, value]) => {
+      if (value === this.nameOfUnselected) {
+        formattedSC[key] = null;
+      } else if (value === undefined) {
+        formattedSC[key] = null;
+      } else {
+        formattedSC[key] = value;
       }
-    );
+    });
     console.log("store formatted", formattedSC);
 
     return formattedSC as SearchCriteria;

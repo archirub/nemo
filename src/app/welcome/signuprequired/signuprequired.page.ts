@@ -63,8 +63,10 @@ export class SignuprequiredPage implements OnInit {
   // OPTIONS
   genderOptions: Gender[] = genderOptions;
   sexualPreferenceOptions: SexualPreference[] = sexualPreferenceOptions;
-  universityOptions$: Observable<UniversityName[]>;
   degreeOptions: Degree[] = searchCriteriaOptions.degree;
+  get universityOptions$(): Observable<UniversityName[]> {
+    return this.universitiesStore.optionsList$;
+  }
 
   maxPictureCount: number = 6; // defines the number of picture boxes in template, as well as is used in logic to save picture picks
   picturesHolder: string[] = Array.from({ length: MAX_PROFILE_PICTURES_COUNT }); // for storing pictures. Separate from rest of form, added to it on form submission
@@ -95,7 +97,6 @@ export class SignuprequiredPage implements OnInit {
 
   ngOnInit() {
     this.universityLogic().subscribe();
-    this.universityOptions$ = this.universitiesStore.optionsList$;
   }
 
   async ionViewWillEnter() {
@@ -182,7 +183,7 @@ export class SignuprequiredPage implements OnInit {
       // IMPORTANT that this is !invalid instead of valid
       var validity = !this.form.get(entry).invalid;
 
-      if (entry === 'dateOfBirth' && this.age < 18) {
+      if (entry === "dateOfBirth" && this.age < 18) {
         this.reqValidatorChecks["dateOfBirth"].style.display = "flex";
         console.log("Not valid, don't slide");
         return;

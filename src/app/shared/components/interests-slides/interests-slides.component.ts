@@ -24,7 +24,13 @@ import { assetsInterestsPath, Interests, searchCriteriaOptions } from "@interfac
 })
 export class InterestSlidesComponent implements OnInit, ControlValueAccessor {
   @Input() listed: boolean = true; //Option to hide the listed interests, automatically shown (false = hidden)
-  @Input() interests: Interests[];
+  _interests: Interests[] = [];
+  @Input() set interests(value: Interests[]) {
+    this._interests = value && Array.isArray(value) ? value : [];
+  }
+  get interests(): Interests[] {
+    return this._interests ?? [];
+  }
   @Output() interestsChange = new EventEmitter<Interests[]>();
 
   pictures = assetsInterestsPath;

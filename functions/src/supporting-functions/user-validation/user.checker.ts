@@ -2,7 +2,7 @@ import {
   additionalEmailsAllowedDocument,
   universitiesAllowedDocument,
 } from "../../../../src/app/shared/interfaces/universities.model";
-import { https } from "firebase-functions";
+import { https, logger } from "firebase-functions";
 import { firestore } from "firebase-admin";
 import { emailIsAllowed } from "../../account-management";
 
@@ -57,10 +57,13 @@ async function strongUserIdentityCheck(context: https.CallableContext): Promise<
   reason?: https.FunctionsErrorCode;
 }> {
   const weakCheck = weakUserIdentityCheck(context);
+  if (!weakCheck.isValid) logger.info("error was weak check");
+
   if (!weakCheck.isValid) return weakCheck;
 
   const emailToCheck = context?.auth?.token?.email as string;
   const isAllowed = await checkEmailIsAllowed(emailToCheck);
+  if (!isAllowed) logger.info("error was email was not allowed");
 
   if (!isAllowed) return { isValid: false, reason: "permission-denied" };
 
@@ -82,13 +85,5 @@ async function checkEmailIsAllowed(emailToCheck: string): Promise<boolean> {
 
   const universityDomains = universitiesAllowed.map((info) => info.emailDomain);
 
-  const isAllowed = emailIsAllowed(
-    emailToCheck,
-    universityDomains,
-    additionalEmailsAllowed
-  );
-
-  if (!isAllowed) return false;
-
-  return true;
+  return emailIsAllowed(emailToCheck, universityDomains, additionalEmailsAllowed);
 }

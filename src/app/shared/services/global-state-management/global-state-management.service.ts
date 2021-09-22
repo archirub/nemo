@@ -1,21 +1,33 @@
 import { EmptyStoresService } from "./empty-stores.service";
 import { Injectable } from "@angular/core";
 import { AlertController } from "@ionic/angular";
-import { ActivatedRoute, NavigationStart, ParamMap, Router } from "@angular/router";
+import { NavigationStart, Router } from "@angular/router";
 
 import { AngularFireAuth } from "@angular/fire/compat/auth";
 import { AngularFirestore } from "@angular/fire/compat/firestore";
 import { Storage } from "@capacitor/core";
 
-import { BehaviorSubject, concat, forkJoin, from, merge, Observable, of } from "rxjs";
+import {
+  BehaviorSubject,
+  concat,
+  forkJoin,
+  from,
+  interval,
+  merge,
+  Observable,
+  of,
+  timer,
+} from "rxjs";
 import {
   concatMap,
+  delay,
   filter,
   first,
   map,
   mergeMap,
   retry,
   switchMap,
+  tap,
 } from "rxjs/operators";
 
 import { OwnPicturesStore } from "@stores/pictures/own-pictures/own-pictures.service";
@@ -97,6 +109,7 @@ export class GlobalStateManagementService {
 
   private globalManagement(): Observable<void> {
     return this.getFirebaseUser().pipe(
+      tap((a) => console.log("start of global management chain", a)),
       switchMap((user) => forkJoin([of(user), this.isUserEmailVerified(user)])),
       switchMap(([user, emailIsVerified]) => {
         const observables$: Observable<any>[] = [];
@@ -193,13 +206,26 @@ export class GlobalStateManagementService {
       this.emptyStoresService.emptyStores(); // to be safe
 
       try {
+        await Storage.clear();
         await user.delete();
         await this.router.navigateByUrl("/welcome");
       } catch (err) {
         if (err?.code === "auth/requires-recent-login") {
           await this.firebaseAuthService.reAuthenticationProcedure(user);
+          await Storage.clear();
           await user.delete();
-          await this.router.navigateByUrl("/welcome");
+
+          await new Promise((resolve) => {
+            const interval = setInterval(async () => {
+              const u = await this.afAuth.currentUser;
+              console.log("this is the current user", u);
+
+              if (!u) {
+                clearInterval(interval);
+                resolve({ user: u });
+              }
+            }, 250);
+          }).then(() => this.router.navigateByUrl("/welcome"));
         }
       }
     };
@@ -213,11 +239,11 @@ export class GlobalStateManagementService {
 
       buttons: [
         {
-          text: "Abort profile",
+          text: "Abort",
           handler: abortProfileProcedure,
         },
         {
-          text: "Finish profile",
+          text: "Finish",
           handler: finishProfileProcedure,
         },
       ],

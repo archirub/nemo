@@ -14,9 +14,9 @@
         <div>
           <ion-input
             type="email"
-            placeholder="first.last@uni.ac.uk"
+            placeholder="myUniversityEmail"
             formControlName="email"
-          ></ion-input>  
+          ></ion-input>
         </div>
       </div>
 
@@ -26,30 +26,26 @@
             type="password"
             placeholder="myPassword"
             formControlName="password"
-          ></ion-input>  
+          ></ion-input>
         </div>
       </div>
 
-        <div class="flexend-row">
-          <ion-button
-            expand="block"
-            fill="clear"
-            shape="round"
-            debounceClick
-            (debounceClick)="onLogin()"
-            [disabled]="(loginForm.statusChanges | async) !== 'VALID'"
-            >Enter Nemo</ion-button
-          >
-        </div>
-        <div class="flexend-row">
-          <ion-button
-            expand="block"
-            fill="clear"
-            shape="round"
-            (click)="returnToLanding()"
-            >Go back</ion-button
-          >
-        </div>
+      <div class="flexend-row">
+        <ion-button
+          expand="block"
+          fill="clear"
+          shape="round"
+          debounceClick
+          (debounceClick)="onLogin()"
+          [disabled]="(loginForm.statusChanges | async) !== 'VALID'"
+          >Enter Nemo</ion-button
+        >
       </div>
+      <div class="flexend-row">
+        <ion-button expand="block" fill="clear" shape="round" (click)="returnToLanding()"
+          >Go back</ion-button
+        >
+      </div>
+    </div>
   </form>
 </ion-content>

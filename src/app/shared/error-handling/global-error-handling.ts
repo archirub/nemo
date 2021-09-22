@@ -1,11 +1,12 @@
-import { ErrorHandler, Injectable } from "@angular/core";
+import { ErrorHandler, Injectable, NgZone } from "@angular/core";
 import { FirebaseError } from "@firebase/util";
+import { AlertController } from "@ionic/angular";
 
 @Injectable()
 export class GlobalErrorHandler implements ErrorHandler {
-  constructor() {}
+  constructor(private alertCtrl: AlertController, private zone: NgZone) {}
 
-  handleError(error: any) {
+  async handleError(error: any) {
     // Check if it's an error from an HTTP response
     // if (!(error instanceof HttpErrorResponse)) {
     //   error = error.rejection; // get the error object
@@ -16,6 +17,22 @@ export class GlobalErrorHandler implements ErrorHandler {
     //     error?.status
     //   )
     // );
+
+    const err = new Error();
+
+    await this.zone.run(async () => {
+      const alert = await this.alertCtrl.create({
+        message: `The error is
+        ${error} 
+        
+        and the stack is
+
+        ${err?.stack}`,
+        buttons: ["Okay"],
+      });
+
+      await alert.present();
+    });
 
     if (error instanceof FirebaseError) {
       console.error(
