@@ -24,21 +24,23 @@ export class ChatsPage {
 
   TOP_SCROLL_SPEED = 100;
 
-  numberOfChats$: Observable<number>;
-  chats$: Observable<Chat[]>;
-  matches$: Observable<Chat[]>;
-
-  constructor(private router: Router, private chatboardStore: ChatboardStore) {
-    this.chats$ = this.chatboardStore.chats$.pipe(
+  get chats$() {
+    return this.chatboardStore.chats$.pipe(
       map((chatsObject) => this.sortChats(chatsObject))
     );
-
-    this.matches$ = this.chatboardStore.matches$.pipe(
-      map((chatsObject) => this.sortChats(chatsObject))
-    );
-
-    this.numberOfChats$ = this.chats$.pipe(map((chats) => chats.length));
   }
+
+  get matches$() {
+    return this.chatboardStore.matches$.pipe(
+      map((chatsObject) => this.sortChats(chatsObject))
+    );
+  }
+
+  get numberOfChats$() {
+    return this.chats$.pipe(map((chats) => chats.length));
+  }
+
+  constructor(private router: Router, private chatboardStore: ChatboardStore) {}
 
   ngAfterViewInit() {
     this.fishSwimAnimation = FishSwimAnimation(this.fish);
@@ -46,7 +48,7 @@ export class ChatsPage {
   }
 
   stopAnimation() {
-    this.fishSwimAnimation.destroy();
+    this.fishSwimAnimation?.destroy();
   }
 
   scrollToTop() {

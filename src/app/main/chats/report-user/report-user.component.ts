@@ -1,5 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 import { UserReport } from "@interfaces/user-report.models";
+import { ModalController } from "@ionic/angular";
 import { UserReportingService } from "@services/user-reporting/user-reporting.service";
 
 @Component({
@@ -15,9 +16,14 @@ export class ReportUserComponent implements OnInit {
 
   report: UserReport;
 
-  constructor(private userReportingService: UserReportingService) {}
+  constructor(
+    private userReportingService: UserReportingService,
+    private modalCtrl: ModalController
+  ) {}
 
-  closeModal() {}
+  closeModal() {
+    this.modalCtrl.dismiss();
+  }
 
   reportUser() {
     this.userReportingService.reportUser(this.report);

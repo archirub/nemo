@@ -39,7 +39,7 @@ import { DragDropModule } from "@angular/cdk/drag-drop";
     AngularFireStorageModule,
     PipesModule,
     DirectivesModule,
-    DragDropModule
+    DragDropModule,
   ],
   providers: [
     StatusBar,

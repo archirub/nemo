@@ -1,13 +1,14 @@
 import { Injectable } from "@angular/core";
 import { AngularFirestore } from "@angular/fire/compat/firestore";
 
-import { BehaviorSubject, Observable } from "rxjs";
+import { BehaviorSubject, forkJoin, from, Observable } from "rxjs";
 
 import { searchCriteria, Criterion } from "@interfaces/search-criteria.model";
 import { SearchCriteria, copyClassInstance } from "@classes/index";
 import { privateProfileFromDatabase, profileFromDatabase } from "@interfaces/index";
 import { FormatService } from "@services/format/format.service";
-import { map } from "rxjs/operators";
+import { exhaustMap, filter, map, take, tap, withLatestFrom } from "rxjs/operators";
+import { AngularFireAuth } from "@angular/fire/compat/auth";
 
 @Injectable({
   providedIn: "root",
@@ -16,7 +17,11 @@ export class SearchCriteriaStore {
   private searchCriteria: BehaviorSubject<SearchCriteria>;
   public readonly searchCriteria$: Observable<SearchCriteria>;
 
-  constructor(private firestore: AngularFirestore, private format: FormatService) {
+  constructor(
+    private firestore: AngularFirestore,
+    private format: FormatService,
+    private afAuth: AngularFireAuth
+  ) {
     this.searchCriteria = new BehaviorSubject<SearchCriteria>(this.emptySearchCriteria());
     this.searchCriteria$ = this.searchCriteria.asObservable();
   }
@@ -30,19 +35,46 @@ export class SearchCriteriaStore {
     this.searchCriteria.next(this.emptySearchCriteria());
   }
 
-  public initalizeThroughCurrentUserStore(SC: SearchCriteria) {
+  public async initalizeThroughCurrentUserStore(SC: SearchCriteria) {
     if (!SC) return console.error("No search criteria provided.");
-    this.addCriteria(SC);
+    await this.updateCriteriaStore(SC);
   }
 
   /** Adds criteria to search */
-  public addCriteria(newCriteria: SearchCriteria): void {
-    let currentCriteria: SearchCriteria = this.searchCriteria.getValue();
+  public updateCriteriaStore(newCriteria: SearchCriteria): Promise<void> {
+    return this.searchCriteria$
+      .pipe(
+        take(1),
+        map((currentSC) => {
+          for (const [criterion, value] of Object.entries(newCriteria)) {
+            currentSC[criterion] = value;
+          }
+          this.searchCriteria.next(currentSC);
+        })
+      )
+      .toPromise();
+  }
 
-    for (const [criterion, value] of Object.entries(newCriteria)) {
-      currentCriteria[criterion] = value;
-    }
-    this.searchCriteria.next(currentCriteria);
+  public async updateCriteriaOnDatabase(): Promise<void> {
+    const user = await this.afAuth.currentUser;
+
+    if (!user) return console.log("no user");
+
+    return this.searchCriteria$
+      .pipe(
+        take(1),
+        exhaustMap((SC) =>
+          this.firestore
+            .collection("profiles")
+            .doc(user.uid)
+            .collection("private")
+            .doc("private")
+            .update({
+              latestSearchCriteria: this.format.searchCriteriaClassToDatabase(SC),
+            })
+        )
+      )
+      .toPromise();
   }
 
   /** Removes all criterion listed in array */

@@ -16,7 +16,7 @@ import {
   LoadingController,
 } from "@ionic/angular";
 import { AngularFireAuth } from "@angular/fire/compat/auth";
-import { ActivatedRoute, ParamMap, Router } from "@angular/router";
+import { ActivatedRoute, ParamMap } from "@angular/router";
 
 import { ReportUserComponent } from "../report-user/report-user.component";
 
@@ -140,7 +140,6 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
     private userReporting: UserReportingService,
     private afAuth: AngularFireAuth,
     private currentUser: CurrentUserStore,
-    private router: Router,
     private host: ElementRef,
     private loadingCtrl: LoadingController,
     private changeDetectionRef: ChangeDetectorRef
@@ -434,7 +433,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
   }
 
   backToChatboard(): void {
-    this.router.navigateByUrl("/main/tabs/chats");
+    this.navCtrl.navigateBack("/main/tabs/chats");
   }
 
   ngOnDestroy() {

@@ -71,7 +71,7 @@ export class CurrentUserStore {
         return forkJoin(profileParts$);
       }),
 
-      map(([profile, privateProfile, infoFromMatchData]) => {
+      switchMap(async ([profile, privateProfile, infoFromMatchData]) => {
         const successResponse: {
           profileSuccess: boolean;
           privateProfileSuccess: boolean;
@@ -92,7 +92,7 @@ export class CurrentUserStore {
           privateProfile?.latestSearchCriteria
         );
 
-        this.SCstore.initalizeThroughCurrentUserStore(latestSearchCriteria);
+        await this.SCstore.initalizeThroughCurrentUserStore(latestSearchCriteria);
 
         const user: AppUser = new AppUser(
           profile?.uid,

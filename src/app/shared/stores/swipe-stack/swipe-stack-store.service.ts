@@ -21,7 +21,11 @@ import { Profile, SearchCriteria } from "@classes/index";
 // store imports written this way to avoid circular dependency
 import { SwipeOutcomeStore } from "@stores/swipe-outcome/swipe-outcome-store.service";
 import { SearchCriteriaStore } from "@stores/search-criteria/search-criteria-store.service";
-import { generateSwipeStackResponse, profileFromDatabase } from "@interfaces/index";
+import {
+  generateSwipeStackRequest,
+  generateSwipeStackResponse,
+  profileFromDatabase,
+} from "@interfaces/index";
 import { AngularFireStorage } from "@angular/fire/compat/storage";
 // import { StackPicturesService } from "@services/pictures/stack-pictures/stack-pictures.service";
 
@@ -155,7 +159,8 @@ export class SwipeStackStore {
   private fetchUIDs(SC: SearchCriteria): Observable<string[]> {
     return of(this.format.searchCriteriaClassToDatabase(SC)).pipe(
       map((SC) => {
-        return { SearchCriteria: SC };
+        const request: generateSwipeStackRequest = { searchCriteria: SC };
+        return request;
       }),
       exhaustMap(
         (request) =>

@@ -26,6 +26,7 @@ import {
 
 import { TabElementRefService } from "src/app/main/tab-menu/tab-element-ref.service";
 import { SwipeCardComponent } from "./swipe-card/swipe-card.component";
+import { AngularFirestore } from "@angular/fire/compat/firestore";
 
 @Component({
   selector: "app-home",
@@ -67,7 +68,8 @@ export class HomePage implements OnInit, OnDestroy {
     private currentUserStore: CurrentUserStore,
     private modalCtrl: ModalController,
     private tabElementRef: TabElementRefService,
-    private firebaseAuth: FirebaseAuthService
+    private firebaseAuth: FirebaseAuthService,
+    private fs: AngularFirestore
   ) {
     this.onResize();
   }

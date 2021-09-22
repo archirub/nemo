@@ -6,7 +6,7 @@ import { FormControl, FormGroup } from "@angular/forms";
 import { Observable, Subscription } from "rxjs";
 
 import { SearchCriteriaStore } from "@stores/search-criteria/search-criteria-store.service";
-import { searchCriteriaOptions } from "@interfaces/search-criteria.model";
+import { searchCriteria, searchCriteriaOptions } from "@interfaces/search-criteria.model";
 import { SearchCriteria } from "@classes/index";
 
 import { AppToggleComponent } from "@components/index";
@@ -82,14 +82,16 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
 
     this.searchCriteriaSub = this.SCstore.searchCriteria$.subscribe({
       next: (sc) => {
-        this.searchCriteriaForm.patchValue({
-          // onCampus: sc.onCampus,
-          university: sc.university,
-          degree: sc.degree,
-          areaOfStudy: sc.areaOfStudy,
-          societyCategory: sc.societyCategory,
-          interests: sc.interests,
-        });
+        this.searchCriteriaForm.patchValue(
+          this.searchCriteriaToTemplateFormatting({
+            // onCampus: sc.onCampus,
+            university: sc.university,
+            degree: sc.degree,
+            areaOfStudy: sc.areaOfStudy,
+            societyCategory: sc.societyCategory,
+            interests: sc.interests,
+          })
+        );
       },
     });
   }
@@ -359,7 +361,45 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
 
   async closeAndConfirmChoices() {
     console.log(this.searchCriteriaForm.value);
-    this.SCstore.addCriteria(this.searchCriteriaForm.value);
-    return await this.modalCtrl.dismiss();
+    await this.SCstore.updateCriteriaStore(
+      this.searchCriteriaToStoreFormatting(this.searchCriteriaForm.value)
+    );
+    console.log("as;ldkasd");
+    await this.SCstore.updateCriteriaOnDatabase();
+    await this.modalCtrl.dismiss();
+  }
+
+  searchCriteriaToStoreFormatting(SCForm: FormGroup): SearchCriteria {
+    const formattedSC = {};
+
+    Object.entries(this.searchCriteriaForm.value as searchCriteria).forEach(
+      ([key, value]) => {
+        if (value === this.nameOfUnselected) {
+          formattedSC[key] = null;
+        } else if (value === undefined) {
+          formattedSC[key] = null;
+        } else {
+          formattedSC[key] = value;
+        }
+      }
+    );
+    console.log("store formatted", formattedSC);
+
+    return formattedSC as SearchCriteria;
+  }
+
+  searchCriteriaToTemplateFormatting(SC: searchCriteria) {
+    const formattedSC = {};
+
+    Object.entries(SC).forEach(([key, value]) => {
+      if (value == null && ["degree", "university"].includes(key)) {
+        formattedSC[key] = this.nameOfUnselected;
+      } else {
+        formattedSC[key] = value;
+      }
+    });
+    console.log("template formatted", formattedSC);
+
+    return formattedSC;
   }
 }

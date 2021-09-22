@@ -4,27 +4,34 @@ service cloud.firestore {
     match /{allPaths=**} {
       allow read, write: if isGod()
     }
+    
 
     match /profiles/{profileID} {
       allow read: if userIsValid();
       allow update: if userIsValid() 
-                    && isDocumentOwner(profileID) 
-                    && onlyPropertiesModifiedAre(["pictureCount"])
-                    && request.resource.data.pictureCount is number;
+                    && profileWriteIsValid(profileID)
+                    
 
-      match /private/{documentName} {
-        allow read, write: if documentName == "private" 
-                            && isDocumentOwner(profileID);
+      match /private/private {
+        allow read: if userIsValid() 
+                    && isDocumentOwner(profileID);
+        allow update: if userIsValid() 
+                      && isDocumentOwner(profileID)
+                      && privateProfileWriteIsValid();
+        
       }
     }
 
     match /chats/{chatID} {
       allow read: if userIsValid() 
-                  // && isPartOfChat()
+                  && isPartOfChat()
 
       match /messages/{messageID} {
-        allow read, create: if userIsValid() 
-                            && isPartOfChat()
+        allow read: if userIsValid() 
+                    && isPartOfChat()
+        allow create: if userIsValid()
+                      && messageWriteIsValid(request.resource.data)
+
       }
     }
 
@@ -32,6 +39,35 @@ service cloud.firestore {
       allow read;
     }
   }
+}
+
+function isGod() {
+  return request.auth.token.email in ["archibald.ruban@gmail.com"]
+}
+
+function userIsValid() {
+  return isAuthenticated() && emailIsAllowed() && emailIsVerified()
+}
+
+function profileWriteIsValid(profileID) {
+      return isDocumentOwner(profileID) 
+              && onlyPropertiesModifiedAre(["pictureCount"])
+              && request.resource.data.pictureCount is number;
+    }
+
+function messageWriteIsValid(msg) {
+  return msg.keys().hasOnly(["uids", "senderID", "time", "content"])
+        && msg.keys().hasAll(["uids", "senderID", "time", "content"])
+        && request.auth.uid in msg.uids
+        && (msg.uids.size() == 2 && msg.uids[0] is string && msg.uids[1] is string)
+        && msg.senderID == request.auth.uid
+        && msg.time is timestamp
+        && msg.content is string
+}
+
+function privateProfileWriteIsValid() {
+  return onlyPropertiesModifiedAre(["latestSearchCriteria"])
+         && isValidSearchCriteria(request.resource.data["latestSearchCriteria"])
 }
 
 function onlyPropertiesModifiedAre(keys) {
@@ -44,14 +80,6 @@ function isDocumentOwner(docID) {
 
 function isPartOfChat() {
   return request.auth.uid in resource.data.uids 
-}
-
-function isGod() {
-  return request.auth.token.email in ["archibald.ruban@gmail.com"]
-}
-
-function userIsValid() {
-  return isAuthenticated() && emailIsAllowed() && emailIsVerified()
 }
 
 // not used directly, for userIsValid()
@@ -70,4 +98,18 @@ function emailIsAllowed() {
 function emailIsVerified() {
   return request.auth.token.email_verified == true
 }
+
+// not used directly, used in privateProfileWriteIsValid()
+function isValidSearchCriteria(SC) {
+  return SC.keys().hasOnly(["university", "degree", "societyCategory", "areaOfStudy", "interests"])
+        && SC.keys().hasAll(["university", "degree", "societyCategory", "areaOfStudy", "interests"])
+        && (SC.university is string || SC.university == null)
+        && (SC.degree is string || SC.degree == null)
+        && (SC.societyCategory is string || SC.societyCategory == null)
+        && (SC.areaOfStudy is string || SC.areaOfStudy == null)
+        && (SC.interests is string || SC.interests == null)
+
+}
+
+
 

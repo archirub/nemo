@@ -44,7 +44,6 @@ export class FormatService {
   }
 
   public searchCriteriaClassToDatabase(searchCriteria: SearchCriteria): searchCriteria {
-    if (!searchCriteria) return;
     const university = searchCriteria.university;
     const areaOfStudy = searchCriteria.areaOfStudy;
     const degree = searchCriteria.degree;
@@ -52,6 +51,14 @@ export class FormatService {
     const interests = searchCriteria.interests;
     // const onCampus = searchCriteria.onCampus;
 
+    console.log("this is the vibes", {
+      university,
+      areaOfStudy,
+      degree,
+      societyCategory,
+      interests,
+      // onCampus,
+    });
     return {
       university,
       areaOfStudy,

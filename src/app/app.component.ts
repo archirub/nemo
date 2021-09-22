@@ -8,7 +8,7 @@ import { ReplaySubject, Subscription } from "rxjs";
 import { GlobalStateManagementService } from "@services/global-state-management/global-state-management.service";
 import { routerInitListenerService } from "@services/global-state-management/initial-url.service";
 import { ConnectionService } from "@services/connection/connection.service";
-import { OtherProfilesStore } from "@stores/index";
+import { OtherProfilesStore, SearchCriteriaStore } from "@stores/index";
 
 @Component({
   selector: "app-root",
@@ -24,14 +24,15 @@ export class AppComponent implements OnDestroy, OnInit {
     private GlobalStateManagement: GlobalStateManagementService,
     private routerInitListener: routerInitListenerService, // don't remove, used in template
     private connectionService: ConnectionService,
-    private otherProfileStore: OtherProfilesStore
+    private otherProfileStore: OtherProfilesStore,
+    private SCStore: SearchCriteriaStore
   ) {
     this.initializeApp();
   }
 
   ngOnInit() {
     this.afAuth.authState.subscribe((a) => console.log("change in authstate: ", a));
-    console.log("array", [][0]);
+    this.SCStore.searchCriteria$.subscribe((a) => console.log("current SC", a));
   }
 
   ngOnDestroy(): void {
