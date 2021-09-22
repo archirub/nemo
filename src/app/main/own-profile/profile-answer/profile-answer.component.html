@@ -22,6 +22,7 @@
     <ion-textarea
       #answerInput
       autoGrow="true"
+      maxlength="70"
       [ngModel]="questionAndAnswer?.answer"
       (ngModelChange)="onAnswerChange($event)"
     ></ion-textarea>

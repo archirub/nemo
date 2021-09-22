@@ -8,7 +8,13 @@ ion-grid {
     width: 100%;
 }
 
+ion-col {
+    display: flex;
+    justify-content: center;
+}
+
 ion-item {
+    width: 70vw;
     --padding-start: 0;
 }
 
@@ -33,12 +39,28 @@ ion-item {
 }
 
 .flexstart-col {
+    top: 40vh;
     position: absolute;
     margin-top: 2vh;
+    width: 100vw;
+}
+
+.flexend-row {
+    display: flex;
+    justify-content: center;
     width: 100vw;
 }
 
 ion-button {
     --ripple-color: transparent;
     text-transform: none;
+}
+
+ion-input {
+    text-align: center;
+    --padding-start: 0;
+    --padding-end: 0;
+    border-bottom: solid 1px var(--ion-color-light-shade);
+    margin-bottom: 2vh;
+    width: 70vw;
 }

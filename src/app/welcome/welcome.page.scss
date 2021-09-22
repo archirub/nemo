@@ -96,6 +96,7 @@ interests-slides {
   position: absolute;
 
   &-icon {
+    display: none;
     border: solid 3px var(--ion-color-primary-tint);
     border-radius: 50%;
     color: var(--ion-color-primary);

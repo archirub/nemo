@@ -126,8 +126,6 @@ export class QuestionSlidesComponent implements OnInit, ControlValueAccessor {
     });
 
     this.availableQuestionsMap[this.questionArray.length] = arrayToPush;
-
-    console.log(this.availableQuestionsMap);
   }
 
   /**
@@ -164,6 +162,8 @@ export class QuestionSlidesComponent implements OnInit, ControlValueAccessor {
     ]);
 
     this.onChange(this.value);
+
+    this.updateDeleteButton(this.counter - 1);
   }
 
   deleteQuestion(i) {
@@ -209,7 +209,7 @@ export class QuestionSlidesComponent implements OnInit, ControlValueAccessor {
 
     // Show delete button only if a question has been selected, answer not necessary
     // Can't delete first slide, otherwise UI disappears lol
-    if (typeof this.questionArray[i] === "string" && i != 0) {
+    if (i != 0) {
       deleteButton.style.display = "block";
     } else {
       deleteButton.style.display = "none";

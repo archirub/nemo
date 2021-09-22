@@ -231,7 +231,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
     //Add styles to the message bar (it is inaccessible in shadowDOM)
     let el = await this.searchBar.getInputElement();
     let styles = {
-      border: "solid 1px var(--ion-color-light-shade)",
+      border: "solid 1px var(--ion-color-light-tint)",
       borderRadius: "25px",
       paddingInlineStart: "10px",
       paddingInlineEnd: "35px",

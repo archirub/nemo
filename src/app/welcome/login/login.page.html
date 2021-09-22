@@ -1,6 +1,5 @@
 <ion-content>
   <div class="center">
-    <img #fish src="/assets/nemo.png" class="fish" />
     <img src="/assets/signup/nemo-icon-orange.png" class="logo" />
   </div>
 
@@ -10,33 +9,27 @@
   </div-->
 
   <form [formGroup]="loginForm">
-    <ion-grid>
-      <ion-row>
-        <ion-col size="12">
-          <ion-item>
-            <ion-label>University Email</ion-label>
-            <ion-input
-              type="email"
-              placeholder="first.last@ucl.ac.uk"
-              formControlName="email"
-            ></ion-input>
-          </ion-item>
-        </ion-col>
-      </ion-row>
+    <div class="flexstart-col">
+      <div class="flexend-row">
+        <div>
+          <ion-input
+            type="email"
+            placeholder="first.last@uni.ac.uk"
+            formControlName="email"
+          ></ion-input>  
+        </div>
+      </div>
 
-      <ion-row>
-        <ion-col size="12">
-          <ion-item>
-            <ion-label>Password</ion-label>
-            <ion-input
-              type="password"
-              placeholder="myPassword"
-              formControlName="password"
-            ></ion-input> </ion-item
-        ></ion-col>
-      </ion-row>
+      <div class="flexend-row">
+        <div>
+          <ion-input
+            type="password"
+            placeholder="myPassword"
+            formControlName="password"
+          ></ion-input>  
+        </div>
+      </div>
 
-      <div class="flexstart-col">
         <div class="flexend-row">
           <ion-button
             expand="block"
@@ -58,6 +51,5 @@
           >
         </div>
       </div>
-    </ion-grid>
   </form>
 </ion-content>

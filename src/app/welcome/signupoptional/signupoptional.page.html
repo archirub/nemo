@@ -45,7 +45,7 @@
                 <div>
                   <ion-input
                     type="text"
-                    maxlength="20"
+                    maxlength="15"
                     placeholder="Course"
                     formControlName="course"
                   ></ion-input>
@@ -54,7 +54,7 @@
             </div>
           </div>
 
-          <p class="tip">Maximum 20 characters</p>
+          <p class="tip">Maximum 15 characters</p>
 
           <div class="skipdiv">
             <p class="tip-center">These details are optional and can be changed later.</p>
@@ -186,7 +186,6 @@
             ></interests-slides> -->
 
             <div class="skipdiv-multiple">
-              <p class="tip-center">You can choose a maximum of three interests.</p>
               <p class="tip-center">
                 These details are optional and can be changed later.
               </p>
@@ -242,7 +241,7 @@
                 <ion-button (click)="unlockAndSlideToNext()">Skip</ion-button>
               </div>
 
-              <ion-button class="next-slide scroll" (click)="unlockAndSlideToNext()">
+              <ion-button class="next-slide scroll" (click)="onSubmit()">
                 <ion-icon name="chevron-forward-outline"></ion-icon>
               </ion-button>
             </div>
@@ -250,7 +249,7 @@
         </div>
       </ion-slide>
 
-      <ion-slide>
+      <!--ion-slide>
         <div class="personal-pref">
           <div class="flexend-col container">
             <div class="question">
@@ -285,7 +284,7 @@
             </div>
           </div>
         </div>
-      </ion-slide>
+      </ion-slide-->
     </ion-slides>
   </form>
 </ion-content>

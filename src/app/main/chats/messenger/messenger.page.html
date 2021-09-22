@@ -88,7 +88,6 @@
             <ion-searchbar
               [(ngModel)]="latestChatInput"
               #searchBar
-              animated
               showCancelButton="never"
               searchIcon="none"
               placeholder=""
@@ -101,7 +100,7 @@
                 id="sendButton"
                 (click)="sendMessage().subscribe()"
               >
-                <ion-icon name="send"></ion-icon>
+                <ion-icon name="arrow-forward-circle"></ion-icon>
               </ion-button>
             </ion-searchbar>
           </ion-toolbar>

@@ -148,8 +148,7 @@ ion-button.back-button {
 }
 
 .ownMessage {
-  background: var(--ion-color-primary);
-  opacity: 0.9;
+  background: rgba(#F07167, 0.8);
   color: #000;
   text-align: left;
   align-items: right;
@@ -160,7 +159,7 @@ ion-button.back-button {
 }
 
 .notOwnMessage {
-  background: var(--ion-color-light-shade);
+  background: var(--ion-color-light-tint);
   color: #000;
   text-align: left;
   margin-right: 0px;

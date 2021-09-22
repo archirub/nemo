@@ -16,15 +16,13 @@ ion-slide {
     border-radius: 10px;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 10px 20px -10px;
+    box-shadow: 0 10px 10px -10px;
     background: #FFF;
     border-radius: 10px;
 }
 
 ion-select {
     font-size: 3vh;
-    font-weight: bold;
-    border-bottom: 1px solid var(--ion-color-medium-shade);
     width: 100%;
     margin: 2vh 0;
     padding-left: 0;

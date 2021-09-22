@@ -6,6 +6,18 @@
   >Activate swipe stack (dev)</ion-button
 >
 
+<div *ngIf="(this.swipeProfiles$ | async).length < 1" class="noSwipes">
+  <div class="overlap">
+    <p>
+      Sorry, looks like your swipe stack is empty. Come back later!
+    </p>
+  </div>
+
+  <div class="overlap">
+    <img src="/assets/nemo.png" />
+  </div>
+</div>
+
 <div id="catchEls">
   <div #pic1 class="picholder left"></div>
   <div #pic2 class="picholder right"></div>

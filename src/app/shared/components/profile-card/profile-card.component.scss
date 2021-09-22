@@ -291,6 +291,7 @@ ion-slides {
 .sticky {
   position: fixed;
   width: 92.8vw; //this should be okay now
+  height: 12.5vh;
   background-color: #FBFBFB;
   z-index: 100;
   border-bottom-left-radius: 20px;

@@ -72,6 +72,7 @@ export class SignuprequiredPage implements OnInit {
   slidesLeft: number;
 
   age: number = 0;
+  minDOB: Date;
 
   // Getting these dynamically would be absolutely amazing, not sure how to however
   slideIndexes: { [k in keyof SignupRequired]: number } = {
@@ -133,6 +134,8 @@ export class SignuprequiredPage implements OnInit {
    * THIS SHOULD BE USED ON THE NEXT SLIDE BUTTONS
    **/
   validateAndSlide(entry: string | string[]) {
+    let falseCount = 0; // Count how many are invalid
+
     const policyCheckMsg = document.getElementById("policiesCheck");
 
     Object.values(this.reqValidatorChecks).forEach(
@@ -141,9 +144,6 @@ export class SignuprequiredPage implements OnInit {
     policyCheckMsg.style.display = "none";
 
     if (typeof entry === "object") {
-      // Checking multiple validators
-      let falseCount = 0; // Count how many are invalid
-
       //Check for policy boxes, these are not checked against form
       if (entry.includes("policies")) {
         const checks = [this.tcbox.checked, this.ppbox.checked];
@@ -181,6 +181,12 @@ export class SignuprequiredPage implements OnInit {
     } else {
       // IMPORTANT that this is !invalid instead of valid
       var validity = !this.form.get(entry).invalid;
+
+      if (entry === 'dateOfBirth' && this.age < 18) {
+        this.reqValidatorChecks["dateOfBirth"].style.display = "flex";
+        console.log("Not valid, don't slide");
+        return;
+      }
 
       if (validity === true) {
         Object.values(this.reqValidatorChecks).forEach(
