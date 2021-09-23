@@ -1,5 +1,5 @@
 import { Chat } from "../../../classes/chat.class";
-import { Injectable } from "@angular/core";
+import { Injectable, Renderer2, RendererFactory2 } from "@angular/core";
 import { AngularFireStorage } from "@angular/fire/compat/storage";
 import { BehaviorSubject, combineLatest, forkJoin, from, Observable, of } from "rxjs";
 import {
@@ -40,7 +40,14 @@ export class ChatboardPicturesStore {
 
   private hasNoChats: boolean = false;
 
-  constructor(private afStorage: AngularFireStorage) {}
+  private renderer: Renderer2;
+
+  constructor(
+    private afStorage: AngularFireStorage,
+    private rendererFactory: RendererFactory2
+  ) {
+    this.renderer = this.rendererFactory.createRenderer(null, null);
+  }
 
   /**
    * Gotta subscribe to this to activate the chain of logic that fills the store etc.
@@ -216,8 +223,8 @@ export class ChatboardPicturesStore {
       const context = canvas.getContext("2d");
       const img = document.createElement("img");
 
-      canvas.style.width = width.toString() + "px";
-      canvas.style.height = height.toString() + "px";
+      this.renderer.setStyle(canvas, "width", width.toString() + "px");
+      this.renderer.setStyle(canvas, "height", height.toString() + "px");
 
       img.src = base64Picture;
       img.onload = function () {

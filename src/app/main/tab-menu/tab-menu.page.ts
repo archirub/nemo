@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild } from "@angular/core";
+import { Component, ElementRef, OnInit, Renderer2, ViewChild } from "@angular/core";
 import { IonTabs } from "@ionic/angular";
 
 import { TabElementRefService } from "./tab-element-ref.service";
@@ -14,7 +14,7 @@ export class TabMenuPage implements OnInit {
   @ViewChild("active", { read: ElementRef }) active: ElementRef;
   @ViewChild("inactive", { read: ElementRef }) inactive: ElementRef;
 
-  constructor(private tabElementRef: TabElementRefService) {}
+  constructor(private tabElementRef: TabElementRefService, private renderer: Renderer2) {}
 
   ngOnInit() {}
 
@@ -24,15 +24,15 @@ export class TabMenuPage implements OnInit {
   }
 
   colorFish() {
-    this.active.nativeElement.style.display = "none";
-    this.inactive.nativeElement.style.display = "none";
+    this.renderer.setStyle(this.active.nativeElement, "display", "none");
+    this.renderer.setStyle(this.inactive.nativeElement, "display", "none");
 
     var selected = this.tabs.getSelected();
 
     if (selected === "home") {
-      this.active.nativeElement.style.display = "block";
+      this.renderer.setStyle(this.active.nativeElement, "display", "block");
     } else {
-      this.inactive.nativeElement.style.display = "block";
+      this.renderer.setStyle(this.inactive.nativeElement, "display", "block");
     }
   }
 }

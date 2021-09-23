@@ -1,5 +1,12 @@
 import { UniversitiesStore } from "@stores/universities/universities.service";
-import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from "@angular/core";
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  ViewChild,
+  ElementRef,
+  Renderer2,
+} from "@angular/core";
 import { IonSlides, IonContent, ModalController } from "@ionic/angular";
 import { FormControl, FormGroup } from "@angular/forms";
 
@@ -71,7 +78,8 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
   constructor(
     private SCstore: SearchCriteriaStore,
     private modalCtrl: ModalController,
-    private universitiesStore: UniversitiesStore
+    private universitiesStore: UniversitiesStore,
+    private renderer: Renderer2
   ) {
     this.form = this.emptyForm;
   }
@@ -124,17 +132,23 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
   }
 
   slideDown() {
-    this.options.nativeElement.style.transform = `translateY(${this.clearButtonHeight}px)`;
-    this.options.nativeElement.style.transition = "0.4s ease-in-out";
-    this.grid.nativeElement.style.height = `${
-      this.gridHeight + this.clearButtonHeight + 20
-    }px`;
+    this.renderer.setStyle(
+      this.options.nativeElement,
+      "transform",
+      `translateY(${this.clearButtonHeight}px)`
+    );
+    this.renderer.setStyle(this.options.nativeElement, "transition", "0.4s ease-in-out");
+    this.renderer.setStyle(
+      this.grid.nativeElement,
+      "height",
+      `${this.gridHeight + this.clearButtonHeight + 20}px`
+    );
   }
 
   slideUp() {
-    this.options.nativeElement.style.transform = `translateY(0px)`;
-    this.options.nativeElement.style.transition = "0.4s ease-in-out";
-    this.grid.nativeElement.style.height = `${this.gridHeight}px`;
+    this.renderer.setStyle(this.options.nativeElement, "transform", `translateY(0px)`);
+    this.renderer.setStyle(this.options.nativeElement, "transition", "0.4s ease-in-out");
+    this.renderer.setStyle(this.grid.nativeElement, "height", `${this.gridHeight}px`);
   }
 
   checkClear() {
@@ -211,32 +225,25 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
   }
 
   async moveTo(name) {
-    var placeholder = document.getElementById("placeholder");
-    placeholder.style.display = "none";
+    const placeholder = document.getElementById("placeholder");
+    this.renderer.setStyle(placeholder, "display", "none");
 
-    var slides = [
+    const slides = [
       document.getElementById("study"),
       document.getElementById("soc"),
       document.getElementById("int"),
     ];
-    var names = ["studies", "societies", "interests"];
+    const names = ["studies", "societies", "interests"];
 
     for (let i = 0; i < names.length; i++) {
       if (name === names[i]) {
-        slides[i].style.display = "block";
-        this.unlockAndSwipe("next");
+        this.renderer.setStyle(slides[i], "display", "block");
+        await this.unlockAndSwipe("next");
       }
     }
 
-    // Get slide height working properly using DOM
-    /*setTimeout(() => {
-      let swipers = Array.from(document.querySelectorAll(".swiper-wrapper")) as HTMLElement[];
-      let modalSwiper = swipers[swipers.length-1]
-      modalSwiper.style.height = "auto";
-    }, 200);*/
-
     const exit = document.getElementById("closeButton");
-    exit.style.display = "none";
+    this.renderer.setStyle(exit, "display", "none");
     this.frame.scrollToTop(100);
   }
 
@@ -252,14 +259,14 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
 
     // Wait 0.2s to replace slides with placeholder so people don't see it disappear in the slide animation
     setTimeout(() => {
-      placeholder.style.display = "block";
+      this.renderer.setStyle(placeholder, "display", "block");
       slides.forEach((element) => {
-        element.style.display = "none";
+        this.renderer.setStyle(element, "display", "none");
       });
     }, 200);
 
     const exit = document.getElementById("closeButton");
-    exit.style.display = "block";
+    this.renderer.setStyle(exit, "display", "block");
 
     this.checkClear();
   }
@@ -330,11 +337,11 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
 
     for (let i = 0; i < sections.length; i++) {
       if (section == names[i]) {
-        sections[i].style.marginTop = "1.9vh";
-        sections[i].style.fontSize = "22px";
-        sections[i].style.color = "var(--ion-color-light-contrast)";
-        sections[i].style.top = "0";
-        sections[i].style.position = "initial";
+        this.renderer.setStyle(sections[i], "marginTop", "1.9vh");
+        this.renderer.setStyle(sections[i], "fontSize", "22px");
+        this.renderer.setStyle(sections[i], "color", "var(--ion-color-light-contrast)");
+        this.renderer.setStyle(sections[i], "top", "0");
+        this.renderer.setStyle(sections[i], "position", "initial");
       }
     }
   }
@@ -349,11 +356,11 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
 
     for (let i = 0; i < sections.length; i++) {
       if (section == names[i]) {
-        sections[i].style.marginTop = "0";
-        sections[i].style.fontSize = "2vh";
-        sections[i].style.color = "var(--ion-color-medium-shade)";
-        sections[i].style.top = "2vh";
-        sections[i].style.position = "absolute";
+        this.renderer.setStyle(sections[i], "marginTop", "0");
+        this.renderer.setStyle(sections[i], "fontSize", "2vh");
+        this.renderer.setStyle(sections[i], "color", "var(--ion-color-medium-shade)");
+        this.renderer.setStyle(sections[i], "top", "2vh");
+        this.renderer.setStyle(sections[i], "position", "absolute");
       }
     }
   }

@@ -79,12 +79,12 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
   private CHAT_ID: string;
   private MSG_BATCH_SIZE: number = 20;
 
-  @ViewChild("messageContainer", { read: ElementRef }) messageContainer: ElementRef;
+  // @ViewChild("messageContainer", { read: ElementRef }) messageContainer: ElementRef;
+  // @ViewChild("profSlide", { read: ElementRef }) profSlide: ElementRef;
+  // @ViewChild("header", { read: ElementRef }) header: ElementRef;
+  // @ViewChild("profCard", { read: ElementRef, static: false }) profCard: ElementRef;
   @ViewChild(IonContent) ionContent: IonContent;
   @ViewChild("slides") slides: IonSlides;
-  @ViewChild("profSlide", { read: ElementRef }) profSlide: ElementRef;
-  @ViewChild("header", { read: ElementRef }) header: ElementRef;
-  @ViewChild("profCard", { read: ElementRef, static: false }) profCard: ElementRef;
   @ViewChild("profCard") grandchildren: ProfileCardComponent; //for access to grandchildren
   @ViewChild("searchBar") searchBar: IonSearchbar;
   @ViewChild("loadingTrigger") loadingTrigger: ElementRef<HTMLElement>;

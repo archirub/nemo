@@ -7,6 +7,7 @@ import {
   EventEmitter,
   Input,
   ChangeDetectionStrategy,
+  Renderer2,
 } from "@angular/core";
 import { CameraPhoto, Plugins } from "@capacitor/core";
 const { CameraResultType, CameraSource, Capacitor, Photos } = Plugins;
@@ -33,16 +34,16 @@ export class AddPhotoComponent {
 
     // if new value of photodisplayed is empty, then that means look should be reverted back
     if (!value) {
-      view.style.background = "var(--ion-color-light-tint)";
-      icon.style.display = "inline";
-      //text.style.display = "inline";
+      this.renderer.setStyle(view, "background", "var(--ion-color-light-tint)");
+      this.renderer.setStyle(icon, "display", "inline");
     } else {
-      view.style.background = `url(${value})`;
-      view.style.backgroundSize = "cover";
-      icon.style.display = "none";
-      //text.style.display = "none";
+      this.renderer.setStyle(view, "background", `url(${value})`);
+      this.renderer.setStyle(view, "backgroundSize", "cover");
+      this.renderer.setStyle(icon, "display", "none");
     }
   }
+
+  constructor(private renderer: Renderer2) {}
 
   async pickPicture() {
     if (!Capacitor.isPluginAvailable("Camera")) {

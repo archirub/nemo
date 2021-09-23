@@ -8,6 +8,7 @@ import {
   ViewChildren,
   QueryList,
   forwardRef,
+  Renderer2,
 } from "@angular/core";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { IonButton } from "@ionic/angular";
@@ -44,7 +45,7 @@ export class AppToggleComponent
   @ViewChild("handle") handle: any;
   @ViewChildren(IonButton) buttons: QueryList<IonButton>;
 
-  constructor() {
+  constructor(private renderer: Renderer2) {
     super();
   }
 
@@ -53,10 +54,16 @@ export class AppToggleComponent
   selectOption(option) {
     for (let i = 0; i < this.buttons.toArray().length; i++) {
       if (this.buttons.toArray()[i].type === option) {
-        this.handle.nativeElement.style.transform = `translateX(${
-          i * this.buttonWidth
-        }vw)`;
-        this.handle.nativeElement.style.transition = "ease-in-out 0.1s";
+        this.renderer.setStyle(
+          this.handle.nativeElement,
+          "transform",
+          `translateX(${i * this.buttonWidth}vw)`
+        );
+        this.renderer.setStyle(
+          this.handle.nativeElement,
+          "transition",
+          "ease-in-out 0.1s"
+        );
       }
     }
 

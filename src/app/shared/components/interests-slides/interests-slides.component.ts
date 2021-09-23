@@ -5,6 +5,7 @@ import {
   Output,
   EventEmitter,
   forwardRef,
+  Renderer2,
 } from "@angular/core";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 
@@ -38,7 +39,7 @@ export class InterestSlidesComponent implements OnInit, ControlValueAccessor {
   slideOpts;
   slideWidth: number;
 
-  constructor() {}
+  constructor(private renderer: Renderer2) {}
 
   ngOnInit() {
     //this.pictures = assetsInterestsPath;
@@ -66,7 +67,7 @@ export class InterestSlidesComponent implements OnInit, ControlValueAccessor {
           swiper.params.watchSlidesProgress = true;
           swiper.originalParams.watchSlidesProgress = true;
         },
-        setTranslate() {
+        setTranslate(component: InterestSlidesComponent) {
           const swiper = this;
           const {
             width: swiperWidth,
@@ -110,7 +111,12 @@ export class InterestSlidesComponent implements OnInit, ControlValueAccessor {
             const slideTransform = `translate3d(${translateX}px,${translateY}px,${translateZ}px)  rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
 
             $slideEl.transform(slideTransform);
-            $slideEl[0].style.zIndex = -Math.abs(Math.round(offsetMultiplier)) + 1;
+
+            component.renderer.setStyle(
+              $slideEl[0],
+              "zIndex",
+              -Math.abs(Math.round(offsetMultiplier)) + 1
+            );
             if (params.slideShadows) {
               // Set shadows
               let $shadowBeforeEl = isHorizontal
@@ -136,11 +142,17 @@ export class InterestSlidesComponent implements OnInit, ControlValueAccessor {
                 $slideEl.append($shadowAfterEl);
               }
               if ($shadowBeforeEl.length)
-                $shadowBeforeEl[0].style.opacity =
-                  offsetMultiplier > 0 ? offsetMultiplier : 0;
+                component.renderer.setStyle(
+                  $shadowBeforeEl[0],
+                  "opacity",
+                  offsetMultiplier > 0 ? offsetMultiplier : 0
+                );
               if ($shadowAfterEl.length)
-                $shadowAfterEl[0].style.opacity =
-                  -offsetMultiplier > 0 ? -offsetMultiplier : 0;
+                component.renderer.setStyle(
+                  $shadowAfterEl[0],
+                  "opacity",
+                  -offsetMultiplier > 0 ? -offsetMultiplier : 0
+                );
             }
           }
 

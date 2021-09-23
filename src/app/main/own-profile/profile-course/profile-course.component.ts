@@ -6,6 +6,7 @@ import {
   EventEmitter,
   OnInit,
   Output,
+  Renderer2,
 } from "@angular/core";
 import { IonInput, IonSelect } from "@ionic/angular";
 
@@ -39,6 +40,8 @@ export class ProfileCourseComponent implements OnInit {
   @Input() categoryChoice: SocietyCategory | AreaOfStudy;
   @Output() categoryChoiceChange = new EventEmitter<SocietyCategory | AreaOfStudy>();
 
+  constructor(private renderer: Renderer2) {}
+
   ngOnInit() {
     // interval(3000).subscribe(() => console.log(this.choice, this.categoryChoice));
     // this.choiceChange.subscribe((a) => console.log("choice change", a));
@@ -48,7 +51,7 @@ export class ProfileCourseComponent implements OnInit {
   onChoiceChange(value: string) {
     this.choice = value;
     this.choiceChange.emit(this.choice);
-    this.close.nativeElement.style.display = "block";
+    this.renderer.setStyle(this.close.nativeElement, "display", "block");
   }
 
   onCategoryChange(value: SocietyCategory | AreaOfStudy) {
@@ -59,6 +62,6 @@ export class ProfileCourseComponent implements OnInit {
   clearValueInput() {
     this.choice = "";
     this.choiceChange.emit(this.choice);
-    this.close.nativeElement.style.display = "none";
+    this.renderer.setStyle(this.close.nativeElement, "display", "none");
   }
 }

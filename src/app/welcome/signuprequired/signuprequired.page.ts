@@ -6,6 +6,7 @@ import {
   ViewChildren,
   QueryList,
   OnInit,
+  Renderer2,
 } from "@angular/core";
 import { FormGroup, FormControl, Validators } from "@angular/forms";
 import { IonCheckbox, IonSlides } from "@ionic/angular";
@@ -92,7 +93,8 @@ export class SignuprequiredPage implements OnInit {
     private signup: SignupService,
     private changeDetectorRef: ChangeDetectorRef,
     private universitiesStore: UniversitiesStore,
-    private afAuth: AngularFireAuth
+    private afAuth: AngularFireAuth,
+    private renderer: Renderer2
   ) {}
 
   ngOnInit() {
@@ -139,10 +141,10 @@ export class SignuprequiredPage implements OnInit {
 
     const policyCheckMsg = document.getElementById("policiesCheck");
 
-    Object.values(this.reqValidatorChecks).forEach(
-      (element) => (element.style.display = "none")
+    Object.values(this.reqValidatorChecks).forEach((element) =>
+      this.renderer.setStyle(element, "display", "none")
     ); // Clear any UI already up
-    policyCheckMsg.style.display = "none";
+    this.renderer.setStyle(policyCheckMsg, "display", "none");
 
     if (typeof entry === "object") {
       //Check for policy boxes, these are not checked against form
@@ -152,7 +154,7 @@ export class SignuprequiredPage implements OnInit {
         console.log("Policy boxes:", checks);
 
         if (checks.includes(false)) {
-          policyCheckMsg.style.display = "flex";
+          this.renderer.setStyle(policyCheckMsg, "display", "flex");
           falseCount++;
         }
       }
@@ -168,14 +170,14 @@ export class SignuprequiredPage implements OnInit {
         if (validity === false) {
           // If invalid, increase falseCount and display "invalid" UI
           falseCount++;
-          this.reqValidatorChecks[element].style.display = "flex";
+          this.renderer.setStyle(this.reqValidatorChecks[element], "display", "flex");
         }
       });
 
       if (falseCount === 0) {
         // All valid, not last entry so slide next
-        Object.values(this.reqValidatorChecks).forEach(
-          (element) => (element.style.display = "none")
+        Object.values(this.reqValidatorChecks).forEach((element) =>
+          this.renderer.setStyle(element, "display", "none")
         ); // Hide all "invalid" UI
         this.unlockAndSlideToNext();
       }
@@ -184,19 +186,19 @@ export class SignuprequiredPage implements OnInit {
       var validity = !this.form.get(entry).invalid;
 
       if (entry === "dateOfBirth" && this.age < 18) {
-        this.reqValidatorChecks["dateOfBirth"].style.display = "flex";
+        this.renderer.setStyle(this.reqValidatorChecks["dateOfBirth"], "display", "flex");
         console.log("Not valid, don't slide");
         return;
       }
 
       if (validity === true) {
-        Object.values(this.reqValidatorChecks).forEach(
-          (element) => (element.style.display = "none")
+        Object.values(this.reqValidatorChecks).forEach((element) =>
+          this.renderer.setStyle(element, "display", "none")
         ); // Hide all "invalid" UI
 
         this.unlockAndSlideToNext(); // If others valid, slide next
       } else {
-        this.reqValidatorChecks[entry].style.display = "flex"; // Show "invalid" UI for invalid validator
+        this.renderer.setStyle(this.reqValidatorChecks[entry], "display", "flex"); // Show "invalid" UI for invalid validator
         console.log("Not valid, don't slide");
       }
     }
@@ -225,11 +227,15 @@ export class SignuprequiredPage implements OnInit {
     };
 
     //Initially display none
-    Object.values(map).forEach((element) => (element.style.display = "none"));
+    Object.values(map).forEach((element) =>
+      this.renderer.setStyle(element, "display", "none")
+    );
 
     //Don't display dots for slides left either
     var dots = Array.from(this.dots);
-    Array.from(dots).forEach((element) => (element.nativeElement.style.display = "none"));
+    Array.from(dots).forEach((element) =>
+      this.renderer.setStyle(element.nativeElement, "display", "none")
+    );
 
     //Get current slide index and calculate slides left after this one
     var l = await this.slides.length();
@@ -240,12 +246,14 @@ export class SignuprequiredPage implements OnInit {
     if (current < 5) {
       //stops anything being displayed on slides after last one
       var slice = Array.from(dots).slice(0, this.slidesLeft);
-      slice.forEach((element) => (element.nativeElement.style.display = "block"));
+      slice.forEach((element) =>
+        this.renderer.setStyle(element.nativeElement, "display", "block")
+      );
     }
 
     //Get correct icon to display
     if (current < 5) {
-      map[current].style.display = "block";
+      this.renderer.setStyle(map[current], "display", "block");
     }
   }
 

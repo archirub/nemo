@@ -1,5 +1,12 @@
 import { AppToggleComponent } from "@components/index";
-import { Component, AfterViewInit, ViewChild, ElementRef, NgZone } from "@angular/core";
+import {
+  Component,
+  AfterViewInit,
+  ViewChild,
+  ElementRef,
+  NgZone,
+  Renderer2,
+} from "@angular/core";
 import { IonSlides, LoadingController, NavController } from "@ionic/angular";
 
 import { AngularFireFunctions } from "@angular/fire/compat/functions";
@@ -63,16 +70,17 @@ export class SettingsPage implements AfterViewInit {
     private firebaseAuth: FirebaseAuthService,
     private afFunctions: AngularFireFunctions,
     private loadingCtrl: LoadingController,
-    private loadingService: LoadingService
+    private loadingService: LoadingService,
+    private renderer: Renderer2
   ) {}
 
   ngAfterViewInit() {
     this.editingInProgress$.subscribe((v) => console.log("editiing in progress", v));
-    var legal = document.getElementById("legal"); //Do not display slides on start up, only when selected
-    var prefs = document.getElementById("preferences");
+    const legal = document.getElementById("legal"); //Do not display slides on start up, only when selected
+    const prefs = document.getElementById("preferences");
 
-    legal.style.display = "none";
-    prefs.style.display = "none";
+    this.renderer.setStyle(legal, "display", "none");
+    this.renderer.setStyle(prefs, "display", "none");
 
     this.slides.lockSwipes(true); //Stop swiping of slides so that users cannot see placeholder slide
   }
@@ -171,10 +179,10 @@ export class SettingsPage implements AfterViewInit {
 
     // Wait 0.2s to replace slides with placeholder so people don't see it disappear in the slide animation
     setTimeout(() => {
-      placeholder.style.display = "block";
-      legal.style.display = "none";
-      prefs.style.display = "none";
-      support.style.display = "none";
+      this.renderer.setStyle(placeholder, "display", "block");
+      this.renderer.setStyle(legal, "display", "none");
+      this.renderer.setStyle(prefs, "display", "none");
+      this.renderer.setStyle(support, "display", "none");
     }, 200);
   }
 
@@ -184,11 +192,11 @@ export class SettingsPage implements AfterViewInit {
      * Swipes to the targeted slide
      **/
 
-    var placeholder = document.getElementById("placeholder");
-    placeholder.style.display = "none";
+    const placeholder = document.getElementById("placeholder");
+    this.renderer.setStyle(placeholder, "display", "none");
 
-    var target = document.getElementById(`${slide}`); //get slide by id from input
-    target.style.display = "block";
+    const target = document.getElementById(`${slide}`); //get slide by id from input
+    this.renderer.setStyle(target, "display", "block");
 
     this.unlockAndSwipe("next"); //move to slide
   }
