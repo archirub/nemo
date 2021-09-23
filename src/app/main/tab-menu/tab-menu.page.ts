@@ -27,7 +27,7 @@ export class TabMenuPage implements OnInit {
     this.renderer.setStyle(this.active.nativeElement, "display", "none");
     this.renderer.setStyle(this.inactive.nativeElement, "display", "none");
 
-    var selected = this.tabs.getSelected();
+    const selected = this.tabs.getSelected();
 
     if (selected === "home") {
       this.renderer.setStyle(this.active.nativeElement, "display", "block");

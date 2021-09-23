@@ -95,7 +95,7 @@ export class InterestSlidesComponent implements OnInit, ControlValueAccessor {
 
             let rotateY = isHorizontal ? rotate * offsetMultiplier : 0;
             let rotateX = isHorizontal ? 0 : rotate * offsetMultiplier;
-            // var rotateZ = 0
+            // const rotateZ = 0
             let translateZ = -translate * Math.abs(offsetMultiplier);
 
             let translateY = isHorizontal ? 0 : params.stretch * offsetMultiplier;
@@ -177,7 +177,7 @@ export class InterestSlidesComponent implements OnInit, ControlValueAccessor {
 
   selectInterest(choice) {
     if (this.interests.includes(choice)) {
-      var index = this.interests.indexOf(choice);
+      const index = this.interests.indexOf(choice);
       this.interests.splice(index, 1);
     } else {
       this.interests.push(choice);

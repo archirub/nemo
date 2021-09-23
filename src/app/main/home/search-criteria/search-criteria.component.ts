@@ -107,29 +107,20 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
   }
 
   async ionViewDidEnter() {
-    this.viewEntered = true;
+    //This initialises slide heights, for some unknown reason
+    //USER DOESN'T SEE THIS, KEEP IT HERE
+    this.moveTo("studies").then(() => this.returnTo());
+    this.modalSlides.lockSwipes(true);
+    this.optionsOriginalPos = this.options.nativeElement.getBoundingClientRect().y;
+    this.gridHeight = this.grid.nativeElement.getBoundingClientRect().height;
+    this.updateCriteria();
+    this.checkClear();
 
-    /* Timeout as elements don't exist until viewEntered set to true */
+    // setTimeout to allow for the time for the template to be setup (particularly for
+    // the nemo-toggle animations to play out)
     setTimeout(() => {
-      //This initialises slide heights, for some unknown reason
-      //USER DOESN'T SEE THIS, KEEP IT HERE
-      this.moveTo("studies").then(() => this.returnTo());
-      // this.returnTo();
-
-      // if (!this.searchCriteriaForm.value.degree) {
-      //   this.degreeHandle.selectOption("undergrad");
-      // }
-
-      // if (!this.searchCriteriaForm.value.onCampus) {
-      //   this.locationHandle.selectOption("Everyone");
-      // }
-
-      this.modalSlides.lockSwipes(true);
-      this.optionsOriginalPos = this.options.nativeElement.getBoundingClientRect().y;
-      this.gridHeight = this.grid.nativeElement.getBoundingClientRect().height;
-      this.updateCriteria();
-      this.checkClear();
-    }, 20);
+      this.viewEntered = true;
+    }, 350);
   }
 
   slideDown() {

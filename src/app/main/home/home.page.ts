@@ -187,8 +187,8 @@ export class HomePage implements OnInit, OnDestroy {
     this.renderer.setStyle(catchItems, "display", "block");
     this.renderer.setStyle(this.fish.nativeElement, "display", "flex");
 
-    var closeButton = document.getElementById("closeAnimation");
-    var messageText = document.getElementById("messageText");
+    const closeButton = document.getElementById("closeAnimation");
+    const messageText = document.getElementById("messageText");
 
     this.openCatchAnimation.play();
     this.fishSwimAnimation.play();

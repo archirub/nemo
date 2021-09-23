@@ -265,8 +265,8 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
 
   /* Nemo toggle selection function */
   toggleChange(option) {
-    var editor = document.getElementById("editing");
-    var profile = document.getElementById("profile");
+    const editor = document.getElementById("editing");
+    const profile = document.getElementById("profile");
 
     if (option == "edit") {
       this.renderer.setStyle(editor, "display", "flex");

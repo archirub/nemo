@@ -416,12 +416,12 @@ export class SignupauthPage implements OnInit {
   }
 
   private async updatePager() {
-    var email = document.getElementById("email");
-    var hourglass = document.getElementById("hourglass");
-    var pass = document.getElementById("pass");
+    const email = document.getElementById("email");
+    const hourglass = document.getElementById("hourglass");
+    const pass = document.getElementById("pass");
 
     //Map to use slide index to get correct pager icon
-    var map = {
+    const map = {
       0: email,
       1: pass,
       2: hourglass,
@@ -432,19 +432,19 @@ export class SignupauthPage implements OnInit {
     }
 
     //Hide all pager dots
-    var dots: HTMLCollectionOf<any> = document.getElementsByClassName("pager-dot");
+    const dots: HTMLCollectionOf<any> = document.getElementsByClassName("pager-dot");
 
     Array.from(dots).forEach((element) =>
       this.renderer.setStyle(element, "display", "none")
     );
 
     //Get current slide, calculate slides left
-    var l = await this.slidesRef.length();
-    var current = await this.slidesRef.getActiveIndex();
+    const l = await this.slidesRef.length();
+    const current = await this.slidesRef.getActiveIndex();
     this.slidesLeft = l - current - 1;
 
     //Show only the necessary number of pager dots equal to this.slidesLeft
-    var slice = Array.from(dots).slice(0, this.slidesLeft);
+    const slice = Array.from(dots).slice(0, this.slidesLeft);
     slice.forEach((element) => this.renderer.setStyle(element, "display", "block"));
 
     //Display pager icon for current slide

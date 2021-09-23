@@ -172,10 +172,10 @@ export class SettingsPage implements AfterViewInit {
   /* Returns to first settings page, displays placeholder again */
   returnToSettings() {
     this.unlockAndSwipe("prev");
-    var legal = document.getElementById("legal");
-    var prefs = document.getElementById("preferences");
-    var support = document.getElementById("support");
-    var placeholder = document.getElementById("placeholder");
+    const legal = document.getElementById("legal");
+    const prefs = document.getElementById("preferences");
+    const support = document.getElementById("support");
+    const placeholder = document.getElementById("placeholder");
 
     // Wait 0.2s to replace slides with placeholder so people don't see it disappear in the slide animation
     setTimeout(() => {

@@ -49,7 +49,9 @@ export class AppToggleComponent
     super();
   }
 
-  ngAfterViewInit() {}
+  ngAfterViewInit() {
+    this.valueChange.subscribe((v) => console.log("value change of nemo-toggle", v));
+  }
 
   selectOption(option) {
     for (let i = 0; i < this.buttons.toArray().length; i++) {
@@ -68,8 +70,8 @@ export class AppToggleComponent
     }
 
     //Emit choice
-    this.valueChange.emit(option);
     this.value = option;
+    this.valueChange.emit(option);
 
     //option variable is the selection directly from the interfaces array
   }
