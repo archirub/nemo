@@ -88,11 +88,11 @@ export class AppDatetimeComponent implements OnInit, ControlValueAccessor {
      * Updates UI accordingly by getting saved day index, month index and year index
      */
     if (typeof this.value === "string") {
-      var currentYear = new Date().getFullYear();
-      var date = new Date(Date.parse(this.value));
-      var y = currentYear - date.getFullYear() - 1; //Year slide indexes run backwards, i.e. 2001 is on index 19, -1 for indexes starting at 0
-      var m = date.getMonth();
-      var d = date.getDate() - 1; //-1 for indexes starting at 0
+      const currentYear = new Date().getFullYear();
+      const date = new Date(Date.parse(this.value));
+      const y = currentYear - date.getFullYear() - 1; //Year slide indexes run backwards, i.e. 2001 is on index 19, -1 for indexes starting at 0
+      const m = date.getMonth();
+      const d = date.getDate() - 1; //-1 for indexes starting at 0
 
       this.updateOptions(d, m, y);
 
@@ -140,22 +140,22 @@ export class AppDatetimeComponent implements OnInit, ControlValueAccessor {
   }
 
   async getDate() {
-    var d = await this.daySlides.getActiveIndex();
-    var m = await this.monthSlides.getActiveIndex();
-    var y = await this.yearSlides.getActiveIndex();
+    const d = await this.daySlides.getActiveIndex();
+    const m = await this.monthSlides.getActiveIndex();
+    const y = await this.yearSlides.getActiveIndex();
 
     this.updateOptions(d, m, y);
 
-    var birthday = new Date(
+    const birthday = new Date(
       `${this.months[m]} ${this.completeDays[d]}, ${this.years[y]} 12:00:00`
     );
     this.value = birthday.toISOString();
     this.onChange(this.value);
 
-    var today = new Date();
-    var dy = today.getFullYear() - birthday.getFullYear();
-    var dm = today.getMonth() - birthday.getMonth();
-    var dd = today.getDate() - birthday.getDate();
+    const today = new Date();
+    const dy = today.getFullYear() - birthday.getFullYear();
+    const dm = today.getMonth() - birthday.getMonth();
+    const dd = today.getDate() - birthday.getDate();
 
     if (dm < 0) {
       this.age = dy - 1;

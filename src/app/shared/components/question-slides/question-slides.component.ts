@@ -85,8 +85,8 @@ export class QuestionSlidesComponent implements OnInit, ControlValueAccessor {
   }
 
   async updatePager() {
-    var current = await this.slides.getActiveIndex(); //Get active index, colour that dot orange
-    var dots = Array.from(this.dots);
+    const current = await this.slides.getActiveIndex(); //Get active index, colour that dot orange
+    const dots = Array.from(this.dots);
     dots.forEach((el) =>
       this.renderer.setStyle(el.nativeElement, "color", "var(--ion-color-light-shade)")
     ); //Colour each dot grey
@@ -228,9 +228,9 @@ export class QuestionSlidesComponent implements OnInit, ControlValueAccessor {
 
     this.renderer.setStyle(add, "display", "none");
 
-    var ind = await this.slides.getActiveIndex();
-    var l = this.counter; //Slides length
-    var last = l - 1; //Final slide index
+    const ind = await this.slides.getActiveIndex();
+    const l = this.counter; //Slides length
+    const last = l - 1; //Final slide index
 
     if (l === 1) {
       //Initial slide
@@ -258,7 +258,7 @@ export class QuestionSlidesComponent implements OnInit, ControlValueAccessor {
      * Built because .filter cannot reach global scope in this typscript construct
      **/
     array2.forEach((element) => {
-      var ind = array1.indexOf(element);
+      const ind = array1.indexOf(element);
       array1.splice(ind, 1);
     });
   }

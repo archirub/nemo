@@ -183,7 +183,7 @@ export class SignuprequiredPage implements OnInit {
       }
     } else {
       // IMPORTANT that this is !invalid instead of valid
-      var validity = !this.form.get(entry).invalid;
+      const validity = !this.form.get(entry).invalid;
 
       if (entry === "dateOfBirth" && this.age < 18) {
         this.renderer.setStyle(this.reqValidatorChecks["dateOfBirth"], "display", "flex");
@@ -211,14 +211,14 @@ export class SignuprequiredPage implements OnInit {
      */
 
     //Retrieve all icons as element variables
-    var person = document.getElementById("person");
-    var gift = document.getElementById("gift");
-    var camera = document.getElementById("camera");
-    var happy = document.getElementById("happy");
-    var school = document.getElementById("school");
+    const person = document.getElementById("person");
+    const gift = document.getElementById("gift");
+    const camera = document.getElementById("camera");
+    const happy = document.getElementById("happy");
+    const school = document.getElementById("school");
 
     //Hash maps are quickest and most efficient; keys are slide numbers, values are icon to show
-    var map = {
+    const map = {
       0: person,
       1: gift,
       2: camera,
@@ -232,20 +232,20 @@ export class SignuprequiredPage implements OnInit {
     );
 
     //Don't display dots for slides left either
-    var dots = Array.from(this.dots);
+    const dots = Array.from(this.dots);
     Array.from(dots).forEach((element) =>
       this.renderer.setStyle(element.nativeElement, "display", "none")
     );
 
     //Get current slide index and calculate slides left after this one
-    var l = await this.slides.length();
-    var current = await this.slides.getActiveIndex();
+    const l = await this.slides.length();
+    const current = await this.slides.getActiveIndex();
     this.slidesLeft = l - current - 2;
 
     //Get the number of dots equal to slides left and display them
     if (current < 5) {
       //stops anything being displayed on slides after last one
-      var slice = Array.from(dots).slice(0, this.slidesLeft);
+      const slice = Array.from(dots).slice(0, this.slidesLeft);
       slice.forEach((element) =>
         this.renderer.setStyle(element.nativeElement, "display", "block")
       );

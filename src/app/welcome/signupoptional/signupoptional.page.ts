@@ -168,15 +168,15 @@ export class SignupoptionalPage implements OnInit {
    */
   async updatePager() {
     //Retrieve all icons as element variables
-    var book = document.getElementById("book");
-    var people = document.getElementById("people");
-    var chatbox = document.getElementById("chatbox");
-    var palette = document.getElementById("palette");
-    var bio = document.getElementById("bio");
-    var insta = document.getElementById("insta");
+    const book = document.getElementById("book");
+    const people = document.getElementById("people");
+    const chatbox = document.getElementById("chatbox");
+    const palette = document.getElementById("palette");
+    const bio = document.getElementById("bio");
+    const insta = document.getElementById("insta");
 
     //Hash maps are quickest and most efficient; keys are slide numbers, values are icon to show
-    var map = {
+    const map = {
       0: book,
       1: people,
       2: chatbox,
@@ -191,18 +191,18 @@ export class SignupoptionalPage implements OnInit {
     );
 
     //Hide all pager dots also
-    var dots = this.dots.toArray();
+    const dots = this.dots.toArray();
     dots.forEach((element) =>
       this.renderer.setStyle(element.nativeElement, "display", "none")
     );
 
     //Get current slide index and calculate slides left after this one
-    var l = await this.slides.length();
-    var current = await this.slides.getActiveIndex();
+    const l = await this.slides.length();
+    const current = await this.slides.getActiveIndex();
     this.slidesLeft = l - current - 1;
 
     //Get the number of dots equal to slides left and display them
-    var slice = dots.slice(0, this.slidesLeft);
+    const slice = dots.slice(0, this.slidesLeft);
     slice.forEach((element) =>
       this.renderer.setStyle(element.nativeElement, "display", "block")
     );

@@ -238,29 +238,29 @@ export class ChatboardPicturesStore {
 
     // console.log('width: ' + loadedData.width + ' height: ' + loadedData.height);
 
-    // var result_image = document.getElementById('result_compress_image');
-    // var quality = parseInt(encodeQuality.value);
+    // const result_image = document.getElementById('result_compress_image');
+    // const quality = parseInt(encodeQuality.value);
     // console.log("Quality >>" + quality);
 
     // console.log("process start...");
-    // var time_start = new Date().getTime();
+    // const time_start = new Date().getTime();
 
-    // var mime_type = "image/jpeg";
+    // const mime_type = "image/jpeg";
     // if (typeof output_format !== "undefined" && output_format == "png") {
     //   mime_type = "image/png";
     // }
 
-    // var cvs = document.createElement('canvas');
+    // const cvs = document.createElement('canvas');
     // cvs.width = loadedData.width;
     // cvs.height = loadedData.height;
-    // var ctx = cvs.getContext("2d").drawImage(loadedData, 0, 0);
-    // var newImageData = cvs.toDataURL(mime_type, quality / 100);
-    // var result_image_obj = new Image();
+    // const ctx = cvs.getContext("2d").drawImage(loadedData, 0, 0);
+    // const newImageData = cvs.toDataURL(mime_type, quality / 100);
+    // const result_image_obj = new Image();
     // result_image_obj.src = newImageData;
     // result_image.src = result_image_obj.src;
 
     // result_image.onload = function() {}
-    // var duration = new Date().getTime() - time_start;
+    // const duration = new Date().getTime() - time_start;
 
     // console.log("process finished...");
     // console.log('Processed in: ' + duration + 'ms');

@@ -196,7 +196,7 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
   }
 
   sizeSwipers() {
-    var h = this.content.nativeElement.getBoundingClientRect().height;
+    const h = this.content.nativeElement.getBoundingClientRect().height;
 
     this.renderer.setStyle(this.yesSwipe.nativeElement, "height", `${h}px`);
     this.renderer.setStyle(this.noSwipe.nativeElement, "height", `${h}px`);
