@@ -13,6 +13,7 @@ import {
   OnChanges,
   SimpleChanges,
   ChangeDetectorRef,
+  Renderer2,
 } from "@angular/core";
 import { LessInfoAnimation, MoreInfoAnimation } from "@animations/info.animation";
 import { Profile } from "@classes/index";
@@ -91,7 +92,7 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
     this.Y = event.touches[0].clientY;
   }
 
-  constructor() {}
+  constructor(private renderer: Renderer2) {}
 
   ngOnInit() {
     this.moreInfo = false;
@@ -104,7 +105,12 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
   }
 
   getContentHeight(): number {
-    let height = 16 + Math.ceil(100*(this.content.nativeElement.getBoundingClientRect().height/window.innerHeight));
+    let height =
+      16 +
+      Math.ceil(
+        100 *
+          (this.content.nativeElement.getBoundingClientRect().height / window.innerHeight)
+      );
     //height of moreInfo content in %/vh
     //16 = 14% offset of the header + 2% bottom
 
@@ -118,10 +124,14 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
         this.expandAnimation.destroy(); //Destroy previous animations to avoid buildup
       }
 
-      this.collapseAnimation = LessInfoAnimation(this.complete, 14, this.getContentHeight()); //Have to reinitialise animation every time
+      this.collapseAnimation = LessInfoAnimation(
+        this.complete,
+        14,
+        this.getContentHeight()
+      ); //Have to reinitialise animation every time
       this.collapseAnimation.play();
 
-      this.header.nativeElement.style.boxShadow = 'none'; //Remove box shadow from header
+      this.renderer.setStyle(this.header.nativeElement, "boxShadow", "none"); //Remove box shadow from header
 
       setTimeout(() => {
         this.moreInfo = false; //Allow animation to play before hiding element
@@ -131,11 +141,19 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
         this.collapseAnimation.destroy(); //Destroy previous animations to avoid buildup
       }
 
-      this.expandAnimation = MoreInfoAnimation(this.complete, 14, this.getContentHeight()); //Have to reinitialise animation every time
+      this.expandAnimation = MoreInfoAnimation(
+        this.complete,
+        14,
+        this.getContentHeight()
+      ); //Have to reinitialise animation every time
       this.expandAnimation.play();
 
-      this.moreInfo = true; //show element and play animation
-      this.header.nativeElement.style.boxShadow = '0px 30px 10px -20px rgb(251 251 251)'; //Add box shadow to header
+      this.moreInfo = true; //show element and play animation]
+      this.renderer.setStyle(
+        this.header.nativeElement,
+        "boxShadow",
+        "0px 30px 10px -20px rgb(251 251 251)"
+      ); //Add box shadow to header
     }
     this.expanded.emit(this.moreInfo);
 
@@ -145,15 +163,15 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
       try {
         this.intSlides.update(); //Fixes broken swiper mechanism that ruins IonSlides snap-swiping
       } catch (TypeError) {
-        console.log('No interest slides found.'); //No interests selected on profile
-      };
+        console.log("No interest slides found."); //No interests selected on profile
+      }
     }, 100);
 
     try {
       this.startSlides();
     } catch (TypeError) {
       console.log("No interest slides to autoplay.");
-    };
+    }
   }
 
   async updatePager(currentIndex: number) {
@@ -161,9 +179,17 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
 
     this.bullets.forEach((bullet: ElementRef) => {
       if (currentIndex === index) {
-        bullet.nativeElement.style.color = "var(--ion-color-primary-contrast)";
+        this.renderer.setStyle(
+          bullet.nativeElement,
+          "color",
+          "var(--ion-color-primary-contrast)"
+        ); //Add box shadow to header
       } else {
-        bullet.nativeElement.style.color = "var(--ion-color-dark-tint)";
+        this.renderer.setStyle(
+          bullet.nativeElement,
+          "color",
+          "var(--ion-color-dark-tint)"
+        ); //Add box shadow to header
       }
       index += 1;
     });
@@ -172,10 +198,10 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
   sizeSwipers() {
     var h = this.content.nativeElement.getBoundingClientRect().height;
 
-    this.yesSwipe.nativeElement.style.height = `${h}px`;
-    this.noSwipe.nativeElement.style.height = `${h}px`;
-    this.yesSwipe.nativeElement.style.marginTop = "13vh";
-    this.noSwipe.nativeElement.style.marginTop = "13vh";
+    this.renderer.setStyle(this.yesSwipe.nativeElement, "height", `${h}px`);
+    this.renderer.setStyle(this.noSwipe.nativeElement, "height", `${h}px`);
+    this.renderer.setStyle(this.yesSwipe.nativeElement, "marginTop", "13vh");
+    this.renderer.setStyle(this.noSwipe.nativeElement, "marginTop", "13vh");
   }
 
   async onSlideChange() {

@@ -10,6 +10,7 @@ import {
   ViewChild,
   ElementRef,
   ChangeDetectorRef,
+  Renderer2,
 } from "@angular/core";
 import { FormControl, FormGroup, Validators } from "@angular/forms";
 import { Router } from "@angular/router";
@@ -104,7 +105,8 @@ export class SignupauthPage implements OnInit {
     private loadingCtrl: LoadingController,
     private loading: LoadingService,
     private universitiesStore: UniversitiesStore,
-    private changeDetector: ChangeDetectorRef
+    private changeDetector: ChangeDetectorRef,
+    private renderer: Renderer2
   ) {
     this.authForm = this.emptyAuthForm;
   }
@@ -426,12 +428,15 @@ export class SignupauthPage implements OnInit {
     };
 
     for (let i = 0; i < 3; i++) {
-      map[i].style.display = "none"; //Display none of the pager icons
+      this.renderer.setStyle(map[i], "display", "none"); //Display none of the pager icons
     }
 
     //Hide all pager dots
     var dots: HTMLCollectionOf<any> = document.getElementsByClassName("pager-dot");
-    Array.from(dots).forEach((element) => (element.style.display = "none"));
+
+    Array.from(dots).forEach((element) =>
+      this.renderer.setStyle(element, "display", "none")
+    );
 
     //Get current slide, calculate slides left
     var l = await this.slidesRef.length();
@@ -440,10 +445,10 @@ export class SignupauthPage implements OnInit {
 
     //Show only the necessary number of pager dots equal to this.slidesLeft
     var slice = Array.from(dots).slice(0, this.slidesLeft);
-    slice.forEach((element) => (element.style.display = "block"));
+    slice.forEach((element) => this.renderer.setStyle(element, "display", "block"));
 
     //Display pager icon for current slide
-    map[current].style.display = "block";
+    this.renderer.setStyle(map[current], "display", "block");
   }
 
   private async displaySignupFailedAlert(message: string): Promise<void> {

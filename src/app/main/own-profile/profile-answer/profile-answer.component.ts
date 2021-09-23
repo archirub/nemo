@@ -6,6 +6,7 @@ import {
   Output,
   ViewChild,
   forwardRef,
+  Renderer2,
 } from "@angular/core";
 import { NG_VALUE_ACCESSOR } from "@angular/forms";
 import { AppUser } from "@classes/user.class";
@@ -35,24 +36,13 @@ export class ProfileAnswerComponent {
   @ViewChild("qInput") qSelect: IonSelect;
 
   @Input() questionAndAnswer: QuestionAndAnswer;
-  @Output() questionAndAnswerChange = new EventEmitter<QuestionAndAnswer | (Array<string | QuestionAndAnswer>)>();
+  @Output() questionAndAnswerChange = new EventEmitter<
+    QuestionAndAnswer | Array<string | QuestionAndAnswer>
+  >();
 
   @Input() questionsNotPicked: Question[];
 
-  constructor() {}
-
-  /**
-   * Updates UI to show cross icon to remove written answers
-   **/
-  // displayExit() {
-  //   if (this.answer.value != "") {
-  //     this.answerClose.nativeElement.style.display = "block";
-  //   } else {
-  //     this.answerClose.nativeElement.style.display = "none";
-  //   }
-  //   this.questionAndAnswer.answer = this.answer.value;
-  //   this.questionAndAnswerChange.emit(this.questionAndAnswer);
-  // }
+  constructor(private renderer: Renderer2) {}
 
   onAnswerChange(value) {
     this.questionAndAnswer.answer = value;
@@ -69,15 +59,16 @@ export class ProfileAnswerComponent {
    * Removes question on click of cross
    **/
   clearInput() {
-    this.questionAndAnswerChange.emit(['delete', this.questionAndAnswer]);
+    this.questionAndAnswerChange.emit(["delete", this.questionAndAnswer]);
   }
 
   /**
    * Show question replace UI to edit already included questions
    **/
   showInput() {
-    this.qHead.nativeElement.style.display = "none"; //Hide text
-    this.qInput.nativeElement.style.display = "flex"; //Show question select
+    this.renderer.setStyle(this.qHead.nativeElement, "display", "none"); //Hide text
+    this.renderer.setStyle(this.qInput.nativeElement, "display", "flex"); //Show question select
+
     this.qSelect.open(); //Open ionSelect immediately
   }
 
@@ -85,8 +76,8 @@ export class ProfileAnswerComponent {
    * Hides select once again so question is just text
    **/
   hideInput() {
-    this.qHead.nativeElement.style.display = "flex";
-    this.qInput.nativeElement.style.display = "none";
+    this.renderer.setStyle(this.qHead.nativeElement, "display", "flex");
+    this.renderer.setStyle(this.qInput.nativeElement, "display", "none");
   }
 
   /**
@@ -95,8 +86,8 @@ export class ProfileAnswerComponent {
   changeQuestion(q) {
     this.questionAndAnswer.question = q.target.value; //Get value of selected question
 
-    this.qHead.nativeElement.style.display = "block"; //Change UI from select to text
-    this.qInput.nativeElement.style.display = "none";
+    this.renderer.setStyle(this.qHead.nativeElement, "display", "block"); //Change UI from select to text
+    this.renderer.setStyle(this.qInput.nativeElement, "display", "none");
 
     this.questionAndAnswerChange.emit(this.questionAndAnswer);
   }
@@ -106,8 +97,8 @@ export class ProfileAnswerComponent {
    * Sets display back to profile question before the select was brought up
    **/
   cancelQuestion() {
-    this.qHead.nativeElement.style.display = "block"; //Change UI from select to text
-    this.qInput.nativeElement.style.display = "none";
+    this.renderer.setStyle(this.qHead.nativeElement, "display", "block"); //Change UI from select to text
+    this.renderer.setStyle(this.qInput.nativeElement, "display", "none");
   }
 
   /**

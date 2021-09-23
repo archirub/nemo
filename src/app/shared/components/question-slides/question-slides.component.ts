@@ -10,6 +10,7 @@ import {
   EventEmitter,
   forwardRef,
   Input,
+  Renderer2,
 } from "@angular/core";
 import {
   ControlValueAccessor,
@@ -66,7 +67,7 @@ export class QuestionSlidesComponent implements OnInit, ControlValueAccessor {
 
   availableQuestionsMap = {};
 
-  constructor(public detector: ChangeDetectorRef) {}
+  constructor(public detector: ChangeDetectorRef, private renderer: Renderer2) {}
 
   ngOnInit() {
     this.counter = 1; //counter to add slides to array
@@ -86,9 +87,15 @@ export class QuestionSlidesComponent implements OnInit, ControlValueAccessor {
   async updatePager() {
     var current = await this.slides.getActiveIndex(); //Get active index, colour that dot orange
     var dots = Array.from(this.dots);
+    dots.forEach((el) =>
+      this.renderer.setStyle(el.nativeElement, "color", "var(--ion-color-light-shade)")
+    ); //Colour each dot grey
 
-    dots.forEach((el) => (el.nativeElement.style.color = "var(--ion-color-light-shade)")); //Colour each dot grey
-    dots[current].nativeElement.style.color = "var(--ion-color-primary)"; //Colour active dot orange
+    this.renderer.setStyle(
+      dots[current].nativeElement,
+      "color",
+      "var(--ion-color-primary)"
+    ); //Colour active dot orange
   }
 
   /**
@@ -210,16 +217,16 @@ export class QuestionSlidesComponent implements OnInit, ControlValueAccessor {
     // Show delete button only if a question has been selected, answer not necessary
     // Can't delete first slide, otherwise UI disappears lol
     if (i != 0) {
-      deleteButton.style.display = "block";
+      this.renderer.setStyle(deleteButton, "display", "block");
     } else {
-      deleteButton.style.display = "none";
+      this.renderer.setStyle(deleteButton, "display", "none");
     }
   }
 
   async updateAddButton() {
     const add = document.getElementById("add");
 
-    add.style.display = "none";
+    this.renderer.setStyle(add, "display", "none");
 
     var ind = await this.slides.getActiveIndex();
     var l = this.counter; //Slides length
@@ -231,7 +238,7 @@ export class QuestionSlidesComponent implements OnInit, ControlValueAccessor {
         typeof this.questionArray[0] === "string" &&
         typeof this.answerArray[0] === "string"
       ) {
-        add.style.display = "flex";
+        this.renderer.setStyle(add, "display", "flex");
       }
     } else if (ind === last && l > 1) {
       //All other slides
@@ -239,7 +246,7 @@ export class QuestionSlidesComponent implements OnInit, ControlValueAccessor {
         typeof this.questionArray[ind] === "string" &&
         typeof this.answerArray[ind] === "string"
       ) {
-        add.style.display = "flex";
+        this.renderer.setStyle(add, "display", "flex");
       }
     }
   }

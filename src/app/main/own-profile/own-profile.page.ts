@@ -7,6 +7,7 @@ import {
   ViewChild,
   ViewChildren,
   AfterViewInit,
+  Renderer2,
 } from "@angular/core";
 
 import { BehaviorSubject, forkJoin, from, Observable, of, Subscription } from "rxjs";
@@ -43,7 +44,7 @@ import {
   questionsOptions,
   assetsInterestsPath,
   Interests,
-  QuestionAndAnswer
+  QuestionAndAnswer,
 } from "@interfaces/index";
 import { CdkDragDrop, transferArrayItem } from "@angular/cdk/drag-drop";
 
@@ -105,7 +106,8 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     private detector: ChangeDetectorRef,
     private tabElementRef: TabElementRefService,
     private modalCtrl: ModalController,
-    private loadingCtrl: LoadingController
+    private loadingCtrl: LoadingController,
+    private renderer: Renderer2
   ) {
     this.appUser$ = this.currentUserStore.user$;
   }
@@ -228,11 +230,10 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
 
   dragAndDropPhotos(event: CdkDragDrop<string[]>) {
     console.log(event);
-    //event.item.element.nativeElement.style.backgroundImage = this.profilePictures[event.previousIndex];
     transferArrayItem(
-      this.profilePictures, 
-      event.previousContainer.data, 
-      event.previousIndex, 
+      this.profilePictures,
+      event.previousContainer.data,
+      event.previousIndex,
       event.currentIndex
     );
 
@@ -248,18 +249,16 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
 
   displayExit(section) {
     if (section === "bio" && this.bio.value !== "") {
-      console.log("display exit for bio");
-
-      this.bioClose.nativeElement.style.display = "block";
+      this.renderer.setStyle(this.bioClose.nativeElement, "display", "block");
     } else if (this.bio.value === "") {
-      this.bioClose.nativeElement.style.display = "none";
+      this.renderer.setStyle(this.bioClose.nativeElement, "display", "none");
     }
   }
 
   clearInput(section) {
     if (section === "bio") {
       this.bio.value = "";
-      this.bioClose.nativeElement.style.display = "none";
+      this.renderer.setStyle(this.bioClose.nativeElement, "display", "none");
       //this.profile.biography = "";
     }
   }
@@ -270,11 +269,11 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     var profile = document.getElementById("profile");
 
     if (option == "edit") {
-      editor.style.display = "flex";
-      profile.style.display = "none";
+      this.renderer.setStyle(editor, "display", "flex");
+      this.renderer.setStyle(profile, "display", "none");
     } else if (option == "view") {
-      editor.style.display = "none";
-      profile.style.display = "flex";
+      this.renderer.setStyle(editor, "display", "none");
+      this.renderer.setStyle(profile, "display", "flex");
     }
   }
 
@@ -324,12 +323,13 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
    * Triggered by profile-answer change
    * If receives an array with 'delete' as first entry, deletes question
    * Either way triggers editing
-  **/
+   **/
   questionsEdit(emitted: any) {
-    if (emitted[0] === 'delete') { //Event signifies delete question
+    if (emitted[0] === "delete") {
+      //Event signifies delete question
       let loc = this.editableFields.questions.indexOf(emitted);
       this.editableFields.questions.splice(loc, 1); //Remove from question array
-    } 
+    }
 
     this.editingTriggered();
   }

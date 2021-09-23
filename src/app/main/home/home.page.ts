@@ -6,6 +6,7 @@ import {
   OnInit,
   ViewChild,
   HostListener,
+  Renderer2,
 } from "@angular/core";
 import { ModalController } from "@ionic/angular";
 
@@ -43,15 +44,15 @@ export class HomePage implements OnInit, OnDestroy {
 
   // PROPERTIES FOR MODAL ANIMATION
   @ViewChild("homeContainer", { read: ElementRef }) homeContainer: ElementRef;
-  @ViewChild("searchButton", { read: ElementRef }) searchButton: ElementRef;
+  // @ViewChild("searchButton", { read: ElementRef }) searchButton: ElementRef;
 
   @ViewChild("pic1", { read: ElementRef }) pic1: ElementRef;
   @ViewChild("pic2", { read: ElementRef }) pic2: ElementRef;
   @ViewChild("catchText", { read: ElementRef }) catchText: ElementRef;
   @ViewChild("swipeCards", { read: ElementRef }) swipeCards: ElementRef;
   @ViewChild("fish", { read: ElementRef }) fish: ElementRef;
-  @ViewChild("leftFish", { read: ElementRef }) leftFish: ElementRef;
-  @ViewChild("rightFish", { read: ElementRef }) rightFish: ElementRef;
+  // @ViewChild("leftFish", { read: ElementRef }) leftFish: ElementRef;
+  // @ViewChild("rightFish", { read: ElementRef }) rightFish: ElementRef;
 
   screenHeight: number;
   screenWidth: number;
@@ -64,10 +65,12 @@ export class HomePage implements OnInit, OnDestroy {
   @ViewChild(SwipeCardComponent) child: SwipeCardComponent;
 
   constructor(
+    private renderer: Renderer2,
     private swipeStackStore: SwipeStackStore,
     private currentUserStore: CurrentUserStore,
     private modalCtrl: ModalController,
     private tabElementRef: TabElementRefService,
+
     private firebaseAuth: FirebaseAuthService,
     private fs: AngularFirestore
   ) {
@@ -164,17 +167,25 @@ export class HomePage implements OnInit, OnDestroy {
     this.matchedName = matchContents[0];
     this.matchedPicture = matchContents[1];
 
-    this.pic1.nativeElement.style.background = `url(${this.currentUser.pictureUrls[0]})`;
-    this.pic1.nativeElement.style.backgroundSize = "cover";
+    this.renderer.setStyle(
+      this.pic1.nativeElement,
+      "background",
+      `url(${this.currentUser.pictureUrls[0]})`
+    );
+    this.renderer.setStyle(this.pic1.nativeElement, "backgroundSize", "cover");
 
     //style match profile to have matched picture
-    this.pic2.nativeElement.style.background = `url(${this.matchedPicture})`;
-    this.pic2.nativeElement.style.backgroundSize = "cover";
+    this.renderer.setStyle(
+      this.pic2.nativeElement,
+      "background",
+      `url(${this.matchedPicture})`
+    );
+    this.renderer.setStyle(this.pic2.nativeElement, "backgroundSize", "cover");
 
     let catchItems = document.getElementById("catchEls");
 
-    catchItems.style.display = "block";
-    this.fish.nativeElement.style.display = "flex";
+    this.renderer.setStyle(catchItems, "display", "block");
+    this.renderer.setStyle(this.fish.nativeElement, "display", "flex");
 
     var closeButton = document.getElementById("closeAnimation");
     var messageText = document.getElementById("messageText");
@@ -182,8 +193,8 @@ export class HomePage implements OnInit, OnDestroy {
     this.openCatchAnimation.play();
     this.fishSwimAnimation.play();
 
-    closeButton.style.display = "block";
-    messageText.style.display = "flex";
+    this.renderer.setStyle(closeButton, "display", "block");
+    this.renderer.setStyle(messageText, "display", "flex");
   }
 
   closeCatch() {
@@ -202,10 +213,10 @@ export class HomePage implements OnInit, OnDestroy {
     this.closeCatchAnimation.play();
 
     setTimeout(() => {
-      catchItems.style.display = "none";
+      this.renderer.setStyle(catchItems, "display", "none");
 
       //Remove background photo from match card
-      this.pic2.nativeElement.style.background = "black";
+      this.renderer.setStyle(this.pic2.nativeElement, "background", "black");
       this.fishSwimAnimation.pause();
     }, 350);
   }

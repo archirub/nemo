@@ -6,6 +6,7 @@ import {
   ViewChildren,
   ElementRef,
   QueryList,
+  Renderer2,
 } from "@angular/core";
 import {
   AlertController,
@@ -102,7 +103,8 @@ export class SignupoptionalPage implements OnInit {
     private loadingCtrl: LoadingController,
     private loading: LoadingService,
     private alertCtrl: AlertController,
-    private navCtrl: NavController
+    private navCtrl: NavController,
+    private renderer: Renderer2
   ) {}
 
   ngOnInit() {
@@ -184,11 +186,15 @@ export class SignupoptionalPage implements OnInit {
     };
 
     //Initially display none
-    Object.values(map).forEach((element) => (element.style.display = "none"));
+    Object.values(map).forEach((element) =>
+      this.renderer.setStyle(element, "display", "none")
+    );
 
     //Hide all pager dots also
     var dots = this.dots.toArray();
-    dots.forEach((element) => (element.nativeElement.style.display = "none"));
+    dots.forEach((element) =>
+      this.renderer.setStyle(element.nativeElement, "display", "none")
+    );
 
     //Get current slide index and calculate slides left after this one
     var l = await this.slides.length();
@@ -197,10 +203,12 @@ export class SignupoptionalPage implements OnInit {
 
     //Get the number of dots equal to slides left and display them
     var slice = dots.slice(0, this.slidesLeft);
-    slice.forEach((element) => (element.nativeElement.style.display = "block"));
+    slice.forEach((element) =>
+      this.renderer.setStyle(element.nativeElement, "display", "block")
+    );
 
     //Get correct icon to display
-    map[current].style.display = "block";
+    this.renderer.setStyle(map[current], "display", "block");
   }
 
   /**

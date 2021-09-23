@@ -64,7 +64,8 @@ export class ChatBoardComponent implements OnInit {
     private modalCtrl: ModalController,
     private tabElementRef: TabElementRefService,
     private chatboardPicturesService: ChatboardPicturesStore, // used in template
-    private domSanitizer: DomSanitizer
+    private domSanitizer: DomSanitizer,
+    private renderer: Renderer2
   ) {
     this.onResize();
   }
@@ -200,8 +201,8 @@ export class ChatBoardComponent implements OnInit {
 
   /* Automates left margin of 'number matches' text so that it is never covered by match images */
   styleFromMatches() {
-    var images = document.getElementsByClassName("match-image");
-    var text = document.getElementById("match-text");
-    text.style.marginLeft = `${(images.length - 1) * 20}px`;
+    const images = document.getElementsByClassName("match-image");
+    const text = document.getElementById("match-text");
+    this.renderer.setStyle(text, "marginLeft", `${(images.length - 1) * 20}px`);
   }
 }
