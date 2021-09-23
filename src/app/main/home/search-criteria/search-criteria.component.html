@@ -41,6 +41,13 @@
           <div #options class="slide-down">
             <ion-row>
               <ion-col>
+                <div (click)="moveTo('university')" class="criterion">
+                  <h3 id="chosenUni">University</h3>
+                  <h2 *ngIf="this.uniSelection">{{ this.uniSelection }}</h2>
+                  <ion-icon name="chevron-forward-outline"></ion-icon>
+                </div>
+              </ion-col>
+              <!--ion-col>
                 <div class="criterion">
                   <h3 id="university">University</h3>
 
@@ -55,27 +62,20 @@
                     formControlName="university"
                   ></nemo-toggle>
                 </div>
-              </ion-col>
+              </ion-col-->
             </ion-row>
+
             <ion-row>
               <ion-col>
+                <div (click)="moveTo('degree')" class="criterion">
+                  <h3 id="chosenDegree">Degree</h3>
+                  <h2 *ngIf="this.degreeSelection">{{ this.degreeSelection }}</h2>
+                  <ion-icon name="chevron-forward-outline"></ion-icon>
+                </div>
+              </ion-col>
+              <!--ion-col>
                 <div class="criterion">
                   <h3 id="degree">Degree</h3>
-                  <!--ion-select
-                    [(ngModel)] = "degreeSelection"
-                    slot="end"
-                    cancelText="Nah"
-                    okText="Okay!"
-                    formControlName="degree"
-                    (ionChange)="selectReplace('degree')"
-                  >
-                    <ion-select-option
-                      *ngFor="let option of this.scOptions.degree"
-                      value="{{ option }}"
-                    >
-                      {{ option }}
-                    </ion-select-option>
-                  </ion-select-->
                   <nemo-toggle
                     #degreeSlider
                     [buttonWidth]="17"
@@ -85,45 +85,13 @@
                     formControlName="degree"
                   ></nemo-toggle>
                 </div>
-              </ion-col>
+              </ion-col-->
             </ion-row>
-
-            <!-- <ion-row>
-              <ion-col>
-                <div class="criterion">
-                  <h3>Location</h3>
-                  <nemo-toggle
-                    #locationslider
-                    [buttonWidth]="17"
-                    [fontSize]="3"
-                    [selections]="['On Campus', 'Everyone']"
-                    (valueChange)="checkClear()"
-                    formControlName="onCampus"
-                  ></nemo-toggle>
-                </div>
-              </ion-col>
-            </ion-row> -->
 
             <ion-row>
               <ion-col>
                 <div (click)="moveTo('studies')" class="criterion">
                   <h3 id="areaOfStudy">Area of Study</h3>
-                  <!--ion-select
-                    [(ngModel)] = "studySelection"
-                    slot="end"
-                    formControlName="areaOfStudy"
-                    cancelText="Nah"
-                    okText="Okay!"
-                    [value]="'haha'"
-                    (ionChange)="selectReplace('areaOfStudy')"
-                  >
-                    <ion-select-option
-                      *ngFor="let option of this.scOptions.areaOfStudy"
-                      value="{{ option }}"
-                    >
-                      {{ option }}
-                    </ion-select-option>
-                  </ion-select-->
                   <h2 *ngIf="this.studySelection">{{ this.studySelection }}</h2>
                   <ion-icon name="chevron-forward-outline"></ion-icon>
                 </div>
@@ -134,21 +102,6 @@
               <ion-col>
                 <div (click)="moveTo('societies')" class="criterion">
                   <h3 id="society">Societies</h3>
-                  <!--ion-select
-                    [(ngModel)] = "societySelection"
-                    slot="end"
-                    formControlName="societyCategory"
-                    cancelText="Nah"
-                    okText="Okay!"
-                    (ionChange)="selectReplace('society')"
-                  >
-                    <ion-select-option
-                      *ngFor="let option of this.scOptions.societyCategory"
-                      value="{{ option }}"
-                    >
-                      {{ option }}
-                    </ion-select-option>
-                  </ion-select-->
                   <h2 *ngIf="this.societySelection">{{ this.societySelection }}</h2>
                   <ion-icon name="chevron-forward-outline"></ion-icon>
                 </div>
@@ -159,21 +112,6 @@
               <ion-col>
                 <div (click)="moveTo('interests')" class="criterion">
                   <h3 id="interests">Interests</h3>
-                  <!--ion-select
-                    [(ngModel)] = "interestSelection"
-                    slot="end"
-                    formControlName="interests"
-                    cancelText="Nah"
-                    okText="Okay!"
-                    (ionChange)="selectReplace('interests')"
-                  >
-                    <ion-select-option
-                      *ngFor="let option of this.scOptions.interests"
-                      value="{{ option }}"
-                    >
-                      {{ option }}
-                    </ion-select-option>
-                  </ion-select-->
                   <h2 *ngIf="this.interestSelection">{{ this.interestSelection }}</h2>
                   <ion-icon name="chevron-forward-outline"></ion-icon>
                 </div>
@@ -184,6 +122,69 @@
       </ion-slide>
 
       <ion-slide id="placeholder" style="display: block">placeholder</ion-slide>
+
+      <ion-slide id="uni">
+        <div class="flexstart-col">
+          <div (click)="returnTo()" class="flexstart-row return">
+            <ion-icon name="arrow-back-outline"></ion-icon>
+            <h4>Back</h4>
+          </div>
+          <ion-list>
+            <ng-container *ngFor="let option of (universityOptions$ | async)">
+              <!--NGIF=OPTION IS IMPORTANT - stops it showing null values-->
+              <ion-item
+                *ngIf="option"
+                (click)="selectReplace(option, 'chosenUni')"
+                lines="none"
+                [style.--background]="
+                  this.uniSelection === option
+                    ? 'var(--ion-color-primary)'
+                    : 'var(--ion-color-primary-contrast)'
+                "
+                [style.color]="
+                  this.uniSelection === option
+                    ? 'var(--ion-color-primary-contrast)'
+                    : 'var(--ion-color-light-contrast)'
+                "
+              >
+                <ion-label *ngIf="option">{{ option }}</ion-label>
+                <ion-label *ngIf="!option">Any</ion-label>
+              </ion-item>
+            </ng-container>
+          </ion-list>
+        </div>
+      </ion-slide>
+
+      <ion-slide id="deg">
+        <div class="flexstart-col">
+          <div (click)="returnTo()" class="flexstart-row return">
+            <ion-icon name="arrow-back-outline"></ion-icon>
+            <h4>Back</h4>
+          </div>
+          <ion-list>
+            <ng-container *ngFor="let option of degreeOptions">
+              <!--NGIF=OPTION IS IMPORTANT - stops it showing null values-->
+                <ion-item
+                *ngIf="option"
+                (click)="selectReplace(option, 'chosenDegree')"
+                lines="none"
+                [style.--background]="
+                  this.degreeSelection === option
+                    ? 'var(--ion-color-primary)'
+                    : 'var(--ion-color-primary-contrast)'
+                "
+                [style.color]="
+                  this.degreeSelection === option
+                    ? 'var(--ion-color-primary-contrast)'
+                    : 'var(--ion-color-light-contrast)'
+                "
+              >
+                <ion-label>{{ option }}</ion-label>
+              </ion-item>
+            </ng-container>
+          </ion-list>
+        </div>
+      </ion-slide>
 
       <ion-slide id="study">
         <div class="flexstart-col">

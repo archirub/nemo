@@ -19,6 +19,7 @@ import { SearchCriteria } from "@classes/index";
 import { AppToggleComponent } from "@components/index";
 import { UniversityName } from "@interfaces/universities.model";
 import { map } from "rxjs/operators";
+import { tap } from "lodash";
 
 @Component({
   selector: "app-search-criteria",
@@ -41,17 +42,17 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
 
   nameOfUnselected = "none";
 
-  degreeOptions = searchCriteriaOptions.degree.concat(null);
+  degreeOptions = searchCriteriaOptions.degree;
   areaOfStudyOptions = searchCriteriaOptions.areaOfStudy;
   societyCategoryOptions = searchCriteriaOptions.societyCategory;
   interestsOptions = searchCriteriaOptions.interests;
   get universityOptions$() {
-    return this.universitiesStore.optionsList$.pipe(
-      map((options) => options.concat(null))
-    );
+    return this.universitiesStore.optionsList$.pipe();
   }
   // onCampus = searchCriteriaOptions.onCampus
 
+  uniSelection: string;
+  degreeSelection: string;
   studySelection: string;
   societySelection: string;
   interestSelection: string;
@@ -154,12 +155,14 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
   checkClear() {
     this.clearButtonHeight = this.clear.nativeElement.getBoundingClientRect().height;
 
-    if (
+    //if (
       // this.locationHandle.value != "Everyone" ||
-      this.degreeHandle.value != "undergrad"
-    ) {
-      this.slideDown();
-    } else if (
+      //this.degreeHandle.value != "undergrad"
+    //) {
+    //  this.slideDown();
+    if (
+      this.uniSelection != undefined ||
+      this.degreeSelection != undefined ||
       this.studySelection != undefined ||
       this.societySelection != undefined ||
       this.interestSelection != undefined
@@ -169,10 +172,10 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
       this.slideUp();
     }
 
-    console.log("uni value is ", this.universityHandle.value);
+    //console.log("uni value is ", this.universityHandle.value);
     // this.searchCriteriaForm.value.onCampus = this.locationHandle.value;
-    this.form.value.degree = this.degreeHandle.value;
-    this.form.value.university = this.universityHandle.value;
+    //this.form.value.degree = this.degreeHandle.value;
+    //this.form.value.university = this.universityHandle.value;
   }
 
   updateCriteria() {
@@ -187,13 +190,22 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
     //   }
     // }
 
-    if (this.degreeHandle.selections.includes(this.form.value.degree)) {
+    //Sort of need to use the pipe here
+    if (this.form.value.university != this.nameOfUnselected) {
+      this.selectReplace(this.form.value.university, "chosenUni");
+    };
+
+    if (this.degreeOptions.includes(this.form.value.degree)) {
+      this.selectReplace(this.form.value.degree, "chosenDegree");
+    };
+
+    /*if (this.degreeHandle.selections.includes(this.form.value.degree)) {
       this.degreeHandle.selectOption(this.form.value.degree);
     }
 
     if (this.universityHandle.selections.includes(this.form.value.university)) {
       this.universityHandle.selectOption(this.form.value.university);
-    }
+    }*/
 
     if (this.areaOfStudyOptions.includes(this.form.value.areaOfStudy)) {
       this.selectReplace(this.form.value.areaOfStudy, "areaOfStudy");
@@ -229,11 +241,13 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
     this.renderer.setStyle(placeholder, "display", "none");
 
     const slides = [
+      document.getElementById("uni"),
+      document.getElementById("deg"),
       document.getElementById("study"),
       document.getElementById("soc"),
       document.getElementById("int"),
     ];
-    const names = ["studies", "societies", "interests"];
+    const names = ["university", "degree", "studies", "societies", "interests"];
 
     for (let i = 0; i < names.length; i++) {
       if (name === names[i]) {
@@ -250,6 +264,8 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
   async returnTo() {
     var placeholder = document.getElementById("placeholder");
     var slides = [
+      document.getElementById("uni"),
+      document.getElementById("deg"),
       document.getElementById("study"),
       document.getElementById("soc"),
       document.getElementById("int"),
@@ -273,7 +289,31 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
 
   selectReplace(option, label) {
     // Have to manually set here, cannot be done in for loop below
-    if (label === "areaOfStudy") {
+    // You can't index them to arrays or objects because you end up just changing the object
+    // You can't reach the pointed variable
+    // e.g. { "chosenUni": this.uniSelection }
+    // You can access the value of this.uniSelection by this but can't change it
+    // Please someone find a better way to do this because this is disgusting code
+
+    if (label === "chosenUni") {
+      if (this.uniSelection === option) {
+        this.uniSelection = undefined;
+        this.resetFormat(label);
+      } else {
+        this.uniSelection = option;
+        this.newFormat(label);
+      }
+      this.form.value.university = this.uniSelection;
+    } else if (label === "chosenDegree") {
+      if (this.degreeSelection === option) {
+        this.degreeSelection = undefined;
+        this.resetFormat(label);
+      } else {
+        this.degreeSelection = option;
+        this.newFormat(label);
+      }
+      this.form.value.degree = this.degreeSelection;
+    } else if (label === "areaOfStudy") {
       if (this.studySelection === option) {
         this.studySelection = undefined;
         this.resetFormat(label);
@@ -306,6 +346,12 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
   clearSelect() {
     // Clear ion-selects
 
+    this.uniSelection = undefined;
+    this.form.value.university = undefined;
+
+    this.degreeSelection = undefined;
+    this.form.value.degree = undefined;
+
     this.studySelection = undefined;
     this.form.value.areaOfStudy = undefined;
 
@@ -316,20 +362,23 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
     this.form.value.interests = undefined;
 
     //Reset formatting of placeholders
-    var names = ["areaOfStudy", "society", "interests"];
+    var names = ["chosenUni", "chosenDegree", "areaOfStudy", "society", "interests"];
     for (let i = 0; i < names.length; i++) {
       this.resetFormat(names[i]);
     }
 
-    this.degreeHandle.selectOption(this.nameOfUnselected);
-    this.universityHandle.selectOption(this.nameOfUnselected); // this.locationHandle.selectOption("Everyone");
+    //this.degreeHandle.selectOption(this.nameOfUnselected);
+    //this.universityHandle.selectOption(this.nameOfUnselected); // this.locationHandle.selectOption("Everyone");
 
     this.slideUp();
   }
 
   resetFormat(section) {
-    var names = ["areaOfStudy", "society", "interests"];
+    //Orders must match
+    var names = ["chosenUni", "chosenDegree", "areaOfStudy", "society", "interests"];
     var sections = [
+      document.getElementById("chosenUni"),
+      document.getElementById("chosenDegree"),
       document.getElementById("areaOfStudy"),
       document.getElementById("society"),
       document.getElementById("interests"),
@@ -338,7 +387,7 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
     for (let i = 0; i < sections.length; i++) {
       if (section == names[i]) {
         this.renderer.setStyle(sections[i], "marginTop", "1.9vh");
-        this.renderer.setStyle(sections[i], "fontSize", "22px");
+        this.renderer.setStyle(sections[i], "fontSize", "18px");
         this.renderer.setStyle(sections[i], "color", "var(--ion-color-light-contrast)");
         this.renderer.setStyle(sections[i], "top", "0");
         this.renderer.setStyle(sections[i], "position", "initial");
@@ -347,8 +396,11 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
   }
 
   newFormat(section) {
-    var names = ["areaOfStudy", "society", "interests"];
+    //Orders must match
+    var names = ["chosenUni", "chosenDegree", "areaOfStudy", "society", "interests"];
     var sections = [
+      document.getElementById("chosenUni"),
+      document.getElementById("chosenDegree"),
       document.getElementById("areaOfStudy"),
       document.getElementById("society"),
       document.getElementById("interests"),

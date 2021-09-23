@@ -23,6 +23,6 @@
       </app-profile-card>
     </div>
 
-    <div class="shadow"></div>
+    <div *ngIf="(profiles$ | async).length > 0" class="shadow"></div>
   </div>
 </ion-content>

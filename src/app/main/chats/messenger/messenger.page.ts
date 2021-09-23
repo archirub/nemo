@@ -88,6 +88,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild("profCard") grandchildren: ProfileCardComponent; //for access to grandchildren
   @ViewChild("searchBar") searchBar: IonSearchbar;
   @ViewChild("loadingTrigger") loadingTrigger: ElementRef<HTMLElement>;
+  @ViewChild("messageContent") messageContent: IonContent;
 
   private subs = new Subscription();
   private messagesDatabaseSub: () => void = null;
@@ -222,7 +223,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
     return this.hasFullyScrolled$.pipe(
       withLatestFrom(this.firstBatchArrived$),
       tap(() => console.log("asdasd")),
-      exhaustMap(() => concat(timer(500), this.listenOnMoreMessages()))
+      exhaustMap(() => concat(timer(500), this.listenOnMoreMessages())),
     );
   }
 

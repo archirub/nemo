@@ -32,7 +32,7 @@
         </ion-toolbar>
       </ion-header>
 
-      <ion-content>
+      <ion-content #messageContent>
         <div #loadingTrigger>
           <ion-spinner name="bubbles" *ngIf="!(firstBatchArrived$ | async)">
           </ion-spinner>
