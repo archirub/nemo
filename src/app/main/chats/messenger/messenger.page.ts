@@ -103,6 +103,15 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
   public messages$ = new BehaviorSubject<Message[]>([]);
   public chat$ = new BehaviorSubject<Chat>(null);
 
+  public noMessagesPopup: Array<string> = [
+    "Go ahead, send that message. You've got to say something!",
+    "Make sure you don't just say 'hey'!",
+    "We can't think of what to say either...",
+    "Have fun with it, you can always try again!",
+    "What is it they say... 'Speak from the heart'?"
+  ]
+  public chosenPopup: string; //Will be randomly chosen from the list above onInit
+
   private pageIsReady = new BehaviorSubject<boolean>(false);
   public pageIsReady$ = this.pageIsReady.asObservable().pipe(distinctUntilChanged());
 
@@ -152,6 +161,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
     this.pageInitialization();
     this.subs.add(this.scrollHandler$.subscribe());
     this.subs.add(this.otherProfileHandler$.subscribe());
+    this.chosenPopup = this.noMessagesPopup[Math.floor(Math.random() * this.noMessagesPopup.length)];
   }
 
   ngAfterViewInit() {

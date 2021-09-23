@@ -15,7 +15,7 @@
                 <ion-text color="dark">
                   <div class="flexcolumn">
                     <ion-avatar>
-                      <img (click)="slideTo('profile')" [src]="bubblePicture$ | async" />
+                      <img style="width: fit-content;" (click)="slideTo('profile')" [src]="bubblePicture$ | async" />
                     </ion-avatar>
                     <h3 class="messenger-header" (click)="slideTo('profile')">
                       {{(chat$ | async)?.recipient?.name}}
@@ -50,6 +50,9 @@
         refreshingSpinner="circles"
         refreshingText="Refreshing..."
       > -->
+        <ion-row *ngIf="(messages$ | async).length < 1">
+          <p class='tip'>{{ chosenPopup }}</p>
+        </ion-row>
         <ion-row
           *ngFor="let message of messages$ | async; index as i; let last='last'; trackBy: trackMessage"
         >
