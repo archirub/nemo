@@ -9,7 +9,7 @@ import {
   Renderer2,
 } from "@angular/core";
 import { FormGroup, FormControl, Validators } from "@angular/forms";
-import { IonCheckbox, IonSlides } from "@ionic/angular";
+import { IonCheckbox, IonSelect, IonSlides } from "@ionic/angular";
 import { Router } from "@angular/router";
 
 import {
@@ -43,6 +43,7 @@ export class SignuprequiredPage implements OnInit {
   @ViewChildren("pagerDots", { read: ElementRef }) dots: QueryList<ElementRef>;
   @ViewChild("tcbox") tcbox: IonCheckbox;
   @ViewChild("ppbox") ppbox: IonCheckbox;
+  @ViewChild("universitySelect") universitySelect: IonSelect;
 
   // UI MAP TO CHECK VALIDATORS, BUILD ON ionViewDidEnter() HOOK
   reqValidatorChecks: object;
@@ -76,6 +77,8 @@ export class SignuprequiredPage implements OnInit {
   age: number = 0;
   minDOB: Date;
 
+  universitySelectionDisabled: boolean = false;
+
   // Getting these dynamically would be absolutely amazing, not sure how to however
   slideIndexes: { [k in keyof SignupRequired]: number } = {
     firstName: 0,
@@ -94,7 +97,11 @@ export class SignuprequiredPage implements OnInit {
     private universitiesStore: UniversitiesStore,
     private afAuth: AngularFireAuth,
     private renderer: Renderer2
-  ) {}
+  ) {
+    this.form.valueChanges.subscribe((a) =>
+      console.log("required form value change:", a)
+    );
+  }
 
   ngOnInit() {
     this.universityLogic().subscribe();
@@ -429,20 +436,17 @@ export class SignuprequiredPage implements OnInit {
     return this.afAuth.user.pipe(
       filter((u) => !!u),
       concatMap((user) => this.universitiesStore.getUniversityFromEmail(user.email)),
+      delay(5000), // required otherwise it gets set too early and gets set back to null
       map((universityName) => {
-        console.log("you know the vibes bro", universityName);
         const uniFormControl = this.form.get("university");
 
         if (universityName) {
-          console.log("disabling university field", uniFormControl.value);
           uniFormControl.setValue(universityName);
-          uniFormControl.disable();
-          this.changeDetectorRef.detectChanges();
-          console.log("disabling university field", uniFormControl.value);
+          // this.universitySelect.value = universityName;
+          this.universitySelectionDisabled = true;
+          // this.changeDetectorRef.detectChanges();
         } else {
-          console.log("enabling university fields");
-
-          uniFormControl.enable();
+          this.universitySelectionDisabled = false;
         }
       })
     );
