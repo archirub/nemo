@@ -115,13 +115,13 @@
     <ion-slide #profSlide>
       <ion-button class="chat-slide" (click)="slideTo('messenger')">
         <ion-icon name="chevron-back-outline"></ion-icon>
-        <p>Back to chat</p>
       </ion-button>
 
       <div class="shadow"></div>
 
       <ion-content class="profile-container">
         <app-profile-card
+          #profCard
           [profile]="recipientProfile$ | async"
           [profilePictures]="(recipientProfile$ | async)?.pictureUrls"
         ></app-profile-card>

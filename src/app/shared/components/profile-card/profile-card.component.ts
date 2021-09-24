@@ -71,19 +71,9 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
   X: number;
   Y: number;
 
-  //for sizing on chats page
-  @ViewChild("fullCard", { read: ElementRef }) swipe: ElementRef; //full swipe-card id
-  @ViewChild("snippet", { read: ElementRef }) snippet: ElementRef; //info before expand
+  //for expandInfo animation
   @ViewChild("complete", { read: ElementRef, static: false }) complete: ElementRef; //info after expand
-  @ViewChild("picSlides", { read: ElementRef }) picture: ElementRef; //picture slides
-  @ViewChildren("pic", { read: ElementRef }) pictures: QueryList<ElementRef>; //pictures
-  @ViewChild("name", { read: ElementRef }) name: ElementRef; //name
-  @ViewChild("department", { read: ElementRef }) department: ElementRef; //department
   @ViewChild("header", { read: ElementRef }) header: ElementRef; //name & department container
-  @ViewChild("question", { read: ElementRef }) question: ElementRef; //question
-  @ViewChild("answer", { read: ElementRef }) answer: ElementRef; //answer
-  @ViewChild("QandA", { read: ElementRef }) QandA: ElementRef; //question & answer container
-  @ViewChild("shadow", { read: ElementRef }) shadow: ElementRef; //photo shadow div
 
   @ViewChild("intSlides") intSlides: IonSlides;
 

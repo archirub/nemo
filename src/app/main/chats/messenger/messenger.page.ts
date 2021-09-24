@@ -79,13 +79,9 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
   private CHAT_ID: string;
   private MSG_BATCH_SIZE: number = 20;
 
-  // @ViewChild("messageContainer", { read: ElementRef }) messageContainer: ElementRef;
-  // @ViewChild("profSlide", { read: ElementRef }) profSlide: ElementRef;
-  // @ViewChild("header", { read: ElementRef }) header: ElementRef;
-  // @ViewChild("profCard", { read: ElementRef, static: false }) profCard: ElementRef;
   @ViewChild(IonContent) ionContent: IonContent;
   @ViewChild("slides") slides: IonSlides;
-  @ViewChild("profCard") grandchildren: ProfileCardComponent; //for access to grandchildren
+  @ViewChild("profCard") profCard: ProfileCardComponent; //for access to grandchildren
   @ViewChild("searchBar") searchBar: IonSearchbar;
   @ViewChild("loadingTrigger") loadingTrigger: ElementRef<HTMLElement>;
   @ViewChild("messageContent") messageContent: IonContent;
@@ -424,6 +420,8 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
     this.slides.lockSwipes(false);
 
     if (page === "profile") {
+      this.profCard.slides.slideTo(0);
+      this.profCard.updatePager(0);
       this.slides.slideNext();
     } else if (page === "messenger") {
       this.slides.slidePrev();
