@@ -16,12 +16,12 @@ import { DocumentData, QueryDocumentSnapshot, Timestamp } from "@angular/fire/fi
 // IF SUCH CONSTANTS ARE CHANGED, MAKE SURE TO CHANGE THE SECURITY RULES ACCORDINGLY
 export const MAX_PROFILE_PICTURES_COUNT = 6;
 export const MAX_PROFILE_QUESTIONS_COUNT = 3;
+export const MAX_PROFILE_INTERESTS = 6;
 
 export interface profile {
   uid: string;
   firstName: string;
   dateOfBirth: Date;
-  pictureCount: number;
   pictureUrls: string[];
   biography: string;
   university: UniversityName;
@@ -59,7 +59,6 @@ export interface appUser extends profile {
 export interface profileFromDatabase {
   firstName: string;
   dateOfBirth: Timestamp;
-  pictureCount: number;
   biography: string;
 
   university: UniversityName;

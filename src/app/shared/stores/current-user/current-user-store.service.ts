@@ -91,14 +91,14 @@ export class CurrentUserStore {
         const latestSearchCriteria = this.format.searchCriteriaDatabaseToClass(
           privateProfile?.latestSearchCriteria
         );
-
-        await this.SCstore.initalizeThroughCurrentUserStore(latestSearchCriteria);
+        if (privateProfile?.latestSearchCriteria) {
+          await this.SCstore.initalizeThroughCurrentUserStore(latestSearchCriteria);
+        }
 
         const user: AppUser = new AppUser(
           profile?.uid,
           profile?.firstName,
           profile?.dateOfBirth,
-          profile?.pictureCount,
           profile?.pictureUrls,
           profile?.biography,
           profile?.university,
@@ -112,7 +112,7 @@ export class CurrentUserStore {
           profile?.degree,
           profile?.socialMediaLinks,
           privateProfile?.settings,
-          latestSearchCriteria,
+          latestSearchCriteria ?? {},
           infoFromMatchData?.gender,
           infoFromMatchData?.sexualPreference
           // infoFromMatchData?.swipeMode
@@ -215,28 +215,6 @@ export class CurrentUserStore {
     this.user.next(null);
   }
 
-  /**
-   * Used in own-pictures store when updating pictures
-   */
-  public updatePictureCount(newCount: number): Observable<any> {
-    return this.afAuth.user.pipe(
-      withLatestFrom(this.user$),
-      take(1),
-      switchMap(([authUser, storeUser]) => {
-        if (!authUser) return of();
-
-        storeUser.pictureCount = newCount;
-
-        return from(
-          this.fs
-            .collection("profiles")
-            .doc(authUser.uid)
-            .update({ pictureCount: newCount })
-        ).pipe(map(() => this.user.next(storeUser)));
-      })
-    );
-  }
-
   /** From the user's id, returns a Profile object containing info from
    * their profile doc on database
    */
@@ -244,7 +222,6 @@ export class CurrentUserStore {
     const query = this.fs.firestore.collection("profiles").doc(uid);
     return from(query.get()).pipe(
       map((snapshot) => {
-        console.log("profile snapshot");
         if (snapshot.exists) {
           const data = snapshot.data() as profileFromDatabase;
           return this.format.profileDatabaseToClass(snapshot.id, data);
@@ -272,7 +249,6 @@ export class CurrentUserStore {
 
     return from(query.get()).pipe(
       map((snapshot) => {
-        console.log("private profile snapshot");
         if (snapshot.exists) {
           const data = snapshot.data() as privateProfileFromDatabase;
           return data;
@@ -294,8 +270,6 @@ export class CurrentUserStore {
       .httpsCallable("getMatchDataUserInfo")({})
       .pipe(
         map((res: getMatchDataUserInfoResponse) => {
-          console.log("match data info ");
-
           if (res) {
             const gender = res?.gender;
             const sexualPreference = res?.sexualPreference;

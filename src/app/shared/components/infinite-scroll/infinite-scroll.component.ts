@@ -34,10 +34,7 @@ export class InfiniteScrollComponent {
       ...this.options,
     };
 
-    console.log("options:", options);
-
     this.observer = new IntersectionObserver(([entry]) => {
-      console.log("is intersecting? ", entry.isIntersecting);
       entry.isIntersecting && this.scrolled.emit();
     }, options);
 

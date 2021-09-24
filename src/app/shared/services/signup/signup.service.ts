@@ -20,6 +20,7 @@ import {
   catchError,
   concatMap,
   filter,
+  last,
   map,
   publish,
   publishReplay,
@@ -91,104 +92,65 @@ export class SignupService {
   }
 
   /**
-   * Used right after the Firebase account has been created to store
-   * locally (and on the app in an Observable) relevant data
-   */
-  // async initializeLocalStorage(d: AuthResponseData) {
-  //   console.log("initializeSignupStorage", d);
-
-  //   if (!d.idToken) {
-  //     return;
-  //   }
-  //   const expTime = new Date(new Date().getTime() + +d.expiresIn * 1000); // returns exp time in milliseconds
-  //   const data = new SignupDataHolder({
-  //     email: d.email,
-  //     uid: d.localId,
-  //     token: d.idToken,
-  //     tokenExpirationDate: expTime.toISOString(),
-  //   });
-  //   await this.updateLocalStorage(data);
-  //   this.signupData.next(data);
-  // }
-
-  /**
    * Creates user documents on firestore with info from signup process,
    * and stores its pictures in Firebase storage
    * @param data object containing all of the data from all parts of the signup process
    */
-  createFirestoreAccount(): Observable<any> {
-    return combineLatest([this.signupData, this.afAuth.user]).pipe(
-      take(1),
-      switchMap(async ([dataStored, user]) => {
-        await user?.reload();
-        await user.getIdToken(true); // to refresh the token
-        return [dataStored, user] as [SignupDataHolder, User];
-      }),
-      switchMap(([dataStored, user]) => {
-        if (!user) {
-          console.error("Big mistake right here");
-          return of(null);
-        }
-        const creationRequestData: createAccountRequest = {
-          firstName: dataStored.firstName,
-          picturesCount: dataStored?.pictures?.filter(Boolean).length ?? 0, // counts # of none empty elements
-          sexualPreference: dataStored.sexualPreference,
-          gender: dataStored.gender,
-          dateOfBirth: new Date(dataStored.dateOfBirth).toISOString(),
-          university: dataStored.university,
-          degree: dataStored.degree,
-          biography: dataStored.biography,
-          course: dataStored.course,
-          society: dataStored.society,
-          areaOfStudy: dataStored.areaOfStudy,
-          // onCampus: dataStored.onCampus,
-          societyCategory: dataStored.societyCategory,
-          interests: dataStored.interests,
-          questions: dataStored.questions,
-          socialMediaLinks: dataStored.socialMediaLinks,
-        };
+  async createFirestoreAccount(): Promise<void> {
+    return combineLatest([this.signupData, this.afAuth.user])
+      .pipe(
+        take(1),
+        switchMap(async ([dataStored, user]) => {
+          await user?.reload();
+          await user.getIdToken(true); // to refresh the token
+          return [dataStored, user] as [SignupDataHolder, User];
+        }),
+        switchMap(([dataStored, user]) => {
+          if (!user) {
+            console.error("Big mistake right here");
+            return throwError("NO USER AUTHENTICATED");
+          }
+          const creationRequestData: createAccountRequest = {
+            firstName: dataStored.firstName,
+            sexualPreference: dataStored.sexualPreference,
+            gender: dataStored.gender,
+            dateOfBirth: new Date(dataStored.dateOfBirth).toISOString(),
+            university: dataStored.university,
+            degree: dataStored.degree,
+            biography: dataStored.biography,
+            course: dataStored.course,
+            society: dataStored.society,
+            areaOfStudy: dataStored.areaOfStudy,
+            // onCampus: dataStored.onCampus,
+            societyCategory: dataStored.societyCategory,
+            interests: dataStored.interests,
+            questions: dataStored.questions,
+            socialMediaLinks: dataStored.socialMediaLinks,
+          };
 
-        console.log("create account request:", creationRequestData);
-
-        return forkJoin([
-          of({ pictures: dataStored.pictures, uid: (user as User).uid }),
-          this.afFunctions.httpsCallable("createAccount")(creationRequestData),
-        ]);
-      }),
-      switchMap(([data, accountCreationRes]) => {
-        if (accountCreationRes.successful)
-          return this.storePictures(data.pictures, data.uid);
-        else throwError("DATABASE DOCUMENT STORAGE FAILED");
-      }),
-      switchMap((pictureStoringRes) => {
-        if ((pictureStoringRes[0].state = "success")) return of("");
-
-        return throwError("PICTURE STORAGE FAILED");
-      })
-    );
-
-    // error handling:
-    //   - if the error is due to misformat in data, then don't retry (with same data at least,
-    //    inform the user that there is a problem with regards to that, and which fields are a problem)
-    //   - if the error is due to connection error or something of the sort, retry
-    //   - if the error is due to an error inside of the cloud function, then retry maybe
-    // (basically retry only if the error is due to connection error. )
-    // easiest option is to just retry a bunch of times regardless of the case, and if it doesn't work
-    // just display an error message
+          return concat(
+            this.storePictures(dataStored.pictures, user.uid),
+            this.afFunctions.httpsCallable("createAccount")(creationRequestData)
+          ).pipe(last());
+        })
+      )
+      .toPromise();
   }
 
-  initialiseUser() {
-    return this.afAuth.user.pipe(
-      take(1),
-      concatMap((user) => {
-        if (!user) {
-          console.error("That's a big no no");
-          return of();
-        }
-        console.log("we out here fam");
-        return concat(this.removeLocalStorage(), this.currentUserStore.fillStore());
-      })
-    );
+  initializeUser() {
+    return this.afAuth.user
+      .pipe(
+        take(1),
+        concatMap((user) => {
+          if (!user) {
+            console.error("That's a big no no");
+            return of();
+          }
+          console.log("we out here fam");
+          return concat(this.removeLocalStorage(), this.currentUserStore.fillStore());
+        })
+      )
+      .toPromise();
   }
 
   /**
@@ -200,21 +162,24 @@ export class SignupService {
   ): Observable<UploadTaskSnapshot[]> {
     if (!uid) return;
     console.log("storing pictures");
-    const pictureStorers$ = pictures.map((picture, index) => {
+    const pictureStorers$ = pictures.map(async (picture, index) => {
       const filePath = `profilePictures/${uid}/${index}`;
-      // const filePath = `profile_pictures/${uid}/${index}.${picture.format}`;
       const ref = this.afStorage.ref(filePath);
-      // const url = URL.createObjectURL(picture.webPath);
-      return from(
-        (async () => {
-          const res = await fetch(picture);
 
-          return await res.blob();
-        })()
-      ).pipe(concatMap((blob) => from(ref.put(blob))));
+      const res = await fetch(picture);
+
+      const blob = await res.blob();
+
+      return ref.put(blob);
     });
 
-    return forkJoin(pictureStorers$);
+    return forkJoin(pictureStorers$).pipe(
+      catchError((err) => {
+        // here we are assuming that if there is an error then that means
+        console.log("Error while attempting to store pictures: ", err);
+        return of([]);
+      })
+    );
 
     // const promises = Array.from({ length: pictures.length });
 
@@ -287,6 +252,7 @@ export class SignupService {
     // checks whether content is empty. If it is, then don't replace the current observable
     if (storageContent && Object.keys(storageContent).length > 0) {
       const data = new SignupDataHolder(storageContent);
+
       this.signupData.next(data);
     }
   }

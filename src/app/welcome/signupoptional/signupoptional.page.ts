@@ -420,7 +420,6 @@ export class SignupoptionalPage implements OnInit {
 
     const slideCount = await this.slides.length();
     const invalidSlide = this.getFirstInvalidSlideIndex();
-    console.log("a");
     // go to slide if invalidSlide is non null and that it isn't the last slide
     if (invalidSlide && invalidSlide + 1 !== slideCount) {
       const alert = await this.alertCtrl.create({
@@ -428,35 +427,37 @@ export class SignupoptionalPage implements OnInit {
         header: "We found some invalid data",
         buttons: ["Go to field"],
       });
-      console.log("b");
 
       await loader.dismiss();
       alert.onDidDismiss().then(() => this.unlockAndSlideTo(invalidSlide));
       return alert.present();
     }
+
+    await this.updateData();
+
     try {
-      console.log("c");
-
-      await this.updateData();
-
-      console.log("d");
-
-      const response = await this.signup.createFirestoreAccount().toPromise();
-      console.log("e");
-
-      console.log(response);
-
-      await this.signup.initialiseUser().toPromise();
-      console.log("f");
-
-      await loader.dismiss();
-
-      return this.navCtrl.navigateForward("/main/home");
+      await this.signup.createFirestoreAccount();
     } catch (e) {
-      console.log("g");
-
-      await loader?.dismiss();
-      console.log("error", JSON.stringify(e));
+      await loader.dismiss();
     }
+
+    await this.signup.initializeUser();
+
+    await loader.dismiss();
+
+    return this.navCtrl.navigateForward("/welcome/signup-to-app");
+  }
+
+  async onAccountCreationFailure() {
+    const alert = await this.alertCtrl.create({
+      header: "Account creation failed",
+      message: `We couldn't complete the creation of your account. 
+      Please try to close and reopen the app, and check your internet connection. 
+      If the problem persists, abort profile creation when the popup comes up.
+      We're sorry for the inconvenience.`,
+      buttons: ["Okay"],
+    });
+
+    return alert.present();
   }
 }

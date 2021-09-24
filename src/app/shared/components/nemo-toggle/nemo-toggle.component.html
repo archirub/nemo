@@ -1,15 +1,14 @@
-<div class="container"
-[ngStyle]="{'width' : selections.length * buttonWidth + 1 + 'vw'}">
+<div class="container" [ngStyle]="{ width: selections.length * buttonWidth + 1 + 'vw' }">
+  <div #handle id="slider" [ngStyle]="{ width: buttonWidth + 'vw' }"></div>
 
-    <div #handle id="slider" [ngStyle]="{'width' : buttonWidth + 'vw'}"></div>
-
-    <div class="buttons">
-        <ion-button type="{{ option }}" 
-        (click)="selectOption(option)" 
-        *ngFor="let option of selections"
-        [ngStyle]="{'width' : buttonWidth + 'vw', 'font-size' : fontSize + 'vw'}">
-            <p>{{ option }}</p>
-        </ion-button>
-    </div>
-
+  <div class="buttons">
+    <ion-button
+      [type]="option"
+      (click)="selectOption(option)"
+      *ngFor="let option of selections"
+      [ngStyle]="{ width: buttonWidth + 'vw', 'font-size': fontSize + 'vw' }"
+    >
+      <p>{{ option }}</p>
+    </ion-button>
+  </div>
 </div>

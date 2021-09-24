@@ -6,6 +6,7 @@ import {
   ElementRef,
   NgZone,
   Renderer2,
+  OnDestroy,
 } from "@angular/core";
 import { IonSlides, LoadingController, NavController } from "@ionic/angular";
 
@@ -20,7 +21,15 @@ import {
   of,
   Subscription,
 } from "rxjs";
-import { distinctUntilChanged, exhaustMap, map, take, tap } from "rxjs/operators";
+import {
+  concatMap,
+  distinctUntilChanged,
+  exhaustMap,
+  filter,
+  map,
+  take,
+  tap,
+} from "rxjs/operators";
 
 import { CurrentUserStore } from "@stores/index";
 import { FirebaseAuthService } from "@services/firebase-auth/firebase-auth.service";
@@ -35,12 +44,14 @@ import {
   changeShowProfileRequest,
 } from "@interfaces/index";
 
+type GoUnder = "on" | "off";
+
 @Component({
   selector: "app-settings",
   templateUrl: "./settings.page.html",
   styleUrls: ["./settings.page.scss"],
 })
-export class SettingsPage implements AfterViewInit {
+export class SettingsPage implements AfterViewInit, OnDestroy {
   @ViewChild("slide") slides: IonSlides;
   @ViewChild("goUnder") goUnder: ElementRef;
   @ViewChild("goUnderToggle") goUnderToggle: AppToggleComponent;
@@ -48,14 +59,24 @@ export class SettingsPage implements AfterViewInit {
   private editingInProgress = new BehaviorSubject<boolean>(false);
   editingInProgress$ = this.editingInProgress.asObservable().pipe(distinctUntilChanged());
 
-  profileSub: Subscription;
+  subs = new Subscription();
+
   profile: AppUser;
 
   sexualPreference: "female" | "male" | "both";
   gender: Gender;
   // swipeMode: SwipeMode
   // onCampus: onCampus
-  showProfile: "on" | "off";
+  goUnderStyling$(): Observable<GoUnder> {
+    return this.currentUserStore.user$.pipe(
+      map((u) => u?.settings?.showProfile),
+      filter((showProfile) => showProfile === true || showProfile === false),
+      distinctUntilChanged(),
+      map((showProfile) => this.showProfileToGoUnder(showProfile)),
+      tap((goUnder) => this.applyGoUnderStyling(goUnder)),
+      tap((goUnder) => this.goUnderToggle.applyStyling(goUnder))
+    );
+  }
 
   // OPTIONS
   // swipeModeOptions: SwipeMode[] = swipeModeOptions;
@@ -75,7 +96,7 @@ export class SettingsPage implements AfterViewInit {
   ) {}
 
   ngAfterViewInit() {
-    this.editingInProgress$.subscribe((v) => console.log("editiing in progress", v));
+    this.subs.add(this.goUnderStyling$().subscribe());
     const legal = document.getElementById("legal"); //Do not display slides on start up, only when selected
     const prefs = document.getElementById("preferences");
 
@@ -87,12 +108,14 @@ export class SettingsPage implements AfterViewInit {
 
   ionViewDidEnter() {
     //Fetch current user profile to change preferences
-    this.profileSub = this.currentUserStore.user$
-      .pipe(
-        tap((user) => (this.profile = user)),
-        map((user) => this.fillPreferences(user))
-      )
-      .subscribe();
+    this.subs.add(
+      this.currentUserStore.user$
+        .pipe(
+          tap((user) => (this.profile = user)),
+          map((user) => this.fillPreferences(user))
+        )
+        .subscribe()
+    );
   }
 
   async goBack() {
@@ -100,20 +123,30 @@ export class SettingsPage implements AfterViewInit {
   }
 
   async logOut() {
-    await this.firebaseAuth.logOut();
+    return this.firebaseAuth.logOut();
   }
 
   async deleteAccount() {
-    await this.firebaseAuth.deleteAccount();
+    return this.firebaseAuth.deleteAccount();
   }
 
   async changePassword() {
     await this.firebaseAuth.changePasswordProcedure();
   }
 
+  showProfileToGoUnder(bool: boolean): GoUnder {
+    if (bool === true) return "off";
+    if (bool === false) return "on";
+  }
+
+  goUnderToShowProfile(str: GoUnder): boolean {
+    return str === "off";
+  }
+
   /* Styles gone 'under' tab on toggle */
-  async actOnGoUnder(option: "on" | "off") {
-    this.applyGoUnderStyling(option);
+  async actOnGoUnder(option: GoUnder) {
+    console.log("actOnGoUnder triggered, option chosen is", option);
+    const newShowProfile = this.goUnderToShowProfile(option);
 
     const loader = await this.loadingCtrl.create(
       this.loadingService.defaultLoadingOptions
@@ -121,21 +154,18 @@ export class SettingsPage implements AfterViewInit {
 
     await this.currentUserStore.user$
       .pipe(
+        map((u) => u?.settings?.showProfile),
+        filter((currentShowProfile) => currentShowProfile !== newShowProfile),
         take(1),
         exhaustMap((user) => {
-          if (
-            this.showProfile == null ||
-            user?.settings?.showProfile === (this.showProfile === "on")
-          )
-            return of("");
           const request: changeShowProfileRequest = {
-            showProfile: this.showProfile === "on",
+            showProfile: newShowProfile,
           };
 
           return concat(
             loader.present(),
             this.afFunctions.httpsCallable("changeShowProfile")(request),
-            this.currentUserStore.updateShowProfileInStore(this.showProfile === "on")
+            this.currentUserStore.updateShowProfileInStore(newShowProfile)
           ).pipe(tap((a) => console.log("this is ", a)));
         })
       )
@@ -144,13 +174,13 @@ export class SettingsPage implements AfterViewInit {
     await loader.dismiss();
   }
 
-  applyGoUnderStyling(showProfile: "on" | "off") {
+  applyGoUnderStyling(goUnder: GoUnder) {
     const tabStyle = this.goUnder.nativeElement.style;
 
-    if (showProfile === "on") {
+    if (goUnder === "on") {
       tabStyle.color = "var(--ion-color-primary)";
       tabStyle.fontWeight = "bold";
-    } else if (showProfile === "off") {
+    } else if (goUnder === "off") {
       tabStyle.color = "var(--ion-color-light-contrast)";
       tabStyle.fontWeight = "normal";
     }
@@ -212,18 +242,6 @@ export class SettingsPage implements AfterViewInit {
 
     if (user?.sexualPreference)
       this.sexualPreference = this.sexPrefArrayToString(user?.sexualPreference);
-
-    if (user?.settings?.showProfile) {
-      this.goUnderToggle.selectOption(user?.settings?.showProfile ? "on" : "off");
-      this.applyGoUnderStyling(this.showProfile);
-    }
-
-    console.log(
-      "preferences template",
-      this.sexualPreference,
-      this.gender,
-      this.showProfile
-    );
   }
 
   editingTriggered() {
@@ -263,7 +281,6 @@ export class SettingsPage implements AfterViewInit {
     );
 
     if (sexPrefIsChanged) {
-      console.log("easy ");
       const request: updateGenderSexPrefRequest = {
         name: "sexualPreference",
         value: this.sexPrefStringToArray(this.sexualPreference),
@@ -311,5 +328,9 @@ export class SettingsPage implements AfterViewInit {
     if (string === "male") return ["male"];
     if (string === "female") return ["female"];
     if (string === "both") return ["male", "female"];
+  }
+
+  ngOnDestroy() {
+    this.subs.unsubscribe();
   }
 }

@@ -1,3 +1,4 @@
+import { uidChoiceMap } from "./../../interfaces/swipe-choice.model";
 import { Injectable } from "@angular/core";
 import { AngularFirestore, DocumentSnapshot } from "@angular/fire/compat/firestore";
 import { AngularFireFunctions } from "@angular/fire/compat/functions";
@@ -73,13 +74,13 @@ export class SwipeStackStore {
   // not good because only sends pictures of a given profile once they are all downloaded,
   // but best I can do for now
   public downloadPictures(profile: Profile) {
-    const pictureUrls$ = Array.from({ length: profile.pictureCount }).map((v, index) =>
-      this.getUrl(profile.uid, index)
-    );
-    0;
-    return forkJoin(pictureUrls$).pipe(
-      concatMap((pictureUrls) => this.addUrls(pictureUrls, profile.uid))
-    );
+    return this.afStorage
+      .ref("/profilePictures/" + profile.uid)
+      .listAll()
+      .pipe(
+        exhaustMap((list) => forkJoin(list.items.map((i) => i.getDownloadURL()))),
+        exhaustMap((urls) => this.addUrls(urls, profile.uid))
+      );
   }
 
   private getUrl(uid: string, pictureIndex: number): Observable<string> {

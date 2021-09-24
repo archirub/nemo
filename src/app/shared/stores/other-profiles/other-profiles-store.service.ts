@@ -74,7 +74,7 @@ export class OtherProfilesStore {
         return EMPTY;
       }), // save profile to store
       exhaustMap((profile) => {
-        if (!!profile) return this.getPictureUrls(uid, profile.pictureCount);
+        if (!!profile) return this.getPictureUrls(uid);
 
         return EMPTY;
       }), // fetch pictures
@@ -166,10 +166,10 @@ export class OtherProfilesStore {
   /**
    * Fetches and returns the picture urls of the given pictures
    */
-  getPictureUrls(uid: string, pictureCount: number): Observable<string[]> {
-    const downloadUrls$ = Array.from({ length: pictureCount }).map((v, index) =>
-      this.afStorage.ref("profilePictures/" + uid + "/" + index).getDownloadURL()
-    );
-    return forkJoin(downloadUrls$);
+  getPictureUrls(uid: string): Observable<string[]> {
+    return this.afStorage
+      .ref("/profilePictures/" + uid)
+      .listAll()
+      .pipe(exhaustMap((list) => forkJoin(list.items.map((i) => i.getDownloadURL()))));
   }
 }

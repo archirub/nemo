@@ -12,6 +12,7 @@ import {
 } from "@angular/core";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { IonButton } from "@ionic/angular";
+import { interval } from "rxjs";
 
 @Component({
   selector: "nemo-toggle",
@@ -38,7 +39,8 @@ export class AppToggleComponent
   onChange: any = () => {};
   onTouched: any = () => {};
 
-  @Input() value: string | number;
+  value: string | number;
+
   // Emits option selected from this child component to be accessed by parents
   @Output() valueChange = new EventEmitter();
 
@@ -49,11 +51,17 @@ export class AppToggleComponent
     super();
   }
 
-  ngAfterViewInit() {
-    this.valueChange.subscribe((v) => console.log("value change of nemo-toggle", v));
-  }
+  ngAfterViewInit() {}
 
   selectOption(option) {
+    this.applyStyling(option);
+    this.value = option;
+    this.valueChange.emit(option);
+  }
+
+  applyStyling(option) {
+    // if (!this.handle || !this.buttons) return;
+
     for (let i = 0; i < this.buttons.toArray().length; i++) {
       if (this.buttons.toArray()[i].type === option) {
         this.renderer.setStyle(
@@ -68,12 +76,6 @@ export class AppToggleComponent
         );
       }
     }
-
-    //Emit choice
-    this.value = option;
-    this.valueChange.emit(option);
-
-    //option variable is the selection directly from the interfaces array
   }
 
   writeValue(value: string | number): void {

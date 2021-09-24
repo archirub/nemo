@@ -147,8 +147,8 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
     this.clearButtonHeight = this.clear.nativeElement.getBoundingClientRect().height;
 
     //if (
-      // this.locationHandle.value != "Everyone" ||
-      //this.degreeHandle.value != "undergrad"
+    // this.locationHandle.value != "Everyone" ||
+    //this.degreeHandle.value != "undergrad"
     //) {
     //  this.slideDown();
     if (
@@ -184,11 +184,11 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
     //Sort of need to use the pipe here
     if (this.form.value.university != this.nameOfUnselected) {
       this.selectReplace(this.form.value.university, "chosenUni");
-    };
+    }
 
     if (this.degreeOptions.includes(this.form.value.degree)) {
       this.selectReplace(this.form.value.degree, "chosenDegree");
-    };
+    }
 
     /*if (this.degreeHandle.selections.includes(this.form.value.degree)) {
       this.degreeHandle.selectOption(this.form.value.degree);
@@ -414,11 +414,9 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
   }
 
   async closeAndConfirmChoices() {
-    console.log(this.form.value);
     await this.SCstore.updateCriteriaStore(
       this.searchCriteriaToStoreFormatting(this.form.value)
     );
-    console.log("as;ldkasd");
     await this.SCstore.updateCriteriaOnDatabase();
     await this.modalCtrl.dismiss();
   }
@@ -435,7 +433,6 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
         formattedSC[key] = value;
       }
     });
-    console.log("store formatted", formattedSC);
 
     return formattedSC as SearchCriteria;
   }
@@ -450,7 +447,6 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
         formattedSC[key] = value;
       }
     });
-    console.log("template formatted", formattedSC);
 
     return formattedSC;
   }

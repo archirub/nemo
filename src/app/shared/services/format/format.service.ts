@@ -51,14 +51,6 @@ export class FormatService {
     const interests = searchCriteria.interests;
     // const onCampus = searchCriteria.onCampus;
 
-    console.log("this is the vibes", {
-      university,
-      areaOfStudy,
-      degree,
-      societyCategory,
-      interests,
-      // onCampus,
-    });
     return {
       university,
       areaOfStudy,
@@ -72,8 +64,7 @@ export class FormatService {
   public profileDatabaseToClass(uid: string, profile: profileFromDatabase): Profile {
     const firstName = profile.firstName;
     const dateOfBirth = profile.dateOfBirth.toDate();
-    const pictureCount = profile.pictureCount;
-    const pictureUrls = Array(pictureCount).fill("") as string[];
+    const pictureUrls = [];
     const biography = profile.biography;
     const university = profile.university;
     const course = profile.course;
@@ -90,7 +81,6 @@ export class FormatService {
       uid,
       firstName,
       dateOfBirth,
-      pictureCount,
       pictureUrls,
       biography,
       university,
@@ -109,7 +99,6 @@ export class FormatService {
   public profileClassToDatabase(profile: Profile): profileFromDatabase {
     const firstName = profile.firstName;
     const dateOfBirth = Timestamp.fromDate(profile.dateOfBirth);
-    const pictureCount = profile.pictureCount;
     const biography = profile.biography;
     const university = profile.university;
     const course = profile.course;
@@ -125,7 +114,6 @@ export class FormatService {
     return {
       firstName,
       dateOfBirth,
-      pictureCount,
       biography,
       university,
       degree,

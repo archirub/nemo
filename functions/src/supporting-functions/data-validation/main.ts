@@ -185,7 +185,6 @@ function sanitizeCreateAccount(request: createAccountRequest): {
   // required properties
   if (!isString(request?.firstName)) return { isValid: false };
   if (!isDateOfBirth(request?.dateOfBirth)) return { isValid: false };
-  if (!isNumber(request?.picturesCount)) return { isValid: false };
   if (!isUniversity(request?.university)) return { isValid: false };
   if (!isGender(request?.gender)) return { isValid: false };
   if (!isSexualPreference(request?.sexualPreference)) return { isValid: false };
@@ -221,7 +220,6 @@ function sanitizeCreateAccount(request: createAccountRequest): {
       firstName: request?.firstName,
       gender: request?.gender,
       interests: request?.interests,
-      picturesCount: request?.picturesCount,
       questions: request?.questions,
       sexualPreference: request?.sexualPreference,
       socialMediaLinks: request?.socialMediaLinks,

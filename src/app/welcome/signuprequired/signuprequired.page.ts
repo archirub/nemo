@@ -29,7 +29,7 @@ import { allowOptionalProp } from "@interfaces/index";
 import { AppDatetimeComponent } from "@components/index";
 import { UniversitiesStore } from "@stores/universities/universities.service";
 import { AngularFireAuth } from "@angular/fire/compat/auth";
-import { concatMap, filter, map, switchMap } from "rxjs/operators";
+import { concatMap, delay, filter, map, switchMap } from "rxjs/operators";
 import { Observable } from "rxjs";
 
 @Component({
@@ -69,7 +69,6 @@ export class SignuprequiredPage implements OnInit {
     return this.universitiesStore.optionsList$;
   }
 
-  maxPictureCount: number = 6; // defines the number of picture boxes in template, as well as is used in logic to save picture picks
   picturesHolder: string[] = Array.from({ length: MAX_PROFILE_PICTURES_COUNT }); // for storing pictures. Separate from rest of form, added to it on form submission
 
   slidesLeft: number;
@@ -151,8 +150,6 @@ export class SignuprequiredPage implements OnInit {
       if (entry.includes("policies")) {
         const checks = [this.tcbox.checked, this.ppbox.checked];
 
-        console.log("Policy boxes:", checks);
-
         if (checks.includes(false)) {
           this.renderer.setStyle(policyCheckMsg, "display", "flex");
           falseCount++;
@@ -163,7 +160,6 @@ export class SignuprequiredPage implements OnInit {
         // IMPORTANT that this is !invalid instead of valid
         // This is because setting a FormControl to disabled makes valid = false but
         // invalid = true (see https://github.com/angular/angular/issues/18678)
-        console.log("entry is " + entry + "    element is " + element);
         if (element === "policies") return;
         const validity = !this.form.get(element).invalid;
 
@@ -187,7 +183,6 @@ export class SignuprequiredPage implements OnInit {
 
       if (entry === "dateOfBirth" && this.age < 18) {
         this.renderer.setStyle(this.reqValidatorChecks["dateOfBirth"], "display", "flex");
-        console.log("Not valid, don't slide");
         return;
       }
 
@@ -199,7 +194,6 @@ export class SignuprequiredPage implements OnInit {
         this.unlockAndSlideToNext(); // If others valid, slide next
       } else {
         this.renderer.setStyle(this.reqValidatorChecks[entry], "display", "flex"); // Show "invalid" UI for invalid validator
-        console.log("Not valid, don't slide");
       }
     }
   }
@@ -348,10 +342,10 @@ export class SignuprequiredPage implements OnInit {
    * @param data
    */
   fillFields(data: allowOptionalProp<SignupRequired>): void {
+    console.log("data coming until fill fields", data);
     Object.keys(data).forEach((field) => {
       if (field === "pictures") {
         if (data[field]) {
-          console.log(data[field]);
           data[field].forEach((pic, i) => {
             this.savePhoto({ photoUrl: pic, index: i });
           });
@@ -359,6 +353,9 @@ export class SignuprequiredPage implements OnInit {
       } else if (field === "dateOfBirth") {
         this.date.writeValue(data[field] as unknown as string);
       } else {
+        if (field === "sexualPreference") {
+          console.log("field is", field, data[field]);
+        }
         const formControl = this.form.get(field);
         if (formControl) formControl.setValue(data[field]);
       }
@@ -381,7 +378,9 @@ export class SignuprequiredPage implements OnInit {
     const formatedSexualPreference: "male" | "female" | "both" =
       this.form.get("sexualPreference").value;
     let sexualPreference: SexualPreference;
-    if (formatedSexualPreference === "both") {
+    if (Array.isArray(formatedSexualPreference)) {
+      sexualPreference = formatedSexualPreference;
+    } else if (formatedSexualPreference === "both") {
       sexualPreference = ["male", "female"];
     } else {
       sexualPreference = [formatedSexualPreference];
@@ -431,14 +430,17 @@ export class SignuprequiredPage implements OnInit {
       filter((u) => !!u),
       concatMap((user) => this.universitiesStore.getUniversityFromEmail(user.email)),
       map((universityName) => {
+        console.log("you know the vibes bro", universityName);
         const uniFormControl = this.form.get("university");
 
         if (universityName) {
-          console.log("disabling");
-          uniFormControl.disable();
+          console.log("disabling university field", uniFormControl.value);
           uniFormControl.setValue(universityName);
+          uniFormControl.disable();
+          this.changeDetectorRef.detectChanges();
+          console.log("disabling university field", uniFormControl.value);
         } else {
-          console.log("enabling");
+          console.log("enabling university fields");
 
           uniFormControl.enable();
         }

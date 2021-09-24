@@ -32,7 +32,6 @@ export class AppComponent implements OnDestroy, OnInit {
 
   ngOnInit() {
     this.afAuth.authState.subscribe((a) => console.log("change in authstate: ", a));
-    this.SCStore.searchCriteria$.subscribe((a) => console.log("current SC", a));
   }
 
   ngOnDestroy(): void {

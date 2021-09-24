@@ -3,9 +3,7 @@ import { AnimationController } from "@ionic/angular";
 import _ from "lodash";
 // import * as anime from "animejs"
 
-export const FlyingLetterAnimation = (
-  letter: ElementRef,
-  ) => {
+export const FlyingLetterAnimation = (letter: ElementRef) => {
   const startXPosition = -15;
   const endXPosition = 105;
 

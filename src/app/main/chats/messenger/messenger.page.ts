@@ -108,8 +108,8 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
     "Make sure you don't just say 'hey'!",
     "We can't think of what to say either...",
     "Have fun with it, you can always try again!",
-    "What is it they say... 'Speak from the heart'?"
-  ]
+    "What is it they say... 'Speak from the heart'?",
+  ];
   public chosenPopup: string; //Will be randomly chosen from the list above onInit
 
   private pageIsReady = new BehaviorSubject<boolean>(false);
@@ -156,12 +156,11 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    this.pageIsReady$.subscribe((a) => console.log("page is ready: " + a));
-    this.firstBatchArrived$.subscribe((a) => console.log("first batch arrived " + a));
     this.pageInitialization();
     this.subs.add(this.scrollHandler$.subscribe());
     this.subs.add(this.otherProfileHandler$.subscribe());
-    this.chosenPopup = this.noMessagesPopup[Math.floor(Math.random() * this.noMessagesPopup.length)];
+    this.chosenPopup =
+      this.noMessagesPopup[Math.floor(Math.random() * this.noMessagesPopup.length)];
   }
 
   ngAfterViewInit() {
@@ -171,9 +170,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
   }
 
   async pageInitialization() {
-    console.log("a");
     const paramMap = await this.route.paramMap.pipe(first()).toPromise();
-    console.log("b");
 
     if (!paramMap.has("chatID")) {
       return this.navCtrl.navigateBack("/tabs/chats");
@@ -182,9 +179,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
     this.CHAT_ID = paramMap.get("chatID");
 
     await this.initializeMessenger().toPromise();
-    console.log("c");
     await this.ionContent.scrollToBottom();
-    console.log("d");
 
     setTimeout(() => this.pageIsReady.next(true), 500);
   }
@@ -232,8 +227,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
 
     return this.hasFullyScrolled$.pipe(
       withLatestFrom(this.firstBatchArrived$),
-      tap(() => console.log("asdasd")),
-      exhaustMap(() => concat(timer(500), this.listenOnMoreMessages())),
+      exhaustMap(() => concat(timer(500), this.listenOnMoreMessages()))
     );
   }
 
@@ -296,11 +290,9 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
   private initializeMessenger(): Observable<any> {
     return this.chatboardStore.chats$.pipe(
       filter((chats) => !!chats?.[this.CHAT_ID]),
-      tap((a) => console.log("the chat right now is" + a)),
       withLatestFrom(this.currentUser.user$.pipe(filter((u) => !!u))),
       take(1),
       map(([chats, user]) => {
-        console.log("we got here ");
         // Fills the chat subject with the data from the chatboard store
         this.chat$.next(chats[this.CHAT_ID]);
         this.latestChatInput = chats[this.CHAT_ID].latestChatInput;
@@ -323,8 +315,6 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
         this.messagesDatabaseSub?.();
 
         const newMsgCount = msgCount + this.MSG_BATCH_SIZE;
-
-        console.log("listening on more messages", msgCount);
 
         this.messagesDatabaseSub = this.firestore.firestore
           .collection("chats")
@@ -356,7 +346,6 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
 
   sendMessage(): Observable<any> {
     const messageTime = new Date();
-    console.log(this.latestChatInput);
 
     return this.afauth.user.pipe(
       withLatestFrom(this.chat$.pipe(filter((c) => !!c))),

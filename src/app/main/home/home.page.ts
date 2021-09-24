@@ -35,9 +35,6 @@ import { AngularFirestore } from "@angular/fire/compat/firestore";
   styleUrls: ["home.page.scss"],
 })
 export class HomePage implements OnInit, OnDestroy {
-  log() {
-    console.log("click fam");
-  }
   swipeProfiles$: Observable<Profile[]>;
 
   private swipeStackSub: Subscription;

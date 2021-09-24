@@ -51,8 +51,7 @@ function userIsValid() {
 
 function profileWriteIsValid(profileID) {
       return isDocumentOwner(profileID) 
-              && onlyPropertiesModifiedAre(["pictureCount"])
-              && request.resource.data.pictureCount is number;
+
     }
 
 function messageWriteIsValid(msg) {

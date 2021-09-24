@@ -29,89 +29,87 @@ type DataChecker = {
 
 export const createAccount = functions
   .region("europe-west2")
-  .https.onCall(
-    async (request: createAccountRequest, context): Promise<successResponse> => {
-      const MAX_UID_COUNT_PI_STORAGE = 2000;
+  .https.onCall(async (request: createAccountRequest, context): Promise<void> => {
+    const MAX_UID_COUNT_PI_STORAGE = 2000;
 
-      await runStrongUserIdentityCheck(context);
+    await runStrongUserIdentityCheck(context);
 
-      const uid = context?.auth?.uid as string;
+    const uid = context?.auth?.uid as string;
 
-      const sanitizedRequest = sanitizeData(
-        "createAccount",
-        request
-      ) as createAccountRequest;
+    const sanitizedRequest = sanitizeData(
+      "createAccount",
+      request
+    ) as createAccountRequest;
 
-      // GET DEMOGRAPHICS OF USER
-      const demographics = getDemographics(sanitizedRequest);
+    // GET DEMOGRAPHICS OF USER
+    const demographics = getDemographics(sanitizedRequest);
 
-      try {
-        // START THE TRANSACTION
-        await admin.firestore().runTransaction(async (transaction) => {
-          // FETCH DATA REQUIRED FROM DATABASE
-          const databaseFetchingPromises: Promise<
-            FirebaseFirestore.QuerySnapshot<any | uidDatingStorage>
-          >[] = [];
+    try {
+      // START THE TRANSACTION
+      await admin.firestore().runTransaction(async (transaction) => {
+        // FETCH DATA REQUIRED FROM DATABASE
+        const databaseFetchingPromises: Promise<
+          FirebaseFirestore.QuerySnapshot<any | uidDatingStorage>
+        >[] = [];
 
-          // data needed for PI storage
-          // (case where no document matches the condition is handled in (addToPiStorage))
-          databaseFetchingPromises.push(
-            transaction.get(
-              admin
-                .firestore()
-                .collection("piStorage")
-                .where("uidCount", "<", MAX_UID_COUNT_PI_STORAGE)
-                .limit(1)
-            )
-          );
+        // data needed for PI storage
+        // (case where no document matches the condition is handled in (addToPiStorage))
+        databaseFetchingPromises.push(
+          transaction.get(
+            admin
+              .firestore()
+              .collection("piStorage")
+              .where("uidCount", "<", MAX_UID_COUNT_PI_STORAGE)
+              .limit(1)
+          )
+        );
 
-          // data needed for uid storage
-          for (const gender of demographics.gender) {
-            for (const sexPref of demographics.sexualPreference) {
-              databaseFetchingPromises.push(
-                transaction.get(
-                  admin
-                    .firestore()
-                    .collection("uidDatingStorage")
-                    .where("degree", "==", demographics.degree)
-                    .where("gender", "==", gender)
-                    .where("sexualPreference", "==", sexPref)
-                ) as Promise<FirebaseFirestore.QuerySnapshot<uidDatingStorage>>
-              );
-            }
+        // data needed for uid storage
+        for (const gender of demographics.gender) {
+          for (const sexPref of demographics.sexualPreference) {
+            databaseFetchingPromises.push(
+              transaction.get(
+                admin
+                  .firestore()
+                  .collection("uidDatingStorage")
+                  .where("degree", "==", demographics.degree)
+                  .where("gender", "==", gender)
+                  .where("sexualPreference", "==", sexPref)
+              ) as Promise<FirebaseFirestore.QuerySnapshot<uidDatingStorage>>
+            );
           }
-          const [piStorageDocument, ...uidStorageDocuments] = await Promise.all(
-            databaseFetchingPromises
-          );
+        }
+        const [piStorageDocument, ...uidStorageDocuments] = await Promise.all(
+          databaseFetchingPromises
+        );
 
-          // SET / UPDATE DOCUMENTS
-          addToProfile(transaction, sanitizedRequest, uid);
-          addToPrivateProfile(transaction, uid);
-          addToMatchDataMain(transaction, sanitizedRequest, uid);
-          addToMatchDataDating(transaction, sanitizedRequest, uid);
-          addToPiStorage(transaction, piStorageDocument, sanitizedRequest, uid);
-          addToUidDatingStorage(transaction, uidStorageDocuments, uid);
-        });
+        // SET / UPDATE DOCUMENTS
+        addToProfile(transaction, sanitizedRequest, uid);
+        addToPrivateProfile(transaction, uid);
+        addToMatchDataMain(transaction, sanitizedRequest, uid);
+        addToMatchDataDating(transaction, sanitizedRequest, uid);
+        addToPiStorage(transaction, piStorageDocument, sanitizedRequest, uid);
+        addToUidDatingStorage(transaction, uidStorageDocuments, uid);
+      });
 
-        // TO DO
-        // DEGREE NEEDS TO BE PART OF REQUIRED FOR BACKEND, otherwise we put them in both categories
-        // NEED TO FINALISE ALL DATA FORMAT INCLUDING PICTURES TO FINISH THIS PART
+      // TO DO
+      // DEGREE NEEDS TO BE PART OF REQUIRED FOR BACKEND, otherwise we put them in both categories
+      // NEED TO FINALISE ALL DATA FORMAT INCLUDING PICTURES TO FINISH THIS PART
 
-        // pictures: profilePictureUrls;
-        // REST TO DO:  CONVERT TO TRANSACTION (absolutely necessary here)
+      // pictures: profilePictureUrls;
+      // REST TO DO:  CONVERT TO TRANSACTION (absolutely necessary here)
 
-        // USE TRANSACTION INSTEAD SO THAT, let's imagine multiple people are creating an account while
-        // the pi storage is at its limit, well multiple new piStorage documents could be created,
-        // same thing if we are close to it, multiple people could be added to the document and exceed the limit
-        // since the limit is low, it isn't really a problem, but might be a good opportunity to learn this stuff
+      // USE TRANSACTION INSTEAD SO THAT, let's imagine multiple people are creating an account while
+      // the pi storage is at its limit, well multiple new piStorage documents could be created,
+      // same thing if we are close to it, multiple people could be added to the document and exceed the limit
+      // since the limit is low, it isn't really a problem, but might be a good opportunity to learn this stuff
 
-        return { successful: true };
-      } catch (e) {
-        console.warn(`uid: ${uid}, ${e}`);
-        return { successful: false, message: "some shit went down: " + e };
-      }
+      return;
+    } catch (e) {
+      console.warn(`uid: ${uid}, ${e}`);
+      throw new functions.https.HttpsError("internal", "Creation of the account failed.");
     }
-  );
+  });
 
 interface demographicMap {
   sexualPreference: ("male" | "female")[];
@@ -201,7 +199,6 @@ function addToProfile(
   const profile: profileFromDatabase = {
     firstName: data.firstName,
     dateOfBirth: admin.firestore.Timestamp.fromDate(new Date(data.dateOfBirth)) as any,
-    pictureCount: data.picturesCount,
     biography: data.biography,
     university: data.university,
     degree: data.degree,

@@ -172,7 +172,7 @@ export class GlobalStateManagementService {
 
   private userIsValidRoutine(user: User) {
     return this.isUserSigningUp().pipe(
-      concatMap((userIsSigningUp) => {
+      switchMap((userIsSigningUp) => {
         // COMMENTED OUT FOR DEVELOPMENT ONLY
 
         // if user is signing up, then do nothing
@@ -180,7 +180,7 @@ export class GlobalStateManagementService {
 
         // otherwise, continue the procedure
         return this.doesProfileDocExist(user.uid).pipe(
-          concatMap((profileDocExists) => {
+          switchMap((profileDocExists) => {
             // "null" implies there has been an error and we couldn't get an answer on whether
             // it exists. Hence take no action
             if (profileDocExists === null) return of("");
@@ -255,6 +255,8 @@ export class GlobalStateManagementService {
   }
 
   private hasDocumentsRoutine() {
+    // case where person is in signupToApp
+    if (this.router.url === "/welcome/signup-to-app") return of("");
     // makes it such that we only navigate to home if the user is not in main
     // such that it doesn't infringe on the user experience
     if (this.pageIsMain(this.getPageFromUrl(this.router.url)))

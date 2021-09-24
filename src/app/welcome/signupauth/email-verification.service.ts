@@ -47,6 +47,8 @@ export class EmailVerificationService {
       exhaustMap(async (user) => {
         await this.afAuth.updateCurrentUser(user);
         await user?.reload();
+        await user.getIdToken(true);
+        console.log("Listening on email verification...");
         return user;
       }),
       filter((user) => !!user?.emailVerified),

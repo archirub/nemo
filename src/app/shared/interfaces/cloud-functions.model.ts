@@ -54,7 +54,7 @@ export interface updateGenderSexPrefRequest {
 }
 
 export type createAccountRequest = Omit<SignupRequired, "pictures" | "dateOfBirth"> &
-  SignupOptional & { picturesCount: number; dateOfBirth: string };
+  SignupOptional & { dateOfBirth: string };
 
 export type profileEditingByUserRequest = {
   data: editableProfileFields;

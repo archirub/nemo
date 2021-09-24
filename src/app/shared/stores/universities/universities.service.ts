@@ -30,9 +30,9 @@ export class UniversitiesStore {
           .pipe(
             map((snapshot) => (snapshot.exists ? snapshot.data() : null)),
             map((data: universitiesAllowedDocument) => {
-              console.log("universities fetched");
               if (!data) return console.error("Document does not exist.");
 
+              console.log("universities fetched");
               this.universities.next(data.list);
             })
           );

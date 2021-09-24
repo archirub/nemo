@@ -33,6 +33,10 @@ const routes: Routes = [
         (m) => m.SignupoptionalPageModule
       ),
   },
+  {
+    path: 'signup-to-app',
+    loadChildren: () => import('./signup-to-app/signup-to-app.module').then( m => m.SignupToAppPageModule)
+  },
   // {
   //   path: '**',
   //   component: HomePage

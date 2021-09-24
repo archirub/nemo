@@ -212,11 +212,7 @@
           <div class="flexstart-col">
             <div class="preferences top">
               <h3>My university is</h3>
-              <ion-select
-                required
-                formControlName="university"
-                *ngIf="universityOptions$ | async"
-              >
+              <ion-select required formControlName="university">
                 <ion-select-option
                   *ngFor="let university of (universityOptions$ | async)"
                   [value]="university"

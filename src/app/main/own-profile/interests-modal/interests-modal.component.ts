@@ -1,6 +1,11 @@
 import { Component, OnInit, Input, Output, EventEmitter } from "@angular/core";
 
-import { assetsInterestsPath, Interests, searchCriteriaOptions } from "@interfaces/index";
+import {
+  assetsInterestsPath,
+  Interests,
+  MAX_PROFILE_QUESTIONS_COUNT,
+  searchCriteriaOptions,
+} from "@interfaces/index";
 
 import { ModalController } from "@ionic/angular";
 
@@ -68,7 +73,7 @@ export class InterestsModalComponent implements OnInit {
     if (this.interests.includes(choice)) {
       const index = this.interests.indexOf(choice);
       this.interests.splice(index, 1);
-    } else {
+    } else if (!this.reachedMaxInterestsCount) {
       this.interests.push(choice);
     }
   }
@@ -80,5 +85,13 @@ export class InterestsModalComponent implements OnInit {
   getPicturePath(interestName: Interests): string {
     const formattedName = interestName.replace(/\s/g, "").toLowerCase();
     return "/assets/interests/" + formattedName + ".svg";
+  }
+
+  get reachedMaxInterestsCount(): boolean {
+    return this.interestsCount >= MAX_PROFILE_QUESTIONS_COUNT;
+  }
+
+  get interestsCount(): number {
+    return this.interests.length ?? 0;
   }
 }

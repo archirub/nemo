@@ -17,9 +17,9 @@ export const SCenterAnimation = (
         height: "90vh",
         width: "90vw",
         "--border-radius": "20px",
-        'border-radius': '20px',
+        "border-radius": "20px",
         opacity: "1",
-        overflow: 'inherit'
+        overflow: "inherit",
       })
       .fromTo("transform", "translateY(-100vh)", "translateY(0vh)");
 
@@ -35,12 +35,12 @@ export const SCenterAnimation = (
       .create()
       .addElement(baseEl.querySelector(".sc-ion-modal-md")!)
       .beforeStyles({
-        overflow: 'hidden !important'
+        overflow: "hidden !important",
       })
       .fromTo("background", "transparent", "var(--ion-color-dark)")
       .fromTo("opacity", "0", "0.2");
-    
-      // ALL CONTENT BELOW MODAL
+
+    // ALL CONTENT BELOW MODAL
     const contentAnimation = new AnimationController()
       .create()
       .addElement(homeComponent.nativeElement)
@@ -60,11 +60,11 @@ export const SCenterAnimation = (
       .easing("ease-out")
       .duration(200)
       .addAnimation([
-        backdropAnimation, 
+        backdropAnimation,
         shadowIOSAnimation,
         shadowAndroidAnimation,
-        wrapperAnimation, 
-        contentAnimation
+        wrapperAnimation,
+        contentAnimation,
       ]);
   };
   return animation;

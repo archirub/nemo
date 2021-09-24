@@ -124,9 +124,9 @@ export class SignupauthPage implements OnInit {
     this.subs.add(this.timerResendingLogic().subscribe());
 
     this.resendingIsAvailable$.subscribe((a) => console.log("resending is available", a));
-    this.timeToResendingAvailable$.subscribe((a) =>
-      console.log("time to resending is available", a)
-    );
+    // this.timeToResendingAvailable$.subscribe((a) =>
+    //   console.log("time to resending is available", a)
+    // );
   }
 
   ionViewDidEnter() {
@@ -153,7 +153,6 @@ export class SignupauthPage implements OnInit {
         interval(1000).pipe(
           take(this.EMAIL_SENDING_INTERVAL + 1),
           map((count) => {
-            console.log("count is ", count);
             const timeLeftUntilAvailable = this.EMAIL_SENDING_INTERVAL - count;
             this.timeToResendingAvailable.next(timeLeftUntilAvailable);
             this.changeDetector.detectChanges();
@@ -275,33 +274,105 @@ export class SignupauthPage implements OnInit {
     await this.slidesRef.lockSwipes(true);
   }
 
-  private requestAccountCreation(): Observable<void | UserCredential> {
+  private requestAccountCreation(): Promise<void | UserCredential> {
     const email: string = this.authForm.get("email").value;
     const password: string = this.authForm.get("password").value;
 
-    if (!this.authForm.valid || !email || !password) return of();
+    if (!this.authForm.valid || !email || !password) return;
 
-    return this.signup.createFirebaseAccount(email, password).pipe(
-      catchError((error) => {
-        console.log("error at signup", error);
-        let messageToDisplay = "Could not sign you up. Please try again.";
-        if (error?.message) messageToDisplay = error?.message;
-        // if (error.code === "auth/email-already-in-use") {
-        //   messageToDisplay = "The email address is already in use by another account.";
-        // }
-        // if (error.code === "auth/weak-password") {
+    return this.signup
+      .createFirebaseAccount(email, password)
+      .pipe(
+        catchError((error) => {
+          // rethrowing error so that the chain of logic from "onSlideFromPassword" is stopped
+          let messageToDisplay = "Could not sign you up. Please try again.";
+          if (error?.message) messageToDisplay = error?.message;
+          if (error?.code === "auth/email-already-in-use") {
+            this.onEmailAlreadyInUse();
+            throw new error();
+          }
+          if (error?.code === "auth/weak-password") {
+            this.onWeakPassword();
+            throw new error();
+          }
+          // if (error.code === "auth/email-already-in-use") {
+          //   messageToDisplay = "The email address is already in use by another account.";
+          // }
+          // if (error.code === "auth/weak-password") {
 
-        // }
-        // if (error.code === "TOO_MANY_ATTEMPTS_TRY_LATER") {
-        //   messageToDisplay =
-        //     "We have blocked all requests from this device due to unusual activity. Try again later.";
-        // }
-        return concat(
-          this.displaySignupFailedAlert(messageToDisplay),
-          of(this.authForm.reset(this.emptyAuthForm))
-        );
-      })
-    );
+          // }
+          // if (error.code === "TOO_MANY_ATTEMPTS_TRY_LATER") {
+          //   messageToDisplay =
+          //     "We have blocked all requests from this device due to unusual activity. Try again later.";
+          // }
+          return concat(
+            this.displaySignupFailedAlert(messageToDisplay),
+            of(this.authForm.reset(this.emptyAuthForm))
+          );
+        })
+      )
+      .toPromise();
+  }
+
+  async onWeakPassword() {
+    const alert = await this.alertCtrl.create({
+      header: "Password too weak",
+      message:
+        "The password you provided is too weak. Try a more complex or longer password.",
+      backdropDismiss: true,
+      buttons: [
+        {
+          text: "Okay",
+        },
+      ],
+    });
+    alert.onDidDismiss().then(() => {
+      this.authForm.reset(this.emptyAuthForm);
+      return this.goToSlide(1);
+    });
+
+    return alert.present();
+  }
+
+  async onEmailAlreadyInUse() {
+    let outcome: "tryAnotherEmail" | "signIn";
+    const tryAnotherEmailProcedure = () => {
+      this.authForm.reset(this.emptyAuthForm);
+      return this.goToSlide(0);
+    };
+    const signInProcedure = () => this.navCtrl.navigateRoot("/welcome/login");
+
+    const alert = await this.alertCtrl.create({
+      header: "This email is already in use",
+      message: `
+      The email you provided already has an account associated with it.
+      If you are the owner of this account and would like to log into the app, 
+      Go to the Sign In page. Otherwise, you may try another email address, or
+      contact support if you have another issue.
+    `,
+      backdropDismiss: true,
+      buttons: [
+        {
+          text: "Sign In",
+          handler: () => {
+            outcome = "signIn";
+          },
+        },
+        {
+          text: "Try another email",
+          handler: () => {
+            outcome = "tryAnotherEmail";
+          },
+        },
+      ],
+    });
+    // this format is used otherwise it makes the slides buggy while it moves back to email
+    alert.onDidDismiss().then(() => {
+      if (outcome === "tryAnotherEmail") return tryAnotherEmailProcedure();
+      if (outcome === "signIn") return signInProcedure().then(() => {});
+    });
+
+    return alert.present();
   }
 
   private async emailSentAnimation() {
@@ -378,9 +449,11 @@ export class SignupauthPage implements OnInit {
         await this.goToSlide(0);
         return alert.present();
       }
-
-      await this.requestAccountCreation().toPromise();
-      await loader.dismiss();
+      try {
+        await this.requestAccountCreation();
+      } catch {
+        return loader.dismiss(); // logic to handle in case of error here is all in requestAccountCreation()
+      }
       await this.slideToNext();
       await this.emailService.sendVerificationToUser("sent").toPromise();
       await this.emailService.listenForVerification().toPromise();
@@ -411,7 +484,7 @@ export class SignupauthPage implements OnInit {
   async devVerifyEmail() {
     return this.afFunctions
       .httpsCallable("makeEmailVerified")({})
-      .pipe(tap((res) => console.log(res)))
+      .pipe(tap((res) => console.log("makeEmailVerified cloud fucntion response: ", res)))
       .toPromise();
   }
 
@@ -451,9 +524,12 @@ export class SignupauthPage implements OnInit {
     this.renderer.setStyle(map[current], "display", "block");
   }
 
-  private async displaySignupFailedAlert(message: string): Promise<void> {
+  private async displaySignupFailedAlert(
+    message: string,
+    header?: string
+  ): Promise<void> {
     const alert = await this.alertCtrl.create({
-      header: "Signup Failed",
+      header: header ?? "Signup Failed",
       message: message,
       buttons: ["Okay"],
     });

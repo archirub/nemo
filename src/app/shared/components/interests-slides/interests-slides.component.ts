@@ -9,7 +9,12 @@ import {
 } from "@angular/core";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 
-import { assetsInterestsPath, Interests, searchCriteriaOptions } from "@interfaces/index";
+import {
+  assetsInterestsPath,
+  Interests,
+  MAX_PROFILE_QUESTIONS_COUNT,
+  searchCriteriaOptions,
+} from "@interfaces/index";
 
 @Component({
   selector: "interests-slides",
@@ -179,7 +184,7 @@ export class InterestSlidesComponent implements OnInit, ControlValueAccessor {
     if (this.interests.includes(choice)) {
       const index = this.interests.indexOf(choice);
       this.interests.splice(index, 1);
-    } else {
+    } else if (!this.reachedMaxInterestsCount) {
       this.interests.push(choice);
     }
     this.interestsChange.emit(this.interests);
@@ -211,5 +216,13 @@ export class InterestSlidesComponent implements OnInit, ControlValueAccessor {
 
   setDisabledState(isDisabled: boolean) {
     //this.disabled = isDisabled;
+  }
+
+  get reachedMaxInterestsCount(): boolean {
+    return this.interestsCount >= MAX_PROFILE_QUESTIONS_COUNT;
+  }
+
+  get interestsCount(): number {
+    return this.interests.length ?? 0;
   }
 }

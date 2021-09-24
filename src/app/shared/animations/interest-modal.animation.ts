@@ -18,7 +18,7 @@ export const IntEnterAnimation = (
         width: "90vw",
         "--border-radius": "20px",
         opacity: "1",
-        overflow: 'inherit'
+        overflow: "inherit",
       })
       .fromTo("transform", "translate3d(0,100%,0)", "translate3d(0,0,0)");
 
@@ -35,7 +35,7 @@ export const IntEnterAnimation = (
       .addElement(baseEl.querySelector(".sc-ion-modal-md")!)
       .fromTo("background", "transparent", "var(--ion-color-dark)")
       .fromTo("opacity", "0", "0.2");
-      
+
     // ALL CONTENT BELOW MODAL
     const contentAnimation = new AnimationController()
       .create()
@@ -56,11 +56,11 @@ export const IntEnterAnimation = (
       .easing("ease-out")
       .duration(200)
       .addAnimation([
-        backdropAnimation, 
+        backdropAnimation,
         shadowIOSAnimation,
         shadowAndroidAnimation,
-        wrapperAnimation, 
-        contentAnimation
+        wrapperAnimation,
+        contentAnimation,
       ]);
   };
   return animation;

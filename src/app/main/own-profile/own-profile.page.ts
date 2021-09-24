@@ -134,8 +134,12 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    this.fishSwimAnimation = FishSwimAnimation(this.fish);
-    this.fishSwimAnimation.play();
+    // assuming that if this.fish is undefined it is because
+    // #fish isn't rendered as picsLoaded$ is already true
+    if (this.fish) {
+      this.fishSwimAnimation = FishSwimAnimation(this.fish);
+      this.fishSwimAnimation.play();
+    }
   }
 
   stopAnimation() {
@@ -180,12 +184,10 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
 
   async presentIntModal(): Promise<void> {
     if (!this.interestModal) {
-      this.buildIntModal();
+      await this.buildIntModal();
     }
 
-    setTimeout(() => {
-      return this.interestModal.present();
-    }, 50);
+    return this.interestModal.present();
   }
 
   // Used to preload modal as soon as the previous SC window was dismissed
@@ -193,7 +195,6 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     modal.onDidDismiss().then(() => {
       this.editingTriggered();
 
-      console.log(this.editableFields?.interests);
       this.interestModal = undefined;
     });
   }
@@ -229,7 +230,6 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
   }
 
   dragAndDropPhotos(event: CdkDragDrop<string[]>) {
-    console.log(event);
     transferArrayItem(
       this.profilePictures,
       event.previousContainer.data,
@@ -241,10 +241,13 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
   }
 
   goToSettings() {
-    if (!this.editingInProgress.value) {
-      //Just check the observable (BehaviorSubject)
-      this.router.navigateByUrl("/main/settings");
-    }
+    return this.editingInProgress$
+      .pipe(
+        switchMap((inProgress) =>
+          !inProgress ? this.router.navigateByUrl("/main/settings") : of("")
+        )
+      )
+      .toPromise();
   }
 
   displayExit(section) {
@@ -348,7 +351,6 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
 
   editingAnimationLogic(): Observable<any> {
     return this.editingInProgress$.pipe(
-      tap((a) => console.log("in progress", a)),
       switchMap((inProgress) =>
         this.toggleDiv ? ToggleAppearAnimation(this.toggleDiv).play() : of()
       )
