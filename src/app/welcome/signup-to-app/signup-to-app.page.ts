@@ -1,6 +1,7 @@
 import { NavController } from "@ionic/angular";
 import { Component, OnInit } from "@angular/core";
 import { Permissions, PermissionType } from "@capacitor/core";
+import { GlobalStateManagementService } from "@services/global-state-management/global-state-management.service";
 
 @Component({
   selector: "app-signup-to-app",
@@ -8,7 +9,10 @@ import { Permissions, PermissionType } from "@capacitor/core";
   styleUrls: ["./signup-to-app.page.scss"],
 })
 export class SignupToAppPage implements OnInit {
-  constructor(private navCtrl: NavController) {}
+  constructor(
+    private navCtrl: NavController,
+    private globalStateManagement: GlobalStateManagementService
+  ) {}
 
   ngOnInit() {}
   async requestNotificationPermission() {
@@ -17,6 +21,7 @@ export class SignupToAppPage implements OnInit {
   }
 
   async goToApp() {
+    this.globalStateManagement.activate().toPromise(); // important to not await this, otherwise navCtrl never gets called
     return this.navCtrl.navigateRoot("/main/tabs/home");
   }
 }

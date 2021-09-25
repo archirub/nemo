@@ -84,6 +84,21 @@ export class QuestionSlidesComponent implements OnInit, ControlValueAccessor {
     this.updatePager();
   }
 
+  resetSlides() {
+    while (this.questionArray.length > 0) {
+      console.log("deleeting");
+      this.deleteQuestion(this.questionArray.length - 1);
+    }
+
+    this.counter = 1; //counter to add slides to array
+
+    if (this.questionArray.length < 1) {
+      this.availableQuestionsMap[0] = [...this.questions];
+    } else {
+      this.formAQM();
+    }
+  }
+
   async updatePager() {
     const current = await this.slides.getActiveIndex(); //Get active index, colour that dot orange
     const dots = Array.from(this.dots);
@@ -297,6 +312,7 @@ export class QuestionSlidesComponent implements OnInit, ControlValueAccessor {
    * Rebuilds the slide UI and fills out each slide
    */
   writeValue(value: any): void {
+    console.log("writting new questions value", value);
     this.value = value;
 
     //Reinitialise everything ready for filling out UI

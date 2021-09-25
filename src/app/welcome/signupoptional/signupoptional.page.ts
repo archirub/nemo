@@ -34,6 +34,7 @@ import { allowOptionalProp } from "@interfaces/index";
 import { SignupService } from "@services/signup/signup.service";
 import { QuestionSlidesComponent } from "@components/index";
 import { LoadingService } from "@services/loading/loading.service";
+import { intersection } from "lodash";
 
 @Component({
   selector: "app-signupoptional",
@@ -44,36 +45,39 @@ export class SignupoptionalPage implements OnInit {
   @ViewChild("interestSlides", { read: ElementRef }) interestSlides: ElementRef;
   @ViewChild("slides") slides: IonSlides;
   @ViewChildren("pagerDots", { read: ElementRef }) dots: QueryList<ElementRef>;
-  @ViewChild("qSlides") qSlides: QuestionSlidesComponent;
+  @ViewChild("qSlides") questionSlides: QuestionSlidesComponent;
 
   slidesLeft: number;
 
   questionArray: QuestionAndAnswer[];
 
   // FIELD FORM
-  form = new FormGroup({});
-  blankForm = new FormGroup({
-    course: new FormControl(null),
-    areaOfStudy: new FormControl(null),
-    interests: new FormControl([]),
-    society: new FormControl(null),
-    societyCategory: new FormControl(null),
-    questions: new FormArray([
-      new FormGroup({
-        q: new FormControl(""),
-        a: new FormControl(""),
-      }),
-    ]),
-    biography: new FormControl(null),
-    onCampus: new FormControl(null),
-    socialMediaLinks: new FormArray([
-      // commented out until we figure out wtf to do with that
-      // new FormGroup({
-      //   socialMedia: new FormControl("instagram"),
-      //   link: new FormControl(null),
-      // }),
-    ]),
-  });
+
+  get blankForm() {
+    return new FormGroup({
+      course: new FormControl(null),
+      areaOfStudy: new FormControl(null),
+      interests: new FormControl([]),
+      society: new FormControl(null),
+      societyCategory: new FormControl(null),
+      questions: new FormArray([
+        new FormGroup({
+          q: new FormControl(""),
+          a: new FormControl(""),
+        }),
+      ]),
+      biography: new FormControl(null),
+      // onCampus: new FormControl(null),
+      socialMediaLinks: new FormArray([
+        // commented out until we figure out wtf to do with that
+        // new FormGroup({
+        //   socialMedia: new FormControl("instagram"),
+        //   link: new FormControl(null),
+        // }),
+      ]),
+    });
+  }
+  form = this.blankForm;
 
   // OPTIONS
   societyCategoryOptions = searchCriteriaOptions.societyCategory;
@@ -108,8 +112,6 @@ export class SignupoptionalPage implements OnInit {
   ) {}
 
   ngOnInit() {
-    // put this way so that we have a trace of what a blank form is like so that we can reset it
-    this.form = this.blankForm;
     this.clearFormArray(this.form.controls.questions as FormArray);
   }
 
@@ -215,15 +217,18 @@ export class SignupoptionalPage implements OnInit {
    * Grabs all questions and answers from question slides component and adds them to form array
    * This is the only way currently written to submit them to the form
    */
-  async submitQuestions() {
+  async questionsOnGoToNextSlide() {
     this.clearFormArray(this.form.controls.questions as FormArray);
     //Clears any previous answers to avoid pushing same twice
 
-    for (let i = 0; i < this.qSlides.questionArray.length; i++) {
-      this.addQuestion([this.qSlides.questionArray[i], this.qSlides.answerArray[i]]);
+    for (let i = 0; i < this.questionSlides.questionArray.length; i++) {
+      this.addQuestion([
+        this.questionSlides.questionArray[i],
+        this.questionSlides.answerArray[i],
+      ]);
     }
 
-    this.unlockAndSlideToNext();
+    return this.onGoToNextSlide();
   }
 
   async unlockAndSlideToNext() {
@@ -326,22 +331,116 @@ export class SignupoptionalPage implements OnInit {
    * and not dynamically updated by changes in the template. Changes in the order of the template
    * may therefore change its validity.
    */
-  getFirstInvalidSlideIndex() {
+  async getFirstInvalidSlideIndex() {
     const fieldValues = this.getFormValues();
     const initIndex = 100;
     let slideIndex: number = initIndex;
 
     // checks whether each field has a value and if that value is valid
-    Object.keys(this.slideIndexes).forEach((field: keyof SignupOptional) => {
-      const formControl = this.form.get(field);
+    await Promise.all(
+      Object.keys(this.slideIndexes).map(async (field: keyof SignupOptional) => {
+        const formControl = this.form.get(field);
 
-      // checks whether element is valid
-      if (!formControl.valid) {
-        slideIndex = Math.min(slideIndex, this.slideIndexes[field]);
-      }
-    });
+        // checks whether element is valid
+        if (!(await this.slideIsValid(this.slideIndexes[field]))) {
+          slideIndex = Math.min(slideIndex, this.slideIndexes[field]);
+        }
+      })
+    );
 
     return slideIndex === initIndex ? null : slideIndex;
+  }
+
+  async onSkipSlide() {
+    console.log("onSkipSlide");
+    const currentSlideIndex = await this.slides.getActiveIndex();
+    const fieldsOnCurrentSlide = await this.getFieldsOnSlide(currentSlideIndex);
+
+    // resetting controls of current slide
+    fieldsOnCurrentSlide.forEach((field) => {
+      const emptyFieldControl = this.blankForm.get(field);
+      console.log(field, emptyFieldControl);
+      if (!emptyFieldControl) return;
+      this.form.setControl(field, emptyFieldControl);
+      if (field === "questions") {
+        this.questionSlides.resetSlides();
+        // this.removeQuestion(0);
+        // this.form.get("questions").setValue([
+        //   {
+        //     q: null,
+        //     a: null,
+        //   },
+        // ]);
+      }
+      // this.changeDetectorRef.detectChanges(); // forces Angular to check updates in the template
+
+      // if (field === "questions") {
+      //   this.removeQuestion()
+      // }
+    });
+
+    return this.unlockAndSlideToNext();
+  }
+
+  /**
+   * checks in particular for whether both course/areaOfStudy or both society/societyCategory
+   * are filled or empty, and same for each question answer pair.
+   * Everything is optional so anything can be empty, but these pairs need to have the same state
+   * of empty or filled
+   */
+  async slideIsValid(slideIndex: number) {
+    const fieldsOnCurrentSlide = await this.getFieldsOnSlide(slideIndex);
+    const isFilled = (v) => typeof v === "string" && v.length > 0;
+    const isEmpty = (v) => !v;
+    const bothNullOrFilled = (v1, v2) =>
+      (isFilled(v1) && isFilled(v2)) || (isEmpty(v1) && isEmpty(v2));
+
+    if (intersection(fieldsOnCurrentSlide, ["course", "areaOfStudy"]).length === 2) {
+      const courseValue = this.form.get("course").value;
+      const areaOfStudyValue = this.form.get("areaOfStudy").value;
+      const isValid = bothNullOrFilled(courseValue, areaOfStudyValue);
+      if (!isValid) return false;
+    }
+
+    if (intersection(fieldsOnCurrentSlide, ["society", "societyCategory"]).length === 2) {
+      const societyValue = this.form.get("society").value;
+      const societyCategoryValue = this.form.get("societyCategory").value;
+      const isValid = bothNullOrFilled(societyValue, societyCategoryValue);
+      if (!isValid) return false;
+    }
+
+    if (fieldsOnCurrentSlide.includes("questions")) {
+      const questionsValue: QuestionAndAnswer[] = (
+        this.form.get("questions").value as Array<any>
+      ).map((qst) => {
+        return { question: qst.q, answer: qst.a };
+      });
+      let isValid = true;
+      questionsValue.forEach((QandA) =>
+        !bothNullOrFilled(QandA.answer, QandA.question) ? (isValid = false) : null
+      );
+      if (!isValid) return false;
+    }
+
+    return true;
+  }
+
+  async onGoToNextSlide() {
+    console.log("onGoToNextSlide");
+    const currentSlideIndex = await this.slides.getActiveIndex();
+    const isValid = await this.slideIsValid(currentSlideIndex);
+    if (isValid) return this.unlockAndSlideToNext();
+  }
+
+  async getFieldsOnSlide(slideIndex: number) {
+    let fieldsOnCurrentSlide: (keyof SignupOptional)[] = [];
+
+    Object.entries(this.slideIndexes).forEach(
+      ([fieldName, slideIndex]: [keyof SignupOptional, number]) =>
+        slideIndex === slideIndex ? fieldsOnCurrentSlide.push(fieldName) : null
+    );
+
+    return fieldsOnCurrentSlide;
   }
 
   /**
@@ -356,7 +455,7 @@ export class SignupoptionalPage implements OnInit {
           (QandA) => this.formBuilder.group({ q: QandA.question, a: QandA.answer })
         );
         this.form.setControl(field, this.formBuilder.array(questionFormGroups || []));
-        this.qSlides.writeValue(this.form.controls.questions.value);
+        this.questionSlides.writeValue(this.form.controls.questions.value);
       } else if (field === "socialMediaLinks") {
         const socialMediaFormGroups = ((data[field] as SocialMediaLink[]) || []).map(
           (sm) => this.formBuilder.group({ socialMedia: sm.socialMedia, link: sm.link })
@@ -419,12 +518,12 @@ export class SignupoptionalPage implements OnInit {
     await loader.present();
 
     const slideCount = await this.slides.length();
-    const invalidSlide = this.getFirstInvalidSlideIndex();
+    const invalidSlide = await this.getFirstInvalidSlideIndex();
     // go to slide if invalidSlide is non null and that it isn't the last slide
     if (invalidSlide && invalidSlide + 1 !== slideCount) {
       const alert = await this.alertCtrl.create({
         backdropDismiss: false,
-        header: "We found some invalid data",
+        header: "We found some invalid data...",
         buttons: ["Go to field"],
       });
 
@@ -439,6 +538,7 @@ export class SignupoptionalPage implements OnInit {
       await this.signup.createFirestoreAccount();
     } catch (e) {
       await loader.dismiss();
+      await this.onAccountCreationFailure();
     }
 
     await this.signup.initializeUser();
@@ -456,6 +556,7 @@ export class SignupoptionalPage implements OnInit {
       If the problem persists, abort profile creation when the popup comes up.
       We're sorry for the inconvenience.`,
       buttons: ["Okay"],
+      backdropDismiss: false,
     });
 
     return alert.present();
