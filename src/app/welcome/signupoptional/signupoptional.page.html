@@ -33,7 +33,7 @@
               <div class="input">
                 <!--Area of Study?-->
                 <ion-select placeholder="Area of study" formControlName="areaOfStudy">
-                  <ion-select-option [value]="null">nuthin</ion-select-option>
+                  <ion-select-option [value]="null">Unselect</ion-select-option>
 
                   <ion-select-option
                     *ngFor="let area of areaOfStudyOptions"
@@ -62,10 +62,10 @@
 
           <div class="buttons first">
             <div class="skip">
-              <ion-button (click)="unlockAndSlideToNext()">Skip</ion-button>
+              <ion-button (click)="onSkipSlide()">Skip</ion-button>
             </div>
 
-            <ion-button class="next-slide scroll" (click)="unlockAndSlideToNext()">
+            <ion-button class="next-slide scroll" (click)="onGoToNextSlide()">
               <ion-icon name="chevron-forward-outline"></ion-icon>
             </ion-button>
           </div>
@@ -87,6 +87,8 @@
                   placeholder="Society category"
                   formControlName="societyCategory"
                 >
+                  <ion-select-option [value]="null">Unselect</ion-select-option>
+
                   <ion-select-option
                     *ngFor="let category of societyCategoryOptions"
                     value="{{category}}"
@@ -120,10 +122,10 @@
               </ion-button>
 
               <div class="skip">
-                <ion-button (click)="unlockAndSlideToNext()">Skip</ion-button>
+                <ion-button (click)="onSkipSlide()">Skip</ion-button>
               </div>
 
-              <ion-button class="next-slide scroll" (click)="unlockAndSlideToNext()">
+              <ion-button class="next-slide scroll" (click)="onGoToNextSlide()">
                 <ion-icon name="chevron-forward-outline"></ion-icon>
               </ion-button>
             </div>
@@ -139,7 +141,7 @@
             </div>
             <question-slides
               #qSlides
-              (questionDeleted)="this.removeQuestion($event)"
+              (questionDeleted)="removeQuestion($event)"
               formArrayName="questions"
             >
             </question-slides>
@@ -156,10 +158,10 @@
             </ion-button>
 
             <div class="skip">
-              <ion-button (click)="unlockAndSlideToNext()">Skip</ion-button>
+              <ion-button (click)="onSkipSlide()">Skip</ion-button>
             </div>
 
-            <ion-button class="next-slide scroll" (click)="submitQuestions()">
+            <ion-button class="next-slide scroll" (click)="questionsOnGoToNextSlide()">
               <ion-icon name="chevron-forward-outline"></ion-icon>
             </ion-button>
           </div>
@@ -197,10 +199,10 @@
               </ion-button>
 
               <div class="skip">
-                <ion-button (click)="unlockAndSlideToNext()">Skip</ion-button>
+                <ion-button (click)="onSkipSlide()">Skip</ion-button>
               </div>
 
-              <ion-button class="next-slide scroll" (click)="unlockAndSlideToNext()">
+              <ion-button class="next-slide scroll" (click)="onGoToNextSlide()">
                 <ion-icon name="chevron-forward-outline"></ion-icon>
               </ion-button>
             </div>
@@ -238,7 +240,7 @@
               </ion-button>
 
               <div class="skip">
-                <ion-button (click)="unlockAndSlideToNext()">Skip</ion-button>
+                <ion-button (click)="onSkipSlide()">Skip</ion-button>
               </div>
 
               <ion-button class="next-slide scroll" (click)="onSubmit()">
