@@ -67,6 +67,13 @@ ion-textarea {
     right: 0;
 }
 
+.noSlides {
+    position: absolute;
+    text-align: center;
+    top: 50%;
+    left: calc(50vw - 4vh);
+}
+
 .prev {
     top: 32%;
 }

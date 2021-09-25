@@ -1,18 +1,99 @@
-<ion-content *ngIf="picsLoaded" #chatContainer>
+<nemo-toggle
+  *ngIf="picsLoaded"
+  (valueChange)="setView($event)"
+  [buttonWidth]="16"
+  [fontSize]="4"
+  [selections]="['chats', 'catches']"
+></nemo-toggle>
+
+<ion-content *ngIf="picsLoaded && (view === 'catches')" #chatContainer>
   <div *ngIf="this.chats.length < 1" class="noChats">
     <p>
       Sorry, looks like you don't have any chats yet. Head to the catch tab to find
       someone new!
     </p>
 
-    <div class="fish" (click)="presentMatches()">
+    <div class="fish" (click)="goToCatch">
       <img name="fish" src="/assets/singlefish-orange.png" />
 
       <h1>Catch</h1>
     </div>
   </div>
 
-  <ion-row *ngIf="matches.length > 0">
+  <h1 class="title">
+    Catches
+  </h1>
+
+  <ion-list *ngIf="this.matches.length > 0">
+    <ion-item-sliding class="parent" *ngFor="let chat of matches; index as i">
+      <ion-item detail="true" button (click)="goToMessenger(chat.id)">
+        <ion-avatar slot="start">
+          <img [src]="(chatboardPictures$ | async)[chat?.recipient?.uid]" />
+        </ion-avatar>
+        <div class="text-container">
+          <ion-label
+            color="primary"
+            class="text-container name"
+          >
+            {{ chat?.recipient?.name }}</ion-label
+          >
+          <ion-label
+            color="black"
+            class="text-container chat read"
+            id="lastMessage"
+            *ngIf="chat?.recentMessage?.senderID === chat?.recipient?.uid"
+          >
+            {{
+              shorten(chat?.recipient?.name + ": " + chat?.recentMessage?.content)
+            }}</ion-label
+          >
+          <ion-label
+            color="black"
+            class="text-container chat unread"
+            id="lastMessage"
+            *ngIf="chat?.recentMessage?.senderID !== chat?.recipient?.uid"
+          >
+            {{ shorten("You: " + chat?.recentMessage?.content) }}</ion-label
+          >
+          <!-- <span> {{ getDate(chat.messages[chat.messages.length - 1].time) }}</span> -->
+        </div>
+        <ion-badge
+          *ngIf="chat?.recentMessage?.senderID === chat?.recipient?.uid"
+          id="unread-badge"
+        >
+          Your turn!
+        </ion-badge>
+      </ion-item>
+
+      <!--Swipe across to delete options-->
+      <ion-item-options side="end">
+        <ion-item-option color="danger" (click)="deleteChat($event, chat)">
+          <ion-icon slot="icon-only" name="trash"></ion-icon>
+        </ion-item-option>
+      </ion-item-options>
+    </ion-item-sliding>
+  </ion-list>
+</ion-content>
+
+<ion-content *ngIf="picsLoaded && (view === 'chats')" #chatContainer>
+  <div *ngIf="this.chats.length < 1" class="noChats">
+    <p>
+      Sorry, looks like you don't have any chats yet. Head to the catch tab to find
+      someone new!
+    </p>
+
+    <div class="fish" (click)="goToCatch">
+      <img name="fish" src="/assets/singlefish-orange.png" />
+
+      <h1>Catch</h1>
+    </div>
+  </div>
+
+  <h1 class="title">
+    Chats
+  </h1>
+
+  <!--ion-row *ngIf="matches.length > 0">
     <ion-item detail="false" #matchesButton button (click)="presentMatches()">
       <ion-avatar slot="start">
         <img
@@ -56,7 +137,7 @@
         10+ new catches!
       </div>
     </ion-item>
-  </ion-row>
+  </ion-row-->
 
   <ion-list *ngIf="this.chats.length > 0">
     <ion-item-sliding class="parent" *ngFor="let chat of chats; index as i">

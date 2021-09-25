@@ -13,6 +13,17 @@ ion-item {
   --background-activated: var(--ion-color-primary-tint);
 }
 
+nemo-toggle {
+  position: absolute;
+  top: 7vh;
+  right: 4vw;
+  z-index: 5;
+}
+
+h1.title {
+  margin: 0 0 10px 10px;
+}
+
 .match-image {
   border: solid 2px var(--ion-color-primary-contrast);
 }

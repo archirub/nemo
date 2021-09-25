@@ -1,4 +1,11 @@
 <ion-content #grid>
+  <div 
+  *ngIf="slideArray.length < 1"
+  (click)="addQuestion()"
+  class="noSlides button">
+    <ion-icon name="add"></ion-icon>
+</div>
+
   <ion-slides #questionSlides (ionSlideDidChange)="this.updatePager()">
     <ion-slide *ngFor="let number of this.slideArray">
       <ion-select

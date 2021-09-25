@@ -10,6 +10,7 @@ import { ChatsPage } from "./chats.page";
 import { ChatBoardComponent } from "./chat-board/chat-board.component";
 import { MatchesComponent } from "./matches/matches.component";
 import { ReportUserModule } from "./report-user/report-user.module";
+import { AppToggleModule } from "@components/nemo-toggle/nemo-toggle.component.module";
 // import { InfiniteScrollModule } from "@components/infinite-scroll/infinite-scroll.component.module";
 
 @NgModule({
@@ -19,6 +20,7 @@ import { ReportUserModule } from "./report-user/report-user.module";
     IonicModule,
     ChatsPageRoutingModule,
     ReportUserModule,
+    AppToggleModule,
     // InfiniteScrollModule,
   ],
   declarations: [ChatsPage, ChatBoardComponent, MatchesComponent],

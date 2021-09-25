@@ -41,6 +41,8 @@ export class ChatBoardComponent implements OnInit {
 
   fadeOutAnimation;
 
+  view: string = "chats";
+
   @Output() loaded = new EventEmitter();
 
   @Input() chats: Chat[];
@@ -195,8 +197,16 @@ export class ChatBoardComponent implements OnInit {
     this.ionContent.scrollToTop(speed);
   }
 
+  setView(event) {
+    this.view = event;
+  }
+
   goToMessenger(chatID: String) {
     this.router.navigate(["main/messenger/" + chatID]);
+  }
+
+  goToCatch() {
+    this.router.navigateByUrl("main/tabs/home");
   }
 
   /* Automates left margin of 'number matches' text so that it is never covered by match images */

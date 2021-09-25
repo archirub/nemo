@@ -213,14 +213,7 @@ export class QuestionSlidesComponent implements OnInit, ControlValueAccessor {
 
   async updateDeleteButton(i) {
     const deleteButton = document.getElementsByClassName("delete")[i] as HTMLElement;
-
-    // Show delete button only if a question has been selected, answer not necessary
-    // Can't delete first slide, otherwise UI disappears lol
-    if (i != 0) {
-      this.renderer.setStyle(deleteButton, "display", "block");
-    } else {
-      this.renderer.setStyle(deleteButton, "display", "none");
-    }
+    this.renderer.setStyle(deleteButton, "display", "block");
   }
 
   async updateAddButton() {
