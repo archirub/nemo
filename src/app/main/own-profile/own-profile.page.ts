@@ -13,9 +13,14 @@ import {
 import { BehaviorSubject, forkJoin, from, Observable, of, Subscription } from "rxjs";
 import { AppUser, Profile } from "@classes/index";
 import { CurrentUserStore } from "@stores/index";
-import { AddPhotoComponent, ProfileCardComponent } from "@components/index";
+import { ProfileCardComponent } from "@components/index";
 import { ProfileCourseComponent } from "./profile-course/profile-course.component";
-import { IonTextarea, LoadingController, ModalController } from "@ionic/angular";
+import {
+  AlertController,
+  IonTextarea,
+  LoadingController,
+  ModalController,
+} from "@ionic/angular";
 import { Router } from "@angular/router";
 import { OwnPicturesStore } from "@stores/pictures/own-pictures/own-pictures.service";
 import { ProfileAnswerComponent } from "./profile-answer/profile-answer.component";
@@ -44,10 +49,15 @@ import {
   questionsOptions,
   assetsInterestsPath,
   Interests,
-  QuestionAndAnswer,
 } from "@interfaces/index";
 import { CdkDragDrop, transferArrayItem } from "@angular/cdk/drag-drop";
+import { isEqualWith } from "lodash";
 
+function nullAndEmptyStrEquiv(value1, value2) {
+  if ((value1 == null || value1 === "") && (value2 == null || value2 === "")) {
+    return true;
+  }
+}
 @Component({
   selector: "app-own-profile",
   templateUrl: "./own-profile.page.html",
@@ -77,18 +87,21 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
   editingInProgress$ = this.editingInProgress.pipe(distinctUntilChanged());
   private editingAnimationLogicSub: Subscription;
 
+  get emptyEditableFields() {
+    return {
+      biography: null,
+      course: null,
+      areaOfStudy: null,
+      society: null,
+      societyCategory: null,
+      interests: [],
+      questions: [],
+    };
+  }
   // these intermediate values (editableFields and profilePictures) are required
   // to allow the user to modify these fields without the backend being affected right away,
   // but only once he/she clicks confirm
-  editableFields: editableProfileFields = {
-    biography: null,
-    course: null,
-    areaOfStudy: null,
-    society: null,
-    societyCategory: null,
-    interests: [],
-    questions: [],
-  };
+  editableFields: editableProfileFields = this.emptyEditableFields;
   profilePictures: string[] = [];
 
   fishSwimAnimation;
@@ -107,16 +120,17 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     private tabElementRef: TabElementRefService,
     private modalCtrl: ModalController,
     private loadingCtrl: LoadingController,
-    private renderer: Renderer2
+    private renderer: Renderer2,
+    private alertCtrl: AlertController
   ) {
     this.appUser$ = this.currentUserStore.user$;
   }
 
-  interestModal: HTMLIonModalElement;
   intEnterAnimation;
   intLeaveAnimation;
 
   ngOnInit() {
+    this.appUser$.subscribe((a) => console.log("app user", a));
     this.editingInProgress$.subscribe((a) => console.log("editing in progress", a));
 
     this.ownPicturesService.urls$
@@ -161,42 +175,21 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
         this.tabElementRef.tabRef,
         this.profileContainer
       );
-
-      this.buildIntModal();
     }, 100);
   }
 
-  async buildIntModal(): Promise<void> {
-    this.modalCtrl
-      .create({
-        component: InterestsModalComponent,
-        componentProps: {
-          interests: this.editableFields?.interests,
-        },
-        enterAnimation: this.intEnterAnimation,
-        leaveAnimation: this.intLeaveAnimation,
-      })
-      .then((m) => {
-        this.interestModal = m;
-        this.onInterestsModalDismiss(this.interestModal);
-      });
-  }
-
-  async presentIntModal(): Promise<void> {
-    if (!this.interestModal) {
-      await this.buildIntModal();
-    }
-
-    return this.interestModal.present();
-  }
-
-  // Used to preload modal as soon as the previous SC window was dismissed
-  onInterestsModalDismiss(modal: HTMLIonModalElement) {
-    modal.onDidDismiss().then(() => {
-      this.editingTriggered();
-
-      this.interestModal = undefined;
+  async presentInterestsModal(): Promise<void> {
+    const modal = await this.modalCtrl.create({
+      component: InterestsModalComponent,
+      componentProps: {
+        interests: this.editableFields?.interests,
+      },
+      enterAnimation: this.intEnterAnimation,
+      leaveAnimation: this.intLeaveAnimation,
     });
+    modal.onWillDismiss().then(() => this.editingTriggered());
+
+    return modal.present();
   }
 
   /**
@@ -216,13 +209,26 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     Object.keys(this.editableFields).forEach((field) => {
       if (!data?.[field]) return;
 
-      if (typeof data[field] === "object") {
-        // for reference of user's objects and editableFields' objects to be different
-        this.editableFields[field] = JSON.parse(JSON.stringify(data[field]));
+      this.editableFields[field] =
+        typeof data[field] === "object"
+          ? JSON.parse(JSON.stringify(data[field]))
+          : data[field];
+    });
+  }
+
+  userToEditableFields(user: AppUser): editableProfileFields {
+    const fields = this.emptyEditableFields;
+
+    Object.keys(fields).forEach((field) => {
+      const fieldValue = user[field];
+      if (fieldValue && typeof fieldValue === "object") {
+        fields[field] = JSON.parse(JSON.stringify(fieldValue));
       } else {
-        this.editableFields[field] = data[field];
+        fields[field] = user[field];
       }
     });
+
+    return fields;
   }
 
   updateProfilePictures(urls: string[]) {
@@ -243,6 +249,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
   goToSettings() {
     return this.editingInProgress$
       .pipe(
+        take(1),
         switchMap((inProgress) =>
           !inProgress ? this.router.navigateByUrl("/main/settings") : of("")
         )
@@ -280,8 +287,22 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     }
   }
 
-  editingTriggered() {
-    this.editingInProgress.next(true);
+  async editingTriggered() {
+    return this.currentUserStore.user$
+      .pipe(
+        map((user) => this.userToEditableFields(user)),
+        map(
+          (fieldsInStore) =>
+            !isEqualWith(fieldsInStore, this.editableFields, nullAndEmptyStrEquiv)
+        ),
+        map((isDifferent) =>
+          isDifferent
+            ? this.editingInProgress.next(true)
+            : this.editingInProgress.next(false)
+        )
+      )
+
+      .toPromise();
   }
 
   async cancelProfileEdit(): Promise<void> {
@@ -300,7 +321,34 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     this.displayExit("bio");
   }
 
+  async presentInvalidPartsMessage() {
+    const invalidParts = this.invalidParts;
+
+    const societyMessage =
+      "Your society and its category must be either both filled or empty.";
+    const courseMessage =
+      "Your course and its category must be either both filled or empty.";
+    const questionsMessage =
+      "Make sure all of your questions contain both a selection and an answer.";
+    const message = `${invalidParts.includes("society") ? societyMessage : ""}
+    ${invalidParts.includes("course") ? courseMessage : ""}
+    ${invalidParts.includes("questions") ? questionsMessage : ""}
+    `;
+
+    const alert = await this.alertCtrl.create({
+      header: `Looks like ${invalidParts.join(", ")} ${
+        invalidParts.length === 1 ? "is" : "are"
+      } invalid.`,
+      message: `${message}`,
+      buttons: ["Okay"],
+    });
+
+    return alert.present();
+  }
+
   async confirmProfileEdit(): Promise<void> {
+    if (this.invalidParts.length > 0) return this.presentInvalidPartsMessage();
+
     const loading = await this.loadingCtrl.create({ backdropDismiss: false });
     await loading.present();
 
@@ -315,6 +363,32 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
       .toPromise();
 
     this.profileCard.buildInterestSlides(this.profileCard.profile);
+  }
+
+  get invalidParts(): ("society" | "questions" | "course")[] {
+    const isFilled = (v) => typeof v === "string" && v.length > 0;
+    const isEmpty = (v) => !v;
+    const bothNullOrFilled = (v1, v2) =>
+      (isFilled(v1) && isFilled(v2)) || (isEmpty(v1) && isEmpty(v2));
+
+    const invalidParts: ("society" | "questions" | "course")[] = [];
+    console.log(
+      this.editableFields,
+      bothNullOrFilled(this.editableFields.society, this.editableFields.societyCategory)
+    );
+    if (
+      !bothNullOrFilled(this.editableFields.society, this.editableFields.societyCategory)
+    )
+      invalidParts.push("society");
+    if (!bothNullOrFilled(this.editableFields.course, this.editableFields.areaOfStudy))
+      invalidParts.push("course");
+    let questionsIsValid = true;
+    this.editableFields.questions.forEach((QandA) =>
+      !bothNullOrFilled(QandA.answer, QandA.question) ? (questionsIsValid = false) : null
+    );
+    if (!questionsIsValid) invalidParts.push("questions");
+
+    return invalidParts;
   }
 
   async actOnProfileEditing($event: "cancel" | "save") {

@@ -154,7 +154,7 @@ export class CurrentUserStore {
           interests: user.interests,
           questions: user.questions,
         };
-
+        console.log("the editable fields here are", editableFields);
         if (isEqual(editableFieldsOfStore, editableFields)) return of({});
 
         return this.afFunctions

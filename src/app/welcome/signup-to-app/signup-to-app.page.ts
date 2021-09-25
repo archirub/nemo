@@ -21,7 +21,7 @@ export class SignupToAppPage implements OnInit {
   }
 
   async goToApp() {
-    this.globalStateManagement.activate().toPromise(); // important to not await this, otherwise navCtrl never gets called
+    this.globalStateManagement.globalManagement().toPromise(); // important to not await this, otherwise navCtrl never gets called
     return this.navCtrl.navigateRoot("/main/tabs/home");
   }
 }

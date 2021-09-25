@@ -61,9 +61,8 @@ export const profileEditingByUser = functions
 
         if (mdUpdateNeeded) {
           propertiesInMatchData.forEach((prop) => {
-            if (prop && sanitizedRequest[prop]) {
-              matchDataUpdateData["searchFeatures." + prop] = sanitizedRequest[prop];
-            }
+            matchDataUpdateData["searchFeatures." + prop] =
+              sanitizedRequest[prop] ?? null;
           });
 
           batch.update(matchDataRef, matchDataUpdateData);

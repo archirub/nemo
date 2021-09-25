@@ -58,7 +58,9 @@
           </div>
 
           <h2>My studies</h2>
-          <h2 class="flexcenter">{{userProfile?.degree}} at {{userProfile?.university}}</h2>
+          <h2 class="flexcenter">
+            {{userProfile?.degree}} at {{userProfile?.university}}
+          </h2>
           <p class="unchangeable">These cannot be changed.</p>
 
           <h2>My photos</h2>
@@ -171,7 +173,9 @@
           </h2>
 
           <div class="flexgrid">
-            <ion-button class="intModal" (click)="presentIntModal()">Change</ion-button>
+            <ion-button class="intModal" (click)="presentInterestsModal()"
+              >Change</ion-button
+            >
           </div>
         </div>
       </div>
