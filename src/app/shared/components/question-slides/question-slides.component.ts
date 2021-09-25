@@ -85,18 +85,24 @@ export class QuestionSlidesComponent implements OnInit, ControlValueAccessor {
   }
 
   resetSlides() {
-    while (this.questionArray.length > 0) {
-      console.log("deleeting");
-      this.deleteQuestion(this.questionArray.length - 1);
-    }
+    //Just re-initialise everything
+    this.slideArray = [];
+    this.newAvailableQuestions = [...this.questions];
 
-    this.counter = 1; //counter to add slides to array
+    this.availableQuestionsMap = {};
+    this.availableQuestionsMap[0] = [...this.questions];
 
-    if (this.questionArray.length < 1) {
-      this.availableQuestionsMap[0] = [...this.questions];
-    } else {
-      this.formAQM();
-    }
+    this.slideArray.push(0);
+    this.counter = 1;
+
+    Array.from(this.selects)[0].value = null;
+    Array.from(this.texts)[0].value = null;
+
+    this.answerArray = [];
+    this.questionArray = [];
+
+    console.log(this.questionArray);
+    console.log(this.answerArray);
   }
 
   async updatePager() {
