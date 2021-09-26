@@ -13,13 +13,12 @@
   <form #editableFieldsForm="ngForm">
     <div *ngIf="picsLoaded$ | async" #profileContainer>
       <div class="shadow"></div>
-
       <div id="profile" style="display: flex">
         <app-profile-card
           #profileCard
           [isOwnProfile]="true"
-          [profile]="appUser$ | async"
-          [profilePictures]="profilePictures"
+          [profile]="userFromStore$ | async"
+          [profilePictures]="profilePictures$ | async"
           [reportable]="false"
         ></app-profile-card>
       </div>
@@ -47,7 +46,11 @@
           (valueChange)="actOnProfileEditing($event)"
         ></save-cancel>
       </div>
-      <div id="editing" style="display: flex" *ngIf="appUser$ | async as userProfile">
+      <div
+        id="editing"
+        style="display: flex"
+        *ngIf="userFromStore$ | async as userProfile"
+      >
         <div class="container">
           <h1>{{userProfile?.firstName}}, {{userProfile?.dateOfBirth | age}}</h1>
 
@@ -70,20 +73,29 @@
           <p class="unchangeable">These cannot be changed.</p>
 
           <h2>My photos</h2>
-          <div
-            class="photos"
-            cdkDropList
-            [cdkDropListData]="profilePictures"
-            (cdkDropListDropped)="dragAndDropPhotos($event)"
-          >
-            <add-photo
-              cdkDrag
-              *ngFor="let pics of ['','','','','','']; index as i"
-              (onPhotoPicked)="onPicturePicked($event)"
-              [photoIndex]="i"
-              [photoDisplayedUrl]="profilePictures[i]"
-            ></add-photo>
+          <div #profilePictures class="photos">
+            <div
+              #bioClose
+              class="close-button"
+              (click)="deletePicture(i)"
+              *ngFor="let pic of profilePictures$ | async; index as i"
+              [ngClass]="{'not-draggable-elements': !pic, 'draggable-elements': pic}"
+            >
+              <add-photo
+                (onPhotoPicked)="onPicturePicked($event)"
+                [photoIndex]="i"
+                [photoDisplayedUrl]="pic"
+              ></add-photo>
+            </div>
           </div>
+          <!-- <div class="photos"> -->
+          <!-- <add-photo
+            *ngFor="let pic of emptyPictureSlots$ | async; index as i"
+            (onPhotoPicked)="onPicturePicked($event)"
+            [photoIndex]="i"
+            [photoDisplayedUrl]="pic"
+          ></add-photo> -->
+          <!-- </div> -->
           <h2>My bio</h2>
           <div>
             <div #bioClose class="close-button" (click)="clearInput('bio')">

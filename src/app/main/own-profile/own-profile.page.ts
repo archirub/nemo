@@ -10,7 +10,16 @@ import {
   Renderer2,
 } from "@angular/core";
 
-import { BehaviorSubject, forkJoin, from, Observable, of, Subscription } from "rxjs";
+import {
+  BehaviorSubject,
+  forkJoin,
+  from,
+  interval,
+  Observable,
+  of,
+  Subscription,
+  timer,
+} from "rxjs";
 import { AppUser, Profile } from "@classes/index";
 import { CurrentUserStore } from "@stores/index";
 import { ProfileCardComponent } from "@components/index";
@@ -35,12 +44,15 @@ import { TabElementRefService } from "../tab-menu/tab-element-ref.service";
 import { InterestsModalComponent } from "./interests-modal/interests-modal.component";
 
 import {
+  concatMap,
   distinctUntilChanged,
+  first,
   map,
   switchMap,
   take,
   tap,
   withLatestFrom,
+  delay,
 } from "rxjs/operators";
 import {
   searchCriteriaOptions,
@@ -49,9 +61,10 @@ import {
   questionsOptions,
   assetsInterestsPath,
   Interests,
+  MAX_PROFILE_PICTURES_COUNT,
 } from "@interfaces/index";
-import { CdkDragDrop, transferArrayItem } from "@angular/cdk/drag-drop";
-import { isEqualWith } from "lodash";
+import { isEqual, isEqualWith } from "lodash";
+import Sortable, { Options as SortableOptions } from "sortablejs";
 
 function nullAndEmptyStrEquiv(value1, value2) {
   if ((value1 == null || value1 === "") && (value2 == null || value2 === "")) {
@@ -77,8 +90,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
   @ViewChildren("answers") answers: QueryList<ProfileAnswerComponent>;
 
   @ViewChild("toggleDiv", { read: ElementRef }) toggleDiv: ElementRef;
-
-  appUser$: Observable<AppUser>;
+  @ViewChild("profilePictures", { read: ElementRef }) profilePicturesRef: ElementRef;
 
   private ownPicturesSub: Subscription;
   picsLoaded$: Observable<boolean>;
@@ -98,17 +110,35 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
       questions: [],
     };
   }
+
+  getUrlFromHTML(element: Element): string {
+    return window
+      .getComputedStyle(element)
+      .backgroundImage.slice(4, -1)
+      .replace(/"/g, "");
+  }
+
   // these intermediate values (editableFields and profilePictures) are required
   // to allow the user to modify these fields without the backend being affected right away,
   // but only once he/she clicks confirm
   editableFields: editableProfileFields = this.emptyEditableFields;
-  profilePictures: string[] = [];
+  private profilePictures = new BehaviorSubject<string[]>([]); // only contains urls (no empty elements)
+  profilePictures$ = this.profilePictures
+    .asObservable()
+    .pipe(
+      map((pics) =>
+        pics.concat(Array(MAX_PROFILE_PICTURES_COUNT - (pics?.length ?? 0)).fill(""))
+      )
+    ); // also contains empty fields at the end so that the # of elements is exactly MAX_PROFILE_PICTURES_COUNT
+
+  profilePicturesFromStore$ = this.ownPicturesService.urls$;
+  userFromStore$ = this.currentUserStore.user$;
 
   fishSwimAnimation;
   toggleDivEnterAnimation;
   toggleDivLeaveAnimation;
 
-  interestIcons = assetsInterestsPath; //Interest icons
+  interestIcons = assetsInterestsPath;
   societyCategoryOptions = searchCriteriaOptions.societyCategory;
   areaOfStudyOptions = searchCriteriaOptions.areaOfStudy;
 
@@ -122,23 +152,19 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     private loadingCtrl: LoadingController,
     private renderer: Renderer2,
     private alertCtrl: AlertController
-  ) {
-    this.appUser$ = this.currentUserStore.user$;
-  }
+  ) {}
 
   intEnterAnimation;
   intLeaveAnimation;
+  pPictures: string[];
 
   ngOnInit() {
-    this.appUser$.subscribe((a) => console.log("app user", a));
     this.editingInProgress$.subscribe((a) => console.log("editing in progress", a));
 
-    this.ownPicturesService.urls$
+    this.profilePicturesFromStore$
       .pipe(map((urls) => this.updateProfilePictures(urls)))
       .subscribe();
-    this.currentUserStore.user$
-      .pipe(map((user) => this.updateEditableFields(user)))
-      .subscribe();
+    this.userFromStore$.pipe(map((user) => this.updateEditableFields(user))).subscribe();
 
     this.picsLoaded$ = this.ownPicturesService.allPicturesLoaded$.pipe(
       tap((allPicturesLoaded) => (allPicturesLoaded ? this.stopAnimation() : null))
@@ -154,6 +180,8 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
       this.fishSwimAnimation = FishSwimAnimation(this.fish);
       this.fishSwimAnimation.play();
     }
+
+    setTimeout(() => this.initPictureSortability(), 2000);
   }
 
   stopAnimation() {
@@ -176,6 +204,37 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
         this.profileContainer
       );
     }, 100);
+  }
+
+  deletePicture(index: number) {
+    return this.profilePictures$
+      .pipe(
+        first(),
+        map((pics) => {
+          pics.splice(index, 1);
+          this.profilePictures.next(pics);
+        }),
+        map(() => this.editingTriggered())
+      )
+      .toPromise();
+  }
+
+  initPictureSortability() {
+    const sortable = Sortable.create(this.profilePicturesRef.nativeElement, {
+      onUpdate: (event) => {
+        let newUrls = Array.from(event.target.children)
+          .map((c) => this.getUrlFromHTML(c.children[0].children[0].children[0]))
+          .filter((u) => !!u);
+
+        this.profilePictures.next(newUrls);
+
+        return this.editingTriggered();
+      },
+      draggable: ".draggable-elements",
+      onMove: (event) => {
+        return event.related.className.indexOf("not-draggable-elements") === -1;
+      },
+    });
   }
 
   async presentInterestsModal(): Promise<void> {
@@ -232,18 +291,32 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
   }
 
   updateProfilePictures(urls: string[]) {
-    this.profilePictures = JSON.parse(JSON.stringify(urls));
+    this.profilePictures.next(JSON.parse(JSON.stringify(urls)));
   }
 
-  dragAndDropPhotos(event: CdkDragDrop<string[]>) {
-    transferArrayItem(
-      this.profilePictures,
-      event.previousContainer.data,
-      event.previousIndex,
-      event.currentIndex
-    );
+  changePictureIndex(oldIndex: number, newIndex: number) {
+    return this.profilePictures$
+      .pipe(
+        first(),
+        map((pics) => {
+          this.array_move(pics, oldIndex, newIndex);
+          this.profilePictures.next(pics.filter((p) => !!p));
+          return pics;
+        }),
+        delay(400),
+        concatMap(() => this.editingTriggered())
+      )
+      .toPromise();
+  }
 
-    let newPhotoArray = event.previousContainer.data;
+  array_move(arr: any[], old_index: number, new_index: number) {
+    if (new_index >= arr.length) {
+      var k = new_index - arr.length + 1;
+      while (k--) {
+        arr.push(undefined);
+      }
+    }
+    arr.splice(new_index, 0, arr.splice(old_index, 1)[0]);
   }
 
   goToSettings() {
@@ -290,12 +363,17 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
   }
 
   async editingTriggered() {
-    return this.currentUserStore.user$
+    return this.userFromStore$
       .pipe(
         map((user) => this.userToEditableFields(user)),
+        withLatestFrom(this.profilePictures$, this.profilePicturesFromStore$),
         map(
-          (fieldsInStore) =>
-            !isEqualWith(fieldsInStore, this.editableFields, nullAndEmptyStrEquiv)
+          ([fieldsInStore, pictures, picturesFromStore]) =>
+            !isEqualWith(fieldsInStore, this.editableFields, nullAndEmptyStrEquiv) ||
+            !isEqual(
+              pictures.filter((pic) => !!pic),
+              picturesFromStore
+            )
         ),
         map((isDifferent) =>
           isDifferent
@@ -308,7 +386,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
   }
 
   async cancelProfileEdit(): Promise<void> {
-    await this.currentUserStore.user$
+    await this.userFromStore$
       .pipe(
         withLatestFrom(this.ownPicturesService.urls$),
         take(1),
@@ -356,7 +434,9 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
 
     await forkJoin([
       this.currentUserStore.updateFieldsOnDatabase(this.editableFields),
-      this.ownPicturesService.updatePictures(this.profilePictures),
+      this.ownPicturesService.updatePictures(
+        await this.profilePictures$.pipe(first()).toPromise()
+      ),
     ])
       .pipe(
         map(() => this.editingInProgress.next(false)),
@@ -374,10 +454,6 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
       (isFilled(v1) && isFilled(v2)) || (isEmpty(v1) && isEmpty(v2));
 
     const invalidParts: ("society" | "questions" | "course")[] = [];
-    console.log(
-      this.editableFields,
-      bothNullOrFilled(this.editableFields.society, this.editableFields.societyCategory)
-    );
     if (
       !bothNullOrFilled(this.editableFields.society, this.editableFields.societyCategory)
     )
@@ -442,9 +518,19 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
   }
 
   onPicturePicked($event: { photoUrl: string; index: number }) {
-    this.profilePictures[$event.index] = $event.photoUrl;
-    this.editingInProgress.next(true);
-    this.detector.detectChanges();
+    return this.profilePictures$
+      .pipe(
+        first(),
+        map((profilePictures) => {
+          profilePictures[$event.index] = $event.photoUrl;
+          this.profilePictures.next(profilePictures);
+        }),
+        map(() => {
+          this.editingInProgress.next(true);
+          this.detector.detectChanges();
+        })
+      )
+      .toPromise();
   }
 
   ngOnDestroy() {

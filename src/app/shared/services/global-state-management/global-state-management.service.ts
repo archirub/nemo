@@ -325,7 +325,7 @@ export class GlobalStateManagementService {
     }
 
     // COMMENTED OUT FOR DEVELOPMENT ONLY -  to not fetch a swipe stack every time
-    // if (page === "home") storesToActivate$.push(this.swipeStackStore.activateStore());
+    if (page === "home") storesToActivate$.push(this.swipeStackStore.activateStore());
 
     if (page === "own-profile" || page === "settings") {
       storesToActivate$.push(this.OwnPicturesStore.activateStore());

@@ -13,6 +13,7 @@ import {
   profileEditingByUserRequest,
   deleteAccountRequest,
   checkEmailValidityRequest,
+  searchCriteriaOptions,
 } from "./../../../../src/app/shared/interfaces/index";
 
 import {
@@ -77,7 +78,6 @@ export function sanitizeData(
         cloudFunctionRequest as checkEmailValidityRequest
       );
       break;
-
     case "profileEditingByUser":
       sanitizationResult = sanitizeProfileEditingByUser(
         cloudFunctionRequest as profileEditingByUserRequest
@@ -234,8 +234,7 @@ function sanitizeUpdateGenderSexPref(request: updateGenderSexPrefRequest): {
   isValid: boolean;
   sanitizedData?: updateGenderSexPrefRequest;
 } {
-  if (!isString(request?.name) || !["gender", "sexualPreference"].includes(request?.name))
-    return { isValid: false };
+  if (!["gender", "sexualPreference"].includes(request?.name)) return { isValid: false };
 
   if (request?.name === "gender" && !isGender(request?.value)) return { isValid: false };
   if (request?.name === "sexualPreference" && !isSexualPreference(request?.value))
@@ -301,8 +300,7 @@ function sanitizeAddOrRemoveReported(request: addOrRemoveReportedRequest): {
   isValid: boolean;
   sanitizedData?: addOrRemoveReportedRequest;
 } {
-  if (!isString(request?.action) || !["add", "remove"].includes(request?.action))
-    return { isValid: false };
+  if (!["add", "remove"].includes(request?.action)) return { isValid: false };
 
   if (!isString(request?.reporteduid)) return { isValid: false };
 
@@ -331,7 +329,7 @@ function sanitizeRegisterSwipeChoices(request: registerSwipeChoicesRequest): {
   let valid = true;
 
   request?.choices.forEach((c) => {
-    if (!isSwipeChoice(c?.choice) || !isString(c?.uid)) valid = false;
+    if (!isSwipeChoice(c?.choice)) valid = false;
   });
 
   if (!valid) return { isValid: false };
@@ -347,37 +345,44 @@ function sanitizeGenerateSwipeStack(request: generateSwipeStackRequest): {
   isValid: boolean;
   sanitizedData?: generateSwipeStackRequest;
 } {
-  if (!isObject(request?.searchCriteria)) return { isValid: false };
+  if (!isObject(request?.searchCriteria)) {
+    return { isValid: false };
+  }
 
   if (
-    !isNull(request?.searchCriteria?.areaOfStudy) ||
+    !isNull(request?.searchCriteria?.areaOfStudy) &&
     !isAreaOfStudy(request?.searchCriteria?.areaOfStudy)
-  )
+  ) {
     return { isValid: false };
+  }
 
   if (
-    !isNull(request?.searchCriteria?.degree) ||
+    !isNull(request?.searchCriteria?.degree) &&
     !isDegree(request?.searchCriteria?.degree)
-  )
+  ) {
     return { isValid: false };
+  }
 
   if (
-    !isNull(request?.searchCriteria?.interests) ||
+    !isNull(request?.searchCriteria?.interests) &&
     !isInterest(request?.searchCriteria?.interests)
-  )
+  ) {
     return { isValid: false };
+  }
 
   if (
-    !isNull(request?.searchCriteria?.societyCategory) ||
+    !isNull(request?.searchCriteria?.societyCategory) &&
     !isSocietyCategory(request?.searchCriteria?.societyCategory)
-  )
+  ) {
     return { isValid: false };
+  }
 
   if (
-    !isNull(request?.searchCriteria?.university) ||
+    !isNull(request?.searchCriteria?.university) &&
     !isUniversity(request?.searchCriteria?.university)
-  )
+  ) {
     return { isValid: false };
+  }
 
   return {
     isValid: true,

@@ -23,6 +23,7 @@ import { pageTransition } from "./shared/animations/page-transition.animation";
 import { PipesModule } from "@pipes/pipes.module";
 import { DirectivesModule } from "./shared/directives/directives.module";
 import { DragDropModule } from "@angular/cdk/drag-drop";
+import { SortablejsModule } from "ngx-sortablejs";
 
 @NgModule({
   declarations: [AppComponent],
@@ -40,6 +41,7 @@ import { DragDropModule } from "@angular/cdk/drag-drop";
     PipesModule,
     DirectivesModule,
     DragDropModule,
+    SortablejsModule.forRoot({}),
   ],
   providers: [
     StatusBar,

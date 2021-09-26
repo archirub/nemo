@@ -29,7 +29,7 @@ import { allowOptionalProp } from "@interfaces/index";
 import { AppDatetimeComponent } from "@components/index";
 import { UniversitiesStore } from "@stores/universities/universities.service";
 import { AngularFireAuth } from "@angular/fire/compat/auth";
-import { concatMap, delay, filter, map, switchMap } from "rxjs/operators";
+import { concatMap, delay, filter, map } from "rxjs/operators";
 import { Observable } from "rxjs";
 
 @Component({

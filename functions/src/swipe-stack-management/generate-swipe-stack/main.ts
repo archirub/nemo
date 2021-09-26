@@ -59,7 +59,7 @@ export const generateSwipeStack = functions
       ) as generateSwipeStackRequest;
 
       // eslint-disable-next-line no-shadow
-      const searchCriteria: searchCriteria = sanitizedRequest.searchCriteria || {};
+      const searchCriteria: searchCriteria = sanitizedRequest.searchCriteria;
 
       // DATA FOR TESTING <-> UNCOMMENT BELOW AND COMMENT ABOVE
       // const targetuid: string = "oY6HiUHmUvcKbFQQnb88t3U4Zew1";
@@ -81,57 +81,53 @@ export const generateSwipeStack = functions
         searchCriteriaGroup: 0.8,
       };
 
-      try {
-        const matchDataMain = (
-          await admin.firestore().collection("matchData").doc(uid).get()
-        ).data() as mdFromDatabase;
+      const matchDataMain = (
+        await admin.firestore().collection("matchData").doc(uid).get()
+      ).data() as mdFromDatabase;
 
-        // const swipeMode: SwipeMode = matchDataMain.swipeMode;
-        let pickedUsers: uidChoiceMap[] = [];
+      // const swipeMode: SwipeMode = matchDataMain.swipeMode;
+      let pickedUsers: uidChoiceMap[] = [];
 
-        // if (swipeMode === "dating") {
-        const percentile = (
-          (
-            await admin
-              .firestore()
-              .collection("piStorage")
-              .where("uids", "array-contains", uid)
-              .limit(1)
-              .get()
-          ).docs[0].data() as piStorage
-        )[uid].percentile;
+      // if (swipeMode === "dating") {
+      const percentile = (
+        (
+          await admin
+            .firestore()
+            .collection("piStorage")
+            .where("uids", "array-contains", uid)
+            .limit(1)
+            .get()
+        ).docs[0].data() as piStorage
+      )[uid].percentile;
 
-        pickedUsers = await datingMode(
-          uid,
-          matchDataMain,
-          searchCriteria,
-          percentile,
-          pickingWeights,
-          PIPickingVariance,
-          SCPickingVariance,
-          profilesPerWave
-        );
-        // } else if (swipeMode === "friend") {
-        //   pickedUsers = await friendMode(
-        //     uid,
-        //     matchDataMain,
-        //     searchCriteria,
-        //     pickingWeights,
-        //     SCPickingVariance,
-        //     profilesPerWave
-        //   );
-        // } else {
-        //   throw new functions.https.HttpsError(
-        //     "aborted",
-        //     `Unrecognized swipeMode: ${swipeMode}`
-        //   );
-        // }
+      pickedUsers = await datingMode(
+        uid,
+        matchDataMain,
+        searchCriteria,
+        percentile,
+        pickingWeights,
+        PIPickingVariance,
+        SCPickingVariance,
+        profilesPerWave
+      );
+      // } else if (swipeMode === "friend") {
+      //   pickedUsers = await friendMode(
+      //     uid,
+      //     matchDataMain,
+      //     searchCriteria,
+      //     pickingWeights,
+      //     SCPickingVariance,
+      //     profilesPerWave
+      //   );
+      // } else {
+      //   throw new functions.https.HttpsError(
+      //     "aborted",
+      //     `Unrecognized swipeMode: ${swipeMode}`
+      //   );
+      // }
 
-        // SENDING RESPONSE
-        return { users: pickedUsers } as generateSwipeStackResponse;
-      } catch (e) {
-        throw new functions.https.HttpsError("unknown", String(e));
-      }
+      // SENDING RESPONSE
+      return { users: pickedUsers } as generateSwipeStackResponse;
     }
   );
 

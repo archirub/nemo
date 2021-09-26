@@ -1,16 +1,14 @@
-<ion-button
+<!-- <ion-button
   style="z-index: 100; position: absolute"
   debounceClick
   (debounceClick)="activateSwipeStack()"
   debounceTime="5000"
   >Activate swipe stack (dev)</ion-button
->
+> -->
 
 <div *ngIf="(this.swipeProfiles$ | async).length < 1" class="noSwipes">
   <div class="overlap">
-    <p>
-      Sorry, looks like your swipe stack is empty. Come back later!
-    </p>
+    <p>Sorry, looks like your swipe stack is empty. Come back later!</p>
   </div>
 </div>
 
