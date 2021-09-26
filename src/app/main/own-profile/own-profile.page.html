@@ -40,8 +40,8 @@
           [selections]="['save', 'cancel']"
         ></nemo-toggle-->
 
-        <save-cancel 
-          [buttonWidth]="17" 
+        <save-cancel
+          [buttonWidth]="17"
           *ngIf="editingInProgress$ | async"
           (valueChange)="actOnProfileEditing($event)"
         ></save-cancel>

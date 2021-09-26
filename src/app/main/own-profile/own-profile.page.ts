@@ -180,6 +180,8 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
       this.fishSwimAnimation = FishSwimAnimation(this.fish);
       this.fishSwimAnimation.play();
     }
+
+    setTimeout(() => this.initPictureSortability(), 2000);
   }
 
   stopAnimation() {
@@ -189,7 +191,6 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
       // This is essentially a lifecycle hook for after the UI appears
       this.toggleDivEnterAnimation = ToggleAppearAnimation(this.toggleDiv);
       this.profileCard.updatePager(0);
-      this.initPictureSortability();
     }, 50);
 
     //Build modal setup once UI has entered
@@ -222,7 +223,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     const sortable = Sortable.create(this.profilePicturesRef.nativeElement, {
       onUpdate: (event) => {
         let newUrls = Array.from(event.target.children)
-          .map((c) => this.getUrlFromHTML(c.children[0].children[0].children[0]))
+          .map((c) => this.getUrlFromHTML(c.children[1].children[0].children[0]))
           .filter((u) => !!u);
 
         this.profilePictures.next(newUrls);
@@ -356,7 +357,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     } else if (option == "view") {
       this.renderer.setStyle(editor, "display", "none");
       this.renderer.setStyle(profile, "display", "flex");
-      let index = await this.profileCard.slides.getActiveIndex()
+      let index = await this.profileCard.slides.getActiveIndex();
       this.profileCard.updatePager(index);
     }
   }
