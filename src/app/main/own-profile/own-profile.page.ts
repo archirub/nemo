@@ -180,8 +180,6 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
       this.fishSwimAnimation = FishSwimAnimation(this.fish);
       this.fishSwimAnimation.play();
     }
-
-    setTimeout(() => this.initPictureSortability(), 2000);
   }
 
   stopAnimation() {
@@ -191,6 +189,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
       // This is essentially a lifecycle hook for after the UI appears
       this.toggleDivEnterAnimation = ToggleAppearAnimation(this.toggleDiv);
       this.profileCard.updatePager(0);
+      this.initPictureSortability();
     }, 50);
 
     //Build modal setup once UI has entered

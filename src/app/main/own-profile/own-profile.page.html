@@ -75,12 +75,13 @@
           <h2>My photos</h2>
           <div #profilePictures class="photos">
             <div
-              #bioClose
-              class="close-button"
-              (click)="deletePicture(i)"
+              class="draggable-container"
               *ngFor="let pic of profilePictures$ | async; index as i"
               [ngClass]="{'not-draggable-elements': !pic, 'draggable-elements': pic}"
             >
+              <div class="delete-pic" (click)="deletePicture(i)">
+                <ion-icon name="close-outline"></ion-icon>
+              </div>
               <add-photo
                 (onPhotoPicked)="onPicturePicked($event)"
                 [photoIndex]="i"
