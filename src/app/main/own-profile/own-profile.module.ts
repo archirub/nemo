@@ -17,6 +17,7 @@ import { ProfileCourseComponent } from "./profile-course/profile-course.componen
 
 import { InterestSlidesModule } from "@components/interests-slides/interests-slides.component.module";
 import { InterestsModalComponent } from "./interests-modal/interests-modal.component";
+import { SaveCancelComponent } from "./save-cancel/save-cancel.component";
 
 @NgModule({
   imports: [
@@ -38,6 +39,7 @@ import { InterestsModalComponent } from "./interests-modal/interests-modal.compo
     ProfileAnswerComponent,
     ProfileCourseComponent,
     InterestsModalComponent,
+    SaveCancelComponent
   ],
 })
 export class OwnProfilePageModule {}

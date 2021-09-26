@@ -16,13 +16,14 @@ export class UserReportingService {
     reportComponent,
     userReportingID: string,
     userReportedID: string,
-    userReportedName: string
+    userReportedName: string,
+    userReportedPicture: string
   ) {
     const modal = await this.modalCtrl.create({
       component: reportComponent,
       showBackdrop: true,
       keyboardClose: true,
-      componentProps: { userReportedID, userReportedName, userReportingID },
+      componentProps: { userReportedID, userReportedName, userReportingID, userReportedPicture },
     });
 
     return modal.present();

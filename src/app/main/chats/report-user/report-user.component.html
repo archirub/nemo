@@ -1,10 +1,28 @@
-<p>
-  {{ userReportingID }}
-</p>
-<ion-button (click)="closeModal()">Close modal</ion-button>
-<p>
-  {{ userReportedID }}
-</p>
-<p>
-  {{ userReportedName }}
-</p>
+<ion-content>
+  <div class="flexend">
+    <ion-button (click)="closeModal()">
+      <ion-icon name="close-outline"></ion-icon>
+    </ion-button>
+  </div>
+
+  <div class="flexcenter">
+    <h1>
+      Report {{ userReportedName }}
+    </h1>
+    <img [src]="userReportedPicture"/>
+    <p>Please tell us a little about why you're reporting {{ userReportedName }}.</p>
+  </div>
+
+  <ion-textarea
+      maxlength="150"
+      class="input"
+      autogrow="true"
+      placeholder="The problem is..."
+    ></ion-textarea>
+
+  <div class="flexcenter">
+    <p>We're sorry this happened. Hopefully we can get it resolved soon.</p>
+
+    <ion-button>Submit</ion-button>
+  </div>
+</ion-content>

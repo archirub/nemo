@@ -14,7 +14,7 @@ import {
   EventEmitter,
 } from "@angular/core";
 import { Router } from "@angular/router";
-import { IonContent, ModalController } from "@ionic/angular";
+import { IonContent, IonTabs, ModalController } from "@ionic/angular";
 
 import { Chat } from "@classes/index";
 import { MatchesEnterAnimation, MatchesLeaveAnimation } from "@animations/index";
@@ -28,6 +28,7 @@ import { forkJoin, fromEvent, Observable, of, Subject, Subscription } from "rxjs
 import { concatMap, exhaustMap, map, tap } from "rxjs/operators";
 import { ChatboardStore, OtherProfilesStore } from "@stores/index";
 import { FadeOutAnimation } from "@animations/fade-out.animation";
+import _ from "lodash";
 
 @Component({
   selector: "app-chat-board",
@@ -48,6 +49,7 @@ export class ChatBoardComponent implements OnInit {
   @Input() chats: Chat[];
   @Input() matches: Chat[];
   @ViewChild(IonContent) ionContent: IonContent;
+  @ViewChild(IonTabs) tabs: IonTabs;
 
   // PROPERTIES FOR MODAL ANIMATION
   @ViewChild("chatContainer", { read: ElementRef }) chatContainer: ElementRef;

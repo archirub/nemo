@@ -250,6 +250,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
     let userReportedID: string;
     let userReportedName: string;
     let userReportingID: string;
+    let userReportedPicture: string;
 
     const getReportedInfo = this.recipientProfile$
       .pipe(
@@ -257,6 +258,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
         map((profile) => {
           userReportedID = profile.uid;
           userReportedName = profile.firstName;
+          userReportedPicture = profile.pictureUrls[0];
         })
       )
       .toPromise();
@@ -277,7 +279,8 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
       ReportUserComponent,
       userReportingID,
       userReportedID,
-      userReportedName
+      userReportedName,
+      userReportedPicture
     );
   }
 

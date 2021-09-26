@@ -100,9 +100,6 @@ export class QuestionSlidesComponent implements OnInit, ControlValueAccessor {
 
     this.answerArray = [];
     this.questionArray = [];
-
-    console.log(this.questionArray);
-    console.log(this.answerArray);
   }
 
   async updatePager() {

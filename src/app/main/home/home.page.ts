@@ -11,6 +11,7 @@ import {
 import { ModalController } from "@ionic/angular";
 
 import { Observable, Subscription } from "rxjs";
+import { map } from "rxjs/operators";
 
 import { SearchCriteriaComponent } from "./search-criteria/search-criteria.component";
 
@@ -28,6 +29,7 @@ import {
 import { TabElementRefService } from "src/app/main/tab-menu/tab-element-ref.service";
 import { SwipeCardComponent } from "./swipe-card/swipe-card.component";
 import { AngularFirestore } from "@angular/fire/compat/firestore";
+import { OwnPicturesStore } from "@stores/pictures/own-pictures/own-pictures.service";
 
 @Component({
   selector: "app-home",
@@ -38,6 +40,7 @@ export class HomePage implements OnInit, OnDestroy {
   swipeProfiles$: Observable<Profile[]>;
 
   private swipeStackSub: Subscription;
+  private ownPicturesSub: Subscription;
 
   // PROPERTIES FOR MODAL ANIMATION
   @ViewChild("homeContainer", { read: ElementRef }) homeContainer: ElementRef;
@@ -67,7 +70,7 @@ export class HomePage implements OnInit, OnDestroy {
     private currentUserStore: CurrentUserStore,
     private modalCtrl: ModalController,
     private tabElementRef: TabElementRefService,
-
+    private ownPicturesService: OwnPicturesStore,
     private firebaseAuth: FirebaseAuthService,
     private fs: AngularFirestore
   ) {
@@ -86,9 +89,14 @@ export class HomePage implements OnInit, OnDestroy {
   matchedPicture;
   currentUser; //profile
   currentUserSub; //subscription
+  profilePictures;
 
   ngOnInit() {
     this.swipeProfiles$ = this.swipeStackStore.profiles$;
+
+    this.ownPicturesService.urls$
+      .pipe(map((urls) => this.updateProfilePictures(urls)))
+      .subscribe();
   }
 
   /**
@@ -97,6 +105,10 @@ export class HomePage implements OnInit, OnDestroy {
   activateSwipeStack() {
     this.swipeStackSub = this.swipeStackStore.activateStore().subscribe();
     // this.firebaseAuth.logOut();
+  }
+
+  updateProfilePictures(urls: string[]) {
+    this.profilePictures = JSON.parse(JSON.stringify(urls));
   }
 
   ionViewDidEnter() {
@@ -151,6 +163,8 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   playCatch(matchContents) {
+    console.log(this.profilePictures);
+
     this.openCatchAnimation = OpenCatchAnimation(
       this.screenHeight,
       this.screenWidth,
@@ -167,7 +181,7 @@ export class HomePage implements OnInit, OnDestroy {
     this.renderer.setStyle(
       this.pic1.nativeElement,
       "background",
-      `url(${this.currentUser.pictureUrls[0]})`
+      `url(${this.profilePictures[0]})`
     );
     this.renderer.setStyle(this.pic1.nativeElement, "backgroundSize", "cover");
 

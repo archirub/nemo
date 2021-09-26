@@ -274,7 +274,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
   }
 
   /* Nemo toggle selection function */
-  toggleChange(option) {
+  async toggleChange(option) {
     const editor = document.getElementById("editing");
     const profile = document.getElementById("profile");
 
@@ -284,6 +284,8 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     } else if (option == "view") {
       this.renderer.setStyle(editor, "display", "none");
       this.renderer.setStyle(profile, "display", "flex");
+      let index = await this.profileCard.slides.getActiveIndex()
+      this.profileCard.updatePager(index);
     }
   }
 

@@ -15,12 +15,15 @@ import {
   ChangeDetectorRef,
   Renderer2,
 } from "@angular/core";
+import { AngularFireAuth } from "@angular/fire/compat/auth";
 import { LessInfoAnimation, MoreInfoAnimation } from "@animations/info.animation";
 import { Profile } from "@classes/index";
 import { IonContent, IonSlides } from "@ionic/angular";
 import { OwnPicturesStore } from "@stores/pictures/own-pictures/own-pictures.service";
+import { UserReportingService } from "@services/user-reporting/user-reporting.service";
 import { BehaviorSubject, Observable, Subscription } from "rxjs";
-import { filter, map, tap } from "rxjs/operators";
+import { filter, map, tap, take } from "rxjs/operators";
+import { ReportUserComponent } from "../../../main/chats/report-user/report-user.component";
 
 @Component({
   selector: "app-profile-card",
@@ -82,7 +85,11 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
     this.Y = event.touches[0].clientY;
   }
 
-  constructor(private renderer: Renderer2) {}
+  constructor(
+    private renderer: Renderer2,
+    private afAuth: AngularFireAuth,
+    private userReporting: UserReportingService
+  ) {}
 
   ngOnInit() {
     this.moreInfo = false;
@@ -92,6 +99,40 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit() {
     this.slides?.lockSwipeToPrev(true);
+  }
+
+  async reportUser() {
+    let userReportedID: string;
+    let userReportedName: string;
+    let userReportedPicture;
+    let userReportingID: string;
+
+    userReportedID = this.profile.uid;
+    userReportedName = this.profile.firstName;
+    
+    this.profilePictures$.subscribe(res => {
+      userReportedPicture = res[0];
+    });
+
+    const getReportingInfo = this.afAuth.user
+      .pipe(
+        filter((user) => !!user),
+        take(1),
+        map((user) => (userReportingID = user.uid))
+      )
+      .toPromise();
+
+    await Promise.all([getReportingInfo]);
+
+    if (!userReportedID || !userReportingID || !userReportedName) return;
+
+    await this.userReporting.displayReportModal(
+      ReportUserComponent,
+      userReportingID,
+      userReportedID,
+      userReportedName,
+      userReportedPicture
+    );
   }
 
   getContentHeight(): number {

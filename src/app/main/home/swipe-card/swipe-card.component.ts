@@ -54,7 +54,9 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
   @ViewChild("yesBubble", { read: ElementRef }) yesBubble: ElementRef;
   @ViewChild("noBubble", { read: ElementRef }) noBubble: ElementRef;
   @ViewChild("profileComponent") profileComponent: ProfileCardComponent;
+  @ViewChildren("profileComponent") profCard: QueryList<ProfileCardComponent>;
 
+  screenHeight: number;
   screenWidth: number;
   yesBubbleAnimation: Animation;
   noBubbleAnimation: Animation;
@@ -81,6 +83,7 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
+    this.screenHeight = window.innerHeight;
     this.screenWidth = window.innerWidth;
   }
 
@@ -166,11 +169,14 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
 
   private doubleTapOnCard(choice: swipeChoice): Observable<void> {
     if (choice === "yes") {
+      this.matched.emit([Array.from(this.profCard)[0].profile.firstName, Array.from(this.profCard)[0].profile.pictureUrls[0]]) 
       return this.profiles$.pipe(
         take(1),
         withLatestFrom(of(SwipeYesAnimation(this.cards.first, this.screenWidth))),
         switchMap(([profiles, swipeAnimation]) =>
-          concat(swipeAnimation.play(), this.onYesSwipe(profiles[0]))
+          concat(swipeAnimation.play(), 
+          this.onYesSwipe(profiles[0]),
+          )
         )
       );
     }

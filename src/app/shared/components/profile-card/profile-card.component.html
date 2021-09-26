@@ -149,7 +149,7 @@
 
         <div *ngIf="reportable">
           <div id="interests-container" class="centered">
-            <div class="reportButton">
+            <div class="reportButton" (click)="reportUser()">
               <ion-icon name="shield" style="color: var(--ion-color-danger)"></ion-icon>
               <br />
               <ion-label>Report {{ profile?.firstName }}</ion-label>

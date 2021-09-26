@@ -33,13 +33,19 @@
           [selections]="['edit', 'view']"
         ></nemo-toggle>
 
-        <nemo-toggle
+        <!--nemo-toggle
           *ngIf="editingInProgress$ | async"
           (valueChange)="actOnProfileEditing($event)"
           [buttonWidth]="15"
           [fontSize]="4"
           [selections]="['save', 'cancel']"
-        ></nemo-toggle>
+        ></nemo-toggle-->
+
+        <save-cancel 
+          [buttonWidth]="17" 
+          *ngIf="editingInProgress$ | async"
+          (valueChange)="actOnProfileEditing($event)"
+        ></save-cancel>
       </div>
       <div id="editing" style="display: flex" *ngIf="appUser$ | async as userProfile">
         <div class="container">

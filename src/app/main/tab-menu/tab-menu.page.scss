@@ -6,9 +6,12 @@ ion-tab-button {
     --ripple-color: transparent;
 } 
 
-img[name=fish] {
+img {
     height: 27px;
-    transform: rotate(-190deg);
+}
+
+.height32 {
+    height: 32px;
 }
 
 ion-icon {

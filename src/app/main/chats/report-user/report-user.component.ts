@@ -12,6 +12,7 @@ export class ReportUserComponent implements OnInit {
   // values given from opening the modal
   userReportedID: string;
   userReportedName: string;
+  userReportedPicture: string;
   userReportingID: string;
 
   report: UserReport;
