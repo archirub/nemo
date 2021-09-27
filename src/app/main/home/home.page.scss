@@ -23,7 +23,7 @@
 
 /* 'IT'S A CATCH' animation elements */
 .picholder {
-
+  top: 5vh;
   position: absolute;
   display: none;
   width: 100px;
@@ -42,18 +42,34 @@
 }
 
 .textholder {
-  display: none;
+  display: flex;
   width: 100%;
   justify-content: center;
   z-index: 100;
   position: absolute;
-  top: 15vh;
+  top: 11vh;
+}
+
+.textholder-2 {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  z-index: 100;
+  position: absolute;
+  top: 21vh;
 }
 
 h1.catchtext {
   font-family: 'Grand Hotel';
   font-size: 6vh;
-  color: var(--ion-color-tertiary);
+  color: #FFF
+}
+
+h2.catchtext {
+  text-align: center;
+  font-size: 3.5vh;
+  color: #FFF;
+  width: 70%;
 }
 
 .backdrop {
@@ -65,7 +81,7 @@ h1.catchtext {
 }
 
 #closeAnimation {
-  color: var(--ion-color-tertiary);
+  color: #FFF;
   --background: transparent;
   --background-activated: transparent;
   position: absolute;
@@ -87,12 +103,36 @@ h1.catchtext {
   z-index: 101;
   bottom: 27vh;
 
-  h1 {
-    font-family: 'Cabin';
-    color: var(--ion-color-tertiary);
-    font-size: 3.5vh;
+  h2 {
+    background: #FFF;
+    padding: 15px;
+    color: #f07167;
+    width: 62%;
+    text-align: center;
+    border-radius: 10px;
+    font-size: 3vh;
   }
 }
+
+#messageText2 {
+  display: none;
+  justify-content: center;
+  width: 100vw;
+  position: absolute;
+  z-index: 101;
+  bottom: 17vh;
+
+  h2 {
+    background: rgb(253, 216, 176);
+    padding: 15px;
+    color: seagreen;
+    width: 62%;
+    text-align: center;
+    border-radius: 10px;
+    font-size: 3vh;
+  }
+}
+
 
 .fish {
   display: none;

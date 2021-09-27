@@ -86,15 +86,17 @@ export const TextAnimation = (text: ElementRef) => {
   return textAnimation;
 };
 
-export const BackAnimation = (baseEl: any) => {
+export const BackAnimation = (backdrop: any) => {
   const backAnimation = new AnimationController().create("backAnimation");
 
   backAnimation
-    .addElement(baseEl.nativeElement)
+    .addElement(backdrop.nativeElement)
     .duration(500)
-    .fromTo("opacity", "1", "0.4")
-    .fromTo("filter", "blur(0px) opacity(1)", "blur(20px) opacity(1)")
-    .fromTo("backgroundColor", "transparent", "var(--ion-color-secondary-shade)");
+    .easing("ease-in")
+    .fromTo('opacity', '0', '1')
+    .fromTo("background", 
+    "transparent", 
+    "linear-gradient(to top, #F07167, #F0B067)");
 
   return backAnimation;
 };
@@ -105,16 +107,17 @@ export const OpenCatchAnimation = (
   leftPicture: ElementRef,
   rightPicture: ElementRef,
   text: ElementRef,
+  backdrop: ElementRef,
   baseEl: any
 ) => {
   return new AnimationController()
     .create()
-    .addElement([viewHeight, viewWidth, leftPicture, rightPicture, text, baseEl])
+    .addElement([viewHeight, viewWidth, leftPicture, rightPicture, text, backdrop, baseEl])
     .addAnimation([
       LeftPicAnimation(viewHeight, viewWidth, leftPicture),
       RightPicAnimation(viewHeight, viewWidth, rightPicture),
       TextAnimation(text),
-      BackAnimation(baseEl),
+      BackAnimation(backdrop),
     ]);
 };
 
@@ -124,16 +127,17 @@ export const CloseCatchAnimation = (
   leftPicture: ElementRef,
   rightPicture: ElementRef,
   text: ElementRef,
+  backdrop: ElementRef,
   baseEl: any
 ) => {
   return new AnimationController()
     .create()
-    .addElement([viewHeight, viewWidth, leftPicture, rightPicture, text, baseEl])
+    .addElement([viewHeight, viewWidth, leftPicture, rightPicture, text, backdrop, baseEl])
     .addAnimation([
       LeftPicAnimation(viewHeight, viewWidth, leftPicture),
       RightPicAnimation(viewHeight, viewWidth, rightPicture),
       TextAnimation(text),
-      BackAnimation(baseEl),
+      BackAnimation(backdrop),
     ])
     .direction("reverse");
 };

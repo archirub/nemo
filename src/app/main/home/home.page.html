@@ -16,21 +16,23 @@
   <div #pic1 class="picholder left"></div>
   <div #pic2 class="picholder right"></div>
   <div #catchText class="textholder">
-    <h1 class="catchtext">It's a Catch!</h1>
+      <h1 class="catchtext">It's a Catch!</h1>
   </div>
+  <div #catchText class="textholder-2">
+      <h2 class="catchtext">{{ this.chosenCatchMsg }}</h2>
+  </div>
+
+  <div #backdrop class="backdrop"></div>
 
   <ion-button id="closeAnimation" (click)="closeCatch()"
     ><ion-icon name="close-outline"></ion-icon
   ></ion-button>
   <div #messageText id="messageText">
-    <h1 class="catchtext">Chat with {{ this.matchedName }}</h1>
+    <h2 class="catchtext">Chat with {{ this.matchedName }}</h2>
   </div>
-
-  <div class="center">
-    <img #fish src="/assets/nemo.png" class="fish" />
+  <div #messageText2 id="messageText2" (click)="closeCatch()">
+    <h2 class="catchtext">Keep fishing</h2>
   </div>
-  <!--img #leftFish src="/assets/singlefish.png" class="singlefish left"/>
-  <img #rightFish src="/assets/singlefish.png" class="singlefish right"/-->
 </div>
 
 <ion-content #homeContainer>

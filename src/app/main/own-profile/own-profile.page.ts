@@ -181,7 +181,13 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
       this.fishSwimAnimation.play();
     }
 
-    setTimeout(() => this.initPictureSortability(), 2000);
+    /*THIS IS A REAL PROBLEM*/
+    //What is it waiting for in order to be ok?
+    //This number may not be long enough dependent on connection
+    setTimeout(() => {
+      this.initPictureSortability();
+      console.log('good to go');
+    }, 10000);
   }
 
   stopAnimation() {

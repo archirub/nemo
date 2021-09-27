@@ -50,7 +50,7 @@ export class HomePage implements OnInit, OnDestroy {
   @ViewChild("pic2", { read: ElementRef }) pic2: ElementRef;
   @ViewChild("catchText", { read: ElementRef }) catchText: ElementRef;
   @ViewChild("swipeCards", { read: ElementRef }) swipeCards: ElementRef;
-  @ViewChild("fish", { read: ElementRef }) fish: ElementRef;
+  @ViewChild("backdrop", { read: ElementRef }) backdrop: ElementRef;
   // @ViewChild("leftFish", { read: ElementRef }) leftFish: ElementRef;
   // @ViewChild("rightFish", { read: ElementRef }) rightFish: ElementRef;
 
@@ -91,12 +91,29 @@ export class HomePage implements OnInit, OnDestroy {
   currentUserSub; //subscription
   profilePictures;
 
+  public catchMessages: Array<string> = [
+    'You guys are too much...',
+    'Play it cool, play it cool...',
+    'You two are straight up killing it!',
+    'This looks fire...',
+    'Love comes around only so often babe...',
+    'Go ooooooon!',
+    'The stars are aligned!',
+    'Wanna whole lotta love?'
+  ];
+  public chosenCatchMsg: string;
+
   ngOnInit() {
     this.swipeProfiles$ = this.swipeStackStore.profiles$;
 
     this.ownPicturesService.urls$
       .pipe(map((urls) => this.updateProfilePictures(urls)))
       .subscribe();
+  }
+
+  selectRandomCatch() {
+    this.chosenCatchMsg =
+      this.catchMessages[Math.floor(Math.random() * this.catchMessages.length)];
   }
 
   /**
@@ -126,7 +143,6 @@ export class HomePage implements OnInit, OnDestroy {
       this.homeContainer
     );
 
-    this.fishSwimAnimation = FishSwimAnimation(this.fish);
     //this.fishEnterAnimation = FishEnterAnimation(this.screenWidth, this.leftFish, this.rightFish);
 
     this.modalCtrl
@@ -163,7 +179,7 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   playCatch(matchContents) {
-    console.log(this.profilePictures);
+    this.selectRandomCatch();
 
     this.openCatchAnimation = OpenCatchAnimation(
       this.screenHeight,
@@ -171,6 +187,7 @@ export class HomePage implements OnInit, OnDestroy {
       this.pic1,
       this.pic2,
       this.catchText,
+      this.backdrop,
       this.swipeCards
     ); //DO NOT MOVE THIS OUT TO ANOTHER HOOK
     //CANNOT REPLAY UNLESS REINITIALISED HERE BECAUSE IT USES THE SAME ELEMENTS AS CLOSE
@@ -196,16 +213,17 @@ export class HomePage implements OnInit, OnDestroy {
     let catchItems = document.getElementById("catchEls");
 
     this.renderer.setStyle(catchItems, "display", "block");
-    this.renderer.setStyle(this.fish.nativeElement, "display", "flex");
 
     const closeButton = document.getElementById("closeAnimation");
     const messageText = document.getElementById("messageText");
+    const messageText2 = document.getElementById("messageText2");
 
     this.openCatchAnimation.play();
-    this.fishSwimAnimation.play();
 
     this.renderer.setStyle(closeButton, "display", "block");
     this.renderer.setStyle(messageText, "display", "flex");
+    this.renderer.setStyle(messageText2, "display", "flex");
+
   }
 
   closeCatch() {
@@ -215,6 +233,7 @@ export class HomePage implements OnInit, OnDestroy {
       this.pic1,
       this.pic2,
       this.catchText,
+      this.backdrop,
       this.swipeCards
     ); //DO NOT MOVE THIS OUT TO ANOTHER HOOK
     //CANNOT REPLAY UNLESS REINITIALISED HERE BECAUSE IT USES THE SAME ELEMENTS AS OPEN
@@ -228,7 +247,6 @@ export class HomePage implements OnInit, OnDestroy {
 
       //Remove background photo from match card
       this.renderer.setStyle(this.pic2.nativeElement, "background", "black");
-      this.fishSwimAnimation.pause();
     }, 350);
   }
 
