@@ -32,13 +32,8 @@ export class ChatboardPicturesStore {
   private holder: BehaviorSubject<pictureHolder> = new BehaviorSubject({});
   holder$: Observable<pictureHolder> = this.holder.asObservable();
 
-  private allPicturesLoaded = new BehaviorSubject<boolean>(false);
-  allPicturesLoaded$ = this.allPicturesLoaded.asObservable().pipe(
-    distinctUntilChanged(),
-    map((val) => (this.hasNoChats ? true : val))
-  );
-
-  private hasNoChats: boolean = false;
+  private isReady = new BehaviorSubject<boolean>(false);
+  public isReady$ = this.isReady.asObservable().pipe(distinctUntilChanged());
 
   private renderer: Renderer2;
 
@@ -58,8 +53,7 @@ export class ChatboardPicturesStore {
   ): Observable<any> {
     return combineLatest([
       this.activateHolderFillingLogic(chats),
-      this.activateLoadingListener(chats),
-      this.activateHasNoChatsListener(hasNoChats),
+      this.activateReadinessListener(chats, hasNoChats),
     ]).pipe(
       // tap(() => console.log("activating chatboard pictures store")),
       share()
@@ -120,40 +114,6 @@ export class ChatboardPicturesStore {
   //   );
   // }
 
-  private activateHasNoChatsListener(hasNoChats: Observable<boolean>): Observable<void> {
-    return hasNoChats.pipe(
-      map((noChats) => {
-        if (noChats) {
-          this.hasNoChats = true;
-          this.allPicturesLoaded.next(true);
-        }
-      })
-    );
-  }
-
-  private activateLoadingListener(
-    chats: Observable<{ [chatID: string]: Chat }>
-  ): Observable<void> {
-    return combineLatest([chats, this.holder$]).pipe(
-      map(([chats, pictureHolder]) => {
-        let allPicturesLoaded = true;
-
-        // if there are no chats to be checked (otherwise it will give true)
-        if (Object.keys(chats).length === 0) {
-          allPicturesLoaded = false;
-        } else {
-          Object.values(chats).forEach((chat) => {
-            if (!pictureHolder[chat.recipient.uid]) {
-              allPicturesLoaded = false;
-            }
-          });
-        }
-
-        this.allPicturesLoaded.next(allPicturesLoaded);
-      })
-    );
-  }
-
   private activateHolderFillingLogic(
     chats: Observable<{ [chatID: string]: Chat }>
   ): Observable<string[]> {
@@ -193,6 +153,37 @@ export class ChatboardPicturesStore {
 
         return forkJoin(pictureAdditions$);
       })
+    );
+  }
+
+  private activateReadinessListener(
+    chats: Observable<{ [chatID: string]: Chat }>,
+    hasNoChats: Observable<boolean>
+  ) {
+    const noChatsListener$ = hasNoChats.pipe(map((noChats) => noChats));
+    const loadingListener$ = combineLatest([chats, this.holder$]).pipe(
+      map(([chats, pictureHolder]) => {
+        let allPicturesLoaded = true;
+
+        // if there are no chats to be checked (otherwise it will give true)
+        if (Object.keys(chats).length === 0) {
+          allPicturesLoaded = false;
+        } else {
+          Object.values(chats).forEach((chat) => {
+            if (!pictureHolder[chat.recipient.uid]) {
+              allPicturesLoaded = false;
+            }
+          });
+        }
+
+        return allPicturesLoaded;
+      })
+    );
+
+    return combineLatest([noChatsListener$, loadingListener$]).pipe(
+      map(([noChats, allPicturesLoaded]) =>
+        this.isReady.next(noChats || allPicturesLoaded)
+      )
     );
   }
 

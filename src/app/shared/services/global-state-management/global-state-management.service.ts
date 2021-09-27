@@ -9,6 +9,7 @@ import { Storage } from "@capacitor/core";
 
 import {
   BehaviorSubject,
+  combineLatest,
   concat,
   forkJoin,
   from,
@@ -33,6 +34,7 @@ import {
 import { OwnPicturesStore } from "@stores/pictures/own-pictures/own-pictures.service";
 import { ChatboardStore } from "@stores/chatboard/chatboard-store.service";
 
+import { SearchCriteriaStore } from "@stores/search-criteria/search-criteria-store.service";
 import { SwipeStackStore } from "@stores/swipe-stack/swipe-stack-store.service";
 import { CurrentUserStore } from "@stores/current-user/current-user-store.service";
 import { ChatboardPicturesStore } from "@stores/pictures/chatboard-pictures/chatboard-pictures.service";
@@ -84,7 +86,8 @@ export class GlobalStateManagementService {
     private chatboardPicturesStore: ChatboardPicturesStore,
     private swipeStackStore: SwipeStackStore,
     private OwnPicturesStore: OwnPicturesStore,
-    private universitiesStore: UniversitiesStore
+    private universitiesStore: UniversitiesStore,
+    private searchCriteriaStore: SearchCriteriaStore
   ) {
     // format allows for this.auth$ to be a BehaviorSubject version of the Firebase.User observable
     this.afAuth.user.subscribe(this.auth$);
@@ -310,28 +313,41 @@ export class GlobalStateManagementService {
   }
 
   private activateCorrespondingStores(page: pageName): Observable<any> {
-    const storesToActivate$: Observable<any>[] = [];
+    let storesToActivate$: Observable<any>[] = [];
 
-    if (this.pageIsMain(page)) storesToActivate$.push(this.userStore.fillStore());
-
-    if (page === "chats" || page === "messenger") {
-      storesToActivate$.push(this.chatboardStore.activateStore());
-      storesToActivate$.push(
+    if (this.pageIsMain(page))
+      storesToActivate$ = storesToActivate$.concat(
+        this.userStore.fillStore(),
+        this.swipeStackStore.activateStore(),
+        this.searchCriteriaStore.activateStore(),
+        this.chatboardStore.activateStore(),
+        this.OwnPicturesStore.activateStore(),
         this.chatboardPicturesStore.activateStore(
           this.chatboardStore.allChats$,
           this.chatboardStore.hasNoChats$
         )
       );
-    }
 
-    // COMMENTED OUT FOR DEVELOPMENT ONLY -  to not fetch a swipe stack every time
-    if (page === "home") storesToActivate$.push(this.swipeStackStore.activateStore());
+    // if (this.pageIsMain(page)) storesToActivate$.push(this.userStore.fillStore());
 
-    if (page === "own-profile" || page === "settings") {
-      storesToActivate$.push(this.OwnPicturesStore.activateStore());
-    }
+    // if (page === "chats" || page === "messenger") {
+    //   storesToActivate$.push(this.chatboardStore.activateStore());
+    //   storesToActivate$.push(
+    //     this.chatboardPicturesStore.activateStore(
+    //       this.chatboardStore.allChats$,
+    //       this.chatboardStore.hasNoChats$
+    //     )
+    //   );
+    // }
 
-    return storesToActivate$.length > 0 ? merge(...storesToActivate$) : of("");
+    // // COMMENTED OUT FOR DEVELOPMENT ONLY -  to not fetch a swipe stack every time
+    // if (page === "home") storesToActivate$.push(this.swipeStackStore.activateStore());
+
+    // if (page === "own-profile" || page === "settings") {
+    //   storesToActivate$.push(this.OwnPicturesStore.activateStore());
+    // }
+    console.log("stores are", storesToActivate$);
+    return storesToActivate$.length > 0 ? combineLatest(storesToActivate$) : of("");
   }
 
   private getFirebaseUser(): Observable<User | null> {

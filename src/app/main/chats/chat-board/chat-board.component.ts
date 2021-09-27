@@ -29,6 +29,7 @@ import { concatMap, exhaustMap, map, tap } from "rxjs/operators";
 import { ChatboardStore, OtherProfilesStore } from "@stores/index";
 import { FadeOutAnimation } from "@animations/fade-out.animation";
 import _ from "lodash";
+import { PageReadinessService } from "@services/page-readiness/page-readiness.service";
 
 @Component({
   selector: "app-chat-board",
@@ -37,8 +38,9 @@ import _ from "lodash";
 })
 export class ChatBoardComponent implements OnInit {
   chatboardPictures$: Observable<pictureHolder>;
-  picsLoaded$: Subscription;
   picsLoaded: boolean = false;
+
+  subs = new Subscription();
 
   fadeOutAnimation;
 
@@ -69,7 +71,8 @@ export class ChatBoardComponent implements OnInit {
     private tabElementRef: TabElementRefService,
     private chatboardPicturesService: ChatboardPicturesStore, // used in template
     private domSanitizer: DomSanitizer,
-    private renderer: Renderer2
+    private renderer: Renderer2,
+    private pageReadiness: PageReadinessService
   ) {
     this.onResize();
   }
@@ -90,13 +93,15 @@ export class ChatBoardComponent implements OnInit {
         return holder;
       })
     );
-    this.picsLoaded$ = this.chatboardPicturesService.allPicturesLoaded$.subscribe(
-      (res) => {
-        this.picsLoaded = res;
-        if (this.picsLoaded === true) {
-          this.loaded.emit(this.picsLoaded);
-        }
-      }
+    this.subs.add(this.pageReadinessHandler().subscribe());
+  }
+
+  pageReadinessHandler() {
+    return this.pageReadiness.chats$.pipe(
+      tap((ready) => {
+        this.picsLoaded = ready;
+        this.loaded.emit(ready);
+      })
     );
   }
 

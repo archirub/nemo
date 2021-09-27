@@ -17,9 +17,9 @@ import {
   successResponse,
 } from "@interfaces/index";
 import { FormatService } from "@services/format/format.service";
-import { SearchCriteriaStore } from "../search-criteria/search-criteria-store.service";
 import {
   catchError,
+  distinctUntilChanged,
   filter,
   map,
   share,
@@ -35,14 +35,18 @@ import { isEqual } from "lodash";
 })
 export class CurrentUserStore {
   private user: BehaviorSubject<AppUser> = new BehaviorSubject<AppUser>(null);
-  public readonly user$: Observable<AppUser> = this.user.asObservable();
+  public user$: Observable<AppUser> = this.user.asObservable();
+
+  public isReady$ = this.user$.pipe(
+    map((user) => user instanceof AppUser),
+    distinctUntilChanged()
+  );
 
   constructor(
     private afAuth: AngularFireAuth,
     private fs: AngularFirestore,
     private afFunctions: AngularFireFunctions,
-    private format: FormatService,
-    private SCstore: SearchCriteriaStore
+    private format: FormatService
   ) {}
 
   updateLatestSearchCriteriaOnDb(searchCriteria: SearchCriteria) {}
@@ -91,9 +95,6 @@ export class CurrentUserStore {
         const latestSearchCriteria = this.format.searchCriteriaDatabaseToClass(
           privateProfile?.latestSearchCriteria
         );
-        if (privateProfile?.latestSearchCriteria) {
-          await this.SCstore.initalizeThroughCurrentUserStore(latestSearchCriteria);
-        }
 
         const user: AppUser = new AppUser(
           profile?.uid,

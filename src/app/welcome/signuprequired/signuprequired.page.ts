@@ -206,6 +206,12 @@ export class SignuprequiredPage implements OnInit {
     }
   }
 
+  validateAndSlidePictures() {
+    if (this.picturesHolder.filter((p) => p).length < 1) return;
+
+    this.unlockAndSlideToNext(); // If others valid, slide next
+  }
+
   async updatePager() {
     /*
      * Function to get the current slider and update the pager icons accordingly, no inputs

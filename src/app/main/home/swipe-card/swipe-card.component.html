@@ -18,7 +18,7 @@
         #profileComponent
         (tapped)="cardTap$.next($event)"
         [profile]="profile"
-        [profilePictures]="profile.pictureUrls"
+        [profilePictures]="profile?.pictureUrls"
       >
       </app-profile-card>
     </div>

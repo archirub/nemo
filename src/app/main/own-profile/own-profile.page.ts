@@ -166,7 +166,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
       .subscribe();
     this.userFromStore$.pipe(map((user) => this.updateEditableFields(user))).subscribe();
 
-    this.picsLoaded$ = this.ownPicturesService.allPicturesLoaded$.pipe(
+    this.picsLoaded$ = this.ownPicturesService.isReady$.pipe(
       tap((allPicturesLoaded) => (allPicturesLoaded ? this.stopAnimation() : null))
     );
 
@@ -186,7 +186,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     //This number may not be long enough dependent on connection
     setTimeout(() => {
       this.initPictureSortability();
-      console.log('good to go');
+      console.log("good to go");
     }, 10000);
   }
 

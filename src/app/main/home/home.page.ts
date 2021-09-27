@@ -30,6 +30,7 @@ import { TabElementRefService } from "src/app/main/tab-menu/tab-element-ref.serv
 import { SwipeCardComponent } from "./swipe-card/swipe-card.component";
 import { AngularFirestore } from "@angular/fire/compat/firestore";
 import { OwnPicturesStore } from "@stores/pictures/own-pictures/own-pictures.service";
+import { PageReadinessService } from "@services/page-readiness/page-readiness.service";
 
 @Component({
   selector: "app-home",
@@ -72,7 +73,8 @@ export class HomePage implements OnInit, OnDestroy {
     private tabElementRef: TabElementRefService,
     private ownPicturesService: OwnPicturesStore,
     private firebaseAuth: FirebaseAuthService,
-    private fs: AngularFirestore
+    private fs: AngularFirestore,
+    private readiness: PageReadinessService
   ) {
     this.onResize();
   }
@@ -92,14 +94,14 @@ export class HomePage implements OnInit, OnDestroy {
   profilePictures;
 
   public catchMessages: Array<string> = [
-    'You guys are too much...',
-    'Play it cool, play it cool...',
-    'You two are straight up killing it!',
-    'This looks fire...',
-    'Love comes around only so often babe...',
-    'Go ooooooon!',
-    'The stars are aligned!',
-    'Wanna whole lotta love?'
+    "You guys are too much...",
+    "Play it cool, play it cool...",
+    "You two are straight up killing it!",
+    "This looks fire...",
+    "Love comes around only so often babe...",
+    "Go ooooooon!",
+    "The stars are aligned!",
+    "Wanna whole lotta love?",
   ];
   public chosenCatchMsg: string;
 
@@ -109,6 +111,8 @@ export class HomePage implements OnInit, OnDestroy {
     this.ownPicturesService.urls$
       .pipe(map((urls) => this.updateProfilePictures(urls)))
       .subscribe();
+
+    this.readiness.status$.subscribe((a) => console.log("Page readiness status:", a));
   }
 
   selectRandomCatch() {
@@ -223,7 +227,6 @@ export class HomePage implements OnInit, OnDestroy {
     this.renderer.setStyle(closeButton, "display", "block");
     this.renderer.setStyle(messageText, "display", "flex");
     this.renderer.setStyle(messageText2, "display", "flex");
-
   }
 
   closeCatch() {
