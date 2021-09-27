@@ -54,7 +54,7 @@ export class InterestSlidesComponent implements OnInit, ControlValueAccessor {
       speed: 200,
       resistanceRatio: 0.5,
       freeMode: true,
-      freeModeSticky: true,
+      //freeModeSticky: true,
       coverflowEffect: {
         rotate: 0,
         stretch: 20,

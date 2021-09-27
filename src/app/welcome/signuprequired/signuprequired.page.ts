@@ -39,6 +39,7 @@ import { Observable } from "rxjs";
 })
 export class SignuprequiredPage implements OnInit {
   @ViewChild("slides") slides: IonSlides;
+  @ViewChild("slides", { read: ElementRef }) slidesRef: ElementRef;
   @ViewChild("date") date: AppDatetimeComponent;
   @ViewChildren("pagerDots", { read: ElementRef }) dots: QueryList<ElementRef>;
   @ViewChild("tcbox") tcbox: IonCheckbox;
@@ -262,6 +263,13 @@ export class SignuprequiredPage implements OnInit {
     await this.slides.lockSwipes(false);
     await this.slides.slideNext();
 
+    let index = await this.slides.getActiveIndex();
+
+    if (index === 5) {
+      this.renderer.setStyle(this.slidesRef.nativeElement, "overflow", "visible");
+      this.renderer.setStyle(this.slidesRef.nativeElement, "--overflow", "visible");
+    }
+
     await this.updatePager();
     await this.slides.lockSwipes(true);
   }
@@ -410,6 +418,10 @@ export class SignuprequiredPage implements OnInit {
       degree,
       pictures,
     };
+  }
+
+  skipToApp() {
+    console.log('Write me! :)');
   }
 
   /**
