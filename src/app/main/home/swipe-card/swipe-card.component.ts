@@ -18,8 +18,10 @@ import {
   concat,
   forkJoin,
   fromEvent,
+  merge,
   Observable,
   of,
+  race,
   Subject,
   Subscription,
 } from "rxjs";
@@ -39,7 +41,29 @@ import {
   NoBubbleAnimation,
 } from "@animations/index";
 import { swipeChoice } from "@interfaces/index";
-import { concatMap, exhaustMap, switchMap, take, withLatestFrom } from "rxjs/operators";
+import {
+  buffer,
+  concatMap,
+  debounce,
+  debounceTime,
+  exhaustMap,
+  filter,
+  last,
+  map,
+  mergeMap,
+  pairwise,
+  scan,
+  startWith,
+  switchMap,
+  take,
+  tap,
+  timeInterval,
+  timestamp,
+  withLatestFrom,
+  window as rxjsWindow,
+  bufferWhen,
+} from "rxjs/operators";
+import { partition } from "functions/node_modules/@types/lodash";
 
 @Component({
   selector: "app-swipe-card",
@@ -61,8 +85,12 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
   yesBubbleAnimation: Animation;
   noBubbleAnimation: Animation;
 
-  cardTap$ = new Subject();
-  cardTapSub: Subscription;
+  cardTap$ = new Subject<swipeChoice>();
+  subs = new Subscription();
+
+  singleTap$ = new Subject<swipeChoice>();
+  doubleTap$ = new Subject<swipeChoice>();
+  tapInProgress$ = new BehaviorSubject<boolean>(false);
 
   @HostListener("window:resize", ["$event"])
   onResize() {
@@ -73,7 +101,7 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
   currentUserSub: Subscription;
 
   timeOfLatestCardTap = 0; // in millisecond; set to 0 when we want the diff with current time to be larger than threshold
-  DOUBLE_TAP_THRESHOLD = 500;
+  DOUBLE_TAP_THRESHOLD = 800;
   choiceOfLatestTap: swipeChoice = null;
 
   constructor(
@@ -88,7 +116,34 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
   }
 
   ngAfterViewInit() {
-    this.cardTapSub = this.onCardTapLogic().subscribe();
+    this.subs.add(this.onCardTapLogic().subscribe());
+    this.subs.add(this.handleTaps().subscribe());
+  }
+
+  handleTaps() {
+    return merge(this.handleSingleTaps(), this.handleDoubleTaps());
+  }
+
+  handleSingleTaps() {
+    return this.singleTap$.pipe(
+      mergeMap((choice) => {
+        this.tapInProgress$.next(true);
+        return this.singleTapOnCard(choice).pipe(
+          tap(() => this.tapInProgress$.next(false))
+        );
+      })
+    );
+  }
+
+  handleDoubleTaps() {
+    return this.doubleTap$.pipe(
+      exhaustMap((choice) => {
+        this.tapInProgress$.next(true);
+        return this.doubleTapOnCard(choice).pipe(
+          tap(() => this.tapInProgress$.next(false))
+        );
+      })
+    );
   }
 
   /**
@@ -97,29 +152,26 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
    */
   onCardTapLogic() {
     return this.cardTap$.pipe(
-      concatMap((choice: swipeChoice) => {
-        // case where user taps different sides
-        if (this.choiceOfLatestTap !== choice) {
-          this.choiceOfLatestTap = choice;
-
-          return this.singleTapOnCard(choice);
+      withLatestFrom(this.tapInProgress$),
+      filter(([_, inProgress]) => !inProgress),
+      map((arr) => arr[0]),
+      tap(() => console.log("tap")),
+      startWith("" as any),
+      timeInterval(),
+      tap((a) => console.log(a)),
+      pairwise(),
+      map((clicks) => {
+        if (clicks[0].value !== clicks[1].value) {
+          return;
+          return this.singleTap$.next(clicks[1].value);
         }
 
-        const now = Date.now();
-
-        // case where we have two taps on same side and close together in time
-        if (Math.abs(now - this.timeOfLatestCardTap) <= this.DOUBLE_TAP_THRESHOLD) {
-          this.timeOfLatestCardTap = 0;
-          this.choiceOfLatestTap = choice;
-
-          return this.doubleTapOnCard(choice);
+        if (clicks[1].interval <= this.DOUBLE_TAP_THRESHOLD) {
+          return this.doubleTap$.next(clicks[1].value);
         }
 
-        // case where we have one tap
-        this.timeOfLatestCardTap = now;
-        this.choiceOfLatestTap = choice;
-
-        return this.singleTapOnCard(choice);
+        return;
+        return this.singleTap$.next(clicks[1].value);
       })
     );
   }
@@ -169,14 +221,15 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
 
   private doubleTapOnCard(choice: swipeChoice): Observable<void> {
     if (choice === "yes") {
-      this.matched.emit([Array.from(this.profCard)[0].profile.firstName, Array.from(this.profCard)[0].profile.pictureUrls[0]]) 
+      this.matched.emit([
+        Array.from(this.profCard)[0].profile.firstName,
+        Array.from(this.profCard)[0].profile.pictureUrls[0],
+      ]);
       return this.profiles$.pipe(
         take(1),
         withLatestFrom(of(SwipeYesAnimation(this.cards.first, this.screenWidth))),
         switchMap(([profiles, swipeAnimation]) =>
-          concat(swipeAnimation.play(), 
-          this.onYesSwipe(profiles[0]),
-          )
+          concat(swipeAnimation.play(), this.onYesSwipe(profiles[0]))
         )
       );
     }
@@ -216,6 +269,6 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.currentUserSub?.unsubscribe();
-    this.cardTapSub?.unsubscribe();
+    this.subs?.unsubscribe();
   }
 }

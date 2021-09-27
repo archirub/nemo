@@ -7,8 +7,17 @@ import { searchCriteria, Criterion } from "@interfaces/search-criteria.model";
 import { SearchCriteria, copyClassInstance } from "@classes/index";
 import { privateProfileFromDatabase, profileFromDatabase } from "@interfaces/index";
 import { FormatService } from "@services/format/format.service";
-import { exhaustMap, filter, map, take, tap, withLatestFrom } from "rxjs/operators";
+import {
+  distinctUntilChanged,
+  exhaustMap,
+  filter,
+  map,
+  take,
+  tap,
+  withLatestFrom,
+} from "rxjs/operators";
 import { AngularFireAuth } from "@angular/fire/compat/auth";
+import { CurrentUserStore } from "@stores/current-user/current-user-store.service";
 
 @Injectable({
   providedIn: "root",
@@ -17,31 +26,37 @@ export class SearchCriteriaStore {
   private searchCriteria: BehaviorSubject<SearchCriteria>;
   public readonly searchCriteria$: Observable<SearchCriteria>;
 
+  private isReady = new BehaviorSubject<boolean>(false);
+  public isReady$ = this.isReady.asObservable().pipe(distinctUntilChanged());
+
   constructor(
     private firestore: AngularFirestore,
     private format: FormatService,
-    private afAuth: AngularFireAuth
+    private afAuth: AngularFireAuth,
+    private appUser: CurrentUserStore
   ) {
     this.searchCriteria = new BehaviorSubject<SearchCriteria>(this.emptySearchCriteria());
     this.searchCriteria$ = this.searchCriteria.asObservable();
   }
 
-  public async initializeStore(uid: string) {
-    if (!uid) return console.error("No uid provided.");
-    await this.fetchCriteria(uid).toPromise();
+  public activateStore() {
+    return this.appUser.user$.pipe(
+      filter((user) => !!user),
+      map((user) => {
+        if (user?.latestSearchCriteria) {
+          this.searchCriteria.next(user.latestSearchCriteria as SearchCriteria);
+          this.isReady.next(true);
+        }
+      })
+    );
   }
 
   resetStore() {
     this.searchCriteria.next(this.emptySearchCriteria());
   }
 
-  public async initalizeThroughCurrentUserStore(SC: SearchCriteria) {
-    if (!SC) return console.error("No search criteria provided.");
-    await this.updateCriteriaStore(SC);
-  }
-
   /** Adds criteria to search */
-  public updateCriteriaStore(newCriteria: SearchCriteria): Promise<void> {
+  public updateCriteriaInStore(newCriteria: SearchCriteria): Promise<void> {
     return this.searchCriteria$
       .pipe(
         take(1),
@@ -77,16 +92,6 @@ export class SearchCriteriaStore {
       .toPromise();
   }
 
-  /** Removes all criterion listed in array */
-  // private removeCriteria(criteria: Criterion[]) {
-  //   const currentCriteria: SearchCriteria = this._searchCriteria.getValue();
-
-  //   criteria.forEach((criterion) => {
-  //     currentCriteria[criterion] = null;
-  //   });
-  //   this._searchCriteria.next(currentCriteria);
-  // }
-
   /** Fetches the lastly saved search criteria from the database */
   private fetchCriteria(uid: string): Observable<void> {
     return this.firestore
@@ -102,7 +107,9 @@ export class SearchCriteriaStore {
             const latestSearchCriteria = this.format.searchCriteriaDatabaseToClass(
               data.latestSearchCriteria
             );
+
             this.searchCriteria.next(latestSearchCriteria);
+            this.isReady.next(true);
           }
         })
       );

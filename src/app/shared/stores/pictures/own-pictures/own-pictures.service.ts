@@ -40,8 +40,8 @@ export class OwnPicturesStore {
   private urls: BehaviorSubject<string[]> = new BehaviorSubject([]);
   urls$: Observable<string[]> = this.urls.asObservable();
 
-  private allPicturesLoaded = new BehaviorSubject<boolean>(false);
-  allPicturesLoaded$ = this.allPicturesLoaded.asObservable().pipe(distinctUntilChanged());
+  private isReady = new BehaviorSubject<boolean>(false);
+  isReady$ = this.isReady.asObservable().pipe(distinctUntilChanged());
 
   constructor(
     private afStorage: AngularFireStorage,
@@ -120,7 +120,7 @@ export class OwnPicturesStore {
         return this.nextFromFirebase();
       }),
       tap(() => console.log("own pictures store is filled")),
-      tap(() => this.allPicturesLoaded.next(true))
+      tap(() => this.isReady.next(true))
     );
   }
 

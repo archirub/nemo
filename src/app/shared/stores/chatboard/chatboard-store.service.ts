@@ -12,7 +12,14 @@ import {
 
 import { Chat } from "@classes/index";
 import { FormatService } from "@services/format/format.service";
-import { map, take, withLatestFrom, distinctUntilChanged, share } from "rxjs/operators";
+import {
+  map,
+  take,
+  withLatestFrom,
+  distinctUntilChanged,
+  share,
+  merge,
+} from "rxjs/operators";
 import { chatFromDatabase, messageFromDatabase, messageMap } from "@interfaces/index";
 import { User } from "@angular/fire/auth";
 
@@ -46,6 +53,13 @@ export class ChatboardStore {
   public chats$ = this.filterBasedOnNature("chat"); // chats where conversation hasn been initiated
   public matches$ = this.filterBasedOnNature("match"); // chats where conversation hasn't been initiated
   public hasNoChats$ = this.hasNoChats.asObservable().pipe(distinctUntilChanged());
+
+  public isReady$ = combineLatest([this.allChats$, this.hasNoChats$]).pipe(
+    map(
+      ([chats, hasNoChats]) =>
+        Object.values(chats).filter((c) => c).length > 0 || hasNoChats
+    )
+  );
 
   private chatsFromDatabase = new BehaviorSubject<
     QueryDocumentSnapshot<chatFromDatabase>[]

@@ -414,7 +414,7 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
   }
 
   async closeAndConfirmChoices() {
-    await this.SCstore.updateCriteriaStore(
+    await this.SCstore.updateCriteriaInStore(
       this.searchCriteriaToStoreFormatting(this.form.value)
     );
     await this.SCstore.updateCriteriaOnDatabase();

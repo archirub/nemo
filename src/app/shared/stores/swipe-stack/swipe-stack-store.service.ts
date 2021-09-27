@@ -6,6 +6,7 @@ import { AngularFireFunctions } from "@angular/fire/compat/functions";
 import { BehaviorSubject, combineLatest, concat, forkJoin, Observable, of } from "rxjs";
 import {
   concatMap,
+  distinctUntilChanged,
   exhaustMap,
   filter,
   last,
@@ -30,6 +31,10 @@ import {
 import { AngularFireStorage } from "@angular/fire/compat/storage";
 // import { StackPicturesService } from "@services/pictures/stack-pictures/stack-pictures.service";
 
+// loading is for when there is no one in the stack but we are fetching
+// empty is for the stack has been fetched and no one was found
+// filled is for when there is someone in the stack
+export type StackState = "filled" | "loading" | "empty";
 @Injectable({
   providedIn: "root",
 })
@@ -38,6 +43,14 @@ export class SwipeStackStore {
   public readonly profiles$ = this.profiles.asObservable();
 
   minimumProfileCount = 4; // # of profiles in stack below which we make another request
+
+  private stackState = new BehaviorSubject<StackState>("loading");
+  public stackState$ = this.stackState.asObservable().pipe(distinctUntilChanged());
+  // now make logic to sub to that in the home page so that it is loading or shows empty
+  // when there is no one
+
+  private isReady = new BehaviorSubject<boolean>(false);
+  public isReady$ = this.isReady.asObservable().pipe(distinctUntilChanged());
 
   constructor(
     private firestore: AngularFirestore,
@@ -53,13 +66,20 @@ export class SwipeStackStore {
    */
   activateStore(): Observable<void> {
     return this.profiles$.pipe(
-      filter((profiles) => profiles.length <= this.minimumProfileCount),
+      map((profiles) => profiles.length),
+      tap((count) => this.stackStateHandler(count)),
+      filter((count) => count <= this.minimumProfileCount),
       withLatestFrom(this.SCstore.searchCriteria$),
       // exhaustMap is a must use here, makes sure we don't have multiple requests to fill the swipe stack
       exhaustMap(([profiles, SC]) => this.addToSwipeStackQueue(SC)),
-      // tap(() => console.log("activating swipe stack store")),
+      tap(() => this.isReady.next(true)),
       share()
     );
+  }
+
+  stackStateHandler(profilesCount: number) {
+    if (profilesCount < 1) this.stackState.next("empty");
+    this.stackState.next("filled");
   }
 
   resetStore() {
@@ -92,12 +112,13 @@ export class SwipeStackStore {
 
   private addUrls(urls: string[], uid: string): Observable<void> {
     return this.profiles$.pipe(
+      map((profiles) => [profiles, profiles.map((p) => p.uid).indexOf(uid)]),
+      filter((array) => array[1] !== -1),
       take(1),
-      tap((profiles) => {
-        const userIndex = profiles.map((p) => p.uid).indexOf(uid);
-        profiles[userIndex].pictureUrls = urls;
+      tap((array: [Profile[], number]) => {
+        array[0][array[1]].pictureUrls = urls;
 
-        this.profiles.next(profiles);
+        this.profiles.next(array[0]);
       }),
       map(() => null)
     );
@@ -105,10 +126,10 @@ export class SwipeStackStore {
 
   /** Adds profiles to the queue a.k.a. beginning of Profiles array */
   public addToSwipeStackQueue(SC: SearchCriteria) {
+    this.stackState.next("loading");
     return this.fetchUIDs(SC).pipe(
       //using exhaustMap s.t. other requests are not listened to while profiles are being fetched
-      // this is because it is a costly operation w.r.t backened and money-wise, and that it is most likely
-      // a mistake
+      // this is because it is a costly operation w.r.t backened and money-wise
       exhaustMap((uids) => this.fetchProfiles(uids)),
       concatMap((profiles) => this.addToQueue(profiles)),
       // THIS NEXT ONE IS WHY IT CONSOLE LOGS MANY TIMES STORE INITIALISED, AS THIS ONE EMITS
