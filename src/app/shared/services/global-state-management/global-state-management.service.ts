@@ -327,7 +327,7 @@ export class GlobalStateManagementService {
           this.chatboardStore.hasNoChats$
         )
       );
-
+    //
     // if (this.pageIsMain(page)) storesToActivate$.push(this.userStore.fillStore());
 
     // if (page === "chats" || page === "messenger") {

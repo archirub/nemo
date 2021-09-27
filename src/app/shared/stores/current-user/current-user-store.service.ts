@@ -42,6 +42,11 @@ export class CurrentUserStore {
     distinctUntilChanged()
   );
 
+  public isReady$ = this.user$.pipe(
+    map((user) => user instanceof AppUser),
+    distinctUntilChanged()
+  );
+
   constructor(
     private afAuth: AngularFireAuth,
     private fs: AngularFirestore,
