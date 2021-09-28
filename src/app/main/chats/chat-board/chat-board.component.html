@@ -6,7 +6,7 @@
   [selections]="['chats', 'catches']"
 ></nemo-toggle>
 
-<ion-content *ngIf="picsLoaded && (view === 'catches')" #chatContainer>
+<ion-content *ngIf="picsLoaded && view === 'catches'" #chatContainer>
   <div *ngIf="this.chats.length < 1" class="noChats">
     <p>
       Sorry, looks like you don't have any chats yet. Head to the catch tab to find
@@ -20,9 +20,7 @@
     </div>
   </div>
 
-  <h1 class="title">
-    Catches
-  </h1>
+  <h1 class="title">Catches</h1>
 
   <ion-list *ngIf="this.matches.length > 0">
     <ion-item-sliding class="parent" *ngFor="let chat of matches; index as i">
@@ -31,10 +29,7 @@
           <img [src]="(chatboardPictures$ | async)[chat?.recipient?.uid]" />
         </ion-avatar>
         <div class="text-container">
-          <ion-label
-            color="primary"
-            class="text-container name"
-          >
+          <ion-label color="primary" class="text-container name">
             {{ chat?.recipient?.name }}</ion-label
           >
           <ion-label
@@ -75,7 +70,7 @@
   </ion-list>
 </ion-content>
 
-<ion-content *ngIf="picsLoaded && (view === 'chats')" #chatContainer>
+<ion-content *ngIf="picsLoaded && view === 'chats'" #chatContainer>
   <div *ngIf="this.chats.length < 1" class="noChats">
     <p>
       Sorry, looks like you don't have any chats yet. Head to the catch tab to find
@@ -89,9 +84,7 @@
     </div>
   </div>
 
-  <h1 class="title">
-    Chats
-  </h1>
+  <h1 class="title">Chats</h1>
 
   <!--ion-row *ngIf="matches.length > 0">
     <ion-item detail="false" #matchesButton button (click)="presentMatches()">
@@ -140,16 +133,17 @@
   </ion-row-->
 
   <ion-list *ngIf="this.chats.length > 0">
-    <ion-item-sliding class="parent" *ngFor="let chat of chats; index as i">
+    <ion-item-sliding
+      class="parent"
+      *ngFor="let chat of chats; index as i"
+      #chatDeleteRef
+    >
       <ion-item detail="true" button (click)="goToMessenger(chat.id)">
         <ion-avatar slot="start">
           <img [src]="(chatboardPictures$ | async)[chat?.recipient?.uid]" />
         </ion-avatar>
         <div class="text-container">
-          <ion-label
-            color="primary"
-            class="text-container name"
-          >
+          <ion-label color="primary" class="text-container name">
             {{ chat?.recipient?.name }}</ion-label
           >
           <ion-label
@@ -181,6 +175,7 @@
       </ion-item>
 
       <!--Swipe across to delete options-->
+
       <ion-item-options side="end">
         <ion-item-option color="danger" (click)="deleteChat($event, chat)">
           <ion-icon slot="icon-only" name="trash"></ion-icon>

@@ -308,7 +308,6 @@ export class QuestionSlidesComponent implements OnInit, ControlValueAccessor {
    * Rebuilds the slide UI and fills out each slide
    */
   writeValue(value: any): void {
-    console.log("writting new questions value", value);
     this.value = value;
 
     //Reinitialise everything ready for filling out UI

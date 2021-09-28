@@ -155,10 +155,8 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
       withLatestFrom(this.tapInProgress$),
       filter(([_, inProgress]) => !inProgress),
       map((arr) => arr[0]),
-      tap(() => console.log("tap")),
       startWith("" as any),
       timeInterval(),
-      tap((a) => console.log(a)),
       pairwise(),
       map((clicks) => {
         if (clicks[0].value !== clicks[1].value) {

@@ -6,6 +6,7 @@ import {
   EventEmitter,
   forwardRef,
   Renderer2,
+  AfterViewInit,
 } from "@angular/core";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 
@@ -28,7 +29,7 @@ import {
     },
   ],
 })
-export class InterestSlidesComponent implements OnInit, ControlValueAccessor {
+export class InterestSlidesComponent implements AfterViewInit, ControlValueAccessor {
   @Input() listed: boolean = true; //Option to hide the listed interests, automatically shown (false = hidden)
   _interests: Interests[] = [];
   @Input() set interests(value: Interests[]) {
@@ -46,10 +47,8 @@ export class InterestSlidesComponent implements OnInit, ControlValueAccessor {
 
   constructor(private renderer: Renderer2) {}
 
-  ngOnInit() {
-    //this.pictures = assetsInterestsPath;
-    //this.names = searchCriteriaOptions.interests;
-
+  ngAfterViewInit() {
+    const componentRef = this; // must be a const and be defined here; in use in this.slideOpts
     this.slideOpts = {
       speed: 200,
       resistanceRatio: 0.5,
@@ -72,7 +71,7 @@ export class InterestSlidesComponent implements OnInit, ControlValueAccessor {
           swiper.params.watchSlidesProgress = true;
           swiper.originalParams.watchSlidesProgress = true;
         },
-        setTranslate(component: InterestSlidesComponent) {
+        setTranslate: function () {
           const swiper = this;
           const {
             width: swiperWidth,
@@ -117,7 +116,7 @@ export class InterestSlidesComponent implements OnInit, ControlValueAccessor {
 
             $slideEl.transform(slideTransform);
 
-            component.renderer.setStyle(
+            componentRef.renderer.setStyle(
               $slideEl[0],
               "zIndex",
               -Math.abs(Math.round(offsetMultiplier)) + 1
@@ -147,13 +146,13 @@ export class InterestSlidesComponent implements OnInit, ControlValueAccessor {
                 $slideEl.append($shadowAfterEl);
               }
               if ($shadowBeforeEl.length)
-                component.renderer.setStyle(
+                componentRef.renderer.setStyle(
                   $shadowBeforeEl[0],
                   "opacity",
                   offsetMultiplier > 0 ? offsetMultiplier : 0
                 );
               if ($shadowAfterEl.length)
-                component.renderer.setStyle(
+                componentRef.renderer.setStyle(
                   $shadowAfterEl[0],
                   "opacity",
                   -offsetMultiplier > 0 ? -offsetMultiplier : 0
@@ -178,6 +177,10 @@ export class InterestSlidesComponent implements OnInit, ControlValueAccessor {
         },
       },
     };
+  }
+  ngOnInit() {
+    //this.pictures = assetsInterestsPath;
+    //this.names = searchCriteriaOptions.interests;
   }
 
   selectInterest(choice) {

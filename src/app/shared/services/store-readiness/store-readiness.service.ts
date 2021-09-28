@@ -22,7 +22,7 @@ type storeName =
 @Injectable({
   providedIn: "root",
 })
-export class PageReadinessService {
+export class StoreReadinessService {
   constructor(
     private userStore: CurrentUserStore,
     private chatboardStore: ChatboardStore,

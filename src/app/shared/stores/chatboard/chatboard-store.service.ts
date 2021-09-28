@@ -19,9 +19,20 @@ import {
   distinctUntilChanged,
   share,
   merge,
+  first,
+  filter,
+  exhaustMap,
+  switchMap,
+  tap,
 } from "rxjs/operators";
-import { chatFromDatabase, messageFromDatabase, messageMap } from "@interfaces/index";
+import {
+  chatDeletionByUserRequest,
+  chatFromDatabase,
+  messageFromDatabase,
+  messageMap,
+} from "@interfaces/index";
 import { User } from "@angular/fire/auth";
+import { AngularFireFunctions } from "@angular/fire/compat/functions";
 
 // the store has this weird shape because of the Firestore's onSnapshot function which
 // takes an observer instead of simply being an observable. Because of that, I need
@@ -81,7 +92,8 @@ export class ChatboardStore {
   constructor(
     private afAuth: AngularFireAuth,
     private firestore: AngularFirestore,
-    private format: FormatService
+    private format: FormatService,
+    private afFunctions: AngularFireFunctions
   ) {}
 
   public activateStore() {
@@ -106,6 +118,23 @@ export class ChatboardStore {
     });
   }
 
+  public deleteChatOnDatabase(chatID: string) {
+    const request: chatDeletionByUserRequest = { chatID };
+    return this.afFunctions.httpsCallable("chatDeletionByUser")(request);
+  }
+
+  public deleteChatInStore(chatID: string) {
+    return this.allChats.pipe(
+      first(),
+      tap((chats) => {
+        if (chats[chatID]) {
+          delete chats[chatID];
+          this.allChats.next(chats);
+        }
+      })
+    );
+  }
+
   private activateChatDocsListening(): Observable<void> {
     return this.afAuth.user.pipe(
       take(1),
@@ -117,7 +146,6 @@ export class ChatboardStore {
           .where("uids", "array-contains", user.uid)
           .onSnapshot({
             next: (snapshot) => {
-              console.log("is empty", snapshot.empty);
               snapshot.empty ? this.hasNoChats.next(true) : this.hasNoChats.next(false);
 
               const docs = snapshot.docs;
@@ -278,4 +306,6 @@ export class ChatboardStore {
       })
     );
   }
+
+  p;
 }

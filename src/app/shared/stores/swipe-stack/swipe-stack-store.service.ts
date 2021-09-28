@@ -9,6 +9,7 @@ import {
   distinctUntilChanged,
   exhaustMap,
   filter,
+  first,
   last,
   map,
   share,
@@ -42,12 +43,10 @@ export class SwipeStackStore {
   private profiles = new BehaviorSubject<Profile[]>([]);
   public readonly profiles$ = this.profiles.asObservable();
 
-  minimumProfileCount = 4; // # of profiles in stack below which we make another request
+  MIN_PROFILE_COUNT = 4; // # of profiles in stack below which we make another request
 
   private stackState = new BehaviorSubject<StackState>("loading");
   public stackState$ = this.stackState.asObservable().pipe(distinctUntilChanged());
-  // now make logic to sub to that in the home page so that it is loading or shows empty
-  // when there is no one
 
   private isReady = new BehaviorSubject<boolean>(false);
   public isReady$ = this.isReady.asObservable().pipe(distinctUntilChanged());
@@ -67,19 +66,40 @@ export class SwipeStackStore {
   activateStore(): Observable<void> {
     return this.profiles$.pipe(
       map((profiles) => profiles.length),
-      tap((count) => this.stackStateHandler(count)),
-      filter((count) => count <= this.minimumProfileCount),
-      withLatestFrom(this.SCstore.searchCriteria$),
+      concatMap((count) => this.updateStackState(count)),
+      this.filterBasedOnStackState(),
+      filter((count) => count <= this.MIN_PROFILE_COUNT),
+      switchMap(() => this.SCstore.searchCriteria$.pipe(first())), // using switchMap instead of withLatestFrom as SC might still be undefined at that point so we want to wait for it to have a value (which withLatestFrom doesn't do)
       // exhaustMap is a must use here, makes sure we don't have multiple requests to fill the swipe stack
-      exhaustMap(([profiles, SC]) => this.addToSwipeStackQueue(SC)),
+      exhaustMap((SC) => this.addToSwipeStackQueue(SC)),
       tap(() => this.isReady.next(true)),
       share()
     );
   }
 
-  stackStateHandler(profilesCount: number) {
-    if (profilesCount < 1) this.stackState.next("empty");
-    this.stackState.next("filled");
+  filterBasedOnStackState() {
+    return (source: Observable<number>) => {
+      return source.pipe(
+        withLatestFrom(this.stackState$),
+        filter(([profileCount, stackState]) => stackState !== "empty"),
+        map(([profileCount, stackState]) => profileCount)
+      );
+    };
+  }
+
+  updateStackState(profilesCount: number): Observable<number> {
+    return this.stackState$.pipe(
+      first(),
+      map((currentState) => {
+        if (currentState === "loading" && profilesCount > 0)
+          return this.stackState.next("filled");
+        if (currentState === "loading" && profilesCount === 0)
+          return this.stackState.next("empty");
+        if (currentState === "filled" && profilesCount === 0)
+          return this.stackState.next("loading");
+      }),
+      map(() => profilesCount)
+    );
   }
 
   resetStore() {
@@ -131,11 +151,15 @@ export class SwipeStackStore {
       //using exhaustMap s.t. other requests are not listened to while profiles are being fetched
       // this is because it is a costly operation w.r.t backened and money-wise
       exhaustMap((uids) => this.fetchProfiles(uids)),
+
       concatMap((profiles) => this.addToQueue(profiles)),
+
       // THIS NEXT ONE IS WHY IT CONSOLE LOGS MANY TIMES STORE INITIALISED, AS THIS ONE EMITS
       // ONCE FOR EVERY USER IT MANAGES THE PICTURES OF, HENCE EVERYTHING IS WORKING FINE,
       // THE LOG JUST BECOMES MISLEADING DUE TO THIS SETUP
-      concatMap((profiles) => this.managePictures(profiles))
+      concatMap((profiles) =>
+        profiles.length > 0 ? this.managePictures(profiles) : of(null)
+      )
     );
   }
 
@@ -197,6 +221,7 @@ export class SwipeStackStore {
 
   /** Gets data from profile docs from an array of uids */
   private fetchProfiles(uids: string[]): Observable<Profile[]> {
+    if (uids.length < 1) return of([]);
     return forkJoin(
       uids.map(
         (uid) =>

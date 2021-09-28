@@ -36,9 +36,7 @@ export class EmailVerificationService {
     // })
     ();
 
-  constructor(private afAuth: AngularFireAuth) {
-    this.emailVerificationState.subscribe((a) => console.log("value here", a));
-  }
+  constructor(private afAuth: AngularFireAuth) {}
 
   public listenForVerification(intervalBetweenChecks = 2000): Observable<void> {
     return this.afAuth.user.pipe(

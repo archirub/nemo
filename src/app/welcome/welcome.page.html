@@ -1,23 +1,18 @@
 <ion-content class="welcome">
-  <video
-  autoplay="true" 
-  muted="muted" 
-  loop="true" 
-  id="backVideo">
-    <source src="/assets/welcome-background.mp4" type="video/mp4">
+  <video autoplay="true" muted="muted" loop="true" id="backVideo">
+    <source src="/assets/welcome-background.mp4" type="video/mp4" />
   </video>
   <ion-grid>
     <ion-row>
       <ion-col size="12">
-        <ion-img
-          class="nemo-logo"
-          [src]="'/assets/logo_and_name.svg'"
-        ></ion-img>
+        <ion-img class="nemo-logo" [src]="'/assets/logo_and_name.svg'"></ion-img>
       </ion-col>
     </ion-row>
     <ion-row>
       <ion-col offset="3" size="6" class="signInUpContainer">
-        <ion-button class="register" fill="clear" (click)="goToSignup()">Continue with UCL email</ion-button>
+        <ion-button class="register" fill="clear" (click)="goToSignup()"
+          >Sign up with my uni email</ion-button
+        >
       </ion-col>
     </ion-row>
     <ion-row>

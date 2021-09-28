@@ -14,6 +14,7 @@ import {
   deleteAccountRequest,
   checkEmailValidityRequest,
   searchCriteriaOptions,
+  chatDeletionByUserRequest,
 } from "./../../../../src/app/shared/interfaces/index";
 
 import {
@@ -50,7 +51,8 @@ type CloudFunctionRequest =
   | createAccountRequest
   | profileEditingByUserRequest
   | deleteAccountRequest
-  | checkEmailValidityRequest;
+  | checkEmailValidityRequest
+  | chatDeletionByUserRequest;
 
 type CloudFunctionName =
   | "checkEmailValidity"
@@ -61,7 +63,8 @@ type CloudFunctionName =
   | "addOrRemoveReported"
   | "changeShowProfile"
   | "registerSwipeChoices"
-  | "generateSwipeStack";
+  | "generateSwipeStack"
+  | "chatDeletionByUser";
 
 export function sanitizeData(
   cloudFunctionName: CloudFunctionName,
@@ -118,6 +121,10 @@ export function sanitizeData(
         cloudFunctionRequest as generateSwipeStackRequest
       );
       break;
+    case "chatDeletionByUser":
+      sanitizationResult = sanitizeChatDeletionByUser(
+        cloudFunctionRequest as chatDeletionByUserRequest
+      );
   }
 
   if (!sanitizationResult)
@@ -394,6 +401,20 @@ function sanitizeGenerateSwipeStack(request: generateSwipeStackRequest): {
         societyCategory: request?.searchCriteria?.societyCategory,
         university: request?.searchCriteria?.university,
       },
+    },
+  };
+}
+
+function sanitizeChatDeletionByUser(request: chatDeletionByUserRequest): {
+  isValid: boolean;
+  sanitizedData?: chatDeletionByUserRequest;
+} {
+  if (!isString(request?.chatID)) return { isValid: false };
+
+  return {
+    isValid: true,
+    sanitizedData: {
+      chatID: request?.chatID,
     },
   };
 }

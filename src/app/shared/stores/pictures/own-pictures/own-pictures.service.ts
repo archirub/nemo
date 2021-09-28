@@ -107,7 +107,6 @@ export class OwnPicturesStore {
   private fillStore() {
     return this.checkLocal().pipe(
       exhaustMap((localStorageContent) => {
-        console.log("filling own pictures store...");
         // dangerous logic as, when changing pictures, if the request to the database works but not that to
         // the local storage, then we will indefinitely be displaying the pictures from the local storage (i.e. the old pictures),
         // hence, either we need to make sure that the of the local storage gets updated if the database one does,
@@ -119,7 +118,6 @@ export class OwnPicturesStore {
         // }
         return this.nextFromFirebase();
       }),
-      tap(() => console.log("own pictures store is filled")),
       tap(() => this.isReady.next(true))
     );
   }

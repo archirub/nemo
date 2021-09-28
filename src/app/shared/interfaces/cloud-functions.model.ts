@@ -62,4 +62,6 @@ export type profileEditingByUserRequest = {
 
 export type deleteAccountRequest = {};
 
+export type chatDeletionByUserRequest = { chatID: string };
+
 export type checkEmailValidityRequest = { email: string };

@@ -110,6 +110,22 @@ export class GlobalStateManagementService {
     );
   }
 
+  activateAllStores(): Observable<any> {
+    const storesToActivate$: Observable<any>[] = [
+      this.userStore.fillStore(),
+      this.swipeStackStore.activateStore(),
+      this.searchCriteriaStore.activateStore(),
+      this.chatboardStore.activateStore(),
+      this.OwnPicturesStore.activateStore(),
+      this.chatboardPicturesStore.activateStore(
+        this.chatboardStore.allChats$,
+        this.chatboardStore.hasNoChats$
+      ),
+    ];
+
+    return merge(...storesToActivate$);
+  }
+
   public globalManagement(): Observable<void> {
     return this.getFirebaseUser().pipe(
       tap((a) => console.log("start of global management chain", a)),
@@ -137,9 +153,9 @@ export class GlobalStateManagementService {
   }
 
   private activateDefaultStores() {
-    const storesToActivate$: Observable<any>[] = [];
-
-    storesToActivate$.push(this.universitiesStore.fetchUniversities());
+    const storesToActivate$: Observable<any>[] = [
+      this.universitiesStore.fetchUniversities(),
+    ];
 
     return merge(...storesToActivate$);
   }
@@ -221,7 +237,6 @@ export class GlobalStateManagementService {
           await new Promise((resolve) => {
             const interval = setInterval(async () => {
               const u = await this.afAuth.currentUser;
-              console.log("this is the current user", u);
 
               if (!u) {
                 clearInterval(interval);
@@ -313,41 +328,44 @@ export class GlobalStateManagementService {
   }
 
   private activateCorrespondingStores(page: pageName): Observable<any> {
-    let storesToActivate$: Observable<any>[] = [];
+    if (this.pageIsMain(page)) return this.activateAllStores();
+    return of("");
 
-    if (this.pageIsMain(page))
-      storesToActivate$ = storesToActivate$.concat(
-        this.userStore.fillStore(),
-        this.swipeStackStore.activateStore(),
-        this.searchCriteriaStore.activateStore(),
-        this.chatboardStore.activateStore(),
-        this.OwnPicturesStore.activateStore(),
-        this.chatboardPicturesStore.activateStore(
-          this.chatboardStore.allChats$,
-          this.chatboardStore.hasNoChats$
-        )
-      );
-    //
-    // if (this.pageIsMain(page)) storesToActivate$.push(this.userStore.fillStore());
+    // let storesToActivate$: Observable<any>[] = [];
 
-    // if (page === "chats" || page === "messenger") {
-    //   storesToActivate$.push(this.chatboardStore.activateStore());
-    //   storesToActivate$.push(
+    // if (this.pageIsMain(page))
+    //   storesToActivate$ = storesToActivate$.concat(
+    //     this.userStore.fillStore(),
+    //     this.swipeStackStore.activateStore(),
+    //     this.searchCriteriaStore.activateStore(),
+    //     this.chatboardStore.activateStore(),
+    //     this.OwnPicturesStore.activateStore(),
     //     this.chatboardPicturesStore.activateStore(
     //       this.chatboardStore.allChats$,
     //       this.chatboardStore.hasNoChats$
     //     )
     //   );
-    // }
+    // //
+    // // if (this.pageIsMain(page)) storesToActivate$.push(this.userStore.fillStore());
 
-    // // COMMENTED OUT FOR DEVELOPMENT ONLY -  to not fetch a swipe stack every time
-    // if (page === "home") storesToActivate$.push(this.swipeStackStore.activateStore());
+    // // if (page === "chats" || page === "messenger") {
+    // //   storesToActivate$.push(this.chatboardStore.activateStore());
+    // //   storesToActivate$.push(
+    // //     this.chatboardPicturesStore.activateStore(
+    // //       this.chatboardStore.allChats$,
+    // //       this.chatboardStore.hasNoChats$
+    // //     )
+    // //   );
+    // // }
 
-    // if (page === "own-profile" || page === "settings") {
-    //   storesToActivate$.push(this.OwnPicturesStore.activateStore());
-    // }
-    console.log("stores are", storesToActivate$);
-    return storesToActivate$.length > 0 ? combineLatest(storesToActivate$) : of("");
+    // // // COMMENTED OUT FOR DEVELOPMENT ONLY -  to not fetch a swipe stack every time
+    // // if (page === "home") storesToActivate$.push(this.swipeStackStore.activateStore());
+
+    // // if (page === "own-profile" || page === "settings") {
+    // //   storesToActivate$.push(this.OwnPicturesStore.activateStore());
+    // // }
+    // console.log("stores are", storesToActivate$);
+    // return storesToActivate$.length > 0 ? combineLatest(storesToActivate$) : of("");
   }
 
   private getFirebaseUser(): Observable<User | null> {
@@ -403,7 +421,7 @@ export class GlobalStateManagementService {
   /**
    * Resets the content of the stores and clears the local storage
    */
-  private resetAppState() {
+  public resetAppState() {
     return forkJoin([of(this.emptyStoresService.emptyStores()), Storage.clear()]);
   }
 }

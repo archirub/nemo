@@ -43,7 +43,7 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
   // this also allows for the initial update of the pager
   profilePictures$ = new BehaviorSubject<string[]>([]);
   @Input() set profilePictures(value: string[]) {
-    if (!!value && value.length > 0) {
+    if (Array.isArray(value) && value.length > 0) {
       this.profilePictures$.next(value);
 
       this.slides
@@ -92,6 +92,7 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
   ) {}
 
   ngOnInit() {
+    this.slides.ionSlidePrevStart;
     this.moreInfo = false;
 
     this.buildInterestSlides(this.profile);
@@ -109,8 +110,8 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
 
     userReportedID = this.profile.uid;
     userReportedName = this.profile.firstName;
-    
-    this.profilePictures$.subscribe(res => {
+
+    this.profilePictures$.subscribe((res) => {
       userReportedPicture = res[0];
     });
 

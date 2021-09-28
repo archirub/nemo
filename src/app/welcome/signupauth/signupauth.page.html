@@ -35,12 +35,13 @@
       <ion-slide>
         <div class="personal-pref">
           <div class="question">
-            <ion-label position="stacked"> What's your uni email? </ion-label>
+            <ion-label position="stacked"> What's your email? </ion-label>
           </div>
 
           <div class="input flexend-col">
             <div>
               <ion-input
+                #testing
                 placeholder="My university email"
                 formControlName="email"
               ></ion-input>
@@ -49,7 +50,7 @@
 
           <div class="flexstart-col">
             <p class="tip" style="margin-bottom: 1vh">
-              The only university domains currently allowed on the app are:
+              The only universities currently allowed on the app are:
             </p>
             <ion-spinner
               name="bubbles"

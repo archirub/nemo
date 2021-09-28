@@ -31,7 +31,7 @@ export class DebounceClickDirective implements OnInit, OnDestroy {
         throttleTime(this.debounceTime),
         map((e) => this.debounceClick.emit(e))
       )
-      .subscribe((e) => console.log("debounced click"));
+      .subscribe();
   }
 
   ngOnDestroy() {

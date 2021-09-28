@@ -9,7 +9,14 @@ import {
   Renderer2,
 } from "@angular/core";
 import { FormGroup, FormControl, Validators } from "@angular/forms";
-import { IonCheckbox, IonSelect, IonSlides } from "@ionic/angular";
+import {
+  AlertController,
+  IonCheckbox,
+  IonSelect,
+  IonSlides,
+  LoadingController,
+  NavController,
+} from "@ionic/angular";
 import { Router } from "@angular/router";
 
 import {
@@ -31,6 +38,7 @@ import { UniversitiesStore } from "@stores/universities/universities.service";
 import { AngularFireAuth } from "@angular/fire/compat/auth";
 import { concatMap, delay, filter, map } from "rxjs/operators";
 import { Observable } from "rxjs";
+import { LoadingService } from "@services/loading/loading.service";
 
 @Component({
   selector: "app-signuprequired",
@@ -97,7 +105,11 @@ export class SignuprequiredPage implements OnInit {
     private changeDetectorRef: ChangeDetectorRef,
     private universitiesStore: UniversitiesStore,
     private afAuth: AngularFireAuth,
-    private renderer: Renderer2
+    private renderer: Renderer2,
+    private loadingCtrl: LoadingController,
+    private loading: LoadingService,
+    private alertCtrl: AlertController,
+    private navCtrl: NavController
   ) {
     this.form.valueChanges.subscribe((a) =>
       console.log("required form value change:", a)
@@ -426,8 +438,56 @@ export class SignuprequiredPage implements OnInit {
     };
   }
 
-  skipToApp() {
-    console.log('Write me! :)');
+  // copy paste from signup optional's onSubmit() method
+  async skipToApp() {
+    const loader = await this.loadingCtrl.create({
+      ...this.loading.defaultLoadingOptions,
+      message: "Setting up your account...",
+    });
+    await loader.present();
+
+    const slideCount = await this.slides.length();
+    const invalidSlide = await this.getFirstInvalidSlideIndex();
+    // go to slide if invalidSlide is non null and that it isn't the last slide
+    if (invalidSlide && invalidSlide + 1 !== slideCount) {
+      const alert = await this.alertCtrl.create({
+        backdropDismiss: false,
+        header: "We found some invalid data...",
+        buttons: ["Go to field"],
+      });
+
+      await loader.dismiss();
+      alert.onDidDismiss().then(() => this.unlockAndSlideTo(invalidSlide));
+      return alert.present();
+    }
+
+    await this.updateData();
+
+    try {
+      await this.signup.createFirestoreAccount();
+    } catch (e) {
+      await loader.dismiss();
+      await this.onAccountCreationFailure();
+    }
+
+    await this.signup.initializeUser();
+
+    await loader.dismiss();
+
+    return this.navCtrl.navigateForward("/welcome/signup-to-app");
+  }
+  async onAccountCreationFailure() {
+    const alert = await this.alertCtrl.create({
+      header: "Account creation failed",
+      message: `We couldn't complete the creation of your account. 
+      Please try to close and reopen the app, and check your internet connection. 
+      If the problem persists, abort profile creation when the popup comes up.
+      We're sorry for the inconvenience.`,
+      buttons: ["Okay"],
+      backdropDismiss: false,
+    });
+
+    return alert.present();
   }
 
   /**

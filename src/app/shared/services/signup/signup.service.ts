@@ -62,9 +62,7 @@ export class SignupService {
     private afStorage: AngularFireStorage,
     private router: Router,
     private currentUserStore: CurrentUserStore // private signupOptionalPage: SignupOptionalPage, // private signupRequiredPage: SignupRequiredPage
-  ) {
-    this.signupData.subscribe((a) => console.log("signup data ", a));
-  }
+  ) {}
 
   /**
    * Creates the account in Firebase authentification, initializes
@@ -161,7 +159,6 @@ export class SignupService {
     uid: string
   ): Observable<UploadTaskSnapshot[]> {
     if (!uid) return;
-    console.log("storing pictures");
     const pictureStorers$ = pictures.map(async (picture, index) => {
       const filePath = `profilePictures/${uid}/${index}`;
       const ref = this.afStorage.ref(filePath);

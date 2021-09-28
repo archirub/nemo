@@ -62,6 +62,7 @@ import { takeWhile } from "lodash";
 export class SignupauthPage implements OnInit {
   @ViewChild("slides") slidesRef: IonSlides;
   @ViewChild("email", { read: ElementRef }) emailRef: ElementRef;
+  @ViewChild("testing", { read: ElementRef }) testingRef: ElementRef;
 
   EMAIL_SENDING_INTERVAL = 30; // in seconds
 
@@ -390,7 +391,16 @@ export class SignupauthPage implements OnInit {
   async onSlideFromEmail() {
     const emailControl = this.authForm.get("email");
 
-    if (!emailControl.valid) return;
+    if (!emailControl.valid) {
+      console.log("yo", this.renderer);
+      this.renderer.setStyle(
+        this.testingRef.nativeElement,
+        "border",
+        "10px solid red !important"
+      );
+      emailControl.setErrors({ incorrect: true });
+      return;
+    }
 
     const loader = await this.loadingCtrl.create({
       ...this.loading.defaultLoadingOptions,

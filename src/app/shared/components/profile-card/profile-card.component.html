@@ -1,5 +1,5 @@
 <div #fullCard id="swipe-card" *ngIf="profile">
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script> -->
   <div class="img-container">
     <div class="pager">
       <ion-icon
@@ -22,9 +22,14 @@
           'background-position': 'center'
         }"
       >
-      <div class="yesSwipe" (click)="this.tapped.emit('yes')"></div>
-      <div class="noSwipe" (click)="this.tapped.emit('no')"></div>
-        <div *ngIf="profile?.questions[i]" #QandA class="question" [hidden]="moreInfo">
+        <div class="yesSwipe" (click)="this.tapped.emit('yes')"></div>
+        <div class="noSwipe" (click)="this.tapped.emit('no')"></div>
+        <div
+          *ngIf="profile?.questions && profile?.questions[i]"
+          #QandA
+          class="question"
+          [hidden]="moreInfo"
+        >
           <ion-card-title #question>{{ profile?.questions[i].question }}</ion-card-title>
           <ion-card-subtitle #answer>{{
             profile?.questions[i].answer
@@ -43,7 +48,6 @@
   </div> -->
   <!-- <div id="photo-shadow"></div> -->
   <div id="info" button>
-
     <!--div #snippet id="snippetInfo" [style.display]="moreInfo ? 'hidden' : 'block'" (click)="expandProfile()">
       <ion-card-header class="name-age">
         <ion-card-title #name
@@ -56,13 +60,14 @@
     </div-->
 
     <div #complete id="completeInfo">
-    <!--[hidden]="!moreInfo"-->
+      <!--[hidden]="!moreInfo"-->
       <ion-card-header #header class="name-age sticky" (click)="expandProfile()">
         <ion-card-title
           >{{ profile?.firstName }}, {{ profile?.dateOfBirth | age }}
         </ion-card-title>
         <ion-card-subtitle id="department"
-          >{{ profile?.course }}, {{ profile?.degree | degrees }}</ion-card-subtitle
+          >{{ profile?.course }}{{ profile?.course && profile?.degree ? ", " : ""
+          }}{{ profile?.degree | degrees }}</ion-card-subtitle
         >
       </ion-card-header>
       <div #content id="content">
@@ -124,8 +129,16 @@
               ></ion-icon>
               <br />
               <div class="interests-text">
-                <ion-label *ngIf="profile?.areaOfStudy != 'Maths and Physical Sciences'" id="interests-label">{{ profile?.areaOfStudy }}</ion-label>
-                <ion-label *ngIf="profile?.areaOfStudy === 'Maths and Physical Sciences'" id="interests-label">MAPS</ion-label>
+                <ion-label
+                  *ngIf="profile?.areaOfStudy != 'Maths and Physical Sciences'"
+                  id="interests-label"
+                  >{{ profile?.areaOfStudy }}</ion-label
+                >
+                <ion-label
+                  *ngIf="profile?.areaOfStudy === 'Maths and Physical Sciences'"
+                  id="interests-label"
+                  >MAPS</ion-label
+                >
               </div>
             </div>
 
@@ -157,7 +170,7 @@
           </div>
         </div>
 
-        <br>
+        <br />
 
         <!--div id="bio-bubble"></div-->
       </div>

@@ -30,7 +30,7 @@ import { TabElementRefService } from "src/app/main/tab-menu/tab-element-ref.serv
 import { SwipeCardComponent } from "./swipe-card/swipe-card.component";
 import { AngularFirestore } from "@angular/fire/compat/firestore";
 import { OwnPicturesStore } from "@stores/pictures/own-pictures/own-pictures.service";
-import { PageReadinessService } from "@services/page-readiness/page-readiness.service";
+import { StoreReadinessService } from "@services/store-readiness/store-readiness.service";
 
 @Component({
   selector: "app-home",
@@ -74,7 +74,7 @@ export class HomePage implements OnInit, OnDestroy {
     private ownPicturesService: OwnPicturesStore,
     private firebaseAuth: FirebaseAuthService,
     private fs: AngularFirestore,
-    private readiness: PageReadinessService
+    private readiness: StoreReadinessService
   ) {
     this.onResize();
   }
@@ -106,6 +106,7 @@ export class HomePage implements OnInit, OnDestroy {
   public chosenCatchMsg: string;
 
   ngOnInit() {
+    this.swipeStackStore.stackState$.subscribe((c) => console.log("stack state:", c));
     this.swipeProfiles$ = this.swipeStackStore.profiles$;
 
     this.ownPicturesService.urls$

@@ -10,6 +10,7 @@ admin.initializeApp();
 export * from "./get-match-data-user-info.function";
 // export * from "./increment-md-uid-count";
 export * from "./profile-editing-by-user";
+export * from "./chat-deletion-by-user";
 
 export * from "./duplicate-data-updating/index";
 export * from "./account-management/index";

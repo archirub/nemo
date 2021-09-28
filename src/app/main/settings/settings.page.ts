@@ -145,7 +145,6 @@ export class SettingsPage implements AfterViewInit, OnDestroy {
 
   /* Styles gone 'under' tab on toggle */
   async actOnGoUnder(option: GoUnder) {
-    console.log("actOnGoUnder triggered, option chosen is", option);
     const newShowProfile = this.goUnderToShowProfile(option);
 
     const loader = await this.loadingCtrl.create(
@@ -166,7 +165,7 @@ export class SettingsPage implements AfterViewInit, OnDestroy {
             loader.present(),
             this.afFunctions.httpsCallable("changeShowProfile")(request),
             this.currentUserStore.updateShowProfileInStore(newShowProfile)
-          ).pipe(tap((a) => console.log("this is ", a)));
+          );
         })
       )
       .toPromise();

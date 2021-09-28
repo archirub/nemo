@@ -46,7 +46,9 @@ export class FirebaseAuthService {
       Promise.all([clearLocalCache(), clearStores()]).then(() => logOut());
 
     const navigateToWelcome = async () =>
-      this.zone.run(() => this.navCtrl.navigateRoot("/welcome"));
+      this.zone
+        .run(() => this.navCtrl.navigateRoot("/welcome"))
+        .then(() => window.location.reload());
 
     await this.loadingService.presentLoader(
       [{ promise: duringLoadingPromise, arguments: [] }],

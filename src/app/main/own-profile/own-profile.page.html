@@ -1,4 +1,4 @@
-<ng-container *ngIf="!(picsLoaded$ | async)">
+<ng-container *ngIf="!(isPageReady$ | async)">
   <div class="fishAnim">
     <div class="flexcol">
       <img src="/assets/nemo_load.svg" #fish />
@@ -7,11 +7,11 @@
   </div>
 </ng-container>
 
-<ion-content *ngIf="picsLoaded$ | async" #profileContainer>
+<ion-content #profileContainer [hidden]="!(isPageReady$ | async)">
   <!--div class="shadow"></div-->
 
   <form #editableFieldsForm="ngForm">
-    <div *ngIf="picsLoaded$ | async" #profileContainer>
+    <div #profileContainer>
       <div class="shadow"></div>
       <div id="profile" style="display: flex">
         <app-profile-card
@@ -31,14 +31,6 @@
           [fontSize]="4"
           [selections]="['edit', 'view']"
         ></nemo-toggle>
-
-        <!--nemo-toggle
-          *ngIf="editingInProgress$ | async"
-          (valueChange)="actOnProfileEditing($event)"
-          [buttonWidth]="15"
-          [fontSize]="4"
-          [selections]="['save', 'cancel']"
-        ></nemo-toggle-->
 
         <save-cancel
           [buttonWidth]="17"
@@ -76,7 +68,7 @@
           <div #profilePictures class="photos">
             <div
               class="draggable-container"
-              *ngFor="let pic of profilePictures$ | async; index as i"
+              *ngFor="let pic of profilePicturesWithEmpty$ | async; index as i"
               [ngClass]="{'not-draggable-elements': !pic, 'draggable-elements': pic}"
             >
               <div class="delete-pic" (click)="deletePicture(i)">

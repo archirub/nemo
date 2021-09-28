@@ -14,7 +14,15 @@ import {
   EventEmitter,
 } from "@angular/core";
 import { Router } from "@angular/router";
-import { IonContent, IonTabs, ModalController } from "@ionic/angular";
+import {
+  AlertController,
+  IonContent,
+  IonItemOptions,
+  IonItemSliding,
+  IonTabs,
+  LoadingController,
+  ModalController,
+} from "@ionic/angular";
 
 import { Chat } from "@classes/index";
 import { MatchesEnterAnimation, MatchesLeaveAnimation } from "@animations/index";
@@ -24,12 +32,11 @@ import {
   ChatboardPicturesStore,
   pictureHolder,
 } from "@stores/pictures/chatboard-pictures/chatboard-pictures.service";
-import { forkJoin, fromEvent, Observable, of, Subject, Subscription } from "rxjs";
-import { concatMap, exhaustMap, map, tap } from "rxjs/operators";
+import { forkJoin, fromEvent, Observable, of, Subject, Subscription, timer } from "rxjs";
+import { concatMap, delay, exhaustMap, first, map, switchMap, tap } from "rxjs/operators";
 import { ChatboardStore, OtherProfilesStore } from "@stores/index";
 import { FadeOutAnimation } from "@animations/fade-out.animation";
-import _ from "lodash";
-import { PageReadinessService } from "@services/page-readiness/page-readiness.service";
+import { StoreReadinessService } from "@services/store-readiness/store-readiness.service";
 
 @Component({
   selector: "app-chat-board",
@@ -41,8 +48,6 @@ export class ChatBoardComponent implements OnInit {
   picsLoaded: boolean = false;
 
   subs = new Subscription();
-
-  fadeOutAnimation;
 
   view: string = "chats";
 
@@ -56,6 +61,8 @@ export class ChatBoardComponent implements OnInit {
   // PROPERTIES FOR MODAL ANIMATION
   @ViewChild("chatContainer", { read: ElementRef }) chatContainer: ElementRef;
   @ViewChild("matchesButton", { read: ElementRef }) matchesButton: ElementRef;
+
+  @ViewChild("chatDeleteRef") chatDeleteRef: IonItemSliding;
 
   screenHeight: number;
   screenWidth: number;
@@ -72,7 +79,10 @@ export class ChatBoardComponent implements OnInit {
     private chatboardPicturesService: ChatboardPicturesStore, // used in template
     private domSanitizer: DomSanitizer,
     private renderer: Renderer2,
-    private pageReadiness: PageReadinessService
+    private pageReadiness: StoreReadinessService,
+    private chatboardStore: ChatboardStore,
+    private loadingCtrl: LoadingController,
+    private alertCtrl: AlertController
   ) {
     this.onResize();
   }
@@ -170,35 +180,63 @@ export class ChatBoardComponent implements OnInit {
     return day.toString() + "/" + month.toString;
   }
 
-  deleteChat(event, chat: Chat) {
-    console.log("deleting chat with", chat.recipient.name);
+  async deleteChat(event, chat: Chat) {
+    // make slide close before starting this procedure
+
+    await this.chatDeleteRef.close();
+
+    const loader = await this.loadingCtrl.create({
+      message: "Deleting chat with " + chat.recipient.name,
+      spinner: "bubbles",
+      backdropDismiss: false,
+    });
+
+    await loader.present();
+    try {
+      await this.chatboardStore.deleteChatOnDatabase(chat.id).toPromise();
+    } catch {
+      await loader.dismiss();
+
+      const alert = await this.alertCtrl.create({
+        header: "An error occured",
+        message: "Your chat with " + chat.recipient.name + " could not be deleted... ",
+        buttons: ["Okay"],
+      });
+
+      return alert.present();
+    }
 
     let target: HTMLElement = event.target; //Get list item where click occurred
-
     while (!target.classList.contains("parent")) {
       //Checks parent until it finds full list box
       target = target.parentElement;
     }
 
-    //Gets index of chat
-    let index = this.chats.findIndex((c) => c === chat);
-    let name = chat.recipient.name;
+    await loader.dismiss();
 
     //Fades out list element
-    this.fadeOutAnimation = FadeOutAnimation(target, 300);
-    this.fadeOutAnimation.play();
+    FadeOutAnimation(target, 300).play();
 
-    //Gets rid of chat from local DOM
-    setTimeout(() => {
-      this.chats.splice(index, 1);
+    await timer(400)
+      .pipe(
+        first(),
+        switchMap(() => this.chatboardStore.deleteChatInStore(chat.id))
+      )
+      .toPromise();
 
-      /** HERE IS WHERE YOU WANT TO SEND DELETION TO BACKEND
-       * I SUGGEST BRINGING UP A POPUP INCLUDING THE CHAT RECIPIENT NAME
-       * NAME IS STORED IN A VARIABLE IN FUNCTION IF NECESSARY
-       * TIMEOUT IS FOR ANIMATION TO PLAY
-       **/
-    }, 400);
+    // //Gets rid of chat from local DOM
+    // setTimeout(() => {
+    //   this.chatboardStore.deleteChatInStore(chat.id)
+
+    //   /** HERE IS WHERE YOU WANT TO SEND DELETION TO BACKEND
+    //    * I SUGGEST BRINGING UP A POPUP INCLUDING THE CHAT RECIPIENT NAME
+    //    * NAME IS STORED IN A VARIABLE IN FUNCTION IF NECESSARY
+    //    * TIMEOUT IS FOR ANIMATION TO PLAY
+    //    **/
+    // }, 400);
   }
+
+  animateSuccessfulChatDeletion(event) {}
 
   scroll(speed) {
     this.ionContent.scrollToTop(speed);

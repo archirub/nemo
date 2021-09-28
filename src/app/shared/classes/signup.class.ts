@@ -62,7 +62,6 @@ export class SignupDataHolder implements signupDataHolder {
     questions = null,
     socialMediaLinks = null,
   }) {
-    console.log("inside data holder, sexPref is", sexualPreference);
     // this.email = email;
     // this.uid = uid;
     // this.token = token;
