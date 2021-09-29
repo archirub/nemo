@@ -1,7 +1,7 @@
 import { uidChoiceMap } from "./../../interfaces/swipe-choice.model";
 import { Injectable } from "@angular/core";
-import { AngularFirestore, DocumentSnapshot } from "@angular/fire/compat/firestore";
-import { AngularFireFunctions } from "@angular/fire/compat/functions";
+import { AngularFirestore, DocumentSnapshot } from "@angular/fire/firestore";
+import { AngularFireFunctions } from "@angular/fire/functions";
 
 import { BehaviorSubject, combineLatest, concat, forkJoin, Observable, of } from "rxjs";
 import {
@@ -29,7 +29,7 @@ import {
   generateSwipeStackResponse,
   profileFromDatabase,
 } from "@interfaces/index";
-import { AngularFireStorage } from "@angular/fire/compat/storage";
+import { AngularFireStorage } from "@angular/fire/storage";
 // import { StackPicturesService } from "@services/pictures/stack-pictures/stack-pictures.service";
 
 // loading is for when there is no one in the stack but we are fetching

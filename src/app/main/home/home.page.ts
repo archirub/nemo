@@ -28,7 +28,7 @@ import {
 
 import { TabElementRefService } from "src/app/main/tab-menu/tab-element-ref.service";
 import { SwipeCardComponent } from "./swipe-card/swipe-card.component";
-import { AngularFirestore } from "@angular/fire/compat/firestore";
+import { AngularFirestore } from "@angular/fire/firestore";
 import { OwnPicturesStore } from "@stores/pictures/own-pictures/own-pictures.service";
 import { StoreReadinessService } from "@services/store-readiness/store-readiness.service";
 

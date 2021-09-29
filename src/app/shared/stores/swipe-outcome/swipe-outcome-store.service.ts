@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { AngularFireFunctions } from "@angular/fire/compat/functions";
+import { AngularFireFunctions } from "@angular/fire/functions";
 
 import { BehaviorSubject, concat, Observable } from "rxjs";
 

@@ -1,9 +1,10 @@
+import { UserCredentialType } from "./../../interfaces/firebase.model";
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Router } from "@angular/router";
-import { AngularFireStorage } from "@angular/fire/compat/storage";
-import { AngularFireFunctions } from "@angular/fire/compat/functions";
-import { AngularFireAuth } from "@angular/fire/compat/auth";
+import { AngularFireStorage } from "@angular/fire/storage";
+import { AngularFireFunctions } from "@angular/fire/functions";
+import { AngularFireAuth } from "@angular/fire/auth";
 
 import { Plugins } from "@capacitor/core";
 import {
@@ -46,8 +47,7 @@ import {
 } from "@interfaces/index";
 import { SignupDataHolder } from "@classes/index";
 import { SignupoptionalPage } from "src/app/welcome/signupoptional/signupoptional.page";
-import { UploadTaskSnapshot } from "@angular/fire/compat/storage/interfaces";
-import { Auth, User, UserCredential } from "@angular/fire/auth";
+import { UploadTaskSnapshot } from "@angular/fire/storage/interfaces";
 
 @Injectable({
   providedIn: "root",
@@ -71,7 +71,10 @@ export class SignupService {
    * @param password
    * @returns
    */
-  createFirebaseAccount(email: string, password: string): Observable<UserCredential> {
+  createFirebaseAccount(
+    email: string,
+    password: string
+  ): Observable<firebase.default.auth.UserCredential> {
     // return this.http
     //   .post<AuthResponseData>(
     //     `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${environment.firebase.apiKey}`,
@@ -84,7 +87,7 @@ export class SignupService {
           this.afAuth.signInWithEmailAndPassword(
             email,
             password
-          ) as unknown as Promise<UserCredential>
+          ) as unknown as Promise<UserCredentialType>
       )
     );
   }
@@ -101,7 +104,7 @@ export class SignupService {
         switchMap(async ([dataStored, user]) => {
           await user?.reload();
           await user.getIdToken(true); // to refresh the token
-          return [dataStored, user] as [SignupDataHolder, User];
+          return [dataStored, user] as [SignupDataHolder, firebase.default.User];
         }),
         switchMap(([dataStored, user]) => {
           if (!user) {

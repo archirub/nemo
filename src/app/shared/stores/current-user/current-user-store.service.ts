@@ -1,8 +1,8 @@
 import { Gender, SexualPreference } from "./../../interfaces/match-data.model";
-import { AngularFireFunctions } from "@angular/fire/compat/functions";
+import { AngularFireFunctions } from "@angular/fire/functions";
 import { Injectable } from "@angular/core";
-import { AngularFireAuth } from "@angular/fire/compat/auth";
-import { AngularFirestore } from "@angular/fire/compat/firestore";
+import { AngularFireAuth } from "@angular/fire/auth";
+import { AngularFirestore } from "@angular/fire/firestore";
 
 import { BehaviorSubject, forkJoin, from, Observable, of } from "rxjs";
 

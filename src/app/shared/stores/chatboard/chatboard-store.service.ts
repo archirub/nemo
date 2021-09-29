@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
-import { AngularFireAuth } from "@angular/fire/compat/auth";
-import { AngularFirestore, QueryDocumentSnapshot } from "@angular/fire/compat/firestore";
+import { AngularFireAuth } from "@angular/fire/auth";
+import { AngularFirestore, QueryDocumentSnapshot } from "@angular/fire/firestore";
 import {
   BehaviorSubject,
   ReplaySubject,
@@ -31,8 +31,7 @@ import {
   messageFromDatabase,
   messageMap,
 } from "@interfaces/index";
-import { User } from "@angular/fire/auth";
-import { AngularFireFunctions } from "@angular/fire/compat/functions";
+import { AngularFireFunctions } from "@angular/fire/functions";
 
 // the store has this weird shape because of the Firestore's onSnapshot function which
 // takes an observer instead of simply being an observable. Because of that, I need
@@ -169,7 +168,7 @@ export class ChatboardStore {
         chatsFromDb.forEach((chatDoc) => {
           const recipientID = chatDoc
             .data()
-            .uids.filter((id) => id !== (user as User).uid)[0];
+            .uids.filter((id) => id !== (user as firebase.default.User).uid)[0];
 
           // assuming that the below being non-falsy means a sub is already active so no action needs to be taken
           if (this.recentMsgDocSubs[recipientID]) return;
@@ -247,7 +246,7 @@ export class ChatboardStore {
             currentChats[chat.id] = {
               nature: "match",
               chat: this.format.chatDatabaseToClass(
-                (user as User).uid,
+                (user as firebase.default.User).uid,
                 chat.id,
                 chat.data(),
                 null
@@ -258,7 +257,7 @@ export class ChatboardStore {
             currentChats[chat.id] = {
               nature: "chat",
               chat: this.format.chatDatabaseToClass(
-                (user as User).uid,
+                (user as firebase.default.User).uid,
                 chat.id,
                 chat.data(),
                 this.format.messageDatabaseToClass(correspondingMsg)

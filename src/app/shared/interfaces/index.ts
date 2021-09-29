@@ -9,3 +9,4 @@ export * from "./signup.model";
 export * from "./auth-response.model";
 export * from "./shared.model";
 export * from "./universities.model";
+export * from "./firebase.model";

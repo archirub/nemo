@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { AngularFirestore } from "@angular/fire/compat/firestore";
+import { AngularFirestore } from "@angular/fire/firestore";
 
 import { BehaviorSubject, forkJoin, from, Observable } from "rxjs";
 
@@ -16,7 +16,7 @@ import {
   tap,
   withLatestFrom,
 } from "rxjs/operators";
-import { AngularFireAuth } from "@angular/fire/compat/auth";
+import { AngularFireAuth } from "@angular/fire/auth";
 import { CurrentUserStore } from "@stores/current-user/current-user-store.service";
 
 @Injectable({

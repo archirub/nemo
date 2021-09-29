@@ -1,12 +1,9 @@
-import { AuthError } from "@angular/fire/auth";
-import { FirestoreError } from "@angular/fire/firestore";
+import { AuthErrorType } from "@interfaces/index";
 import { AlertController } from "@ionic/angular";
 import { Observable, throwError } from "rxjs";
 import { catchError, map } from "rxjs/operators";
 
 const alertCtrl = new AlertController();
-
-let a: AuthError;
 
 type AuthErrorCode =
   | "auth/app-deleted"
@@ -29,7 +26,7 @@ type AuthErrorCode =
 function catchFirebaseAuthErrors<T>() {
   return function (source: Observable<T>) {
     return source.pipe(
-      catchError((err: AuthError) => {
+      catchError((err: AuthErrorType) => {
         console.error("error occured");
         if (!err?.code || !err.code.startsWith("auth/")) return throwError(err);
 

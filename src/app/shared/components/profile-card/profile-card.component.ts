@@ -15,7 +15,7 @@ import {
   ChangeDetectorRef,
   Renderer2,
 } from "@angular/core";
-import { AngularFireAuth } from "@angular/fire/compat/auth";
+import { AngularFireAuth } from "@angular/fire/auth";
 import { LessInfoAnimation, MoreInfoAnimation } from "@animations/info.animation";
 import { Profile } from "@classes/index";
 import { IonContent, IonSlides } from "@ionic/angular";

@@ -1,6 +1,6 @@
 import { Chat } from "../../../classes/chat.class";
 import { Injectable, Renderer2, RendererFactory2 } from "@angular/core";
-import { AngularFireStorage } from "@angular/fire/compat/storage";
+import { AngularFireStorage } from "@angular/fire/storage";
 import { BehaviorSubject, combineLatest, forkJoin, from, Observable, of } from "rxjs";
 import {
   concatMap,

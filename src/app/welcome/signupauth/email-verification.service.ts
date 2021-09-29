@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Injectable } from "@angular/core";
-import { AngularFireAuth } from "@angular/fire/compat/auth";
+import { AngularFireAuth } from "@angular/fire/auth";
 import { BehaviorSubject, Observable } from "rxjs";
 import {
   auditTime,

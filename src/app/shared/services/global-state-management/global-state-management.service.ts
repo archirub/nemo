@@ -3,8 +3,8 @@ import { Injectable } from "@angular/core";
 import { AlertController } from "@ionic/angular";
 import { NavigationStart, Router } from "@angular/router";
 
-import { AngularFireAuth } from "@angular/fire/compat/auth";
-import { AngularFirestore } from "@angular/fire/compat/firestore";
+import { AngularFireAuth } from "@angular/fire/auth";
+import { AngularFirestore } from "@angular/fire/firestore";
 import { Storage } from "@capacitor/core";
 
 import {
@@ -45,7 +45,6 @@ import { routerInitListenerService } from "./initial-url.service";
 
 import { SignupAuthMethodSharer } from "../../../welcome/signupauth/signupauth-method-sharer.service";
 import { ConnectionService } from "@services/connection/connection.service";
-import { User } from "@angular/fire/auth";
 import { UniversitiesStore } from "@stores/universities/universities.service";
 
 type pageName =
@@ -62,7 +61,7 @@ type pageName =
   providedIn: "root",
 })
 export class GlobalStateManagementService {
-  auth$ = new BehaviorSubject<User>(null);
+  auth$ = new BehaviorSubject<firebase.default.User>(null);
 
   alreadyConnectedOnce: boolean = false;
 
@@ -189,7 +188,7 @@ export class GlobalStateManagementService {
     );
   }
 
-  private userIsValidRoutine(user: User) {
+  private userIsValidRoutine(user: firebase.default.User) {
     return this.isUserSigningUp().pipe(
       switchMap((userIsSigningUp) => {
         // COMMENTED OUT FOR DEVELOPMENT ONLY
@@ -216,7 +215,7 @@ export class GlobalStateManagementService {
    * that account on the database. We check whether that user has documents on the db by attempting
    * to fetch that person's profile
    */
-  private noDocumentsRoutine(user: User): Observable<void> {
+  private noDocumentsRoutine(user: firebase.default.User): Observable<void> {
     const finishProfileProcedure = () => {
       this.emptyStoresService.emptyStores(); // to be safe
       return this.signupService.checkAndRedirect();
@@ -368,11 +367,11 @@ export class GlobalStateManagementService {
     // return storesToActivate$.length > 0 ? combineLatest(storesToActivate$) : of("");
   }
 
-  private getFirebaseUser(): Observable<User | null> {
+  private getFirebaseUser(): Observable<firebase.default.User | null> {
     return this.afAuth.authState;
   }
 
-  private isUserEmailVerified(user: User): Observable<boolean> {
+  private isUserEmailVerified(user: firebase.default.User): Observable<boolean> {
     return of(user).pipe(map((user) => !!user?.emailVerified));
   }
 

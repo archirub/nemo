@@ -15,9 +15,8 @@ import {
 import { FormControl, FormGroup, Validators } from "@angular/forms";
 import { Router } from "@angular/router";
 
-import { AngularFireAuth } from "@angular/fire/compat/auth";
-import { UserCredential } from "@angular/fire/auth";
-import { AngularFireFunctions } from "@angular/fire/compat/functions";
+import { AngularFireAuth } from "@angular/fire/auth";
+import { AngularFireFunctions } from "@angular/fire/functions";
 
 import {
   BehaviorSubject,
@@ -275,7 +274,7 @@ export class SignupauthPage implements OnInit {
     await this.slidesRef.lockSwipes(true);
   }
 
-  private requestAccountCreation(): Promise<void | UserCredential> {
+  private requestAccountCreation(): Promise<void | firebase.default.auth.UserCredential> {
     const email: string = this.authForm.get("email").value;
     const password: string = this.authForm.get("password").value;
 

@@ -10,7 +10,7 @@ import {
 } from "@angular/core";
 import { IonSlides, LoadingController, NavController } from "@ionic/angular";
 
-import { AngularFireFunctions } from "@angular/fire/compat/functions";
+import { AngularFireFunctions } from "@angular/fire/functions";
 
 import {
   BehaviorSubject,

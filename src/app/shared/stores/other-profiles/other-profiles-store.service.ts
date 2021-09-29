@@ -1,11 +1,11 @@
-import { AngularFireStorage } from "@angular/fire/compat/storage";
+import { AngularFireStorage } from "@angular/fire/storage";
 import { Injectable } from "@angular/core";
 
 import { BehaviorSubject, forkJoin, Observable, EMPTY } from "rxjs";
 import { exhaustMap, filter, map, take, tap } from "rxjs/operators";
 
 import { Profile } from "@classes/index";
-import { AngularFirestore, DocumentSnapshot } from "@angular/fire/compat/firestore";
+import { AngularFirestore, DocumentSnapshot } from "@angular/fire/firestore";
 import { profileFromDatabase } from "@interfaces/index";
 import { FormatService } from "@services/format/format.service";
 

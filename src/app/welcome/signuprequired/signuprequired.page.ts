@@ -35,7 +35,7 @@ import { SignupService } from "@services/signup/signup.service";
 import { allowOptionalProp } from "@interfaces/index";
 import { AppDatetimeComponent } from "@components/index";
 import { UniversitiesStore } from "@stores/universities/universities.service";
-import { AngularFireAuth } from "@angular/fire/compat/auth";
+import { AngularFireAuth } from "@angular/fire/auth";
 import { concatMap, delay, filter, map } from "rxjs/operators";
 import { Observable } from "rxjs";
 import { LoadingService } from "@services/loading/loading.service";

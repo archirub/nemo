@@ -1,5 +1,4 @@
 import { Injectable } from "@angular/core";
-import { Timestamp } from "@angular/fire/firestore";
 
 import { Chat, Message, Profile, SearchCriteria } from "@classes/index";
 import {
@@ -10,6 +9,7 @@ import {
   profileFromDatabase,
   searchCriteria,
   userSnippet,
+  Timestamp,
 } from "@interfaces/index";
 
 @Injectable({

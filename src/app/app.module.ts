@@ -12,10 +12,10 @@ import { StatusBar } from "@ionic-native/status-bar/ngx";
 import { AppComponent } from "./app.component";
 import { AppRoutingModule } from "./app-routing.module";
 
-import { AngularFireModule } from "@angular/fire/compat";
-import { AngularFirestoreModule } from "@angular/fire/compat/firestore";
-import { AngularFireFunctionsModule, REGION } from "@angular/fire/compat/functions";
-import { AngularFireStorageModule } from "@angular/fire/compat/storage";
+import { AngularFireModule } from "@angular/fire";
+import { AngularFirestoreModule } from "@angular/fire/firestore";
+import { AngularFireFunctionsModule, REGION } from "@angular/fire/functions";
+import { AngularFireStorageModule } from "@angular/fire/storage";
 
 import { environment } from "src/environments/environment";
 

@@ -11,7 +11,8 @@ import { CameraPhoto } from "@capacitor/core";
 import { allowOptionalProp } from "./shared.model";
 import { Gender, SexualPreference, SwipeMode } from "./match-data.model";
 import { UniversityName } from "./universities.model";
-import { DocumentData, QueryDocumentSnapshot, Timestamp } from "@angular/fire/firestore";
+import { DocumentData, QueryDocumentSnapshot } from "@angular/fire/firestore";
+import { TimestampType } from "./firebase.model";
 
 // IF SUCH CONSTANTS ARE CHANGED, MAKE SURE TO CHANGE THE SECURITY RULES ACCORDINGLY
 export const MAX_PROFILE_PICTURES_COUNT = 6;
@@ -58,7 +59,7 @@ export interface appUser extends profile {
 
 export interface profileFromDatabase {
   firstName: string;
-  dateOfBirth: Timestamp;
+  dateOfBirth: TimestampType;
   biography: string;
 
   university: UniversityName;

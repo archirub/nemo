@@ -1,4 +1,4 @@
-import { Timestamp } from "@angular/fire/firestore";
+import { TimestampType } from "./firebase.model";
 import {
   AreaOfStudy,
   Degree,
@@ -12,7 +12,7 @@ export interface UidDateMap {
 
 export interface dateMap {
   exists: true;
-  date: Timestamp;
+  date: TimestampType;
 }
 
 export interface mdFromDatabase {

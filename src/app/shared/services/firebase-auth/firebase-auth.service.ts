@@ -1,20 +1,16 @@
+// import { EmailAuthProvider } from "@interfaces/index";
 import { AlertController, NavController, LoadingController } from "@ionic/angular";
 import { Injectable, NgZone } from "@angular/core";
 import { Router } from "@angular/router";
 
-import { AngularFireAuth } from "@angular/fire/compat/auth";
+import { AngularFireAuth } from "@angular/fire/auth";
 import { Storage } from "@capacitor/core";
 
 import { LoadingOptions, LoadingService } from "@services/loading/loading.service";
-import { AngularFireFunctions } from "@angular/fire/compat/functions";
+import { AngularFireFunctions } from "@angular/fire/functions";
 import { deleteAccountRequest, successResponse } from "@interfaces/cloud-functions.model";
 import { EmptyStoresService } from "@services/global-state-management/empty-stores.service";
-import {
-  EmailAuthProvider,
-  updatePassword,
-  User,
-  reauthenticateWithCredential,
-} from "@angular/fire/auth";
+// import firebase from "firebase/app";
 
 @Injectable({
   providedIn: "root",
@@ -139,7 +135,7 @@ export class FirebaseAuthService {
     await userConfirmationAlert.present();
   }
 
-  public async changePasswordProcedure(): Promise<User> {
+  public async changePasswordProcedure(): Promise<firebase.default.User> {
     const user = await this.afAuth.currentUser;
 
     if (!user) return;
@@ -148,12 +144,12 @@ export class FirebaseAuthService {
     const OkProcedure = async (data) => {
       pswrd = data.password;
       try {
-        await updatePassword(user, pswrd);
+        await user.updatePassword(pswrd);
         await this.successPopup("Your password was successfully updated.");
       } catch (err) {
         if (err?.code === "auth/requires-recent-login") {
           return this.reAuthenticationProcedure(user)
-            .then(() => updatePassword(user, pswrd))
+            .then(() => user.updatePassword(pswrd))
             .then(() => this.successPopup("Your password was successfully updated."))
             .catch(() => this.unknownErrorPopup());
         } else {
@@ -185,11 +181,11 @@ export class FirebaseAuthService {
   }
 
   public async reAuthenticationProcedure(
-    user: User,
+    user: firebase.default.User,
     message: string = null,
     cancelProcedureChosen: () => Promise<any> = null
   ): Promise<{
-    user: User;
+    user: firebase.default.User;
     outcome: "user-reauthenticated" | "user-canceled" | "auth-failed";
   }> {
     let outcome: "user-reauthenticated" | "user-canceled" | "auth-failed";
@@ -214,9 +210,11 @@ export class FirebaseAuthService {
     `;
 
     const OkProcedure = async (data) => {
-      const credentials = EmailAuthProvider.credential(user.email, data.password);
+      // WRONG TO FIX
+      const credentials = {} as firebase.default.auth.AuthCredential;
+      // const credentials = firebase.default.auth.EmailAuthProvider.credential(user.email, data.password);
       try {
-        await reauthenticateWithCredential(user, credentials);
+        await user.reauthenticateWithCredential(credentials);
         outcome = "user-reauthenticated";
       } catch (err) {
         console.log("error is", err);

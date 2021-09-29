@@ -15,7 +15,7 @@ import {
   IonSearchbar,
   LoadingController,
 } from "@ionic/angular";
-import { AngularFireAuth } from "@angular/fire/compat/auth";
+import { AngularFireAuth } from "@angular/fire/auth";
 import { ActivatedRoute, ParamMap } from "@angular/router";
 
 import { ReportUserComponent } from "../report-user/report-user.component";
@@ -54,14 +54,14 @@ import { ChatboardStore, CurrentUserStore } from "@stores/index";
 import { ProfileCardComponent } from "@components/index";
 import { OtherProfilesStore } from "@stores/other-profiles/other-profiles-store.service";
 import { ChatboardPicturesStore } from "@stores/pictures/chatboard-pictures/chatboard-pictures.service";
-import { Timestamp } from "@angular/fire/firestore";
 import { messageFromDatabase, messageMap } from "@interfaces/message.model";
 import { FormatService } from "@services/format/format.service";
 
 import { SafeUrl } from "@angular/platform-browser";
 import { UserReportingService } from "@services/user-reporting/user-reporting.service";
-import { AngularFirestore } from "@angular/fire/compat/firestore";
+import { AngularFirestore } from "@angular/fire/firestore";
 import { isEqual } from "lodash";
+import { Timestamp } from "@interfaces/index";
 
 function sortUIDs(uids: string[]): string[] {
   return uids.sort((a, b) => ("" + a).localeCompare(b));

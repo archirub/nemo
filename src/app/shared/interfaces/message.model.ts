@@ -1,9 +1,9 @@
-import { Timestamp } from "@angular/fire/firestore";
+import { TimestampType } from "./firebase.model";
 
 export interface messageFromDatabase {
   uids: string[]; // necessary for checking it is own message in firestore security rules
   senderID: string;
-  time: Timestamp;
+  time: TimestampType;
   content: string;
   // reaction: messageReaction;
   // seen: boolean;
