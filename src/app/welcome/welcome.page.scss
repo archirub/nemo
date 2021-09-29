@@ -118,6 +118,7 @@ ion-button.optional {
   text-transform: none;
   z-index: 2;
   font-size: 3vh;
+  height: 8vh;
 }
 
 interests-slides {
@@ -629,12 +630,14 @@ ion-content {
       --checkmark-color: var(--ion-color-primary);
       --border-color-checked: var(--ion-color-primary-contrast);
       --transition: 0.3s;
+      flex: 1;
     }
 
     h2 {
       margin-left: 4vw;
       font-size: 2vh;
       text-decoration: underline;
+      flex: 8.5;
     }
   }
 }

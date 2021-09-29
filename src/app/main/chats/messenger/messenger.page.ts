@@ -6,6 +6,8 @@ import {
   ViewChild,
   ElementRef,
   ChangeDetectorRef,
+  QueryList,
+  ViewChildren,
 } from "@angular/core";
 
 import {
@@ -14,6 +16,7 @@ import {
   IonSlides,
   IonSearchbar,
   LoadingController,
+  IonRow,
 } from "@ionic/angular";
 import { AngularFireAuth } from "@angular/fire/auth";
 import { ActivatedRoute, ParamMap } from "@angular/router";
