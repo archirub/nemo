@@ -1,3 +1,4 @@
+import { FirebaseUser } from "./../../interfaces/firebase.model";
 import { EmptyStoresService } from "./empty-stores.service";
 import { Injectable } from "@angular/core";
 import { AlertController } from "@ionic/angular";
@@ -17,11 +18,13 @@ import {
   merge,
   Observable,
   of,
+  Subject,
   timer,
 } from "rxjs";
 import {
   concatMap,
   delay,
+  distinctUntilChanged,
   filter,
   first,
   map,
@@ -57,13 +60,29 @@ type pageName =
   | "login"
   | "signup";
 
+type userState =
+  | "unauthenticated"
+  | "authenticated"
+  | "is-signing-up"
+  | "has-no-documents"
+  | "full";
+
+// unauthenticated = not authenticated with Firebase auth
+// authenticated = authenticated with Firebase auth
+// is-signing-up = "authenticated" state + email verified + is on a sign up page (assumed to be signing up)
+// has-no-documents = "authenticated" state + email verified + is not on sign up page + has no documents on database
+// full = "authenticated" state + email verified + has documents on database
+
 @Injectable({
   providedIn: "root",
 })
 export class GlobalStateManagementService {
-  auth$ = new BehaviorSubject<firebase.default.User>(null);
+  auth$ = new BehaviorSubject<FirebaseUser>(null);
 
-  alreadyConnectedOnce: boolean = false;
+  private userState = new Subject<userState>();
+  userState$ = this.userState.asObservable().pipe(distinctUntilChanged());
+
+  private alreadyConnectedOnce: boolean = false;
 
   constructor(
     private router: Router,
@@ -164,6 +183,7 @@ export class GlobalStateManagementService {
    */
   private nobodyAuthenticatedRoutine(): Observable<any> {
     return of(this.router.url).pipe(
+      tap(() => this.userState.next("unauthenticated")),
       concatMap((url) => {
         if (["/welcome/login", "/welcome/signupauth", "/welcome"].includes(url))
           return of(); // do nothing of user is in login, signupauth or welcome page,
@@ -175,6 +195,7 @@ export class GlobalStateManagementService {
 
   private requiresEmailVerificationRoutine(): Observable<any> {
     return of(this.router.url).pipe(
+      tap(() => this.userState.next("authenticated")),
       concatMap((url) =>
         url !== "/welcome/signupauth"
           ? this.router.navigateByUrl("/welcome/signupauth")
@@ -188,13 +209,16 @@ export class GlobalStateManagementService {
     );
   }
 
-  private userIsValidRoutine(user: firebase.default.User) {
+  private userIsValidRoutine(user: FirebaseUser) {
     return this.isUserSigningUp().pipe(
       switchMap((userIsSigningUp) => {
         // COMMENTED OUT FOR DEVELOPMENT ONLY
 
         // if user is signing up, then do nothing
-        if (userIsSigningUp) return this.signupService.checkAndRedirect();
+        if (userIsSigningUp) {
+          this.userState.next("is-signing-up");
+          return this.signupService.checkAndRedirect();
+        }
 
         // otherwise, continue the procedure
         return this.doesProfileDocExist(user.uid).pipe(
@@ -202,7 +226,11 @@ export class GlobalStateManagementService {
             // "null" implies there has been an error and we couldn't get an answer on whether
             // it exists. Hence take no action
             if (profileDocExists === null) return of("");
-            if (profileDocExists === false) return this.noDocumentsRoutine(user);
+            if (profileDocExists === false) {
+              this.userState.next("has-no-documents");
+              return this.noDocumentsRoutine(user);
+            }
+            this.userState.next("full");
             return this.hasDocumentsRoutine();
           })
         );
@@ -215,7 +243,7 @@ export class GlobalStateManagementService {
    * that account on the database. We check whether that user has documents on the db by attempting
    * to fetch that person's profile
    */
-  private noDocumentsRoutine(user: firebase.default.User): Observable<void> {
+  private noDocumentsRoutine(user: FirebaseUser): Observable<void> {
     const finishProfileProcedure = () => {
       this.emptyStoresService.emptyStores(); // to be safe
       return this.signupService.checkAndRedirect();
@@ -367,11 +395,11 @@ export class GlobalStateManagementService {
     // return storesToActivate$.length > 0 ? combineLatest(storesToActivate$) : of("");
   }
 
-  private getFirebaseUser(): Observable<firebase.default.User | null> {
+  private getFirebaseUser(): Observable<FirebaseUser | null> {
     return this.afAuth.authState;
   }
 
-  private isUserEmailVerified(user: firebase.default.User): Observable<boolean> {
+  private isUserEmailVerified(user: FirebaseUser): Observable<boolean> {
     return of(user).pipe(map((user) => !!user?.emailVerified));
   }
 

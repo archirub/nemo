@@ -2,7 +2,7 @@ rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
     match /{allPaths=**} {
-      allow read, write: if isGod()
+      allow read, write: if true;
     }
      
     match /profilePictures/{uid}/{pictureNumber} {
@@ -26,7 +26,7 @@ function pictureNumberIsAllowed(value) {
 }
 
 function isGod() {
-  return request.auth.email in ["oY6HiUHmUvcKbFQQnb88t3U4Zew1"]
+  return request.auth.email in ["archibald.ruban@gmail.com", "zcqsaru@ucl.ac.uk"]
 }
 
 function userIsValid() {

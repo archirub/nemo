@@ -1,4 +1,4 @@
-// import { EmailAuthProvider } from "@interfaces/index";
+import { EmailAuthProvider, FirebaseUser } from "@interfaces/index";
 import { AlertController, NavController, LoadingController } from "@ionic/angular";
 import { Injectable, NgZone } from "@angular/core";
 import { Router } from "@angular/router";
@@ -10,7 +10,6 @@ import { LoadingOptions, LoadingService } from "@services/loading/loading.servic
 import { AngularFireFunctions } from "@angular/fire/functions";
 import { deleteAccountRequest, successResponse } from "@interfaces/cloud-functions.model";
 import { EmptyStoresService } from "@services/global-state-management/empty-stores.service";
-// import firebase from "firebase/app";
 
 @Injectable({
   providedIn: "root",
@@ -135,7 +134,7 @@ export class FirebaseAuthService {
     await userConfirmationAlert.present();
   }
 
-  public async changePasswordProcedure(): Promise<firebase.default.User> {
+  public async changePasswordProcedure(): Promise<FirebaseUser> {
     const user = await this.afAuth.currentUser;
 
     if (!user) return;
@@ -181,11 +180,11 @@ export class FirebaseAuthService {
   }
 
   public async reAuthenticationProcedure(
-    user: firebase.default.User,
+    user: FirebaseUser,
     message: string = null,
     cancelProcedureChosen: () => Promise<any> = null
   ): Promise<{
-    user: firebase.default.User;
+    user: FirebaseUser;
     outcome: "user-reauthenticated" | "user-canceled" | "auth-failed";
   }> {
     let outcome: "user-reauthenticated" | "user-canceled" | "auth-failed";
@@ -210,9 +209,7 @@ export class FirebaseAuthService {
     `;
 
     const OkProcedure = async (data) => {
-      // WRONG TO FIX
-      const credentials = {} as firebase.default.auth.AuthCredential;
-      // const credentials = firebase.default.auth.EmailAuthProvider.credential(user.email, data.password);
+      const credentials = EmailAuthProvider.credential(user.email, data.password);
       try {
         await user.reauthenticateWithCredential(credentials);
         outcome = "user-reauthenticated";

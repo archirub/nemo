@@ -52,6 +52,7 @@ import { LoadingService } from "@services/loading/loading.service";
 import { UniversityName } from "@interfaces/universities.model";
 import { UniversitiesStore } from "@stores/universities/universities.service";
 import { takeWhile } from "lodash";
+import { UserCredentialType } from "@interfaces/firebase.model";
 
 @Component({
   selector: "app-signupauth",
@@ -274,7 +275,7 @@ export class SignupauthPage implements OnInit {
     await this.slidesRef.lockSwipes(true);
   }
 
-  private requestAccountCreation(): Promise<void | firebase.default.auth.UserCredential> {
+  private requestAccountCreation(): Promise<void | UserCredentialType> {
     const email: string = this.authForm.get("email").value;
     const password: string = this.authForm.get("password").value;
 

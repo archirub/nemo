@@ -28,6 +28,7 @@ import {
 import {
   chatDeletionByUserRequest,
   chatFromDatabase,
+  FirebaseUser,
   messageFromDatabase,
   messageMap,
 } from "@interfaces/index";
@@ -168,7 +169,7 @@ export class ChatboardStore {
         chatsFromDb.forEach((chatDoc) => {
           const recipientID = chatDoc
             .data()
-            .uids.filter((id) => id !== (user as firebase.default.User).uid)[0];
+            .uids.filter((id) => id !== (user as FirebaseUser).uid)[0];
 
           // assuming that the below being non-falsy means a sub is already active so no action needs to be taken
           if (this.recentMsgDocSubs[recipientID]) return;
@@ -246,7 +247,7 @@ export class ChatboardStore {
             currentChats[chat.id] = {
               nature: "match",
               chat: this.format.chatDatabaseToClass(
-                (user as firebase.default.User).uid,
+                (user as FirebaseUser).uid,
                 chat.id,
                 chat.data(),
                 null
@@ -257,7 +258,7 @@ export class ChatboardStore {
             currentChats[chat.id] = {
               nature: "chat",
               chat: this.format.chatDatabaseToClass(
-                (user as firebase.default.User).uid,
+                (user as FirebaseUser).uid,
                 chat.id,
                 chat.data(),
                 this.format.messageDatabaseToClass(correspondingMsg)

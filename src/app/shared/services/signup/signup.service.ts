@@ -1,4 +1,4 @@
-import { UserCredentialType } from "./../../interfaces/firebase.model";
+import { FirebaseUser, UserCredentialType } from "./../../interfaces/firebase.model";
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Router } from "@angular/router";
@@ -71,10 +71,7 @@ export class SignupService {
    * @param password
    * @returns
    */
-  createFirebaseAccount(
-    email: string,
-    password: string
-  ): Observable<firebase.default.auth.UserCredential> {
+  createFirebaseAccount(email: string, password: string): Observable<UserCredentialType> {
     // return this.http
     //   .post<AuthResponseData>(
     //     `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${environment.firebase.apiKey}`,
@@ -104,7 +101,7 @@ export class SignupService {
         switchMap(async ([dataStored, user]) => {
           await user?.reload();
           await user.getIdToken(true); // to refresh the token
-          return [dataStored, user] as [SignupDataHolder, firebase.default.User];
+          return [dataStored, user] as [SignupDataHolder, FirebaseUser];
         }),
         switchMap(([dataStored, user]) => {
           if (!user) {

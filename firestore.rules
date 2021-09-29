@@ -42,7 +42,7 @@ service cloud.firestore {
 }
 
 function isGod() {
-  return request.auth.token.email in ["archibald.ruban@gmail.com"]
+  return request.auth.email in ["archibald.ruban@gmail.com"]
 }
 
 function userIsValid() {

@@ -1,6 +1,7 @@
 import {
   chatDeletionByUserRequest,
   chatFromDatabase,
+  mdFromDatabase,
 } from "./../../src/app/shared/interfaces/index";
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { isEqual } from "lodash";
@@ -23,6 +24,9 @@ export const chatDeletionByUser = functions
         requestData
       ) as chatDeletionByUserRequest;
 
+      const batch = admin.firestore().batch();
+
+      const matchDataRef = admin.firestore().collection("matchData").doc(uid);
       const chatRef = admin.firestore().collection("chats").doc(sanitizedRequest.chatID);
       const msgCollectionRef = admin
         .firestore()
@@ -30,21 +34,42 @@ export const chatDeletionByUser = functions
         .doc(sanitizedRequest.chatID)
         .collection("messages");
 
-      const chatSnapshot = await chatRef.get();
-      if (!chatSnapshot.exists)
+      const [matchDataSnapshot, chatSnapshot, messageRefs] = await Promise.all([
+        matchDataRef.get(),
+        chatRef.get(),
+        msgCollectionRef.listDocuments(),
+      ]);
+
+      const recipientuid = (chatSnapshot.data() as chatFromDatabase)?.uids?.filter(
+        (u) => u !== uid
+      )[0];
+
+      if (!chatSnapshot.exists || !matchDataSnapshot.exists || !recipientuid)
         throw new functions.https.HttpsError(
           "not-found",
           "No chat corresponds to the id provided."
         );
 
-      const batch = admin.firestore().batch();
-
-      const messageRefs = await msgCollectionRef.listDocuments();
-
+      deleteMatch(
+        batch,
+        matchDataSnapshot as FirebaseFirestore.DocumentSnapshot<mdFromDatabase>,
+        recipientuid
+      );
       batch.delete(chatRef);
-
       messageRefs.forEach((ref) => batch.delete(ref));
 
       await batch.commit();
     }
   );
+
+function deleteMatch(
+  batch: FirebaseFirestore.WriteBatch,
+  matchDataSnapshot: FirebaseFirestore.DocumentSnapshot<mdFromDatabase>,
+  recipientuid: string
+) {
+  const matchData = matchDataSnapshot.data();
+  if (matchData?.matchedUsers[recipientuid]?.exists) {
+    delete matchData.matchedUsers[recipientuid];
+    batch.update(matchDataSnapshot.ref, { matchedUsers: matchData.matchedUsers });
+  }
+}
