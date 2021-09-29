@@ -63,7 +63,7 @@ import {
   window as rxjsWindow,
   bufferWhen,
 } from "rxjs/operators";
-import { partition } from "functions/node_modules/@types/lodash";
+import { partition } from "node_modules/@types/lodash";
 
 @Component({
   selector: "app-swipe-card",

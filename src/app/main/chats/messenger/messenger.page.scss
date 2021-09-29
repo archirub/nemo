@@ -19,6 +19,11 @@ ion-avatar {
   margin: 5px auto 0 auto;
 }
 
+.profile-icon {
+  width: 45px;
+  height: 45px;
+}
+
 ion-toolbar {
   padding: 0px;
 }
@@ -100,10 +105,10 @@ ion-button.chat-slide {
   font-size: 2.3vh;
 }
 
-ion-icon[name="shield"] {
-  font-size: 4.3vh;
-  color: var(--ion-color-primary);
-  padding: 4vw;
+img[name="shield"] {
+  height: 4.3vh;
+  padding: 0 4vw;
+  margin-top: 2vh;
 }
 
 ion-button.back-button {

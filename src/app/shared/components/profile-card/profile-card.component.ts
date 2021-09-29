@@ -38,6 +38,7 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
   @Input() reportable: boolean = true;
   @Input() isOwnProfile: boolean = false;
   @Input() profile: Profile;
+  @Input() headerBottom: number; //in %
 
   // this format is used such that the pager is re-updated whenever we get a new input of pictures
   // this also allows for the initial update of the pager

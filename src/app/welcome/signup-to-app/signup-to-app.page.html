@@ -1,19 +1,28 @@
 <ion-content>
-  <ion-slides>
-    <ion-slide>Succesful account creation</ion-slide>
-    <ion-slide>
-      How the app works (mainly about the effect of search-criteria on the swipe stack)
-    </ion-slide>
-    <ion-slide>
-      Notification permission We will only send you notifications for new messages, new
-      matches, and occasionally we release new features
+  <video autoplay="true" muted="muted" loop="true" id="backVideo">
+    <source src="/assets/welcome-background.mp4" type="video/mp4" />
+  </video>
+  <div class="page-container">
+    <h1 class="title">You've made it!</h1>
 
-      <ion-button (click)="requestNotificationPermission()"
-        >Allow Notifications</ion-button
-      >
-    </ion-slide>
-    <ion-slide>
-      <ion-button (click)="goToApp()">Enter Nemo</ion-button>
-    </ion-slide>
-  </ion-slides></ion-content
->
+    <div class="flexcenter">
+      <img class="nemo-logo" [src]="'/assets/logo_and_name.svg'" alt="Nemo Logo"/>
+    </div>
+
+    <div class="flexcenter">
+      <h2 class="subtitle">Obviously, to get the full experience you'll want to enable notifications:</h2>
+    </div>
+
+    <div class="flexcenter">
+      <ion-button class="notifs" (click)="requestNotificationPermission()">
+        Allow Notifications
+      </ion-button>
+    </div>
+
+    <div class="flexcenter">
+      <ion-button class="enter" (click)="goToApp()">
+        Start swiping
+      </ion-button>
+    </div>
+  </div>
+</ion-content>

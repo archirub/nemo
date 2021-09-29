@@ -1,0 +1,64 @@
+ion-content {
+    overflow: hidden;
+    --overflow: hidden;
+}
+
+.page-container {
+    position: absolute;
+    color: #FFF;
+    height: 100vh;
+    z-index: 1;
+}
+
+#backVideo {
+    position: absolute;
+    z-index: 0;
+    height: 100vh;
+}
+
+.flexcenter {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+ion-button {
+    text-transform: none;
+}
+
+.title {
+    font-weight: 600;
+    font-size: 8vh;
+    text-align: center;
+    margin-top: 9vh;
+}
+
+img {
+    height: 30vh;
+}
+
+.subtitle {
+    width: 90%;
+    text-align: center;
+    font-weight: 600;
+    margin: 0;
+    font-size: 4vh;
+}
+
+.notifs {
+    margin: 4vh;
+    font-size: 2.5vh;
+    font-weight: 600;
+    border-radius: 50px;
+    --border-radius: 50px;
+    --background: var(--ion-color-secondary-shade);
+    --background-activated: #226e91;
+}
+
+.enter {
+    font-size: 4vh;
+    width: 70%;
+    font-weight: 600;
+    border-radius: 100px;
+    --border-radius: 100px;
+}

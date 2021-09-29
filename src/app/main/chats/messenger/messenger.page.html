@@ -15,7 +15,7 @@
                 <ion-text color="dark">
                   <div class="flexcolumn">
                     <ion-avatar>
-                      <img style="width: fit-content;" (click)="slideTo('profile')" [src]="bubblePicture$ | async" />
+                      <img class="profile-icon" (click)="slideTo('profile')" [src]="bubblePicture$ | async" />
                     </ion-avatar>
                     <h3 class="messenger-header" (click)="slideTo('profile')">
                       {{(chat$ | async)?.recipient?.name}}
@@ -25,7 +25,7 @@
               </ion-col>
 
               <ion-col size="2">
-                <ion-icon name="shield" (click)="openUserReportModal()"></ion-icon>
+                <img name="shield" src="/assets/reporticon.svg" alt="Report User" (click)="openUserReportModal()"/>
               </ion-col>
             </ion-row>
           </ion-grid>
@@ -124,6 +124,7 @@
           #profCard
           [profile]="recipientProfile$ | async"
           [profilePictures]="(recipientProfile$ | async)?.pictureUrls"
+          [headerBottom]="2"
         ></app-profile-card>
       </ion-content>
     </ion-slide>
