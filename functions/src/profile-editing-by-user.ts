@@ -43,7 +43,8 @@ export const profileEditingByUser = functions
 
       const profileSnapshot = await profileRef.get();
 
-      if (!profileSnapshot.exists) inexistentDocumentError("profile");
+      if (!profileSnapshot.exists)
+        inexistentDocumentError("profile", profileSnapshot.id, uid);
 
       const currentProfile = profileSnapshot.data() as profileFromDatabase;
 

@@ -6,7 +6,16 @@
   >Activate swipe stack (dev)</ion-button
 > -->
 
-<div *ngIf="(this.swipeProfiles$ | async).length < 1" class="noSwipes">
+<ng-container *ngIf="showLoading$ | async">
+  <div class="fishAnim">
+    <div class="flexcol">
+      <img src="/assets/nemo_load.svg" #fish />
+      <h2 class="load">Loading profiles...</h2>
+    </div>
+  </div>
+</ng-container>
+
+<div *ngIf="showEmptyPrompt$ | async" class="noSwipes">
   <div class="overlap">
     <p>Sorry, looks like your swipe stack is empty. Come back later!</p>
   </div>
@@ -16,10 +25,10 @@
   <div #pic1 class="picholder left"></div>
   <div #pic2 class="picholder right"></div>
   <div #catchText class="textholder">
-      <h1 class="catchtext">It's a Catch!</h1>
+    <h1 class="catchtext">It's a Catch!</h1>
   </div>
   <div #catchText class="textholder-2">
-      <h2 class="catchtext">{{ this.chosenCatchMsg }}</h2>
+    <h2 class="catchtext">{{ this.chosenCatchMsg }}</h2>
   </div>
 
   <div #backdrop class="backdrop"></div>

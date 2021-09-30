@@ -8,8 +8,6 @@ import {
   OnInit,
   AfterViewInit,
   Output,
-  ChangeDetectorRef,
-  OnDestroy,
   Renderer2,
   EventEmitter,
 } from "@angular/core";
@@ -17,7 +15,6 @@ import { Router } from "@angular/router";
 import {
   AlertController,
   IonContent,
-  IonItemOptions,
   IonItemSliding,
   IonTabs,
   LoadingController,
@@ -32,8 +29,28 @@ import {
   ChatboardPicturesStore,
   pictureHolder,
 } from "@stores/pictures/chatboard-pictures/chatboard-pictures.service";
-import { forkJoin, fromEvent, Observable, of, Subject, Subscription, timer } from "rxjs";
-import { concatMap, delay, exhaustMap, first, map, switchMap, tap } from "rxjs/operators";
+import {
+  BehaviorSubject,
+  combineLatest,
+  forkJoin,
+  fromEvent,
+  Observable,
+  of,
+  Subject,
+  Subscription,
+  timer,
+} from "rxjs";
+import {
+  concatMap,
+  delay,
+  distinctUntilChanged,
+  exhaustMap,
+  filter,
+  first,
+  map,
+  switchMap,
+  tap,
+} from "rxjs/operators";
 import { ChatboardStore, OtherProfilesStore } from "@stores/index";
 import { FadeOutAnimation } from "@animations/fade-out.animation";
 import { StoreReadinessService } from "@services/store-readiness/store-readiness.service";
@@ -43,7 +60,7 @@ import { StoreReadinessService } from "@services/store-readiness/store-readiness
   templateUrl: "./chat-board.component.html",
   styleUrls: ["./chat-board.component.scss"],
 })
-export class ChatBoardComponent implements OnInit {
+export class ChatBoardComponent implements OnInit, AfterViewInit {
   chatboardPictures$: Observable<pictureHolder>;
   picsLoaded: boolean = false;
 
@@ -72,6 +89,14 @@ export class ChatBoardComponent implements OnInit {
     this.screenWidth = window.innerWidth;
   }
 
+  private viewIsReady$ = new BehaviorSubject<boolean>(false);
+  get pageIsReady$() {
+    return combineLatest([this.viewIsReady$, this.storeReadiness.ownProfile$]).pipe(
+      map(([a, b]) => a && b),
+      distinctUntilChanged()
+    );
+  }
+
   constructor(
     private router: Router,
     private modalCtrl: ModalController,
@@ -79,7 +104,7 @@ export class ChatBoardComponent implements OnInit {
     private chatboardPicturesService: ChatboardPicturesStore, // used in template
     private domSanitizer: DomSanitizer,
     private renderer: Renderer2,
-    private pageReadiness: StoreReadinessService,
+    private storeReadiness: StoreReadinessService,
     private chatboardStore: ChatboardStore,
     private loadingCtrl: LoadingController,
     private alertCtrl: AlertController
@@ -103,15 +128,24 @@ export class ChatBoardComponent implements OnInit {
         return holder;
       })
     );
-    this.subs.add(this.pageReadinessHandler().subscribe());
+    this.readinessHandler();
   }
 
-  pageReadinessHandler() {
-    return this.pageReadiness.chats$.pipe(
-      tap((ready) => {
-        this.picsLoaded = ready;
-        this.loaded.emit(ready);
-      })
+  ngAfterViewInit() {
+    this.viewIsReady$.next(true);
+  }
+
+  readinessHandler() {
+    this.subs.add(
+      this.pageIsReady$
+        .pipe(
+          filter((ready) => ready),
+          tap((ready) => {
+            this.picsLoaded = ready;
+            this.loaded.emit(ready);
+          })
+        )
+        .subscribe()
     );
   }
 
@@ -182,7 +216,6 @@ export class ChatBoardComponent implements OnInit {
 
   async deleteChat(event, chat: Chat) {
     // make slide close before starting this procedure
-
     await this.chatDeleteRef.close();
 
     const loader = await this.loadingCtrl.create({

@@ -70,6 +70,7 @@ import {
 import { isEqual, isEqualWith } from "lodash";
 import Sortable, { Options as SortableOptions } from "sortablejs";
 import { StoreReadinessService } from "@services/store-readiness/store-readiness.service";
+import { Animation } from "@ionic/angular";
 
 function nullAndEmptyStrEquiv(value1, value2) {
   if ((value1 == null || value1 === "") && (value2 == null || value2 === "")) {
@@ -90,12 +91,14 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
 
   @ViewChild("profileCard") profileCard: ProfileCardComponent;
   @ViewChild("profileContainer", { read: ElementRef }) profileContainer: ElementRef;
-  @ViewChild("fish", { read: ElementRef }) fish: ElementRef;
+  @ViewChild("fish", { read: ElementRef }) fishRef: ElementRef;
 
   @ViewChildren("answers") answers: QueryList<ProfileAnswerComponent>;
 
   @ViewChild("toggleDiv", { read: ElementRef }) toggleDiv: ElementRef;
   @ViewChild("profilePictures", { read: ElementRef }) profilePicturesRef: ElementRef;
+
+  subs = new Subscription();
 
   private ownPicturesSub: Subscription;
   picsLoaded$: Observable<boolean>;
@@ -104,7 +107,13 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
   editingInProgress$ = this.editingInProgress.pipe(distinctUntilChanged());
   private editingAnimationLogicSub: Subscription;
 
-  private viewHasInit$ = new BehaviorSubject<boolean>(false);
+  private viewIsReady$ = new BehaviorSubject<boolean>(false);
+  get pageIsReady$() {
+    return combineLatest([this.viewIsReady$, this.storeReadiness.ownProfile$]).pipe(
+      map(([a, b]) => a && b),
+      distinctUntilChanged()
+    );
+  }
 
   get emptyEditableFields() {
     return {
@@ -142,20 +151,13 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
   profilePicturesFromStore$ = this.ownPicturesService.urls$;
   userFromStore$ = this.currentUserStore.user$;
 
-  fishSwimAnimation;
-  toggleDivEnterAnimation;
-  toggleDivLeaveAnimation;
+  loadingAnimation: Animation;
+  toggleDivEnterAnimation: Animation;
+  toggleDivLeaveAnimation: Animation;
 
   interestIcons = assetsInterestsPath;
   societyCategoryOptions = searchCriteriaOptions.societyCategory;
   areaOfStudyOptions = searchCriteriaOptions.areaOfStudy;
-
-  get isPageReady$(): Observable<boolean> {
-    return combineLatest([this.viewHasInit$, this.storeReadiness.ownProfile$]).pipe(
-      map(([viewHasInit, storesHaveInit]) => viewHasInit && storesHaveInit),
-      distinctUntilChanged()
-    );
-  }
 
   constructor(
     private currentUserStore: CurrentUserStore,
@@ -183,41 +185,38 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     //   tap((allPicturesLoaded) => (allPicturesLoaded ? this.stopAnimation() : null))
     // );
     this.editingAnimationLogicSub = this.editingAnimationLogic().subscribe();
-    this.onPageReady$().subscribe();
+    this.readinessHandler();
   }
 
   ngAfterViewInit() {
-    this.viewHasInit$.next(true);
-
     // assuming that if this.fish is undefined it is because
     // #fish isn't rendered as picsLoaded$ is already true
-    if (this.fish) {
-      this.fishSwimAnimation = FishSwimAnimation(this.fish);
-      this.fishSwimAnimation.play();
-    }
+    if (this.fishRef) this.startLoadingAnimation();
 
-    // /*THIS IS A REAL PROBLEM*/
-    // //What is it waiting for in order to be ok?
-    // //This number may not be long enough dependent on connection
-    // setTimeout(() => {
-    //   this.initPictureSortability();
-    //   console.log("good to go");
-    // }, 10000);
+    this.viewIsReady$.next(true);
   }
 
-  onPageReady$(): Observable<any> {
-    return this.isPageReady$.pipe(
-      filter((isReady) => isReady),
-      take(1),
-      tap((a) => console.log("stores are ready for own profile", a)),
-      switchMap(() => this.stopAnimation()),
-      tap(() => this.initPictureSortability())
+  readinessHandler(): void {
+    this.subs.add(
+      this.pageIsReady$
+        .pipe(
+          filter((isReady) => isReady),
+          take(1),
+          switchMap(() => this.stopLoadingAnimation()),
+          tap(() => this.initPictureSortability())
+        )
+        .subscribe()
     );
   }
 
-  async stopAnimation() {
+  startLoadingAnimation() {
+    this.loadingAnimation = FishSwimAnimation(this.fishRef);
+    this.loadingAnimation.play();
+  }
+
+  async stopLoadingAnimation() {
     return new Promise((resolve) => {
-      this.fishSwimAnimation?.destroy();
+      this.loadingAnimation?.destroy();
 
       setTimeout(() => {
         // This is essentially a lifecycle hook for after the UI appears

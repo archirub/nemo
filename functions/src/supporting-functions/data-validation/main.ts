@@ -6,7 +6,7 @@ import {
   getPickingDataUserInfoRequest,
   registerSwipeChoicesRequest,
   changeShowProfileRequest,
-  addOrRemoveReportedRequest,
+  reportUserRequest,
   updateSearchFeaturesRequest,
   updateGenderSexPrefRequest,
   createAccountRequest,
@@ -45,7 +45,7 @@ type CloudFunctionRequest =
   | getPickingDataUserInfoRequest
   | registerSwipeChoicesRequest
   | changeShowProfileRequest
-  | addOrRemoveReportedRequest
+  | reportUserRequest
   | updateSearchFeaturesRequest
   | updateGenderSexPrefRequest
   | createAccountRequest
@@ -60,7 +60,7 @@ type CloudFunctionName =
   | "createAccount"
   | "updateGenderSexPref"
   | "updateSearchFeatures"
-  | "addOrRemoveReported"
+  | "reportUser"
   | "changeShowProfile"
   | "registerSwipeChoices"
   | "generateSwipeStack"
@@ -101,10 +101,8 @@ export function sanitizeData(
         cloudFunctionRequest as updateSearchFeaturesRequest
       );
       break;
-    case "addOrRemoveReported":
-      sanitizationResult = sanitizeAddOrRemoveReported(
-        cloudFunctionRequest as addOrRemoveReportedRequest
-      );
+    case "reportUser":
+      sanitizationResult = sanitizeReportUser(cloudFunctionRequest as reportUserRequest);
       break;
     case "changeShowProfile":
       sanitizationResult = sanitizeChangeShowProfile(
@@ -303,17 +301,23 @@ function sanitizeUpdateSearchFeatures(request: updateSearchFeaturesRequest): {
   return { isValid: true, sanitizedData };
 }
 
-function sanitizeAddOrRemoveReported(request: addOrRemoveReportedRequest): {
+function sanitizeReportUser(request: reportUserRequest): {
   isValid: boolean;
-  sanitizedData?: addOrRemoveReportedRequest;
+  sanitizedData?: reportUserRequest;
 } {
-  if (!["add", "remove"].includes(request?.action)) return { isValid: false };
+  if (!isObject(request?.report)) return { isValid: false };
 
-  if (!isString(request?.reporteduid)) return { isValid: false };
+  if (!isString(request?.report?.descriptionByUserReporting)) return { isValid: false };
+  if (!isString(request?.report?.userReportedID)) return { isValid: false };
 
   return {
     isValid: true,
-    sanitizedData: { action: request?.action, reporteduid: request?.reporteduid },
+    sanitizedData: {
+      report: {
+        descriptionByUserReporting: request?.report?.descriptionByUserReporting,
+        userReportedID: request?.report?.userReportedID,
+      },
+    },
   };
 }
 

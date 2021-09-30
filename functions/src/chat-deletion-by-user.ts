@@ -48,9 +48,17 @@ export const chatDeletionByUser = functions
         (u) => u !== uid
       )[0];
 
-      if (!chatSnapshot.exists) inexistentDocumentError("chat");
-      if (!matchDataSnapshot.exists) inexistentDocumentError("matchData");
-      if (!recipientuid) invalidDocumentError("chat", "recipientuid");
+      if (!chatSnapshot.exists) inexistentDocumentError("chat", chatSnapshot.id, uid);
+      if (!matchDataSnapshot.exists)
+        inexistentDocumentError("matchData", matchDataSnapshot.id, uid);
+      if (!recipientuid)
+        invalidDocumentError(
+          "chat",
+          "recipientuid",
+          chatSnapshot.id,
+          uid,
+          "This is the uid which isn't the caller's in the uids field"
+        );
 
       deleteMatch(
         batch,

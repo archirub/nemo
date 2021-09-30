@@ -2,14 +2,15 @@ import { chat } from "./../../shared/interfaces/chat.model";
 import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from "@angular/core";
 import { Animation } from "@ionic/angular";
 
-import { combineLatest, Observable, Subscription } from "rxjs";
+import { BehaviorSubject, combineLatest, Observable, Subscription } from "rxjs";
 
 import { ChatboardStore, SwipeStackStore } from "@stores/index";
 import { Chat, Profile } from "@classes/index";
 import { ChatBoardComponent } from "./chat-board/chat-board.component";
 import { Router } from "@angular/router";
-import { map, tap } from "rxjs/operators";
+import { distinctUntilChanged, map, tap } from "rxjs/operators";
 import { FishSwimAnimation } from "@animations/fish.animation";
+import { StoreReadinessService } from "@services/store-readiness/store-readiness.service";
 
 @Component({
   selector: "app-chats",
@@ -23,6 +24,8 @@ export class ChatsPage {
   fishSwimAnimation: Animation;
 
   TOP_SCROLL_SPEED = 100;
+
+  showLoading$ = new BehaviorSubject<boolean>(true);
 
   get chats$() {
     return this.chatboardStore.chats$.pipe(
@@ -41,14 +44,23 @@ export class ChatsPage {
     return this.chats$.pipe(map((chats) => chats.length));
   }
 
-  constructor(private router: Router, private chatboardStore: ChatboardStore) {}
+  constructor(
+    private router: Router,
+    private chatboardStore: ChatboardStore,
+    private storeReadiness: StoreReadinessService
+  ) {}
 
   ngAfterViewInit() {
     this.fishSwimAnimation = FishSwimAnimation(this.fish);
     this.fishSwimAnimation.play();
   }
 
-  stopAnimation() {
+  onLoadedChatboard() {
+    this.showLoading$.next(false);
+    this.stopLoadingAnimation();
+  }
+
+  stopLoadingAnimation() {
     this.fishSwimAnimation?.destroy();
   }
 

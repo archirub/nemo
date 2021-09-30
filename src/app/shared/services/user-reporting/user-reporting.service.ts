@@ -1,4 +1,6 @@
 import { Injectable } from "@angular/core";
+import { AngularFireFunctions } from "@angular/fire/functions";
+import { reportUserRequest } from "@interfaces/cloud-functions.model";
 import { UserReport } from "@interfaces/user-report.models";
 import { ModalController } from "@ionic/angular";
 
@@ -6,10 +8,15 @@ import { ModalController } from "@ionic/angular";
   providedIn: "root",
 })
 export class UserReportingService {
-  constructor(private modalCtrl: ModalController) {}
+  constructor(
+    private modalCtrl: ModalController,
+    private afFunctions: AngularFireFunctions
+  ) {}
 
   reportUser(report: UserReport) {
-    console.log("user reported");
+    const request: reportUserRequest = { report };
+
+    return this.afFunctions.httpsCallable("reportUser")(request).toPromise();
   }
 
   async displayReportModal(
@@ -23,7 +30,12 @@ export class UserReportingService {
       component: reportComponent,
       showBackdrop: true,
       keyboardClose: true,
-      componentProps: { userReportedID, userReportedName, userReportingID, userReportedPicture },
+      componentProps: {
+        userReportedID,
+        userReportedName,
+        userReportingID,
+        userReportedPicture,
+      },
     });
 
     return modal.present();

@@ -21,7 +21,7 @@ export const getMatchDataUserInfo = functions
 
       const snapshot = await admin.firestore().collection("matchData").doc(uid).get();
 
-      if (!snapshot.exists) notFoundDocumentError("matchData");
+      if (!snapshot.exists) notFoundDocumentError("matchData", snapshot.id, uid);
 
       const data = snapshot.data() as mdFromDatabase;
 

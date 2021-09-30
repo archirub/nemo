@@ -135,6 +135,27 @@ export class ChatboardStore {
     );
   }
 
+  /**
+   * returns false if user doesn't have chat with the provided user,
+   * returns the chatID otherwise
+   */
+  public userHasChatWith(uid: string): Observable<false | string> {
+    return this.allChats$.pipe(
+      first(),
+      map((chats) => {
+        let theChatID: false | string = false;
+
+        Object.entries(chats).forEach(([chatID, chat]) => {
+          if (chat.recipient.uid === uid) {
+            theChatID = chatID;
+          }
+        });
+
+        return theChatID;
+      })
+    );
+  }
+
   private activateChatDocsListening(): Observable<void> {
     return this.afAuth.user.pipe(
       take(1),
@@ -306,6 +327,4 @@ export class ChatboardStore {
       })
     );
   }
-
-  p;
 }

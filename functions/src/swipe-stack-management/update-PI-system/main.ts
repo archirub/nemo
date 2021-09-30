@@ -62,8 +62,9 @@ export const updatePISystem = functions
         >,
       ]);
 
-      if (currentUidStorageDocs.empty) emptyCollectionError("uidDatingStorage");
-      if (piStorageDocs.empty) emptyCollectionError("piStorage");
+      if (currentUidStorageDocs.empty)
+        emptyCollectionError("uidDatingStorage", "none; pubsub function");
+      if (piStorageDocs.empty) emptyCollectionError("piStorage", "none; pubsub function");
 
       // MERGING UIDSTORAGE ARRAYS THAT HAVE SAME COMBINATION DEGREE/GENDER/SEXPREF
       const uidStorageArrays: Omit<uidDatingStorage, "volume">[] =
@@ -119,7 +120,8 @@ export const updatePISystem = functions
                 invalidDocumentError(
                   "uidDatingStorage",
                   "user uid",
-                  `User with uid ${user.uid} was not found.`
+                  `User with uid ${user.uid} was not found.`,
+                  "none: pubsub function"
                 );
 
               swipeUserInfo[i][user.uid].percentile = (index + 1) / peopleCount;

@@ -1,4 +1,4 @@
-<ng-container *ngIf="!(isPageReady$ | async)">
+<ng-container *ngIf="!(pageIsReady$ | async)">
   <div class="fishAnim">
     <div class="flexcol">
       <img src="/assets/nemo_load.svg" #fish />
@@ -7,7 +7,7 @@
   </div>
 </ng-container>
 
-<ion-content #profileContainer [hidden]="!(isPageReady$ | async)">
+<ion-content #profileContainer [hidden]="!(pageIsReady$ | async)">
   <!--div class="shadow"></div-->
 
   <form #editableFieldsForm="ngForm">

@@ -13,7 +13,6 @@ import { exhaustMap, filter, first, startWith, tap } from "rxjs/operators";
 })
 export class SignupToAppPage implements OnInit {
   get appIsReady$(): Observable<boolean> {
-    return of(false);
     return this.readiness.app$;
   }
 

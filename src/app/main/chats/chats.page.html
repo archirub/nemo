@@ -1,4 +1,4 @@
-<ng-container *ngIf="!chatboard.picsLoaded">
+<ng-container *ngIf="showLoading$ | async">
   <div class="fishAnim">
     <div class="flexcol">
       <img src="/assets/nemo_load.svg" #fish />
@@ -27,6 +27,6 @@
     #chatboard
     [chats]="chats$ | async"
     [matches]="matches$ | async"
-    (loaded)="stopAnimation()"
+    (loaded)="onLoadedChatboard()"
   ></app-chat-board>
 </ion-content>

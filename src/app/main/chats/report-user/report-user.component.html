@@ -6,23 +6,22 @@
   </div>
 
   <div class="flexcenter">
-    <h1>
-      Report {{ userReportedName }}
-    </h1>
-    <img [src]="userReportedPicture"/>
-    <p>Please tell us a little about why you're reporting {{ userReportedName }}.</p>
+    <h1>Report {{ userReportedName }}</h1>
+    <img [src]="userReportedPicture" />
+    <p>Please tell us a little about why you're reporting this user.</p>
   </div>
 
   <ion-textarea
-      maxlength="150"
-      class="input"
-      autogrow="true"
-      placeholder="The problem is..."
-    ></ion-textarea>
+    [(ngModel)]="description"
+    maxlength="150"
+    class="input"
+    autogrow="true"
+    placeholder="The problem is..."
+  ></ion-textarea>
 
   <div class="flexcenter">
     <p>We're sorry this happened. Hopefully we can get it resolved soon.</p>
 
-    <ion-button>Submit</ion-button>
+    <ion-button (click)="reportUser()">Submit</ion-button>
   </div>
 </ion-content>

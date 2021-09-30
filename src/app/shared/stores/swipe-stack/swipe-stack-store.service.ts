@@ -66,23 +66,12 @@ export class SwipeStackStore {
   activateStore(): Observable<any> {
     return this.profiles$.pipe(
       map((profiles) => profiles.length),
-      tap(() => console.log("a")),
       concatMap((count) => this.updateStackState(count)),
-      tap(() => console.log("b")),
-
       this.filterBasedOnStackState(),
-      tap(() => console.log("c")),
-
       filter((count) => count <= this.MIN_PROFILE_COUNT),
-      tap(() => console.log("d")),
-
       switchMap(() => this.SCstore.searchCriteria$.pipe(first())), // using switchMap instead of withLatestFrom as SC might still be undefined at that point so we want to wait for it to have a value (which withLatestFrom doesn't do)
       // exhaustMap is a must use here, makes sure we don't have multiple requests to fill the swipe stack
-      tap(() => console.log("e")),
-
       exhaustMap((SC) => this.addToSwipeStackQueue(SC)),
-      tap(() => console.log("f")),
-
       tap(() => this.isReady.next(true)),
       share()
     );

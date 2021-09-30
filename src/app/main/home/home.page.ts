@@ -7,11 +7,21 @@ import {
   ViewChild,
   HostListener,
   Renderer2,
+  AfterViewInit,
 } from "@angular/core";
-import { ModalController } from "@ionic/angular";
+import { ModalController, Animation } from "@ionic/angular";
 
-import { Observable, Subscription } from "rxjs";
-import { map } from "rxjs/operators";
+import { BehaviorSubject, combineLatest, Observable, of, Subscription } from "rxjs";
+import {
+  delay,
+  distinctUntilChanged,
+  filter,
+  map,
+  startWith,
+  switchMap,
+  take,
+  tap,
+} from "rxjs/operators";
 
 import { SearchCriteriaComponent } from "./search-criteria/search-criteria.component";
 
@@ -38,23 +48,35 @@ import { Router } from "@angular/router";
   templateUrl: "home.page.html",
   styleUrls: ["home.page.scss"],
 })
-export class HomePage implements OnInit, OnDestroy {
-  swipeProfiles$: Observable<Profile[]>;
+export class HomePage implements OnInit, OnDestroy, AfterViewInit {
+  private subs = new Subscription();
+  loadingAnimation: Animation;
 
-  private swipeStackSub: Subscription;
-  private ownPicturesSub: Subscription;
+  showLoading$ = new BehaviorSubject<boolean>(true);
+  showEmptyPrompt$ = combineLatest([
+    this.showLoading$,
+    this.swipeStackStore.stackState$,
+  ]).pipe(
+    map(([showLoading, stackState]) => stackState === "empty" && showLoading === false)
+  );
+
+  private viewIsReady$ = new BehaviorSubject<boolean>(false);
+  get pageIsReady$() {
+    return combineLatest([this.viewIsReady$, this.storeReadiness.home$]).pipe(
+      map(([a, b]) => a && b),
+      distinctUntilChanged()
+    );
+  }
 
   // PROPERTIES FOR MODAL ANIMATION
   @ViewChild("homeContainer", { read: ElementRef }) homeContainer: ElementRef;
-  // @ViewChild("searchButton", { read: ElementRef }) searchButton: ElementRef;
 
   @ViewChild("pic1", { read: ElementRef }) pic1: ElementRef;
   @ViewChild("pic2", { read: ElementRef }) pic2: ElementRef;
   @ViewChild("catchText", { read: ElementRef }) catchText: ElementRef;
   @ViewChild("swipeCards", { read: ElementRef }) swipeCards: ElementRef;
   @ViewChild("backdrop", { read: ElementRef }) backdrop: ElementRef;
-  // @ViewChild("leftFish", { read: ElementRef }) leftFish: ElementRef;
-  // @ViewChild("rightFish", { read: ElementRef }) rightFish: ElementRef;
+  @ViewChild("fish", { read: ElementRef }) fish: ElementRef;
 
   screenHeight: number;
   screenWidth: number;
@@ -75,20 +97,19 @@ export class HomePage implements OnInit, OnDestroy {
     private ownPicturesService: OwnPicturesStore,
     private firebaseAuth: FirebaseAuthService,
     private fs: AngularFirestore,
-    private readiness: StoreReadinessService,
+    private storeReadiness: StoreReadinessService,
     private router: Router
   ) {
     this.onResize();
   }
 
   modal: HTMLIonModalElement;
-  SCenterAnimation;
-  SCleaveAnimation;
+  SCenterAnimation: (baseEl: any) => Animation;
+  SCleaveAnimation: (baseEl: any) => Animation;
 
-  openCatchAnimation;
-  closeCatchAnimation;
-  fishEnterAnimation;
-  fishSwimAnimation;
+  openCatchAnimation: Animation;
+  closeCatchAnimation: Animation;
+
   matchedName: string;
   matchedPicture;
   currentUser; //profile
@@ -108,14 +129,46 @@ export class HomePage implements OnInit, OnDestroy {
   public chosenCatchMsg: string;
 
   ngOnInit() {
+    this.readinessHandler();
+
+    this.subs.add(
+      this.ownPicturesService.urls$
+        .pipe(map((urls) => this.updateProfilePictures(urls)))
+        .subscribe()
+    );
+
     this.swipeStackStore.stackState$.subscribe((c) => console.log("stack state:", c));
-    this.swipeProfiles$ = this.swipeStackStore.profiles$;
+    this.storeReadiness.status$.subscribe((a) =>
+      console.log("Page readiness status:", a)
+    );
+  }
 
-    this.ownPicturesService.urls$
-      .pipe(map((urls) => this.updateProfilePictures(urls)))
-      .subscribe();
+  get swipeProfiles$() {
+    return this.pageIsReady$.pipe(
+      switchMap((isReady) => (isReady ? this.swipeStackStore.profiles$ : of([])))
+    );
+  }
 
-    this.readiness.status$.subscribe((a) => console.log("Page readiness status:", a));
+  readinessHandler() {
+    this.subs.add(
+      this.pageIsReady$
+        .pipe(
+          filter((isReady) => isReady),
+          take(1),
+          tap(() => this.showLoading$.next(false)),
+          tap(() => this.stopLoadingAnimation())
+        )
+        .subscribe()
+    );
+  }
+
+  stopLoadingAnimation() {
+    this.loadingAnimation?.destroy();
+  }
+
+  startLoadingAnimation() {
+    this.loadingAnimation = FishSwimAnimation(this.fish);
+    this.loadingAnimation.play();
   }
 
   selectRandomCatch() {
@@ -127,7 +180,7 @@ export class HomePage implements OnInit, OnDestroy {
    * Temporary, just for development, to avoid fetching the stack on each reload / document save
    */
   activateSwipeStack() {
-    this.swipeStackSub = this.swipeStackStore.activateStore().subscribe();
+    this.subs.add(this.swipeStackStore.activateStore().subscribe());
     // this.firebaseAuth.logOut();
   }
 
@@ -135,7 +188,9 @@ export class HomePage implements OnInit, OnDestroy {
     this.profilePictures = JSON.parse(JSON.stringify(urls));
   }
 
-  ionViewDidEnter() {
+  ngAfterViewInit() {
+    this.startLoadingAnimation();
+
     // Subscription for chat doc creation in case of match
     this.currentUserSub = this.currentUserStore.user$.subscribe((profile) => {
       this.currentUser = profile;
@@ -162,6 +217,8 @@ export class HomePage implements OnInit, OnDestroy {
         this.modal = m;
         this.onModalDismiss(this.modal);
       });
+
+    this.viewIsReady$.next(true);
   }
 
   async presentSCmodal(): Promise<void> {
@@ -257,6 +314,6 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.swipeStackSub?.unsubscribe();
+    this.subs.unsubscribe();
   }
 }

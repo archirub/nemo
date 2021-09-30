@@ -1,4 +1,4 @@
-export type UserReportCause = "";
+// export type UserReportCause = "";
 export type UserReportState = "not-seen" | "in-progress" | "closed";
 export type UserReportActionTaken =
   | "not-yet-taken"
@@ -7,10 +7,16 @@ export type UserReportActionTaken =
   | "reported-to-authority";
 
 export interface UserReport {
+  userReportedID: string;
+  // causeGiven: UserReportCause;
+  descriptionByUserReporting: string;
+}
+
+export interface UserReportOnDatabase {
   userReportingID: string;
   userReportedID: string;
-  causeGiven: UserReportCause;
-  additionalCommentGiven: string;
+  // causeGiven: UserReportCause;
+  descriptionByUserReporting: string;
   state: UserReportState;
   actionTaken: UserReportActionTaken;
 }
