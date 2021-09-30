@@ -1,3 +1,4 @@
+import { checkEmailValidityResponse } from "./../../shared/interfaces/cloud-functions.model";
 import {
   AlertController,
   IonSlides,
@@ -47,7 +48,6 @@ import {
   EmailVerificationService,
   EmailVerificationState,
 } from "./email-verification.service";
-import { successResponse } from "@interfaces/cloud-functions.model";
 import { LoadingService } from "@services/loading/loading.service";
 import { UniversityName } from "@interfaces/universities.model";
 import { UniversitiesStore } from "@stores/universities/universities.service";
@@ -199,9 +199,8 @@ export class SignupauthPage implements OnInit {
     return this.afFunctions
       .httpsCallable("checkEmailValidity")({ email })
       .pipe(
-        map((res: successResponse) => {
-          console.log(res);
-          return !!res?.successful;
+        map((res: checkEmailValidityResponse) => {
+          return !!res?.isValid;
         })
       )
       .toPromise();

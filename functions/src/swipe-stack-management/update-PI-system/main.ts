@@ -5,6 +5,10 @@ import {
   SwipeUserInfo,
   uidDatingStorage,
 } from "../../../../src/app/shared/interfaces/index";
+import {
+  emptyCollectionError,
+  invalidDocumentError,
+} from "../../supporting-functions/error-handling/generic-errors";
 
 interface SwipeUserInfoMap {
   [uid: string]: SwipeUserInfo;
@@ -46,106 +50,114 @@ export const updatePISystem = functions
     // functions.pubsub
     //   .schedule("every day 05:00")
     //   .onRun(async (context) => {
-    // FETCHING UID AND PI STORAGE DOCUMENTS
-    const [currentUidStorageDocs, piStorageDocs] = await Promise.all([
-      admin.firestore().collection("uidDatingStorage").get() as Promise<
-        FirebaseFirestore.QuerySnapshot<uidDatingStorage>
-      >,
-      admin.firestore().collection("piStorage").get() as Promise<
-        FirebaseFirestore.QuerySnapshot<piStorage>
-      >,
-    ]);
 
-    // MERGING UIDSTORAGE ARRAYS THAT HAVE SAME COMBINATION DEGREE/GENDER/SEXPREF
-    const uidStorageArrays: Omit<uidDatingStorage, "volume">[] =
-      concatSameDemographicDocs(currentUidStorageDocs.docs.map((doc) => doc.data()));
+    await admin.firestore().runTransaction(async (transaction) => {
+      // FETCHING UID AND PI STORAGE DOCUMENTS
+      const [currentUidStorageDocs, piStorageDocs] = await Promise.all([
+        transaction.get(admin.firestore().collection("uidDatingStorage")) as Promise<
+          FirebaseFirestore.QuerySnapshot<uidDatingStorage>
+        >,
+        transaction.get(admin.firestore().collection("piStorage")) as Promise<
+          FirebaseFirestore.QuerySnapshot<piStorage>
+        >,
+      ]);
 
-    // CALCULATE MEAN AND VARIANCE OF PI DISTRIBUTIONS
-    // (removed those who don't want to show their profiles or that are not in dating mode)
-    const distribParamMaps = initialiseDemographicMap<distributionParameters>({
-      mean: null,
-      variance: null,
-      occurences: 0,
-    });
-    const swipeUserInfo: SwipeUserInfoMap[] = piStorageDocs.docs.map((doc) => {
-      const data = doc.data() as SwipeUserInfoMap;
-      delete data.uids;
-      for (const uid_ in data) {
-        // if user is in "dating" mode and shows their profile, then they are accounted for in the
-        // mean and variance of the distribution, and left in the object, otherwise they are deleted from the object
-        if (data[uid_].swipeMode === "dating" && data[uid_].showProfile === true) {
-          updateDistributionParameters(distribParamMaps, data[uid_]);
-        } else {
-          delete data[uid_];
+      if (currentUidStorageDocs.empty) emptyCollectionError("uidDatingStorage");
+      if (piStorageDocs.empty) emptyCollectionError("piStorage");
+
+      // MERGING UIDSTORAGE ARRAYS THAT HAVE SAME COMBINATION DEGREE/GENDER/SEXPREF
+      const uidStorageArrays: Omit<uidDatingStorage, "volume">[] =
+        concatSameDemographicDocs(currentUidStorageDocs.docs.map((doc) => doc.data()));
+
+      // CALCULATE MEAN AND VARIANCE OF PI DISTRIBUTIONS
+      // (removed those who don't want to show their profiles or that are not in dating mode)
+      const distribParamMaps = initialiseDemographicMap<distributionParameters>({
+        mean: null,
+        variance: null,
+        occurences: 0,
+      });
+      const swipeUserInfo: SwipeUserInfoMap[] = piStorageDocs.docs.map((doc) => {
+        const data = doc.data() as SwipeUserInfoMap;
+        delete data.uids;
+        for (const uid_ in data) {
+          // if user is in "dating" mode and shows their profile, then they are accounted for in the
+          // mean and variance of the distribution, and left in the object, otherwise they are deleted from the object
+          if (data[uid_].swipeMode === "dating" && data[uid_].showProfile === true) {
+            updateDistributionParameters(distribParamMaps, data[uid_]);
+          } else {
+            delete data[uid_];
+          }
         }
-      }
-      return data;
-    });
+        return data;
+      });
 
-    // CALCULATE SCORES OF USERS & SUBSEQUENTLY ADD USERS TO RESPECTIVE DEMOGRAPHIC ARRAYS
-    const newDemographicScoreMaps = initialiseDemographicMap<uid_score[]>([]);
+      // CALCULATE SCORES OF USERS & SUBSEQUENTLY ADD USERS TO RESPECTIVE DEMOGRAPHIC ARRAYS
+      const newDemographicScoreMaps = initialiseDemographicMap<uid_score[]>([]);
 
-    swipeUserInfo.forEach((swipeUserInfoMap) => {
-      for (const uid in swipeUserInfoMap) {
-        const info = swipeUserInfoMap[uid];
+      swipeUserInfo.forEach((swipeUserInfoMap) => {
+        for (const uid in swipeUserInfoMap) {
+          const info = swipeUserInfoMap[uid];
 
-        const score = computeScore(info, distribParamMaps);
-        addToDemographicArrays(uid, score, info, newDemographicScoreMaps);
-      }
-    });
+          const score = computeScore(info, distribParamMaps);
+          addToDemographicArrays(uid, score, info, newDemographicScoreMaps);
+        }
+      });
 
-    // ORDER ARRAYS IN ASCENDING ORDER OF SCORE, REGISTER NEW PERCENTILE, RESET LIKE/SEEN COUNTS
-    const newUIDStorageArrays = initialiseDemographicMap<string[]>([]);
-    for (const demographic in newDemographicScoreMaps) {
-      const peopleCount =
-        newDemographicScoreMaps[demographic as keyof demographicMap<any>].length;
+      // ORDER ARRAYS IN ASCENDING ORDER OF SCORE, REGISTER NEW PERCENTILE, RESET LIKE/SEEN COUNTS
+      const newUIDStorageArrays = initialiseDemographicMap<string[]>([]);
+      for (const demographic in newDemographicScoreMaps) {
+        const peopleCount =
+          newDemographicScoreMaps[demographic as keyof demographicMap<any>].length;
 
-      newUIDStorageArrays[demographic as keyof demographicMap<any>] =
-        newDemographicScoreMaps[demographic as keyof demographicMap<any>]
-          .sort((a, b) => a.score - b.score)
-          .map((user, index) => {
-            const i = swipeUserInfo.findIndex((map) => map.hasOwnProperty(user.uid));
-            if (i !== -1) {
+        newUIDStorageArrays[demographic as keyof demographicMap<any>] =
+          newDemographicScoreMaps[demographic as keyof demographicMap<any>]
+            .sort((a, b) => a.score - b.score)
+            .map((user, index) => {
+              const i = swipeUserInfo.findIndex((map) => map.hasOwnProperty(user.uid));
+
+              if (i === -1)
+                invalidDocumentError(
+                  "uidDatingStorage",
+                  "user uid",
+                  `User with uid ${user.uid} was not found.`
+                );
+
               swipeUserInfo[i][user.uid].percentile = (index + 1) / peopleCount;
               swipeUserInfo[i][user.uid].seenCount = 0;
               swipeUserInfo[i][user.uid].likeCount = 0;
-            } else {
-              functions.logger.warn(
-                `User with id ${user.uid} was not found in the uidStorageDocuments`
-              );
-            }
 
-            return user.uid;
-          });
-    }
-
-    // FORMATS DEMOGRAPHIC ARRAYS TO DATABASE DOC FORMAT
-    const newUidStorageDocuments: uidDatingStorage[] = toUidStorage(newUIDStorageArrays);
-
-    // BATCH WRITE THE CHANGES FOR UIDSTORAGE AND PISTORAGE
-    if (!Array.isArray(newUidStorageDocuments) || newUidStorageDocuments.length < 1)
-      return functions.logger.warn(
-        "Anomality concerning number of new uidStorageDocuments, the PI system update was aborted."
-      );
-    const batch = admin.firestore().batch();
-    currentUidStorageDocs.docs.forEach((doc) => batch.delete(doc.ref));
-    newUidStorageDocuments.forEach((doc) => {
-      batch.set(admin.firestore().collection("uidDatingStorage").doc(), doc);
-    });
-    swipeUserInfo.forEach((swipeUserInfoMap) => {
-      for (const uid in swipeUserInfoMap) {
-        // find which doc that uid is in
-        const i = piStorageDocs.docs.findIndex((doc) => doc.data().hasOwnProperty(uid));
-        // update the property of that doc
-        if (i !== -1) {
-          batch.update(piStorageDocs.docs[i].ref, {
-            [`${uid}`]: swipeUserInfoMap[uid],
-          });
-        }
+              return user.uid;
+            });
       }
-    });
 
-    await batch.commit();
+      // FORMATS DEMOGRAPHIC ARRAYS TO DATABASE DOC FORMAT
+      const newUidStorageDocuments: uidDatingStorage[] =
+        toUidStorage(newUIDStorageArrays);
+
+      // BATCH WRITE THE CHANGES FOR UIDSTORAGE AND PISTORAGE
+      if (!Array.isArray(newUidStorageDocuments) || newUidStorageDocuments.length < 1)
+        throw new functions.https.HttpsError(
+          "aborted",
+          "Anomality concerning number of new uidStorageDocuments, the PI system update was aborted."
+        );
+
+      currentUidStorageDocs.docs.forEach((doc) => transaction.delete(doc.ref));
+      newUidStorageDocuments.forEach((doc) => {
+        transaction.set(admin.firestore().collection("uidDatingStorage").doc(), doc);
+      });
+      swipeUserInfo.forEach((swipeUserInfoMap) => {
+        for (const uid in swipeUserInfoMap) {
+          // find which doc that uid is in
+          const i = piStorageDocs.docs.findIndex((doc) => doc.data().hasOwnProperty(uid));
+          // update the property of that doc
+          if (i !== -1) {
+            transaction.update(piStorageDocs.docs[i].ref, {
+              [`${uid}`]: swipeUserInfoMap[uid],
+            });
+          }
+        }
+      });
+    });
   });
 
 /**

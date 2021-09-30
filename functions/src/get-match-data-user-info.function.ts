@@ -6,6 +6,7 @@ import {
   mdFromDatabase,
 } from "../../src/app/shared/interfaces/index";
 import { runWeakUserIdentityCheck } from "./supporting-functions/user-validation/user.checker";
+import { notFoundDocumentError } from "./supporting-functions/error-handling/generic-errors";
 
 export const getMatchDataUserInfo = functions
   .region("europe-west2")
@@ -20,11 +21,7 @@ export const getMatchDataUserInfo = functions
 
       const snapshot = await admin.firestore().collection("matchData").doc(uid).get();
 
-      if (!snapshot.exists)
-        throw new functions.https.HttpsError(
-          "unavailable",
-          "The Firestore document requested doesn't exist."
-        );
+      if (!snapshot.exists) notFoundDocumentError("matchData");
 
       const data = snapshot.data() as mdFromDatabase;
 

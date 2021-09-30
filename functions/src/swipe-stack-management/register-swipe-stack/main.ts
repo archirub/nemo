@@ -1,3 +1,7 @@
+import {
+  mdDatingPickingFromDatabase,
+  mdFriendPickingFromDatabase,
+} from "./../../../../src/app/shared/interfaces/match-data.model";
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import {
@@ -8,10 +12,28 @@ import {
   piStorage,
   SwipeUserInfo,
 } from "../../../../src/app/shared/interfaces/index";
-import { createDatingChatDocuments, handleDatingYesChoices } from "./dating-mode";
-import { createFriendChatDocuments, handleFriendYesChoices } from "./friend-mode";
+import {
+  profileSnapshot,
+  createDatingChatDocumentsREAD,
+  createDatingChatDocumentsWRITE,
+  handleDatingYesChoicesREAD,
+  handleDatingYesChoicesWRITE,
+  uidDocRefMapDating,
+} from "./dating-mode";
+import {
+  createFriendChatDocumentsREAD,
+  createFriendChatDocumentsWRITE,
+  handleFriendYesChoicesREAD,
+  handleFriendYesChoicesWRITE,
+  uidDocRefMapFriend,
+} from "./friend-mode";
 import { runWeakUserIdentityCheck } from "../../supporting-functions/user-validation/user.checker";
 import { sanitizeData } from "../../supporting-functions/data-validation/main";
+import {
+  emptyCollectionError,
+  inexistentDocumentError,
+  invalidDocumentError,
+} from "../../supporting-functions/error-handling/generic-errors";
 
 export const registerSwipeChoices = functions
   .region("europe-west2")
@@ -27,76 +49,192 @@ export const registerSwipeChoices = functions
 
     const choices: uidChoiceMap[] = sanitizedRequest.choices;
 
-    const targetMatchData = (await admin
-      .firestore()
-      .collection("matchData")
-      .doc(currentUserID)
-      .get()) as FirebaseFirestore.DocumentSnapshot<mdFromDatabase>;
+    await admin.firestore().runTransaction(async (transaction) => {
+      const targetMatchData = (await transaction.get(
+        admin.firestore().collection("matchData").doc(currentUserID)
+      )) as FirebaseFirestore.DocumentSnapshot<mdFromDatabase>;
 
-    const swipeMode = targetMatchData.data()?.swipeMode || "";
-    if (!["friend", "dating"].includes(swipeMode)) {
-      throw new functions.https.HttpsError(
-        "aborted",
-        `swipeMode not recognized: ${swipeMode}`
+      if (!targetMatchData.exists)
+        inexistentDocumentError("matchData", targetMatchData.id, currentUserID);
+
+      const swipeMode = targetMatchData.data()?.swipeMode;
+
+      if (!swipeMode)
+        invalidDocumentError("matchData", "swipeMode", targetMatchData.id, currentUserID);
+
+      const date = admin.firestore.Timestamp.fromDate(new Date());
+
+      const { yes, no, superLike } = separateChoices(choices);
+      const thereAreLikedUsers = yes.length > 0 || superLike.length > 0;
+      const thereAreDislikedUsers = no.length > 0;
+
+      // GENERIC READS (here regardless of swipe mode)
+
+      const incrementCountsReadReturn = await incrementCountsREAD(
+        transaction,
+        currentUserID,
+        [...(superLike || []), ...(yes || [])],
+        no
       );
-    }
 
-    const batch = admin.firestore().batch();
-
-    const date = admin.firestore.Timestamp.fromDate(new Date());
-
-    const { yes, no, superLike } = separateChoices(choices);
-
-    if (no.length > 0)
-      handleNoChoices(batch, targetMatchData.ref, swipeMode as SwipeMode, no, date);
-
-    try {
       // DATING MODE HANDLING
       if (swipeMode === "dating") {
-        // Only in dating atm
-        await incrementCounts(batch, [...(superLike || []), ...(yes || [])], no);
+        let handleDatingYesChoicesReadReturn: {
+          notMatchedYesUsers: uidDocRefMapDating[];
+          notMatchedSuperUsers: uidDocRefMapDating[];
+          matchedUsers: uidDocRefMapDating[];
+        } | null = null;
+        let createDatingChatDocumentsReadReturn: {
+          targetUserProfile: profileSnapshot;
+          matchedUserProfiles: profileSnapshot[];
+        } | null = null;
 
-        let matchedUsers: string[] | undefined;
-        if (yes.length > 0 || superLike.length > 0) {
-          matchedUsers = await handleDatingYesChoices(
-            batch,
-            targetMatchData.ref,
+        // DATING READS
+
+        if (thereAreLikedUsers) {
+          handleDatingYesChoicesReadReturn = await handleDatingYesChoicesREAD(
+            transaction,
             currentUserID,
             yes,
             superLike,
             date
           );
+
+          const matchedUsers = handleDatingYesChoicesReadReturn.matchedUsers.map(
+            (mu) => mu.uid
+          );
+
+          const thereAreMatchedUsers = matchedUsers.length > 0;
+
+          if (thereAreMatchedUsers) {
+            createDatingChatDocumentsReadReturn = await createDatingChatDocumentsREAD(
+              transaction,
+              currentUserID,
+              matchedUsers
+            );
+          }
         }
 
-        await batch.commit();
+        // DATING WRITES
 
-        if (typeof matchedUsers !== "undefined" && matchedUsers.length > 0)
-          await createDatingChatDocuments(currentUserID, matchedUsers);
+        const targetMatchDataDatingRef = admin
+          .firestore()
+          .collection("matchData")
+          .doc(currentUserID)
+          .collection("pickingData")
+          .doc(
+            "dating"
+          ) as FirebaseFirestore.DocumentReference<mdDatingPickingFromDatabase>;
+        const targetMatchDataMainRef = admin
+          .firestore()
+          .collection("matchData")
+          .doc(currentUserID) as FirebaseFirestore.DocumentReference<mdFromDatabase>;
+
+        if (handleDatingYesChoicesReadReturn)
+          handleDatingYesChoicesWRITE(
+            transaction,
+            targetMatchDataMainRef,
+            targetMatchDataDatingRef,
+            currentUserID,
+            handleDatingYesChoicesReadReturn.notMatchedYesUsers,
+            handleDatingYesChoicesReadReturn.notMatchedSuperUsers,
+            handleDatingYesChoicesReadReturn.matchedUsers
+          );
+
+        if (createDatingChatDocumentsReadReturn)
+          createDatingChatDocumentsWRITE(
+            transaction,
+            createDatingChatDocumentsReadReturn.targetUserProfile,
+            createDatingChatDocumentsReadReturn.matchedUserProfiles
+          );
 
         // FRIEND MODE HANDLING
       } else if (swipeMode === "friend") {
-        let fmatchedUsers: string[] | undefined;
-        if (yes.length > 0 || superLike.length > 0) {
-          fmatchedUsers = await handleFriendYesChoices(
-            batch,
-            targetMatchData.ref,
+        let handleFriendYesChoicesReadReturn: {
+          notMatchedYesUsers: uidDocRefMapFriend[];
+          matchedUsers: uidDocRefMapFriend[];
+        } | null = null;
+        let createFriendChatDocumentsReadReturn: {
+          targetUserProfile: profileSnapshot;
+          matchedUserProfiles: profileSnapshot[];
+        } | null = null;
+
+        // FRIEND READS
+
+        if (thereAreLikedUsers) {
+          handleFriendYesChoicesReadReturn = await handleFriendYesChoicesREAD(
+            transaction,
             currentUserID,
             yes,
             date
           );
+
+          const matchedUsers = handleFriendYesChoicesReadReturn.matchedUsers.map(
+            (mu) => mu.uid
+          );
+
+          const thereAreMatchedUsers = matchedUsers.length > 0;
+
+          if (thereAreMatchedUsers) {
+            createFriendChatDocumentsReadReturn = await createFriendChatDocumentsREAD(
+              transaction,
+              currentUserID,
+              matchedUsers
+            );
+          }
         }
 
-        await batch.commit();
+        // FRIEND WRITES
 
-        if (typeof fmatchedUsers !== "undefined" && fmatchedUsers.length > 0)
-          await createFriendChatDocuments(currentUserID, fmatchedUsers);
+        const targetMatchDataFriendRef = admin
+          .firestore()
+          .collection("matchData")
+          .doc(currentUserID)
+          .collection("pickingData")
+          .doc(
+            "friend"
+          ) as FirebaseFirestore.DocumentReference<mdFriendPickingFromDatabase>;
+        const targetMatchDataMainRef = admin
+          .firestore()
+          .collection("matchData")
+          .doc(currentUserID) as FirebaseFirestore.DocumentReference<mdFromDatabase>;
+
+        if (handleFriendYesChoicesReadReturn)
+          handleFriendYesChoicesWRITE(
+            transaction,
+            targetMatchDataMainRef,
+            targetMatchDataFriendRef,
+            currentUserID,
+            handleFriendYesChoicesReadReturn.notMatchedYesUsers,
+            handleFriendYesChoicesReadReturn.matchedUsers
+          );
+
+        if (createFriendChatDocumentsReadReturn)
+          createDatingChatDocumentsWRITE(
+            transaction,
+            createFriendChatDocumentsReadReturn.targetUserProfile,
+            createFriendChatDocumentsReadReturn.matchedUserProfiles
+          );
       }
-    } catch (e) {
-      throw new functions.https.HttpsError(
-        "aborted",
-        `error occured during handleYesChoices or while trying to commit the batch ${e}`
+
+      // REMAINING WRITES (which don't depend on friend vs dating mode)
+
+      if (thereAreDislikedUsers)
+        UpdateNoChoicesWRITE(
+          transaction,
+          targetMatchData.ref,
+          swipeMode as SwipeMode,
+          no,
+          date
+        );
+
+      incrementCountsWRITE(
+        transaction,
+        incrementCountsReadReturn,
+        [...(superLike || []), ...(yes || [])],
+        no
       );
-    }
+    });
   });
 
 function separateChoices(choices: uidChoiceMap[]): {
@@ -120,18 +258,13 @@ function separateChoices(choices: uidChoiceMap[]): {
   return { yes, no, superLike };
 }
 
-function handleNoChoices(
-  batch: FirebaseFirestore.WriteBatch,
+function UpdateNoChoicesWRITE(
+  transaction: FirebaseFirestore.Transaction,
   targetMatchDataMainRef: FirebaseFirestore.DocumentReference<mdFromDatabase>,
   swipeMode: SwipeMode,
   uids: string[],
   date: admin.firestore.Timestamp
 ) {
-  // if (!uids || !batch || !targetMatchDataRef)
-  //   throw new functions.https.HttpsError(
-  //     "invalid-argument",
-  //     "handleNoChoices could not be executed due to missing / invalid arguments."
-  //   );
   const uidDateMaps: {
     uid: string;
     dateMap: { exists: true; date: admin.firestore.Timestamp };
@@ -142,13 +275,13 @@ function handleNoChoices(
   if (uids.length > 0) {
     if (swipeMode === "dating") {
       uidDateMaps.forEach((uidref) => {
-        batch.update(targetMatchDataMainRef, {
+        transaction.update(targetMatchDataMainRef, {
           [`dislikedUsers.${uidref.uid}`]: uidref.dateMap,
         });
       });
     } else if (swipeMode === "friend") {
       uidDateMaps.forEach((uidref) => {
-        batch.update(targetMatchDataMainRef, {
+        transaction.update(targetMatchDataMainRef, {
           [`fdislikedUsers.${uidref.uid}`]: uidref.dateMap,
         });
       });
@@ -162,32 +295,44 @@ export function sortUIDs(uids: string[]): string[] {
   return uids.sort((a, b) => ("" + a).localeCompare(b));
 }
 
+async function incrementCountsREAD(
+  transaction: FirebaseFirestore.Transaction,
+  currentuid: string,
+  yesAndSuper: string[],
+  no: string[]
+): Promise<
+  FirebaseFirestore.QuerySnapshot<{
+    [uid: string]: SwipeUserInfo;
+  }>
+> {
+  const piStorageDocs = (await transaction.get(
+    admin
+      .firestore()
+      .collection("piStorage")
+      .where("uids", "array-contains-any", [...(yesAndSuper || []), ...(no || [])])
+  )) as FirebaseFirestore.QuerySnapshot<{ [uid: string]: SwipeUserInfo }>;
+
+  if (piStorageDocs.empty) emptyCollectionError("piStorage", currentuid);
+
+  return piStorageDocs;
+}
+
 /** Only used for dating mode (at least for now) since dating mode is the only
  * thing that uses PI
  */
-async function incrementCounts(
-  batch: FirebaseFirestore.WriteBatch,
+function incrementCountsWRITE(
+  transaction: FirebaseFirestore.Transaction,
+  piStorageDocs: FirebaseFirestore.QuerySnapshot<{
+    [uid: string]: SwipeUserInfo;
+  }>,
   yesAndSuper: string[],
   no: string[]
 ) {
-  // Safe guards so that the array contains any condition doesn't return every document
-  // if the arrays are empty
-  if (!Array.isArray(no) || !Array.isArray(yesAndSuper)) return;
-
-  if (yesAndSuper.length < 1 && no.length < 1) return;
-  const piStorageDocs = (await admin
-    .firestore()
-    .collection("piStorage")
-    .where("uids", "array-contains-any", [...(yesAndSuper || []), ...(no || [])])
-    .get()) as FirebaseFirestore.QuerySnapshot<{ [uid: string]: SwipeUserInfo }>;
-
-  if (piStorageDocs.empty) return;
-
   piStorageDocs.docs.forEach((piStorageDoc) => {
     const piData = piStorageDoc.data();
     yesAndSuper.forEach((uid_) => {
       if (piData.hasOwnProperty(uid_)) {
-        batch.update(piStorageDoc.ref, {
+        transaction.update(piStorageDoc.ref, {
           [`${uid_}.seenCount`]: admin.firestore.FieldValue.increment(1),
           [`${uid_}.likeCount`]: admin.firestore.FieldValue.increment(1),
         });
@@ -196,7 +341,7 @@ async function incrementCounts(
 
     no.forEach((uid_) => {
       if (piData.hasOwnProperty(uid_)) {
-        batch.update(piStorageDoc.ref, {
+        transaction.update(piStorageDoc.ref, {
           [`${uid_}.seenCount`]: admin.firestore.FieldValue.increment(1),
         });
       }

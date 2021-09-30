@@ -27,11 +27,6 @@ export interface registerSwipeChoicesRequest {
 }
 export interface registerSwipeChoicesResponse {}
 
-export interface successResponse {
-  successful: boolean;
-  message?: string;
-}
-
 export interface changeShowProfileRequest {
   showProfile: boolean;
 }
@@ -65,3 +60,4 @@ export type deleteAccountRequest = {};
 export type chatDeletionByUserRequest = { chatID: string };
 
 export type checkEmailValidityRequest = { email: string };
+export type checkEmailValidityResponse = { isValid: boolean };

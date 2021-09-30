@@ -10,6 +10,10 @@ import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import { runWeakUserIdentityCheck } from "./supporting-functions/user-validation/user.checker";
 import { sanitizeData } from "./supporting-functions/data-validation/main";
+import {
+  inexistentDocumentError,
+  invalidDocumentError,
+} from "./supporting-functions/error-handling/generic-errors";
 
 export const chatDeletionByUser = functions
   .region("europe-west2")
@@ -44,11 +48,9 @@ export const chatDeletionByUser = functions
         (u) => u !== uid
       )[0];
 
-      if (!chatSnapshot.exists || !matchDataSnapshot.exists || !recipientuid)
-        throw new functions.https.HttpsError(
-          "not-found",
-          "No chat corresponds to the id provided."
-        );
+      if (!chatSnapshot.exists) inexistentDocumentError("chat");
+      if (!matchDataSnapshot.exists) inexistentDocumentError("matchData");
+      if (!recipientuid) invalidDocumentError("chat", "recipientuid");
 
       deleteMatch(
         batch,

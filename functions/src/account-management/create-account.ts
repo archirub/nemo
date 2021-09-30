@@ -5,7 +5,6 @@ import {
   piStorage,
   privateProfileFromDatabase,
   profileFromDatabase,
-  successResponse,
   SwipeUserInfo,
   uidDatingStorage,
 } from "./../../../src/app/shared/interfaces/index";
@@ -107,7 +106,10 @@ export const createAccount = functions
       return;
     } catch (e) {
       console.warn(`uid: ${uid}, ${e}`);
-      throw new functions.https.HttpsError("internal", "Creation of the account failed.");
+      throw new functions.https.HttpsError(
+        "internal",
+        `Creation of the account failed. uid: ${uid}, Error given: ${e}`
+      );
     }
   });
 

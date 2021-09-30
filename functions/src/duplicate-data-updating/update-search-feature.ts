@@ -2,7 +2,6 @@ import { searchFeatureNames } from "./../../../src/app/shared/interfaces/search-
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import {
-  successResponse,
   updateSearchFeaturesRequest,
   searchCriteriaNames,
   piStorage,
@@ -14,54 +13,50 @@ import { sanitizeData } from "../supporting-functions/data-validation/main";
 
 export const updateSearchFeatures = functions
   .region("europe-west2")
-  .https.onCall(
-    async (data: updateSearchFeaturesRequest, context): Promise<successResponse> => {
-      runWeakUserIdentityCheck(context);
+  .https.onCall(async (data: updateSearchFeaturesRequest, context): Promise<void> => {
+    runWeakUserIdentityCheck(context);
 
-      const uid = context?.auth?.uid as string;
+    const uid = context?.auth?.uid as string;
 
-      const sanitizedData = sanitizeData(
-        "updateSearchFeatures",
-        data
-      ) as updateSearchFeaturesRequest;
+    const sanitizedData = sanitizeData(
+      "updateSearchFeatures",
+      data
+    ) as updateSearchFeaturesRequest;
 
-      // for all: matchDataDating, matchDataFriend (only these for areaOfStudy, societyCategory)
-      // for onCampus, interests, university: profiles
-      // for degree: piStorage
+    // for all: matchDataDating, matchDataFriend (only these for areaOfStudy, societyCategory)
+    // for onCampus, interests, university: profiles
+    // for degree: piStorage
 
-      const batch = admin.firestore().batch();
+    const batch = admin.firestore().batch();
 
-      let failedAddToPiStorage = false;
+    let failedAddToPiStorage = false;
 
-      await Promise.all(
-        sanitizedData.features.map(async (feature) => {
-          // All search features are in matchdata, so add to matchdata regardless
-          addToMatchData(batch, uid, feature.name, feature.value);
+    await Promise.all(
+      sanitizedData.features.map(async (feature) => {
+        // All search features are in matchdata, so add to matchdata regardless
+        addToMatchData(batch, uid, feature.name, feature.value);
 
-          // only these are in profile
-          if (["onCampus", "interests", "university", "degree"].includes(feature.name)) {
-            addToProfileDocument(batch, uid, feature.name, feature.value);
-          }
+        // only these are in profile
+        if (["onCampus", "interests", "university", "degree"].includes(feature.name)) {
+          addToProfileDocument(batch, uid, feature.name, feature.value);
+        }
 
-          // Only degree of the search features is in piStorage
-          if (["degree"].includes(feature.name)) {
-            const e = await addToPiStorage(batch, uid, feature.name, feature.value);
-            if (e === "failed") failedAddToPiStorage = true;
-          }
-        })
+        // Only degree of the search features is in piStorage
+        if (["degree"].includes(feature.name)) {
+          const e = await addToPiStorage(batch, uid, feature.name, feature.value);
+          if (e === "failed") failedAddToPiStorage = true;
+        }
+      })
+    );
+
+    if (failedAddToPiStorage)
+      throw new functions.https.HttpsError(
+        "aborted",
+        `failled to add degree to piStorage, uid: ${uid}`
       );
 
-      if (failedAddToPiStorage) return { successful: false };
-
-      try {
-        await batch.commit();
-        return { successful: true };
-      } catch (e) {
-        functions.logger.error(`Error for ${uid} : ${e}`);
-        return { successful: false };
-      }
-    }
-  );
+    await batch.commit();
+  });
 
 function addToMatchData(
   batch: admin.firestore.WriteBatch,

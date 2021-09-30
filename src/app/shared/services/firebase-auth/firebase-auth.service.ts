@@ -8,7 +8,7 @@ import { Storage } from "@capacitor/storage";
 
 import { LoadingOptions, LoadingService } from "@services/loading/loading.service";
 import { AngularFireFunctions } from "@angular/fire/functions";
-import { deleteAccountRequest, successResponse } from "@interfaces/cloud-functions.model";
+import { deleteAccountRequest } from "@interfaces/cloud-functions.model";
 import { EmptyStoresService } from "@services/global-state-management/empty-stores.service";
 
 @Injectable({
@@ -88,26 +88,29 @@ export class FirebaseAuthService {
 
       await Promise.all([clearLocalCache(), clearStores()]);
 
-      const successResponse: successResponse = await deleteAccount();
+      const accountDeletionFailedPopup = await this.alertCtrl.create({
+        header: "Account deletion failed",
+        message: `
+        An error occured while we were trying to delete your account. 
+        Please either log back in and try again, or contact support for assistance.
+        `,
+        backdropDismiss: false,
+        buttons: ["Ok"],
+      });
+
+      try {
+        await deleteAccount();
+      } catch (e) {
+        await Promise.all([logOut(), navigateToWelcome()]);
+        await accountDeletionLoading.dismiss();
+        await accountDeletionFailedPopup.present();
+        return;
+      }
 
       // must logout after deleteAccount, otherwise it fails (as delete account)
       // requires the user to be authenticated
       await Promise.all([logOut(), navigateToWelcome()]);
-
       await accountDeletionLoading.dismiss();
-
-      if (!successResponse.successful) {
-        const accountDeletionFailedPopup = await this.alertCtrl.create({
-          header: "Account deletion failed",
-          message: `
-          An error occured while we were trying to delete your account. 
-          Please either log back in and try again, or contact support for assistance.
-          `,
-          backdropDismiss: false,
-          buttons: ["Ok"],
-        });
-        await accountDeletionFailedPopup.present();
-      }
     };
 
     const userConfirmationAlert = await this.alertCtrl.create({

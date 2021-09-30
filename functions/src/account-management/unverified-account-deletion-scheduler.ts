@@ -35,6 +35,4 @@ export const unverifiedAccountDeletionScheduler = functions
       const usersInBatch = usersToDelete.splice(0, batchSize);
       await admin.auth().deleteUsers(usersInBatch);
     }
-
-    return null;
   });

@@ -1,8 +1,8 @@
 import {
   additionalEmailsAllowedDocument,
   checkEmailValidityRequest,
-  successResponse,
   universitiesAllowedDocument,
+  checkEmailValidityResponse,
 } from "../../../src/app/shared/interfaces/index";
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
@@ -11,7 +11,10 @@ import { sanitizeData } from "../supporting-functions/data-validation/main";
 export const checkEmailValidity = functions
   .region("europe-west2")
   .https.onCall(
-    async (request: checkEmailValidityRequest, context): Promise<successResponse> => {
+    async (
+      request: checkEmailValidityRequest,
+      context
+    ): Promise<checkEmailValidityResponse> => {
       const sanitizedRequest = sanitizeData(
         "checkEmailValidity",
         request
@@ -19,38 +22,27 @@ export const checkEmailValidity = functions
 
       const emailToCheck = sanitizedRequest.email;
 
-      try {
-        const additionalEmailsAllowed = (
-          (
-            await admin
-              .firestore()
-              .collection("admin")
-              .doc("additionalEmailsAllowed")
-              .get()
-          ).data() as additionalEmailsAllowedDocument
-        ).list;
+      const additionalEmailsAllowed = (
+        (
+          await admin.firestore().collection("admin").doc("additionalEmailsAllowed").get()
+        ).data() as additionalEmailsAllowedDocument
+      ).list;
 
-        const universitiesAllowed = (
-          (
-            await admin.firestore().collection("admin").doc("universitiesAllowed").get()
-          ).data() as universitiesAllowedDocument
-        ).list;
+      const universitiesAllowed = (
+        (
+          await admin.firestore().collection("admin").doc("universitiesAllowed").get()
+        ).data() as universitiesAllowedDocument
+      ).list;
 
-        const universityDomains = universitiesAllowed.map((info) => info.emailDomain);
+      const universityDomains = universitiesAllowed.map((info) => info.emailDomain);
 
-        const isAllowed = emailIsAllowed(
-          emailToCheck,
-          universityDomains,
-          additionalEmailsAllowed
-        );
+      const isValid = emailIsAllowed(
+        emailToCheck,
+        universityDomains,
+        additionalEmailsAllowed
+      );
 
-        if (!isAllowed)
-          return { successful: false, message: "This email is not allowed." };
-
-        return { successful: true };
-      } catch (e) {
-        return { successful: false, message: String(e) };
-      }
+      return { isValid };
     }
   );
 

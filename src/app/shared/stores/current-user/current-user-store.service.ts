@@ -14,7 +14,6 @@ import {
   userInfoFromMatchData,
   editableProfileFields,
   profileEditingByUserRequest,
-  successResponse,
 } from "@interfaces/index";
 import { FormatService } from "@services/format/format.service";
 import {
@@ -136,9 +135,7 @@ export class CurrentUserStore {
     );
   }
 
-  public updateFieldsOnDatabase(
-    editableFields: editableProfileFields
-  ): Observable<successResponse | {}> {
+  public updateFieldsOnDatabase(editableFields: editableProfileFields): Observable<void> {
     const requestData: profileEditingByUserRequest = { data: editableFields };
 
     return this.user$.pipe(
@@ -160,17 +157,12 @@ export class CurrentUserStore {
         return this.afFunctions
           .httpsCallable("profileEditingByUser")(requestData)
           .pipe(
-            map((response: successResponse) => {
-              if (response.successful) {
-                Object.keys(editableFields).forEach((field) => {
-                  user[field] = JSON.parse(JSON.stringify(editableFields[field]));
-                });
+            map(() => {
+              Object.keys(editableFields).forEach((field) => {
+                user[field] = JSON.parse(JSON.stringify(editableFields[field]));
 
                 this.user.next(user);
-              } else {
-                console.error("unsuccessful change of profile on db:", response?.message);
-              }
-              return response;
+              });
             }),
             catchError((err) => {
               console.log("profile editing by user error");

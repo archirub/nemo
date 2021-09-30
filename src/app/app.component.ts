@@ -69,7 +69,7 @@ export class AppComponent implements OnDestroy, OnInit {
       await SplashScreen.hide();
     }
 
-    this.capacitorPushNotificationStuff();
+    // this.capacitorPushNotificationStuff();
   }
 
   startGlobalStateManagement() {

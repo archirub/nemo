@@ -2,7 +2,6 @@ import {
   editableProfileFields,
   profileEditingByUserRequest,
   profileFromDatabase,
-  successResponse,
 } from "./../../src/app/shared/interfaces/index";
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { isEqual } from "lodash";
@@ -11,14 +10,12 @@ import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import { runWeakUserIdentityCheck } from "./supporting-functions/user-validation/user.checker";
 import { sanitizeData } from "./supporting-functions/data-validation/main";
+import { inexistentDocumentError } from "./supporting-functions/error-handling/generic-errors";
 
 export const profileEditingByUser = functions
   .region("europe-west2")
   .https.onCall(
-    async (
-      requestData: profileEditingByUserRequest,
-      context
-    ): Promise<successResponse> => {
+    async (requestData: profileEditingByUserRequest, context): Promise<void> => {
       runWeakUserIdentityCheck(context);
 
       const uid = context?.auth?.uid as string;
@@ -43,47 +40,32 @@ export const profileEditingByUser = functions
       let mdUpdateNeeded: boolean = false;
 
       const matchDataUpdateData = {};
-      try {
-        const profileSnapshot = await profileRef.get();
-        if (!profileSnapshot.exists) throw new Error();
 
-        const currentProfile = profileSnapshot.data() as profileFromDatabase;
+      const profileSnapshot = await profileRef.get();
 
-        const batch = admin.firestore().batch();
+      if (!profileSnapshot.exists) inexistentDocumentError("profile");
 
-        batch.update(profileRef, sanitizedRequest);
+      const currentProfile = profileSnapshot.data() as profileFromDatabase;
 
-        mdUpdateNeeded = matchDataUpdateNeeded(
-          sanitizedRequest.data,
-          currentProfile,
-          propertiesInMatchData
-        );
+      const batch = admin.firestore().batch();
 
-        if (mdUpdateNeeded) {
-          propertiesInMatchData.forEach((prop) => {
-            matchDataUpdateData["searchFeatures." + prop] =
-              sanitizedRequest[prop] ?? null;
-          });
+      batch.update(profileRef, sanitizedRequest);
 
-          batch.update(matchDataRef, matchDataUpdateData);
-        }
+      mdUpdateNeeded = matchDataUpdateNeeded(
+        sanitizedRequest.data,
+        currentProfile,
+        propertiesInMatchData
+      );
 
-        await batch.commit();
-        return { successful: true };
-      } catch (e) {
-        return {
-          successful: false,
-          message:
-            "error message: " +
-            e +
-            " editableProfileMap:" +
-            JSON.stringify(sanitizedRequest) +
-            " matchDataUpdateData:" +
-            JSON.stringify(matchDataUpdateData) +
-            " updateNeeded:" +
-            mdUpdateNeeded,
-        };
+      if (mdUpdateNeeded) {
+        propertiesInMatchData.forEach((prop) => {
+          matchDataUpdateData["searchFeatures." + prop] = sanitizedRequest[prop] ?? null;
+        });
+
+        batch.update(matchDataRef, matchDataUpdateData);
       }
+
+      await batch.commit();
     }
   );
 

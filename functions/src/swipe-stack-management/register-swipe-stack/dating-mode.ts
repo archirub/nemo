@@ -1,4 +1,3 @@
-import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import {
   mdFromDatabase,
@@ -9,139 +8,143 @@ import {
   dateMap,
 } from "../../../../src/app/shared/interfaces/index";
 import { sortUIDs } from "./main";
-interface uidDocRefMap {
+import { inexistentDocumentError } from "../../supporting-functions/error-handling/generic-errors";
+export interface uidDocRefMapDating {
   uid: string;
   dateMap: dateMap;
   mainRef: FirebaseFirestore.DocumentReference<mdFromDatabase>;
   datingRef: FirebaseFirestore.DocumentReference<mdDatingPickingFromDatabase>;
 }
 
-export async function handleDatingYesChoices(
-  batch: FirebaseFirestore.WriteBatch,
-  targetMatchDataMainRef: FirebaseFirestore.DocumentReference<mdFromDatabase>,
+export async function handleDatingYesChoicesREAD(
+  transaction: FirebaseFirestore.Transaction,
   currentUserID: string,
   yesuids: string[],
   superuids: string[],
   date: admin.firestore.Timestamp
-) {
-  if (!currentUserID || !yesuids || !superuids || !batch || !targetMatchDataMainRef)
-    throw new functions.https.HttpsError(
-      "invalid-argument",
-      "handleNoChoices could not be executed due to missing / invalid arguments."
-    );
-  const targetMatchDataDatingRef = admin
-    .firestore()
-    .collection("matchData")
-    .doc(currentUserID)
-    .collection("pickingData")
-    .doc("dating");
-
-  const notMatchedYesUsers: uidDocRefMap[] = [];
-  const notMatchedSuperUsers: uidDocRefMap[] = [];
-  const matchedUsers: uidDocRefMap[] = [];
+): Promise<{
+  notMatchedYesUsers: uidDocRefMapDating[];
+  notMatchedSuperUsers: uidDocRefMapDating[];
+  matchedUsers: uidDocRefMapDating[];
+}> {
+  const notMatchedYesUsers: uidDocRefMapDating[] = [];
+  const notMatchedSuperUsers: uidDocRefMapDating[] = [];
+  const matchedUsers: uidDocRefMapDating[] = [];
 
   const alluids: string[] = yesuids.concat(superuids);
 
-  try {
-    await Promise.all(
-      alluids.map(async (uid) => {
-        const matchDataDatingDoc = (await admin
+  await Promise.all(
+    alluids.map(async (uid) => {
+      const matchDataDatingDoc = (await transaction.get(
+        admin
           .firestore()
           .collection("matchData")
           .doc(uid)
           .collection("pickingData")
           .doc("dating")
-          .get()) as FirebaseFirestore.DocumentSnapshot<mdDatingPickingFromDatabase>;
-        const matchDataMainRef = admin
-          .firestore()
-          .collection("matchData")
-          .doc(uid) as FirebaseFirestore.DocumentReference<mdFromDatabase>;
-        if (!matchDataDatingDoc.exists)
-          return functions.logger.warn("matchData doc doesn't exist for", uid);
+      )) as FirebaseFirestore.DocumentSnapshot<mdDatingPickingFromDatabase>;
+      const matchDataMainRef = admin
+        .firestore()
+        .collection("matchData")
+        .doc(uid) as FirebaseFirestore.DocumentReference<mdFromDatabase>;
 
-        if (!matchDataDatingDoc.exists) return;
+      if (!matchDataDatingDoc.exists)
+        inexistentDocumentError("matchDataDating", matchDataDatingDoc.id, currentUserID);
 
-        const matchData = matchDataDatingDoc.data() as mdDatingPickingFromDatabase;
+      const matchData = matchDataDatingDoc.data() as mdDatingPickingFromDatabase;
 
-        const uidRefMap: uidDocRefMap = {
-          uid,
-          dateMap: {
-            exists: true,
-            date: date as any,
-          },
-          datingRef: matchDataDatingDoc.ref,
-          mainRef: matchDataMainRef,
-        };
+      const uidRefMap: uidDocRefMapDating = {
+        uid,
+        dateMap: {
+          exists: true,
+          date: date as any,
+        },
+        datingRef: matchDataDatingDoc.ref,
+        mainRef: matchDataMainRef,
+      };
 
-        // Check whether targetID is in user's liked or superliked array
-        const isLiked =
-          matchData.likedUsers[currentUserID]?.exists ||
-          matchData.superLikedUsers[currentUserID]?.exists;
+      // Check whether targetID is in user's liked or superliked array
+      const isLiked =
+        matchData.likedUsers[currentUserID]?.exists ||
+        matchData.superLikedUsers[currentUserID]?.exists;
 
-        // If targetID is, then add to match otherwise add to like or super
-        if (isLiked) {
-          matchedUsers.push(uidRefMap);
+      // If targetID is, then add to match otherwise add to like or super
+      if (isLiked) {
+        matchedUsers.push(uidRefMap);
+      } else {
+        // If other's ID was from normal likes, add them there, otherwise add to super
+        if (superuids.indexOf(uid) === -1) {
+          notMatchedYesUsers.push(uidRefMap);
         } else {
-          // If other's ID was from normal likes, add them there, otherwise add to super
-          if (superuids.indexOf(uid) === -1) {
-            notMatchedYesUsers.push(uidRefMap);
-          } else {
-            notMatchedSuperUsers.push(uidRefMap);
-          }
+          notMatchedSuperUsers.push(uidRefMap);
         }
-      })
-    );
+      }
+    })
+  );
 
-    handleDatingNotMatchUsers(
-      batch,
-      targetMatchDataDatingRef,
-      notMatchedYesUsers,
-      notMatchedSuperUsers
-    );
+  return {
+    notMatchedYesUsers,
+    notMatchedSuperUsers,
+    matchedUsers,
+  };
+}
 
-    handleDatingMatchUsers(batch, targetMatchDataMainRef, currentUserID, matchedUsers);
+export function handleDatingYesChoicesWRITE(
+  transaction: FirebaseFirestore.Transaction,
+  targetMatchDataMainRef: FirebaseFirestore.DocumentReference<mdFromDatabase>,
+  targetMatchDataDatingRef: FirebaseFirestore.DocumentReference<mdDatingPickingFromDatabase>,
+  currentUserID: string,
+  notMatchedYesUsers: uidDocRefMapDating[],
+  notMatchedSuperUsers: uidDocRefMapDating[],
+  matchedUsers: uidDocRefMapDating[]
+) {
+  handleDatingNotMatchUsers(
+    transaction,
+    targetMatchDataDatingRef,
+    notMatchedYesUsers,
+    notMatchedSuperUsers
+  );
 
-    return matchedUsers.map((map) => map.uid);
-  } catch (e) {
-    throw new functions.https.HttpsError(
-      "internal",
-      `Could not handle yes choices of ${currentUserID}: ${e}`
-    );
-  }
+  handleDatingMatchUsers(
+    transaction,
+    targetMatchDataMainRef,
+    currentUserID,
+    matchedUsers
+  );
 }
 
 function handleDatingMatchUsers(
-  batch: FirebaseFirestore.WriteBatch,
+  transaction: FirebaseFirestore.Transaction,
   targetMatchDataMainRef: FirebaseFirestore.DocumentReference<mdFromDatabase>,
   targetuid: string,
-  uidRefs: uidDocRefMap[]
+  uidRefs: uidDocRefMapDating[]
 ) {
   uidRefs.forEach((uidref) => {
     // UPDATING MATCHEDUSERS FIELD OF TARGET USER
-    batch.update(targetMatchDataMainRef, {
+    transaction.update(targetMatchDataMainRef, {
       [`matchedUsers.${uidref.uid}`]: uidref.dateMap,
     });
 
     // UPDATING MATCHEDUSERS AND LIKEDUSERS FIELDS OF EACH NEW MATCH
     // Here we use the datemap of the other user but it works just as well
-    batch.update(uidref.mainRef, {
+    transaction.update(uidref.mainRef, {
       [`matchedUsers.${targetuid}`]: uidref.dateMap,
     });
-    batch.update(uidref.datingRef, {
+    transaction.update(uidref.datingRef, {
       [`likedUsers.${targetuid}`]: FirebaseFirestore.FieldValue.delete(),
     });
   });
 }
 
 function handleDatingNotMatchUsers(
-  batch: FirebaseFirestore.WriteBatch,
-  targetMatchDataDatingRef: FirebaseFirestore.DocumentReference<FirebaseFirestore.DocumentData>,
-  notMatchedYesUsers: uidDocRefMap[],
-  notMatchedSuperUsers: uidDocRefMap[]
+  transaction: FirebaseFirestore.Transaction,
+  targetMatchDataDatingRef: FirebaseFirestore.DocumentReference<mdDatingPickingFromDatabase>,
+  notMatchedYesUsers: uidDocRefMapDating[],
+  notMatchedSuperUsers: uidDocRefMapDating[]
 ) {
   if (notMatchedYesUsers.length > 0) {
     notMatchedYesUsers.forEach((uidref) => {
-      batch.update(targetMatchDataDatingRef, {
+      transaction.update(targetMatchDataDatingRef, {
         [`likedUsers.${uidref.uid}`]: uidref.dateMap,
       });
     });
@@ -149,80 +152,78 @@ function handleDatingNotMatchUsers(
 
   if (notMatchedSuperUsers.length > 0) {
     notMatchedSuperUsers.forEach((uidref) => {
-      batch.update(targetMatchDataDatingRef, {
+      transaction.update(targetMatchDataDatingRef, {
         [`superLikedUsers.${uidref.uid}`]: uidref.dateMap,
       });
     });
   }
 }
 
-type profileSnapshot = FirebaseFirestore.DocumentSnapshot<profileFromDatabase>;
+export type profileSnapshot = FirebaseFirestore.DocumentSnapshot<profileFromDatabase>;
 
-export async function createDatingChatDocuments(
+export async function createDatingChatDocumentsREAD(
+  transaction: FirebaseFirestore.Transaction,
   targetuid: string,
   matcheduids: string[]
-) {
-  if (!targetuid || !matcheduids || matcheduids.length < 1)
-    functions.logger.warn("Missing parameter in createChatDocuments");
-
-  let targetUserProfile: profileSnapshot | undefined;
-  let matchedUsersProfile: profileSnapshot[] = [];
-
-  const targetUserProfileCall = admin
-    .firestore()
-    .collection("profiles")
-    .doc(targetuid)
-    .get();
+): Promise<{
+  targetUserProfile: profileSnapshot;
+  matchedUserProfiles: profileSnapshot[];
+}> {
+  const targetUserProfileCall = transaction.get(
+    admin.firestore().collection("profiles").doc(targetuid)
+  );
   const matchedUsersProfileCall = matcheduids.map(async (uid) => {
-    return await admin.firestore().collection("profiles").doc(uid).get();
+    return await transaction.get(admin.firestore().collection("profiles").doc(uid));
   });
 
-  await Promise.all([targetUserProfileCall, ...matchedUsersProfileCall]).then(
-    (snapshots) => {
-      targetUserProfile = snapshots[0] as profileSnapshot;
-      matchedUsersProfile = snapshots.slice(1) as profileSnapshot[];
-    }
-  );
+  const snapshots = await Promise.all([
+    targetUserProfileCall,
+    ...matchedUsersProfileCall,
+  ]);
 
-  await Promise.all(
-    matchedUsersProfile.map(async (matchedUserProfile) => {
-      if (!matchedUserProfile.exists)
-        return functions.logger.warn(
-          `The following user does not have a profile doc:${matchedUserProfile.id}`
-        );
+  const targetUserProfile = snapshots[0] as profileSnapshot;
 
-      // Had to do this check inside arrow function otherwise typescript shouts because it doesn't
-      // detect I checked outside of the arrow function's scope
-      if (
-        !targetUserProfile ||
-        !targetUserProfile.exists ||
-        !matchedUserProfile ||
-        !matchedUserProfile.exists
-      )
-        return;
+  snapshots.shift(); // to remove targetUserProfile from snapshots array
+  const matchedUserProfiles = snapshots as profileSnapshot[];
 
-      const targetUserData = targetUserProfile.data() as profileFromDatabase;
-      const matchedUserData = matchedUserProfile.data() as profileFromDatabase;
+  if (!targetUserProfile?.exists)
+    inexistentDocumentError("profile", targetUserProfile.id, targetuid);
 
-      const uids = sortUIDs([targetUserProfile.id, matchedUserProfile?.id]);
-      // FIX, ADD RIGHT PICTURES LOGIC
-      const userSnippets: userSnippet[] = [
-        {
-          uid: targetUserProfile.id,
-          name: targetUserData.firstName,
-        },
-        {
-          uid: matchedUserProfile.id,
-          name: matchedUserData.firstName,
-        },
-      ];
+  return { targetUserProfile, matchedUserProfiles };
+}
 
-      const chat: chatFromDatabase = {
-        uids,
-        userSnippets,
-      };
+export function createDatingChatDocumentsWRITE(
+  transaction: FirebaseFirestore.Transaction,
+  targetUserProfile: profileSnapshot,
+  matchedUserProfiles: profileSnapshot[]
+) {
+  matchedUserProfiles.map((matchedUserProfile) => {
+    if (!matchedUserProfile.exists)
+      inexistentDocumentError("profile", matchedUserProfile.id, targetUserProfile.id);
 
-      await admin.firestore().collection("chats").add(chat);
-    })
-  );
+    const targetUserData = targetUserProfile.data() as profileFromDatabase;
+    const matchedUserData = matchedUserProfile.data() as profileFromDatabase;
+
+    const uids = sortUIDs([targetUserProfile.id, matchedUserProfile?.id]);
+    // FIX, ADD RIGHT PICTURES LOGIC
+    const userSnippets: userSnippet[] = [
+      {
+        uid: targetUserProfile.id,
+        name: targetUserData.firstName,
+      },
+      {
+        uid: matchedUserProfile.id,
+        name: matchedUserData.firstName,
+      },
+    ];
+
+    const chat: chatFromDatabase = {
+      uids,
+      userSnippets,
+    };
+
+    const newChatRef = admin.firestore().collection("chats").doc();
+
+    transaction.set(newChatRef, chat);
+  });
 }

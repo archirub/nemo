@@ -43,7 +43,6 @@ import {
   SignupOptional,
   SignupAuthenticated,
   allowOptionalProp,
-  successResponse,
 } from "@interfaces/index";
 import { SignupDataHolder } from "@classes/index";
 import { SignupoptionalPage } from "src/app/welcome/signupoptional/signupoptional.page";
