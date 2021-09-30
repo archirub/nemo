@@ -24,10 +24,10 @@ const routes: Routes = [
       import("./chats/messenger/messenger.module").then((m) => m.MessengerPageModule),
   },
 
-  {
-    path: "**",
-    redirectTo: "tabs/home",
-  },
+  // {
+  //   path: "**",
+  //   redirectTo: "tabs/home",
+  // },
 ];
 
 @NgModule({

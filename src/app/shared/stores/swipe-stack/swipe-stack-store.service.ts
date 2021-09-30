@@ -35,7 +35,7 @@ import { AngularFireStorage } from "@angular/fire/storage";
 // loading is for when there is no one in the stack but we are fetching
 // empty is for the stack has been fetched and no one was found
 // filled is for when there is someone in the stack
-export type StackState = "filled" | "loading" | "empty";
+export type StackState = "init" | "filled" | "loading" | "empty";
 @Injectable({
   providedIn: "root",
 })
@@ -45,7 +45,7 @@ export class SwipeStackStore {
 
   MIN_PROFILE_COUNT = 4; // # of profiles in stack below which we make another request
 
-  private stackState = new BehaviorSubject<StackState>("loading");
+  private stackState = new BehaviorSubject<StackState>("init");
   public stackState$ = this.stackState.asObservable().pipe(distinctUntilChanged());
 
   private isReady = new BehaviorSubject<boolean>(false);
@@ -63,15 +63,26 @@ export class SwipeStackStore {
   /**
    * Have to subscribe to this to activate the chain of logic that fills the store etc.
    */
-  activateStore(): Observable<void> {
+  activateStore(): Observable<any> {
     return this.profiles$.pipe(
       map((profiles) => profiles.length),
+      tap(() => console.log("a")),
       concatMap((count) => this.updateStackState(count)),
+      tap(() => console.log("b")),
+
       this.filterBasedOnStackState(),
+      tap(() => console.log("c")),
+
       filter((count) => count <= this.MIN_PROFILE_COUNT),
+      tap(() => console.log("d")),
+
       switchMap(() => this.SCstore.searchCriteria$.pipe(first())), // using switchMap instead of withLatestFrom as SC might still be undefined at that point so we want to wait for it to have a value (which withLatestFrom doesn't do)
       // exhaustMap is a must use here, makes sure we don't have multiple requests to fill the swipe stack
+      tap(() => console.log("e")),
+
       exhaustMap((SC) => this.addToSwipeStackQueue(SC)),
+      tap(() => console.log("f")),
+
       tap(() => this.isReady.next(true)),
       share()
     );

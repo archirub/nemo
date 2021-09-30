@@ -12,8 +12,8 @@ import {
   withLatestFrom,
 } from "rxjs/operators";
 import { urlToBase64, Base64ToUrl } from "../common-pictures-functions";
-import { Plugins } from "@capacitor/core";
-const { Storage } = Plugins;
+import { Storage } from "@capacitor/storage";
+
 import { SafeUrl } from "@angular/platform-browser";
 
 export interface pictureHolder {

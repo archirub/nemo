@@ -4,7 +4,7 @@ import { Injectable, NgZone } from "@angular/core";
 import { Router } from "@angular/router";
 
 import { AngularFireAuth } from "@angular/fire/auth";
-import { Storage } from "@capacitor/core";
+import { Storage } from "@capacitor/storage";
 
 import { LoadingOptions, LoadingService } from "@services/loading/loading.service";
 import { AngularFireFunctions } from "@angular/fire/functions";

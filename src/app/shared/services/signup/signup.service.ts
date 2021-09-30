@@ -6,7 +6,7 @@ import { AngularFireStorage } from "@angular/fire/storage";
 import { AngularFireFunctions } from "@angular/fire/functions";
 import { AngularFireAuth } from "@angular/fire/auth";
 
-import { Plugins } from "@capacitor/core";
+import { Storage } from "@capacitor/storage";
 import {
   BehaviorSubject,
   Observable,
@@ -226,15 +226,14 @@ export class SignupService {
       }
     });
 
-    if (!empty)
-      return Plugins.Storage.set({ key: "signupData", value: JSON.stringify(data) });
+    if (!empty) return Storage.set({ key: "signupData", value: JSON.stringify(data) });
   }
 
   /**
    * Removes data in local storage under key "signupData"
    */
   async removeLocalStorage() {
-    return Plugins.Storage.remove({ key: "signupData" });
+    return Storage.remove({ key: "signupData" });
   }
 
   /**
@@ -242,9 +241,7 @@ export class SignupService {
    * signupData observable
    */
   async getLocalStorage() {
-    const storageContent = JSON.parse(
-      (await Plugins.Storage.get({ key: "signupData" })).value
-    );
+    const storageContent = JSON.parse((await Storage.get({ key: "signupData" })).value);
 
     // checks whether content is empty. If it is, then don't replace the current observable
     if (storageContent && Object.keys(storageContent).length > 0) {

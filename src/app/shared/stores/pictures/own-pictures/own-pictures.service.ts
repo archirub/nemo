@@ -2,8 +2,7 @@ import { isEqual } from "lodash";
 import { Injectable } from "@angular/core";
 import { AngularFireStorage } from "@angular/fire/storage";
 import { AngularFireAuth } from "@angular/fire/auth";
-import { Plugins } from "@capacitor/core";
-const { Storage } = Plugins;
+import { Storage } from "@capacitor/storage";
 
 import { BehaviorSubject, combineLatest, forkJoin, from, Observable, of } from "rxjs";
 import {

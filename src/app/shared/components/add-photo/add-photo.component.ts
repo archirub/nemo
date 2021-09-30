@@ -9,8 +9,9 @@ import {
   ChangeDetectionStrategy,
   Renderer2,
 } from "@angular/core";
-import { CameraPhoto, Plugins } from "@capacitor/core";
-const { CameraResultType, CameraSource, Capacitor, Photos } = Plugins;
+
+import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
+import { Capacitor } from "@capacitor/core";
 
 @Component({
   selector: "add-photo",
@@ -51,7 +52,7 @@ export class AddPhotoComponent {
     }
 
     // get image
-    const photo = await Plugins.Camera.getPhoto({
+    const photo = await Camera.getPhoto({
       quality: 50,
       source: CameraSource.Prompt,
       correctOrientation: true,

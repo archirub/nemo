@@ -21,11 +21,12 @@ const routes: Routes = [
     loadChildren: () =>
       import("./welcome/welcome.module").then((m) => m.WelcomePageModule),
   },
-  {
-    path: "**",
-    loadChildren: () =>
-      import("./welcome/welcome.module").then((m) => m.WelcomePageModule),
-  },
+
+  // {
+  //   path: "**",
+  //   loadChildren: () =>
+  //     import("./welcome/welcome.module").then((m) => m.WelcomePageModule),
+  // },
 ];
 
 @NgModule({

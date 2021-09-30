@@ -29,7 +29,7 @@ npm-debug.log*
 # /platforms
 # /plugins
 /www
-/ios
+# /ios
 
 package-lock.json
 

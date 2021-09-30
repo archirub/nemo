@@ -3,10 +3,10 @@ import { EmptyStoresService } from "./empty-stores.service";
 import { Injectable } from "@angular/core";
 import { AlertController } from "@ionic/angular";
 import { NavigationStart, Router } from "@angular/router";
+import { Storage } from "@capacitor/storage";
 
 import { AngularFireAuth } from "@angular/fire/auth";
 import { AngularFirestore } from "@angular/fire/firestore";
-import { Storage } from "@capacitor/core";
 
 import {
   BehaviorSubject,

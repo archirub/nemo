@@ -7,7 +7,7 @@ import {
 } from "./search-criteria.model";
 
 // FOR CLOUD FUNCTION DEPLOYMENT, otherwise it doesn't recognize the type declaration below
-import { CameraPhoto } from "@capacitor/core";
+import { Camera } from "@capacitor/camera";
 import { allowOptionalProp } from "./shared.model";
 import { Gender, SexualPreference, SwipeMode } from "./match-data.model";
 import { UniversityName } from "./universities.model";

@@ -1,6 +1,5 @@
 import { LoadingController, NavController } from "@ionic/angular";
 import { Component, OnInit } from "@angular/core";
-import { Permissions, PermissionType } from "@capacitor/core";
 import { GlobalStateManagementService } from "@services/global-state-management/global-state-management.service";
 import { StoreReadinessService } from "@services/store-readiness/store-readiness.service";
 import { Observable, of } from "rxjs";
@@ -37,8 +36,8 @@ export class SignupToAppPage implements OnInit {
   }
 
   async requestNotificationPermission() {
-    console.log("requesting notification permission");
-    return Permissions.query({ name: PermissionType.Notifications });
+    console.log("requesting notification permission disabled");
+    // return Permissions.query({ name: PermissionType.Notifications });
   }
 
   async goToApp() {
@@ -51,7 +50,6 @@ export class SignupToAppPage implements OnInit {
     return this.appIsReady$
       .pipe(
         filter((isReady) => isReady),
-        tap((i) => console.log("yo bro is ready", i)),
         first(),
         exhaustMap(() => loader.dismiss())
       )
