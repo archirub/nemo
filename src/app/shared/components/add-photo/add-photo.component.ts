@@ -33,6 +33,8 @@ export class AddPhotoComponent {
     const icon = this.icon.nativeElement;
     //const text = this.text.nativeElement;
 
+    this.PreloadImage(value);
+
     // if new value of photodisplayed is empty, then that means look should be reverted back
     if (!value) {
       this.renderer.setStyle(view, "background", "var(--ion-color-light-tint)");
@@ -42,6 +44,15 @@ export class AddPhotoComponent {
       this.renderer.setStyle(view, "backgroundSize", "cover");
       this.renderer.setStyle(icon, "display", "none");
     }
+  }
+
+  PreloadImage(src) {
+    var img = new Image();
+
+    img.onload = function (a) {
+      console.log("image has been loaded right now", a);
+    };
+    img.src = src;
   }
 
   constructor(private renderer: Renderer2) {}

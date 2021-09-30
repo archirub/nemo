@@ -7,7 +7,28 @@
     border-radius: 15px;
     text-align: center;
     padding: 2vh; 
-}
+
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+
+    -webkit-animation: myfirst 0.7s ; /* Chrome, Safari, Opera */
+    animation: myfirst 0.7s ;
+  }
+
+  /* Chrome, Safari, Opera */
+  @-webkit-keyframes myfirst {
+    from {opacity: 0.2;}
+    to {opacity: 1;}
+  }
+
+  /* Standard syntax */
+  @keyframes myfirst {
+    from {opacity: 0.2;}
+    to {opacity: 1;}
+  }
+
 
 p {
     margin: 5px;

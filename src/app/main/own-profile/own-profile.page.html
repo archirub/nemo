@@ -72,7 +72,7 @@
               *ngFor="let pic of profilePicturesWithEmpty$ | async; index as i"
               [ngClass]="{'not-draggable-elements': !pic, 'draggable-elements': pic}"
             >
-              <div class="delete-pic" (click)="deletePicture(i)">
+              <div class="delete-pic" (click)="deletePicture(i)" *ngIf="pic">
                 <ion-icon name="close-outline"></ion-icon>
               </div>
               <add-photo
