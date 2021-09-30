@@ -111,7 +111,6 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    this.profiles$.subscribe((a) => console.log("swipeProfiles in swipe-card is", a));
     this.screenHeight = window.innerHeight;
     this.screenWidth = window.innerWidth;
   }

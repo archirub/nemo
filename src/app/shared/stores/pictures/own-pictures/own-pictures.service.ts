@@ -26,8 +26,12 @@ import {
 } from "../common-pictures-functions";
 import { CurrentUserStore } from "@stores/index";
 
-interface ownPicturesStorage {
+interface picturesMap {
   [position: number]: string;
+}
+interface ownPicturesStorage {
+  timestamp: Date;
+  pictures: picturesMap;
 }
 
 @Injectable({
@@ -35,6 +39,8 @@ interface ownPicturesStorage {
 })
 export class OwnPicturesStore {
   private localStorageKey: string = "own_pictures";
+
+  private MAX_STORAGE_TIME: number = 2 * 24 * 3600; // = 2 days in ms, completely arbitrary
 
   private urls: BehaviorSubject<string[]> = new BehaviorSubject([]);
   urls$: Observable<string[]> = this.urls.asObservable();
@@ -106,15 +112,12 @@ export class OwnPicturesStore {
   private fillStore() {
     return this.checkLocal().pipe(
       exhaustMap((localStorageContent) => {
-        // dangerous logic as, when changing pictures, if the request to the database works but not that to
-        // the local storage, then we will indefinitely be displaying the pictures from the local storage (i.e. the old pictures),
-        // hence, either we need to make sure that the of the local storage gets updated if the database one does,
-        // or we need to check for consistency every once in a while by fetching the user's pics from the database
-        // if (localStorageContent) {
-        //   const localPictureCount = Object.keys(localStorageContent).length;
-        //   if (localPictureCount === pictureCount)
-        //     return this.nextFromLocal(localStorageContent);
-        // }
+        if (
+          localStorageContent &&
+          this.localIsValid(new Date(localStorageContent.timestamp))
+        )
+          return this.nextFromLocal(localStorageContent.pictures);
+
         return this.nextFromFirebase();
       }),
       tap(() => this.isReady.next(true))
@@ -143,6 +146,9 @@ export class OwnPicturesStore {
     // format based on the assumption that the urlToBase64() function doesn't get executed right away
     // as "base64Pictures" gets defined (as that would then happen one after the other), but that it does
     // if forkJoin below (as that would then happen in parallel)
+
+    const timestamp = new Date();
+
     const base64Pictures$: Array<Observable<string>> = urls.map((url) =>
       urlToBase64(url)
     );
@@ -150,9 +156,12 @@ export class OwnPicturesStore {
     return forkJoin(base64Pictures$).pipe(
       take(1),
       map((base64Pictures) => {
-        let storageObject: ownPicturesStorage = {};
+        let storageObject: ownPicturesStorage = {
+          timestamp,
+          pictures: {},
+        };
         base64Pictures.forEach((v, i) => {
-          storageObject[i] = v;
+          storageObject.pictures[i] = v;
         });
         return storageObject;
       }),
@@ -165,9 +174,9 @@ export class OwnPicturesStore {
     );
   }
 
-  private nextFromLocal(storedObject: ownPicturesStorage): Observable<string[]> {
-    let urlArray$: Observable<string>[] = Object.keys(storedObject).map((key) =>
-      Base64ToUrl(storedObject[key])
+  private nextFromLocal(pictures: picturesMap): Observable<string[]> {
+    let urlArray$: Observable<string>[] = Object.keys(pictures).map((key) =>
+      Base64ToUrl(pictures[key])
     );
 
     return forkJoin(urlArray$).pipe(
@@ -178,7 +187,6 @@ export class OwnPicturesStore {
 
   private nextFromFirebase(): Observable<string[]> {
     const uid$: Observable<string> = this.afAuth.user.pipe(
-      tap((a) => console.log("user in next form fireabase is", a)),
       map((user) => user?.uid),
       filter((uid) => !!uid),
       take(1)
@@ -235,5 +243,12 @@ export class OwnPicturesStore {
         await ref.put(blob);
       })
     );
+  }
+
+  private localIsValid(timestamp: Date): boolean {
+    if (!timestamp) return false;
+    const now = new Date();
+    const timeElapsed = now.getTime() - timestamp.getTime();
+    return timeElapsed < this.MAX_STORAGE_TIME;
   }
 }

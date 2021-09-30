@@ -138,9 +138,6 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     );
 
     this.swipeStackStore.stackState$.subscribe((c) => console.log("stack state:", c));
-    this.storeReadiness.status$.subscribe((a) =>
-      console.log("Page readiness status:", a)
-    );
   }
 
   get swipeProfiles$() {

@@ -25,7 +25,7 @@ import { NotificationsService } from "@services/notifications/notifications.serv
   styleUrls: ["app.component.scss"],
 })
 export class AppComponent implements OnDestroy, OnInit {
-  private appGlobalStateManagementSub: Subscription;
+  subs = new Subscription();
 
   constructor(
     private platform: Platform,
@@ -46,7 +46,7 @@ export class AppComponent implements OnDestroy, OnInit {
   }
 
   ngOnDestroy(): void {
-    this.appGlobalStateManagementSub?.unsubscribe();
+    this.subs.unsubscribe();
   }
 
   async initializeApp() {
@@ -58,6 +58,7 @@ export class AppComponent implements OnDestroy, OnInit {
     await this.platform.ready();
 
     this.startGlobalStateManagement();
+    console.log("stringified date", new Date(JSON.parse(JSON.stringify(new Date()))));
 
     const userStateSnapshot = await this.GlobalStateManagement.userState$
       .pipe(first())
@@ -73,7 +74,7 @@ export class AppComponent implements OnDestroy, OnInit {
   }
 
   startGlobalStateManagement() {
-    this.appGlobalStateManagementSub = this.GlobalStateManagement.activate().subscribe();
+    this.subs.add(this.GlobalStateManagement.activate().subscribe());
   }
 
   /**

@@ -32,7 +32,6 @@ export class UniversitiesStore {
             map((data: universitiesAllowedDocument) => {
               if (!data) return console.error("Document does not exist.");
 
-              console.log("universities fetched");
               this.universities.next(data.list);
             })
           );
