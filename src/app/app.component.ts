@@ -9,8 +9,10 @@ import {
 } from "@capacitor/push-notifications";
 
 import { AngularFireAuth } from "@angular/fire/auth";
-import { Capacitor } from "@capacitor/core";
-import { SplashScreen } from "@capacitor/splash-screen";
+import { Plugins } from "@capacitor/core";
+const { SplashScreen } = Plugins;
+
+import { HideOptions, ShowOptions } from "@capacitor/splash-screen";
 import { Subscription } from "rxjs";
 
 import { GlobalStateManagementService } from "@services/global-state-management/global-state-management.service";
@@ -50,15 +52,16 @@ export class AppComponent implements OnDestroy, OnInit {
   }
 
   async initializeApp() {
-    const SplashScreenAvailable = Capacitor.isPluginAvailable("SplashScreen");
-    console.log("SplashScreenAvailable", SplashScreenAvailable);
-    if (SplashScreenAvailable) {
-      await SplashScreen.show({ autoHide: false });
-    }
-    await this.platform.ready();
-
+    console.log("ca dit quoi par ici");
+    // const SplashScreenAvailable = Capacitor.isPluginAvailable("SplashScreen");
+    // console.log("SplashScreenAvailable", SplashScreenAvailable);
+    const splashScreenShowOptions: ShowOptions = { showDuration: 10000 };
+    const splashScreenHideOptions: HideOptions = {};
+    // if (SplashScreenAvailable) {
+    await SplashScreen.show(splashScreenShowOptions);
     this.startGlobalStateManagement();
-    console.log("stringified date", new Date(JSON.parse(JSON.stringify(new Date()))));
+    // }
+    await this.platform.ready();
 
     const userStateSnapshot = await this.GlobalStateManagement.userState$
       .pipe(first())
@@ -66,9 +69,10 @@ export class AppComponent implements OnDestroy, OnInit {
 
     if (userStateSnapshot === "full") await this.storesReady();
 
-    if (SplashScreenAvailable) {
-      await SplashScreen.hide();
-    }
+    // if (SplashScreenAvailable) {
+    console.log("calling hide right now");
+    await SplashScreen.hide(splashScreenHideOptions);
+    // }
 
     // this.capacitorPushNotificationStuff();
   }

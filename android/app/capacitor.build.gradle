@@ -15,7 +15,7 @@ dependencies {
     implementation project(':capacitor-storage')
 
 }
-apply from: "../../node_modules/cordova-plugin-fcm-with-dependecy-updated/src/android/FCMPlugin.gradle"
+
 
 if (hasProperty('postBuildExtras')) {
   postBuildExtras()

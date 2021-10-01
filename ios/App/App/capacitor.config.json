@@ -6,8 +6,12 @@
 	"webDir": "www",
 	"plugins": {
 		"SplashScreen": {
-			"launchShowDuration": 0
+			"launchAutoHide": false,
+			"launchShowDuration": 3000
 		}
 	},
-	"cordova": {}
+	"cordova": {},
+	"server": {
+		"url": "http://localhost:8100"
+	}
 }
