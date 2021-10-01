@@ -1,10 +1,12 @@
 import { Injectable, ElementRef } from "@angular/core";
+import { IonTabs } from "@ionic/angular";
 
 @Injectable({
   providedIn: "root",
 })
 export class TabElementRefService {
-  tabRef: ElementRef;
+  tabsRef: ElementRef;
+  tabs: IonTabs;
 
   constructor() {}
 }

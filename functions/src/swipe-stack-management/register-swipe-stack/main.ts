@@ -289,12 +289,6 @@ function UpdateNoChoicesWRITE(
   }
 }
 
-/**  ESSENTIAL FOR SORTING THE UIDS IN THE UIDS ARRAY IN CHAT DOCUMENTS
-TO BE ABLE TO FIND THEM IN THE DATABASE */
-export function sortUIDs(uids: string[]): string[] {
-  return uids.sort((a, b) => ("" + a).localeCompare(b));
-}
-
 async function incrementCountsREAD(
   transaction: FirebaseFirestore.Transaction,
   currentuid: string,

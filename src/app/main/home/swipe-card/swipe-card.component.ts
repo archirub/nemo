@@ -72,7 +72,7 @@ import { partition } from "node_modules/@types/lodash";
 })
 export class SwipeCardComponent implements OnInit, OnDestroy {
   @Input() profiles$: Observable<Profile[]>;
-  @Output() matched = new EventEmitter();
+  @Output() matched = new EventEmitter<Profile>();
 
   @ViewChildren("cards", { read: ElementRef }) cards: QueryList<ElementRef>;
   @ViewChild("yesBubble", { read: ElementRef }) yesBubble: ElementRef;
@@ -155,7 +155,7 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
       withLatestFrom(this.tapInProgress$),
       filter(([_, inProgress]) => !inProgress),
       map((arr) => arr[0]),
-      startWith("" as any),
+      startWith("" as any), // this is necessary due to the presence of pairwise. Using something that's neither no, yes nor super
       timeInterval(),
       pairwise(),
       map((clicks) => {
@@ -211,7 +211,7 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
    */
   private onMatch(profile: Profile) {
     return concat(
-      of(this.matched.emit([profile.firstName, profile.pictureUrls[0]])),
+      of(this.matched.emit(profile)),
       this.otherProfilesStore.saveProfile(profile.uid, profile),
       this.swipeOutcomeStore.registerSwipeChoices()
     );
@@ -219,10 +219,7 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
 
   private doubleTapOnCard(choice: swipeChoice): Observable<void> {
     if (choice === "yes") {
-      this.matched.emit([
-        Array.from(this.profCard)[0].profile.firstName,
-        Array.from(this.profCard)[0].profile.pictureUrls[0],
-      ]);
+      this.matched.emit(Array.from(this.profCard)[0].profile); // FOR DEVELOPMENT
       return this.profiles$.pipe(
         take(1),
         withLatestFrom(of(SwipeYesAnimation(this.cards.first, this.screenWidth))),

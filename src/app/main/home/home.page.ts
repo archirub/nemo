@@ -9,10 +9,23 @@ import {
   Renderer2,
   AfterViewInit,
 } from "@angular/core";
-import { ModalController, Animation } from "@ionic/angular";
-
-import { BehaviorSubject, combineLatest, Observable, of, Subscription } from "rxjs";
 import {
+  ModalController,
+  Animation,
+  LoadingController,
+  NavController,
+} from "@ionic/angular";
+
+import {
+  BehaviorSubject,
+  combineLatest,
+  concat,
+  Observable,
+  of,
+  Subscription,
+} from "rxjs";
+import {
+  catchError,
   delay,
   distinctUntilChanged,
   filter,
@@ -21,12 +34,14 @@ import {
   switchMap,
   take,
   tap,
+  timeout,
+  timeoutWith,
 } from "rxjs/operators";
 
 import { SearchCriteriaComponent } from "./search-criteria/search-criteria.component";
 
 import { Profile } from "@classes/index";
-import { CurrentUserStore, SwipeStackStore } from "@stores/index";
+import { ChatboardStore, CurrentUserStore, SwipeStackStore } from "@stores/index";
 
 import {
   SCenterAnimation,
@@ -39,9 +54,11 @@ import {
 import { TabElementRefService } from "src/app/main/tab-menu/tab-element-ref.service";
 import { SwipeCardComponent } from "./swipe-card/swipe-card.component";
 import { AngularFirestore } from "@angular/fire/firestore";
+import { AngularFireAuth } from "@angular/fire/auth";
 import { OwnPicturesStore } from "@stores/pictures/own-pictures/own-pictures.service";
 import { StoreReadinessService } from "@services/store-readiness/store-readiness.service";
 import { Router } from "@angular/router";
+import { LoadingService } from "@services/loading/loading.service";
 
 @Component({
   selector: "app-home",
@@ -95,10 +112,13 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     private modalCtrl: ModalController,
     private tabElementRef: TabElementRefService,
     private ownPicturesService: OwnPicturesStore,
-    private firebaseAuth: FirebaseAuthService,
-    private fs: AngularFirestore,
+
     private storeReadiness: StoreReadinessService,
-    private router: Router
+    private loadingCtrl: LoadingController,
+    private loading: LoadingService,
+    private afAuth: AngularFireAuth,
+    private chatboardStore: ChatboardStore,
+    private navCtrl: NavController
   ) {
     this.onResize();
   }
@@ -110,8 +130,8 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
   openCatchAnimation: Animation;
   closeCatchAnimation: Animation;
 
-  matchedName: string;
-  matchedPicture;
+  latestMatchedProfile: Profile | null;
+
   currentUser; //profile
   currentUserSub; //subscription
   profilePictures;
@@ -194,11 +214,11 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     });
 
     this.SCenterAnimation = SCenterAnimation(
-      this.tabElementRef.tabRef,
+      this.tabElementRef.tabsRef,
       this.homeContainer
     );
     this.SCleaveAnimation = SCleaveAnimation(
-      this.tabElementRef.tabRef,
+      this.tabElementRef.tabsRef,
       this.homeContainer
     );
 
@@ -239,7 +259,9 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
-  playCatch(matchContents) {
+  playCatch(matchedProfile: Profile) {
+    this.latestMatchedProfile = matchedProfile;
+
     this.selectRandomCatch();
 
     this.openCatchAnimation = OpenCatchAnimation(
@@ -253,9 +275,6 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     ); //DO NOT MOVE THIS OUT TO ANOTHER HOOK
     //CANNOT REPLAY UNLESS REINITIALISED HERE BECAUSE IT USES THE SAME ELEMENTS AS CLOSE
 
-    this.matchedName = matchContents[0];
-    this.matchedPicture = matchContents[1];
-
     this.renderer.setStyle(
       this.pic1.nativeElement,
       "background",
@@ -267,7 +286,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     this.renderer.setStyle(
       this.pic2.nativeElement,
       "background",
-      `url(${this.matchedPicture})`
+      `url(${matchedProfile.pictureUrls[0]})`
     );
     this.renderer.setStyle(this.pic2.nativeElement, "backgroundSize", "cover");
 
@@ -286,7 +305,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     this.renderer.setStyle(messageText2, "display", "flex");
   }
 
-  closeCatch() {
+  async closeCatch() {
     this.closeCatchAnimation = CloseCatchAnimation(
       this.screenHeight,
       this.screenWidth,
@@ -308,6 +327,47 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
       //Remove background photo from match card
       this.renderer.setStyle(this.pic2.nativeElement, "background", "black");
     }, 350);
+  }
+
+  async goToChat() {
+    const maxTimeWaitingForChat = 6000; // i.e. 6 seconds
+
+    const user = await this.afAuth.currentUser;
+    if (!user) return console.error("no user authenticated");
+
+    const loader = await this.loadingCtrl.create({
+      ...this.loading.defaultLoadingOptions,
+    });
+    await loader.present();
+
+    return this.chatboardStore.matches$
+      .pipe(
+        map((matches) => matches?.[this.latestMatchedProfile.uid]),
+        filter((chat) => !!chat),
+        take(1),
+        tap((chat) => console.log("got one right here", chat)),
+        timeout(maxTimeWaitingForChat),
+        switchMap((chat) =>
+          concat(
+            loader.dismiss(),
+            this.navCtrl.navigateForward(["main/messenger/" + chat.id]),
+            this.destroyCatch()
+          )
+        ),
+        catchError(() => {
+          console.log("ah shit it fucking timed out");
+          return loader.dismiss();
+        })
+      )
+      .toPromise();
+  }
+
+  async destroyCatch() {
+    this.closeCatchAnimation?.destroy();
+    this.openCatchAnimation?.destroy();
+    let catchItems = document.getElementById("catchEls");
+    this.renderer.setStyle(catchItems, "display", "none");
+    this.renderer.setStyle(this.pic2.nativeElement, "background", "black");
   }
 
   ngOnDestroy() {

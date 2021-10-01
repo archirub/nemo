@@ -2,7 +2,7 @@ import { chat } from "./../../shared/interfaces/chat.model";
 import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from "@angular/core";
 import { Animation } from "@ionic/angular";
 
-import { BehaviorSubject, combineLatest, Observable, Subscription } from "rxjs";
+import { BehaviorSubject, combineLatest, Observable, of, Subscription } from "rxjs";
 
 import { ChatboardStore, SwipeStackStore } from "@stores/index";
 import { Chat, Profile } from "@classes/index";
@@ -34,7 +34,6 @@ export class ChatsPage {
   }
 
   get matches$() {
-    return this.chats$;
     return this.chatboardStore.matches$.pipe(
       map((chatsObject) => this.sortChats(chatsObject))
     );
@@ -66,10 +65,6 @@ export class ChatsPage {
 
   scrollToTop() {
     this.chatboard.scroll(this.TOP_SCROLL_SPEED);
-  }
-
-  goToCatch() {
-    this.router.navigateByUrl("/main/tabs/home");
   }
 
   private sortChats(chats: { [chatID: string]: Chat }): Chat[] {

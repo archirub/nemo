@@ -19,6 +19,7 @@ import {
   IonTabs,
   LoadingController,
   ModalController,
+  NavController,
 } from "@ionic/angular";
 
 import { Chat } from "@classes/index";
@@ -98,7 +99,7 @@ export class ChatBoardComponent implements OnInit, AfterViewInit {
   }
 
   constructor(
-    private router: Router,
+    private navCtrl: NavController,
     private modalCtrl: ModalController,
     private tabElementRef: TabElementRefService,
     private chatboardPicturesService: ChatboardPicturesStore, // used in template
@@ -152,14 +153,14 @@ export class ChatBoardComponent implements OnInit, AfterViewInit {
   async presentMatches(): Promise<void> {
     this.MatchesEnterAnimation = MatchesEnterAnimation(
       this.matchesButton,
-      this.tabElementRef.tabRef,
+      this.tabElementRef.tabsRef,
       this.chatContainer,
       this.screenHeight,
       this.screenWidth
     );
     this.MatchesLeaveAnimation = MatchesLeaveAnimation(
       this.matchesButton,
-      this.tabElementRef.tabRef,
+      this.tabElementRef.tabsRef,
       this.chatContainer,
       this.screenHeight,
       this.screenWidth
@@ -280,11 +281,11 @@ export class ChatBoardComponent implements OnInit, AfterViewInit {
   }
 
   goToMessenger(chatID: String) {
-    this.router.navigate(["main/messenger/" + chatID]);
+    this.navCtrl.navigateForward(["main/messenger/" + chatID]);
   }
 
   goToCatch() {
-    this.router.navigateByUrl("main/tabs/home");
+    return this.tabElementRef.tabs.select("home");
   }
 
   /* Automates left margin of 'number matches' text so that it is never covered by match images */

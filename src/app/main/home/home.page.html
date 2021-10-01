@@ -28,7 +28,7 @@
     <h1 class="catchtext">It's a Catch!</h1>
   </div>
   <div #catchText class="textholder-2">
-    <h2 class="catchtext">{{ this.chosenCatchMsg }}</h2>
+    <h2 class="catchtext">{{ chosenCatchMsg }}</h2>
   </div>
 
   <div #backdrop class="backdrop"></div>
@@ -36,8 +36,8 @@
   <ion-button id="closeAnimation" (click)="closeCatch()"
     ><ion-icon name="close-outline"></ion-icon
   ></ion-button>
-  <div #messageText id="messageText">
-    <h2 class="catchtext">Chat with {{ this.matchedName }}</h2>
+  <div #messageText id="messageText" (click)="goToChat()">
+    <h2 class="catchtext">Chat with {{ latestMatchedProfile?.firstName }}</h2>
   </div>
   <div #messageText2 id="messageText2" (click)="closeCatch()">
     <h2 class="catchtext">Keep fishing</h2>

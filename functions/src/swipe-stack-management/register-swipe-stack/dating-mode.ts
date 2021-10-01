@@ -7,7 +7,7 @@ import {
   mdDatingPickingFromDatabase,
   dateMap,
 } from "../../../../src/app/shared/interfaces/index";
-import { sortUIDs } from "./main";
+import { sortUIDs } from "../../../../src/app/shared/interfaces/chat.model";
 import { inexistentDocumentError } from "../../supporting-functions/error-handling/generic-errors";
 export interface uidDocRefMapDating {
   uid: string;

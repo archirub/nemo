@@ -18,10 +18,6 @@ import {
 export class FormatService {
   constructor() {}
 
-  public sortUIDs(uids: string[]): string[] {
-    return uids.sort((a, b) => ("" + a).localeCompare(b));
-  }
-
   public searchCriteriaDatabaseToClass(
     searchCriteria: allowOptionalProp<searchCriteria>
   ): SearchCriteria {

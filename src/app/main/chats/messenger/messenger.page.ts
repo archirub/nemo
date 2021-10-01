@@ -64,11 +64,7 @@ import { SafeUrl } from "@angular/platform-browser";
 import { UserReportingService } from "@services/user-reporting/user-reporting.service";
 import { AngularFirestore } from "@angular/fire/firestore";
 import { isEqual } from "lodash";
-import { Timestamp } from "@interfaces/index";
-
-function sortUIDs(uids: string[]): string[] {
-  return uids.sort((a, b) => ("" + a).localeCompare(b));
-}
+import { sortUIDs, Timestamp } from "@interfaces/index";
 
 @Component({
   selector: "app-messenger",

@@ -1,4 +1,12 @@
-import { Component, ElementRef, OnInit, Renderer2, ViewChild, QueryList, ViewChildren } from "@angular/core";
+import {
+  Component,
+  ElementRef,
+  OnInit,
+  Renderer2,
+  ViewChild,
+  QueryList,
+  ViewChildren,
+} from "@angular/core";
 import { IonTabs } from "@ionic/angular";
 
 import { TabElementRefService } from "./tab-element-ref.service";
@@ -19,32 +27,37 @@ export class TabMenuPage implements OnInit {
   ngOnInit() {}
 
   ngAfterViewInit() {
-    this.tabElementRef.tabRef = this.tabsContainer;
+    this.tabElementRef.tabsRef = this.tabsContainer;
+    this.tabElementRef.tabs = this.tabs;
   }
 
   colorIcon(event) {
     //Hide all orange icons
     let targets = Array.from(this.actives);
-    targets.forEach(el => {
+    targets.forEach((el) => {
       this.renderer.setStyle(el.nativeElement, "display", "none");
     });
 
     //Show all grey icons
     let placeholders = Array.from(this.inactives);
-    placeholders.forEach(el => {
+    placeholders.forEach((el) => {
       this.renderer.setStyle(el.nativeElement, "display", "block");
     });
 
     //Map indexes of grey icons based on tab name
     let indexMap = {
-      'chats': 0,
-      'home': 1,
-      'own-profile': 2
-    }
+      chats: 0,
+      home: 1,
+      "own-profile": 2,
+    };
 
     let target = document.getElementsByName(event.tab)[0]; //Target and show orange icon
     this.renderer.setStyle(target, "display", "block");
 
-    this.renderer.setStyle(placeholders[indexMap[event.tab]].nativeElement, "display", "none"); //Hide the grey icon
+    this.renderer.setStyle(
+      placeholders[indexMap[event.tab]].nativeElement,
+      "display",
+      "none"
+    ); //Hide the grey icon
   }
 }

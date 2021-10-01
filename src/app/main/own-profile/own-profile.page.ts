@@ -226,11 +226,11 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
         //Build modal setup once UI has entered
         setTimeout(() => {
           this.intEnterAnimation = IntEnterAnimation(
-            this.tabElementRef.tabRef,
+            this.tabElementRef.tabsRef,
             this.profileContainer
           );
           this.intLeaveAnimation = IntLeaveAnimation(
-            this.tabElementRef.tabRef,
+            this.tabElementRef.tabsRef,
             this.profileContainer
           );
           resolve(null);
