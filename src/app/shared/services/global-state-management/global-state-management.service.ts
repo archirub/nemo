@@ -49,6 +49,7 @@ import { routerInitListenerService } from "./initial-url.service";
 import { SignupAuthMethodSharer } from "../../../welcome/signupauth/signupauth-method-sharer.service";
 import { ConnectionService } from "@services/connection/connection.service";
 import { UniversitiesStore } from "@stores/universities/universities.service";
+import { NotificationsService } from "@services/notifications/notifications.service";
 
 type pageName =
   | "chats"
@@ -96,6 +97,7 @@ export class GlobalStateManagementService {
     private routerInitListener: routerInitListenerService,
     private emptyStoresService: EmptyStoresService,
     private connectionService: ConnectionService,
+    private notificationsService: NotificationsService,
 
     private signupauthMethodSharer: SignupAuthMethodSharer,
 
@@ -355,7 +357,10 @@ export class GlobalStateManagementService {
   }
 
   private activateCorrespondingStores(page: pageName): Observable<any> {
-    if (this.pageIsMain(page)) return this.activateAllStores();
+    if (this.pageIsMain(page)) {
+      console.log("activating stores for main pages");
+      return merge(this.activateAllStores(), this.notificationsService.activate());
+    }
     return of("");
 
     // let storesToActivate$: Observable<any>[] = [];

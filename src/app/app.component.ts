@@ -9,7 +9,7 @@ import {
 } from "@capacitor/push-notifications";
 
 import { AngularFireAuth } from "@angular/fire/auth";
-import { Plugins } from "@capacitor/core";
+import { Capacitor, Plugins } from "@capacitor/core";
 const { SplashScreen } = Plugins;
 
 import { HideOptions, ShowOptions } from "@capacitor/splash-screen";
@@ -47,34 +47,29 @@ export class AppComponent implements OnDestroy, OnInit {
     );
   }
 
-  ngOnDestroy(): void {
-    this.subs.unsubscribe();
-  }
-
   async initializeApp() {
-    console.log("ca dit quoi par ici");
-    // const SplashScreenAvailable = Capacitor.isPluginAvailable("SplashScreen");
-    // console.log("SplashScreenAvailable", SplashScreenAvailable);
+    console.log("App initialization started...");
+
+    const SplashScreenAvailable = Capacitor.isPluginAvailable("SplashScreen");
     const splashScreenShowOptions: ShowOptions = { showDuration: 10000 };
     const splashScreenHideOptions: HideOptions = {};
-    // if (SplashScreenAvailable) {
-    await SplashScreen.show(splashScreenShowOptions);
+
+    if (SplashScreenAvailable) await SplashScreen.show(splashScreenShowOptions);
+
     this.startGlobalStateManagement();
-    // }
+
     await this.platform.ready();
 
-    const userStateSnapshot = await this.GlobalStateManagement.userState$
-      .pipe(first())
-      .toPromise();
+    if ((await this.userState) === "full") await this.storesReady();
 
-    if (userStateSnapshot === "full") await this.storesReady();
+    console.log("calling hide splashScreen now");
+    if (SplashScreenAvailable) await SplashScreen.hide(splashScreenHideOptions);
 
-    // if (SplashScreenAvailable) {
-    console.log("calling hide right now");
-    await SplashScreen.hide(splashScreenHideOptions);
-    // }
+    console.log("App initialization ended.");
+  }
 
-    // this.capacitorPushNotificationStuff();
+  get userState() {
+    return this.GlobalStateManagement.userState$.pipe(first()).toPromise();
   }
 
   startGlobalStateManagement() {
@@ -97,43 +92,47 @@ export class AppComponent implements OnDestroy, OnInit {
     this.routerInitListener.onRouterOutletActivation();
   }
 
-  capacitorPushNotificationStuff() {
-    // Request permission to use push notifications
-    // iOS will prompt user and return if they granted permission or not
-    // Android will just grant without prompting
-    PushNotifications.requestPermissions().then((result) => {
-      if (result.receive === "granted") {
-        // Register with Apple / Google to receive push via APNS/FCM
-        PushNotifications.register();
-      } else {
-        // Show some error
-      }
-    });
+  // capacitorPushNotificationStuff() {
+  //   // Request permission to use push notifications
+  //   // iOS will prompt user and return if they granted permission or not
+  //   // Android will just grant without prompting
+  //   PushNotifications.requestPermissions().then((result) => {
+  //     if (result.receive === "granted") {
+  //       // Register with Apple / Google to receive push via APNS/FCM
+  //       PushNotifications.register();
+  //     } else {
+  //       // Show some error
+  //     }
+  //   });
 
-    // On success, we should be able to receive notifications
-    PushNotifications.addListener("registration", (token: Token) => {
-      alert("Push registration success, token: " + token.value);
-    });
+  //   // On success, we should be able to receive notifications
+  //   PushNotifications.addListener("registration", (token: Token) => {
+  //     alert("Push registration success, token: " + token.value);
+  //   });
 
-    // Some issue with our setup and push will not work
-    PushNotifications.addListener("registrationError", (error: any) => {
-      alert("Error on registration: " + JSON.stringify(error));
-    });
+  //   // Some issue with our setup and push will not work
+  //   PushNotifications.addListener("registrationError", (error: any) => {
+  //     alert("Error on registration: " + JSON.stringify(error));
+  //   });
 
-    // Show us the notification payload if the app is open on our device
-    PushNotifications.addListener(
-      "pushNotificationReceived",
-      (notification: PushNotificationSchema) => {
-        alert("Push received: " + JSON.stringify(notification));
-      }
-    );
+  //   // Show us the notification payload if the app is open on our device
+  //   PushNotifications.addListener(
+  //     "pushNotificationReceived",
+  //     (notification: PushNotificationSchema) => {
+  //       alert("Push received: " + JSON.stringify(notification));
+  //     }
+  //   );
 
-    // Method called when tapping on a notification
-    PushNotifications.addListener(
-      "pushNotificationActionPerformed",
-      (notification: ActionPerformed) => {
-        alert("Push action performed: " + JSON.stringify(notification));
-      }
-    );
+  //   // Method called when tapping on a notification
+  //   PushNotifications.addListener(
+  //     "pushNotificationActionPerformed",
+  //     (notification: ActionPerformed) => {
+  //       alert("Push action performed: " + JSON.stringify(notification));
+  //     }
+  //   );
+  // }
+
+  ngOnDestroy(): void {
+    this.subs.unsubscribe();
   }
 }

@@ -1,31 +1,38 @@
 import { Injectable } from "@angular/core";
-import { AngularFireMessaging } from "@angular/fire/messaging";
-import { BehaviorSubject } from "rxjs";
+import { PushNotifications, PermissionStatus } from "@capacitor/push-notifications";
+import { BehaviorSubject, from, of } from "rxjs";
+import { map, switchMap } from "rxjs/operators";
 
 @Injectable({ providedIn: "root" })
 export class NotificationsService {
-  currentMessage = new BehaviorSubject({});
-  constructor(private angularFireMessaging: AngularFireMessaging) {
-    this.angularFireMessaging.messages.subscribe((_messaging: AngularFireMessaging) => {
-      _messaging.onMessage = _messaging.onMessage.bind(_messaging);
-      _messaging.onTokenRefresh = _messaging.onTokenRefresh.bind(_messaging);
-    });
-  }
-  requestPermission() {
-    this.angularFireMessaging.requestToken.subscribe(
-      (token) => {
-        console.log("the token is", token);
-      },
-      (err) => {
-        console.error("Unable to get permission to notify.", err);
-      }
+  private permissionState = new BehaviorSubject<PermissionStatus["receive"]>(null);
+  private permissionState$ = this.permissionState.asObservable();
+
+  constructor() {}
+
+  activate() {
+    return this.permissionState$.pipe(
+      switchMap((state) => {
+        if (state === null) return this.getPermissionState();
+        if (state === "prompt" || state === "prompt-with-rationale")
+          return this.requestPermission();
+        if (state === "granted") return this.startHandling();
+        return of("");
+      })
     );
   }
-  receiveMessage() {
-    console.log("yo");
-    this.angularFireMessaging.messages.subscribe((payload) => {
-      console.log("new message received. ", payload);
-      this.currentMessage.next(payload);
-    });
+
+  requestPermission() {
+    return from(PushNotifications.requestPermissions()).pipe(
+      map((permissions) => this.permissionState.next(permissions.receive))
+    );
   }
+
+  getPermissionState() {
+    return from(PushNotifications.checkPermissions()).pipe(
+      map((permissions) => this.permissionState.next(permissions.receive))
+    );
+  }
+
+  async startHandling() {}
 }
