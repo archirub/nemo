@@ -1,3 +1,26 @@
+.flexcol {
+  display: flex;
+  flex-direction: column;
+}
+
+.fishAnim { 
+  display: flex;
+  width: 100vw;
+  justify-content: center;
+  position: absolute;
+  top: 35vh;
+  z-index: 2;
+
+  img {
+    height: 18vh;
+  }
+}
+
+h2 {
+  color: var(--ion-color-light);
+  font-size: 2.6vh;
+}
+
 .search {
   display: flex;
   justify-content: flex-end;

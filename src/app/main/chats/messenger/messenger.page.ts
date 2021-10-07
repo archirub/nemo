@@ -234,6 +234,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
       borderRadius: "25px",
       paddingInlineStart: "10px",
       paddingInlineEnd: "35px",
+      fontSize: "2.4vh",
     };
 
     Object.keys(styles).forEach((key) => {

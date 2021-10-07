@@ -181,6 +181,7 @@ h2 {
     text-transform: none;
     --ripple-color: transparent;
     margin-bottom: 1.5vh;
+    font-size: 2.2vh;
 }
 
 ;
@@ -246,14 +247,15 @@ app-profile-card {
 
 .bio {
     padding-bottom: 5vh;
+
     ion-textarea {
         width: 100%;
         --background: var(--ion-color-light-tint);
         border: 2px solid var(--ion-color-light-shade);
         padding: 1vh;
         border-radius: 15px;
-    }
-    ;
+        font-size: 2.6vh;
+    };
 }
 
 a {

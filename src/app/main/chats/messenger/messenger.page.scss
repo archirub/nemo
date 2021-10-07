@@ -42,7 +42,7 @@ ion-header {
 
 ion-content {
   position: absolute;
-  bottom: 5px;
+  bottom: 3vh;
   height: calc(100% - 135px);
 }
 
@@ -116,6 +116,7 @@ ion-button.back-button {
   --background-activated: transparent;
   --box-shadow: none;
   --ripple-color: transparent;
+  margin-top: 1vh;
 
 
   ion-icon {
@@ -218,7 +219,13 @@ ion-button.back-button {
 #messageInputContainer {
   position: fixed;
   bottom: 0;
+  padding-bottom: 3vh;
+  background: var(--ion-color-primary-contrast);
   width: 100vw;
+
+  ion-searchbar {
+    font-size: 2.4vh;
+  }
 }
 
 .return {
