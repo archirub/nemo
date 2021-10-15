@@ -30,7 +30,7 @@ import {
 import { runWeakUserIdentityCheck } from "../../supporting-functions/user-validation/user.checker";
 import { sanitizeData } from "../../supporting-functions/data-validation/main";
 import {
-  emptyCollectionError,
+  emptyCollectionOrQueryError,
   inexistentDocumentError,
   invalidDocumentError,
 } from "../../supporting-functions/error-handling/generic-errors";
@@ -306,7 +306,7 @@ async function incrementCountsREAD(
       .where("uids", "array-contains-any", [...(yesAndSuper || []), ...(no || [])])
   )) as FirebaseFirestore.QuerySnapshot<{ [uid: string]: SwipeUserInfo }>;
 
-  if (piStorageDocs.empty) emptyCollectionError("piStorage", currentuid);
+  if (piStorageDocs.empty) emptyCollectionOrQueryError("piStorage", currentuid);
 
   return piStorageDocs;
 }

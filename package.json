@@ -25,6 +25,7 @@
     "@capacitor/camera": "^1.1.0",
     "@capacitor/cli": "^3.2.4",
     "@capacitor/core": "^3.2.4",
+    "@capacitor/haptics": "^1.1.0",
     "@capacitor/ios": "3.2.4",
     "@capacitor/push-notifications": "^1.0.4",
     "@capacitor/splash-screen": "^1.1.3",

@@ -6,7 +6,7 @@ import {
   uidDatingStorage,
 } from "../../../../src/app/shared/interfaces/index";
 import {
-  emptyCollectionError,
+  emptyCollectionOrQueryError,
   invalidDocumentError,
 } from "../../supporting-functions/error-handling/generic-errors";
 
@@ -63,8 +63,9 @@ export const updatePISystem = functions
       ]);
 
       if (currentUidStorageDocs.empty)
-        emptyCollectionError("uidDatingStorage", "none; pubsub function");
-      if (piStorageDocs.empty) emptyCollectionError("piStorage", "none; pubsub function");
+        emptyCollectionOrQueryError("uidDatingStorage", "none; pubsub function");
+      if (piStorageDocs.empty)
+        emptyCollectionOrQueryError("piStorage", "none; pubsub function");
 
       // MERGING UIDSTORAGE ARRAYS THAT HAVE SAME COMBINATION DEGREE/GENDER/SEXPREF
       const uidStorageArrays: Omit<uidDatingStorage, "volume">[] =

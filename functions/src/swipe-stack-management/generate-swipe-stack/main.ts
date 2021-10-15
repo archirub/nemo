@@ -13,6 +13,10 @@ import { datingMode } from "./dating-mode";
 import { friendMode } from "./friend-mode";
 import { runWeakUserIdentityCheck } from "../../supporting-functions/user-validation/user.checker";
 import { sanitizeData } from "../../supporting-functions/data-validation/main";
+import {
+  emptyCollectionOrQueryError,
+  invalidDocumentError,
+} from "../../supporting-functions/error-handling/generic-errors";
 
 // to test function locally:
 // 1. convert functions to javascript using "npm run build" in the "functions" folder
@@ -89,16 +93,32 @@ export const generateSwipeStack = functions
       let pickedUsers: uidChoiceMap[] = [];
 
       // if (swipeMode === "dating") {
-      const percentile = (
-        (
-          await admin
-            .firestore()
-            .collection("piStorage")
-            .where("uids", "array-contains", uid)
-            .limit(1)
-            .get()
-        ).docs[0].data() as piStorage
-      )[uid].percentile;
+
+      const piStorageQuery = await admin
+        .firestore()
+        .collection("piStorage")
+        .where("uids", "array-contains", uid)
+        .limit(1)
+        .get();
+
+      if (piStorageQuery.empty)
+        emptyCollectionOrQueryError(
+          "piStorage",
+          uid,
+          `.where("uids", "array-contains", ${uid}).limit(1)`
+        );
+
+      const piStorageData = piStorageQuery.docs[0].data() as piStorage;
+
+      const percentile = piStorageData?.[uid]?.percentile;
+
+      if (!percentile)
+        invalidDocumentError(
+          "piStorage",
+          `['${uid}'].percentile`,
+          piStorageQuery.docs[0].id,
+          uid
+        );
 
       pickedUsers = await datingMode(
         uid,
@@ -127,7 +147,10 @@ export const generateSwipeStack = functions
       // }
 
       // SENDING RESPONSE
-      return { users: pickedUsers } as generateSwipeStackResponse;
+
+      const response: generateSwipeStackResponse = { users: pickedUsers };
+
+      return response;
     }
   );
 

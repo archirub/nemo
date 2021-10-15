@@ -47,10 +47,15 @@ export function notFoundDocumentError(
 }
 
 // calleruid === uid of the person calling the function
-export function emptyCollectionError(collection: string, calleruid: string) {
+export function emptyCollectionOrQueryError(
+  collection: string,
+  calleruid: string,
+  query?: string
+) {
   throw new https.HttpsError(
     "internal",
-    `The collection ${collection} is empty 
-    (or if not the collection query returned empty.)`
+    `The ${query ? "query " + query + " for" : ""} collection ${collection} is empty.
+    calleruid: ${calleruid}
+    `
   );
 }

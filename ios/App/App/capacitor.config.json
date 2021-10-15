@@ -10,9 +10,13 @@
 			"launchShowDuration": 3000
 		}
 	},
+<<<<<<< HEAD
 	"cordova": {},
 	"server": {
 		"url": "http://localhost:8100",
 		"cleartext": true
 	}
+=======
+	"cordova": {}
+>>>>>>> 89eb8b45134ea3a5a2cd3e96af9cacabcd4f3957
 }

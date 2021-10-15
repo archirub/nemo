@@ -5,6 +5,7 @@ import { StoreReadinessService } from "@services/store-readiness/store-readiness
 import { Observable, of } from "rxjs";
 import { LoadingService } from "@services/loading/loading.service";
 import { exhaustMap, filter, first, startWith, tap } from "rxjs/operators";
+import { NotificationsService } from "@services/notifications/notifications.service";
 
 @Component({
   selector: "app-signup-to-app",
@@ -21,31 +22,32 @@ export class SignupToAppPage implements OnInit {
     private globalStateManagement: GlobalStateManagementService,
     private readiness: StoreReadinessService,
     private loadingCtrl: LoadingController,
-    private loading: LoadingService
+    private loading: LoadingService,
+    private notifications: NotificationsService
   ) {}
 
   ngOnInit() {
-    this.initTheApp();
+    this.initializeAppState();
     console.log(this.appIsReady$);
-  }
-
-  async initTheApp() {
-    await this.globalStateManagement.resetAppState().toPromise();
-    return this.globalStateManagement.activateAllStores().toPromise();
-  }
-
-  async requestNotificationPermission() {
-    console.log("requesting notification permission disabled");
-    // return Permissions.query({ name: PermissionType.Notifications });
   }
 
   async goToApp() {
     if (await this.appIsReady$.pipe(first()).toPromise())
       return this.navCtrl.navigateRoot("/main/tabs/home");
 
-    const loader = await this.loadingCtrl.create(this.loading.defaultLoadingOptions);
+    const loader = await this.loadingCtrl.create({
+      ...this.loading.defaultLoadingOptions,
+      message: "Getting the app ready...",
+    });
+
     loader.onDidDismiss().then(() => this.navCtrl.navigateRoot("/main/tabs/home"));
+
     await loader.present();
+
+    return this.dismissOnAppReady(loader);
+  }
+
+  async dismissOnAppReady(loader: HTMLIonLoadingElement) {
     return this.appIsReady$
       .pipe(
         filter((isReady) => isReady),
@@ -53,5 +55,14 @@ export class SignupToAppPage implements OnInit {
         exhaustMap(() => loader.dismiss())
       )
       .toPromise();
+  }
+
+  async requestNotificationsPermission() {
+    return this.notifications.requestPermission().toPromise();
+  }
+
+  async initializeAppState() {
+    await this.globalStateManagement.resetAppState().toPromise();
+    return this.globalStateManagement.activateAllStores().toPromise();
   }
 }

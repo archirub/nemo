@@ -6,23 +6,23 @@
     <h1 class="title">You've made it!</h1>
 
     <div class="flexcenter">
-      <img class="nemo-logo" [src]="'/assets/logo_and_name.svg'" alt="Nemo Logo"/>
+      <img class="nemo-logo" [src]="'/assets/logo_and_name.svg'" alt="Nemo Logo" />
     </div>
 
     <div class="flexcenter">
-      <h2 class="subtitle">Obviously, to get the full experience you'll want to enable notifications:</h2>
+      <h2 class="subtitle">
+        Obviously, to get the full experience you'll want to enable notifications:
+      </h2>
     </div>
 
     <div class="flexcenter">
-      <ion-button class="notifs" (click)="requestNotificationPermission()">
+      <ion-button class="notifs" (click)="requestNotificationsPermission()">
         Allow Notifications
       </ion-button>
     </div>
 
     <div class="flexcenter">
-      <ion-button class="enter" (click)="goToApp()">
-        Start swiping
-      </ion-button>
+      <ion-button class="enter" (click)="goToApp()"> Start swiping </ion-button>
     </div>
   </div>
 </ion-content>
