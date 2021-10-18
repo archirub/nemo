@@ -15,10 +15,6 @@ ion-content {
         display: flex;
         justify-content: center;
     };
-
-    h4 {
-        margin-left: -50px;
-    };
 }
 
 .loading {
@@ -80,7 +76,6 @@ ion-grid {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    position: relative;
     padding: 3vh 3vw;
     border-bottom: solid 1px var(--ion-color-light-shade);
 }
@@ -109,43 +104,6 @@ ion-grid {
         font-size: 3vh;
         margin-right: 0.5vh;
     }
-}
-
-.labels {
-    display: flex;
-    justify-content: flex-end;
-    pointer-events: none;
-    z-index: 2;
-    position: absolute;
-    width: 93%;
-    margin: 0 auto;
-    ion-label {
-        padding-right: 2.5vw;
-        &.left {
-            padding-right: 4vw;
-        }
-    }
-    ;
-}
-
-ion-toggle {
-    width: 50vw;
-    --handle-width: 25vw;
-    height: 5vh;
-    --handle-height: 5vh;
-    --background: var(--ion-color-light-shade);
-    --background-checked: var(--ion-color-light-shade);
-    border: solid 1px;
-    border-radius: 20px;
-}
-
-ion-select {
-    flex: 1;
-    font-size: 22px;
-    font-weight: bold;
-    color: var(--ion-color-primary);
-    --padding-start: none;
-    margin-top: 5px;
 }
 
 .flex {
@@ -200,16 +158,6 @@ p {
     border-radius: 50%;
     text-align: center;
     padding-top: 1.25vh;
-}
-
-ion-button {
-    &.exit {
-        --background: transparent;
-        color: var(--ion-color-light-contrast);
-        --background-activated: transparent;
-        font-size: 3vh;
-    }
-    ;
 }
 
 .return {

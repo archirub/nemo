@@ -70,12 +70,6 @@ p.unchangeable {
     color: var(--ion-color-primary);
 }
 
-#submitQuestion {
-    margin-top: -2vh;
-    font-size: 4vh;
-    color: var(--ion-color-primary);
-}
-
 nemo-toggle {
     position: sticky;
     background: var(--ion-color-primary-contrast);
@@ -121,31 +115,6 @@ save-cancel {
     display: none;
 }
 
-//Deleting questions slide button
-/*ion-item-sliding {
-    margin: 0 -27px 0 -21px;
-    width: auto;
-
-    ion-item { 
-        --inner-border-width: 0;
-
-        profile-answer {
-            width: 95%;
-        }
-    }
-
-    //Styling of button when dragged across; colour is inline styled as "color = 'danger'"
-    ion-item-options {
-        height: 99%;
-        border: 0;
-
-        ion-item-option {
-            width: 20vw;
-            font-size: 4vh;
-        }
-    }
-}*/
-
 .draggable-container {
     flex-basis: 26%;
     margin: 3vh 0 3vh 0;
@@ -157,6 +126,7 @@ h2 {
 }
 
 .flexgrid {
+    margin-top: 3vh;
     display: flex;
     justify-content: space-evenly;
     flex-wrap: wrap;

@@ -101,16 +101,6 @@ nemo-toggle {
             &:focus {
                 outline: none;
             };
-
-        /*ion-select {
-            flex: 1;
-            border: none;
-            background: transparent;
-            color: var(--ion-color-light-contrast);
-    
-            &:focus {
-                outline: none;
-            };*/
         };
     }
   
@@ -131,15 +121,6 @@ h3 {
 
 a:focus {
     outline: none;
-}
-
-ion-toggle {
-    height: 5vh;
-    margin: auto 0;
-    width: 24vw;
-    --handle-width: 12vw;
-    --handle-height: 4.75vh;
-    border-radius: 30px;
 }
 
 .email {

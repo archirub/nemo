@@ -59,16 +59,6 @@ ion-content {
   overflow-y: hidden;
 }
 
-ion-col {
-  top: -10.5vh;
-  display: flex;
-  justify-content: space-evenly;
-
-  ion-button {
-    margin: 0 auto;
-  };
-}
-
 @media only screen and (max-device-height: 650px) {
   .shadow {
     position: absolute;

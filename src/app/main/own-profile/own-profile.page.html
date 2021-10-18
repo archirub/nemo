@@ -133,14 +133,6 @@
             <div class="noQuestions" *ngIf="reachedMaxQuestionsCount">
               <span>Sorry, there's no space for any more questions!</span>
             </div>
-
-            <!-- <div *ngIf="reachedMaxQuestionsCount" class="flexcenter">
-              <ion-icon
-                id="submitQuestion"
-                name="checkmark-outline"
-                (click)="submitQuestion()"
-              ></ion-icon>
-            </div> -->
           </ng-container>
 
           <h2>My course</h2>
@@ -168,6 +160,10 @@
           ></profile-course>
 
           <h2>My interests</h2>
+
+          <h2 class="no-interests">
+            You can select a maximum of 3 interests.
+          </h2>
           <!--interests-slides
             name="interests"
             [interests]="editableFields?.interests"

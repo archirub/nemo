@@ -62,7 +62,7 @@ ion-textarea {
     z-index: 2;
 }
 
-.add, .next {
+.add {
     top: 32%;
     right: 0;
 }
@@ -72,10 +72,6 @@ ion-textarea {
     text-align: center;
     top: 50%;
     left: calc(50vw - 4vh);
-}
-
-.prev {
-    top: 32%;
 }
 
 .delete {
