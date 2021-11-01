@@ -11,7 +11,6 @@ import { ProfileCardModule } from "@components/profile-card/profile-card.compone
 import { AddPhotoModule } from "@components/add-photo/add-photo.component.module";
 import { AppToggleModule } from "@components/nemo-toggle/nemo-toggle.component.module";
 import { PipesModule } from "../../shared/pipes/pipes.module";
-import { DragDropModule } from "@angular/cdk/drag-drop";
 import { ProfileAnswerComponent } from "./profile-answer/profile-answer.component";
 import { ProfileCourseComponent } from "./profile-course/profile-course.component";
 
@@ -33,7 +32,6 @@ import { SortablejsModule } from "ngx-sortablejs";
     AppToggleModule,
     InterestSlidesModule,
     PipesModule,
-    DragDropModule,
     SortablejsModule,
   ],
   declarations: [

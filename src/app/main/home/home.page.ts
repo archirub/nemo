@@ -149,6 +149,12 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
   public chosenCatchMsg: string;
 
   ngOnInit() {
+    // this.swipeStackStore.profiles$.subscribe((p) =>
+    //   console.log("profiles$ emitted: ", p)
+    // );
+    // this.swipeStackStore.profilesToRender$.subscribe((p) =>
+    //   console.log("profilesToRender$ emited: ", p)
+    // );
     this.readinessHandler();
 
     this.subs.add(
@@ -162,7 +168,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
 
   get swipeProfiles$() {
     return this.pageIsReady$.pipe(
-      switchMap((isReady) => (isReady ? this.swipeStackStore.profiles$ : of([])))
+      switchMap((isReady) => (isReady ? this.swipeStackStore.profilesToRender$ : of([])))
     );
   }
 

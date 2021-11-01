@@ -6,14 +6,19 @@ export const FishSwimAnimation = (fish: ElementRef) => {
 
   fishAnimation
     .addElement(fish.nativeElement)
-    .duration(1200)
-    .keyframes([
-      { offset: 0, transform: "rotate(0deg)" },
-      { offset: 0.395, transform: "rotate(-90deg)" },
-      { offset: 0.511, transform: "rotate(-110deg)" },
-      { offset: 0.884, transform: "rotate(-160deg)" },
-      { offset: 1, transform: "rotate(-180deg)" },
-    ])
+    .delay(300)
+    .duration(1000)
+    .easing("ease-in-out")
+    // seems a lot more performant this way
+    .fromTo("transform", "rotate(0deg)", "rotate(-360deg)")
+    // .keyframes([
+    //   { offset: 0, transform: "rotate(0deg)" },
+    //   {offset: }
+    //   { offset: 0.395, transform: "rotate(-90deg)" },
+    //   { offset: 0.511, transform: "rotate(-110deg)" },
+    //   { offset: 0.884, transform: "rotate(-160deg)" },
+    //   { offset: 1, transform: "rotate(-180deg)" },
+    // ])
     .iterations(Infinity);
 
   return fishAnimation;

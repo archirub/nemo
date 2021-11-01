@@ -1,9 +1,23 @@
-import { uidChoiceMap } from "./../../interfaces/swipe-choice.model";
+// Next to do after Monday 25th October 2021 for finishing up profile stack rendering optimization:
+// - change appropriate observables to using profilesToRender$ instead of profiles$ (template + isReady logic etc.)
+// - test whether it works sufficiently well
+// - Create logic for picture loading strategy, which will most likely use profilesToRender$ as a source.
+// - test performance and adjust variables to optimial value (i.e. MIN_RENDERED_COUNT, MAX_RENDERED_COUNT, and those from picture loading strategy)
+
 import { Injectable } from "@angular/core";
 import { AngularFirestore, DocumentSnapshot } from "@angular/fire/firestore";
 import { AngularFireFunctions } from "@angular/fire/functions";
 
-import { BehaviorSubject, combineLatest, concat, forkJoin, Observable, of } from "rxjs";
+import {
+  BehaviorSubject,
+  combineLatest,
+  concat,
+  forkJoin,
+  merge,
+  Observable,
+  of,
+  ReplaySubject,
+} from "rxjs";
 import {
   concatMap,
   distinctUntilChanged,
@@ -12,10 +26,13 @@ import {
   first,
   last,
   map,
+  pairwise,
   share,
+  startWith,
   switchMap,
   take,
   tap,
+  throttle,
   withLatestFrom,
 } from "rxjs/operators";
 
@@ -30,20 +47,28 @@ import {
   profileFromDatabase,
 } from "@interfaces/index";
 import { AngularFireStorage } from "@angular/fire/storage";
-// import { StackPicturesService } from "@services/pictures/stack-pictures/stack-pictures.service";
+import { isEqual, cloneDeep } from "lodash";
 
 // loading is for when there is no one in the stack but we are fetching
 // empty is for the stack has been fetched and no one was found
 // filled is for when there is someone in the stack
 export type StackState = "init" | "filled" | "loading" | "empty";
+
+export type PictureQueue = Array<{ uid: string; pictureIndex: number }>;
 @Injectable({
   providedIn: "root",
 })
 export class SwipeStackStore {
   private profiles = new BehaviorSubject<Profile[]>([]);
-  public readonly profiles$ = this.profiles.asObservable();
+  public profiles$ = this.profiles.asObservable();
 
-  MIN_PROFILE_COUNT = 4; // # of profiles in stack below which we make another request
+  // for performance - this is a subset of profiles, and contains just profiles to render on the page
+  private profilesToRender = new BehaviorSubject<Profile[]>([]);
+  public profilesToRender$ = this.profilesToRender.asObservable();
+
+  private readonly MIN_PROFILE_COUNT = 4; // # of profiles in profiles$ below which we make another request
+  private readonly MIN_RENDERED_COUNT = 2; // min # of profiles in profilesToRender$
+  private readonly MAX_RENDERED_COUNT = 5; // max # of profiles in profilesToRender$
 
   private stackState = new BehaviorSubject<StackState>("init");
   public stackState$ = this.stackState.asObservable().pipe(distinctUntilChanged());
@@ -57,24 +82,122 @@ export class SwipeStackStore {
     private afStorage: AngularFireStorage,
     private format: FormatService,
     private SCstore: SearchCriteriaStore,
-    private swipeOutcomeStore: SwipeOutcomeStore // private stackPictures: StackPicturesService
+    private swipeOutcomeStore: SwipeOutcomeStore
   ) {}
+
+  // format: [profileIndex (in profilesToRender$), pictureIndex (in pictureUrls)]
+  picturePriority = [
+    [[0, 0]], // batch 1
+    [
+      [0, 1],
+      [0, 2],
+      [1, 0],
+      [1, 1],
+    ], // batch 2
+    [
+      [2, 0],
+      [3, 0],
+      [4, 0],
+    ], // batch 3
+  ];
+
+  managePictureQueue() {
+    // this relies on a particular fact: that adding new urls to the profiles BehavioSubject
+    // triggers profilesToRender$ to reemit, thereby making it fetch the next batch of pictures on the priority list.
+    // That is: it relies on the fact that finishing to fetch a given batch triggers the fetching of the next batch
+    return this.profilesToRender$.pipe(
+      filter((profiles) => Array.isArray(profiles) && profiles.length > 0),
+      throttle(
+        (p) =>
+          of(p).pipe(
+            map((profiles) => {
+              let toDownload: Array<[string, number]> = []; // format [uid, picture index]
+
+              // looping through batches of priority
+              for (const batch of this.picturePriority) {
+                // looping through pairs of profile/picture indices in each batch
+                for (const indices of batch) {
+                  // collecting profile/picture indices of the batch which have no url yet
+                  const profile = profiles[indices[0]];
+                  if (!profile) continue;
+                  const noPicture = !profile.pictureUrls[indices[1]];
+                  if (noPicture) toDownload.push([profile.uid, indices[1]]);
+                }
+
+                // if there are pictures without url in this batch, then return them so that they can be downloaded
+                if (toDownload.length > 0) break;
+              }
+
+              return toDownload;
+            }),
+            concatMap((batch) =>
+              // fetching urls of batch
+              forkJoin(batch.map(([uid, picIndex]) => this.getUrl(uid, picIndex))).pipe(
+                // transforming to object whose shape fits the parameter of this.addPictures
+                // (note: this puts an empty string for url if there isn't any corresponding url
+                // there needs to be something there so that we don't attempt to fetch it everytime
+                // if we already know there is something there)
+                map((urls) =>
+                  urls.map((url, i) => ({ uid: batch[i][0], picIndex: batch[i][1], url }))
+                )
+              )
+            ),
+            concatMap((picMaps) => this.addPictures(picMaps))
+          ),
+        { leading: true, trailing: true }
+      )
+    );
+  }
+
+  manageStoreReadiness() {
+    // waits for the swipe stack to have at least one profile and for the first picture of first profile to be loaded
+    return this.profilesToRender$.pipe(
+      filter(
+        (profiles) =>
+          Array.isArray(profiles) && profiles.length > 0 && !!profiles[0].pictureUrls[0]
+      ),
+      first(),
+
+      tap((profiles) => console.log("swipe stack is ready:", profiles)),
+      tap(() => this.isReady.next(true))
+    );
+  }
 
   /**
    * Have to subscribe to this to activate the chain of logic that fills the store etc.
    */
   activateStore(): Observable<any> {
+    return merge(
+      this.manageSwipeStack(),
+      this.manageRenderedProfiles(),
+      this.managePictureQueue(),
+      this.manageStoreReadiness()
+    );
+  }
+
+  manageSwipeStack() {
     return this.profiles$.pipe(
+      this.filterUnchangedLength(),
       map((profiles) => profiles.length),
       concatMap((count) => this.updateStackState(count)),
       this.filterBasedOnStackState(),
       filter((count) => count <= this.MIN_PROFILE_COUNT),
       switchMap(() => this.SCstore.searchCriteria$.pipe(first())), // using switchMap instead of withLatestFrom as SC might still be undefined at that point so we want to wait for it to have a value (which withLatestFrom doesn't do)
-      // exhaustMap is a must use here, makes sure we don't have multiple requests to fill the swipe stack
-      exhaustMap((SC) => this.addToSwipeStackQueue(SC)),
-      tap(() => this.isReady.next(true)),
+      exhaustMap((SC) => this.addToSwipeStackQueue(SC)), // exhaustMap is a must use here, makes sure we don't have multiple requests to fill the swipe stack
       share()
     );
+  }
+
+  filterUnchangedLength() {
+    return (source: Observable<Profile[]>) => {
+      return source.pipe(
+        startWith(""),
+        pairwise(),
+        filter(([prev, curr]) => prev === "" || prev.length !== curr.length),
+        // filter(([prev, curr]) => !isEqual(prev, curr)),
+        map(([prev, curr]) => curr as Profile[])
+      );
+    };
   }
 
   filterBasedOnStackState() {
@@ -102,45 +225,115 @@ export class SwipeStackStore {
     );
   }
 
+  manageRenderedProfiles() {
+    return this.profiles$.pipe(
+      withLatestFrom(this.profilesToRender$),
+      filter(([allProfiles, profilesToRender]) => {
+        if (!Array.isArray(allProfiles) || !Array.isArray(profilesToRender)) return false;
+        if (profilesToRender.length === 0) return true;
+        return !isEqual(
+          profilesToRender.map((p) => [p.uid, ...p.pictureUrls]),
+          allProfiles
+            .slice(0, profilesToRender.length)
+            .map((p) => [p.uid, ...p.pictureUrls])
+        );
+        //  return !isEqual(profilesToRender, allProfiles.slice(0, profilesToRender.length));
+      }),
+      // this deals with deleting rendered profiles that have been removed from allProfiles due
+      // to user action (so only looks at the front of the array and operates in a very non-general way)
+      map(([allProfiles, profilesToRender]) => {
+        if (profilesToRender.length !== 0) {
+          // skips this step if renderer contains no profiles
+          const lastuid = allProfiles[0].uid;
+          let indexInRendered = profilesToRender.length - 1; // default value everyone will be removed if user is not found
+          for (const [index, p] of profilesToRender.entries()) {
+            if (p.uid === lastuid) {
+              indexInRendered = index;
+              break;
+            }
+          }
+          profilesToRender.splice(0, indexInRendered);
+        }
+
+        return [allProfiles, profilesToRender];
+      }),
+
+      // deals with:
+      // - refilling the renderer periodically when the number of profiles it holds falls below a given threshold
+      // - updating the profiles in profilesToRender$ at this point with the version in profiles$ in case their pictureUrls array has been updated in between
+      // (indeed the changes in pictureUrls array are made in profiles$, not in profilesToRender$)
+      map(([allProfiles, profilesToRender]) => {
+        // this part assumes that the items of profilesToRender are exactly the same as the first few of allProfiles in same order
+        const countRendered = profilesToRender.length;
+        const isBelowMin = countRendered < this.MIN_RENDERED_COUNT;
+
+        const upperBound = isBelowMin ? this.MAX_RENDERED_COUNT : countRendered;
+
+        profilesToRender = allProfiles.slice(0, upperBound);
+
+        return [allProfiles, profilesToRender];
+      }),
+      // submits updated profilesToRender version
+      tap(([allProfiles, newProfilesToRender]) =>
+        // deep cloning so that their pictureUrls have different references
+        // it seems like it'd be great if they did point to the same ref, as the pictureUrls
+        // array in profilesToRender would be updated automatically as those in profiles get updated.
+        // However, on a new emission from profiles$ due to an update in a picture array, we wouldn't
+        // pass the filter above, and so the next round of picture fetching could not be started
+        // as well, we wouldn't inform the subscribers of profilesToRender$ that there has been an update
+        // and so for example the readiness observer would never get the info that the first pic of first profile
+        // has been fetched
+        this.profilesToRender.next(cloneDeep(newProfilesToRender))
+      )
+    );
+  }
+
   resetStore() {
     this.profiles.next([]);
   }
 
-  public managePictures(profiles: Profile[]): Observable<void> {
-    const pictureDownloads$ = profiles.map((p) => this.downloadPictures(p));
-    return concat(...pictureDownloads$).pipe(last());
-  }
-
-  // not good because only sends pictures of a given profile once they are all downloaded,
-  // but best I can do for now
-  public downloadPictures(profile: Profile) {
+  // gives out an empty string if the pictureIndex doesn't exist
+  private getUrl(uid: string, pictureIndex: number): Observable<string> {
     return this.afStorage
-      .ref("/profilePictures/" + profile.uid)
+      .ref("/profilePictures/" + uid)
       .listAll()
       .pipe(
-        exhaustMap((list) => forkJoin(list.items.map((i) => i.getDownloadURL()))),
-        exhaustMap((urls) => this.addUrls(urls, profile.uid))
+        exhaustMap((list) => {
+          // done this way as the items in list.items might not be in order of picture #
+          const index = list.items.map((i) => i.name).indexOf(pictureIndex.toString());
+          return index === -1 ? of("") : list.items[index].getDownloadURL();
+        })
       );
   }
 
-  private getUrl(uid: string, pictureIndex: number): Observable<string> {
-    return this.afStorage
-      .ref("profilePictures/" + uid + "/" + pictureIndex)
-      .getDownloadURL()
-      .pipe(take(1));
-  }
-
-  private addUrls(urls: string[], uid: string): Observable<void> {
+  private addPictures(
+    picMaps: { uid: string; picIndex: number; url: string }[]
+  ): Observable<void> {
     return this.profiles$.pipe(
-      map((profiles) => [profiles, profiles.map((p) => p.uid).indexOf(uid)]),
-      filter((array) => array[1] !== -1),
-      take(1),
-      tap((array: [Profile[], number]) => {
-        array[0][array[1]].pictureUrls = urls;
+      first(),
+      map((profiles) => {
+        console.log("wsh", picMaps);
+        // loops through picture maps
+        picMaps.forEach((map) => {
+          // finds index of profile in profilesToRender
+          const profIndex = profiles.map((p) => p.uid).indexOf(map.uid);
+          if (profIndex === -1) return;
 
-        this.profiles.next(array[0]);
-      }),
-      map(() => null)
+          // adds url to appropriate location in pictureUrls
+          // done this strange way so that the reference to pictureUrls changes such that changes are detected in the template
+          profiles[profIndex].pictureUrls = profiles[profIndex].pictureUrls.slice(0);
+          profiles[profIndex].pictureUrls[map.picIndex] = map.url;
+          // profiles[profIndex].pictureUrls = Object.assign(
+          //   [],
+          //   profiles[profIndex].pictureUrls,
+          //   { [map.picIndex]: map.url }
+          // );
+          // profiles[profIndex].pictureUrls[map.picIndex] = map.url;
+        });
+
+        // passes the new profiles object with the new urls to the profiles BehaviorSubject
+        this.profiles.next(profiles);
+      })
     );
   }
 
@@ -152,14 +345,11 @@ export class SwipeStackStore {
       // this is because it is a costly operation w.r.t backened and money-wise
       exhaustMap((uids) => this.fetchProfiles(uids)),
 
-      concatMap((profiles) => this.addToQueue(profiles)),
+      concatMap((profiles) => this.addToQueue(profiles))
 
-      // THIS NEXT ONE IS WHY IT CONSOLE LOGS MANY TIMES STORE INITIALISED, AS THIS ONE EMITS
-      // ONCE FOR EVERY USER IT MANAGES THE PICTURES OF, HENCE EVERYTHING IS WORKING FINE,
-      // THE LOG JUST BECOMES MISLEADING DUE TO THIS SETUP
-      concatMap((profiles) =>
-        profiles.length > 0 ? this.managePictures(profiles) : of(null)
-      )
+      // concatMap((profiles) =>
+      //   profiles.length > 0 ? this.managePictures(profiles) : of(null)
+      // )
     );
   }
 

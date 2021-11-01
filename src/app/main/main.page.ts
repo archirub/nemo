@@ -1,4 +1,6 @@
 import { Component, OnInit } from "@angular/core";
+import { DomController } from "@ionic/angular";
+import { RafCallback } from "@ionic/angular/providers/dom-controller";
 
 @Component({
   selector: "app-main",
@@ -6,7 +8,8 @@ import { Component, OnInit } from "@angular/core";
   styleUrls: ["./main.page.scss"],
 })
 export class MainPage implements OnInit {
-  constructor() {}
+  constructor(private domCtrl: DomController) {
+  }
 
   ngOnInit() {}
 }

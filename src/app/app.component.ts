@@ -9,10 +9,9 @@ import {
 } from "@capacitor/push-notifications";
 
 import { AngularFireAuth } from "@angular/fire/auth";
-import { Capacitor, Plugins } from "@capacitor/core";
-const { SplashScreen } = Plugins;
+import { Capacitor } from "@capacitor/core";
 
-import { HideOptions, ShowOptions } from "@capacitor/splash-screen";
+import { HideOptions, ShowOptions, SplashScreen } from "@capacitor/splash-screen";
 import { Subscription } from "rxjs";
 
 import { GlobalStateManagementService } from "@services/global-state-management/global-state-management.service";
@@ -37,10 +36,13 @@ export class AppComponent implements OnDestroy, OnInit {
     private storeReadiness: StoreReadinessService,
     private notifications: NotificationsService
   ) {
+    // window.onanimationiteration = console.log;
+
     this.initializeApp();
   }
 
   ngOnInit() {
+    // this.storeReadiness.status$.subscribe((a) => console.log("store readiniess: ", a));
     this.afAuth.authState.subscribe((a) => console.log("change in authstate: ", a));
     this.GlobalStateManagement.userState$.subscribe((a) =>
       console.log("user state is", a)

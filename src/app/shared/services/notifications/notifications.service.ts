@@ -11,6 +11,7 @@ export class NotificationsService {
   constructor() {}
 
   activate() {
+    return of("");
     return this.permissionState$.pipe(
       switchMap((state) => {
         if (state === null) return this.getPermissionState();

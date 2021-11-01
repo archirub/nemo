@@ -49,9 +49,9 @@ export class AddPhotoComponent {
   PreloadImage(src) {
     var img = new Image();
 
-    img.onload = function (a) {
-      console.log("image has been loaded right now", a);
-    };
+    // img.onload = function (a) {
+    //   console.log("image has been loaded right now", a);
+    // };
     img.src = src;
   }
 

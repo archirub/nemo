@@ -44,8 +44,15 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
   // this also allows for the initial update of the pager
   profilePictures$ = new BehaviorSubject<string[]>([]);
   @Input() set profilePictures(value: string[]) {
-    if (Array.isArray(value) && value.length > 0) {
-      this.profilePictures$.next(value);
+    if (!Array.isArray(value)) return;
+
+    // absolutely necessary. This is because empty strings can be coming in
+    // in the array when the swipeStackStore has attempted to fetch that picture but hasn't found anything
+    // there being an empty string is necessary to signify to the swipeStackStore that it has already tried fetching that pic
+    const pics = value.filter(Boolean);
+
+    if (pics.length > 0) {
+      this.profilePictures$.next(pics);
 
       this.slides
         ?.getActiveIndex()
@@ -93,9 +100,7 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
   ) {}
 
   ngOnInit() {
-    this.slides.ionSlidePrevStart;
     this.moreInfo = false;
-
     this.buildInterestSlides(this.profile);
   }
 

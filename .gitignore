@@ -35,3 +35,4 @@ package-lock.json
 
 /functions/lib
 /functions/node_modules
+package-lock.json

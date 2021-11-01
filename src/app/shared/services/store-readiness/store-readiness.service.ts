@@ -59,10 +59,10 @@ export class StoreReadinessService {
     const storesToCheck$: Observable<boolean>[] = [
       this.userStore.isReady$,
       this.swipeStackStore.isReady$,
-      this.searchCriteriaStore.isReady$,
-      this.chatboardStore.isReady$,
-      this.chatboardPicturesStore.isReady$,
-      this.OwnPicturesStore.isReady$,
+      // this.searchCriteriaStore.isReady$,
+      // this.chatboardStore.isReady$,
+      // this.chatboardPicturesStore.isReady$,
+      // this.OwnPicturesStore.isReady$,
     ];
     return combineLatest(storesToCheck$).pipe(
       map((arr) => arr.reduce((prev, curr) => (curr === false ? curr : prev)))

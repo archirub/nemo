@@ -6,7 +6,6 @@ import { HttpClientModule, HTTP_INTERCEPTORS } from "@angular/common/http";
 import { RouteReuseStrategy } from "@angular/router";
 
 import { IonicModule, IonicRouteStrategy } from "@ionic/angular";
-import { SplashScreen } from "@ionic-native/splash-screen/ngx";
 import { StatusBar } from "@ionic-native/status-bar/ngx";
 
 import { AppComponent } from "./app.component";
@@ -22,7 +21,6 @@ import { environment } from "src/environments/environment";
 import { pageTransition } from "./shared/animations/page-transition.animation";
 import { PipesModule } from "@pipes/pipes.module";
 import { DirectivesModule } from "./shared/directives/directives.module";
-import { DragDropModule } from "@angular/cdk/drag-drop";
 import { SortablejsModule } from "ngx-sortablejs";
 
 @NgModule({
@@ -40,12 +38,10 @@ import { SortablejsModule } from "ngx-sortablejs";
     AngularFireStorageModule,
     PipesModule,
     DirectivesModule,
-    DragDropModule,
     SortablejsModule.forRoot({}),
   ],
   providers: [
     StatusBar,
-    SplashScreen,
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     { provide: REGION, useValue: "europe-west2" },
     {

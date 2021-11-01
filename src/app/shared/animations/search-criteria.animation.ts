@@ -27,7 +27,7 @@ export const SCenterAnimation = (
     const shadowIOSAnimation = new AnimationController()
       .create()
       .addElement(baseEl.querySelector(".modal-shadow")!)
-      .fromTo("background", "transparent", "var(--ion-color-dark)")
+      // .fromTo("background", "transparent", "var(--ion-color-dark)")
       .fromTo("opacity", "0", "0.2");
 
     // SHADOW ANDROID
@@ -37,22 +37,22 @@ export const SCenterAnimation = (
       .beforeStyles({
         overflow: "hidden !important",
       })
-      .fromTo("background", "transparent", "var(--ion-color-dark)")
+      // .fromTo("background", "transparent", "var(--ion-color-dark)")
       .fromTo("opacity", "0", "0.2");
 
     // ALL CONTENT BELOW MODAL
     const contentAnimation = new AnimationController()
       .create()
       .addElement(homeComponent.nativeElement)
-      .addElement(tabComponent.nativeElement)
-      .fromTo("filter", "blur(0px)", "blur(20px)");
+      .addElement(tabComponent.nativeElement);
+    // .fromTo("filter", "blur(0px)", "blur(20px)");
 
     // BACKDROP
     const backdropAnimation = new AnimationController()
       .create()
       .addElement(baseEl.querySelector("ion-backdrop"))
-      .fromTo("opacity", "0.01", "var(--backdrop-opacity)")
-      .fromTo("backdropFilter", "blur(0px) opacity(1)", "blur(100px) opacity(0)");
+      .fromTo("opacity", "0.01", "var(--backdrop-opacity)");
+    // .fromTo("backdropFilter", "blur(0px) opacity(1)", "blur(100px) opacity(0)");
 
     return new AnimationController()
       .create()
