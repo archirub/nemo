@@ -1,13 +1,12 @@
-import { Component, OnInit, OnDestroy, Input } from "@angular/core";
+import { Component, OnInit, Input } from "@angular/core";
 import { ModalController, NavController } from "@ionic/angular";
 
-import { ChatboardStore } from "@stores/index";
 import { Chat } from "@classes/index";
 import {
   ChatboardPicturesStore,
   pictureHolder,
 } from "@stores/pictures/chatboard-pictures/chatboard-pictures.service";
-import { Observable, Subscription } from "rxjs";
+import { Observable } from "rxjs";
 
 @Component({
   selector: "app-matches",
@@ -21,7 +20,6 @@ export class MatchesComponent implements OnInit {
 
   constructor(
     private modalCtrl: ModalController,
-    private chatboardStore: ChatboardStore,
     private chatboardPicturesService: ChatboardPicturesStore, // used in template
     private navCtrl: NavController
   ) {}

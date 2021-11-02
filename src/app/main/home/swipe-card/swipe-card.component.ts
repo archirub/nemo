@@ -1,4 +1,4 @@
-import { ModalController, Animation } from "@ionic/angular";
+import { Animation } from "@ionic/angular";
 import {
   Component,
   OnInit,
@@ -17,17 +17,14 @@ import {
   BehaviorSubject,
   concat,
   forkJoin,
-  fromEvent,
   merge,
   Observable,
   of,
-  race,
   Subject,
   Subscription,
 } from "rxjs";
 
 import {
-  CurrentUserStore,
   OtherProfilesStore,
   SwipeOutcomeStore,
   SwipeStackStore,
@@ -42,28 +39,19 @@ import {
 } from "@animations/index";
 import { swipeChoice } from "@interfaces/index";
 import {
-  buffer,
-  concatMap,
-  debounce,
-  debounceTime,
   exhaustMap,
   filter,
-  last,
   map,
   mergeMap,
   pairwise,
-  scan,
   startWith,
   switchMap,
   take,
   tap,
   timeInterval,
-  timestamp,
   withLatestFrom,
-  window as rxjsWindow,
-  bufferWhen,
+  window as rxjsWindow
 } from "rxjs/operators";
-import { partition } from "node_modules/@types/lodash";
 
 @Component({
   selector: "app-swipe-card",

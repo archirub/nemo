@@ -1,16 +1,13 @@
-import { chat } from "./../../shared/interfaces/chat.model";
-import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from "@angular/core";
+import { Component, ElementRef, ViewChild } from "@angular/core";
 import { Animation } from "@ionic/angular";
 
-import { BehaviorSubject, combineLatest, Observable, of, Subscription } from "rxjs";
+import { BehaviorSubject } from "rxjs";
 
-import { ChatboardStore, SwipeStackStore } from "@stores/index";
-import { Chat, Profile } from "@classes/index";
+import { ChatboardStore } from "@stores/index";
+import { Chat } from "@classes/index";
 import { ChatBoardComponent } from "./chat-board/chat-board.component";
-import { Router } from "@angular/router";
-import { distinctUntilChanged, map, tap } from "rxjs/operators";
+import { map } from "rxjs/operators";
 import { FishSwimAnimation } from "@animations/fish.animation";
-import { StoreReadinessService } from "@services/store-readiness/store-readiness.service";
 
 @Component({
   selector: "app-chats",
@@ -44,9 +41,9 @@ export class ChatsPage {
   }
 
   constructor(
-    private router: Router,
+    //private router: Router,
     private chatboardStore: ChatboardStore,
-    private storeReadiness: StoreReadinessService
+    //private storeReadiness: StoreReadinessService
   ) {}
 
   ngAfterViewInit() {

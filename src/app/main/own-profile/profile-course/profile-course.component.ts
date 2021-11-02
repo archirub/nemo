@@ -12,12 +12,9 @@ import { IonInput, IonSelect } from "@ionic/angular";
 
 import {
   AreaOfStudy,
-  searchCriteriaOptions,
   SocietyCategory,
 } from "@interfaces/search-criteria.model";
-import { Profile } from "@classes/profile.class";
 import { ControlContainer, NgForm } from "@angular/forms";
-import { interval } from "rxjs";
 
 @Component({
   selector: "profile-course",

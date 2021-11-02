@@ -1,7 +1,7 @@
 import { AuthErrorType } from "@interfaces/index";
 import { AlertController } from "@ionic/angular";
 import { Observable, throwError } from "rxjs";
-import { catchError, map } from "rxjs/operators";
+import { catchError } from "rxjs/operators";
 
 const alertCtrl = new AlertController();
 

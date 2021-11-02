@@ -3,7 +3,6 @@ import {
   SocietyCategory,
   Interests,
   searchCriteria,
-  searchCriteriaOptions,
   UniversityName,
   // OnCampus,
   Degree,

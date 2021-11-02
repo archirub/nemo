@@ -12,7 +12,6 @@ import {
 } from "@angular/core";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { IonButton } from "@ionic/angular";
-import { interval } from "rxjs";
 
 @Component({
   selector: "nemo-toggle",

@@ -9,7 +9,6 @@ import {
   Output,
   EventEmitter,
   forwardRef,
-  Input,
   Renderer2,
 } from "@angular/core";
 import {
@@ -20,7 +19,7 @@ import {
   NG_VALUE_ACCESSOR,
 } from "@angular/forms";
 
-import { Question, QuestionAndAnswer } from "@interfaces/index";
+import { Question } from "@interfaces/index";
 import { questionsOptions } from "@interfaces/index";
 import { IonSelect, IonSlides, IonTextarea } from "@ionic/angular";
 

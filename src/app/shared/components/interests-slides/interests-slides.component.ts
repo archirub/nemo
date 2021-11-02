@@ -1,7 +1,6 @@
 import {
   Component,
   Input,
-  OnInit,
   Output,
   EventEmitter,
   forwardRef,

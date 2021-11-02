@@ -4,7 +4,6 @@ import {
   AfterViewInit,
   ViewChild,
   ElementRef,
-  NgZone,
   Renderer2,
   OnDestroy,
 } from "@angular/core";
@@ -18,11 +17,9 @@ import {
   forkJoin,
   from,
   Observable,
-  of,
   Subscription,
 } from "rxjs";
 import {
-  concatMap,
   distinctUntilChanged,
   exhaustMap,
   filter,

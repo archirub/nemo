@@ -3,18 +3,14 @@ import {
   AreaOfStudy,
   Baseline,
   Degree,
-  Full,
   Gender,
   Interests,
-  profilePicturePaths,
   QuestionAndAnswer,
   SexualPreference,
   SignupAuthenticated,
-  SignupOptional,
   SignupRequired,
   SocialMediaLink,
   SocietyCategory,
-  SwipeMode,
   UniversityName,
 } from "@interfaces/index";
 

@@ -1,7 +1,6 @@
 import { UniversityName } from "./universities.model";
-import { searchCriteriaOptions } from "@interfaces/index";
-import { Gender, SexualPreference, SwipeMode } from "./match-data.model";
-import { profilePicturePaths, QuestionAndAnswer, SocialMediaLink } from "./profile.model";
+import { Gender, SexualPreference } from "./match-data.model";
+import { QuestionAndAnswer, SocialMediaLink } from "./profile.model";
 import {
   AreaOfStudy,
   Degree,

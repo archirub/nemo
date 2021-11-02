@@ -14,12 +14,9 @@ import {
   BehaviorSubject,
   combineLatest,
   forkJoin,
-  from,
-  interval,
   Observable,
   of,
   Subscription,
-  timer,
 } from "rxjs";
 import { AppUser, Profile } from "@classes/index";
 import { CurrentUserStore } from "@stores/index";
@@ -55,8 +52,6 @@ import {
   withLatestFrom,
   delay,
   filter,
-  share,
-  debounceTime,
 } from "rxjs/operators";
 import {
   searchCriteriaOptions,

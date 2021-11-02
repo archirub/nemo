@@ -1,16 +1,11 @@
 import { Injectable, Inject, PLATFORM_ID } from "@angular/core";
-import { Observable, fromEvent, merge, EMPTY, Subject, ReplaySubject } from "rxjs";
+import { Observable, fromEvent, merge, EMPTY } from "rxjs";
 import { isPlatformBrowser } from "@angular/common";
 import {
   filter,
   map,
   mapTo,
-  multicast,
-  refCount,
-  share,
-  shareReplay,
   startWith,
-  switchMap,
   take,
   withLatestFrom,
 } from "rxjs/operators";

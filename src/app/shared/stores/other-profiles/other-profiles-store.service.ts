@@ -2,7 +2,7 @@ import { AngularFireStorage } from "@angular/fire/storage";
 import { Injectable } from "@angular/core";
 
 import { BehaviorSubject, forkJoin, Observable, EMPTY } from "rxjs";
-import { exhaustMap, filter, map, take, tap } from "rxjs/operators";
+import { exhaustMap, filter, map, take } from "rxjs/operators";
 
 import { Profile } from "@classes/index";
 import { AngularFirestore, DocumentSnapshot } from "@angular/fire/firestore";

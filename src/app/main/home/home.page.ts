@@ -1,4 +1,3 @@
-import { FirebaseAuthService } from "@services/firebase-auth/firebase-auth.service";
 import {
   Component,
   ElementRef,
@@ -20,22 +19,18 @@ import {
   BehaviorSubject,
   combineLatest,
   concat,
-  Observable,
   of,
   Subscription,
 } from "rxjs";
 import {
   catchError,
-  delay,
   distinctUntilChanged,
   filter,
   map,
-  startWith,
   switchMap,
   take,
   tap,
   timeout,
-  timeoutWith,
 } from "rxjs/operators";
 
 import { SearchCriteriaComponent } from "./search-criteria/search-criteria.component";
@@ -53,11 +48,9 @@ import {
 
 import { TabElementRefService } from "src/app/main/tab-menu/tab-element-ref.service";
 import { SwipeCardComponent } from "./swipe-card/swipe-card.component";
-import { AngularFirestore } from "@angular/fire/firestore";
 import { AngularFireAuth } from "@angular/fire/auth";
 import { OwnPicturesStore } from "@stores/pictures/own-pictures/own-pictures.service";
 import { StoreReadinessService } from "@services/store-readiness/store-readiness.service";
-import { Router } from "@angular/router";
 import { LoadingService } from "@services/loading/loading.service";
 
 @Component({
@@ -219,10 +212,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
       this.currentUser = profile;
     });
 
-    this.SCenterAnimation = SCenterAnimation(
-      this.tabElementRef.tabsRef,
-      this.homeContainer
-    );
+    this.SCenterAnimation = SCenterAnimation();
     this.SCleaveAnimation = SCleaveAnimation(
       this.tabElementRef.tabsRef,
       this.homeContainer

@@ -7,7 +7,7 @@ import {
 import { editableProfileFields } from "./profile.model";
 import { searchCriteria, SearchFeatures } from "./search-criteria.model";
 import { SignupOptional, SignupRequired } from "./signup.model";
-import { swipeChoice, uidChoiceMap } from "./swipe-choice.model";
+import { uidChoiceMap } from "./swipe-choice.model";
 import { UserReport } from "./user-report.models";
 
 export interface generateSwipeStackRequest {

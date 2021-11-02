@@ -6,8 +6,6 @@ import {
   ViewChild,
   ElementRef,
   ChangeDetectorRef,
-  QueryList,
-  ViewChildren,
 } from "@angular/core";
 
 import {
@@ -16,10 +14,9 @@ import {
   IonSlides,
   IonSearchbar,
   LoadingController,
-  IonRow,
 } from "@ionic/angular";
 import { AngularFireAuth } from "@angular/fire/auth";
-import { ActivatedRoute, ParamMap } from "@angular/router";
+import { ActivatedRoute } from "@angular/router";
 
 import { ReportUserComponent } from "../report-user/report-user.component";
 
@@ -37,18 +34,14 @@ import {
 import {
   concatMap,
   delay,
-  distinct,
   distinctUntilChanged,
   exhaustMap,
   filter,
   first,
   map,
-  share,
   shareReplay,
-  startWith,
   switchMap,
   take,
-  tap,
   withLatestFrom,
 } from "rxjs/operators";
 

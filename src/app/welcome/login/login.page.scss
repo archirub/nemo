@@ -2,34 +2,34 @@ ion-content {
     --overflow: hidden;
 }
 
-ion-grid {
-    position: absolute;
-    top: 40.5vh;
-    width: 100%;
-}
+// ion-grid {
+//     position: absolute;
+//     top: 40.5vh;
+//     width: 100%;
+// }
 
-ion-col {
-    display: flex;
-    justify-content: center;
-}
+// ion-col {
+//     display: flex;
+//     justify-content: center;
+// }
 
-ion-item {
-    width: 70vw;
-    --padding-start: 0;
-}
+// ion-item {
+//     width: 70vw;
+//     --padding-start: 0;
+// }
 
 .center {
     display: flex;
     justify-content: center;
 }
 
-.fish {
-    height: 20vh;
-    position: absolute;
-    z-index: 2;
-    top: 11vh;
-    opacity: 0.55;
-}
+// .fish {
+//     height: 20vh;
+//     position: absolute;
+//     z-index: 2;
+//     top: 11vh;
+//     opacity: 0.55;
+// }
 
 .logo {
     position: absolute;

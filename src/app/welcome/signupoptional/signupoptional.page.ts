@@ -14,11 +14,7 @@ import {
   LoadingController,
   NavController,
 } from "@ionic/angular";
-import { Router } from "@angular/router";
 import { FormGroup, FormControl, FormArray, FormBuilder } from "@angular/forms";
-
-import { concat, from, of } from "rxjs";
-import { catchError, concatMap, switchMap } from "rxjs/operators";
 
 import {
   searchCriteriaOptions,

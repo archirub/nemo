@@ -22,12 +22,10 @@ import { AngularFireFunctions } from "@angular/fire/functions";
 import {
   BehaviorSubject,
   concat,
-  from,
   interval,
   Observable,
   of,
   Subscription,
-  timer,
 } from "rxjs";
 import {
   catchError,
@@ -38,7 +36,6 @@ import {
   switchMap,
   take,
   tap,
-  withLatestFrom,
 } from "rxjs/operators";
 
 import { FlyingLetterAnimation } from "@animations/letter.animation";
@@ -51,7 +48,6 @@ import {
 import { LoadingService } from "@services/loading/loading.service";
 import { UniversityName } from "@interfaces/universities.model";
 import { UniversitiesStore } from "@stores/universities/universities.service";
-import { takeWhile } from "lodash";
 import { UserCredentialType } from "@interfaces/firebase.model";
 
 @Component({

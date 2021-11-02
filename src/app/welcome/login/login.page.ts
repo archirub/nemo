@@ -1,18 +1,13 @@
 import {
   AlertController,
-  Animation,
   LoadingController,
   NavController,
 } from "@ionic/angular";
-import { Component, ElementRef, ViewChild } from "@angular/core";
+import { Component } from "@angular/core";
 import { FormControl, FormGroup, Validators } from "@angular/forms";
 
 import { AngularFireAuth } from "@angular/fire/auth";
-
 import { FirebaseAuthService } from "@services/firebase-auth/firebase-auth.service";
-
-import { FishSwimAnimation } from "@animations/index";
-import { Router } from "@angular/router";
 import { LoadingService } from "@services/loading/loading.service";
 
 @Component({

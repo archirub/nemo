@@ -23,7 +23,6 @@ import {
 } from "@ionic/angular";
 
 import { Chat } from "@classes/index";
-import { MatchesEnterAnimation, MatchesLeaveAnimation } from "@animations/index";
 import { MatchesComponent } from "../matches/matches.component";
 import { TabElementRefService } from "src/app/main/tab-menu/tab-element-ref.service";
 import {
@@ -33,26 +32,19 @@ import {
 import {
   BehaviorSubject,
   combineLatest,
-  forkJoin,
-  fromEvent,
   Observable,
-  of,
-  Subject,
   Subscription,
   timer,
 } from "rxjs";
 import {
-  concatMap,
-  delay,
   distinctUntilChanged,
-  exhaustMap,
   filter,
   first,
   map,
   switchMap,
   tap,
 } from "rxjs/operators";
-import { ChatboardStore, OtherProfilesStore } from "@stores/index";
+import { ChatboardStore } from "@stores/index";
 import { FadeOutAnimation } from "@animations/fade-out.animation";
 import { StoreReadinessService } from "@services/store-readiness/store-readiness.service";
 
@@ -150,35 +142,35 @@ export class ChatBoardComponent implements OnInit, AfterViewInit {
     );
   }
 
-  async presentMatches(): Promise<void> {
-    this.MatchesEnterAnimation = MatchesEnterAnimation(
-      this.matchesButton,
-      this.tabElementRef.tabsRef,
-      this.chatContainer,
-      this.screenHeight,
-      this.screenWidth
-    );
-    this.MatchesLeaveAnimation = MatchesLeaveAnimation(
-      this.matchesButton,
-      this.tabElementRef.tabsRef,
-      this.chatContainer,
-      this.screenHeight,
-      this.screenWidth
-    );
+  // async presentMatches(): Promise<void> {
+  //   this.MatchesEnterAnimation = MatchesEnterAnimation(
+  //     this.matchesButton,
+  //     this.tabElementRef.tabsRef,
+  //     this.chatContainer,
+  //     this.screenHeight,
+  //     this.screenWidth
+  //   );
+  //   this.MatchesLeaveAnimation = MatchesLeaveAnimation(
+  //     this.matchesButton,
+  //     this.tabElementRef.tabsRef,
+  //     this.chatContainer,
+  //     this.screenHeight,
+  //     this.screenWidth
+  //   );
 
-    this.modal = await this.modalCtrl.create({
-      component: MatchesComponent,
-      componentProps: { chats: this.matches },
-      enterAnimation: this.MatchesEnterAnimation,
-      leaveAnimation: this.MatchesLeaveAnimation,
-    });
-    // .then((m) => {
-    //   this.modal = m;
-    //   this.onModalDismiss(this.modal);
-    // });
+  //   this.modal = await this.modalCtrl.create({
+  //     component: MatchesComponent,
+  //     componentProps: { chats: this.matches },
+  //     enterAnimation: this.MatchesEnterAnimation,
+  //     leaveAnimation: this.MatchesLeaveAnimation,
+  //   });
+  //   // .then((m) => {
+  //   //   this.modal = m;
+  //   //   this.onModalDismiss(this.modal);
+  //   // });
 
-    return this.modal.present();
-  }
+  //   return this.modal.present();
+  // }
 
   // Used to preload modal as soon as the previous modal was dismissed
   // Shamelessly adapted from the homepage SC modal

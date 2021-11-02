@@ -2,9 +2,9 @@ import { LoadingController, NavController } from "@ionic/angular";
 import { Component, OnInit } from "@angular/core";
 import { GlobalStateManagementService } from "@services/global-state-management/global-state-management.service";
 import { StoreReadinessService } from "@services/store-readiness/store-readiness.service";
-import { Observable, of } from "rxjs";
+import { Observable } from "rxjs";
 import { LoadingService } from "@services/loading/loading.service";
-import { exhaustMap, filter, first, startWith, tap } from "rxjs/operators";
+import { exhaustMap, filter, first } from "rxjs/operators";
 import { NotificationsService } from "@services/notifications/notifications.service";
 
 @Component({

@@ -1,4 +1,4 @@
-import { SexualPreference, Gender, SwipeMode } from "./../interfaces/match-data.model";
+import { SexualPreference, Gender } from "./../interfaces/match-data.model";
 import { Profile } from "./profile.class";
 import {
   SocialMediaLink,

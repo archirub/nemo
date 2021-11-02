@@ -1,4 +1,3 @@
-import { ElementRef } from "@angular/core";
 import { AnimationController } from "@ionic/angular";
 // import * as anime from "animejs"
 

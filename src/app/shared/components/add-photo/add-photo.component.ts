@@ -1,12 +1,10 @@
 import {
   Component,
-  OnInit,
   ViewChild,
   ElementRef,
   Output,
   EventEmitter,
   Input,
-  ChangeDetectionStrategy,
   Renderer2,
 } from "@angular/core";
 

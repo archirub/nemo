@@ -8,7 +8,7 @@ import {
   Output,
 } from "@angular/core";
 import { Subject, Subscription } from "rxjs";
-import { debounceTime, map, throttle, throttleTime } from "rxjs/operators";
+import { map, throttleTime } from "rxjs/operators";
 
 @Directive({
   selector: "[debounceClick]",

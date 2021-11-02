@@ -6,7 +6,6 @@ import {
   ReplaySubject,
   Observable,
   combineLatest,
-  of,
   Subject,
 } from "rxjs";
 
@@ -18,18 +17,13 @@ import {
   withLatestFrom,
   distinctUntilChanged,
   share,
-  merge,
   first,
-  filter,
-  exhaustMap,
-  switchMap,
   tap,
 } from "rxjs/operators";
 import {
   chatDeletionByUserRequest,
   chatFromDatabase,
   FirebaseUser,
-  messageFromDatabase,
   messageMap,
 } from "@interfaces/index";
 import { AngularFireFunctions } from "@angular/fire/functions";

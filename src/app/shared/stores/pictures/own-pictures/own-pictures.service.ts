@@ -12,16 +12,13 @@ import {
   filter,
   map,
   share,
-  skipWhile,
   switchMap,
   take,
   tap,
-  withLatestFrom,
 } from "rxjs/operators";
 
 import {
   Base64ToUrl,
-  firebaseStoragePath,
   urlToBase64,
 } from "../common-pictures-functions";
 import { CurrentUserStore } from "@stores/index";

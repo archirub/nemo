@@ -1,5 +1,4 @@
 import { Component } from "@angular/core";
-import { FormsModule } from "@angular/forms";
 import { UserReport } from "@interfaces/user-report.models";
 import { AlertController, LoadingController, ModalController } from "@ionic/angular";
 import { LoadingService } from "@services/loading/loading.service";

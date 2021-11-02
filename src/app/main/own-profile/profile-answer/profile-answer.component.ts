@@ -5,12 +5,9 @@ import {
   Input,
   Output,
   ViewChild,
-  forwardRef,
   Renderer2,
 } from "@angular/core";
-import { NG_VALUE_ACCESSOR } from "@angular/forms";
-import { AppUser } from "@classes/user.class";
-import { Question, QuestionAndAnswer, questionsOptions } from "@interfaces/profile.model";
+import { Question, QuestionAndAnswer } from "@interfaces/profile.model";
 import { IonSelect, IonTextarea } from "@ionic/angular";
 
 // change the "addable" system so that questions are added outside of the slides component,

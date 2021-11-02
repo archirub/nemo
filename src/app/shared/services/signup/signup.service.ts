@@ -20,32 +20,19 @@ import {
 import {
   catchError,
   concatMap,
-  filter,
   last,
-  map,
-  publish,
-  publishReplay,
-  share,
-  shareReplay,
-  startWith,
   switchMap,
   take,
-  tap,
-  withLatestFrom,
 } from "rxjs/operators";
-
-import { environment } from "src/environments/environment";
 
 import { CurrentUserStore } from "@stores/index";
 import {
   SignupRequired,
   createAccountRequest,
   SignupOptional,
-  SignupAuthenticated,
   allowOptionalProp,
 } from "@interfaces/index";
 import { SignupDataHolder } from "@classes/index";
-import { SignupoptionalPage } from "src/app/welcome/signupoptional/signupoptional.page";
 import { UploadTaskSnapshot } from "@angular/fire/storage/interfaces";
 
 @Injectable({

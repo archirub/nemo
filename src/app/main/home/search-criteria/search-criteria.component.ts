@@ -10,16 +10,13 @@ import {
 import { IonSlides, IonContent, ModalController } from "@ionic/angular";
 import { FormControl, FormGroup } from "@angular/forms";
 
-import { Observable, Subscription } from "rxjs";
+import { Subscription } from "rxjs";
 
 import { SearchCriteriaStore } from "@stores/search-criteria/search-criteria-store.service";
 import { searchCriteria, searchCriteriaOptions } from "@interfaces/search-criteria.model";
 import { SearchCriteria } from "@classes/index";
 
 import { AppToggleComponent } from "@components/index";
-import { UniversityName } from "@interfaces/universities.model";
-import { map } from "rxjs/operators";
-import { tap } from "lodash";
 
 @Component({
   selector: "app-search-criteria",

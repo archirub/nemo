@@ -6,8 +6,6 @@ import { SwipeOutcomeStore } from "@stores/swipe-outcome/swipe-outcome-store.ser
 import { SwipeStackStore } from "@stores/swipe-stack/swipe-stack-store.service";
 import { SettingsStore } from "@stores/settings/settings-store.service";
 import { CurrentUserStore } from "@stores/current-user/current-user-store.service";
-import { ChatboardPicturesStore } from "@stores/pictures/chatboard-pictures/chatboard-pictures.service";
-import { OwnPicturesStore } from "@stores/pictures/own-pictures/own-pictures.service";
 
 // service created to solve a circular dependency between global-state-management service and
 // firebase-auth service, where the latter only imported the former to use the emptyStores functionality
@@ -19,7 +17,7 @@ export class EmptyStoresService {
   constructor(
     private userStore: CurrentUserStore,
     private chatboardStore: ChatboardStore,
-    private chatboardPicturesStore: ChatboardPicturesStore,
+    //private chatboardPicturesStore: ChatboardPicturesStore,
     private searchCriteriaStore: SearchCriteriaStore,
     private otherProfilesStore: OtherProfilesStore,
     private swipeOutcomeStore: SwipeOutcomeStore,

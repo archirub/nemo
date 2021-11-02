@@ -2,10 +2,7 @@ import { ElementRef } from "@angular/core";
 import { AnimationController } from "@ionic/angular";
 // import * as anime from "animejs"
 
-export const SCenterAnimation = (
-  tabComponent: ElementRef<any>,
-  homeComponent: ElementRef<any>
-) => {
+export const SCenterAnimation = () => {
   const animation = (baseEl: any) => {
     // MODAL
     const wrapperAnimation = new AnimationController()
@@ -41,10 +38,10 @@ export const SCenterAnimation = (
       .fromTo("opacity", "0", "0.2");
 
     // ALL CONTENT BELOW MODAL
-    const contentAnimation = new AnimationController()
-      .create()
-      .addElement(homeComponent.nativeElement)
-      .addElement(tabComponent.nativeElement);
+    // const contentAnimation = new AnimationController()
+    //   .create()
+    //   .addElement(homeComponent.nativeElement)
+    //   .addElement(tabComponent.nativeElement);
     // .fromTo("filter", "blur(0px)", "blur(20px)");
 
     // BACKDROP
@@ -64,7 +61,7 @@ export const SCenterAnimation = (
         shadowIOSAnimation,
         shadowAndroidAnimation,
         wrapperAnimation,
-        contentAnimation,
+        //contentAnimation,
       ]);
   };
   return animation;
@@ -75,7 +72,7 @@ export const SCleaveAnimation = (
   homeComponent: ElementRef<any>
 ) => {
   const animation = (baseEl) => {
-    return SCenterAnimation(tabComponent, homeComponent)(baseEl).direction("reverse");
+    return SCenterAnimation()(baseEl).direction("reverse");
   };
   return animation;
 };

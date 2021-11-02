@@ -1,6 +1,5 @@
 import {
   profile,
-  profilePicturePaths,
   SocialMediaLink,
   QuestionAndAnswer,
   UniversityName,

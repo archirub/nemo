@@ -10,19 +10,15 @@ import {
   EventEmitter,
   ViewChildren,
   HostListener,
-  OnChanges,
-  SimpleChanges,
-  ChangeDetectorRef,
   Renderer2,
 } from "@angular/core";
 import { AngularFireAuth } from "@angular/fire/auth";
 import { LessInfoAnimation, MoreInfoAnimation } from "@animations/info.animation";
 import { Profile } from "@classes/index";
 import { IonContent, IonSlides } from "@ionic/angular";
-import { OwnPicturesStore } from "@stores/pictures/own-pictures/own-pictures.service";
 import { UserReportingService } from "@services/user-reporting/user-reporting.service";
-import { BehaviorSubject, Observable, Subscription } from "rxjs";
-import { filter, map, tap, take } from "rxjs/operators";
+import { BehaviorSubject } from "rxjs";
+import { filter, map, take } from "rxjs/operators";
 import { ReportUserComponent } from "../../../main/chats/report-user/report-user.component";
 
 @Component({

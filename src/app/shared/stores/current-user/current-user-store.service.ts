@@ -23,9 +23,7 @@ import {
   map,
   share,
   switchMap,
-  take,
-  tap,
-  withLatestFrom,
+  take
 } from "rxjs/operators";
 import { isEqual } from "lodash";
 
