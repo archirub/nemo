@@ -23,6 +23,7 @@ export interface profile {
   firstName: string;
   dateOfBirth: Date;
   pictureUrls: string[];
+  pictureCount: number | null;
   biography: string;
   university: UniversityName;
   degree: Degree;

@@ -30,6 +30,7 @@ import {
   map,
   mergeMap,
   retry,
+  share,
   switchMap,
   tap,
 } from "rxjs/operators";
@@ -113,30 +114,29 @@ export class GlobalStateManagementService {
     this.afAuth.user.subscribe(this.auth$);
   }
 
-  activate(): Observable<any> {
-    return this.connectionService.monitor().pipe(
-      switchMap((isConnected) => {
-        if (isConnected && !this.alreadyConnectedOnce) {
-          this.alreadyConnectedOnce = true;
-          return this.globalManagement();
-        } else if (isConnected && this.alreadyConnectedOnce) {
-          return from(this.connectionService.displayBackOnlineToast()).pipe(
-            switchMap(() => this.globalManagement())
-          );
-        } else {
-          return this.connectionService.displayOfflineToast();
-        }
-      })
-    );
-  }
+  public activate$ = this.connectionService.monitor().pipe(
+    switchMap((isConnected) => {
+      if (isConnected && !this.alreadyConnectedOnce) {
+        this.alreadyConnectedOnce = true;
+        return this.globalManagement();
+      } else if (isConnected && this.alreadyConnectedOnce) {
+        return from(this.connectionService.displayBackOnlineToast()).pipe(
+          switchMap(() => this.globalManagement())
+        );
+      } else {
+        return this.connectionService.displayOfflineToast();
+      }
+    }),
+    share()
+  );
 
   activateAllStores(): Observable<any> {
     const storesToActivate$: Observable<any>[] = [
-      this.userStore.fillStore(),
-      this.swipeStackStore.activateStore(),
-      this.searchCriteriaStore.activateStore(),
-      this.chatboardStore.activateStore(),
-      this.OwnPicturesStore.activateStore(),
+      this.userStore.fillStore$,
+      this.swipeStackStore.activateStore$,
+      this.searchCriteriaStore.activateStore$,
+      this.chatboardStore.activateStore$,
+      this.OwnPicturesStore.activateStore$,
       this.chatboardPicturesStore.activateStore(
         this.chatboardStore.allChats$,
         this.chatboardStore.hasNoChats$

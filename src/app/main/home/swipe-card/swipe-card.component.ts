@@ -24,11 +24,7 @@ import {
   Subscription,
 } from "rxjs";
 
-import {
-  OtherProfilesStore,
-  SwipeOutcomeStore,
-  SwipeStackStore,
-} from "@stores/index";
+import { OtherProfilesStore, SwipeOutcomeStore, SwipeStackStore } from "@stores/index";
 import { Profile, AppUser } from "@classes/index";
 import { ProfileCardComponent } from "@components/index";
 import {
@@ -50,7 +46,6 @@ import {
   tap,
   timeInterval,
   withLatestFrom,
-  window as rxjsWindow
 } from "rxjs/operators";
 
 @Component({
@@ -66,7 +61,7 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
   @ViewChild("yesBubble", { read: ElementRef }) yesBubble: ElementRef;
   @ViewChild("noBubble", { read: ElementRef }) noBubble: ElementRef;
   @ViewChild("profileComponent") profileComponent: ProfileCardComponent;
-  @ViewChildren("profileComponent") profCard: QueryList<ProfileCardComponent>;
+  @ViewChildren("profileComponent") profCardStack: QueryList<ProfileCardComponent>;
 
   screenHeight: number;
   screenWidth: number;
@@ -104,6 +99,9 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
   }
 
   ngAfterViewInit() {
+    this.subs.add(
+      this.swipeStackStore.managePictureSwiping(this.profCardStack).subscribe()
+    );
     this.subs.add(this.onCardTapLogic().subscribe());
     this.subs.add(this.handleTaps().subscribe());
   }
@@ -207,7 +205,7 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
 
   private doubleTapOnCard(choice: swipeChoice): Observable<void> {
     if (choice === "yes") {
-      this.matched.emit(Array.from(this.profCard)[0].profile); // FOR DEVELOPMENT
+      this.matched.emit(Array.from(this.profCardStack)[0].profile); // FOR DEVELOPMENT
       return this.profiles$.pipe(
         take(1),
         withLatestFrom(of(SwipeYesAnimation(this.cards.first, this.screenWidth))),
