@@ -196,7 +196,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
    * Temporary, just for development, to avoid fetching the stack on each reload / document save
    */
   activateSwipeStack() {
-    this.subs.add(this.swipeStackStore.activateStore().subscribe());
+    this.subs.add(this.swipeStackStore.activateStore$.subscribe());
     // this.firebaseAuth.logOut();
   }
 

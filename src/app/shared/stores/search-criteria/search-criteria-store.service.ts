@@ -39,7 +39,9 @@ export class SearchCriteriaStore {
     this.searchCriteria$ = this.searchCriteria.asObservable();
   }
 
-  public activateStore() {
+  public activateStore$ = this.activateStore();
+
+  private activateStore() {
     return this.appUser.user$.pipe(
       filter((user) => !!user),
       map((user) => {

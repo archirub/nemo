@@ -90,7 +90,9 @@ export class ChatboardStore {
     private afFunctions: AngularFireFunctions
   ) {}
 
-  public activateStore() {
+  public activateStore$ = this.activateStore();
+
+  private activateStore() {
     return combineLatest([
       this.activateChatDocsListening(),
       this.activateRecentMessageListening(),

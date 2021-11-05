@@ -15,6 +15,7 @@ export class Profile implements profile {
   private _firstName: string;
   private _dateOfBirth: Date;
   private _pictureUrls: string[];
+  private _pictureCount: number | null;
   private _biography: string;
   private _university: UniversityName;
   private _course: string;
@@ -32,6 +33,7 @@ export class Profile implements profile {
     firstName: string,
     dateOfBirth: Date,
     pictureUrls: string[],
+    pictureCount: number | null,
     biography: string,
     university: UniversityName,
     course: string,
@@ -48,6 +50,7 @@ export class Profile implements profile {
     this.firstName = firstName;
     this.dateOfBirth = dateOfBirth;
     this.pictureUrls = pictureUrls;
+    this.pictureCount = pictureCount;
     this.biography = biography;
     this.university = university;
     this.course = course;
@@ -87,6 +90,13 @@ export class Profile implements profile {
   }
   public set pictureUrls(value: string[]) {
     this._pictureUrls = value;
+  }
+
+  public get pictureCount(): number | null {
+    return this._pictureCount;
+  }
+  public set pictureCount(value: number | null) {
+    this._pictureCount = value;
   }
 
   public get biography(): string {

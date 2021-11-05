@@ -2,11 +2,7 @@
   <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script> -->
   <div class="img-container">
     <div class="pager">
-      <ion-icon
-        #bullets
-        name="ellipse"
-        *ngFor="let path of profilePictures$ | async"
-      ></ion-icon>
+      <ion-icon #bullets name="ellipse" *ngFor="let path of pictureCountArray"></ion-icon>
     </div>
     <ion-slides
       #picSlides
@@ -163,7 +159,7 @@
         <div *ngIf="reportable">
           <div id="interests-container" class="centered">
             <div class="reportButton" (click)="reportUser()">
-              <img name="shield" src="/assets/reporticon.svg" alt="Report User"/>
+              <img name="shield" src="/assets/reporticon.svg" alt="Report User" />
               <br />
               <ion-label>Report {{ profile?.firstName }}</ion-label>
             </div>

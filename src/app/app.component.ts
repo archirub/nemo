@@ -75,7 +75,7 @@ export class AppComponent implements OnDestroy, OnInit {
   }
 
   startGlobalStateManagement() {
-    this.subs.add(this.GlobalStateManagement.activate().subscribe());
+    this.subs.add(this.GlobalStateManagement.activate$.subscribe());
   }
 
   /**

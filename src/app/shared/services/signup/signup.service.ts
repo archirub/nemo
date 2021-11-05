@@ -92,7 +92,7 @@ export class SignupService {
         switchMap(([dataStored, user]) => {
           if (!user) {
             console.error("Big mistake right here");
-            return throwError("NO USER AUTHENTICATED");
+            return throwError(() => new Error("NO USER AUTHENTICATED"));
           }
           const creationRequestData: createAccountRequest = {
             firstName: dataStored.firstName,
@@ -131,7 +131,7 @@ export class SignupService {
             return of();
           }
           console.log("we out here fam");
-          return concat(this.removeLocalStorage(), this.currentUserStore.fillStore());
+          return concat(this.removeLocalStorage(), this.currentUserStore.fillStore$);
         })
       )
       .toPromise();

@@ -61,6 +61,7 @@ export class FormatService {
     const firstName = profile.firstName;
     const dateOfBirth = profile.dateOfBirth.toDate();
     const pictureUrls = [];
+    const pictureCount = null;
     const biography = profile.biography;
     const university = profile.university;
     const course = profile.course;
@@ -78,6 +79,7 @@ export class FormatService {
       firstName,
       dateOfBirth,
       pictureUrls,
+      pictureCount,
       biography,
       university,
       course,

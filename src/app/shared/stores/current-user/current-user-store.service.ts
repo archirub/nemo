@@ -20,12 +20,15 @@ import {
   catchError,
   distinctUntilChanged,
   filter,
+  first,
   map,
   share,
+  shareReplay,
   switchMap,
   take
 } from "rxjs/operators";
 import { isEqual } from "lodash";
+import { AngularFireStorage } from "@angular/fire/storage";
 
 @Injectable({
   providedIn: "root",
@@ -43,19 +46,19 @@ export class CurrentUserStore {
     private afAuth: AngularFireAuth,
     private fs: AngularFirestore,
     private afFunctions: AngularFireFunctions,
-    private format: FormatService
+    private format: FormatService,
+    private afStorage: AngularFireStorage
   ) {}
 
   updateLatestSearchCriteriaOnDb(searchCriteria: SearchCriteria) {}
 
+  public fillStore$ = this.fillStore();
+
   /** Fetches info from database to update the User BehaviorSubject */
-  public fillStore(): Observable<{
-    profileSuccess: boolean;
-    privateProfileSuccess: boolean;
-    matchDataSuccess: boolean;
-  }> {
+  private fillStore() {
     return this.afAuth.user.pipe(
       take(1),
+      tap(() => console.log("FILL USER STORE TRIGGERED")),
       switchMap((user) => {
         if (!user) throw "no user authenticated";
 
@@ -98,6 +101,7 @@ export class CurrentUserStore {
           profile?.firstName,
           profile?.dateOfBirth,
           profile?.pictureUrls,
+          profile?.pictureCount,
           profile?.biography,
           profile?.university,
           profile?.course,
@@ -116,10 +120,20 @@ export class CurrentUserStore {
           // infoFromMatchData?.swipeMode
         );
 
-        this.user.next(user);
-
-        return successResponse;
+        return user;
       }),
+      switchMap((user) =>
+        this.afStorage
+          .ref("/profilePictures/" + user.uid)
+          .listAll()
+          .pipe(
+            first(),
+            map((list) => list.items.length),
+            tap((count) => (user.pictureCount = count)),
+            map(() => user)
+          )
+      ),
+      tap((user) => this.user.next(user)),
       catchError((error) => {
         if (error === "no user authenticated")
           return of({
@@ -128,12 +142,14 @@ export class CurrentUserStore {
             matchDataSuccess: false,
           });
       }),
-      share()
+      shareReplay()
       // tap(() => console.log("activating current user store"))
     );
   }
 
-  public updateFieldsOnDatabase(editableFields: editableProfileFields): Observable<void> {
+  public updateFieldsOnDatabase(
+    editableFields: editableProfileFields
+  ): Observable<void | {}> {
     const requestData: profileEditingByUserRequest = { data: editableFields };
 
     return this.user$.pipe(

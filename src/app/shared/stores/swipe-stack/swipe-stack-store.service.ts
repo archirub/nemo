@@ -4,7 +4,7 @@
 // - Create logic for picture loading strategy, which will most likely use profilesToRender$ as a source.
 // - test performance and adjust variables to optimial value (i.e. MIN_RENDERED_COUNT, MAX_RENDERED_COUNT, and those from picture loading strategy)
 
-import { Injectable } from "@angular/core";
+import { Injectable, QueryList } from "@angular/core";
 import { AngularFirestore, DocumentSnapshot } from "@angular/fire/firestore";
 import { AngularFireFunctions } from "@angular/fire/functions";
 
@@ -12,7 +12,9 @@ import {
   BehaviorSubject,
   combineLatest,
   concat,
+  EMPTY,
   forkJoin,
+  lastValueFrom,
   merge,
   Observable,
   of,
@@ -48,6 +50,7 @@ import {
 } from "@interfaces/index";
 import { AngularFireStorage } from "@angular/fire/storage";
 import { isEqual, cloneDeep } from "lodash";
+import { ProfileCardComponent } from "@components/profile-card/profile-card.component";
 
 // loading is for when there is no one in the stack but we are fetching
 // empty is for the stack has been fetched and no one was found
@@ -100,6 +103,62 @@ export class SwipeStackStore {
       [4, 0],
     ], // batch 3
   ];
+
+  public activateStore$ = this.activateStore();
+
+  /**
+   * Have to subscribe to this to activate the chain of logic that fills the store etc.
+   */
+  private activateStore(): Observable<any> {
+    return merge(
+      this.manageSwipeStack(),
+      this.manageRenderedProfiles(),
+      this.managePictureQueue(),
+      this.manageStoreReadiness()
+    );
+  }
+
+  managePictureSwiping(profileCards: QueryList<ProfileCardComponent>) {
+    return profileCards.changes.pipe(
+      switchMap((list: QueryList<ProfileCardComponent>) =>
+        list.first.slides.ionSlideWillChange.pipe(
+          map((slides) => ({
+            slides,
+            uid: list.first.profile.uid,
+            profilePictures$: list.first.profilePictures$,
+          }))
+        )
+      ),
+      map((map) => ({
+        picIndex: (map.slides.target as any)?.swiper?.realIndex as number,
+        uid: map.uid,
+        profilePictures$: map.profilePictures$,
+      })),
+      filter((map) => typeof map.picIndex === "number" && map.picIndex > 0),
+      switchMap((map) =>
+        map.profilePictures$.pipe(
+          first(),
+          switchMap((pics) => {
+            const maxIndex = map.picIndex + 2;
+
+            const addPictures$ = Array.from({ length: maxIndex + 1 }).map((_, i) => {
+              const hasUrl = typeof pics[i] === "string" && pics[i].length > 1;
+              if (hasUrl) return EMPTY;
+
+              return this.getUrl(map.uid, i).pipe(
+                switchMap((url) =>
+                  url
+                    ? this.addPictures([{ uid: map.uid, picIndex: map.picIndex, url }])
+                    : EMPTY
+                )
+              );
+            });
+            return concat(...addPictures$);
+          })
+        )
+      )
+    );
+  }
 
   managePictureQueue() {
     // this relies on a particular fact: that adding new urls to the profiles BehavioSubject
@@ -160,18 +219,6 @@ export class SwipeStackStore {
 
       tap((profiles) => console.log("swipe stack is ready:", profiles)),
       tap(() => this.isReady.next(true))
-    );
-  }
-
-  /**
-   * Have to subscribe to this to activate the chain of logic that fills the store etc.
-   */
-  activateStore(): Observable<any> {
-    return merge(
-      this.manageSwipeStack(),
-      this.manageRenderedProfiles(),
-      this.managePictureQueue(),
-      this.manageStoreReadiness()
     );
   }
 
@@ -312,7 +359,6 @@ export class SwipeStackStore {
     return this.profiles$.pipe(
       first(),
       map((profiles) => {
-        console.log("wsh", picMaps);
         // loops through picture maps
         picMaps.forEach((map) => {
           // finds index of profile in profilesToRender
@@ -346,10 +392,6 @@ export class SwipeStackStore {
       exhaustMap((uids) => this.fetchProfiles(uids)),
 
       concatMap((profiles) => this.addToQueue(profiles))
-
-      // concatMap((profiles) =>
-      //   profiles.length > 0 ? this.managePictures(profiles) : of(null)
-      // )
     );
   }
 
@@ -384,8 +426,9 @@ export class SwipeStackStore {
    * Returns an observable of the new profiles
    */
   private addToQueue(newProfiles: Profile[]): Observable<Profile[]> {
-    return this.profiles$.pipe(
-      take(1),
+    return this.getPictureCounts(newProfiles).pipe(
+      switchMap(() => this.profiles$),
+      first(),
       tap((profiles) => this.profiles.next(newProfiles.concat(profiles))),
       concatMap(() => of(newProfiles)) // makes it so that the observable returned gives an array of the new profiles
     );
@@ -430,6 +473,25 @@ export class SwipeStackStore {
           })
           .filter((s) => s)
       )
+    );
+  }
+
+  getPictureCounts(profiles: Profile[]): Observable<Profile[]> {
+    const getPictureCounts$ = profiles.map((p, i) =>
+      this.afStorage
+        .ref("/profilePictures/" + p.uid)
+        .listAll()
+        .pipe(
+          first(),
+          map((list) => list.items.length)
+        )
+    );
+
+    return forkJoin(getPictureCounts$).pipe(
+      map((pictureCounts) =>
+        pictureCounts.forEach((count, i) => (profiles[i].pictureCount = count))
+      ),
+      map(() => profiles)
     );
   }
 }

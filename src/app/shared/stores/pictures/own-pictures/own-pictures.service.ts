@@ -51,10 +51,12 @@ export class OwnPicturesStore {
     private currentUser: CurrentUserStore
   ) {}
 
+  public activateStore$ = this.activateStore();
+
   /**
    * Subscribe to this method to activate the logic that manages the store
    */
-  activateStore(): Observable<any> {
+  private activateStore(): Observable<any> {
     return combineLatest([this.fillStore(), this.activateLocalStorer()]).pipe(
       // tap(() => console.log("activating own pictures store")),
       share()

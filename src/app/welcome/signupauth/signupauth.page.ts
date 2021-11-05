@@ -144,7 +144,6 @@ export class SignupauthPage implements OnInit {
       concatMap(() => this.resendingIsAvailable$),
       take(1),
       filter((canResend) => canResend),
-      tap(() => console.log("dalsdaks")),
       map(() => this.resendingIsAvailable.next(false)),
       exhaustMap(() =>
         interval(1000).pipe(

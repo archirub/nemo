@@ -11,14 +11,15 @@ import {
   ViewChildren,
   HostListener,
   Renderer2,
+  OnDestroy,
 } from "@angular/core";
 import { AngularFireAuth } from "@angular/fire/auth";
 import { LessInfoAnimation, MoreInfoAnimation } from "@animations/info.animation";
 import { Profile } from "@classes/index";
 import { IonContent, IonSlides } from "@ionic/angular";
 import { UserReportingService } from "@services/user-reporting/user-reporting.service";
-import { BehaviorSubject } from "rxjs";
-import { filter, map, take } from "rxjs/operators";
+import { BehaviorSubject, combineLatest, Subscription } from "rxjs";
+import { filter, map, take, startWith } from "rxjs/operators";
 import { ReportUserComponent } from "../../../main/chats/report-user/report-user.component";
 
 @Component({
@@ -26,7 +27,7 @@ import { ReportUserComponent } from "../../../main/chats/report-user/report-user
   templateUrl: "./profile-card.component.html",
   styleUrls: ["./profile-card.component.scss"],
 })
-export class ProfileCardComponent implements OnInit, AfterViewInit {
+export class ProfileCardComponent implements OnInit, AfterViewInit, OnDestroy {
   @Output() expanded = new EventEmitter();
   @Output() tapped = new EventEmitter();
 
@@ -35,6 +36,12 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
   @Input() isOwnProfile: boolean = false;
   @Input() profile: Profile;
   @Input() headerBottom: number; //in %
+  // @Input() set pictureCount(value: number) {
+  //   this.pictureCountArray = Array(value).fill("");
+  // }
+  get pictureCountArray(): string[] {
+    return Array(this.profile?.pictureCount ?? 0).fill("");
+  }
 
   // this format is used such that the pager is re-updated whenever we get a new input of pictures
   // this also allows for the initial update of the pager
@@ -50,9 +57,9 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
     if (pics.length > 0) {
       this.profilePictures$.next(pics);
 
-      this.slides
-        ?.getActiveIndex()
-        .then((currentIndex) => this.updatePager(currentIndex));
+      // this.slides
+      //   ?.getActiveIndex()
+      //   .then((currentIndex) => this.updatePager(currentIndex));
     }
   }
 
@@ -78,6 +85,8 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
   X: number;
   Y: number;
 
+  subs = new Subscription();
+
   //for expandInfo animation
   @ViewChild("complete", { read: ElementRef, static: false }) complete: ElementRef; //info after expand
   @ViewChild("header", { read: ElementRef }) header: ElementRef; //name & department container
@@ -102,6 +111,15 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit() {
     this.slides?.lockSwipeToPrev(true);
+    this.subs.add(this.managePager().subscribe());
+  }
+
+  managePager() {
+    return combineLatest([this.profilePictures$, this.slides.ionSlideWillChange]).pipe(
+      map(([_, s]) => (s.target as any)?.swiper?.realIndex as number),
+      startWith(0), // for initial
+      map((index) => this.updatePager(index))
+    );
   }
 
   async reportUser() {
@@ -208,11 +226,9 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
     }
   }
 
-  async updatePager(currentIndex: number) {
-    let index = 0;
-
-    this.bullets.forEach((bullet: ElementRef) => {
-      if (currentIndex === index) {
+  updatePager(currentIndex: number) {
+    this.bullets.forEach((bullet: ElementRef, i) => {
+      if (currentIndex === i) {
         this.renderer.setStyle(
           bullet.nativeElement,
           "color",
@@ -225,7 +241,6 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
           "var(--ion-color-dark-tint)"
         ); //Add box shadow to header
       }
-      index += 1;
     });
   }
 
@@ -246,7 +261,7 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
 
     await Promise.all([
       this.checkSlide(slideIndex, slidesLength),
-      this.updatePager(slideIndex),
+      // this.updatePager(slideIndex),
     ]);
   }
 
@@ -305,5 +320,9 @@ export class ProfileCardComponent implements OnInit, AfterViewInit {
     interest = interest.replace(/\s/g, ""); //remove spaces
 
     return `/assets/interests/${interest}.svg`;
+  }
+
+  ngOnDestroy() {
+    this.subs.unsubscribe();
   }
 }
