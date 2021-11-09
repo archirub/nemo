@@ -36,4 +36,8 @@ export class MatchesComponent implements OnInit {
   async closeModal() {
     return await this.modalCtrl.dismiss();
   }
+
+  trackChat(index: number, chat: Chat) {
+    return chat.id;
+  }
 }

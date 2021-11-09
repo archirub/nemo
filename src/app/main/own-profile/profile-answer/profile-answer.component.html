@@ -14,7 +14,10 @@
         placeholder="Choose a question"
         (ionChange)="onQuestionChange($event)"
       >
-        <ion-select-option *ngFor="let q of questionsNotPicked" [value]="q">
+        <ion-select-option
+          *ngFor="let q of questionsNotPicked; trackBy: trackQuestion"
+          [value]="q"
+        >
           {{ q }}
         </ion-select-option>
       </ion-select>

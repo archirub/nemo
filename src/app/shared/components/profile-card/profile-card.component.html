@@ -7,17 +7,25 @@
     <ion-slides
       #picSlides
       (ionSlideWillChange)="onSlideChange()"
-      *ngIf="profilePictures$ | async as profPictures"
+      *ngIf="profilePicturesWithDefault$ | async as profilePictures"
     >
       <ion-slide
         #pic
-        *ngFor="let path of profPictures; index as i"
+        *ngFor="let path of profilePicturesWithDefault$ | async; index as i"
         [ngStyle]="{
-          'background-image': 'url(' + path + ')',
           'background-size': 'cover',
-          'background-position': 'center'
+          'background-position': 'center',
+          'background-image': 'url(' + path + ')'
         }"
       >
+        <!-- <img [src]="path" /> -->
+        <!-- <div
+          [ngStyle]="{
+            'background-image': 'url(' + path + ')',
+            'background-size': 'cover',
+            'background-position': 'center'
+          }"
+        > -->
         <div class="yesSwipe" (click)="this.tapped.emit('yes')"></div>
         <div class="noSwipe" (click)="this.tapped.emit('no')"></div>
         <div
@@ -32,6 +40,7 @@
           }}</ion-card-subtitle>
         </div>
         <div #shadow class="img-shadow"></div>
+        <!-- </div> -->
       </ion-slide>
     </ion-slides>
     <!--div #QandA class="question" [hidden]="moreInfo">

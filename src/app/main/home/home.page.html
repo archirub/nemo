@@ -36,7 +36,7 @@
   <ion-button id="closeAnimation" (click)="closeCatch()"
     ><ion-icon name="close-outline"></ion-icon
   ></ion-button>
-  <div #messageText id="messageText" (click)="goToChat()">
+  <div #messageText id="messageText" (click)="goToNewCatchChat()">
     <h2 class="catchtext">Chat with {{ latestMatchedProfile?.firstName }}</h2>
   </div>
   <div #messageText2 id="messageText2" (click)="closeCatch()">
@@ -47,7 +47,7 @@
 <ion-content #homeContainer>
   <div class="swipe-stack" #swipeCards>
     <div class="search">
-      <ion-button #searchButton id="searchButton" (click)="presentSCmodal()">
+      <ion-button #searchButton id="searchButton" (click)="showSearchCriteria()">
         <ion-icon slot="icon-only" name="search-outline"></ion-icon>
       </ion-button>
     </div>

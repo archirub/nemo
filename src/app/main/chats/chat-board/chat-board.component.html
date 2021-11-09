@@ -89,7 +89,7 @@
   <ion-list *ngIf="this.chats.length > 0">
     <ion-item-sliding
       class="parent"
-      *ngFor="let chat of chats; index as i"
+      *ngFor="let chat of chats; index as i; trackBy: trackChat"
       #chatDeleteRef
     >
       <ion-item detail="true" button (click)="goToMessenger(chat.id)">
