@@ -11,7 +11,6 @@ import {
   Renderer2,
   EventEmitter,
 } from "@angular/core";
-import { Router } from "@angular/router";
 import {
   AlertController,
   IonContent,
@@ -23,7 +22,6 @@ import {
 } from "@ionic/angular";
 
 import { Chat } from "@classes/index";
-import { MatchesComponent } from "../matches/matches.component";
 import { TabElementRefService } from "src/app/main/tab-menu/tab-element-ref.service";
 import {
   ChatboardPicturesStore,
@@ -92,7 +90,6 @@ export class ChatBoardComponent implements OnInit, AfterViewInit {
 
   constructor(
     private navCtrl: NavController,
-    private modalCtrl: ModalController,
     private tabElementRef: TabElementRefService,
     private chatboardPicturesService: ChatboardPicturesStore, // used in template
     private domSanitizer: DomSanitizer,
@@ -142,55 +139,6 @@ export class ChatBoardComponent implements OnInit, AfterViewInit {
     );
   }
 
-  // async presentMatches(): Promise<void> {
-  //   this.MatchesEnterAnimation = MatchesEnterAnimation(
-  //     this.matchesButton,
-  //     this.tabElementRef.tabsRef,
-  //     this.chatContainer,
-  //     this.screenHeight,
-  //     this.screenWidth
-  //   );
-  //   this.MatchesLeaveAnimation = MatchesLeaveAnimation(
-  //     this.matchesButton,
-  //     this.tabElementRef.tabsRef,
-  //     this.chatContainer,
-  //     this.screenHeight,
-  //     this.screenWidth
-  //   );
-
-  //   this.modal = await this.modalCtrl.create({
-  //     component: MatchesComponent,
-  //     componentProps: { chats: this.matches },
-  //     enterAnimation: this.MatchesEnterAnimation,
-  //     leaveAnimation: this.MatchesLeaveAnimation,
-  //   });
-  //   // .then((m) => {
-  //   //   this.modal = m;
-  //   //   this.onModalDismiss(this.modal);
-  //   // });
-
-  //   return this.modal.present();
-  // }
-
-  // Used to preload modal as soon as the previous modal was dismissed
-  // Shamelessly adapted from the homepage SC modal
-  // onModalDismiss(modal: HTMLIonModalElement) {
-  //   if (!modal) return;
-  //   modal.onDidDismiss().then(() => {
-  //     this.modalCtrl
-  //       .create({
-  //         component: MatchesComponent,
-  //         enterAnimation: this.MatchesEnterAnimation,
-  //         leaveAnimation: this.MatchesLeaveAnimation,
-  //       })
-  //       .then((m) => {
-  //         this.modal = m;
-  //         return this.modal;
-  //       })
-  //       .then((m) => this.onModalDismiss(m));
-  //   });
-  // }
-
   shorten(sentence: string) {
     if (sentence.length > 25) {
       let shortenedSentence = sentence.slice(0, 25);
@@ -199,12 +147,6 @@ export class ChatBoardComponent implements OnInit, AfterViewInit {
       }
       return shortenedSentence + "...";
     } else return sentence;
-  }
-
-  getDate(date: Date) {
-    let month = date.getMonth();
-    let day = date.getDay();
-    return day.toString() + "/" + month.toString;
   }
 
   async deleteChat(event, chat: Chat) {
@@ -262,8 +204,6 @@ export class ChatBoardComponent implements OnInit, AfterViewInit {
     // }, 400);
   }
 
-  animateSuccessfulChatDeletion(event) {}
-
   scroll(speed) {
     this.ionContent.scrollToTop(speed);
   }
@@ -278,12 +218,5 @@ export class ChatBoardComponent implements OnInit, AfterViewInit {
 
   goToCatch() {
     return this.tabElementRef.tabs.select("home");
-  }
-
-  /* Automates left margin of 'number matches' text so that it is never covered by match images */
-  styleFromMatches() {
-    const images = document.getElementsByClassName("match-image");
-    const text = document.getElementById("match-text");
-    this.renderer.setStyle(text, "marginLeft", `${(images.length - 1) * 20}px`);
   }
 }

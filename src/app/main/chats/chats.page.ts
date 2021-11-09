@@ -60,10 +60,6 @@ export class ChatsPage {
     this.fishSwimAnimation?.destroy();
   }
 
-  scrollToTop() {
-    this.chatboard.scroll(this.TOP_SCROLL_SPEED);
-  }
-
   private sortChats(chats: { [chatID: string]: Chat }): Chat[] {
     return Object.values(chats).sort(
       (chat1, chat2) =>

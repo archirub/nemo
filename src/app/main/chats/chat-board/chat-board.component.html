@@ -7,9 +7,9 @@
 ></nemo-toggle>
 
 <ion-content *ngIf="picsLoaded && view === 'catches'" #chatContainer>
-  <div *ngIf="this.chats.length < 1" class="noChats">
+  <div *ngIf="this.matches.length < 1" class="noChats">
     <p>
-      Sorry, looks like you don't have any chats yet. Head to the catch tab to find
+      Sorry, looks like you don't have any catches yet. Head to the catch tab to find
       someone new!
     </p>
 
@@ -73,8 +73,7 @@
 <ion-content *ngIf="picsLoaded && view === 'chats'" #chatContainer>
   <div *ngIf="this.chats.length < 1" class="noChats">
     <p>
-      Sorry, looks like you don't have any chats yet. Head to the catch tab to find
-      someone new!
+      Sorry, no chats here! Strike up a conversation with one of your catches, or head to the catch tab!
     </p>
 
     <div class="fish" (click)="goToCatch()">
