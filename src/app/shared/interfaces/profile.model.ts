@@ -120,11 +120,16 @@ export const socialMediaOptions = ["facebook" as const, "instagram" as const];
 export type socialMedia = typeof socialMediaOptions[number];
 export type SocialMediaLink = { socialMedia: socialMedia; link: string };
 
-// export interface socialFeatures {
-//   university: string;
-//   course: string;
-//   societies: SocietyCategory;
-// }
+export const matchMessages = [
+  "You guys are too much...",
+  "Play it cool, play it cool...",
+  "You two are straight up killing it!",
+  "This looks fire...",
+  "Love comes around only so often babe...",
+  "Go ooooooon!",
+  "The stars are aligned!",
+  "Wanna whole lotta love?",
+];
 
 // users must have between 1 and 5 pictures
 export type profilePicturePaths = [

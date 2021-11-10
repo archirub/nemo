@@ -8,7 +8,7 @@
   <ion-row>
     <div
       class="profile"
-      *ngFor="let chat of chats; index as j"
+      *ngFor="let chat of chats; index as j; trackBy: trackChat"
       (click)="goToMessenger(chat?.id)"
     >
       <img [src]="(chatboardPictures$ | async)[chat?.recipient?.uid]" />

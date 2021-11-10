@@ -69,7 +69,7 @@
           <div #profilePictures class="photos">
             <div
               class="draggable-container"
-              *ngFor="let pic of profilePicturesWithEmpty$ | async; index as i"
+              *ngFor="let pic of profilePicturesWithEmpty$ | async; index as i;"
               [ngClass]="{'not-draggable-elements': !pic, 'draggable-elements': pic}"
             >
               <div class="delete-pic" (click)="deletePicture(i)" *ngIf="pic">
@@ -111,7 +111,7 @@
           <h2>My answers</h2>
           <profile-answer
             #answers
-            *ngFor="let q of editableFields.questions; let i = index"
+            *ngFor="let q of editableFields.questions; let i = index; trackBy: trackQuestion"
             [(questionAndAnswer)]="editableFields.questions[i]"
             (questionAndAnswerChange)="questionsEdit($event)"
             [questionsNotPicked]="questionsNotPicked"
@@ -161,9 +161,7 @@
 
           <h2>My interests</h2>
 
-          <h2 class="no-interests">
-            You can select a maximum of 3 interests.
-          </h2>
+          <h2 class="no-interests">You can select a maximum of 3 interests.</h2>
           <!--interests-slides
             name="interests"
             [interests]="editableFields?.interests"

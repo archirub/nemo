@@ -148,9 +148,6 @@ export class GlobalStateManagementService {
 
   public globalManagement(): Observable<void> {
     return this.getFirebaseUser().pipe(
-      tap((a) => {
-        console.log("start of global management chain", a);
-      }),
       switchMap((user) => forkJoin([of(user), this.isUserEmailVerified(user)])),
       switchMap(([user, emailIsVerified]) => {
         const observables$: Observable<any>[] = [];

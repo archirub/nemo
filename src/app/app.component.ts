@@ -44,13 +44,13 @@ export class AppComponent implements OnDestroy, OnInit {
   ngOnInit() {
     // this.storeReadiness.status$.subscribe((a) => console.log("store readiniess: ", a));
     this.afAuth.authState.subscribe((a) => console.log("change in authstate: ", a));
-    this.GlobalStateManagement.userState$.subscribe((a) =>
-      console.log("user state is", a)
-    );
+    // this.GlobalStateManagement.userState$.subscribe((a) =>
+    //   console.log("user state is", a)
+    // );
   }
 
   async initializeApp() {
-    console.log("App initialization started...");
+    // console.log("App initialization started...");
 
     const SplashScreenAvailable = Capacitor.isPluginAvailable("SplashScreen");
     const splashScreenShowOptions: ShowOptions = { showDuration: 10000 };
@@ -64,10 +64,10 @@ export class AppComponent implements OnDestroy, OnInit {
 
     if ((await this.userState) === "full") await this.storesReady();
 
-    console.log("calling hide splashScreen now");
+    // console.log("calling hide splashScreen now");
     if (SplashScreenAvailable) await SplashScreen.hide(splashScreenHideOptions);
 
-    console.log("App initialization ended.");
+    // console.log("App initialization ended.");
   }
 
   get userState() {

@@ -115,11 +115,14 @@ export class SwipeStackStore {
       this.manageRenderedProfiles(),
       this.managePictureQueue(),
       this.manageStoreReadiness()
-    );
+    ).pipe(share());
   }
 
   managePictureSwiping(profileCards: QueryList<ProfileCardComponent>) {
+    // triggers when there is a change to the array of rendered profiles
+    // (usually means a profile has been added or removed)
     return profileCards.changes.pipe(
+      // listens to the user's swipping on that profile
       switchMap((list: QueryList<ProfileCardComponent>) =>
         list.first.slides.ionSlideWillChange.pipe(
           map((slides) => ({
@@ -129,31 +132,59 @@ export class SwipeStackStore {
           }))
         )
       ),
+      // Gets index of new slide
       map((map) => ({
         picIndex: (map.slides.target as any)?.swiper?.realIndex as number,
         uid: map.uid,
         profilePictures$: map.profilePictures$,
       })),
-      filter((map) => typeof map.picIndex === "number" && map.picIndex > 0),
-      switchMap((map) =>
-        map.profilePictures$.pipe(
+      // doesn't keep going if slide is the first one
+      filter((m) => typeof m.picIndex === "number" && m.picIndex > 0),
+      switchMap((m) =>
+        // subscribes to profile picture of that array
+        m.profilePictures$.pipe(
           first(),
           switchMap((pics) => {
-            const maxIndex = map.picIndex + 2;
+            const maxIndex = m.picIndex + 2; // defines how many pics forward we're loading (so here 2 pics forward)
 
-            const addPictures$ = Array.from({ length: maxIndex + 1 }).map((_, i) => {
-              const hasUrl = typeof pics[i] === "string" && pics[i].length > 1;
-              if (hasUrl) return EMPTY;
+            // array of observables, each for a diff pic, that checks whether a pic has already been fetched
+            // and if not fetches it
+            const addPictures$ = Array.from({ length: maxIndex + 1 })
+              .map((_, i) => {
+                const alreadyDownloaded =
+                  typeof pics[i] === "string" && pics[i].length > 0; // checks for it not being an empty string
+                if (alreadyDownloaded) return false;
 
-              return this.getUrl(map.uid, i).pipe(
-                switchMap((url) =>
-                  url
-                    ? this.addPictures([{ uid: map.uid, picIndex: map.picIndex, url }])
-                    : EMPTY
+                return (() => {
+                  const index = i;
+                  return this.getUrl(m.uid, index).pipe(
+                    map((url) => (url ? { url, picIndex: index, uid: m.uid } : false))
+                  );
+                })();
+
+                // return this.getUrl(m.uid, i).pipe(
+                //   switchMap((url) =>
+                //     url
+                //       ? this.addPictures([{ uid: m.uid, picIndex: m.picIndex, url }])
+                //       : EMPTY
+                //   )
+                // );
+              })
+              .filter(Boolean) as Observable<
+              | false
+              | {
+                  url: string;
+                  picIndex: number;
+                  uid: string;
+                }
+            >[]; // filters out "false" elements (a.k.a where fetching wasn't needed)
+            return forkJoin(addPictures$).pipe(
+              switchMap((urls) =>
+                this.addPictures(
+                  urls.filter(Boolean) as { url: string; picIndex: number; uid: string }[]
                 )
-              );
-            });
-            return concat(...addPictures$);
+              )
+            );
           })
         )
       )
@@ -230,8 +261,7 @@ export class SwipeStackStore {
       this.filterBasedOnStackState(),
       filter((count) => count <= this.MIN_PROFILE_COUNT),
       switchMap(() => this.SCstore.searchCriteria$.pipe(first())), // using switchMap instead of withLatestFrom as SC might still be undefined at that point so we want to wait for it to have a value (which withLatestFrom doesn't do)
-      exhaustMap((SC) => this.addToSwipeStackQueue(SC)), // exhaustMap is a must use here, makes sure we don't have multiple requests to fill the swipe stack
-      share()
+      exhaustMap((SC) => this.addToSwipeStackQueue(SC)) // exhaustMap is a must use here, makes sure we don't have multiple requests to fill the swipe stack
     );
   }
 

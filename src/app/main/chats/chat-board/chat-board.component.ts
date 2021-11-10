@@ -27,21 +27,8 @@ import {
   ChatboardPicturesStore,
   pictureHolder,
 } from "@stores/pictures/chatboard-pictures/chatboard-pictures.service";
-import {
-  BehaviorSubject,
-  combineLatest,
-  Observable,
-  Subscription,
-  timer,
-} from "rxjs";
-import {
-  distinctUntilChanged,
-  filter,
-  first,
-  map,
-  switchMap,
-  tap,
-} from "rxjs/operators";
+import { BehaviorSubject, combineLatest, Observable, Subscription, timer } from "rxjs";
+import { distinctUntilChanged, filter, first, map, switchMap, tap } from "rxjs/operators";
 import { ChatboardStore } from "@stores/index";
 import { FadeOutAnimation } from "@animations/fade-out.animation";
 import { StoreReadinessService } from "@services/store-readiness/store-readiness.service";
@@ -218,5 +205,16 @@ export class ChatBoardComponent implements OnInit, AfterViewInit {
 
   goToCatch() {
     return this.tabElementRef.tabs.select("home");
+  }
+
+  /* Automates left margin of 'number matches' text so that it is never covered by match images */
+  styleFromMatches() {
+    const images = document.getElementsByClassName("match-image");
+    const text = document.getElementById("match-text");
+    this.renderer.setStyle(text, "marginLeft", `${(images.length - 1) * 20}px`);
+  }
+
+  trackChat(index: number, chat: Chat) {
+    return chat.id;
   }
 }

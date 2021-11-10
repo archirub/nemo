@@ -105,4 +105,8 @@ export class ProfileAnswerComponent {
     this.questionAndAnswer.answer = a.target.value;
     this.questionAndAnswerChange.emit(this.questionAndAnswer);
   }
+
+  trackQuestion(index: number, question: QuestionAndAnswer) {
+    return question.question + question.answer;
+  }
 }

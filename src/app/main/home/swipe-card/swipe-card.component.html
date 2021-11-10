@@ -10,7 +10,8 @@
         let profile of profiles$ | async as profiles;
         index as i;
         first as isFirst;
-        last as isLast
+        last as isLast;
+        trackBy: trackProfile
       "
       [ngStyle]="{ zIndex: profiles.length - i }"
     >

@@ -248,6 +248,10 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
     }
   }
 
+  trackProfile(index: number, profile: Profile) {
+    return profile.uid;
+  }
+
   ngOnDestroy() {
     this.currentUserSub?.unsubscribe();
     this.subs?.unsubscribe();

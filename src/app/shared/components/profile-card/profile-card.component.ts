@@ -18,8 +18,17 @@ import { LessInfoAnimation, MoreInfoAnimation } from "@animations/info.animation
 import { Profile } from "@classes/index";
 import { IonContent, IonSlides } from "@ionic/angular";
 import { UserReportingService } from "@services/user-reporting/user-reporting.service";
-import { BehaviorSubject, combineLatest, Subscription } from "rxjs";
-import { filter, map, take, startWith } from "rxjs/operators";
+import { BehaviorSubject, combineLatest, EMPTY, interval, Subscription } from "rxjs";
+import {
+  filter,
+  map,
+  take,
+  startWith,
+  tap,
+  concatMap,
+  first,
+  switchMap,
+} from "rxjs/operators";
 import { ReportUserComponent } from "../../../main/chats/report-user/report-user.component";
 
 @Component({
@@ -39,28 +48,34 @@ export class ProfileCardComponent implements OnInit, AfterViewInit, OnDestroy {
   // @Input() set pictureCount(value: number) {
   //   this.pictureCountArray = Array(value).fill("");
   // }
+
+  get pictureCount(): number {
+    return this.profile?.pictureCount ?? 0;
+  }
+
   get pictureCountArray(): string[] {
-    return Array(this.profile?.pictureCount ?? 0).fill("");
+    return Array(this.pictureCount).fill("");
   }
 
   // this format is used such that the pager is re-updated whenever we get a new input of pictures
   // this also allows for the initial update of the pager
   profilePictures$ = new BehaviorSubject<string[]>([]);
+
+  profilePicturesWithDefault$ = this.profilePictures$.pipe(
+    map((pp) => pp ?? "/assets/icons/icon-192x192.png")
+  );
+  counter = 0;
+
   @Input() set profilePictures(value: string[]) {
     if (!Array.isArray(value)) return;
 
     // absolutely necessary. This is because empty strings can be coming in
     // in the array when the swipeStackStore has attempted to fetch that picture but hasn't found anything
-    // there being an empty string is necessary to signify to the swipeStackStore that it has already tried fetching that pic
-    const pics = value.filter(Boolean);
+    // there being an empty string is necessary to signify to the swipeStackStore that it has already tried fetching that pic with no results
+    let pics = value.slice(0, this.pictureCount);
+    pics = [...pics, ...Array(this.pictureCount - pics.length).fill("")];
 
-    if (pics.length > 0) {
-      this.profilePictures$.next(pics);
-
-      // this.slides
-      //   ?.getActiveIndex()
-      //   .then((currentIndex) => this.updatePager(currentIndex));
-    }
+    this.profilePictures$.next(pics);
   }
 
   @ViewChild(IonContent) ionContent: IonContent;
@@ -111,7 +126,7 @@ export class ProfileCardComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit() {
     this.slides?.lockSwipeToPrev(true);
-    this.subs.add(this.managePager().subscribe());
+    this.subs.add(this.managePager().subscribe()), 5000;
   }
 
   managePager() {
@@ -259,10 +274,7 @@ export class ProfileCardComponent implements OnInit, AfterViewInit, OnDestroy {
       this.slides.length(),
     ]);
 
-    await Promise.all([
-      this.checkSlide(slideIndex, slidesLength),
-      // this.updatePager(slideIndex),
-    ]);
+    await this.checkSlide(slideIndex, slidesLength);
   }
 
   async checkSlide(slideIndex: number, slidesLength: number) {

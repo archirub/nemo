@@ -61,6 +61,7 @@ import {
   assetsInterestsPath,
   Interests,
   MAX_PROFILE_PICTURES_COUNT,
+  QuestionAndAnswer,
 } from "@interfaces/index";
 import { isEqual, isEqualWith } from "lodash";
 import Sortable, { Options as SortableOptions } from "sortablejs";
@@ -78,18 +79,11 @@ function nullAndEmptyStrEquiv(value1, value2) {
   styleUrls: ["./own-profile.page.scss"],
 })
 export class OwnProfilePage implements OnInit, AfterViewInit {
-  // @ViewChild(AddPhotoComponent) photo: AddPhotoComponent;
   @ViewChild("bioInput") bio: IonTextarea;
   @ViewChild("bioClose", { read: ElementRef }) bioClose: ElementRef;
-  @ViewChild("depts") depts: ProfileCourseComponent;
-  @ViewChild("socs") socs: ProfileCourseComponent;
-
   @ViewChild("profileCard") profileCard: ProfileCardComponent;
   @ViewChild("profileContainer", { read: ElementRef }) profileContainer: ElementRef;
   @ViewChild("fish", { read: ElementRef }) fishRef: ElementRef;
-
-  @ViewChildren("answers") answers: QueryList<ProfileAnswerComponent>;
-
   @ViewChild("toggleDiv", { read: ElementRef }) toggleDiv: ElementRef;
   @ViewChild("profilePictures", { read: ElementRef }) profilePicturesRef: ElementRef;
 
@@ -559,6 +553,10 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
         })
       )
       .toPromise();
+  }
+
+  trackQuestion(index: number, question: QuestionAndAnswer) {
+    return question.question + question.answer;
   }
 
   ngOnDestroy() {

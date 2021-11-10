@@ -59,7 +59,6 @@ export class CurrentUserStore {
   private fillStore() {
     return this.afAuth.user.pipe(
       take(1),
-      tap(() => console.log("FILL USER STORE TRIGGERED")),
       switchMap((user) => {
         if (!user) throw "no user authenticated";
 
