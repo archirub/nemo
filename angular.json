@@ -73,7 +73,9 @@
             },
             "ci": {
               "progress": false
-            }
+            },
+            "sourceMap": true,
+            "namedChunks": true
           },
           "defaultConfiguration": ""
         },
