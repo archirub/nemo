@@ -1,4 +1,3 @@
-import { AppToggleComponent } from "@components/index";
 import {
   Component,
   AfterViewInit,
@@ -6,31 +5,28 @@ import {
   ElementRef,
   Renderer2,
   OnDestroy,
+  OnInit,
 } from "@angular/core";
 import { IonSlides, LoadingController, NavController } from "@ionic/angular";
-
 import { AngularFireFunctions } from "@angular/fire/functions";
 
 import {
   BehaviorSubject,
   concat,
+  firstValueFrom,
   forkJoin,
   from,
   Observable,
   Subscription,
 } from "rxjs";
-import {
-  distinctUntilChanged,
-  exhaustMap,
-  filter,
-  map,
-  take,
-  tap,
-} from "rxjs/operators";
+import { distinctUntilChanged, exhaustMap, filter, map, tap } from "rxjs/operators";
+
+import { AppToggleComponent } from "@components/index";
 
 import { CurrentUserStore } from "@stores/index";
 import { FirebaseAuthService } from "@services/firebase-auth/firebase-auth.service";
 import { LoadingService } from "@services/loading/loading.service";
+
 import { AppUser } from "@classes/user.class";
 import {
   Gender,
@@ -48,43 +44,41 @@ type GoUnder = "on" | "off";
   templateUrl: "./settings.page.html",
   styleUrls: ["./settings.page.scss"],
 })
-export class SettingsPage implements AfterViewInit, OnDestroy {
+export class SettingsPage implements AfterViewInit, OnDestroy, OnInit {
+  sexualPreferenceOptions: SexualPreference[] = sexualPreferenceOptions;
+  genderOptions: Gender[] = genderOptions;
+  sexualPreference: "female" | "male" | "both";
+  gender: Gender;
+
+  profile: AppUser;
+
+  subs = new Subscription();
+
   @ViewChild("slide") slides: IonSlides;
   @ViewChild("goUnder") goUnder: ElementRef;
   @ViewChild("goUnderToggle") goUnderToggle: AppToggleComponent;
 
   private editingInProgress = new BehaviorSubject<boolean>(false);
+
   editingInProgress$ = this.editingInProgress.asObservable().pipe(distinctUntilChanged());
 
-  subs = new Subscription();
+  fillPageFromUserStoreHandler$ = this.currentUserStore.user$.pipe(
+    tap((user) => (this.profile = user)),
+    map((user) => this.fillPreferences(user))
+  );
 
-  profile: AppUser;
-
-  sexualPreference: "female" | "male" | "both";
-  gender: Gender;
-  // swipeMode: SwipeMode
-  // onCampus: onCampus
-  goUnderStyling$(): Observable<GoUnder> {
-    return this.currentUserStore.user$.pipe(
-      map((u) => u?.settings?.showProfile),
-      filter((showProfile) => showProfile === true || showProfile === false),
-      distinctUntilChanged(),
-      map((showProfile) => this.showProfileToGoUnder(showProfile)),
-      tap((goUnder) => this.applyGoUnderStyling(goUnder)),
-      tap((goUnder) => this.goUnderToggle.applyStyling(goUnder))
-    );
-  }
-
-  // OPTIONS
-  // swipeModeOptions: SwipeMode[] = swipeModeOptions;
-  sexualPreferenceOptions: SexualPreference[] = sexualPreferenceOptions;
-  genderOptions: Gender[] = genderOptions;
-  // onCampusOptions: OnCampus[] = searchCriteriaOptions.onCampus;
+  goUnderStylingHandler$ = this.currentUserStore.user$.pipe(
+    map((u) => u?.settings?.showProfile),
+    filter((showProfile) => showProfile === true || showProfile === false),
+    distinctUntilChanged(),
+    map((showProfile) => showProfileToGoUnder(showProfile)),
+    tap((goUnder) => this.applyGoUnderStyling(goUnder)),
+    tap((goUnder) => this.goUnderToggle.applyStyling(goUnder))
+  );
 
   constructor(
     private navCtrl: NavController,
     private currentUserStore: CurrentUserStore,
-
     private firebaseAuth: FirebaseAuthService,
     private afFunctions: AngularFireFunctions,
     private loadingCtrl: LoadingController,
@@ -92,67 +86,93 @@ export class SettingsPage implements AfterViewInit, OnDestroy {
     private renderer: Renderer2
   ) {}
 
+  ngOnInit() {
+    this.subs.add(this.fillPageFromUserStoreHandler$.subscribe());
+  }
+
   ngAfterViewInit() {
-    this.subs.add(this.goUnderStyling$().subscribe());
+    this.subs.add(this.goUnderStylingHandler$.subscribe());
+
+    // what is all that for?
     const legal = document.getElementById("legal"); //Do not display slides on start up, only when selected
     const prefs = document.getElementById("preferences");
-
     this.renderer.setStyle(legal, "display", "none");
     this.renderer.setStyle(prefs, "display", "none");
-
     this.slides.lockSwipes(true); //Stop swiping of slides so that users cannot see placeholder slide
   }
 
-  ionViewDidEnter() {
-    //Fetch current user profile to change preferences
-    this.subs.add(
-      this.currentUserStore.user$
-        .pipe(
-          tap((user) => (this.profile = user)),
-          map((user) => this.fillPreferences(user))
-        )
-        .subscribe()
+  editingTriggered() {
+    if (this.propertyChanged()) return this.editingInProgress.next(true);
+    return this.editingInProgress.next(false);
+  }
+
+  async actOnEditing(action: "cancel" | "confirm") {
+    if (action === "cancel") return this.onCancelPreferenceModification();
+    if (action === "confirm") return this.onConfirmPreferenceModification();
+  }
+
+  private onCancelPreferenceModification() {
+    this.sexualPreference = sexPrefArrayToString(this.profile?.sexualPreference);
+    this.gender = this.profile?.gender;
+    this.editingInProgress.next(false);
+  }
+
+  private async onConfirmPreferenceModification(): Promise<any> {
+    const loader = await this.loadingCtrl.create(
+      this.loadingService.defaultLoadingOptions
     );
+    await loader.present();
+
+    const actionsToTake$: Observable<any>[] = [];
+
+    const genderIsChanged = this.genderChanged();
+    const sexPrefIsChanged = this.sexualPreferenceChanged();
+
+    actionsToTake$.push(
+      from(
+        this.currentUserStore.updateGenderSexPrefInStore(
+          genderIsChanged ? this.gender : null,
+          sexPrefIsChanged ? sexPrefStringToArray(this.sexualPreference) : null
+        )
+      )
+    );
+
+    if (sexPrefIsChanged) {
+      const request: updateGenderSexPrefRequest = {
+        name: "sexualPreference",
+        value: sexPrefStringToArray(this.sexualPreference),
+      };
+      actionsToTake$.push(this.afFunctions.httpsCallable("updateGenderSexPref")(request));
+    }
+
+    if (genderIsChanged) {
+      const request: updateGenderSexPrefRequest = {
+        name: "gender",
+        value: this.gender,
+      };
+      actionsToTake$.push(this.afFunctions.httpsCallable("updateGenderSexPref")(request));
+    }
+
+    await firstValueFrom(forkJoin(actionsToTake$));
+
+    this.editingInProgress.next(false);
+
+    await loader.dismiss();
   }
 
-  async goBack() {
-    return this.navCtrl.navigateBack("/main/tabs/own-profile");
-  }
-
-  async logOut() {
-    return this.firebaseAuth.logOut();
-  }
-
-  async deleteAccount() {
-    return this.firebaseAuth.deleteAccount();
-  }
-
-  async changePassword() {
-    await this.firebaseAuth.changePasswordProcedure();
-  }
-
-  showProfileToGoUnder(bool: boolean): GoUnder {
-    if (bool === true) return "off";
-    if (bool === false) return "on";
-  }
-
-  goUnderToShowProfile(str: GoUnder): boolean {
-    return str === "off";
-  }
-
-  /* Styles gone 'under' tab on toggle */
+  // For responding to a change in the "goUnder" property. It sends it to the database and
+  // updates the profile locally
   async actOnGoUnder(option: GoUnder) {
-    const newShowProfile = this.goUnderToShowProfile(option);
+    const newShowProfile = goUnderToShowProfile(option);
 
     const loader = await this.loadingCtrl.create(
       this.loadingService.defaultLoadingOptions
     );
 
-    await this.currentUserStore.user$
-      .pipe(
+    await firstValueFrom(
+      this.currentUserStore.user$.pipe(
         map((u) => u?.settings?.showProfile),
         filter((currentShowProfile) => currentShowProfile !== newShowProfile),
-        take(1),
         exhaustMap((user) => {
           const request: changeShowProfileRequest = {
             showProfile: newShowProfile,
@@ -165,7 +185,7 @@ export class SettingsPage implements AfterViewInit, OnDestroy {
           );
         })
       )
-      .toPromise();
+    );
 
     await loader.dismiss();
   }
@@ -180,6 +200,14 @@ export class SettingsPage implements AfterViewInit, OnDestroy {
       tabStyle.color = "var(--ion-color-light-contrast)";
       tabStyle.fontWeight = "normal";
     }
+  }
+
+  /* Finds preferences from profile and fills form with each control's value */
+  fillPreferences(user: AppUser) {
+    if (user?.gender) this.gender = user?.gender;
+
+    if (user?.sexualPreference)
+      this.sexualPreference = sexPrefArrayToString(user?.sexualPreference);
   }
 
   /* Unlocks swipes, slides to next/prev and then locks swipes */
@@ -227,106 +255,62 @@ export class SettingsPage implements AfterViewInit, OnDestroy {
     this.unlockAndSwipe("next"); //move to slide
   }
 
+  async goBack() {
+    return this.navCtrl.navigateBack("/main/tabs/own-profile");
+  }
+
+  async logOut() {
+    return this.firebaseAuth.logOut();
+  }
+
+  async deleteAccount() {
+    return this.firebaseAuth.deleteAccount();
+  }
+
+  async changePassword() {
+    await this.firebaseAuth.changePasswordProcedure();
+  }
+
+  propertyChanged(): boolean {
+    return this.genderChanged() || this.sexualPreferenceChanged();
+  }
+
+  genderChanged(): boolean {
+    return this.profile?.gender !== this.gender;
+  }
+
+  sexualPreferenceChanged(): boolean {
+    return sexPrefArrayToString(this.profile?.sexualPreference) !== this.sexualPreference;
+  }
+
   /* Opens user's mail program with a new blank email to the address */
   openEmail() {
     window.open("mailto:customersupport@nemodating.com");
   }
 
-  /* Finds preferences from profile and fills form with each control's value */
-  fillPreferences(user: AppUser) {
-    if (user?.gender) this.gender = user?.gender;
-
-    if (user?.sexualPreference)
-      this.sexualPreference = this.sexPrefArrayToString(user?.sexualPreference);
-  }
-
-  editingTriggered() {
-    if (this.aPropertyIsChanged()) return this.editingInProgress.next(true);
-    return this.editingInProgress.next(false);
-  }
-
-  async actOnEditing(action: "cancel" | "confirm") {
-    if (action === "cancel") return this.onCancelPreferenceModification();
-    if (action === "confirm") return this.onConfirmPreferenceModification();
-  }
-
-  private onCancelPreferenceModification() {
-    this.sexualPreference = this.sexPrefArrayToString(this.profile?.sexualPreference);
-    this.gender = this.profile?.gender;
-    this.editingInProgress.next(false);
-  }
-
-  private async onConfirmPreferenceModification(): Promise<any> {
-    const loader = await this.loadingCtrl.create(
-      this.loadingService.defaultLoadingOptions
-    );
-    await loader.present();
-
-    const actionsToTake$: Observable<any>[] = [];
-
-    const genderIsChanged = this.genderIsChanged();
-    const sexPrefIsChanged = this.sexualPreferenceIsChanged();
-
-    actionsToTake$.push(
-      from(
-        this.currentUserStore.updateGenderSexPrefInStore(
-          genderIsChanged ? this.gender : null,
-          sexPrefIsChanged ? this.sexPrefStringToArray(this.sexualPreference) : null
-        )
-      )
-    );
-
-    if (sexPrefIsChanged) {
-      const request: updateGenderSexPrefRequest = {
-        name: "sexualPreference",
-        value: this.sexPrefStringToArray(this.sexualPreference),
-      };
-      actionsToTake$.push(this.afFunctions.httpsCallable("updateGenderSexPref")(request));
-    }
-
-    if (genderIsChanged) {
-      const request: updateGenderSexPrefRequest = {
-        name: "gender",
-        value: this.gender,
-      };
-      actionsToTake$.push(this.afFunctions.httpsCallable("updateGenderSexPref")(request));
-    }
-
-    await forkJoin(actionsToTake$).toPromise();
-
-    this.editingInProgress.next(false);
-
-    await loader.dismiss();
-  }
-
-  genderIsChanged(): boolean {
-    return this.profile?.gender !== this.gender;
-  }
-
-  sexualPreferenceIsChanged(): boolean {
-    return (
-      this.sexPrefArrayToString(this.profile?.sexualPreference) !== this.sexualPreference
-    );
-  }
-
-  aPropertyIsChanged(): boolean {
-    return this.genderIsChanged() || this.sexualPreferenceIsChanged();
-  }
-
-  sexPrefArrayToString(array: SexualPreference): "male" | "female" | "both" {
-    if (JSON.stringify(["male", "female"].sort()) === JSON.stringify(array?.sort()))
-      return "both";
-    if (JSON.stringify(["male"]) === JSON.stringify(array)) return "male";
-    if (JSON.stringify(["female"]) === JSON.stringify(array)) return "female";
-  }
-
-  sexPrefStringToArray(string: "male" | "female" | "both"): SexualPreference {
-    if (string === "male") return ["male"];
-    if (string === "female") return ["female"];
-    if (string === "both") return ["male", "female"];
-  }
-
   ngOnDestroy() {
     this.subs.unsubscribe();
   }
+}
+
+function showProfileToGoUnder(bool: boolean): GoUnder {
+  if (bool === true) return "off";
+  if (bool === false) return "on";
+}
+
+function goUnderToShowProfile(str: GoUnder): boolean {
+  return str === "off";
+}
+
+function sexPrefArrayToString(array: SexualPreference): "male" | "female" | "both" {
+  if (JSON.stringify(["male", "female"].sort()) === JSON.stringify(array?.sort()))
+    return "both";
+  if (JSON.stringify(["male"]) === JSON.stringify(array)) return "male";
+  if (JSON.stringify(["female"]) === JSON.stringify(array)) return "female";
+}
+
+function sexPrefStringToArray(string: "male" | "female" | "both"): SexualPreference {
+  if (string === "male") return ["male"];
+  if (string === "female") return ["female"];
+  if (string === "both") return ["male", "female"];
 }

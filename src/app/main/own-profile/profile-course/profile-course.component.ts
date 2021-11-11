@@ -8,13 +8,9 @@ import {
   Output,
   Renderer2,
 } from "@angular/core";
-import { IonInput, IonSelect } from "@ionic/angular";
-
-import {
-  AreaOfStudy,
-  SocietyCategory,
-} from "@interfaces/search-criteria.model";
 import { ControlContainer, NgForm } from "@angular/forms";
+
+import { AreaOfStudy, SocietyCategory } from "@interfaces/search-criteria.model";
 
 @Component({
   selector: "profile-course",
@@ -23,27 +19,18 @@ import { ControlContainer, NgForm } from "@angular/forms";
   viewProviders: [{ provide: ControlContainer, useExisting: NgForm }],
 })
 export class ProfileCourseComponent implements OnInit {
-  @ViewChild("input") input: IonInput;
-  @ViewChild("select") select: IonSelect;
-  @ViewChild("close", { read: ElementRef }) close: ElementRef;
-
   @Input() categoryPlaceHolder: string;
-
   @Input() categoryOptions: string;
-
   @Input() choice: string;
-  @Output() choiceChange = new EventEmitter<string>();
-
   @Input() categoryChoice: SocietyCategory | AreaOfStudy;
+  @Output() choiceChange = new EventEmitter<string>();
   @Output() categoryChoiceChange = new EventEmitter<SocietyCategory | AreaOfStudy>();
+
+  @ViewChild("close", { read: ElementRef }) close: ElementRef;
 
   constructor(private renderer: Renderer2) {}
 
-  ngOnInit() {
-    // interval(3000).subscribe(() => console.log(this.choice, this.categoryChoice));
-    // this.choiceChange.subscribe((a) => console.log("choice change", a));
-    // this.categoryChoiceChange.subscribe((a) => console.log("categoryChoiceChange", a));
-  }
+  ngOnInit() {}
 
   onChoiceChange(value: string) {
     this.choice = value;

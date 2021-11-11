@@ -1,12 +1,8 @@
-import {
-  AlertController,
-  LoadingController,
-  NavController,
-} from "@ionic/angular";
+import { AlertController, LoadingController, NavController } from "@ionic/angular";
 import { Component } from "@angular/core";
 import { FormControl, FormGroup, Validators } from "@angular/forms";
-
 import { AngularFireAuth } from "@angular/fire/auth";
+
 import { FirebaseAuthService } from "@services/firebase-auth/firebase-auth.service";
 import { LoadingService } from "@services/loading/loading.service";
 
@@ -16,15 +12,8 @@ import { LoadingService } from "@services/loading/loading.service";
   styleUrls: ["./login.page.scss"],
 })
 export class LoginPage {
-  // @ViewChild("fish", { read: ElementRef }) fish: ElementRef;
-  // fishSwimAnimation: Animation;
-
   loginForm = new FormGroup({
-    email: new FormControl("", [
-      Validators.email,
-      Validators.required,
-      // Validators.pattern("[a-zA-Z]*@[a-zA-Z]*.ac.uk"),
-    ]),
+    email: new FormControl("", [Validators.email, Validators.required]),
     password: new FormControl("", [Validators.required]),
   });
 
@@ -36,14 +25,6 @@ export class LoginPage {
     private loadingCtrl: LoadingController,
     private loadingService: LoadingService
   ) {}
-
-  // ionViewDidEnter() {
-  //   //Initialise animations
-  //   this.fishSwimAnimation = FishSwimAnimation(this.fish);
-
-  //   //Play animations (WILL LOOP INFINITELY)
-  //   this.fishSwimAnimation.play();
-  // }
 
   async onLogin() {
     if (!this.loginForm.valid) {
@@ -75,10 +56,6 @@ export class LoginPage {
       }
     }
   }
-
-  // ionViewWillLeave() {
-  //   this.fishSwimAnimation.destroy();
-  // }
 
   private showAlert(message: string) {
     this.alertCtrl

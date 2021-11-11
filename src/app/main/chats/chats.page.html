@@ -27,6 +27,6 @@
     #chatboard
     [chats]="chats$ | async"
     [matches]="matches$ | async"
-    (loaded)="onLoadedChatboard()"
+    (chatboardReady)="onCharboardReady()"
   ></app-chat-board>
 </ion-content>

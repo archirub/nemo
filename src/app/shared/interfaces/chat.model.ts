@@ -20,6 +20,14 @@ export interface chat {
   // lastInteracted: Date;
 }
 
+export const messengerMotivationMessages = [
+  "Go ahead, send that message. You've got to say something!",
+  "Make sure you don't just say 'hey'!",
+  "We can't think of what to say either...",
+  "Have fun with it, you can always try again!",
+  "What is it they say... 'Speak from the heart'?",
+];
+
 // function that is essential for sorting the "uids" property of documents of the chats collection
 // this is the only way that we can find a chat shared by two specific users
 // (by using the query "where("uids", "==", sorteduidsarray)")

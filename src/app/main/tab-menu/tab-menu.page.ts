@@ -16,15 +16,13 @@ import { TabElementRefService } from "./tab-element-ref.service";
   templateUrl: "./tab-menu.page.html",
   styleUrls: ["./tab-menu.page.scss"],
 })
-export class TabMenuPage implements OnInit {
+export class TabMenuPage {
   @ViewChild("tabs") tabs: IonTabs;
   @ViewChild("tabs", { read: ElementRef }) tabsContainer: ElementRef;
   @ViewChildren("active", { read: ElementRef }) actives: QueryList<ElementRef>;
   @ViewChildren("inactive", { read: ElementRef }) inactives: QueryList<ElementRef>;
 
   constructor(private tabElementRef: TabElementRefService, private renderer: Renderer2) {}
-
-  ngOnInit() {}
 
   ngAfterViewInit() {
     this.tabElementRef.tabsRef = this.tabsContainer;

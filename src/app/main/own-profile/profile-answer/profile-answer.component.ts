@@ -1,3 +1,4 @@
+import { IonSelect } from "@ionic/angular";
 import {
   EventEmitter,
   Component,
@@ -7,45 +8,34 @@ import {
   ViewChild,
   Renderer2,
 } from "@angular/core";
+
 import { Question, QuestionAndAnswer } from "@interfaces/profile.model";
-import { IonSelect, IonTextarea } from "@ionic/angular";
-
-// change the "addable" system so that questions are added outside of the slides component,
-// within the own-profile, not within the custom component as that creates so many problems
-
 @Component({
   selector: "profile-answer",
   templateUrl: "./profile-answer.component.html",
   styleUrls: ["./profile-answer.component.scss"],
-  providers: [
-    // {
-    //   provide: NG_VALUE_ACCESSOR,
-    //   multi: true,
-    //   useExisting: forwardRef(() => ProfileAnswerComponent),
-    // },
-  ],
+  providers: [],
 })
 export class ProfileAnswerComponent {
-  @ViewChild("answerInput") answer: IonTextarea;
-  @ViewChild("answerClose", { read: ElementRef }) answerClose: ElementRef;
-  @ViewChild("qHead", { read: ElementRef }) qHead: ElementRef;
-  @ViewChild("qInput", { read: ElementRef }) qInput: ElementRef;
-  @ViewChild("qInput") qSelect: IonSelect;
-
   @Input() questionAndAnswer: QuestionAndAnswer;
+  @Input() questionsNotPicked: Question[];
   @Output() questionAndAnswerChange = new EventEmitter<
     QuestionAndAnswer | Array<string | QuestionAndAnswer>
   >();
 
-  @Input() questionsNotPicked: Question[];
+  @ViewChild("qHead", { read: ElementRef }) qHead: ElementRef;
+  @ViewChild("qInput", { read: ElementRef }) qInput: ElementRef;
+  @ViewChild("qInput") qSelect: IonSelect;
 
   constructor(private renderer: Renderer2) {}
 
+  // for when the answer changes
   onAnswerChange(value) {
     this.questionAndAnswer.answer = value;
     this.questionAndAnswerChange.emit(this.questionAndAnswer);
   }
 
+  // for when the question changes
   onQuestionChange(event) {
     this.questionAndAnswer.question = event.target.value;
     this.questionAndAnswerChange.emit(this.questionAndAnswer);
@@ -106,6 +96,7 @@ export class ProfileAnswerComponent {
     this.questionAndAnswerChange.emit(this.questionAndAnswer);
   }
 
+  // for trackBy property of ngFor on questions in template
   trackQuestion(index: number, question: QuestionAndAnswer) {
     return question.question + question.answer;
   }
