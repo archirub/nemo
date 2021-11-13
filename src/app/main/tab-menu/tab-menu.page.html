@@ -1,18 +1,15 @@
-<ion-tabs #tabs (ionTabsWillChange)="colorIcon($event)">
+<ion-tabs #tabs (ionTabsWillChange)="colorIcon()">
   <ion-tab-bar slot="bottom" id="tabs">
     <ion-tab-button tab="chats">
-      <img #inactive src="/assets/chatsicon.svg"/>
-      <img #active name="chats" style="display: none;" src="/assets/chatsicon-orange.svg"/>
+      <img id="chats" src="/assets/chatsicon.svg"/>
     </ion-tab-button>
 
     <ion-tab-button tab="home">
-      <img class="height32" #inactive src="/assets/swipeicon.svg"/>
-      <img class="height32" #active name="home" style="display: none;" src="/assets/swipeicon-orange.svg"/>
+      <img id="home" class="height32" src="/assets/swipeicon.svg"/>
     </ion-tab-button>
 
     <ion-tab-button tab="own-profile">
-      <img #inactive src="/assets/profileicon.svg"/>
-      <img #active name="own-profile" style="display: none;" src="/assets/profileicon-orange.svg"/>
+      <img id="own-profile" src="/assets/profileicon.svg"/>
     </ion-tab-button>
   </ion-tab-bar>
 </ion-tabs>

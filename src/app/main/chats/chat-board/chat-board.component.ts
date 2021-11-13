@@ -207,13 +207,6 @@ export class ChatBoardComponent implements OnInit, AfterViewInit {
     return this.tabElementRef.tabs.select("home");
   }
 
-  /* Automates left margin of 'number matches' text so that it is never covered by match images */
-  styleFromMatches() {
-    const images = document.getElementsByClassName("match-image");
-    const text = document.getElementById("match-text");
-    this.renderer.setStyle(text, "marginLeft", `${(images.length - 1) * 20}px`);
-  }
-
   trackChat(index: number, chat: Chat) {
     return chat.id;
   }

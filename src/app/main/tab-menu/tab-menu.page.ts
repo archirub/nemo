@@ -3,9 +3,7 @@ import {
   ElementRef,
   OnInit,
   Renderer2,
-  ViewChild,
-  QueryList,
-  ViewChildren,
+  ViewChild
 } from "@angular/core";
 import { IonTabs } from "@ionic/angular";
 
@@ -19,8 +17,6 @@ import { TabElementRefService } from "./tab-element-ref.service";
 export class TabMenuPage implements OnInit {
   @ViewChild("tabs") tabs: IonTabs;
   @ViewChild("tabs", { read: ElementRef }) tabsContainer: ElementRef;
-  @ViewChildren("active", { read: ElementRef }) actives: QueryList<ElementRef>;
-  @ViewChildren("inactive", { read: ElementRef }) inactives: QueryList<ElementRef>;
 
   constructor(private tabElementRef: TabElementRefService, private renderer: Renderer2) {}
 
@@ -31,33 +27,15 @@ export class TabMenuPage implements OnInit {
     this.tabElementRef.tabs = this.tabs;
   }
 
-  colorIcon(event) {
-    //Hide all orange icons
-    let targets = Array.from(this.actives);
-    targets.forEach((el) => {
-      this.renderer.setStyle(el.nativeElement, "display", "none");
+  async colorIcon() {
+    var prev = document.getElementsByClassName('fillColor'); //Remove class from previous tab
+    Array.from(prev).forEach(el => {
+      el.classList.remove('fillColor');
     });
 
-    //Show all grey icons
-    let placeholders = Array.from(this.inactives);
-    placeholders.forEach((el) => {
-      this.renderer.setStyle(el.nativeElement, "display", "block");
-    });
+    var sel = await this.tabs.getSelected(); //Which tab has just been selected
+    let target = document.getElementById(sel);
 
-    //Map indexes of grey icons based on tab name
-    let indexMap = {
-      chats: 0,
-      home: 1,
-      "own-profile": 2,
-    };
-
-    let target = document.getElementsByName(event.tab)[0]; //Target and show orange icon
-    this.renderer.setStyle(target, "display", "block");
-
-    this.renderer.setStyle(
-      placeholders[indexMap[event.tab]].nativeElement,
-      "display",
-      "none"
-    ); //Hide the grey icon
+    target.classList.add('fillColor'); //Class is a filter that very closely approximates primary color
   }
 }
