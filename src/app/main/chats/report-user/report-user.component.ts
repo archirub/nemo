@@ -1,9 +1,13 @@
-import { Component } from "@angular/core";
-import { UserReport } from "@interfaces/user-report.models";
 import { AlertController, LoadingController, ModalController } from "@ionic/angular";
+import { Component } from "@angular/core";
+
+import { lastValueFrom } from "rxjs";
+
+import { ChatboardStore } from "@stores/index";
 import { LoadingService } from "@services/loading/loading.service";
 import { UserReportingService } from "@services/user-reporting/user-reporting.service";
-import { ChatboardStore } from "@stores/index";
+
+import { UserReport } from "@interfaces/user-report.models";
 
 @Component({
   selector: "app-report-user",
@@ -35,10 +39,6 @@ export class ReportUserComponent {
     private chatboardStore: ChatboardStore
   ) {}
 
-  closeModal() {
-    this.modalCtrl.dismiss();
-  }
-
   async reportUser() {
     const loader = await this.loadingCtrl.create({
       ...this.loading.defaultLoadingOptions,
@@ -55,14 +55,19 @@ export class ReportUserComponent {
 
     await loader.dismiss();
 
-    const chatID = await this.chatboardStore
-      .userHasChatWith(this.userReportedID)
-      .toPromise();
+    const chatID = await lastValueFrom(
+      this.chatboardStore.userHasChatWith(this.userReportedID)
+    );
 
     if (chatID === false) return this.reportSuccesfulNoChatAlert();
     return this.reportSuccessfulHasChatAlert(chatID);
   }
 
+  async closeModal() {
+    return this.modalCtrl.dismiss();
+  }
+
+  // shows an alert saying the request failed
   async reportFailedAlert() {
     const alert = await this.alertCtrl.create({
       header: "An error occured...",
@@ -73,6 +78,8 @@ export class ReportUserComponent {
     return alert.present();
   }
 
+  // shows an alert saying the the report was successful.
+  // Shown if the reported user ISN'T part of the user's chats
   async reportSuccesfulNoChatAlert() {
     const alert = await this.alertCtrl.create({
       header: "The report was succesfully sent.",
@@ -83,6 +90,8 @@ export class ReportUserComponent {
     return alert.present();
   }
 
+  // shows an alert saying the the report was successful.
+  // Shown if the reported user IS part of the user's chats
   async reportSuccessfulHasChatAlert(chatID: string) {
     let choice: "keep" | "delete" = "keep";
 
@@ -93,13 +102,13 @@ export class ReportUserComponent {
       });
       await loader.present();
       try {
-        await this.chatboardStore.deleteChatOnDatabase(chatID).toPromise();
+        await lastValueFrom(this.chatboardStore.deleteChatOnDatabase(chatID));
       } catch (e) {
         console.error(e);
         await loader.dismiss();
         return this.reportFailedAlert();
       }
-      await this.chatboardStore.deleteChatInStore(chatID).toPromise();
+      await lastValueFrom(this.chatboardStore.deleteChatInStore(chatID));
       return loader.dismiss();
     };
 

@@ -4,7 +4,6 @@ import { SearchCriteriaStore } from "@stores/search-criteria/search-criteria-sto
 import { OtherProfilesStore } from "@stores/other-profiles/other-profiles-store.service";
 import { SwipeOutcomeStore } from "@stores/swipe-outcome/swipe-outcome-store.service";
 import { SwipeStackStore } from "@stores/swipe-stack/swipe-stack-store.service";
-import { SettingsStore } from "@stores/settings/settings-store.service";
 import { CurrentUserStore } from "@stores/current-user/current-user-store.service";
 
 // service created to solve a circular dependency between global-state-management service and
@@ -21,9 +20,9 @@ export class EmptyStoresService {
     private searchCriteriaStore: SearchCriteriaStore,
     private otherProfilesStore: OtherProfilesStore,
     private swipeOutcomeStore: SwipeOutcomeStore,
-    private swipeStackStore: SwipeStackStore,
-    private settingsStore: SettingsStore // private OwnPicturesStore: OwnPicturesStore
-  ) {}
+    private swipeStackStore: SwipeStackStore
+  ) // private OwnPicturesStore: OwnPicturesStore
+  {}
 
   emptyStores() {
     this.userStore.resetStore();
@@ -32,7 +31,6 @@ export class EmptyStoresService {
     this.swipeOutcomeStore.resetStore();
     this.swipeStackStore.resetStore();
     this.otherProfilesStore.resetStore();
-    this.settingsStore.resetStore();
 
     console.log("stores emptied");
     // ANY OTHERS / NEW ONES ? Add them here

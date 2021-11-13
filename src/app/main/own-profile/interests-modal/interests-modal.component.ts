@@ -15,16 +15,28 @@ import { ModalController } from "@ionic/angular";
   styleUrls: ["./interests-modal.component.scss"],
 })
 export class InterestsModalComponent implements OnInit {
-  interests: Interests[];
-  @Output() interestsChange = new EventEmitter<Interests[]>();
-
   pictures = assetsInterestsPath; //Interest icons
   names = searchCriteriaOptions.interests; //Interest names
-
   interestGrid: Array<Array<string>>;
   pictureGrid: Array<Array<string>>;
-
   viewReady: boolean = false;
+
+  interests: Interests[];
+
+  @Output() interestsChange = new EventEmitter<Interests[]>();
+
+  get reachedMaxInterestsCount(): boolean {
+    return this.interestsCount >= MAX_PROFILE_QUESTIONS_COUNT;
+  }
+
+  get interestsCount(): number {
+    return this.interests.length ?? 0;
+  }
+
+  getPicturePath(interestName: Interests): string {
+    const formattedName = interestName.replace(/\s/g, "").toLowerCase();
+    return "/assets/interests/" + formattedName + ".svg";
+  }
 
   constructor(private modalCtrl: ModalController) {}
 
@@ -33,6 +45,11 @@ export class InterestsModalComponent implements OnInit {
     this.viewReady = true;
   }
 
+  async closeAndConfirmChoices() {
+    return await this.modalCtrl.dismiss(this.interests);
+  }
+
+  // builds the interest grid
   buildInterestGrid() {
     this.interestGrid = []; //Array of arrays of interest triplets
     this.pictureGrid = []; //Arrays of icons to support
@@ -69,6 +86,7 @@ export class InterestsModalComponent implements OnInit {
     }
   }
 
+  // changes the interest selection
   selectInterest(choice) {
     if (this.interests.includes(choice)) {
       const index = this.interests.indexOf(choice);
@@ -76,22 +94,5 @@ export class InterestsModalComponent implements OnInit {
     } else if (!this.reachedMaxInterestsCount) {
       this.interests.push(choice);
     }
-  }
-
-  async closeAndConfirmChoices() {
-    return await this.modalCtrl.dismiss(this.interests);
-  }
-
-  getPicturePath(interestName: Interests): string {
-    const formattedName = interestName.replace(/\s/g, "").toLowerCase();
-    return "/assets/interests/" + formattedName + ".svg";
-  }
-
-  get reachedMaxInterestsCount(): boolean {
-    return this.interestsCount >= MAX_PROFILE_QUESTIONS_COUNT;
-  }
-
-  get interestsCount(): number {
-    return this.interests.length ?? 0;
   }
 }

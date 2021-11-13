@@ -12,7 +12,6 @@ export class WelcomePage implements OnInit {
   ngOnInit() {}
 
   goToSignup() {
-    // window.location.reload();
     this.navCtrl.navigateForward("welcome/signupauth");
   }
 

@@ -2,11 +2,13 @@ import { Component, ElementRef, ViewChild } from "@angular/core";
 import { Animation } from "@ionic/angular";
 
 import { BehaviorSubject } from "rxjs";
+import { map } from "rxjs/operators";
+
+import { ChatBoardComponent } from "./chat-board/chat-board.component";
 
 import { ChatboardStore } from "@stores/index";
+
 import { Chat } from "@classes/index";
-import { ChatBoardComponent } from "./chat-board/chat-board.component";
-import { map } from "rxjs/operators";
 import { FishSwimAnimation } from "@animations/fish.animation";
 
 @Component({
@@ -15,12 +17,11 @@ import { FishSwimAnimation } from "@animations/fish.animation";
   styleUrls: ["./chats.page.scss"],
 })
 export class ChatsPage {
-  @ViewChild("chatboard") chatboard: ChatBoardComponent;
-  @ViewChild("fish", { read: ElementRef }) fish: ElementRef;
-
+  TOP_SCROLL_SPEED = 100;
   fishSwimAnimation: Animation;
 
-  TOP_SCROLL_SPEED = 100;
+  @ViewChild("chatboard") chatboard: ChatBoardComponent;
+  @ViewChild("fish", { read: ElementRef }) fish: ElementRef;
 
   showLoading$ = new BehaviorSubject<boolean>(true);
 
@@ -40,18 +41,14 @@ export class ChatsPage {
     return this.chats$.pipe(map((chats) => chats.length));
   }
 
-  constructor(
-    //private router: Router,
-    private chatboardStore: ChatboardStore,
-    //private storeReadiness: StoreReadinessService
-  ) {}
+  constructor(private chatboardStore: ChatboardStore) {}
 
   ngAfterViewInit() {
     this.fishSwimAnimation = FishSwimAnimation(this.fish);
     this.fishSwimAnimation.play();
   }
 
-  onLoadedChatboard() {
+  onCharboardReady() {
     this.showLoading$.next(false);
     this.stopLoadingAnimation();
   }

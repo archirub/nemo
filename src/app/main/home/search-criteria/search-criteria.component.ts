@@ -1,4 +1,4 @@
-import { UniversitiesStore } from "@stores/universities/universities.service";
+import { IonSlides, IonContent, ModalController } from "@ionic/angular";
 import {
   Component,
   OnInit,
@@ -7,16 +7,15 @@ import {
   ElementRef,
   Renderer2,
 } from "@angular/core";
-import { IonSlides, IonContent, ModalController } from "@ionic/angular";
 import { FormControl, FormGroup } from "@angular/forms";
 
-import { Subscription } from "rxjs";
+import { Subscription, tap } from "rxjs";
 
 import { SearchCriteriaStore } from "@stores/search-criteria/search-criteria-store.service";
-import { searchCriteria, searchCriteriaOptions } from "@interfaces/search-criteria.model";
-import { SearchCriteria } from "@classes/index";
+import { UniversitiesStore } from "@stores/universities/universities.service";
 
-import { AppToggleComponent } from "@components/index";
+import { SearchCriteria } from "@classes/index";
+import { searchCriteria, searchCriteriaOptions } from "@interfaces/search-criteria.model";
 
 @Component({
   selector: "app-search-criteria",
@@ -24,29 +23,17 @@ import { AppToggleComponent } from "@components/index";
   styleUrls: ["./search-criteria.component.scss"],
 })
 export class SearchCriteriaComponent implements OnInit, OnDestroy {
-  @ViewChild("options", { read: ElementRef }) options: ElementRef;
-  @ViewChild("clear", { read: ElementRef }) clear: ElementRef;
-  @ViewChild("grid", { read: ElementRef }) grid: ElementRef;
-  // @ViewChild("locationslider") locationHandle: AppToggleComponent;
-  @ViewChild("degreeSlider") degreeHandle: AppToggleComponent;
-  @ViewChild("universitySlider") universityHandle: AppToggleComponent;
-  @ViewChild("modalSlides") modalSlides: IonSlides;
-  @ViewChild("modalSlides", { read: ElementRef }) slidesRef: ElementRef;
-  @ViewChild(IonContent) frame: IonContent;
-
-  searchCriteriaSub: Subscription;
-  searchCriteria: SearchCriteria;
-
-  nameOfUnselected = "none";
+  UNSELECTED_NAME = "none";
+  gridHeight: number;
+  clearButtonHeight: number;
+  optionsOriginalPos: number;
+  viewEntered: boolean = false;
+  form: FormGroup;
 
   degreeOptions = searchCriteriaOptions.degree;
   areaOfStudyOptions = searchCriteriaOptions.areaOfStudy;
   societyCategoryOptions = searchCriteriaOptions.societyCategory;
   interestsOptions = searchCriteriaOptions.interests;
-  get universityOptions$() {
-    return this.universitiesStore.optionsList$.pipe();
-  }
-  // onCampus = searchCriteriaOptions.onCampus
 
   uniSelection: string;
   degreeSelection: string;
@@ -54,13 +41,29 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
   societySelection: string;
   interestSelection: string;
 
-  gridHeight: number;
-  clearButtonHeight: number;
-  optionsOriginalPos: number;
+  private subs = new Subscription();
 
-  viewEntered: boolean = false;
+  @ViewChild("options", { read: ElementRef }) options: ElementRef;
+  @ViewChild("clear", { read: ElementRef }) clear: ElementRef;
+  @ViewChild("grid", { read: ElementRef }) grid: ElementRef;
+  @ViewChild("modalSlides") modalSlides: IonSlides;
+  @ViewChild(IonContent) frame: IonContent;
 
-  form: FormGroup;
+  universityOptions$ = this.universitiesStore.optionsList$;
+
+  searchCriteriaHandler$ = this.SCstore.searchCriteria$.pipe(
+    tap((sc) =>
+      this.form.patchValue(
+        this.searchCriteriaToTemplateFormatting({
+          university: sc.university,
+          degree: sc.degree,
+          areaOfStudy: sc.areaOfStudy,
+          societyCategory: sc.societyCategory,
+          interests: sc.interests,
+        })
+      )
+    )
+  );
 
   get emptyForm() {
     return new FormGroup({
@@ -83,27 +86,10 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    /*this.fishSwimAnimation = FishSwimAnimation(this.fish);
-    
-    this.fishSwimAnimation.play();*/
-
-    this.searchCriteriaSub = this.SCstore.searchCriteria$.subscribe({
-      next: (sc) => {
-        this.form.patchValue(
-          this.searchCriteriaToTemplateFormatting({
-            // onCampus: sc.onCampus,
-            university: sc.university,
-            degree: sc.degree,
-            areaOfStudy: sc.areaOfStudy,
-            societyCategory: sc.societyCategory,
-            interests: sc.interests,
-          })
-        );
-      },
-    });
+    this.subs.add(this.searchCriteriaHandler$.subscribe());
   }
 
-  async ionViewDidEnter() {
+  ionViewDidEnter() {
     //This initialises slide heights, for some unknown reason
     //USER DOESN'T SEE THIS, KEEP IT HERE
     this.moveTo("studies").then(() => this.returnTo());
@@ -120,6 +106,33 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
     }, 350);
   }
 
+  // saves the new choices to the store, as well as to the database, and then closes the modal
+  async closeAndConfirmChoices() {
+    await this.SCstore.updateCriteriaInStore(
+      this.searchCriteriaToStoreFormatting(this.form.value)
+    );
+    await this.SCstore.updateCriteriaOnDatabase();
+    await this.modalCtrl.dismiss();
+  }
+
+  // checks whether any of the options are not empty. If it is the case, then show the button to reset the selections
+  checkClear() {
+    this.clearButtonHeight = this.clear.nativeElement.getBoundingClientRect().height;
+
+    if (
+      this.uniSelection != undefined ||
+      this.degreeSelection != undefined ||
+      this.studySelection != undefined ||
+      this.societySelection != undefined ||
+      this.interestSelection != undefined
+    ) {
+      this.slideDown();
+    } else {
+      this.slideUp();
+    }
+  }
+
+  // slides down to show the "clear selection" button
   slideDown() {
     this.renderer.setStyle(
       this.options.nativeElement,
@@ -134,66 +147,24 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
     );
   }
 
+  // slides up to hide the "clear selection" button
   slideUp() {
     this.renderer.setStyle(this.options.nativeElement, "transform", `translateY(0px)`);
     this.renderer.setStyle(this.options.nativeElement, "transition", "0.4s ease-in-out");
     this.renderer.setStyle(this.grid.nativeElement, "height", `${this.gridHeight}px`);
   }
 
-  checkClear() {
-    this.clearButtonHeight = this.clear.nativeElement.getBoundingClientRect().height;
-
-    //if (
-    // this.locationHandle.value != "Everyone" ||
-    //this.degreeHandle.value != "undergrad"
-    //) {
-    //  this.slideDown();
-    if (
-      this.uniSelection != undefined ||
-      this.degreeSelection != undefined ||
-      this.studySelection != undefined ||
-      this.societySelection != undefined ||
-      this.interestSelection != undefined
-    ) {
-      this.slideDown();
-    } else {
-      this.slideUp();
-    }
-
-    //console.log("uni value is ", this.universityHandle.value);
-    // this.searchCriteriaForm.value.onCampus = this.locationHandle.value;
-    //this.form.value.degree = this.degreeHandle.value;
-    //this.form.value.university = this.universityHandle.value;
-  }
-
+  // checks each field of the form, and if it contains a value, update that value in the main SC page
+  // this seems to only be used on init of the SC component
   updateCriteria() {
-    // if (this.locationHandle.selections.includes(this.searchCriteriaForm.value.onCampus)) {
-    //   switch (this.searchCriteriaForm.value.onCampus) {
-    //     case true:
-    //       this.locationHandle.selectOption("On Campus");
-    //       break;
-    //     case false:
-    //       this.locationHandle.selectOption("Everyone");
-    //       break;
-    //   }
-    // }
-
     //Sort of need to use the pipe here
-    if (this.form.value.university != this.nameOfUnselected) {
+    if (this.form.value.university != this.UNSELECTED_NAME) {
       this.selectReplace(this.form.value.university, "chosenUni");
     }
 
     if (this.degreeOptions.includes(this.form.value.degree)) {
       this.selectReplace(this.form.value.degree, "chosenDegree");
     }
-
-    /*if (this.degreeHandle.selections.includes(this.form.value.degree)) {
-      this.degreeHandle.selectOption(this.form.value.degree);
-    }
-
-    if (this.universityHandle.selections.includes(this.form.value.university)) {
-      this.universityHandle.selectOption(this.form.value.university);
-    }*/
 
     if (this.areaOfStudyOptions.includes(this.form.value.areaOfStudy)) {
       this.selectReplace(this.form.value.areaOfStudy, "areaOfStudy");
@@ -224,6 +195,7 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
     this.modalSlides.update();
   }
 
+  // to move to the selection page for a certain property
   async moveTo(name) {
     const placeholder = document.getElementById("placeholder");
     this.renderer.setStyle(placeholder, "display", "none");
@@ -241,6 +213,7 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
       if (name === names[i]) {
         this.renderer.setStyle(slides[i], "display", "block");
         await this.unlockAndSwipe("next");
+        break;
       }
     }
 
@@ -249,6 +222,7 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
     this.frame.scrollToTop(100);
   }
 
+  // to return to main SC
   async returnTo() {
     var placeholder = document.getElementById("placeholder");
     var slides = [
@@ -275,6 +249,8 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
     this.checkClear();
   }
 
+  // This is used to either change the selection of a given category, or to
+  // unselect that selection
   selectReplace(option, label) {
     // Have to manually set here, cannot be done in for loop below
     // You can't index them to arrays or objects because you end up just changing the object
@@ -331,6 +307,7 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
     }
   }
 
+  // this is used to clear all selections
   clearSelect() {
     // Clear ion-selects
 
@@ -355,12 +332,10 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
       this.resetFormat(names[i]);
     }
 
-    //this.degreeHandle.selectOption(this.nameOfUnselected);
-    //this.universityHandle.selectOption(this.nameOfUnselected); // this.locationHandle.selectOption("Everyone");
-
     this.slideUp();
   }
 
+  // this is used to reset the format of the search criteria
   resetFormat(section) {
     //Orders must match
     var names = ["chosenUni", "chosenDegree", "areaOfStudy", "society", "interests"];
@@ -383,6 +358,7 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
     }
   }
 
+  // this is used when a new selection has been made, to reformat the category it concerns
   newFormat(section) {
     //Orders must match
     var names = ["chosenUni", "chosenDegree", "areaOfStudy", "society", "interests"];
@@ -405,24 +381,11 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
     }
   }
 
-  ngOnDestroy() {
-    this.searchCriteriaSub.unsubscribe();
-    this.viewEntered = false;
-  }
-
-  async closeAndConfirmChoices() {
-    await this.SCstore.updateCriteriaInStore(
-      this.searchCriteriaToStoreFormatting(this.form.value)
-    );
-    await this.SCstore.updateCriteriaOnDatabase();
-    await this.modalCtrl.dismiss();
-  }
-
   searchCriteriaToStoreFormatting(SCForm: FormGroup): SearchCriteria {
     const formattedSC = {};
 
     Object.entries(this.form.value as searchCriteria).forEach(([key, value]) => {
-      if (value === this.nameOfUnselected) {
+      if (value === this.UNSELECTED_NAME) {
         formattedSC[key] = null;
       } else if (value === undefined) {
         formattedSC[key] = null;
@@ -439,12 +402,17 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
 
     Object.entries(SC).forEach(([key, value]) => {
       if (value == null && ["degree", "university"].includes(key)) {
-        formattedSC[key] = this.nameOfUnselected;
+        formattedSC[key] = this.UNSELECTED_NAME;
       } else {
         formattedSC[key] = value;
       }
     });
 
     return formattedSC;
+  }
+
+  ngOnDestroy() {
+    this.subs.unsubscribe();
+    this.viewEntered = false;
   }
 }

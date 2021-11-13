@@ -1,3 +1,6 @@
+// USELESS COMPONENT, CAN BE DELETED (as of November 10th 2021)
+// REPLACED BY TOGGLE BETWEEN MATCHES AND CATCHES
+
 import { Component, OnInit, Input } from "@angular/core";
 import { ModalController, NavController } from "@ionic/angular";
 
@@ -28,13 +31,10 @@ export class MatchesComponent implements OnInit {
     this.chatboardPictures$ = this.chatboardPicturesService.holder$;
   }
 
+  // for moving to the messenger
   async goToMessenger(chatID: String) {
     await this.modalCtrl.dismiss();
     return this.navCtrl.navigateForward("main/messenger/" + chatID);
-  }
-
-  async closeModal() {
-    return await this.modalCtrl.dismiss();
   }
 
   trackChat(index: number, chat: Chat) {

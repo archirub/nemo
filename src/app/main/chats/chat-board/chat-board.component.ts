@@ -1,37 +1,30 @@
-import { DomSanitizer } from "@angular/platform-browser";
-import {
-  Component,
-  Input,
-  ViewChild,
-  ElementRef,
-  HostListener,
-  OnInit,
-  AfterViewInit,
-  Output,
-  Renderer2,
-  EventEmitter,
-} from "@angular/core";
 import {
   AlertController,
   IonContent,
   IonItemSliding,
-  IonTabs,
   LoadingController,
-  ModalController,
   NavController,
 } from "@ionic/angular";
+import {
+  Component,
+  Input,
+  ViewChild,
+  HostListener,
+  OnInit,
+  AfterViewInit,
+  Output,
+  EventEmitter,
+} from "@angular/core";
+
+import { BehaviorSubject, combineLatest, Subscription, timer } from "rxjs";
+import { distinctUntilChanged, filter, first, map, switchMap, tap } from "rxjs/operators";
+
+import { ChatboardPicturesStore } from "@stores/pictures/chatboard-pictures/chatboard-pictures.service";
+import { ChatboardStore } from "@stores/index";
+import { StoreReadinessService } from "@services/store-readiness/store-readiness.service";
 
 import { Chat } from "@classes/index";
-import { TabElementRefService } from "src/app/main/tab-menu/tab-element-ref.service";
-import {
-  ChatboardPicturesStore,
-  pictureHolder,
-} from "@stores/pictures/chatboard-pictures/chatboard-pictures.service";
-import { BehaviorSubject, combineLatest, Observable, Subscription, timer } from "rxjs";
-import { distinctUntilChanged, filter, first, map, switchMap, tap } from "rxjs/operators";
-import { ChatboardStore } from "@stores/index";
 import { FadeOutAnimation } from "@animations/fade-out.animation";
-import { StoreReadinessService } from "@services/store-readiness/store-readiness.service";
 
 @Component({
   selector: "app-chat-board",
@@ -39,93 +32,103 @@ import { StoreReadinessService } from "@services/store-readiness/store-readiness
   styleUrls: ["./chat-board.component.scss"],
 })
 export class ChatBoardComponent implements OnInit, AfterViewInit {
-  chatboardPictures$: Observable<pictureHolder>;
-  picsLoaded: boolean = false;
+  view: "chats" | "catches" = "chats";
 
-  subs = new Subscription();
-
-  view: string = "chats";
-
-  @Output() loaded = new EventEmitter();
+  private subs = new Subscription();
 
   @Input() chats: Chat[];
   @Input() matches: Chat[];
+  @Output() chatboardReady = new EventEmitter();
   @ViewChild(IonContent) ionContent: IonContent;
-  @ViewChild(IonTabs) tabs: IonTabs;
-
-  // PROPERTIES FOR MODAL ANIMATION
-  @ViewChild("chatContainer", { read: ElementRef }) chatContainer: ElementRef;
-  @ViewChild("matchesButton", { read: ElementRef }) matchesButton: ElementRef;
-
   @ViewChild("chatDeleteRef") chatDeleteRef: IonItemSliding;
 
-  screenHeight: number;
-  screenWidth: number;
-  @HostListener("window:resize", ["$event"])
-  onResize() {
-    this.screenHeight = window.innerHeight;
-    this.screenWidth = window.innerWidth;
-  }
+  chatboardPictures$ = this.chatboardPicturesService.holder$;
 
-  private viewIsReady$ = new BehaviorSubject<boolean>(false);
-  get pageIsReady$() {
-    return combineLatest([this.viewIsReady$, this.storeReadiness.ownProfile$]).pipe(
-      map(([a, b]) => a && b),
-      distinctUntilChanged()
-    );
-  }
+  viewIsReady$ = new BehaviorSubject<boolean>(false);
+  pageIsReady$ = combineLatest([this.viewIsReady$, this.storeReadiness.ownProfile$]).pipe(
+    map(([a, b]) => a && b),
+    distinctUntilChanged()
+  );
+
+  readinessHandler$ = this.pageIsReady$.pipe(
+    filter((ready) => ready),
+    tap((ready) => this.chatboardReady.emit(ready))
+  );
 
   constructor(
     private navCtrl: NavController,
-    private tabElementRef: TabElementRefService,
     private chatboardPicturesService: ChatboardPicturesStore, // used in template
-    private domSanitizer: DomSanitizer,
-    private renderer: Renderer2,
     private storeReadiness: StoreReadinessService,
     private chatboardStore: ChatboardStore,
     private loadingCtrl: LoadingController,
     private alertCtrl: AlertController
-  ) {
-    this.onResize();
-  }
-
-  modal: HTMLIonModalElement;
-  MatchesEnterAnimation;
-  MatchesLeaveAnimation;
+  ) {}
 
   ngOnInit() {
-    this.chatboardPictures$ = this.chatboardPicturesService.holder$.pipe(
-      map((holder) => {
-        // const sanitisedHolder = [];
-        // Object.keys(holder).forEach((uid) =>
-        //   sanitisedHolder.push([holder[uid], this.domSanitizer.sanitize(4, holder[uid])])
-        // );
-        // console.log("comparison:" + JSON.stringify(sanitisedHolder));
-        // return sanitisedHolder;
-        return holder;
-      })
-    );
-    this.readinessHandler();
+    this.subs.add(this.readinessHandler$.subscribe());
   }
 
   ngAfterViewInit() {
     this.viewIsReady$.next(true);
   }
 
-  readinessHandler() {
-    this.subs.add(
-      this.pageIsReady$
-        .pipe(
-          filter((ready) => ready),
-          tap((ready) => {
-            this.picsLoaded = ready;
-            this.loaded.emit(ready);
-          })
-        )
-        .subscribe()
-    );
+  // for deleting a particular chat
+  async deleteChat(event, chat: Chat) {
+    // make "delete" side slide close before starting this procedure
+    await this.chatDeleteRef.close();
+
+    // create loader
+    const loader = await this.loadingCtrl.create({
+      message: "Deleting chat with " + chat.recipient.name,
+      spinner: "bubbles",
+      backdropDismiss: false,
+    });
+
+    // show loader
+    await loader.present();
+
+    // attempt to delete the chat on the database
+    try {
+      await this.chatboardStore.deleteChatOnDatabase(chat.id).toPromise();
+    } catch {
+      // if unsuccesful, dismiss loader and show alert saying there was an error
+      await loader.dismiss();
+
+      return this.alertCtrl
+        .create({
+          header: "An error occured",
+          message: "Your chat with " + chat.recipient.name + " could not be deleted... ",
+          buttons: ["Okay"],
+        })
+        .then((a) => a.present());
+    }
+
+    // get element for fadeOut animation
+    let target: HTMLElement = event.target; //Get list item where click occurred
+    while (!target.classList.contains("parent")) {
+      //Checks parent until it finds full list box
+      target = target.parentElement;
+    }
+
+    await loader.dismiss();
+
+    //Fades out the chatboard list element which just got deleted
+    await FadeOutAnimation(target, 300).play();
+
+    await timer(400)
+      .pipe(
+        first(),
+        switchMap(() => this.chatboardStore.deleteChatInStore(chat.id))
+      )
+      .toPromise();
   }
 
+  // for use in chat page
+  scroll(speed) {
+    this.ionContent.scrollToTop(speed);
+  }
+
+  // for shortening last message
   shorten(sentence: string) {
     if (sentence.length > 25) {
       let shortenedSentence = sentence.slice(0, 25);
@@ -136,77 +139,29 @@ export class ChatBoardComponent implements OnInit, AfterViewInit {
     } else return sentence;
   }
 
-  async deleteChat(event, chat: Chat) {
-    // make slide close before starting this procedure
-    await this.chatDeleteRef.close();
-
-    const loader = await this.loadingCtrl.create({
-      message: "Deleting chat with " + chat.recipient.name,
-      spinner: "bubbles",
-      backdropDismiss: false,
-    });
-
-    await loader.present();
-    try {
-      await this.chatboardStore.deleteChatOnDatabase(chat.id).toPromise();
-    } catch {
-      await loader.dismiss();
-
-      const alert = await this.alertCtrl.create({
-        header: "An error occured",
-        message: "Your chat with " + chat.recipient.name + " could not be deleted... ",
-        buttons: ["Okay"],
-      });
-
-      return alert.present();
-    }
-
-    let target: HTMLElement = event.target; //Get list item where click occurred
-    while (!target.classList.contains("parent")) {
-      //Checks parent until it finds full list box
-      target = target.parentElement;
-    }
-
-    await loader.dismiss();
-
-    //Fades out list element
-    FadeOutAnimation(target, 300).play();
-
-    await timer(400)
-      .pipe(
-        first(),
-        switchMap(() => this.chatboardStore.deleteChatInStore(chat.id))
-      )
-      .toPromise();
-
-    // //Gets rid of chat from local DOM
-    // setTimeout(() => {
-    //   this.chatboardStore.deleteChatInStore(chat.id)
-
-    //   /** HERE IS WHERE YOU WANT TO SEND DELETION TO BACKEND
-    //    * I SUGGEST BRINGING UP A POPUP INCLUDING THE CHAT RECIPIENT NAME
-    //    * NAME IS STORED IN A VARIABLE IN FUNCTION IF NECESSARY
-    //    * TIMEOUT IS FOR ANIMATION TO PLAY
-    //    **/
-    // }, 400);
+  // for transforming date format to string format (should be an Angular pipe for cleanliness)
+  getDate(date: Date) {
+    let month = date.getMonth();
+    let day = date.getDay();
+    return day.toString() + "/" + month.toString;
   }
 
-  scroll(speed) {
-    this.ionContent.scrollToTop(speed);
-  }
-
-  setView(event) {
+  // For use in template. To toggle between chats and catches (should really be a behaviorSubject)
+  setView(event: "chats" | "catches") {
     this.view = event;
   }
 
+  // got messenger of chat with chat id = chatID
   goToMessenger(chatID: String) {
     this.navCtrl.navigateForward(["main/messenger/" + chatID]);
   }
 
-  goToCatch() {
-    return this.tabElementRef.tabs.select("home");
+  // go to home page
+  goToHome() {
+    return this.navCtrl.navigateRoot("main/home");
   }
 
+  // for trackBy of ngFor loop on chats
   trackChat(index: number, chat: Chat) {
     return chat.id;
   }

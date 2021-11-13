@@ -1,6 +1,8 @@
 import { Platform } from "@ionic/angular";
 import { Component, OnInit, OnDestroy } from "@angular/core";
+import { AngularFireAuth } from "@angular/fire/auth";
 
+import { HideOptions, ShowOptions, SplashScreen } from "@capacitor/splash-screen";
 import {
   ActionPerformed,
   PushNotificationSchema,
@@ -8,17 +10,13 @@ import {
   Token,
 } from "@capacitor/push-notifications";
 
-import { AngularFireAuth } from "@angular/fire/auth";
+import { firstValueFrom, Subscription } from "rxjs";
+import { filter, first } from "rxjs/operators";
 import { Capacitor } from "@capacitor/core";
-
-import { HideOptions, ShowOptions, SplashScreen } from "@capacitor/splash-screen";
-import { Subscription } from "rxjs";
 
 import { GlobalStateManagementService } from "@services/global-state-management/global-state-management.service";
 import { routerInitListenerService } from "@services/global-state-management/initial-url.service";
 import { StoreReadinessService } from "@services/store-readiness/store-readiness.service";
-import { filter, first } from "rxjs/operators";
-import { NotificationsService } from "@services/notifications/notifications.service";
 
 @Component({
   selector: "app-root",
@@ -28,30 +26,25 @@ import { NotificationsService } from "@services/notifications/notifications.serv
 export class AppComponent implements OnDestroy, OnInit {
   subs = new Subscription();
 
+  get userState() {
+    return firstValueFrom(this.GlobalStateManagement.userState$.pipe(first()));
+  }
+
   constructor(
     private platform: Platform,
     private afAuth: AngularFireAuth,
     private GlobalStateManagement: GlobalStateManagementService,
-    private routerInitListener: routerInitListenerService, // don't remove, used in template
-    private storeReadiness: StoreReadinessService,
-    private notifications: NotificationsService
+    private routerInitListener: routerInitListenerService,
+    private storeReadiness: StoreReadinessService
   ) {
-    // window.onanimationiteration = console.log;
-
     this.initializeApp();
   }
 
   ngOnInit() {
-    // this.storeReadiness.status$.subscribe((a) => console.log("store readiniess: ", a));
     this.afAuth.authState.subscribe((a) => console.log("change in authstate: ", a));
-    // this.GlobalStateManagement.userState$.subscribe((a) =>
-    //   console.log("user state is", a)
-    // );
   }
 
   async initializeApp() {
-    // console.log("App initialization started...");
-
     const SplashScreenAvailable = Capacitor.isPluginAvailable("SplashScreen");
     const splashScreenShowOptions: ShowOptions = { showDuration: 10000 };
     const splashScreenHideOptions: HideOptions = {};
@@ -64,34 +57,24 @@ export class AppComponent implements OnDestroy, OnInit {
 
     if ((await this.userState) === "full") await this.storesReady();
 
-    // console.log("calling hide splashScreen now");
     if (SplashScreenAvailable) await SplashScreen.hide(splashScreenHideOptions);
-
-    // console.log("App initialization ended.");
-  }
-
-  get userState() {
-    return this.GlobalStateManagement.userState$.pipe(first()).toPromise();
   }
 
   startGlobalStateManagement() {
     this.subs.add(this.GlobalStateManagement.activate$.subscribe());
   }
 
-  /**
-   * Returns a promise when the stores are ready
-   */
+  // Returns a promise when the stores are ready
   storesReady() {
-    return this.storeReadiness.app$
-      .pipe(
-        filter((isReady) => isReady),
-        first()
-      )
-      .toPromise();
+    return firstValueFrom(this.storeReadiness.app$.pipe(filter((isReady) => isReady)));
   }
 
   onRouterOutletActivation() {
     this.routerInitListener.onRouterOutletActivation();
+  }
+
+  ngOnDestroy(): void {
+    this.subs.unsubscribe();
   }
 
   // capacitorPushNotificationStuff() {
@@ -133,8 +116,4 @@ export class AppComponent implements OnDestroy, OnInit {
   //     }
   //   );
   // }
-
-  ngOnDestroy(): void {
-    this.subs.unsubscribe();
-  }
 }

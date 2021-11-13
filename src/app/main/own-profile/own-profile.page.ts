@@ -3,44 +3,28 @@ import {
   Component,
   ElementRef,
   OnInit,
-  QueryList,
   ViewChild,
-  ViewChildren,
   AfterViewInit,
   Renderer2,
 } from "@angular/core";
-
-import {
-  BehaviorSubject,
-  combineLatest,
-  forkJoin,
-  Observable,
-  of,
-  Subscription,
-} from "rxjs";
-import { AppUser, Profile } from "@classes/index";
-import { CurrentUserStore } from "@stores/index";
-import { ProfileCardComponent } from "@components/index";
-import { ProfileCourseComponent } from "./profile-course/profile-course.component";
 import {
   AlertController,
   IonTextarea,
   LoadingController,
   ModalController,
+  Animation,
 } from "@ionic/angular";
 import { Router } from "@angular/router";
-import { OwnPicturesStore } from "@stores/pictures/own-pictures/own-pictures.service";
-import { ProfileAnswerComponent } from "./profile-answer/profile-answer.component";
+
 import {
-  FishSwimAnimation,
-  ToggleAppearAnimation,
-  IntEnterAnimation,
-  IntLeaveAnimation,
-} from "@animations/index";
-
-import { TabElementRefService } from "../tab-menu/tab-element-ref.service";
-import { InterestsModalComponent } from "./interests-modal/interests-modal.component";
-
+  BehaviorSubject,
+  combineLatest,
+  firstValueFrom,
+  forkJoin,
+  lastValueFrom,
+  of,
+  Subscription,
+} from "rxjs";
 import {
   concatMap,
   distinctUntilChanged,
@@ -53,6 +37,24 @@ import {
   delay,
   filter,
 } from "rxjs/operators";
+import { isEqual, isEqualWith } from "lodash";
+import Sortable, { Options as SortableOptions } from "sortablejs";
+
+import { ProfileCardComponent } from "@components/index";
+import { InterestsModalComponent } from "./interests-modal/interests-modal.component";
+
+import { CurrentUserStore } from "@stores/index";
+import { OwnPicturesStore } from "@stores/pictures/own-pictures/own-pictures.service";
+import { StoreReadinessService } from "@services/store-readiness/store-readiness.service";
+import { TabElementRefService } from "../tab-menu/tab-element-ref.service";
+
+import { AppUser, Profile } from "@classes/index";
+import {
+  FishSwimAnimation,
+  ToggleAppearAnimation,
+  IntEnterAnimation,
+  IntLeaveAnimation,
+} from "@animations/index";
 import {
   searchCriteriaOptions,
   editableProfileFields,
@@ -63,22 +65,27 @@ import {
   MAX_PROFILE_PICTURES_COUNT,
   QuestionAndAnswer,
 } from "@interfaces/index";
-import { isEqual, isEqualWith } from "lodash";
-import Sortable, { Options as SortableOptions } from "sortablejs";
-import { StoreReadinessService } from "@services/store-readiness/store-readiness.service";
-import { Animation } from "@ionic/angular";
 
-function nullAndEmptyStrEquiv(value1, value2) {
-  if ((value1 == null || value1 === "") && (value2 == null || value2 === "")) {
-    return true;
-  }
-}
 @Component({
   selector: "app-own-profile",
   templateUrl: "./own-profile.page.html",
   styleUrls: ["./own-profile.page.scss"],
 })
 export class OwnProfilePage implements OnInit, AfterViewInit {
+  interestIcons = assetsInterestsPath;
+  societyCategoryOptions = searchCriteriaOptions.societyCategory;
+  areaOfStudyOptions = searchCriteriaOptions.areaOfStudy;
+  loadingAnimation: Animation;
+  toggleDivEnterAnimation: Animation;
+  toggleDivLeaveAnimation: Animation;
+
+  // These intermediate variables (editableFields and profilePictures) are required
+  // to allow the user to modify these fields without the backend being affected right away,
+  // but only once they click confirm
+  editableFields: editableProfileFields = this.emptyEditableFields;
+
+  subs = new Subscription();
+
   @ViewChild("bioInput") bio: IonTextarea;
   @ViewChild("bioClose", { read: ElementRef }) bioClose: ElementRef;
   @ViewChild("profileCard") profileCard: ProfileCardComponent;
@@ -87,22 +94,43 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
   @ViewChild("toggleDiv", { read: ElementRef }) toggleDiv: ElementRef;
   @ViewChild("profilePictures", { read: ElementRef }) profilePicturesRef: ElementRef;
 
-  subs = new Subscription();
-
-  private ownPicturesSub: Subscription;
-  picsLoaded$: Observable<boolean>;
-
   private editingInProgress = new BehaviorSubject<boolean>(false);
-  editingInProgress$ = this.editingInProgress.pipe(distinctUntilChanged());
-  private editingAnimationLogicSub: Subscription;
-
   private viewIsReady$ = new BehaviorSubject<boolean>(false);
-  get pageIsReady$() {
-    return combineLatest([this.viewIsReady$, this.storeReadiness.ownProfile$]).pipe(
-      map(([a, b]) => a && b),
-      distinctUntilChanged()
-    );
-  }
+  private profilePictures = new BehaviorSubject<string[]>([]); // only contains urls (no empty elements)
+
+  editingInProgress$ = this.editingInProgress.asObservable().pipe(distinctUntilChanged());
+  profilePictures$ = this.profilePictures.asObservable();
+
+  pageIsReady$ = combineLatest([this.viewIsReady$, this.storeReadiness.ownProfile$]).pipe(
+    map(([a, b]) => a && b),
+    distinctUntilChanged()
+  );
+
+  profilePicturesWithEmpty$ = this.profilePictures
+    .asObservable()
+    .pipe(
+      map((pics) =>
+        pics.concat(Array(MAX_PROFILE_PICTURES_COUNT - (pics?.length ?? 0)).fill(""))
+      )
+    ); // # of elements is exactly MAX_PROFILE_PICTURES_COUNT
+
+  fillUserFromStoreHandler$ = this.currentUserStore.user$.pipe(
+    map((user) => this.updateEditableFields(user))
+  );
+  fillPicturesFromStoreHandler$ = this.ownPicturesService.urls$.pipe(
+    map((urls) => this.updateProfilePictures(urls))
+  );
+  onPageReadyHandler$ = this.pageIsReady$.pipe(
+    filter((isReady) => isReady),
+    first(),
+    tap(() => this.stopLoadingAnimation()),
+    tap(() => this.activatePictureDragging())
+  );
+  editingAnimationHandler$ = this.editingInProgress$.pipe(
+    switchMap((inProgress) =>
+      this.toggleDiv ? ToggleAppearAnimation(this.toggleDiv).play() : of()
+    )
+  );
 
   get emptyEditableFields() {
     return {
@@ -116,37 +144,15 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     };
   }
 
-  getUrlFromHTML(element: Element): string {
-    return window
-      .getComputedStyle(element)
-      .backgroundImage.slice(4, -1)
-      .replace(/"/g, "");
+  get questionsNotPicked(): string[] {
+    const questionsPicked = this.editableFields?.questions.map((QandA) => QandA.question);
+    return questionsOptions.filter((option) => !questionsPicked.includes(option));
   }
 
-  // these intermediate values (editableFields and profilePictures) are required
-  // to allow the user to modify these fields without the backend being affected right away,
-  // but only once he/she clicks confirm
-  editableFields: editableProfileFields = this.emptyEditableFields;
-  private profilePictures = new BehaviorSubject<string[]>([]); // only contains urls (no empty elements)
-  profilePictures$ = this.profilePictures.asObservable();
-  profilePicturesWithEmpty$ = this.profilePictures
-    .asObservable()
-    .pipe(
-      map((pics) =>
-        pics.concat(Array(MAX_PROFILE_PICTURES_COUNT - (pics?.length ?? 0)).fill(""))
-      )
-    ); // also contains empty fields at the end so that the # of elements is exactly MAX_PROFILE_PICTURES_COUNT
-
-  profilePicturesFromStore$ = this.ownPicturesService.urls$;
-  userFromStore$ = this.currentUserStore.user$;
-
-  loadingAnimation: Animation;
-  toggleDivEnterAnimation: Animation;
-  toggleDivLeaveAnimation: Animation;
-
-  interestIcons = assetsInterestsPath;
-  societyCategoryOptions = searchCriteriaOptions.societyCategory;
-  areaOfStudyOptions = searchCriteriaOptions.areaOfStudy;
+  get reachedMaxQuestionsCount(): boolean {
+    const questionsCount = this.editableFields?.questions?.length ?? 0;
+    return questionsCount >= MAX_PROFILE_QUESTIONS_COUNT;
+  }
 
   constructor(
     private currentUserStore: CurrentUserStore,
@@ -161,20 +167,11 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     private storeReadiness: StoreReadinessService
   ) {}
 
-  intEnterAnimation;
-  intLeaveAnimation;
-  pPictures: string[];
-
   ngOnInit() {
-    this.profilePicturesFromStore$
-      .pipe(map((urls) => this.updateProfilePictures(urls)))
-      .subscribe();
-    this.userFromStore$.pipe(map((user) => this.updateEditableFields(user))).subscribe();
-    // this.picsLoaded$ = this.ownPicturesService.isReady$.pipe(
-    //   tap((allPicturesLoaded) => (allPicturesLoaded ? this.stopAnimation() : null))
-    // );
-    this.editingAnimationLogicSub = this.editingAnimationLogic().subscribe();
-    this.readinessHandler();
+    this.subs.add(this.fillPicturesFromStoreHandler$.subscribe());
+    this.subs.add(this.fillUserFromStoreHandler$.subscribe());
+    this.subs.add(this.editingAnimationHandler$.subscribe());
+    this.subs.add(this.onPageReadyHandler$.subscribe());
   }
 
   ngAfterViewInit() {
@@ -185,17 +182,9 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     this.viewIsReady$.next(true);
   }
 
-  readinessHandler(): void {
-    this.subs.add(
-      this.pageIsReady$
-        .pipe(
-          filter((isReady) => isReady),
-          take(1),
-          switchMap(() => this.stopLoadingAnimation()),
-          tap(() => this.initPictureSortability())
-        )
-        .subscribe()
-    );
+  async actOnProfileEditing($event: "cancel" | "save") {
+    if ($event === "cancel") return this.cancelProfileEdit();
+    if ($event === "save") return this.confirmProfileEdit();
   }
 
   startLoadingAnimation() {
@@ -203,49 +192,30 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     this.loadingAnimation.play();
   }
 
-  async stopLoadingAnimation() {
-    return new Promise((resolve) => {
-      this.loadingAnimation?.destroy();
-
-      setTimeout(() => {
-        // This is essentially a lifecycle hook for after the UI appears
-        // this.toggleDivEnterAnimation = ToggleAppearAnimation(this.toggleDiv);
-        this.profileCard.updatePager(0);
-
-        //Build modal setup once UI has entered
-        setTimeout(() => {
-          this.intEnterAnimation = IntEnterAnimation(
-            this.tabElementRef.tabsRef,
-            this.profileContainer
-          );
-          this.intLeaveAnimation = IntLeaveAnimation(
-            this.tabElementRef.tabsRef,
-            this.profileContainer
-          );
-          resolve(null);
-        }, 50);
-      }, 100);
-    });
+  stopLoadingAnimation() {
+    this.loadingAnimation?.destroy();
   }
 
-  deletePicture(index: number) {
-    return this.profilePicturesWithEmpty$
-      .pipe(
+  // deletes the picture at the given index
+  deletePicture(index: number): Promise<void> {
+    return lastValueFrom(
+      this.profilePicturesWithEmpty$.pipe(
         first(),
         map((pics) => {
           pics.splice(index, 1);
           this.profilePictures.next(pics);
         }),
-        map(() => this.editingTriggered())
+        switchMap(() => this.editingTriggered())
       )
-      .toPromise();
+    );
   }
 
-  initPictureSortability() {
+  // Initialises the logic that makes the pictures sortable by dragging
+  activatePictureDragging() {
     const sortable = Sortable.create(this.profilePicturesRef.nativeElement, {
       onUpdate: (event) => {
         let newUrls = Array.from(event.target.children)
-          .map((c) => this.getUrlFromHTML(c.children[1].children[0].children[0]))
+          .map((c) => getUrlFromHTML(c.children[1].children[0].children[0]))
           .filter((u) => !!u);
 
         this.profilePictures.next(newUrls);
@@ -265,25 +235,24 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
       componentProps: {
         interests: this.editableFields?.interests,
       },
-      enterAnimation: this.intEnterAnimation,
-      leaveAnimation: this.intLeaveAnimation,
+      enterAnimation: IntEnterAnimation(
+        this.tabElementRef.tabsRef,
+        this.profileContainer
+      ),
+      leaveAnimation: IntLeaveAnimation(
+        this.tabElementRef.tabsRef,
+        this.profileContainer
+      ),
     });
     modal.onWillDismiss().then(() => this.editingTriggered());
 
     return modal.present();
   }
 
-  /**
-   * Get interest icon path by parsing interest name
-   **/
+  //Get interest icon path by parsing interest name (used in template)
   getPicturePath(interestName: Interests): string {
     const formattedName = interestName.replace(/\s/g, "").toLowerCase();
     return "/assets/interests/" + formattedName + ".svg";
-  }
-
-  get questionsNotPicked(): string[] {
-    const questionsPicked = this.editableFields?.questions.map((QandA) => QandA.question);
-    return questionsOptions.filter((option) => !questionsPicked.includes(option));
   }
 
   updateEditableFields(data: AppUser | Profile | editableProfileFields): void {
@@ -297,6 +266,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     });
   }
 
+  // takes a User object and returns an editableProfileFields object with the User object's values
   userToEditableFields(user: AppUser): editableProfileFields {
     const fields = this.emptyEditableFields;
 
@@ -312,46 +282,58 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     return fields;
   }
 
+  // linked in template to the "onPhotoPicked" emitor from the "add-photo" component
+  onPicturePicked($event: { photoUrl: string; index: number }) {
+    return firstValueFrom(
+      this.profilePicturesWithEmpty$.pipe(
+        map((profilePictures) => {
+          profilePictures[$event.index] = $event.photoUrl;
+          this.profilePictures.next(profilePictures);
+        }),
+        map(() => {
+          this.editingInProgress.next(true);
+          this.detector.detectChanges();
+        })
+      )
+    );
+  }
+
+  // updates the profile pictures observable which dictates what is shown in the template
   updateProfilePictures(urls: string[]) {
     this.profilePictures.next(JSON.parse(JSON.stringify(urls)));
   }
 
+  // this serves to change the position of a given picture in the picture array
+  // by inserting it at a specific location in the array (thereby shifting the position of
+  // other pictures in the process)
   changePictureIndex(oldIndex: number, newIndex: number) {
-    return this.profilePicturesWithEmpty$
-      .pipe(
+    return lastValueFrom(
+      this.profilePicturesWithEmpty$.pipe(
         first(),
         map((pics) => {
-          this.array_move(pics, oldIndex, newIndex);
+          changeElementPosition(pics, oldIndex, newIndex);
           this.profilePictures.next(pics.filter((p) => !!p));
           return pics;
         }),
         delay(400),
         concatMap(() => this.editingTriggered())
       )
-      .toPromise();
+    );
   }
 
-  array_move(arr: any[], old_index: number, new_index: number) {
-    if (new_index >= arr.length) {
-      var k = new_index - arr.length + 1;
-      while (k--) {
-        arr.push(undefined);
-      }
-    }
-    arr.splice(new_index, 0, arr.splice(old_index, 1)[0]);
-  }
-
+  // allows to move to settings only if editing is not in progress
   goToSettings() {
-    return this.editingInProgress$
-      .pipe(
-        take(1),
+    return lastValueFrom(
+      this.editingInProgress$.pipe(
+        first(),
         switchMap((inProgress) =>
           !inProgress ? this.router.navigateByUrl("/main/settings") : of("")
         )
       )
-      .toPromise();
+    );
   }
 
+  // to show or not the close button of the biography
   displayExit(section) {
     if (section === "bio" && this.bio.value !== "") {
       this.renderer.setStyle(this.bioClose.nativeElement, "display", "block");
@@ -360,6 +342,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     }
   }
 
+  // to clear the input of the biography
   clearInput(section) {
     if (section === "bio") {
       this.bio.value = "";
@@ -368,7 +351,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     }
   }
 
-  /* Nemo toggle selection function */
+  // to make apperance changes when the option of the toggle is changed between edit and view
   async toggleChange(option) {
     const editor = document.getElementById("editing");
     const profile = document.getElementById("profile");
@@ -379,16 +362,16 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     } else if (option == "view") {
       this.renderer.setStyle(editor, "display", "none");
       this.renderer.setStyle(profile, "display", "flex");
-      let index = await this.profileCard.slides.getActiveIndex();
-      this.profileCard.updatePager(index);
     }
   }
 
+  // watches whether there is a difference between the info the currentUserStore holds
+  // and what is shown in the template. Marks editingInProgress as true or false accordingly
   async editingTriggered() {
-    return this.userFromStore$
-      .pipe(
+    return lastValueFrom(
+      this.currentUserStore.user$.pipe(
         map((user) => this.userToEditableFields(user)),
-        withLatestFrom(this.profilePicturesWithEmpty$, this.profilePicturesFromStore$),
+        withLatestFrom(this.profilePicturesWithEmpty$, this.ownPicturesService.urls$),
         map(
           ([fieldsInStore, pictures, picturesFromStore]) =>
             !isEqualWith(fieldsInStore, this.editableFields, nullAndEmptyStrEquiv) ||
@@ -403,13 +386,14 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
             : this.editingInProgress.next(false)
         )
       )
-
-      .toPromise();
+    );
   }
 
+  // used to cancel the editing of the profile by filling the template with the infom from
+  // currentUserStore and ownPicturesService
   async cancelProfileEdit(): Promise<void> {
-    await this.userFromStore$
-      .pipe(
+    await lastValueFrom(
+      this.currentUserStore.user$.pipe(
         withLatestFrom(this.ownPicturesService.urls$),
         take(1),
         map(([user, urls]) => {
@@ -418,60 +402,73 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
         }),
         map(() => this.editingInProgress.next(false))
       )
-      .toPromise();
+    );
 
     this.displayExit("bio");
   }
 
-  async presentInvalidPartsMessage() {
-    const invalidParts = this.invalidParts;
-
+  // checks whether any of the parts of the editable fields are invalid.
+  // if it is the case, then display a message showing which they are
+  async presentInvalidPartsMessage(invalidParts: ("society" | "questions" | "course")[]) {
     const societyMessage =
       "Your society and its category must be either both filled or empty.";
     const courseMessage =
       "Your course and its category must be either both filled or empty.";
     const questionsMessage =
       "Make sure all of your questions contain both a selection and an answer.";
-    const message = `${invalidParts.includes("society") ? societyMessage : ""}
+
+    const message = `
+    ${invalidParts.includes("society") ? societyMessage : ""}
     ${invalidParts.includes("course") ? courseMessage : ""}
     ${invalidParts.includes("questions") ? questionsMessage : ""}
     `;
 
+    const header = `
+    Looks like ${invalidParts.join(", ")} 
+    ${invalidParts.length === 1 ? "is" : "are"} invalid.
+    `;
+
     const alert = await this.alertCtrl.create({
-      header: `Looks like ${invalidParts.join(", ")} ${
-        invalidParts.length === 1 ? "is" : "are"
-      } invalid.`,
-      message: `${message}`,
+      header,
+      message,
       buttons: ["Okay"],
     });
 
     return alert.present();
   }
 
+  // used to confirm the editing of the profile. It first checks if there are
+  // any invalid parts. If there are then it display the invalidPartsMessage
+  // otherwise, it shows a loader, then update the fields in the database, updates the pictures
+  // and then turns off editing in progress
   async confirmProfileEdit(): Promise<void> {
-    if (this.invalidParts.length > 0) return this.presentInvalidPartsMessage();
+    const invalidParts = this.getInvalidParts();
+
+    if (invalidParts.length > 0) return this.presentInvalidPartsMessage(invalidParts);
 
     const loading = await this.loadingCtrl.create({ backdropDismiss: false });
     await loading.present();
 
-    await forkJoin([
-      this.currentUserStore.updateFieldsOnDatabase(this.editableFields),
-      this.ownPicturesService.updatePictures(
-        await this.profilePicturesWithEmpty$.pipe(first()).toPromise()
-      ),
-    ])
-      .pipe(
+    await lastValueFrom(
+      forkJoin([
+        this.currentUserStore.updateFieldsOnDatabase(this.editableFields),
+        this.ownPicturesService.updatePictures(
+          await firstValueFrom(this.profilePicturesWithEmpty$)
+        ),
+      ]).pipe(
         map(() => this.editingInProgress.next(false)),
         switchMap(() => loading.dismiss())
       )
-      .toPromise();
+    );
 
     this.profileCard.buildInterestSlides(this.profileCard.profile);
   }
 
-  get invalidParts(): ("society" | "questions" | "course")[] {
+  // gets the invalid parts of the editable fields
+  getInvalidParts(): ("society" | "questions" | "course")[] {
     const isFilled = (v) => typeof v === "string" && v.length > 0;
     const isEmpty = (v) => !v;
+
     const bothNullOrFilled = (v1, v2) =>
       (isFilled(v1) && isFilled(v2)) || (isEmpty(v1) && isEmpty(v2));
 
@@ -491,11 +488,6 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     return invalidParts;
   }
 
-  async actOnProfileEditing($event: "cancel" | "save") {
-    if ($event === "cancel") return this.cancelProfileEdit();
-    if ($event === "save") return this.confirmProfileEdit();
-  }
-
   /**
    * Triggered by profile-answer change
    * If receives an array with 'delete' as first entry, deletes question
@@ -511,56 +503,45 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     this.editingTriggered();
   }
 
-  addQuestion() {
+  // to add a question
+  async addQuestion() {
     if (this.reachedMaxQuestionsCount) return;
 
-    setTimeout(() => {
-      this.toggleDivEnterAnimation = ToggleAppearAnimation(this.toggleDiv);
-      this.toggleDivEnterAnimation.play();
-    }, 250);
+    await ToggleAppearAnimation(this.toggleDiv).play();
 
     this.editableFields.questions.push({ question: null, answer: null });
-    this.editingTriggered();
+
+    await this.editingTriggered();
   }
 
-  editingAnimationLogic(): Observable<any> {
-    return this.editingInProgress$.pipe(
-      switchMap((inProgress) =>
-        this.toggleDiv ? ToggleAppearAnimation(this.toggleDiv).play() : of()
-      )
-    );
-  }
-
-  get reachedMaxQuestionsCount(): boolean {
-    return this.questionsCount >= MAX_PROFILE_QUESTIONS_COUNT;
-  }
-
-  get questionsCount(): number {
-    return this.editableFields?.questions?.length ?? 0;
-  }
-
-  onPicturePicked($event: { photoUrl: string; index: number }) {
-    return this.profilePicturesWithEmpty$
-      .pipe(
-        first(),
-        map((profilePictures) => {
-          profilePictures[$event.index] = $event.photoUrl;
-          this.profilePictures.next(profilePictures);
-        }),
-        map(() => {
-          this.editingInProgress.next(true);
-          this.detector.detectChanges();
-        })
-      )
-      .toPromise();
-  }
-
+  // for trackBy of ngFor on questions in template
   trackQuestion(index: number, question: QuestionAndAnswer) {
     return question.question + question.answer;
   }
 
   ngOnDestroy() {
-    this.ownPicturesSub?.unsubscribe();
-    this.editingAnimationLogicSub?.unsubscribe();
+    this.subs.unsubscribe();
+  }
+}
+
+// efficient way to take an item of an array and insert it at a specific other location in the array
+function changeElementPosition(arr: any[], old_index: number, new_index: number) {
+  if (new_index >= arr.length) {
+    var k = new_index - arr.length + 1;
+    while (k--) {
+      arr.push(undefined);
+    }
+  }
+  arr.splice(new_index, 0, arr.splice(old_index, 1)[0]);
+}
+
+function getUrlFromHTML(element: Element): string {
+  return window.getComputedStyle(element).backgroundImage.slice(4, -1).replace(/"/g, "");
+}
+
+// for comparator function in Lodash's isEqual function in "editingTriggered"
+function nullAndEmptyStrEquiv(value1, value2) {
+  if ((value1 == null || value1 === "") && (value2 == null || value2 === "")) {
+    return true;
   }
 }

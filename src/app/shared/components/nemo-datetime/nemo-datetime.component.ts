@@ -96,9 +96,11 @@ export class AppDatetimeComponent implements OnInit, ControlValueAccessor {
 
       this.updateOptions(d, m, y);
 
-      await this.daySlides.slideTo(d);
-      await this.monthSlides.slideTo(m);
-      await this.yearSlides.slideTo(y);
+      await Promise.all([
+        this.daySlides.slideTo(d),
+        this.monthSlides.slideTo(m),
+        this.yearSlides.slideTo(y),
+      ]);
     }
   }
 
@@ -140,9 +142,11 @@ export class AppDatetimeComponent implements OnInit, ControlValueAccessor {
   }
 
   async getDate() {
-    const d = await this.daySlides.getActiveIndex();
-    const m = await this.monthSlides.getActiveIndex();
-    const y = await this.yearSlides.getActiveIndex();
+    const [d, m, y] = await Promise.all([
+      this.daySlides.getActiveIndex(),
+      this.monthSlides.getActiveIndex(),
+      this.yearSlides.getActiveIndex(),
+    ]);
 
     this.updateOptions(d, m, y);
 

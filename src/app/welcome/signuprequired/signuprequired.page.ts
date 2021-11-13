@@ -7,8 +7,8 @@ import {
   QueryList,
   OnInit,
   Renderer2,
+  OnDestroy,
 } from "@angular/core";
-import { FormGroup, FormControl, Validators } from "@angular/forms";
 import {
   AlertController,
   IonCheckbox,
@@ -17,7 +17,18 @@ import {
   LoadingController,
   NavController,
 } from "@ionic/angular";
+import { FormGroup, FormControl, Validators } from "@angular/forms";
 import { Router } from "@angular/router";
+import { AngularFireAuth } from "@angular/fire/auth";
+
+import { Subscription } from "rxjs";
+import { concatMap, delay, filter, map } from "rxjs/operators";
+
+import { AppDatetimeComponent } from "@components/index";
+
+import { UniversitiesStore } from "@stores/universities/universities.service";
+import { SignupService } from "@services/signup/signup.service";
+import { LoadingService } from "@services/loading/loading.service";
 
 import {
   Degree,
@@ -30,65 +41,21 @@ import {
   MAX_PROFILE_PICTURES_COUNT,
 } from "@interfaces/index";
 import { SignupRequired } from "@interfaces/signup.model";
-
-import { SignupService } from "@services/signup/signup.service";
 import { allowOptionalProp } from "@interfaces/index";
-import { AppDatetimeComponent } from "@components/index";
-import { UniversitiesStore } from "@stores/universities/universities.service";
-import { AngularFireAuth } from "@angular/fire/auth";
-import { concatMap, delay, filter, map } from "rxjs/operators";
-import { Observable } from "rxjs";
-import { LoadingService } from "@services/loading/loading.service";
 
 @Component({
   selector: "app-signuprequired",
   templateUrl: "./signuprequired.page.html",
   styleUrls: ["../welcome.page.scss"],
 })
-export class SignuprequiredPage implements OnInit {
-  @ViewChild("slides") slides: IonSlides;
-  @ViewChild("slides", { read: ElementRef }) slidesRef: ElementRef;
-  @ViewChild("date") date: AppDatetimeComponent;
-  @ViewChildren("pagerDots", { read: ElementRef }) dots: QueryList<ElementRef>;
-  @ViewChild("tcbox") tcbox: IonCheckbox;
-  @ViewChild("ppbox") ppbox: IonCheckbox;
-  @ViewChild("universitySelect") universitySelect: IonSelect;
-
-  // UI MAP TO CHECK VALIDATORS, BUILD ON ionViewDidEnter() HOOK
-  reqValidatorChecks: object;
-
-  // FIELD FORM
-  blankForm = new FormGroup({
-    firstName: new FormControl(null, [Validators.required, Validators.minLength(1)]),
-    dateOfBirth: new FormControl(
-      null
-      // [Validators.required]
-    ),
-    sexualPreference: new FormControl(null, [Validators.required]),
-    gender: new FormControl(null, [Validators.required]),
-    university: new FormControl(null, [Validators.required]),
-    degree: new FormControl(null, [Validators.required]),
-  });
-  form = this.blankForm; // put this way so that we have a trace of what a blank form is like so that we can reset it
-
-  // OPTIONS
+export class SignuprequiredPage implements OnInit, OnDestroy {
   genderOptions: Gender[] = genderOptions;
   sexualPreferenceOptions: SexualPreference[] = sexualPreferenceOptions;
   degreeOptions: Degree[] = searchCriteriaOptions.degree;
-  get universityOptions$(): Observable<UniversityName[]> {
-    return this.universitiesStore.optionsList$;
-  }
-
-  picturesHolder: string[] = Array.from({ length: MAX_PROFILE_PICTURES_COUNT }); // for storing pictures. Separate from rest of form, added to it on form submission
-
   slidesLeft: number;
-
   age: number = 0;
   minDOB: Date;
-
   universitySelectionDisabled: boolean = false;
-
-  // Getting these dynamically would be absolutely amazing, not sure how to however
   slideIndexes: { [k in keyof SignupRequired]: number } = {
     firstName: 0,
     dateOfBirth: 1,
@@ -98,6 +65,50 @@ export class SignuprequiredPage implements OnInit {
     university: 4,
     degree: 4,
   };
+
+  private subs = new Subscription();
+
+  form = this.blankForm;
+  picturesHolder: string[] = Array.from({ length: MAX_PROFILE_PICTURES_COUNT }); // for storing pictures. Separate from rest of form, added to it on form submission
+  reqValidatorChecks: object; // ui map to check validators, built in ionViewDidEnter() hook and for usage in validateAndSlide()
+
+  @ViewChild("slides") slides: IonSlides;
+  @ViewChild("slides", { read: ElementRef }) slidesRef: ElementRef;
+  @ViewChild("date") date: AppDatetimeComponent;
+  @ViewChildren("pagerDots", { read: ElementRef }) dots: QueryList<ElementRef>;
+  @ViewChild("tcbox") tcbox: IonCheckbox;
+  @ViewChild("ppbox") ppbox: IonCheckbox;
+
+  universityOptions$ = this.universitiesStore.optionsList$;
+
+  universitySelectingHandler$ = this.afAuth.user.pipe(
+    filter((u) => !!u),
+    concatMap((user) => this.universitiesStore.getUniversityFromEmail(user.email)),
+    delay(5000), // required otherwise it gets set too early and gets set back to null
+    map((universityName) => {
+      const uniFormControl = this.form.get("university");
+
+      if (universityName) {
+        uniFormControl.setValue(universityName);
+        // this.universitySelect.value = universityName;
+        this.universitySelectionDisabled = true;
+        // this.changeDetectorRef.detectChanges();
+      } else {
+        this.universitySelectionDisabled = false;
+      }
+    })
+  );
+
+  get blankForm() {
+    return new FormGroup({
+      firstName: new FormControl(null, [Validators.required, Validators.minLength(1)]),
+      dateOfBirth: new FormControl(null),
+      sexualPreference: new FormControl(null, [Validators.required]),
+      gender: new FormControl(null, [Validators.required]),
+      university: new FormControl(null, [Validators.required]),
+      degree: new FormControl(null, [Validators.required]),
+    });
+  }
 
   constructor(
     private router: Router,
@@ -110,43 +121,36 @@ export class SignuprequiredPage implements OnInit {
     private loading: LoadingService,
     private alertCtrl: AlertController,
     private navCtrl: NavController
-  ) {
-    this.form.valueChanges.subscribe((a) =>
-      console.log("required form value change:", a)
-    );
-  }
+  ) {}
 
   ngOnInit() {
-    this.universityLogic().subscribe();
+    this.subs.add(this.universitySelectingHandler$.subscribe());
   }
 
   async ionViewWillEnter() {
-    // UI elements map to show on invalid checks when trying to move slide, see validateAndSlide()
-    this.reqValidatorChecks = {
-      firstName: document.getElementById("nameCheck"),
-      dateOfBirth: document.getElementById("dateCheck"),
-      sexualPreference: document.getElementById("sexCheck"),
-      gender: document.getElementById("genderCheck"),
-      university: document.getElementById("uniCheck"),
-      degree: document.getElementById("degreeCheck"),
-    };
+    this.reqValidatorChecks = this.getReqValidatorChecks();
   }
 
-  async ionViewDidEnter() {
-    await this.signup.getLocalStorage();
-    await this.fillFieldsAndGoToSlide();
-
-    await this.date.getWrittenValue();
-    await this.date.getDate();
-
-    await this.slides.lockSwipes(true);
-
-    await this.updatePager();
+  ionViewDidEnter() {
+    this.signup
+      .getLocalStorage()
+      .then(() => this.fillFieldsAndGoToSlide())
+      .then(() => this.updatePager());
   }
 
-  updateAge(age: number) {
-    this.age = age;
-    this.changeDetectorRef.detectChanges();
+  /**
+   * Checks whether all the data is valid, if it isn't redirect to slide of unvalid data,
+   * if it is, then save the data and direct to signupoptional
+   */
+  async onSubmit() {
+    const invalidSlide = this.getfirstInvalidSlideIndex();
+
+    // if invalidSlide is non-null, then there is a slide with invalid data
+    // cannot just use if (invalidSlide) {} syntax as number 0 is falsy
+    if (typeof invalidSlide === "number") return this.unlockAndSlideTo(invalidSlide);
+
+    await this.updateData(); // may not be necessary, but last check to make sure data we have in logic exactly reflects that in the UI
+    return this.router.navigateByUrl("/welcome/signupoptional");
   }
 
   /**
@@ -218,94 +222,43 @@ export class SignuprequiredPage implements OnInit {
     }
   }
 
-  validateAndSlidePictures() {
-    if (this.picturesHolder.filter((p) => p).length < 1) return;
+  // copy paste from signup optional's onSubmit() method
+  async skipToApp() {
+    const loader = await this.loadingCtrl.create({
+      ...this.loading.defaultLoadingOptions,
+      message: "Setting up your account...",
+    });
+    await loader.present();
 
-    this.unlockAndSlideToNext(); // If others valid, slide next
-  }
+    const slideCount = await this.slides.length();
+    const invalidSlide = await this.getfirstInvalidSlideIndex();
+    // go to slide if invalidSlide is non null and that it isn't the last slide
+    if (invalidSlide && invalidSlide + 1 !== slideCount) {
+      const alert = await this.alertCtrl.create({
+        backdropDismiss: false,
+        header: "We found some invalid data...",
+        buttons: ["Go to field"],
+      });
 
-  async updatePager() {
-    /*
-     * Function to get the current slider and update the pager icons accordingly, no inputs
-     * Should be called on launch and after a slide is changed each time
-     */
-
-    //Retrieve all icons as element variables
-    const person = document.getElementById("person");
-    const gift = document.getElementById("gift");
-    const camera = document.getElementById("camera");
-    const happy = document.getElementById("happy");
-    const school = document.getElementById("school");
-
-    //Hash maps are quickest and most efficient; keys are slide numbers, values are icon to show
-    const map = {
-      0: person,
-      1: gift,
-      2: camera,
-      3: happy,
-      4: school,
-    };
-
-    //Initially display none
-    Object.values(map).forEach((element) =>
-      this.renderer.setStyle(element, "display", "none")
-    );
-
-    //Don't display dots for slides left either
-    const dots = Array.from(this.dots);
-    Array.from(dots).forEach((element) =>
-      this.renderer.setStyle(element.nativeElement, "display", "none")
-    );
-
-    //Get current slide index and calculate slides left after this one
-    const l = await this.slides.length();
-    const current = await this.slides.getActiveIndex();
-    this.slidesLeft = l - current - 2;
-
-    //Get the number of dots equal to slides left and display them
-    if (current < 5) {
-      //stops anything being displayed on slides after last one
-      const slice = Array.from(dots).slice(0, this.slidesLeft);
-      slice.forEach((element) =>
-        this.renderer.setStyle(element.nativeElement, "display", "block")
-      );
+      await loader.dismiss();
+      alert.onDidDismiss().then(() => this.unlockAndSlideTo(invalidSlide));
+      return alert.present();
     }
 
-    //Get correct icon to display
-    if (current < 5) {
-      this.renderer.setStyle(map[current], "display", "block");
-    }
-  }
+    await this.updateData();
 
-  async unlockAndSlideToNext() {
-    await this.slides.lockSwipes(false);
-    await this.slides.slideNext();
-
-    let index = await this.slides.getActiveIndex();
-
-    if (index === 5) {
-      this.renderer.setStyle(this.slidesRef.nativeElement, "overflow", "visible");
-      this.renderer.setStyle(this.slidesRef.nativeElement, "--overflow", "visible");
+    try {
+      await this.signup.createFirestoreAccount();
+    } catch (e) {
+      await loader.dismiss();
+      await this.onAccountCreationFailure();
     }
 
-    await this.updatePager();
-    await this.slides.lockSwipes(true);
-  }
+    await this.signup.initializeUser();
 
-  async unlockAndSlideToPrev() {
-    await this.slides.lockSwipes(false);
-    await this.slides.slidePrev();
+    await loader.dismiss();
 
-    await this.updatePager();
-    await this.slides.lockSwipes(true);
-  }
-
-  async unlockAndSlideTo(index: number) {
-    await this.slides.lockSwipes(false);
-    await this.slides.slideTo(index);
-
-    await this.updatePager();
-    await this.slides.lockSwipes(true);
+    return this.navCtrl.navigateForward("/welcome/signup-to-app");
   }
 
   /**
@@ -331,43 +284,14 @@ export class SignuprequiredPage implements OnInit {
     // filling fields
     this.fillFields(requiredData);
 
+    // updating date component value
+    await this.date.getWrittenValue().then(() => this.date.getDate());
+
     // moving to slide of index with earliest incomplete fields
     // if there is none, then moving to last slide
     await this.unlockAndSlideTo(
-      this.getFirstInvalidSlideIndex() ?? (await this.slides.length())
+      this.getfirstInvalidSlideIndex() ?? (await this.slides.length())
     );
-  }
-
-  /**
-   * From the current values of the fields, returns the index of the earliest
-   * slide that has invalid or missing information.
-   *
-   * CAREFUL: the slide indexes are based on the property "slideIndexes", which is fixed
-   * and not dynamically updated by changes in the template. Changes in the order of the template
-   * may therefore change its validity.
-   */
-  getFirstInvalidSlideIndex(): number | null {
-    const fieldValues = this.formValues;
-    const initIndex = 100;
-    let slideIndex: number = initIndex;
-
-    // checks whether each field has a value and if that value is valid
-    Object.keys(this.slideIndexes).forEach((field) => {
-      if (field === "pictures") {
-        // checks first whether that field exists / contains a value
-        // and then whether there is at least one picture in the pictures array (the others should be null)
-        if (!(fieldValues[field] && fieldValues[field].filter(Boolean).length > 0)) {
-          slideIndex = Math.min(slideIndex, this.slideIndexes[field]);
-        }
-      } else {
-        // checks whether element exists / is non null & whether its value is valid
-        if (!(fieldValues[field] && !this.form.get(field).invalid)) {
-          slideIndex = Math.min(slideIndex, this.slideIndexes[field]);
-        }
-      }
-    });
-
-    return slideIndex === initIndex ? null : slideIndex;
   }
 
   /**
@@ -438,51 +362,103 @@ export class SignuprequiredPage implements OnInit {
     };
   }
 
-  // copy paste from signup optional's onSubmit() method
-  async skipToApp() {
-    const loader = await this.loadingCtrl.create({
-      ...this.loading.defaultLoadingOptions,
-      message: "Setting up your account...",
-    });
-    await loader.present();
-
-    const slideCount = await this.slides.length();
-    const invalidSlide = await this.getFirstInvalidSlideIndex();
-    // go to slide if invalidSlide is non null and that it isn't the last slide
-    if (invalidSlide && invalidSlide + 1 !== slideCount) {
-      const alert = await this.alertCtrl.create({
-        backdropDismiss: false,
-        header: "We found some invalid data...",
-        buttons: ["Go to field"],
-      });
-
-      await loader.dismiss();
-      alert.onDidDismiss().then(() => this.unlockAndSlideTo(invalidSlide));
-      return alert.present();
-    }
-
-    await this.updateData();
-
-    try {
-      await this.signup.createFirestoreAccount();
-    } catch (e) {
-      await loader.dismiss();
-      await this.onAccountCreationFailure();
-    }
-
-    await this.signup.initializeUser();
-
-    await loader.dismiss();
-
-    return this.navCtrl.navigateForward("/welcome/signup-to-app");
+  savePhoto(e: { photoUrl: string; index: number }) {
+    this.picturesHolder[e.index] = e.photoUrl;
+    this.changeDetectorRef.detectChanges(); // forces Angular to check updates in the template
   }
+
+  async updatePager() {
+    /*
+     * Function to get the current slider and update the pager icons accordingly, no inputs
+     * Should be called on launch and after a slide is changed each time
+     */
+
+    //Retrieve all icons as element variables
+    const person = document.getElementById("person");
+    const gift = document.getElementById("gift");
+    const camera = document.getElementById("camera");
+    const happy = document.getElementById("happy");
+    const school = document.getElementById("school");
+
+    //Hash maps are quickest and most efficient; keys are slide numbers, values are icon to show
+    const map = {
+      0: person,
+      1: gift,
+      2: camera,
+      3: happy,
+      4: school,
+    };
+
+    //Initially display none
+    Object.values(map).forEach((element) =>
+      this.renderer.setStyle(element, "display", "none")
+    );
+
+    //Don't display dots for slides left either
+    const dots = Array.from(this.dots);
+    Array.from(dots).forEach((element) =>
+      this.renderer.setStyle(element.nativeElement, "display", "none")
+    );
+
+    //Get current slide index and calculate slides left after this one
+    const l = await this.slides.length();
+    const current = await this.slides.getActiveIndex();
+    this.slidesLeft = l - current - 2;
+
+    //Get the number of dots equal to slides left and display them
+    if (current < 5) {
+      //stops anything being displayed on slides after last one
+      const slice = Array.from(dots).slice(0, this.slidesLeft);
+      slice.forEach((element) =>
+        this.renderer.setStyle(element.nativeElement, "display", "block")
+      );
+    }
+
+    //Get correct icon to display
+    if (current < 5) {
+      this.renderer.setStyle(map[current], "display", "block");
+    }
+  }
+
+  /**
+   * From the current values of the fields, returns the index of the earliest
+   * slide that has invalid or missing information.
+   *
+   * CAREFUL: the slide indexes are based on the property "slideIndexes", which is fixed
+   * and not dynamically updated by changes in the template. Changes in the order of the template
+   * may therefore change its validity.
+   */
+  getfirstInvalidSlideIndex(): number | null {
+    const fieldValues = this.formValues;
+    const initIndex = 100;
+    let slideIndex: number = initIndex;
+
+    // checks whether each field has a value and if that value is valid
+    Object.keys(this.slideIndexes).forEach((field) => {
+      if (field === "pictures") {
+        // checks first whether that field exists / contains a value
+        // and then whether there is at least one picture in the pictures array (the others should be null)
+        if (!(fieldValues[field] && fieldValues[field].filter(Boolean).length > 0)) {
+          slideIndex = Math.min(slideIndex, this.slideIndexes[field]);
+        }
+      } else {
+        // checks whether element exists / is non null & whether its value is valid
+        if (!(fieldValues[field] && !this.form.get(field).invalid)) {
+          slideIndex = Math.min(slideIndex, this.slideIndexes[field]);
+        }
+      }
+    });
+
+    return slideIndex === initIndex ? null : slideIndex;
+  }
+
   async onAccountCreationFailure() {
     const alert = await this.alertCtrl.create({
       header: "Account creation failed",
       message: `We couldn't complete the creation of your account. 
-      Please try to close and reopen the app, and check your internet connection. 
-      If the problem persists, abort profile creation when the popup comes up.
-      We're sorry for the inconvenience.`,
+        Please try to close and reopen the app, and check your internet connection. 
+        If the problem persists, abort profile creation when the popup comes up.
+        We're sorry for the inconvenience.`,
       buttons: ["Okay"],
       backdropDismiss: false,
     });
@@ -490,45 +466,60 @@ export class SignuprequiredPage implements OnInit {
     return alert.present();
   }
 
-  /**
-   * Checks whether all the data is valid, if it isn't redirect to slide of unvalid data,
-   * if it is, then save the data and direct to signupoptional
-   */
-  async onSubmit() {
-    const invalidSlide = this.getFirstInvalidSlideIndex();
+  validateAndSlidePictures() {
+    if (this.picturesHolder.filter((p) => p).length < 1) return;
 
-    // if invalidSlide is non-null, then there is a slide with invalid data
-    // cannot just use if (invalidSlide) {} syntax as number 0 is falsy
-    if (typeof invalidSlide === "number") return this.unlockAndSlideTo(invalidSlide);
-
-    await this.updateData(); // may not be necessary, but last check to make sure data we have in logic exactly reflects that in the UI
-    return this.router.navigateByUrl("/welcome/signupoptional");
+    this.unlockAndSlideToNext(); // If others valid, slide next
   }
 
-  savePhoto(e: { photoUrl: string; index: number }) {
-    this.picturesHolder[e.index] = e.photoUrl;
-    this.changeDetectorRef.detectChanges(); // forces Angular to check updates in the template
+  async unlockAndSlideToNext() {
+    await this.slides.lockSwipes(false);
+    await this.slides.slideNext();
+
+    let index = await this.slides.getActiveIndex();
+
+    if (index === 5) {
+      this.renderer.setStyle(this.slidesRef.nativeElement, "overflow", "visible");
+      this.renderer.setStyle(this.slidesRef.nativeElement, "--overflow", "visible");
+    }
+
+    await this.updatePager();
+    await this.slides.lockSwipes(true);
   }
 
-  universityLogic() {
-    return this.afAuth.user.pipe(
-      filter((u) => !!u),
-      concatMap((user) => this.universitiesStore.getUniversityFromEmail(user.email)),
-      delay(5000), // required otherwise it gets set too early and gets set back to null
-      map((universityName) => {
-        const uniFormControl = this.form.get("university");
+  async unlockAndSlideToPrev() {
+    await this.slides.lockSwipes(false);
+    await this.slides.slidePrev();
 
-        if (universityName) {
-          uniFormControl.setValue(universityName);
-          // this.universitySelect.value = universityName;
-          this.universitySelectionDisabled = true;
-          // this.changeDetectorRef.detectChanges();
-        } else {
-          this.universitySelectionDisabled = false;
-        }
-      })
-    );
+    await this.updatePager();
+    await this.slides.lockSwipes(true);
+  }
 
-    // return this.universitiesStore.universities$.pipe(map)
+  async unlockAndSlideTo(index: number) {
+    await this.slides.lockSwipes(false);
+    await this.slides.slideTo(index);
+
+    await this.updatePager();
+    await this.slides.lockSwipes(true);
+  }
+
+  updateAge(age: number) {
+    this.age = age;
+    this.changeDetectorRef.detectChanges();
+  }
+
+  getReqValidatorChecks() {
+    return {
+      firstName: document.getElementById("nameCheck"),
+      dateOfBirth: document.getElementById("dateCheck"),
+      sexualPreference: document.getElementById("sexCheck"),
+      gender: document.getElementById("genderCheck"),
+      university: document.getElementById("uniCheck"),
+      degree: document.getElementById("degreeCheck"),
+    };
+  }
+
+  ngOnDestroy() {
+    this.subs.unsubscribe();
   }
 }

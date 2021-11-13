@@ -2,7 +2,7 @@ import { LoadingController, NavController } from "@ionic/angular";
 import { Component, OnInit } from "@angular/core";
 import { GlobalStateManagementService } from "@services/global-state-management/global-state-management.service";
 import { StoreReadinessService } from "@services/store-readiness/store-readiness.service";
-import { Observable } from "rxjs";
+import { firstValueFrom, Observable } from "rxjs";
 import { LoadingService } from "@services/loading/loading.service";
 import { exhaustMap, filter, first } from "rxjs/operators";
 import { NotificationsService } from "@services/notifications/notifications.service";
@@ -28,11 +28,10 @@ export class SignupToAppPage implements OnInit {
 
   ngOnInit() {
     this.initializeAppState();
-    console.log(this.appIsReady$);
   }
 
   async goToApp() {
-    if (await this.appIsReady$.pipe(first()).toPromise())
+    if (await firstValueFrom(this.appIsReady$))
       return this.navCtrl.navigateRoot("/main/tabs/home");
 
     const loader = await this.loadingCtrl.create({
@@ -48,13 +47,12 @@ export class SignupToAppPage implements OnInit {
   }
 
   async dismissOnAppReady(loader: HTMLIonLoadingElement) {
-    return this.appIsReady$
-      .pipe(
+    return firstValueFrom(
+      this.appIsReady$.pipe(
         filter((isReady) => isReady),
-        first(),
         exhaustMap(() => loader.dismiss())
       )
-      .toPromise();
+    );
   }
 
   async requestNotificationsPermission() {
