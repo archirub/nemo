@@ -3,6 +3,7 @@ import { AngularFireFunctions } from "@angular/fire/functions";
 import { reportUserRequest } from "@interfaces/cloud-functions.model";
 import { UserReport } from "@interfaces/user-report.models";
 import { ModalController } from "@ionic/angular";
+import { firstValueFrom } from "rxjs";
 
 @Injectable({
   providedIn: "root",
@@ -16,7 +17,7 @@ export class UserReportingService {
   reportUser(report: UserReport) {
     const request: reportUserRequest = { report };
 
-    return this.afFunctions.httpsCallable("reportUser")(request).toPromise();
+    return firstValueFrom(this.afFunctions.httpsCallable("reportUser")(request));
   }
 
   async displayReportModal(

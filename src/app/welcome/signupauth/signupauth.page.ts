@@ -23,6 +23,7 @@ import {
   concat,
   firstValueFrom,
   interval,
+  lastValueFrom,
   of,
   Subscription,
 } from "rxjs";
@@ -237,8 +238,8 @@ export class SignupauthPage implements OnInit {
         return loader.dismiss(); // logic to handle in case of error here is all in requestAccountCreation()
       }
       await this.slideToNext();
-      await this.emailService.sendVerificationToUser("sent").toPromise();
-      await this.emailService.listenForVerification().toPromise();
+      await lastValueFrom(this.emailService.sendVerificationToUser("sent"));
+      await lastValueFrom(this.emailService.listenForVerification());
     } catch (e) {
       console.error(String(e));
       await loader?.dismiss();
@@ -351,8 +352,8 @@ export class SignupauthPage implements OnInit {
 
       console.log("user on right page but wrong slide for email verification");
       await this.goToSlide(2);
-      await this.emailService.sendVerificationToUser("sent").toPromise();
-      return this.emailService.listenForVerification().toPromise();
+      await lastValueFrom(this.emailService.sendVerificationToUser("sent"));
+      return lastValueFrom(this.emailService.listenForVerification());
     }
 
     console.log("user on wrong page and wrong slide for email verification");

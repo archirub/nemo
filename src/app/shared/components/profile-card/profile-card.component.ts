@@ -13,23 +13,24 @@ import {
   Renderer2,
   OnDestroy,
 } from "@angular/core";
-import { AngularFireAuth } from "@angular/fire/auth";
-import { LessInfoAnimation, MoreInfoAnimation } from "@animations/info.animation";
-import { Profile } from "@classes/index";
 import { IonContent, IonSlides } from "@ionic/angular";
-import { UserReportingService } from "@services/user-reporting/user-reporting.service";
-import { BehaviorSubject, combineLatest, EMPTY, interval, Subscription } from "rxjs";
+import { AngularFireAuth } from "@angular/fire/auth";
+
 import {
-  filter,
-  map,
-  take,
-  startWith,
-  tap,
-  concatMap,
-  first,
-  switchMap,
-} from "rxjs/operators";
+  BehaviorSubject,
+  combineLatest,
+  firstValueFrom,
+  Observable,
+  Subscription,
+} from "rxjs";
+import { filter, map, take, startWith } from "rxjs/operators";
+
 import { ReportUserComponent } from "../../../main/chats/report-user/report-user.component";
+
+import { UserReportingService } from "@services/user-reporting/user-reporting.service";
+
+import { Profile } from "@classes/index";
+import { LessInfoAnimation, MoreInfoAnimation } from "@animations/info.animation";
 
 @Component({
   selector: "app-profile-card",
@@ -37,35 +38,25 @@ import { ReportUserComponent } from "../../../main/chats/report-user/report-user
   styleUrls: ["./profile-card.component.scss"],
 })
 export class ProfileCardComponent implements OnInit, AfterViewInit, OnDestroy {
+  counter = 0;
+  expandAnimation: any;
+  collapseAnimation: any;
+  interestSlideContent: Array<Array<string>>;
+  interestsBuilt: boolean = false;
+  loaded: boolean = false;
+  socialFound = false; //Make this TRUE when social media acct is loaded
+  X: number; /* Track touch locations */
+  Y: number;
+
+  subs = new Subscription();
+
   @Output() expanded = new EventEmitter();
   @Output() tapped = new EventEmitter();
-
   @Input() moreInfo: boolean;
   @Input() reportable: boolean = true;
   @Input() isOwnProfile: boolean = false;
   @Input() profile: Profile;
   @Input() headerBottom: number; //in %
-  // @Input() set pictureCount(value: number) {
-  //   this.pictureCountArray = Array(value).fill("");
-  // }
-
-  get pictureCount(): number {
-    return this.profile?.pictureCount ?? 0;
-  }
-
-  get pictureCountArray(): string[] {
-    return Array(this.pictureCount).fill("");
-  }
-
-  // this format is used such that the pager is re-updated whenever we get a new input of pictures
-  // this also allows for the initial update of the pager
-  profilePictures$ = new BehaviorSubject<string[]>([]);
-
-  profilePicturesWithDefault$ = this.profilePictures$.pipe(
-    map((pp) => pp ?? "/assets/icons/icon-192x192.png")
-  );
-  counter = 0;
-
   @Input() set profilePictures(value: string[]) {
     if (!Array.isArray(value)) return;
 
@@ -77,40 +68,36 @@ export class ProfileCardComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.profilePictures$.next(pics);
   }
-
-  @ViewChild(IonContent) ionContent: IonContent;
   @ViewChild(IonSlides) slides: IonSlides;
   @ViewChildren("bullets", { read: ElementRef }) bullets: QueryList<ElementRef>;
   @ViewChild("content", { read: ElementRef }) content: ElementRef;
   @ViewChild("yes", { read: ElementRef }) yesSwipe: ElementRef;
   @ViewChild("no", { read: ElementRef }) noSwipe: ElementRef;
-
-  // profilePictures$ = new BehaviorSubject<string[]>([]);
-
-  expandAnimation: any;
-  collapseAnimation: any;
-
-  interestSlideContent: Array<Array<string>>;
-  interestsBuilt: boolean = false;
-
-  loaded: boolean = false;
-  socialFound = false; //Make this TRUE when social media acct is loaded
-
-  /* Track touch locations */
-  X: number;
-  Y: number;
-
-  subs = new Subscription();
-
-  //for expandInfo animation
   @ViewChild("complete", { read: ElementRef, static: false }) complete: ElementRef; //info after expand
   @ViewChild("header", { read: ElementRef }) header: ElementRef; //name & department container
-
   @ViewChild("intSlides") intSlides: IonSlides;
-
   @HostListener("touchstart", ["$event"]) touchStart(event) {
     this.X = event.touches[0].clientX;
     this.Y = event.touches[0].clientY;
+  }
+
+  isReady$ = new BehaviorSubject<boolean>(false); // used in parent page (created for use in ownProfile page)
+
+  // this format is used such that the pager is re-updated whenever we get a new input of pictures
+  // this also allows for the initial update of the pager
+  profilePictures$ = new BehaviorSubject<string[]>([]);
+
+  profilePicturesWithDefault$ = this.profilePictures$.pipe(
+    map((pp) => pp ?? "/assets/icons/icon-192x192.png")
+  );
+  pagerHandler$: Observable<void>;
+
+  get pictureCount(): number {
+    return this.profile?.pictureCount ?? 0;
+  }
+
+  get pictureCountArray(): string[] {
+    return Array(this.pictureCount).fill("");
   }
 
   constructor(
@@ -126,10 +113,16 @@ export class ProfileCardComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit() {
     this.slides?.lockSwipeToPrev(true);
-    this.subs.add(this.managePager().subscribe()), 5000;
+    this.isReady$.next(true);
+    setTimeout(() => {
+      console.log("slides is", this.slides);
+      this.pagerHandler$ = this.getPagerHandler$(); // this format is used as "slides" only gets init after view init
+      this.subs.add(this.pagerHandler$.subscribe());
+    }, 2000);
   }
 
-  managePager() {
+  getPagerHandler$() {
+    console.log("slides is ", this.slides);
     return combineLatest([this.profilePictures$, this.slides.ionSlideWillChange]).pipe(
       map(([_, s]) => (s.target as any)?.swiper?.realIndex as number),
       startWith(0), // for initial
@@ -150,13 +143,13 @@ export class ProfileCardComponent implements OnInit, AfterViewInit, OnDestroy {
       userReportedPicture = res[0];
     });
 
-    const getReportingInfo = this.afAuth.user
-      .pipe(
+    const getReportingInfo = firstValueFrom(
+      this.afAuth.user.pipe(
         filter((user) => !!user),
         take(1),
         map((user) => (userReportingID = user.uid))
       )
-      .toPromise();
+    );
 
     await Promise.all([getReportingInfo]);
 

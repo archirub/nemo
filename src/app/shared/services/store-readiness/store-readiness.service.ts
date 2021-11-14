@@ -32,72 +32,48 @@ export class StoreReadinessService {
     private searchCriteriaStore: SearchCriteriaStore
   ) {}
 
-  get status$(): Observable<{ [key in storeName]: boolean }> {
-    const storesToCheck$: Observable<boolean>[] = [
-      this.userStore.isReady$,
-      this.swipeStackStore.isReady$,
-      this.searchCriteriaStore.isReady$,
-      this.chatboardStore.isReady$,
-      this.chatboardPicturesStore.isReady$,
-      this.OwnPicturesStore.isReady$,
-    ];
+  status$: Observable<{ [key in storeName]: boolean }> = combineLatest([
+    this.userStore.isReady$,
+    this.swipeStackStore.isReady$,
+    this.searchCriteriaStore.isReady$,
+    this.chatboardStore.isReady$,
+    this.chatboardPicturesStore.isReady$,
+    this.OwnPicturesStore.isReady$,
+  ]).pipe(
+    map((arr) => ({
+      user: arr[0],
+      swipeStack: arr[1],
+      searchCriteria: arr[2],
+      chatboard: arr[3],
+      chatboardPictures: arr[4],
+      userPictures: arr[5],
+    })),
+    distinctUntilChanged((x, y) => isEqual(x, y))
+  );
 
-    return combineLatest(storesToCheck$).pipe(
-      map((arr) => ({
-        user: arr[0],
-        swipeStack: arr[1],
-        searchCriteria: arr[2],
-        chatboard: arr[3],
-        chatboardPictures: arr[4],
-        userPictures: arr[5],
-      })),
-      distinctUntilChanged((x, y) => isEqual(x, y))
-    );
-  }
+  app$ = combineLatest([
+    this.userStore.isReady$,
+    this.swipeStackStore.isReady$,
+    // this.searchCriteriaStore.isReady$,
+    // this.chatboardStore.isReady$,
+    // this.chatboardPicturesStore.isReady$,
+    // this.OwnPicturesStore.isReady$,
+  ]).pipe(map((arr) => arr.reduce((prev, curr) => (curr === false ? curr : prev))));
 
-  get app$() {
-    const storesToCheck$: Observable<boolean>[] = [
-      this.userStore.isReady$,
-      this.swipeStackStore.isReady$,
-      // this.searchCriteriaStore.isReady$,
-      // this.chatboardStore.isReady$,
-      // this.chatboardPicturesStore.isReady$,
-      // this.OwnPicturesStore.isReady$,
-    ];
-    return combineLatest(storesToCheck$).pipe(
-      map((arr) => arr.reduce((prev, curr) => (curr === false ? curr : prev)))
-    );
-  }
+  home$ = combineLatest([
+    this.userStore.isReady$,
+    this.swipeStackStore.isReady$,
+    this.searchCriteriaStore.isReady$,
+  ]).pipe(map((arr) => arr.reduce((prev, curr) => (curr === false ? curr : prev))));
 
-  get home$() {
-    const storesToCheck$: Observable<boolean>[] = [
-      this.userStore.isReady$,
-      this.swipeStackStore.isReady$,
-      this.searchCriteriaStore.isReady$,
-    ];
-    return combineLatest(storesToCheck$).pipe(
-      map((arr) => arr.reduce((prev, curr) => (curr === false ? curr : prev)))
-    );
-  }
+  chats$ = combineLatest([
+    this.userStore.isReady$,
+    this.chatboardStore.isReady$,
+    this.chatboardPicturesStore.isReady$,
+  ]).pipe(map((arr) => arr.reduce((prev, curr) => (curr === false ? curr : prev))));
 
-  get chats$() {
-    const storesToCheck$: Observable<boolean>[] = [
-      this.userStore.isReady$,
-      this.chatboardStore.isReady$,
-      this.chatboardPicturesStore.isReady$,
-    ];
-    return combineLatest(storesToCheck$).pipe(
-      map((arr) => arr.reduce((prev, curr) => (curr === false ? curr : prev)))
-    );
-  }
-
-  get ownProfile$() {
-    const storesToCheck$: Observable<boolean>[] = [
-      this.userStore.isReady$,
-      this.OwnPicturesStore.isReady$,
-    ];
-    return combineLatest(storesToCheck$).pipe(
-      map((arr) => arr.reduce((prev, curr) => (curr === false ? curr : prev)))
-    );
-  }
+  ownProfile$ = combineLatest([
+    this.userStore.isReady$,
+    this.OwnPicturesStore.isReady$,
+  ]).pipe(map((arr) => arr.reduce((prev, curr) => (curr === false ? curr : prev))));
 }

@@ -22,6 +22,7 @@ import {
   firstValueFrom,
   forkJoin,
   lastValueFrom,
+  Observable,
   of,
   Subscription,
 } from "rxjs";
@@ -36,6 +37,7 @@ import {
   withLatestFrom,
   delay,
   filter,
+  startWith,
 } from "rxjs/operators";
 import { isEqual, isEqualWith } from "lodash";
 import Sortable, { Options as SortableOptions } from "sortablejs";
@@ -95,16 +97,15 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
   @ViewChild("profilePictures", { read: ElementRef }) profilePicturesRef: ElementRef;
 
   private editingInProgress = new BehaviorSubject<boolean>(false);
+
   private viewIsReady$ = new BehaviorSubject<boolean>(false);
   private profilePictures = new BehaviorSubject<string[]>([]); // only contains urls (no empty elements)
 
+  pageIsReady$: Observable<boolean>;
+  onPageReadyHandler$: Observable<any>;
   editingInProgress$ = this.editingInProgress.asObservable().pipe(distinctUntilChanged());
   profilePictures$ = this.profilePictures.asObservable();
-
-  pageIsReady$ = combineLatest([this.viewIsReady$, this.storeReadiness.ownProfile$]).pipe(
-    map(([a, b]) => a && b),
-    distinctUntilChanged()
-  );
+  userFromStore$ = this.currentUserStore.user$; // used in template
 
   profilePicturesWithEmpty$ = this.profilePictures
     .asObservable()
@@ -114,18 +115,22 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
       )
     ); // # of elements is exactly MAX_PROFILE_PICTURES_COUNT
 
-  fillUserFromStoreHandler$ = this.currentUserStore.user$.pipe(
+  fillUserFromStoreHandler$ = this.userFromStore$.pipe(
     map((user) => this.updateEditableFields(user))
   );
+
   fillPicturesFromStoreHandler$ = this.ownPicturesService.urls$.pipe(
     map((urls) => this.updateProfilePictures(urls))
   );
-  onPageReadyHandler$ = this.pageIsReady$.pipe(
-    filter((isReady) => isReady),
-    first(),
-    tap(() => this.stopLoadingAnimation()),
-    tap(() => this.activatePictureDragging())
+
+  dataFillingHandler$ = combineLatest([
+    this.fillUserFromStoreHandler$,
+    this.fillPicturesFromStoreHandler$,
+  ]).pipe(
+    startWith(false),
+    map(() => true)
   );
+
   editingAnimationHandler$ = this.editingInProgress$.pipe(
     switchMap((inProgress) =>
       this.toggleDiv ? ToggleAppearAnimation(this.toggleDiv).play() : of()
@@ -154,6 +159,28 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     return questionsCount >= MAX_PROFILE_QUESTIONS_COUNT;
   }
 
+  getPageIsReady() {
+    return combineLatest([
+      this.viewIsReady$,
+      this.dataFillingHandler$,
+      this.profileCard.isReady$,
+      this.storeReadiness.ownProfile$,
+    ]).pipe(
+      map(([a, b, c]) => a && b && c),
+      distinctUntilChanged()
+    );
+  }
+
+  getOnPageReadyHandler() {
+    return this.pageIsReady$.pipe(
+      tap((a) => console.log("isReady a", a)),
+      filter((isReady) => isReady),
+      first(),
+      tap(() => this.stopLoadingAnimation()),
+      tap(() => this.activatePictureDragging())
+    );
+  }
+
   constructor(
     private currentUserStore: CurrentUserStore,
     private router: Router,
@@ -168,13 +195,15 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
   ) {}
 
   ngOnInit() {
-    this.subs.add(this.fillPicturesFromStoreHandler$.subscribe());
-    this.subs.add(this.fillUserFromStoreHandler$.subscribe());
-    this.subs.add(this.editingAnimationHandler$.subscribe());
-    this.subs.add(this.onPageReadyHandler$.subscribe());
+    this.subs.add(this.dataFillingHandler$.subscribe());
   }
 
   ngAfterViewInit() {
+    this.pageIsReady$ = this.getPageIsReady(); // this format is needed because the ViewChild "profileCard" only gets defined after view init
+    this.onPageReadyHandler$ = this.getOnPageReadyHandler(); // same here
+    this.subs.add(this.onPageReadyHandler$.subscribe());
+    this.subs.add(this.editingAnimationHandler$.subscribe());
+
     // assuming that if this.fish is undefined it is because
     // #fish isn't rendered as picsLoaded$ is already true
     if (this.fishRef) this.startLoadingAnimation();
@@ -212,6 +241,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
 
   // Initialises the logic that makes the pictures sortable by dragging
   activatePictureDragging() {
+    console.log("profilePicturesRef", this.profilePicturesRef);
     const sortable = Sortable.create(this.profilePicturesRef.nativeElement, {
       onUpdate: (event) => {
         let newUrls = Array.from(event.target.children)
@@ -369,7 +399,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
   // and what is shown in the template. Marks editingInProgress as true or false accordingly
   async editingTriggered() {
     return lastValueFrom(
-      this.currentUserStore.user$.pipe(
+      this.userFromStore$.pipe(
         map((user) => this.userToEditableFields(user)),
         withLatestFrom(this.profilePicturesWithEmpty$, this.ownPicturesService.urls$),
         map(
@@ -393,7 +423,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
   // currentUserStore and ownPicturesService
   async cancelProfileEdit(): Promise<void> {
     await lastValueFrom(
-      this.currentUserStore.user$.pipe(
+      this.userFromStore$.pipe(
         withLatestFrom(this.ownPicturesService.urls$),
         take(1),
         map(([user, urls]) => {

@@ -9,15 +9,20 @@ import {
   Component,
   Input,
   ViewChild,
-  HostListener,
   OnInit,
   AfterViewInit,
   Output,
   EventEmitter,
 } from "@angular/core";
 
-import { BehaviorSubject, combineLatest, Subscription, timer } from "rxjs";
-import { distinctUntilChanged, filter, first, map, switchMap, tap } from "rxjs/operators";
+import {
+  BehaviorSubject,
+  combineLatest,
+  firstValueFrom,
+  Subscription,
+  timer,
+} from "rxjs";
+import { distinctUntilChanged, filter, map, switchMap, tap } from "rxjs/operators";
 
 import { ChatboardPicturesStore } from "@stores/pictures/chatboard-pictures/chatboard-pictures.service";
 import { ChatboardStore } from "@stores/index";
@@ -42,7 +47,7 @@ export class ChatBoardComponent implements OnInit, AfterViewInit {
   @ViewChild(IonContent) ionContent: IonContent;
   @ViewChild("chatDeleteRef") chatDeleteRef: IonItemSliding;
 
-  chatboardPictures$ = this.chatboardPicturesService.holder$;
+  chatboardPictures$ = this.chatboardPicturesService.holder$; // used in template
 
   viewIsReady$ = new BehaviorSubject<boolean>(false);
   pageIsReady$ = combineLatest([this.viewIsReady$, this.storeReadiness.ownProfile$]).pipe(
@@ -57,7 +62,7 @@ export class ChatBoardComponent implements OnInit, AfterViewInit {
 
   constructor(
     private navCtrl: NavController,
-    private chatboardPicturesService: ChatboardPicturesStore, // used in template
+    private chatboardPicturesService: ChatboardPicturesStore,
     private storeReadiness: StoreReadinessService,
     private chatboardStore: ChatboardStore,
     private loadingCtrl: LoadingController,
@@ -89,7 +94,7 @@ export class ChatBoardComponent implements OnInit, AfterViewInit {
 
     // attempt to delete the chat on the database
     try {
-      await this.chatboardStore.deleteChatOnDatabase(chat.id).toPromise();
+      await firstValueFrom(this.chatboardStore.deleteChatOnDatabase(chat.id));
     } catch {
       // if unsuccesful, dismiss loader and show alert saying there was an error
       await loader.dismiss();
@@ -115,12 +120,9 @@ export class ChatBoardComponent implements OnInit, AfterViewInit {
     //Fades out the chatboard list element which just got deleted
     await FadeOutAnimation(target, 300).play();
 
-    await timer(400)
-      .pipe(
-        first(),
-        switchMap(() => this.chatboardStore.deleteChatInStore(chat.id))
-      )
-      .toPromise();
+    await firstValueFrom(
+      timer(400).pipe(switchMap(() => this.chatboardStore.deleteChatInStore(chat.id)))
+    );
   }
 
   // for use in chat page
@@ -151,7 +153,7 @@ export class ChatBoardComponent implements OnInit, AfterViewInit {
     this.view = event;
   }
 
-  // got messenger of chat with chat id = chatID
+  // go to messenger of chat with chat id = chatID
   goToMessenger(chatID: String) {
     this.navCtrl.navigateForward(["main/messenger/" + chatID]);
   }

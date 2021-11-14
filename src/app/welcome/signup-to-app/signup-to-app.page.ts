@@ -2,7 +2,7 @@ import { LoadingController, NavController } from "@ionic/angular";
 import { Component, OnInit } from "@angular/core";
 import { GlobalStateManagementService } from "@services/global-state-management/global-state-management.service";
 import { StoreReadinessService } from "@services/store-readiness/store-readiness.service";
-import { firstValueFrom, Observable } from "rxjs";
+import { firstValueFrom, lastValueFrom, Observable } from "rxjs";
 import { LoadingService } from "@services/loading/loading.service";
 import { exhaustMap, filter, first } from "rxjs/operators";
 import { NotificationsService } from "@services/notifications/notifications.service";
@@ -56,11 +56,11 @@ export class SignupToAppPage implements OnInit {
   }
 
   async requestNotificationsPermission() {
-    return this.notifications.requestPermission().toPromise();
+    return lastValueFrom(this.notifications.requestPermission());
   }
 
   async initializeAppState() {
-    await this.globalStateManagement.resetAppState().toPromise();
-    return this.globalStateManagement.activateAllStores().toPromise();
+    await lastValueFrom(this.globalStateManagement.resetAppState());
+    return lastValueFrom(this.globalStateManagement.activateAllStores());
   }
 }

@@ -16,7 +16,14 @@ import {
 } from "@ionic/angular";
 
 import { AngularFireAuth } from "@angular/fire/auth";
-import { BehaviorSubject, combineLatest, concat, of, Subscription } from "rxjs";
+import {
+  BehaviorSubject,
+  combineLatest,
+  concat,
+  firstValueFrom,
+  of,
+  Subscription,
+} from "rxjs";
 import {
   catchError,
   distinctUntilChanged,
@@ -24,7 +31,6 @@ import {
   first,
   map,
   switchMap,
-  take,
   tap,
   timeout,
 } from "rxjs/operators";
@@ -240,11 +246,11 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     });
     await loader.present();
 
-    return this.chatboardStore.matches$
-      .pipe(
+    return firstValueFrom(
+      this.chatboardStore.matches$.pipe(
         map((matches) => matches?.[this.latestMatchedProfile.uid]),
         filter((chat) => !!chat),
-        take(1),
+        first(),
         tap((chat) => console.log("got one right here", chat)),
         timeout(maxTimeWaitingForChat),
         switchMap((chat) =>
@@ -259,7 +265,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
           return loader.dismiss();
         })
       )
-      .toPromise();
+    );
   }
 
   async destroyCatch() {

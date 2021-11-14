@@ -10,6 +10,7 @@ import { LoadingOptions, LoadingService } from "@services/loading/loading.servic
 import { AngularFireFunctions } from "@angular/fire/functions";
 import { deleteAccountRequest } from "@interfaces/cloud-functions.model";
 import { EmptyStoresService } from "@services/global-state-management/empty-stores.service";
+import { firstValueFrom } from "rxjs";
 
 @Injectable({
   providedIn: "root",
@@ -62,9 +63,9 @@ export class FirebaseAuthService {
     const clearStores = async () => this.emptyStoresService.emptyStores();
     const logOut = () => this.afAuth.signOut();
     const deleteAccount = () =>
-      this.afFunctions
-        .httpsCallable("deleteAccount")({} as deleteAccountRequest)
-        .toPromise();
+      firstValueFrom(
+        this.afFunctions.httpsCallable("deleteAccount")({} as deleteAccountRequest)
+      );
 
     const loadingOptions: LoadingOptions = {
       ...this.loadingService.defaultLoadingOptions,

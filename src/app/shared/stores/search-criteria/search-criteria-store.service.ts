@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { AngularFirestore } from "@angular/fire/firestore";
 
-import { BehaviorSubject, forkJoin, from, Observable } from "rxjs";
+import { BehaviorSubject, firstValueFrom, forkJoin, from, Observable } from "rxjs";
 
 import { searchCriteria, Criterion } from "@interfaces/search-criteria.model";
 import { SearchCriteria, copyClassInstance } from "@classes/index";
@@ -59,8 +59,8 @@ export class SearchCriteriaStore {
 
   /** Adds criteria to search */
   public updateCriteriaInStore(newCriteria: SearchCriteria): Promise<void> {
-    return this.searchCriteria$
-      .pipe(
+    return firstValueFrom(
+      this.searchCriteria$.pipe(
         take(1),
         map((currentSC) => {
           for (const [criterion, value] of Object.entries(newCriteria)) {
@@ -69,7 +69,7 @@ export class SearchCriteriaStore {
           this.searchCriteria.next(currentSC);
         })
       )
-      .toPromise();
+    );
   }
 
   public async updateCriteriaOnDatabase(): Promise<void> {
@@ -77,8 +77,8 @@ export class SearchCriteriaStore {
 
     if (!user) return console.log("no user");
 
-    return this.searchCriteria$
-      .pipe(
+    return firstValueFrom(
+      this.searchCriteria$.pipe(
         take(1),
         exhaustMap((SC) =>
           this.firestore
@@ -91,7 +91,7 @@ export class SearchCriteriaStore {
             })
         )
       )
-      .toPromise();
+    );
   }
 
   /** Fetches the lastly saved search criteria from the database */

@@ -16,14 +16,10 @@ import {
   throwError,
   concat,
   combineLatest,
+  lastValueFrom,
+  firstValueFrom,
 } from "rxjs";
-import {
-  catchError,
-  concatMap,
-  last,
-  switchMap,
-  take,
-} from "rxjs/operators";
+import { catchError, concatMap, first, last, switchMap } from "rxjs/operators";
 
 import { CurrentUserStore } from "@stores/index";
 import {
@@ -80,10 +76,10 @@ export class SignupService {
    * and stores its pictures in Firebase storage
    * @param data object containing all of the data from all parts of the signup process
    */
-  async createFirestoreAccount(): Promise<void> {
-    return combineLatest([this.signupData, this.afAuth.user])
-      .pipe(
-        take(1),
+  async createFirestoreAccount(): Promise<any> {
+    return lastValueFrom(
+      combineLatest([this.signupData, this.afAuth.user]).pipe(
+        first(),
         switchMap(async ([dataStored, user]) => {
           await user?.reload();
           await user.getIdToken(true); // to refresh the token
@@ -118,13 +114,13 @@ export class SignupService {
           ).pipe(last());
         })
       )
-      .toPromise();
+    );
   }
 
   initializeUser() {
-    return this.afAuth.user
-      .pipe(
-        take(1),
+    return firstValueFrom(
+      this.afAuth.user.pipe(
+        first(),
         concatMap((user) => {
           if (!user) {
             console.error("That's a big no no");
@@ -134,7 +130,7 @@ export class SignupService {
           return concat(this.removeLocalStorage(), this.currentUserStore.fillStore$);
         })
       )
-      .toPromise();
+    );
   }
 
   /**

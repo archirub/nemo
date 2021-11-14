@@ -25,27 +25,22 @@ export class ChatsPage {
 
   showLoading$ = new BehaviorSubject<boolean>(true);
 
-  get chats$() {
-    return this.chatboardStore.chats$.pipe(
-      map((chatsObject) => this.sortChats(chatsObject))
-    );
-  }
+  chats$ = this.chatboardStore.chats$.pipe(
+    map((chatsObject) => this.sortChats(chatsObject))
+  );
 
-  get matches$() {
-    return this.chatboardStore.matches$.pipe(
-      map((chatsObject) => this.sortChats(chatsObject))
-    );
-  }
+  matches$ = this.chatboardStore.matches$.pipe(
+    map((chatsObject) => this.sortChats(chatsObject))
+  );
 
-  get numberOfChats$() {
-    return this.chats$.pipe(map((chats) => chats.length));
-  }
+  numberOfChats$ = this.chats$.pipe(map((chats) => chats.length));
 
   constructor(private chatboardStore: ChatboardStore) {}
 
   ngAfterViewInit() {
     this.fishSwimAnimation = FishSwimAnimation(this.fish);
     this.fishSwimAnimation.play();
+    this.chatboardStore.chats$.subscribe((chats) => console.log("chats are", chats));
   }
 
   onCharboardReady() {

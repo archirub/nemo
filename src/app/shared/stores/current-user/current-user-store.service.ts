@@ -4,7 +4,7 @@ import { Injectable } from "@angular/core";
 import { AngularFireAuth } from "@angular/fire/auth";
 import { AngularFirestore } from "@angular/fire/firestore";
 
-import { BehaviorSubject, forkJoin, from, Observable, of } from "rxjs";
+import { BehaviorSubject, firstValueFrom, forkJoin, from, Observable, of } from "rxjs";
 
 import { Profile, SearchCriteria, AppUser } from "@classes/index";
 import {
@@ -191,9 +191,9 @@ export class CurrentUserStore {
     newGender: Gender | null,
     newSexualPreference: SexualPreference | null
   ) {
-    return this.user$
-      .pipe(
-        take(1),
+    return firstValueFrom(
+      this.user$.pipe(
+        first(),
         map((u) => {
           if (newGender == null && newSexualPreference == null) return;
           if (newGender != null) u.gender = newGender;
@@ -201,20 +201,20 @@ export class CurrentUserStore {
           this.user.next(u);
         })
       )
-      .toPromise();
+    );
   }
 
   public async updateShowProfileInStore(newShowProfile: boolean) {
-    return this.user$
-      .pipe(
-        take(1),
+    return firstValueFrom(
+      this.user$.pipe(
+        first(),
         map((u) => {
           if (newShowProfile == null || u?.settings?.showProfile == null) return;
           u.settings.showProfile = newShowProfile;
           this.user.next(u);
         })
       )
-      .toPromise();
+    );
   }
 
   public resetStore() {
