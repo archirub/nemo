@@ -1,10 +1,9 @@
-import { FirebaseUser, UserCredentialType } from "./../../interfaces/firebase.model";
 import { Injectable } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
 import { Router } from "@angular/router";
 import { AngularFireStorage } from "@angular/fire/storage";
 import { AngularFireFunctions } from "@angular/fire/functions";
 import { AngularFireAuth } from "@angular/fire/auth";
+import { UploadTaskSnapshot } from "@angular/fire/storage/interfaces";
 
 import { Storage } from "@capacitor/storage";
 import {
@@ -22,14 +21,15 @@ import {
 import { catchError, concatMap, first, last, switchMap } from "rxjs/operators";
 
 import { CurrentUserStore } from "@stores/index";
+
+import { SignupDataHolder } from "@classes/index";
 import {
   SignupRequired,
   createAccountRequest,
   SignupOptional,
   allowOptionalProp,
 } from "@interfaces/index";
-import { SignupDataHolder } from "@classes/index";
-import { UploadTaskSnapshot } from "@angular/fire/storage/interfaces";
+import { FirebaseUser, UserCredentialType } from "./../../interfaces/firebase.model";
 
 @Injectable({
   providedIn: "root",
@@ -37,8 +37,35 @@ import { UploadTaskSnapshot } from "@angular/fire/storage/interfaces";
 export class SignupService {
   signupData = new BehaviorSubject<SignupDataHolder>(new SignupDataHolder({}));
 
+  /**
+   * null indicates that the authentification hasn't be done, in other words,
+   * that the signup process hasn't been initialized.
+   */
+  get signupStage(): null | "required" | "optional" {
+    const signupData = this.signupData.value;
+
+    const requiredProperties: (keyof SignupRequired)[] = [
+      "firstName",
+      "dateOfBirth",
+      "gender",
+      "sexualPreference",
+      "degree",
+      "university",
+      "pictures",
+      // "swipeMode",
+    ];
+
+    let requiredIsDone = true;
+
+    // these checks are quite bad, but might be sufficient
+    requiredProperties.forEach((prop) => {
+      if (!signupData[prop]) requiredIsDone = false;
+    });
+
+    return requiredIsDone ? "optional" : "required";
+  }
+
   constructor(
-    private http: HttpClient,
     private afAuth: AngularFireAuth,
     private afFunctions: AngularFireFunctions,
     private afStorage: AngularFireStorage,
@@ -49,18 +76,9 @@ export class SignupService {
   /**
    * Creates the account in Firebase authentification, initializes
    * the signData observable and stores its content on the local storage
-   * @param email
-   * @param password
-   * @returns
    */
   createFirebaseAccount(email: string, password: string): Observable<UserCredentialType> {
-    // return this.http
-    //   .post<AuthResponseData>(
-    //     `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${environment.firebase.apiKey}`,
-    //     { email: email, password: password, returnSecureToken: true }
-    //   )
     return from(this.afAuth.createUserWithEmailAndPassword(email, password)).pipe(
-      // tap(this.initializeLocalStorage.bind(this)),
       switchMap(
         () =>
           this.afAuth.signInWithEmailAndPassword(
@@ -101,7 +119,6 @@ export class SignupService {
             course: dataStored.course,
             society: dataStored.society,
             areaOfStudy: dataStored.areaOfStudy,
-            // onCampus: dataStored.onCampus,
             societyCategory: dataStored.societyCategory,
             interests: dataStored.interests,
             questions: dataStored.questions,
@@ -124,13 +141,54 @@ export class SignupService {
         concatMap((user) => {
           if (!user) {
             console.error("That's a big no no");
-            return of();
+            return of("");
           }
-          console.log("we out here fam");
           return concat(this.removeLocalStorage(), this.currentUserStore.fillStore$);
         })
       )
     );
+  }
+
+  /**
+   * Checks the signup information contained by the local storage. Based how much data it contains,
+   * redirects to the correct signup stage
+   */
+  async checkAndRedirect() {
+    const user = await this.afAuth.currentUser;
+
+    if (!user) {
+      return this.router.navigateByUrl("welcome/signupauth");
+    }
+
+    // get the information stored on local storage to signupData observable (if there is any)
+    await this.getLocalStorage();
+
+    // get the stage of completion of the signup process of the user
+    const stage = this.signupStage;
+
+    // this check of whether stage is not falsy is to make sure that we are only
+    // redirected to a stage if the signup process has been initialized
+    if (stage) {
+      return this.router.navigateByUrl(`welcome/signup${stage}`);
+    }
+  }
+
+  /**
+   * Adds the given data to the service's observable and to the local storage.
+   * Only modifies the properties provided in "additionalData", leaves the others unchanged
+   */
+  async addToDataHolders(
+    additionalData: allowOptionalProp<SignupRequired> & allowOptionalProp<SignupOptional>
+  ) {
+    const observableData = this.signupData.value;
+
+    for (let key of Object.keys(additionalData)) {
+      observableData[key] = additionalData[key];
+    }
+
+    await this.updateLocalStorage(observableData);
+
+    this.signupData.next(observableData);
   }
 
   /**
@@ -159,41 +217,6 @@ export class SignupService {
         return of([]);
       })
     );
-
-    // const promises = Array.from({ length: pictures.length });
-
-    // // associating each picture to a location in storage of shape "profile_pictures/uid/pictureIndex.pictureFormat"
-    // pictures.forEach((picture, index) => {
-    //   const filePath = `profile_pictures/${uid}/${index}`;
-    //   // const filePath = `profile_pictures/${uid}/${index}.${picture.format}`;
-    //   const ref = this.afStorage.ref(filePath);
-    //   console.log("pic", picture.webPath.replace("blob:", ""));
-    //   urlToBlob(picture.webPath.replace("blob:", "")).subscribe((a) =>
-    //     console.log("blob", a)
-    //   );
-    //   promises[index] = ref.put(picture.webPath.replace("blob:", ""));
-    // });
-
-    // // making all requests at the same time
-    // await Promise.all(promises);
-  }
-
-  /**
-   * Adds the given data to the service's observable and to the local storage.
-   * Only modifies the properties provided in "additionalData", leaves the others unchanged
-   */
-  async addToDataHolders(
-    additionalData: allowOptionalProp<SignupRequired> & allowOptionalProp<SignupOptional>
-  ) {
-    const observableData = this.signupData.value;
-
-    for (let key of Object.keys(additionalData)) {
-      observableData[key] = additionalData[key];
-    }
-
-    await this.updateLocalStorage(observableData);
-
-    this.signupData.next(observableData);
   }
 
   /**
@@ -212,13 +235,6 @@ export class SignupService {
   }
 
   /**
-   * Removes data in local storage under key "signupData"
-   */
-  async removeLocalStorage() {
-    return Storage.remove({ key: "signupData" });
-  }
-
-  /**
    * get the data in local storage under key "signupData" and stores it in the
    * signupData observable
    */
@@ -234,79 +250,16 @@ export class SignupService {
   }
 
   /**
+   * Removes data in local storage under key "signupData"
+   */
+  async removeLocalStorage() {
+    return Storage.remove({ key: "signupData" });
+  }
+
+  /**
    * Resets the signup data holder by passing a new value to the behaviorSubject
    */
   resetDataHolder() {
-    // this.signupOptionalPage.form.reset(this.signupOptionalPage.blankForm)
-
     this.signupData.next(new SignupDataHolder({}));
-  }
-
-  /**
-   * Checks the signup information contained by the local storage. Based how much data it contains,
-   * redirects to the correct signup stage
-   */
-  async checkAndRedirect() {
-    const user = await this.afAuth.currentUser;
-
-    if (!user) {
-      return this.router.navigateByUrl("welcome/signupauth");
-    }
-
-    // get the information stored on local storage to signupData observable (if there is any)
-    await this.getLocalStorage();
-
-    // get the stage of completion of the signup process of the user
-    const stage = this.signupStage;
-
-    // this check of whether stage is not falsy is to make sure that we are only
-    // redirected to a stage if the signup process has been initialized
-    if (stage) {
-      return this.router.navigateByUrl(`welcome/signup${stage}`);
-    }
-  }
-
-  /**
-   * null indicates that the authentification hasn't be done, in other words,
-   * that the signup process hasn't been initialized.
-   */
-  get signupStage(): null | "required" | "optional" {
-    const signupData = this.signupData.value;
-
-    // const authProperties: (keyof SignupAuthenticated)[] = [
-    //   "email",
-    //   "uid",
-    //   "token",
-    //   "tokenExpirationDate",
-    // ];
-    const requiredProperties: (keyof SignupRequired)[] = [
-      "firstName",
-      "dateOfBirth",
-      "gender",
-      "sexualPreference",
-      "degree",
-      "university",
-      "pictures",
-      // "swipeMode",
-    ];
-    // not amazing to have the default value of these as true in principle it feels
-    let authIsDone = true;
-    let requiredIsDone = true;
-
-    // these checks are quite bad, but might be sufficient
-
-    // checking for auth might be useless since the local storage only contains
-    // signup data if auth is done
-    // authProperties.forEach((prop) => {
-    //   if (!signupData[prop]) authIsDone = false;
-    // });
-
-    requiredProperties.forEach((prop) => {
-      if (!signupData[prop]) requiredIsDone = false;
-    });
-
-    if (!authIsDone) return null;
-    if (!requiredIsDone) return "required";
-    return "optional";
   }
 }

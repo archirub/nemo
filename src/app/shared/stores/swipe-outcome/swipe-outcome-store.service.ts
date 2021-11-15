@@ -12,17 +12,12 @@ import { exhaustMap, map, retry, take } from "rxjs/operators";
 })
 export class SwipeOutcomeStore {
   private swipeChoices = new BehaviorSubject<profileChoiceMap[]>([]);
-  public readonly swipeChoices$ = this.swipeChoices.asObservable();
-
   private swipeAnswers = new BehaviorSubject<uidChoiceMap[]>([]);
-  public readonly swipeAnswers$ = this.swipeAnswers.asObservable();
+
+  swipeChoices$ = this.swipeChoices.asObservable();
+  swipeAnswers$ = this.swipeAnswers.asObservable();
 
   constructor(private afFunctions: AngularFireFunctions) {}
-
-  resetStore() {
-    this.swipeChoices.next([]);
-    this.swipeAnswers.next([]);
-  }
 
   public yesSwipe(profile: Profile): Observable<void> {
     return this.swipeChoices$.pipe(
@@ -103,5 +98,10 @@ export class SwipeOutcomeStore {
       ),
       retry(3)
     );
+  }
+
+  resetStore() {
+    this.swipeChoices.next([]);
+    this.swipeAnswers.next([]);
   }
 }

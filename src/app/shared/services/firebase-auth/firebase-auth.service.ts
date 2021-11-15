@@ -1,16 +1,17 @@
-import { EmailAuthProvider, FirebaseUser } from "@interfaces/index";
-import { AlertController, NavController, LoadingController } from "@ionic/angular";
 import { Injectable, NgZone } from "@angular/core";
+import { AlertController, NavController, LoadingController } from "@ionic/angular";
 import { Router } from "@angular/router";
-
-import { AngularFireAuth } from "@angular/fire/auth";
-import { Storage } from "@capacitor/storage";
-
-import { LoadingOptions, LoadingService } from "@services/loading/loading.service";
 import { AngularFireFunctions } from "@angular/fire/functions";
-import { deleteAccountRequest } from "@interfaces/cloud-functions.model";
-import { EmptyStoresService } from "@services/global-state-management/empty-stores.service";
+import { AngularFireAuth } from "@angular/fire/auth";
+
+import { Storage } from "@capacitor/storage";
 import { firstValueFrom } from "rxjs";
+
+import { EmptyStoresService } from "@services/global-state-management/empty-stores.service";
+import { LoadingOptions, LoadingService } from "@services/loading/loading.service";
+
+import { deleteAccountRequest } from "@interfaces/cloud-functions.model";
+import { EmailAuthProvider, FirebaseUser } from "@interfaces/index";
 
 @Injectable({
   providedIn: "root",
@@ -28,6 +29,7 @@ export class FirebaseAuthService {
     private emptyStoresService: EmptyStoresService
   ) {}
 
+  // Entire log out procedure with
   public async logOut() {
     // have to explicitely do it this way instead of using directly "this.navCtrl.navigateRoot"
     // otherwise it causes an error
@@ -52,6 +54,7 @@ export class FirebaseAuthService {
     );
   }
 
+  // entire account deletion procedure
   public async deleteAccount() {
     const user = await this.afAuth.currentUser;
 

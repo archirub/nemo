@@ -1,19 +1,25 @@
 import { Injectable } from "@angular/core";
 import { AngularFirestore } from "@angular/fire/firestore";
+
+import { BehaviorSubject, Observable, of } from "rxjs";
+import { filter, map, switchMap, take } from "rxjs/operators";
+
 import {
   universitiesAllowedDocument,
   UniversityInfo,
   UniversityName,
 } from "@interfaces/universities.model";
-import { BehaviorSubject, Observable, of } from "rxjs";
-import { filter, map, switchMap, take } from "rxjs/operators";
 
 @Injectable({
   providedIn: "root",
 })
 export class UniversitiesStore {
   private universities = new BehaviorSubject<UniversityInfo[]>(null);
-  public universities$ = this.universities.asObservable();
+  universities$ = this.universities.asObservable();
+
+  optionsList$ = this.universities$.pipe(
+    map((universities) => (universities ? universities.map((info) => info.name) : []))
+  );
 
   constructor(private firestore: AngularFirestore) {}
 
@@ -51,12 +57,6 @@ export class UniversitiesStore {
             .map((info) => (email.endsWith(info.emailDomain) ? info.name : null))
             .filter(Boolean)[0] ?? null
       )
-    );
-  }
-
-  get optionsList$(): Observable<UniversityName[]> {
-    return this.universities$.pipe(
-      map((universities) => (universities ? universities.map((info) => info.name) : []))
     );
   }
 }

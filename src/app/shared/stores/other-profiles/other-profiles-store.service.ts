@@ -1,13 +1,14 @@
-import { AngularFireStorage } from "@angular/fire/storage";
 import { Injectable } from "@angular/core";
+import { AngularFireStorage } from "@angular/fire/storage";
+import { AngularFirestore, DocumentSnapshot } from "@angular/fire/firestore";
 
 import { BehaviorSubject, forkJoin, Observable, EMPTY } from "rxjs";
 import { exhaustMap, filter, map, take } from "rxjs/operators";
 
-import { Profile } from "@classes/index";
-import { AngularFirestore, DocumentSnapshot } from "@angular/fire/firestore";
-import { profileFromDatabase } from "@interfaces/index";
 import { FormatService } from "@services/format/format.service";
+
+import { Profile } from "@classes/index";
+import { profileFromDatabase } from "@interfaces/index";
 
 interface ProfileHolder {
   [uid: string]: Profile;
@@ -40,21 +41,38 @@ export class OtherProfilesStore {
     private format: FormatService
   ) {}
 
-  resetStore() {
-    const profiles = this.profiles.value;
+  /**
+   * saves the profile to the store, emits the profile
+   */
+  public saveProfile(uid: string, profile: Profile): Observable<Profile> {
+    return this.profiles$.pipe(
+      take(1),
+      map((holder) => {
+        holder[uid] = profile;
+        this.profiles.next(holder);
+        return profile;
+      })
+    );
+  }
 
-    Object.keys(profiles).forEach((uid) => {
-      this.revokeUrls(profiles[uid].pictureUrls);
-    });
+  public removeProfile(uid: string): Observable<void> {
+    return this.profiles$.pipe(
+      map((profileHolder) => {
+        if (profileHolder.hasOwnProperty(uid)) {
+          this.revokeUrls(profileHolder[uid].pictureUrls); // revokes urls
+          delete profileHolder[uid]; // deletes the profile from the store
 
-    this.profiles.next({});
+          this.profiles.next(profileHolder); // updates the store
+        }
+      })
+    );
   }
 
   /**
    * to subscribe to to check whether a certain user's profile is stored in the store,
    * and if it isn't, to add it as well as its pictures
    */
-  checkAndSave(uid: string): Observable<{ uid: string; pictures: string[] }> {
+  public checkAndSave(uid: string): Observable<{ uid: string; pictures: string[] }> {
     const profileSnapshot$ = this.firestore
       .collection("profiles")
       .doc(uid)
@@ -62,7 +80,7 @@ export class OtherProfilesStore {
 
     return this.hasProfile(uid).pipe(
       filter((hasProfile) => !hasProfile), // continue only if profile is not in store
-      exhaustMap((a) => profileSnapshot$), // fetch profile from database
+      exhaustMap(() => profileSnapshot$), // fetch profile from database
       map((doc) => {
         if (!doc.exists) return;
 
@@ -86,24 +104,11 @@ export class OtherProfilesStore {
     );
   }
 
-  removeProfile(uid: string): Observable<void> {
-    return this.profiles$.pipe(
-      map((profileHolder) => {
-        if (profileHolder.hasOwnProperty(uid)) {
-          this.revokeUrls(profileHolder[uid].pictureUrls); // revokes urls
-          delete profileHolder[uid]; // deletes the profile from the store
-
-          this.profiles.next(profileHolder); // updates the store
-        }
-      })
-    );
-  }
-
   /**
    * returns an observable of a boolean indicating whether the profile with uid "uid" is
    * in the store
    */
-  hasProfile(uid: string): Observable<boolean> {
+  private hasProfile(uid: string): Observable<boolean> {
     return this.profiles$.pipe(
       map((holder) => {
         if (holder.hasOwnProperty(uid) && holder[uid]) return true;
@@ -112,21 +117,7 @@ export class OtherProfilesStore {
     );
   }
 
-  /**
-   * saves the profile to the store, emits the profile
-   */
-  saveProfile(uid: string, profile: Profile): Observable<Profile> {
-    return this.profiles$.pipe(
-      take(1),
-      map((holder) => {
-        holder[uid] = profile;
-        this.profiles.next(holder);
-        return profile;
-      })
-    );
-  }
-
-  addProfilePictures(
+  private addProfilePictures(
     uid: string,
     pictures: string[]
   ): Observable<{ uid: string; pictures: string[] }> {
@@ -143,17 +134,6 @@ export class OtherProfilesStore {
     );
   }
 
-  // removeProfilePictures(uid: string): Observable<void> {
-  //   return this.profiles$.pipe(
-  //     map((holder) => {
-  //       if (!holder.hasOwnProperty(uid)) return;
-  //       this.revokeUrls(holder[uid].pictureUrls);
-  //       holder[uid].pictureUrls = [];
-  //       this.profiles.next(holder);
-  //     })
-  //   );
-  // }
-
   /**
    * revokes the urls provided in the array. Important for memory management.
    */
@@ -166,10 +146,20 @@ export class OtherProfilesStore {
   /**
    * Fetches and returns the picture urls of the given pictures
    */
-  getPictureUrls(uid: string): Observable<string[]> {
+  private getPictureUrls(uid: string): Observable<string[]> {
     return this.afStorage
       .ref("/profilePictures/" + uid)
       .listAll()
       .pipe(exhaustMap((list) => forkJoin(list.items.map((i) => i.getDownloadURL()))));
+  }
+
+  resetStore() {
+    const profiles = this.profiles.value;
+
+    Object.keys(profiles).forEach((uid) => {
+      this.revokeUrls(profiles[uid].pictureUrls);
+    });
+
+    this.profiles.next({});
   }
 }

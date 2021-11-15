@@ -1,29 +1,23 @@
-import { FirebaseUser } from "./../../interfaces/firebase.model";
-import { EmptyStoresService } from "./empty-stores.service";
 import { Injectable } from "@angular/core";
 import { AlertController } from "@ionic/angular";
 import { NavigationStart, Router } from "@angular/router";
-import { Storage } from "@capacitor/storage";
 
 import { AngularFireAuth } from "@angular/fire/auth";
 import { AngularFirestore } from "@angular/fire/firestore";
 
+import { Storage } from "@capacitor/storage";
 import {
   BehaviorSubject,
-  combineLatest,
   concat,
   forkJoin,
   from,
-  interval,
   merge,
   Observable,
   of,
   Subject,
-  timer,
 } from "rxjs";
 import {
   concatMap,
-  delay,
   distinctUntilChanged,
   filter,
   first,
@@ -37,20 +31,21 @@ import {
 
 import { OwnPicturesStore } from "@stores/pictures/own-pictures/own-pictures.service";
 import { ChatboardStore } from "@stores/chatboard/chatboard-store.service";
-
 import { SearchCriteriaStore } from "@stores/search-criteria/search-criteria-store.service";
 import { SwipeStackStore } from "@stores/swipe-stack/swipe-stack-store.service";
 import { CurrentUserStore } from "@stores/current-user/current-user-store.service";
 import { ChatboardPicturesStore } from "@stores/pictures/chatboard-pictures/chatboard-pictures.service";
+import { UniversitiesStore } from "@stores/universities/universities.service";
 
 import { SignupService } from "@services/signup/signup.service";
 import { FirebaseAuthService } from "@services/firebase-auth/firebase-auth.service";
 import { routerInitListenerService } from "./initial-url.service";
-
 import { SignupAuthMethodSharer } from "../../../welcome/signupauth/signupauth-method-sharer.service";
 import { ConnectionService } from "@services/connection/connection.service";
-import { UniversitiesStore } from "@stores/universities/universities.service";
 import { NotificationsService } from "@services/notifications/notifications.service";
+import { EmptyStoresService } from "./empty-stores.service";
+
+import { FirebaseUser } from "./../../interfaces/firebase.model";
 
 type pageName =
   | "chats"
@@ -69,11 +64,12 @@ type userState =
   | "has-no-documents"
   | "full";
 
-// unauthenticated = not authenticated with Firebase auth
-// authenticated = authenticated with Firebase auth
-// is-signing-up = "authenticated" state + email verified + is on a sign up page (assumed to be signing up)
-// has-no-documents = "authenticated" state + email verified + is not on sign up page + has no documents on database
-// full = "authenticated" state + email verified + has documents on database
+// guide map to what each userState means:
+// - unauthenticated = not authenticated with Firebase auth
+// - authenticated = authenticated with Firebase auth
+// - is-signing-up = "authenticated" state + email verified + is on a sign up page (assumed to be signing up)
+// - has-no-documents = "authenticated" state + email verified + is not on sign up page + has no documents on database
+// - full = "authenticated" state + email verified + has documents on database
 
 @Injectable({
   providedIn: "root",
@@ -130,7 +126,7 @@ export class GlobalStateManagementService {
     share()
   );
 
-  activateAllStores(): Observable<any> {
+  public activateAllStores(): Observable<any> {
     const storesToActivate$: Observable<any>[] = [
       this.userStore.fillStore$,
       this.swipeStackStore.activateStore$,
@@ -146,7 +142,7 @@ export class GlobalStateManagementService {
     return merge(...storesToActivate$);
   }
 
-  public globalManagement(): Observable<void> {
+  private globalManagement(): Observable<void> {
     return this.getFirebaseUser().pipe(
       switchMap((user) => forkJoin([of(user), this.isUserEmailVerified(user)])),
       switchMap(([user, emailIsVerified]) => {
@@ -213,8 +209,6 @@ export class GlobalStateManagementService {
   private userIsValidRoutine(user: FirebaseUser) {
     return this.isUserSigningUp().pipe(
       switchMap((userIsSigningUp) => {
-        // COMMENTED OUT FOR DEVELOPMENT ONLY
-
         // if user is signing up, then do nothing
         if (userIsSigningUp) {
           this.userState.next("is-signing-up");
@@ -325,36 +319,6 @@ export class GlobalStateManagementService {
     );
   }
 
-  private getPageFromUrl(url: string): pageName {
-    if (url.includes("chats")) return "chats";
-    if (url.includes("home")) return "home";
-    if (url.includes("own-profile")) return "own-profile";
-    if (url.includes("settings")) return "settings";
-    if (url.includes("messenger")) return "messenger";
-    if (url.includes("login")) return "login";
-    if (url.includes("signup")) return "signup";
-    if (url === "/welcome") return "welcome";
-    return null;
-  }
-
-  private pageIsMain(page: pageName): boolean {
-    const mainPages: pageName[] = [
-      "home",
-      "own-profile",
-      "chats",
-      "settings",
-      "messenger",
-    ];
-    if (mainPages.includes(page)) return true;
-    return false;
-  }
-
-  private pageIsWelcome(page: pageName): boolean {
-    const welcomePages: pageName[] = ["welcome", "login", "signup"];
-    if (welcomePages.includes(page)) return true;
-    return false;
-  }
-
   private activateCorrespondingStores(page: pageName): Observable<any> {
     if (this.pageIsMain(page)) {
       console.log("activating stores for main pages");
@@ -397,6 +361,36 @@ export class GlobalStateManagementService {
     // // }
     // console.log("stores are", storesToActivate$);
     // return storesToActivate$.length > 0 ? combineLatest(storesToActivate$) : of("");
+  }
+
+  private getPageFromUrl(url: string): pageName {
+    if (url.includes("chats")) return "chats";
+    if (url.includes("home")) return "home";
+    if (url.includes("own-profile")) return "own-profile";
+    if (url.includes("settings")) return "settings";
+    if (url.includes("messenger")) return "messenger";
+    if (url.includes("login")) return "login";
+    if (url.includes("signup")) return "signup";
+    if (url === "/welcome") return "welcome";
+    return null;
+  }
+
+  private pageIsMain(page: pageName): boolean {
+    const mainPages: pageName[] = [
+      "home",
+      "own-profile",
+      "chats",
+      "settings",
+      "messenger",
+    ];
+    if (mainPages.includes(page)) return true;
+    return false;
+  }
+
+  private pageIsWelcome(page: pageName): boolean {
+    const welcomePages: pageName[] = ["welcome", "login", "signup"];
+    if (welcomePages.includes(page)) return true;
+    return false;
   }
 
   private getFirebaseUser(): Observable<FirebaseUser | null> {

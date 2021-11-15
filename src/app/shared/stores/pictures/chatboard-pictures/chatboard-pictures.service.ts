@@ -1,6 +1,8 @@
-import { Chat } from "../../../classes/chat.class";
 import { Injectable, Renderer2, RendererFactory2 } from "@angular/core";
+import { SafeUrl } from "@angular/platform-browser";
 import { AngularFireStorage } from "@angular/fire/storage";
+
+import { Storage } from "@capacitor/storage";
 import { BehaviorSubject, combineLatest, forkJoin, from, Observable, of } from "rxjs";
 import {
   concatMap,
@@ -11,10 +13,10 @@ import {
   take,
   withLatestFrom,
 } from "rxjs/operators";
-import { urlToBase64, Base64ToUrl } from "../common-pictures-functions";
-import { Storage } from "@capacitor/storage";
 
-import { SafeUrl } from "@angular/platform-browser";
+import { urlToBase64, Base64ToUrl } from "../common-pictures-functions";
+
+import { Chat } from "../../../classes/chat.class";
 
 export interface pictureHolder {
   [uid: string]: string;
@@ -25,17 +27,35 @@ export interface pictureHolder {
 })
 export class ChatboardPicturesStore {
   private uidsStorageKey = "chatboard_picture_uids";
-
   private picture_width = 300;
   private picture_height = 300;
+  private renderer: Renderer2;
 
   private holder: BehaviorSubject<pictureHolder> = new BehaviorSubject({});
+  private isReady = new BehaviorSubject<boolean>(false);
+
   holder$: Observable<pictureHolder> = this.holder.asObservable();
 
-  private isReady = new BehaviorSubject<boolean>(false);
   public isReady$ = this.isReady.asObservable().pipe(distinctUntilChanged());
 
-  private renderer: Renderer2;
+  private storageKey(uid: string): string {
+    return "chatboard_picture_" + uid;
+  }
+
+  private getPictureLocal(uid: string): Observable<string> {
+    return from(Storage.get({ key: this.storageKey(uid) })).pipe(
+      take(1),
+      map((res) => JSON.parse(res.value)),
+      concatMap((base64Picture) => Base64ToUrl(base64Picture))
+    );
+  }
+
+  private getUidsLocal(): Observable<string[]> {
+    return from(Storage.get({ key: this.uidsStorageKey })).pipe(
+      take(1),
+      map((res) => JSON.parse(res.value) || [])
+    );
+  }
 
   constructor(
     private afStorage: AngularFireStorage,
@@ -187,10 +207,6 @@ export class ChatboardPicturesStore {
     );
   }
 
-  private storageKey(uid: string): string {
-    return "chatboard_picture_" + uid;
-  }
-
   private getAllPicturesFromLocalToHolder(): Observable<SafeUrl[][]> {
     return this.getUidsLocal().pipe(
       switchMap((uids: string[]) => {
@@ -226,50 +242,6 @@ export class ChatboardPicturesStore {
     });
 
     return from(promise as Promise<string>);
-
-    // console.log('width: ' + loadedData.width + ' height: ' + loadedData.height);
-
-    // const result_image = document.getElementById('result_compress_image');
-    // const quality = parseInt(encodeQuality.value);
-    // console.log("Quality >>" + quality);
-
-    // console.log("process start...");
-    // const time_start = new Date().getTime();
-
-    // const mime_type = "image/jpeg";
-    // if (typeof output_format !== "undefined" && output_format == "png") {
-    //   mime_type = "image/png";
-    // }
-
-    // const cvs = document.createElement('canvas');
-    // cvs.width = loadedData.width;
-    // cvs.height = loadedData.height;
-    // const ctx = cvs.getContext("2d").drawImage(loadedData, 0, 0);
-    // const newImageData = cvs.toDataURL(mime_type, quality / 100);
-    // const result_image_obj = new Image();
-    // result_image_obj.src = newImageData;
-    // result_image.src = result_image_obj.src;
-
-    // result_image.onload = function() {}
-    // const duration = new Date().getTime() - time_start;
-
-    // console.log("process finished...");
-    // console.log('Processed in: ' + duration + 'ms');
-  }
-
-  private getPictureLocal(uid: string): Observable<string> {
-    return from(Storage.get({ key: this.storageKey(uid) })).pipe(
-      take(1),
-      map((res) => JSON.parse(res.value)),
-      concatMap((base64Picture) => Base64ToUrl(base64Picture))
-    );
-  }
-
-  private getUidsLocal(): Observable<string[]> {
-    return from(Storage.get({ key: this.uidsStorageKey })).pipe(
-      take(1),
-      map((res) => JSON.parse(res.value) || [])
-    );
   }
 
   private storeUid(uid: string): Observable<any> {

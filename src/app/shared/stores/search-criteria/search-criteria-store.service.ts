@@ -1,45 +1,38 @@
 import { Injectable } from "@angular/core";
+import { AngularFireAuth } from "@angular/fire/auth";
 import { AngularFirestore } from "@angular/fire/firestore";
 
-import { BehaviorSubject, firstValueFrom, forkJoin, from, Observable } from "rxjs";
+import { BehaviorSubject, firstValueFrom, Observable } from "rxjs";
+import { distinctUntilChanged, exhaustMap, filter, map, take } from "rxjs/operators";
 
-import { searchCriteria, Criterion } from "@interfaces/search-criteria.model";
-import { SearchCriteria, copyClassInstance } from "@classes/index";
-import { privateProfileFromDatabase, profileFromDatabase } from "@interfaces/index";
-import { FormatService } from "@services/format/format.service";
-import {
-  distinctUntilChanged,
-  exhaustMap,
-  filter,
-  map,
-  take,
-  tap,
-  withLatestFrom,
-} from "rxjs/operators";
-import { AngularFireAuth } from "@angular/fire/auth";
 import { CurrentUserStore } from "@stores/current-user/current-user-store.service";
+import { FormatService } from "@services/format/format.service";
+
+import { SearchCriteria } from "@classes/index";
+import { privateProfileFromDatabase } from "@interfaces/index";
 
 @Injectable({
   providedIn: "root",
 })
 export class SearchCriteriaStore {
-  private searchCriteria: BehaviorSubject<SearchCriteria>;
-  public readonly searchCriteria$: Observable<SearchCriteria>;
-
+  private searchCriteria = new BehaviorSubject<SearchCriteria>(this.emptySearchCriteria);
   private isReady = new BehaviorSubject<boolean>(false);
-  public isReady$ = this.isReady.asObservable().pipe(distinctUntilChanged());
+
+  searchCriteria$ = this.searchCriteria.asObservable();
+  isReady$ = this.isReady.asObservable().pipe(distinctUntilChanged());
+
+  activateStore$ = this.activateStore();
+
+  get emptySearchCriteria() {
+    return new SearchCriteria({});
+  }
 
   constructor(
     private firestore: AngularFirestore,
     private format: FormatService,
     private afAuth: AngularFireAuth,
     private appUser: CurrentUserStore
-  ) {
-    this.searchCriteria = new BehaviorSubject<SearchCriteria>(this.emptySearchCriteria());
-    this.searchCriteria$ = this.searchCriteria.asObservable();
-  }
-
-  public activateStore$ = this.activateStore();
+  ) {}
 
   private activateStore() {
     return this.appUser.user$.pipe(
@@ -51,10 +44,6 @@ export class SearchCriteriaStore {
         }
       })
     );
-  }
-
-  resetStore() {
-    this.searchCriteria.next(this.emptySearchCriteria());
   }
 
   /** Adds criteria to search */
@@ -117,7 +106,7 @@ export class SearchCriteriaStore {
       );
   }
 
-  private emptySearchCriteria() {
-    return new SearchCriteria({});
+  resetStore() {
+    this.searchCriteria.next(this.emptySearchCriteria);
   }
 }

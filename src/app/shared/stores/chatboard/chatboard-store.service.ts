@@ -1,16 +1,9 @@
 import { Injectable } from "@angular/core";
 import { AngularFireAuth } from "@angular/fire/auth";
+import { AngularFireFunctions } from "@angular/fire/functions";
 import { AngularFirestore, QueryDocumentSnapshot } from "@angular/fire/firestore";
-import {
-  BehaviorSubject,
-  ReplaySubject,
-  Observable,
-  combineLatest,
-  Subject,
-} from "rxjs";
 
-import { Chat } from "@classes/index";
-import { FormatService } from "@services/format/format.service";
+import { BehaviorSubject, ReplaySubject, Observable, combineLatest, Subject } from "rxjs";
 import {
   map,
   take,
@@ -20,13 +13,16 @@ import {
   first,
   tap,
 } from "rxjs/operators";
+
+import { FormatService } from "@services/format/format.service";
+
+import { Chat } from "@classes/index";
 import {
   chatDeletionByUserRequest,
   chatFromDatabase,
   FirebaseUser,
   messageMap,
 } from "@interfaces/index";
-import { AngularFireFunctions } from "@angular/fire/functions";
 
 // the store has this weird shape because of the Firestore's onSnapshot function which
 // takes an observer instead of simply being an observable. Because of that, I need
@@ -51,12 +47,32 @@ interface chatNatureMap {
   providedIn: "root",
 })
 export class ChatboardStore {
+  // object containing the listeners for recent messages.
+  // has to be done with multiple listeners instead of one (like for the chat docs) as
+  // firebase doesn't allow us to do it in one listener
+  private recentMsgDocSubs: { [recipientID: string]: () => void } = {};
+  private chatDocsSub: () => void = null; // calling this function unsubscribes to the listener
+
+  private chatsFromDatabase = new BehaviorSubject<
+    QueryDocumentSnapshot<chatFromDatabase>[]
+  >([]);
+
+  private recentMsgsFromDatabase = new BehaviorSubject<{
+    [chatID: string]: messageMap | "no message documents";
+  }>({});
+
+  private recentMsgToBeProcessed = new ReplaySubject<{
+    chatID: string;
+    data: messageMap | "no message documents";
+  }>();
+
   private allChats = new BehaviorSubject<chatNatureMap>({});
+
   private hasNoChats = new Subject<boolean>();
 
   public allChats$ = this.allChatsWithoutNatureProp();
-  public chats$ = this.filterBasedOnNature("chat"); // chats where conversation hasn been initiated
-  public matches$ = this.filterBasedOnNature("match"); // chats where conversation hasn't been initiated
+  public chats$ = this.filterBasedOnNature("chat");
+  public matches$ = this.filterBasedOnNature("match");
   public hasNoChats$ = this.hasNoChats.asObservable().pipe(distinctUntilChanged());
 
   public isReady$ = combineLatest([this.allChats$, this.hasNoChats$]).pipe(
@@ -65,23 +81,6 @@ export class ChatboardStore {
         Object.values(chats).filter((c) => c).length > 0 || hasNoChats
     )
   );
-
-  private chatsFromDatabase = new BehaviorSubject<
-    QueryDocumentSnapshot<chatFromDatabase>[]
-  >([]);
-  private recentMsgsFromDatabase = new BehaviorSubject<{
-    [chatID: string]: messageMap | "no message documents";
-  }>({});
-  private recentMsgToBeProcessed = new ReplaySubject<{
-    chatID: string;
-    data: messageMap | "no message documents";
-  }>();
-
-  private chatDocsSub: () => void = null; // calling this function unsubscribes to the listener
-  // object containing the listeners for recent messages.
-  // has to be done with multiple listeners instead of one (like for the chat docs) as
-  // firebase doesn't allow us to do it in one listener
-  private recentMsgDocSubs: { [recipientID: string]: () => void } = {};
 
   constructor(
     private afAuth: AngularFireAuth,
@@ -98,58 +97,7 @@ export class ChatboardStore {
       this.activateRecentMessageListening(),
       this.activateRecentMessagePreprocessing(),
       this.activateMsgAndChatDocumentsProcessing(),
-    ]).pipe(
-      share()
-      // tap(() => console.log("activating chatboard store"))
-    );
-  }
-
-  public resetStore() {
-    console.log("reseting chatboard store", this.chatDocsSub);
-    this.chatDocsSub ? this.chatDocsSub() : null;
-
-    Object.keys(this.recentMsgDocSubs).forEach((recipientID) => {
-      const sub = this.recentMsgDocSubs[recipientID];
-      sub ? sub() : null;
-    });
-  }
-
-  public deleteChatOnDatabase(chatID: string) {
-    const request: chatDeletionByUserRequest = { chatID };
-    return this.afFunctions.httpsCallable("chatDeletionByUser")(request);
-  }
-
-  public deleteChatInStore(chatID: string) {
-    return this.allChats.pipe(
-      first(),
-      tap((chats) => {
-        if (chats[chatID]) {
-          delete chats[chatID];
-          this.allChats.next(chats);
-        }
-      })
-    );
-  }
-
-  /**
-   * returns false if user doesn't have chat with the provided user,
-   * returns the chatID otherwise
-   */
-  public userHasChatWith(uid: string): Observable<false | string> {
-    return this.allChats$.pipe(
-      first(),
-      map((chats) => {
-        let theChatID: false | string = false;
-
-        Object.entries(chats).forEach(([chatID, chat]) => {
-          if (chat.recipient.uid === uid) {
-            theChatID = chatID;
-          }
-        });
-
-        return theChatID;
-      })
-    );
+    ]).pipe(share());
   }
 
   private activateChatDocsListening(): Observable<void> {
@@ -322,5 +270,53 @@ export class ChatboardStore {
         return modifiedChatMap;
       })
     );
+  }
+
+  public deleteChatOnDatabase(chatID: string) {
+    const request: chatDeletionByUserRequest = { chatID };
+    return this.afFunctions.httpsCallable("chatDeletionByUser")(request);
+  }
+
+  public deleteChatInStore(chatID: string) {
+    return this.allChats.pipe(
+      first(),
+      tap((chats) => {
+        if (chats[chatID]) {
+          delete chats[chatID];
+          this.allChats.next(chats);
+        }
+      })
+    );
+  }
+
+  /**
+   * returns false if user doesn't have chat with the provided user,
+   * returns the chatID otherwise
+   */
+  public userHasChatWith(uid: string): Observable<false | string> {
+    return this.allChats$.pipe(
+      first(),
+      map((chats) => {
+        let theChatID: false | string = false;
+
+        Object.entries(chats).forEach(([chatID, chat]) => {
+          if (chat.recipient.uid === uid) {
+            theChatID = chatID;
+          }
+        });
+
+        return theChatID;
+      })
+    );
+  }
+
+  public resetStore() {
+    console.log("reseting chatboard store", this.chatDocsSub);
+    this.chatDocsSub ? this.chatDocsSub() : null;
+
+    Object.keys(this.recentMsgDocSubs).forEach((recipientID) => {
+      const sub = this.recentMsgDocSubs[recipientID];
+      sub ? sub() : null;
+    });
   }
 }

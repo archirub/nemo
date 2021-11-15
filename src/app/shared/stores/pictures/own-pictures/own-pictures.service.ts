@@ -17,11 +17,7 @@ import {
   tap,
 } from "rxjs/operators";
 
-import {
-  Base64ToUrl,
-  urlToBase64,
-} from "../common-pictures-functions";
-import { CurrentUserStore } from "@stores/index";
+import { Base64ToUrl, urlToBase64 } from "../common-pictures-functions";
 
 interface picturesMap {
   [position: number]: string;
@@ -36,20 +32,16 @@ interface ownPicturesStorage {
 })
 export class OwnPicturesStore {
   private localStorageKey: string = "own_pictures";
-
   private MAX_STORAGE_TIME: number = 2 * 24 * 3600; // = 2 days in ms, completely arbitrary
 
   private urls: BehaviorSubject<string[]> = new BehaviorSubject([]);
+  private isReady = new BehaviorSubject<boolean>(false);
+
   urls$: Observable<string[]> = this.urls.asObservable();
 
-  private isReady = new BehaviorSubject<boolean>(false);
   isReady$ = this.isReady.asObservable().pipe(distinctUntilChanged());
 
-  constructor(
-    private afStorage: AngularFireStorage,
-    private afAuth: AngularFireAuth,
-    private currentUser: CurrentUserStore
-  ) {}
+  constructor(private afStorage: AngularFireStorage, private afAuth: AngularFireAuth) {}
 
   public activateStore$ = this.activateStore();
 

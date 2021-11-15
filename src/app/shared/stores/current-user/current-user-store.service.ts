@@ -1,12 +1,26 @@
-import { Gender, SexualPreference } from "./../../interfaces/match-data.model";
 import { AngularFireFunctions } from "@angular/fire/functions";
 import { Injectable } from "@angular/core";
 import { AngularFireAuth } from "@angular/fire/auth";
 import { AngularFirestore } from "@angular/fire/firestore";
+import { AngularFireStorage } from "@angular/fire/storage";
 
+import {
+  catchError,
+  distinctUntilChanged,
+  filter,
+  first,
+  map,
+  shareReplay,
+  switchMap,
+  take,
+  tap,
+} from "rxjs/operators";
 import { BehaviorSubject, firstValueFrom, forkJoin, from, Observable, of } from "rxjs";
+import { isEqual } from "lodash";
 
-import { Profile, SearchCriteria, AppUser } from "@classes/index";
+import { FormatService } from "@services/format/format.service";
+
+import { Profile, AppUser } from "@classes/index";
 import {
   getMatchDataUserInfoResponse,
   privateProfileFromDatabase,
@@ -15,28 +29,18 @@ import {
   editableProfileFields,
   profileEditingByUserRequest,
 } from "@interfaces/index";
-import { FormatService } from "@services/format/format.service";
-import {
-  catchError,
-  distinctUntilChanged,
-  filter,
-  first,
-  map,
-  share,
-  shareReplay,
-  switchMap,
-  take,
-  tap,
-} from "rxjs/operators";
-import { isEqual } from "lodash";
-import { AngularFireStorage } from "@angular/fire/storage";
+
+import { Gender, SexualPreference } from "./../../interfaces/match-data.model";
 
 @Injectable({
   providedIn: "root",
 })
 export class CurrentUserStore {
   private user: BehaviorSubject<AppUser> = new BehaviorSubject<AppUser>(null);
+
   public user$: Observable<AppUser> = this.user.asObservable();
+
+  public fillStore$ = this.getFillStore();
 
   public isReady$ = this.user$.pipe(
     map((user) => user instanceof AppUser),
@@ -51,14 +55,10 @@ export class CurrentUserStore {
     private afStorage: AngularFireStorage
   ) {}
 
-  updateLatestSearchCriteriaOnDb(searchCriteria: SearchCriteria) {}
-
-  public fillStore$ = this.fillStore();
-
   /** Fetches info from database to update the User BehaviorSubject */
-  private fillStore() {
+  private getFillStore() {
     return this.afAuth.user.pipe(
-      take(1),
+      first(),
       switchMap((user) => {
         if (!user) throw "no user authenticated";
 
@@ -110,14 +110,12 @@ export class CurrentUserStore {
           profile?.areaOfStudy,
           profile?.interests,
           profile?.questions,
-          // profile?.onCampus,
           profile?.degree,
           profile?.socialMediaLinks,
           privateProfile?.settings,
           latestSearchCriteria ?? {},
           infoFromMatchData?.gender,
           infoFromMatchData?.sexualPreference
-          // infoFromMatchData?.swipeMode
         );
 
         return user;
@@ -217,10 +215,6 @@ export class CurrentUserStore {
     );
   }
 
-  public resetStore() {
-    this.user.next(null);
-  }
-
   /** From the user's id, returns a Profile object containing info from
    * their profile doc on database
    */
@@ -290,5 +284,9 @@ export class CurrentUserStore {
           return of(null);
         })
       );
+  }
+
+  public resetStore() {
+    this.user.next(null);
   }
 }
