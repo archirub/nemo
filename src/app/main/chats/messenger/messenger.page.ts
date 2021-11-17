@@ -35,6 +35,7 @@ import {
   shareReplay,
   switchMap,
   take,
+  tap,
   withLatestFrom,
 } from "rxjs/operators";
 import { isEqual } from "lodash";
@@ -71,12 +72,6 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
 
   latestChatInput: string; // Storing latest chat input functionality
   chosenPopup = this.randomMotivationMessage; //Will be randomly chosen from the list above onInit
-
-  get randomMotivationMessage() {
-    return messengerMotivationMessages[
-      Math.floor(Math.random() * messengerMotivationMessages.length)
-    ];
-  }
 
   @ViewChild(IonContent) ionContent: IonContent;
   @ViewChild("slides") slides: IonSlides;
@@ -133,7 +128,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
     map((chat) => chat.recipient.uid),
     switchMap((recipientUID) => this.profilesStore.checkAndSave(recipientUID)),
     switchMap(({ uid, pictures }) => {
-      return of();
+      return of("");
       return forkJoin([
         this.chatboardPictures.storeInLocal(uid, pictures[0], true),
         this.chatboardPictures.addToHolder({ uids: [uid], urls: [pictures[0]] }),
@@ -144,6 +139,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
   // Handles the loading of more messages when the user scrolls all the way to the oldest loaded messages
   get moreMessagesLoadingHandler$() {
     this.loadingObserver?.disconnect();
+    console.log("moreMessagesLoadingHandler");
 
     this.loadingObserver = new IntersectionObserver(
       ([entry]) => {
@@ -158,6 +154,12 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
       withLatestFrom(this.firstBatchArrived$), // to make sure we are only loading more messages if the first batch has already arrived
       exhaustMap(() => concat(timer(500), this.listenOnMoreMessages()))
     );
+  }
+
+  get randomMotivationMessage() {
+    return messengerMotivationMessages[
+      Math.floor(Math.random() * messengerMotivationMessages.length)
+    ];
   }
 
   constructor(

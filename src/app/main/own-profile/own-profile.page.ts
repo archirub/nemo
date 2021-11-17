@@ -38,6 +38,7 @@ import {
   delay,
   filter,
   startWith,
+  exhaustMap,
 } from "rxjs/operators";
 import { isEqual, isEqualWith } from "lodash";
 import Sortable, { Options as SortableOptions } from "sortablejs";
@@ -94,7 +95,14 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
   @ViewChild("profileContainer", { read: ElementRef }) profileContainer: ElementRef;
   @ViewChild("fish", { read: ElementRef }) fishRef: ElementRef;
   @ViewChild("toggleDiv", { read: ElementRef }) toggleDiv: ElementRef;
-  @ViewChild("profilePictures", { read: ElementRef }) profilePicturesRef: ElementRef;
+  @ViewChild("profilePictures", { read: ElementRef }) set profilePicturesRef(
+    ref: ElementRef
+  ) {
+    if (ref) this.profilePicturesRef$.next(ref);
+  }
+  private profilePicturesRef$ = new BehaviorSubject<ElementRef>(null);
+  // MAKE THE SAME SYSTEM FOR PROFILE CARD REF AND THEREFORE REMOVE THE ISREADY IN PROFILE CARD COMP (16 Nov 2021)
+  private profileCardViewReady$ = new BehaviorSubject<boolean>(false);
 
   private editingInProgress = new BehaviorSubject<boolean>(false);
 
@@ -166,8 +174,10 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
       this.profileCard.isReady$,
       this.storeReadiness.ownProfile$,
     ]).pipe(
-      map(([a, b, c]) => a && b && c),
-      distinctUntilChanged()
+      // tap((a) => console.log("page is ready array", a)),
+      map(([a, b, c, d]) => !!a && !!b && !!c && !!d),
+      distinctUntilChanged(),
+      tap((a) => console.log("page is ready", a))
     );
   }
 
@@ -177,7 +187,9 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
       filter((isReady) => isReady),
       first(),
       tap(() => this.stopLoadingAnimation()),
-      tap(() => this.activatePictureDragging())
+      exhaustMap(() => this.profilePicturesRef$),
+      filter((ref) => !!ref),
+      tap((ref) => this.activatePictureDragging(ref))
     );
   }
 
@@ -200,7 +212,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
 
   ngAfterViewInit() {
     this.pageIsReady$ = this.getPageIsReady(); // this format is needed because the ViewChild "profileCard" only gets defined after view init
-    this.onPageReadyHandler$ = this.getOnPageReadyHandler(); // same here
+    this.onPageReadyHandler$ = this.getOnPageReadyHandler(); // same here (this one depends on pageIsReady$ so needs to be defined after it is defined)
     this.subs.add(this.onPageReadyHandler$.subscribe());
     this.subs.add(this.editingAnimationHandler$.subscribe());
 
@@ -240,9 +252,8 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
   }
 
   // Initialises the logic that makes the pictures sortable by dragging
-  activatePictureDragging() {
-    console.log("profilePicturesRef", this.profilePicturesRef);
-    const sortable = Sortable.create(this.profilePicturesRef.nativeElement, {
+  activatePictureDragging(profilePicturesRef: ElementRef) {
+    const sortable = Sortable.create(profilePicturesRef.nativeElement, {
       onUpdate: (event) => {
         let newUrls = Array.from(event.target.children)
           .map((c) => getUrlFromHTML(c.children[1].children[0].children[0]))
