@@ -17,9 +17,18 @@ import {
   forkJoin,
   from,
   Observable,
+  of,
+  ReplaySubject,
   Subscription,
 } from "rxjs";
-import { distinctUntilChanged, exhaustMap, filter, map, tap } from "rxjs/operators";
+import {
+  distinctUntilChanged,
+  exhaustMap,
+  filter,
+  map,
+  switchMap,
+  tap,
+} from "rxjs/operators";
 
 import { AppToggleComponent } from "@components/index";
 
@@ -54,9 +63,17 @@ export class SettingsPage implements AfterViewInit, OnDestroy, OnInit {
 
   subs = new Subscription();
 
-  @ViewChild("slide") slides: IonSlides;
-  @ViewChild("goUnder") goUnder: ElementRef;
   @ViewChild("goUnderToggle") goUnderToggle: AppToggleComponent;
+
+  private goUnderRef$ = new ReplaySubject<ElementRef>(1);
+  @ViewChild("goUnder") set goUnderRefSetter(ref: ElementRef) {
+    if (ref) this.goUnderRef$.next(ref);
+  }
+
+  private slidesRef$ = new ReplaySubject<IonSlides>(1);
+  @ViewChild("slides") set slidesRefSetter(ref: IonSlides) {
+    if (ref) this.slidesRef$.next(ref);
+  }
 
   private editingInProgress = new BehaviorSubject<boolean>(false);
 
@@ -71,8 +88,8 @@ export class SettingsPage implements AfterViewInit, OnDestroy, OnInit {
     map((u) => u?.settings?.showProfile),
     filter((showProfile) => showProfile === true || showProfile === false),
     distinctUntilChanged(),
-    map((showProfile) => showProfileToGoUnder(showProfile)),
-    tap((goUnder) => this.applyGoUnderStyling(goUnder)),
+    map((showProfile) => formatShowProfileToGoUnder(showProfile)),
+    switchMap((goUnder) => this.applyGoUnderStyling(goUnder)),
     tap((goUnder) => this.goUnderToggle.applyStyling(goUnder))
   );
 
@@ -98,7 +115,7 @@ export class SettingsPage implements AfterViewInit, OnDestroy, OnInit {
     const prefs = document.getElementById("preferences");
     this.renderer.setStyle(legal, "display", "none");
     this.renderer.setStyle(prefs, "display", "none");
-    this.slides.lockSwipes(true); //Stop swiping of slides so that users cannot see placeholder slide
+    this.lockSwipes(true); //Stop swiping of slides so that users cannot see placeholder slide
   }
 
   editingTriggered() {
@@ -163,7 +180,7 @@ export class SettingsPage implements AfterViewInit, OnDestroy, OnInit {
   // For responding to a change in the "goUnder" property. It sends it to the database and
   // updates the profile locally
   async actOnGoUnder(option: GoUnder) {
-    const newShowProfile = goUnderToShowProfile(option);
+    const newShowProfile = formatGoUnderToShowProfile(option);
 
     const loader = await this.loadingCtrl.create(
       this.loadingService.defaultLoadingOptions
@@ -190,8 +207,8 @@ export class SettingsPage implements AfterViewInit, OnDestroy, OnInit {
     await loader.dismiss();
   }
 
-  applyGoUnderStyling(goUnder: GoUnder) {
-    const tabStyle = this.goUnder.nativeElement.style;
+  async applyGoUnderStyling(goUnder: GoUnder) {
+    const tabStyle = (await firstValueFrom(this.goUnderRef$)).nativeElement.style;
 
     if (goUnder === "on") {
       tabStyle.color = "var(--ion-color-primary)";
@@ -212,15 +229,15 @@ export class SettingsPage implements AfterViewInit, OnDestroy, OnInit {
 
   /* Unlocks swipes, slides to next/prev and then locks swipes */
   async unlockAndSwipe(direction) {
-    await this.slides.lockSwipes(false);
+    await this.lockSwipes(false);
 
     if (direction === "next") {
-      await this.slides.slideNext();
+      await this.slideNext();
     } else {
-      await this.slides.slidePrev();
+      await this.slidePrev();
     }
 
-    await this.slides.lockSwipes(true);
+    await this.lockSwipes(true);
   }
 
   /* Returns to first settings page, displays placeholder again */
@@ -271,6 +288,17 @@ export class SettingsPage implements AfterViewInit, OnDestroy, OnInit {
     await this.firebaseAuth.changePasswordProcedure();
   }
 
+  async lockSwipes(bool: boolean) {
+    return firstValueFrom(this.slidesRef$).then((ref) => ref.lockSwipes(bool));
+  }
+
+  async slidePrev() {
+    return firstValueFrom(this.slidesRef$).then((ref) => ref.slidePrev());
+  }
+  async slideNext() {
+    return firstValueFrom(this.slidesRef$).then((ref) => ref.slideNext());
+  }
+
   propertyChanged(): boolean {
     return this.genderChanged() || this.sexualPreferenceChanged();
   }
@@ -293,12 +321,12 @@ export class SettingsPage implements AfterViewInit, OnDestroy, OnInit {
   }
 }
 
-function showProfileToGoUnder(bool: boolean): GoUnder {
+function formatShowProfileToGoUnder(bool: boolean): GoUnder {
   if (bool === true) return "off";
   if (bool === false) return "on";
 }
 
-function goUnderToShowProfile(str: GoUnder): boolean {
+function formatGoUnderToShowProfile(str: GoUnder): boolean {
   return str === "off";
 }
 

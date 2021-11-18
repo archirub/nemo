@@ -24,6 +24,8 @@ import {
   lastValueFrom,
   Observable,
   of,
+  ReplaySubject,
+  Subject,
   Subscription,
 } from "rxjs";
 import {
@@ -39,6 +41,7 @@ import {
   filter,
   startWith,
   exhaustMap,
+  share,
 } from "rxjs/operators";
 import { isEqual, isEqualWith } from "lodash";
 import Sortable, { Options as SortableOptions } from "sortablejs";
@@ -81,6 +84,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
   loadingAnimation: Animation;
   toggleDivEnterAnimation: Animation;
   toggleDivLeaveAnimation: Animation;
+  sortableHolder: Sortable;
 
   // These intermediate variables (editableFields and profilePictures) are required
   // to allow the user to modify these fields without the backend being affected right away,
@@ -95,14 +99,13 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
   @ViewChild("profileContainer", { read: ElementRef }) profileContainer: ElementRef;
   @ViewChild("fish", { read: ElementRef }) fishRef: ElementRef;
   @ViewChild("toggleDiv", { read: ElementRef }) toggleDiv: ElementRef;
-  @ViewChild("profilePictures", { read: ElementRef }) set profilePicturesRef(
+
+  private profilePicturesRef$ = new ReplaySubject<ElementRef>(1);
+  @ViewChild("profilePictures", { read: ElementRef }) set profilePicturesRefSetter(
     ref: ElementRef
   ) {
     if (ref) this.profilePicturesRef$.next(ref);
   }
-  private profilePicturesRef$ = new BehaviorSubject<ElementRef>(null);
-  // MAKE THE SAME SYSTEM FOR PROFILE CARD REF AND THEREFORE REMOVE THE ISREADY IN PROFILE CARD COMP (16 Nov 2021)
-  private profileCardViewReady$ = new BehaviorSubject<boolean>(false);
 
   private editingInProgress = new BehaviorSubject<boolean>(false);
 
@@ -145,6 +148,15 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     )
   );
 
+  // this systems allows that, after each modification of the profilePictures array,
+  // The current Sortable object is destroyed a new one is instanciated for that new array
+  // Doing so completely removed the bugs present
+  pictureDragginHandler$ = this.profilePictures$.pipe(
+    switchMap(() => this.profilePicturesRef$.pipe(first())),
+    tap((pPicturesRef) => this.resetPictureDragging(pPicturesRef)),
+    share()
+  );
+
   get emptyEditableFields() {
     return {
       biography: null,
@@ -171,11 +183,9 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     return combineLatest([
       this.viewIsReady$,
       this.dataFillingHandler$,
-      this.profileCard.isReady$,
       this.storeReadiness.ownProfile$,
     ]).pipe(
-      // tap((a) => console.log("page is ready array", a)),
-      map(([a, b, c, d]) => !!a && !!b && !!c && !!d),
+      map(([a, b, c]) => !!a && !!b && !!c),
       distinctUntilChanged(),
       tap((a) => console.log("page is ready", a))
     );
@@ -187,9 +197,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
       filter((isReady) => isReady),
       first(),
       tap(() => this.stopLoadingAnimation()),
-      exhaustMap(() => this.profilePicturesRef$),
-      filter((ref) => !!ref),
-      tap((ref) => this.activatePictureDragging(ref))
+      tap(() => this.subs.add(this.pictureDragginHandler$.subscribe()))
     );
   }
 
@@ -214,6 +222,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     this.pageIsReady$ = this.getPageIsReady(); // this format is needed because the ViewChild "profileCard" only gets defined after view init
     this.onPageReadyHandler$ = this.getOnPageReadyHandler(); // same here (this one depends on pageIsReady$ so needs to be defined after it is defined)
     this.subs.add(this.onPageReadyHandler$.subscribe());
+
     this.subs.add(this.editingAnimationHandler$.subscribe());
 
     // assuming that if this.fish is undefined it is because
@@ -251,12 +260,15 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     );
   }
 
-  // Initialises the logic that makes the pictures sortable by dragging
-  activatePictureDragging(profilePicturesRef: ElementRef) {
-    const sortable = Sortable.create(profilePicturesRef.nativeElement, {
+  // Initialises / reinitialises the logic that makes the pictures sortable by dragging
+  resetPictureDragging(profilePicturesRef: ElementRef) {
+    this.sortableHolder?.destroy();
+    this.sortableHolder = Sortable.create(profilePicturesRef.nativeElement, {
       onUpdate: (event) => {
         let newUrls = Array.from(event.target.children)
-          .map((c) => getUrlFromHTML(c.children[1].children[0].children[0]))
+          .map((c) => {
+            return getUrlFromHTML(c?.children[1]?.children[0]?.children[0]);
+          })
           .filter((u) => !!u);
 
         this.profilePictures.next(newUrls);
@@ -264,9 +276,10 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
         return this.editingTriggered();
       },
       draggable: ".draggable-elements",
-      onMove: (event) => {
-        return event.related.className.indexOf("not-draggable-elements") === -1;
-      },
+      // onMove: (event) => {
+      //   return 1;
+      //   return event.related.className.indexOf("not-draggable-elements") === -1;
+      // },
     });
   }
 
@@ -576,8 +589,10 @@ function changeElementPosition(arr: any[], old_index: number, new_index: number)
   arr.splice(new_index, 0, arr.splice(old_index, 1)[0]);
 }
 
-function getUrlFromHTML(element: Element): string {
-  return window.getComputedStyle(element).backgroundImage.slice(4, -1).replace(/"/g, "");
+function getUrlFromHTML(element: Element): string | null {
+  return element
+    ? window.getComputedStyle(element).backgroundImage.slice(4, -1).replace(/"/g, "")
+    : null;
 }
 
 // for comparator function in Lodash's isEqual function in "editingTriggered"

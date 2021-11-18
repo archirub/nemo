@@ -44,7 +44,6 @@ export class ChatBoardComponent implements OnInit, AfterViewInit {
   @Input() chats: Chat[];
   @Input() matches: Chat[];
   @Output() chatboardReady = new EventEmitter();
-  @ViewChild(IonContent) ionContent: IonContent;
   @ViewChild("chatDeleteRef") chatDeleteRef: IonItemSliding;
 
   chatboardPictures$ = this.chatboardPicturesService.holder$; // used in template
@@ -123,11 +122,6 @@ export class ChatBoardComponent implements OnInit, AfterViewInit {
     await firstValueFrom(
       timer(400).pipe(switchMap(() => this.chatboardStore.deleteChatInStore(chat.id)))
     );
-  }
-
-  // for use in chat page
-  scroll(speed) {
-    this.ionContent.scrollToTop(speed);
   }
 
   // for shortening last message

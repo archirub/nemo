@@ -6,9 +6,6 @@ import { DomController } from "@ionic/angular";
   templateUrl: "./main.page.html",
   styleUrls: ["./main.page.scss"],
 })
-export class MainPage implements OnInit {
-  constructor(private domCtrl: DomController) {
-  }
-
-  ngOnInit() {}
+export class MainPage {
+  constructor() {}
 }

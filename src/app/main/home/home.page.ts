@@ -22,10 +22,12 @@ import {
   concat,
   firstValueFrom,
   of,
+  ReplaySubject,
   Subscription,
 } from "rxjs";
 import {
   catchError,
+  delay,
   distinctUntilChanged,
   filter,
   first,
@@ -71,6 +73,25 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
 
   private subs = new Subscription();
 
+  // All of these are for showing SC or match animation. Assuming that always happens sufficiently late that these refs can't be undefined
+  @ViewChild("homeContainer", { read: ElementRef }) homeContainer: ElementRef;
+  @ViewChild("pic1", { read: ElementRef }) pic1: ElementRef;
+  @ViewChild("pic2", { read: ElementRef }) pic2: ElementRef;
+  @ViewChild("catchText", { read: ElementRef }) catchText: ElementRef;
+  @ViewChild("swipeCards", { read: ElementRef }) swipeCards: ElementRef;
+  @ViewChild("backdrop", { read: ElementRef }) backdrop: ElementRef;
+
+  private fishRef$ = new ReplaySubject<ElementRef>(1);
+  @ViewChild("fish", { read: ElementRef }) set fishRefSetter(ref: ElementRef) {
+    if (ref) this.fishRef$.next(ref);
+  }
+
+  @HostListener("window:resize", ["$event"])
+  onResize() {
+    this.screenHeight = window.innerHeight;
+    this.screenWidth = window.innerWidth;
+  }
+
   showLoading$ = new BehaviorSubject<boolean>(true);
   viewIsReady$ = new BehaviorSubject<boolean>(false);
 
@@ -94,7 +115,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     filter((isReady) => !!isReady),
     first(),
     tap(() => this.showLoading$.next(false)),
-    tap(() => this.stopLoadingAnimation())
+    tap(() => this.subs.add(this.stopLoadingAnimation$.subscribe()))
   );
 
   mainProfilePictureGetter$ = this.ownPicturesService.urls$.pipe(
@@ -103,19 +124,19 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     })
   );
 
-  @ViewChild("homeContainer", { read: ElementRef }) homeContainer: ElementRef;
-  @ViewChild("pic1", { read: ElementRef }) pic1: ElementRef;
-  @ViewChild("pic2", { read: ElementRef }) pic2: ElementRef;
-  @ViewChild("catchText", { read: ElementRef }) catchText: ElementRef;
-  @ViewChild("swipeCards", { read: ElementRef }) swipeCards: ElementRef;
-  @ViewChild("backdrop", { read: ElementRef }) backdrop: ElementRef;
-  @ViewChild("fish", { read: ElementRef }) fish: ElementRef;
+  playLoadingAnimation$ = this.fishRef$.pipe(
+    first(),
+    switchMap((ref) => {
+      this.loadingAnimation = FishSwimAnimation(ref);
+      return this.loadingAnimation.play();
+    })
+  );
 
-  @HostListener("window:resize", ["$event"])
-  onResize() {
-    this.screenHeight = window.innerHeight;
-    this.screenWidth = window.innerWidth;
-  }
+  stopLoadingAnimation$ = this.fishRef$.pipe(
+    first(),
+    delay(200),
+    map(() => this.loadingAnimation?.destroy())
+  );
 
   constructor(
     private renderer: Renderer2,
@@ -142,7 +163,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    this.startLoadingAnimation();
+    this.subs.add(this.playLoadingAnimation$.subscribe());
 
     this.viewIsReady$.next(true);
   }
@@ -160,15 +181,6 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     });
 
     return modal.present();
-  }
-
-  stopLoadingAnimation() {
-    this.loadingAnimation?.destroy();
-  }
-
-  startLoadingAnimation() {
-    this.loadingAnimation = FishSwimAnimation(this.fish);
-    this.loadingAnimation.play();
   }
 
   changeCatchMessage() {
