@@ -15,7 +15,11 @@
                 <ion-text color="dark">
                   <div class="flexcolumn">
                     <ion-avatar>
-                      <img class="profile-icon" (click)="slideTo('profile')" [src]="bubblePicture$ | async" />
+                      <img
+                        class="profile-icon"
+                        (click)="slideTo('profile')"
+                        [src]="bubblePicture$ | async"
+                      />
                     </ion-avatar>
                     <h3 class="messenger-header" (click)="slideTo('profile')">
                       {{(chat$ | async)?.recipient?.name}}
@@ -25,7 +29,12 @@
               </ion-col>
 
               <ion-col size="2">
-                <img name="shield" src="/assets/reporticon.svg" alt="Report User" (click)="openUserReportModal()"/>
+                <img
+                  name="shield"
+                  src="/assets/reporticon.svg"
+                  alt="Report User"
+                  (click)="openUserReportModal()"
+                />
               </ion-col>
             </ion-row>
           </ion-grid>
@@ -51,7 +60,7 @@
         refreshingText="Refreshing..."
       > -->
         <ion-row *ngIf="(messages$ | async).length < 1">
-          <p class='tip'>{{ chosenPopup }}</p>
+          <p class="tip">{{ chosenPopup }}</p>
         </ion-row>
         <ion-row
           *ngFor="let message of messages$ | async; index as i; let last='last'; trackBy: trackMessage"
@@ -61,12 +70,7 @@
             *ngIf="message?.senderID === (chat$ | async)?.recipient?.uid"
             class="message-col col-recieved"
           >
-            <div
-              class="message notOwnMessage"
-              [ngClass]="{'failedToSend': hasFailed(message), 'isSending': isSending(message) }"
-            >
-              {{message?.content}}
-            </div>
+            <div class="message notOwnMessage">{{message?.content}}</div>
           </ion-col>
 
           <ion-col
@@ -75,12 +79,7 @@
             *ngIf="message?.senderID !== (chat$ | async)?.recipient?.uid"
             class="message-col col-sent"
           >
-            <div
-              class="message ownMessage"
-              [ngClass]="{'failedToSend': hasFailed(message), 'isSending': isSending(message) }"
-            >
-              {{message?.content}}
-            </div>
+            <div class="message ownMessage">{{message?.content}}</div>
           </ion-col>
         </ion-row>
 

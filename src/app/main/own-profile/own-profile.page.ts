@@ -276,10 +276,13 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
         return this.editingTriggered();
       },
       draggable: ".draggable-elements",
-      // onMove: (event) => {
-      //   return 1;
-      //   return event.related.className.indexOf("not-draggable-elements") === -1;
-      // },
+
+      onMove: (event) => {
+        // return false;
+        if (event.related.className.indexOf("not-draggable-elements") > -1) {
+          return false;
+        }
+      },
     });
   }
 

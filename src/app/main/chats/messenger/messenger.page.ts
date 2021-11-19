@@ -18,6 +18,7 @@ import {
   firstValueFrom,
   forkJoin,
   from,
+  interval,
   lastValueFrom,
   Observable,
   of,
@@ -38,6 +39,7 @@ import {
   switchMap,
   take,
   tap,
+  timeInterval,
   withLatestFrom,
 } from "rxjs/operators";
 import { isEqual } from "lodash";
@@ -100,13 +102,13 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
     if (ref) this.loadingTriggerRef$.next(ref);
   }
 
-  chat$ = new BehaviorSubject<Chat>(null);
-  messages$ = new BehaviorSubject<Message[]>([]);
-
+  chat$ = new BehaviorSubject<Chat>(null); // used in template
+  messages$ = new BehaviorSubject<Message[]>([]); // used in template
   private pageIsReady = new BehaviorSubject<boolean>(false);
+  private hasFullyScrolled = new Subject<"">();
+
   pageIsReady$ = this.pageIsReady.asObservable().pipe(distinctUntilChanged());
 
-  private hasFullyScrolled = new Subject<"">();
   private hasFullyScrolled$ = this.hasFullyScrolled.asObservable();
 
   // emits once the first batch of messages has arrived.
@@ -131,7 +133,6 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
   );
 
   /** Handles scrolling to bottom of messenger when there a new message is sent (on either side).
-   * We assume a change in the time of the newest message means a new message appeared.
    */
   private scrollHandler$ = this.messages$.pipe(
     filter((messages) => messages.length > 0),
@@ -173,8 +174,25 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
 
       return this.hasFullyScrolled$.pipe(
         withLatestFrom(this.firstBatchArrived$), // to make sure we are only loading more messages if the first batch has already arrived
-        exhaustMap(() => concat(timer(500), this.listenOnMoreMessages()))
+        exhaustMap(() => concat(timer(500), this.listenOnMoreMessages$))
       );
+    })
+  );
+
+  /**
+   * Activates the listener for this chat's messages and fills the messages subject
+   * when something changes in the messages collection
+   */
+  listenOnMoreMessages$ = this.messages$.pipe(
+    withLatestFrom(this.currentUser.user$.pipe(filter((u) => !!u))),
+    first(),
+    map(([msgs, user]) => [msgs.length, user] as [number, AppUser]),
+    tap((arr) => console.log("here here", arr)),
+    map(([msgCount, user]) => {
+      const newMsgCount = msgCount + this.MSG_BATCH_SIZE;
+
+      this.messagesDatabaseSub?.();
+      this.messagesDatabaseSub = this.listenOnMessages(user.uid, newMsgCount, msgCount);
     })
   );
 
@@ -203,6 +221,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
     this.subs.add(this.scrollHandler$.subscribe());
     this.subs.add(this.otherProfileHandler$.subscribe());
     this.pageInitialization();
+    this.messages$.subscribe((msgs) => console.log("msgs", msgs));
   }
 
   ngAfterViewInit() {
@@ -221,7 +240,8 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
 
     this.CHAT_ID = paramMap.get("chatID");
 
-    await lastValueFrom(this.initializeMessenger());
+    lastValueFrom(this.initializeMessenger());
+
     await this.scrollToBottom();
 
     setTimeout(() => this.pageIsReady.next(true), 500);
@@ -240,7 +260,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
         this.latestChatInput = chats[this.CHAT_ID].latestChatInput;
         return user.uid;
       }),
-      concatMap(() => this.listenOnMoreMessages())
+      concatMap(() => this.listenOnMoreMessages$)
     );
   }
 
@@ -283,46 +303,31 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
     );
   }
 
-  /**
-   * Activates the listener for this chat's messages and fills the messages subject
-   * when something changes in the messages collection
-   */
-  listenOnMoreMessages() {
-    return this.messages$.pipe(
-      withLatestFrom(this.currentUser.user$.pipe(filter((u) => !!u))),
-      take(1),
-      map(([msgs, user]) => [msgs.length, user] as [number, AppUser]),
-      map(([msgCount, user]) => {
-        this.messagesDatabaseSub?.();
+  listenOnMessages(uid: string, newMsgCount: number, currentMsgCount: number) {
+    return this.firestore.firestore
+      .collection("chats")
+      .doc(this.CHAT_ID)
+      .collection("messages")
+      .where("uids", "array-contains", uid)
+      .orderBy("time", "desc")
+      .limit(newMsgCount)
+      .onSnapshot({
+        next: (snapshot) => {
+          // this is necessary because on updating the batch size,
+          // we sometimes only get 1 message at first for some reason,
+          // and that makes the messages rerender weirdly in ngFor loop
+          if (currentMsgCount >= snapshot.docs.length) return;
 
-        const newMsgCount = msgCount + this.MSG_BATCH_SIZE;
-
-        this.messagesDatabaseSub = this.firestore.firestore
-          .collection("chats")
-          .doc(this.CHAT_ID)
-          .collection("messages")
-          .where("uids", "array-contains", user.uid)
-          .orderBy("time", "desc")
-          .limit(newMsgCount)
-          .onSnapshot({
-            next: (snapshot) => {
-              // this is necessary because on updating the batch size,
-              // we sometimes only get 1 message at first for some reason,
-              // and that makes the messages rerender weirdly in ngFor loop
-              if (msgCount >= snapshot.docs.length) return;
-
-              this.messages$.next(
-                this.format.messagesDatabaseToClass(
-                  snapshot.docs
-                    .map((d) => ({ id: d.id, message: d.data() }))
-                    .reverse() as messageMap[]
-                )
-              );
-            },
-            error: (err) => console.error("error in database message listening", err),
-          });
-      })
-    );
+          this.messages$.next(
+            this.format.messagesDatabaseToClass(
+              snapshot.docs
+                .map((d) => ({ id: d.id, message: d.data() }))
+                .reverse() as messageMap[]
+            )
+          );
+        },
+        error: (err) => console.error("error in database message listening", err),
+      });
   }
 
   // Sends the content of the input bar as a new message to the database
@@ -339,7 +344,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
         const message: messageFromDatabase = {
           uids: sortUIDs([thisChat.recipient.uid, user.uid]),
           senderID: user.uid,
-          time: Timestamp.fromDate(messageTime),
+          time: Timestamp.fromDate(new Date()),
           content: this.latestChatInput,
         };
 
@@ -407,9 +412,10 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
   }
 
   async scrollToBottom() {
-    return firstValueFrom(this.ionContentRef$).then((ref) =>
-      ref.scrollToBottom(this.SCROLL_SPEED)
-    );
+    return firstValueFrom(this.ionContentRef$).then((ref) => {
+      console.log("ref is", ref);
+      return ref.scrollToBottom(this.SCROLL_SPEED);
+    });
   }
 
   backToChatboard(): void {
