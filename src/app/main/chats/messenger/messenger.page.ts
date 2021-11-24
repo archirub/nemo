@@ -15,11 +15,14 @@ import { ActivatedRoute } from "@angular/router";
 import {
   BehaviorSubject,
   concat,
+  firstValueFrom,
   forkJoin,
   from,
+  interval,
   lastValueFrom,
   Observable,
   of,
+  ReplaySubject,
   Subject,
   Subscription,
   timer,
@@ -36,6 +39,7 @@ import {
   switchMap,
   take,
   tap,
+  timeInterval,
   withLatestFrom,
 } from "rxjs/operators";
 import { isEqual } from "lodash";
@@ -73,19 +77,38 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
   latestChatInput: string; // Storing latest chat input functionality
   chosenPopup = this.randomMotivationMessage; //Will be randomly chosen from the list above onInit
 
-  @ViewChild(IonContent) ionContent: IonContent;
-  @ViewChild("slides") slides: IonSlides;
-  @ViewChild("profCard") profCard: ProfileCardComponent; //for access to grandchildren
-  @ViewChild("searchBar") searchBar: IonSearchbar;
-  @ViewChild("loadingTrigger") loadingTrigger: ElementRef<HTMLElement>;
+  private ionContentRef$ = new ReplaySubject<IonContent>(1);
+  @ViewChild(IonContent) set ionContentRefSetter(ref: IonContent) {
+    if (ref) this.ionContentRef$.next(ref);
+  }
 
-  chat$ = new BehaviorSubject<Chat>(null);
-  messages$ = new BehaviorSubject<Message[]>([]);
+  private slidesRef$ = new ReplaySubject<IonSlides>(1);
+  @ViewChild("slides") set slidesRefSetter(ref: IonSlides) {
+    if (ref) this.slidesRef$.next(ref);
+  }
 
+  private profCardRef$ = new ReplaySubject<ProfileCardComponent>(1);
+  @ViewChild("profCard") set profCardRefSetter(ref: ProfileCardComponent) {
+    if (ref) this.profCardRef$.next(ref);
+  }
+
+  private searchBarRef$ = new ReplaySubject<IonSearchbar>(1);
+  @ViewChild("searchBar") set searchBarRefSetter(ref: IonSearchbar) {
+    if (ref) this.searchBarRef$.next(ref);
+  }
+
+  private loadingTriggerRef$ = new ReplaySubject<ElementRef<HTMLElement>>(1);
+  @ViewChild("loadingTrigger") set loadingTriggerSetter(ref: ElementRef<HTMLElement>) {
+    if (ref) this.loadingTriggerRef$.next(ref);
+  }
+
+  chat$ = new BehaviorSubject<Chat>(null); // used in template
+  messages$ = new BehaviorSubject<Message[]>([]); // used in template
   private pageIsReady = new BehaviorSubject<boolean>(false);
+  private hasFullyScrolled = new Subject<"">();
+
   pageIsReady$ = this.pageIsReady.asObservable().pipe(distinctUntilChanged());
 
-  private hasFullyScrolled = new Subject<"">();
   private hasFullyScrolled$ = this.hasFullyScrolled.asObservable();
 
   // emits once the first batch of messages has arrived.
@@ -110,7 +133,6 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
   );
 
   /** Handles scrolling to bottom of messenger when there a new message is sent (on either side).
-   * We assume a change in the time of the newest message means a new message appeared.
    */
   private scrollHandler$ = this.messages$.pipe(
     filter((messages) => messages.length > 0),
@@ -118,7 +140,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
       isEqual(this.getMostRecent(oldMessages), this.getMostRecent(newMessages))
     ),
     delay(300),
-    exhaustMap(() => this.ionContent.scrollToBottom(this.SCROLL_SPEED))
+    exhaustMap(() => this.scrollToBottom())
   );
 
   // handles storing the profile of the other user in the chat after it has been loaded
@@ -137,24 +159,42 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
   );
 
   // Handles the loading of more messages when the user scrolls all the way to the oldest loaded messages
-  get moreMessagesLoadingHandler$() {
-    this.loadingObserver?.disconnect();
-    console.log("moreMessagesLoadingHandler");
+  moreMessagesLoadingHandler$ = this.loadingTriggerRef$.pipe(
+    exhaustMap((loadingTriggerRef) => {
+      this.loadingObserver?.disconnect();
 
-    this.loadingObserver = new IntersectionObserver(
-      ([entry]) => {
-        entry.isIntersecting && this.hasFullyScrolled.next("");
-      },
-      { root: this.host.nativeElement }
-    );
+      this.loadingObserver = new IntersectionObserver(
+        ([entry]) => {
+          entry.isIntersecting && this.hasFullyScrolled.next("");
+        },
+        { root: this.host.nativeElement }
+      );
 
-    this.loadingObserver.observe(this.loadingTrigger.nativeElement);
+      this.loadingObserver.observe(loadingTriggerRef.nativeElement);
 
-    return this.hasFullyScrolled$.pipe(
-      withLatestFrom(this.firstBatchArrived$), // to make sure we are only loading more messages if the first batch has already arrived
-      exhaustMap(() => concat(timer(500), this.listenOnMoreMessages()))
-    );
-  }
+      return this.hasFullyScrolled$.pipe(
+        withLatestFrom(this.firstBatchArrived$), // to make sure we are only loading more messages if the first batch has already arrived
+        exhaustMap(() => concat(timer(500), this.listenOnMoreMessages$))
+      );
+    })
+  );
+
+  /**
+   * Activates the listener for this chat's messages and fills the messages subject
+   * when something changes in the messages collection
+   */
+  listenOnMoreMessages$ = this.messages$.pipe(
+    withLatestFrom(this.currentUser.user$.pipe(filter((u) => !!u))),
+    first(),
+    map(([msgs, user]) => [msgs.length, user] as [number, AppUser]),
+    tap((arr) => console.log("here here", arr)),
+    map(([msgCount, user]) => {
+      const newMsgCount = msgCount + this.MSG_BATCH_SIZE;
+
+      this.messagesDatabaseSub?.();
+      this.messagesDatabaseSub = this.listenOnMessages(user.uid, newMsgCount, msgCount);
+    })
+  );
 
   get randomMotivationMessage() {
     return messengerMotivationMessages[
@@ -181,12 +221,13 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
     this.subs.add(this.scrollHandler$.subscribe());
     this.subs.add(this.otherProfileHandler$.subscribe());
     this.pageInitialization();
+    this.messages$.subscribe((msgs) => console.log("msgs", msgs));
   }
 
   ngAfterViewInit() {
     this.subs.add(this.moreMessagesLoadingHandler$.subscribe());
     this.styleMessageBar();
-    this.slides.lockSwipes(true);
+    firstValueFrom(this.slidesRef$).then((ref) => ref.lockSwipes(true));
   }
 
   // initialises the page
@@ -199,8 +240,9 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
 
     this.CHAT_ID = paramMap.get("chatID");
 
-    await lastValueFrom(this.initializeMessenger());
-    await this.ionContent.scrollToBottom();
+    lastValueFrom(this.initializeMessenger());
+
+    await this.scrollToBottom();
 
     setTimeout(() => this.pageIsReady.next(true), 500);
   }
@@ -218,7 +260,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
         this.latestChatInput = chats[this.CHAT_ID].latestChatInput;
         return user.uid;
       }),
-      concatMap(() => this.listenOnMoreMessages())
+      concatMap(() => this.listenOnMoreMessages$)
     );
   }
 
@@ -261,46 +303,31 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
     );
   }
 
-  /**
-   * Activates the listener for this chat's messages and fills the messages subject
-   * when something changes in the messages collection
-   */
-  listenOnMoreMessages() {
-    return this.messages$.pipe(
-      withLatestFrom(this.currentUser.user$.pipe(filter((u) => !!u))),
-      take(1),
-      map(([msgs, user]) => [msgs.length, user] as [number, AppUser]),
-      map(([msgCount, user]) => {
-        this.messagesDatabaseSub?.();
+  listenOnMessages(uid: string, newMsgCount: number, currentMsgCount: number) {
+    return this.firestore.firestore
+      .collection("chats")
+      .doc(this.CHAT_ID)
+      .collection("messages")
+      .where("uids", "array-contains", uid)
+      .orderBy("time", "desc")
+      .limit(newMsgCount)
+      .onSnapshot({
+        next: (snapshot) => {
+          // this is necessary because on updating the batch size,
+          // we sometimes only get 1 message at first for some reason,
+          // and that makes the messages rerender weirdly in ngFor loop
+          if (currentMsgCount >= snapshot.docs.length) return;
 
-        const newMsgCount = msgCount + this.MSG_BATCH_SIZE;
-
-        this.messagesDatabaseSub = this.firestore.firestore
-          .collection("chats")
-          .doc(this.CHAT_ID)
-          .collection("messages")
-          .where("uids", "array-contains", user.uid)
-          .orderBy("time", "desc")
-          .limit(newMsgCount)
-          .onSnapshot({
-            next: (snapshot) => {
-              // this is necessary because on updating the batch size,
-              // we sometimes only get 1 message at first for some reason,
-              // and that makes the messages rerender weirdly in ngFor loop
-              if (msgCount >= snapshot.docs.length) return;
-
-              this.messages$.next(
-                this.format.messagesDatabaseToClass(
-                  snapshot.docs
-                    .map((d) => ({ id: d.id, message: d.data() }))
-                    .reverse() as messageMap[]
-                )
-              );
-            },
-            error: (err) => console.error("error in database message listening", err),
-          });
-      })
-    );
+          this.messages$.next(
+            this.format.messagesDatabaseToClass(
+              snapshot.docs
+                .map((d) => ({ id: d.id, message: d.data() }))
+                .reverse() as messageMap[]
+            )
+          );
+        },
+        error: (err) => console.error("error in database message listening", err),
+      });
   }
 
   // Sends the content of the input bar as a new message to the database
@@ -317,7 +344,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
         const message: messageFromDatabase = {
           uids: sortUIDs([thisChat.recipient.uid, user.uid]),
           senderID: user.uid,
-          time: Timestamp.fromDate(messageTime),
+          time: Timestamp.fromDate(new Date()),
           content: this.latestChatInput,
         };
 
@@ -338,7 +365,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
             (msgs) => !!msgs.find((msg) => msg.time.getTime() === messageTime.getTime()) // filters out
           ),
           take(1),
-          map(() => this.ionContent.scrollToBottom(this.SCROLL_SPEED))
+          switchMap(() => this.scrollToBottom())
         )
       )
     );
@@ -346,7 +373,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
 
   async styleMessageBar() {
     //Add styles to the message bar (it is inaccessible in shadowDOM)
-    let el = await this.searchBar.getInputElement();
+    let el = await (await firstValueFrom(this.searchBarRef$)).getInputElement();
     let styles = {
       border: "solid 1px var(--ion-color-light-tint)",
       borderRadius: "25px",
@@ -369,17 +396,26 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
 
   // used to slide between the other user's profile and the messages panels
   async slideTo(page) {
-    this.slides.lockSwipes(false);
+    const slidesRef = await firstValueFrom(this.slidesRef$);
+    slidesRef.lockSwipes(false);
 
     if (page === "profile") {
-      this.profCard.slides.slideTo(0);
-      this.profCard.updatePager(0);
-      this.slides.slideNext();
+      const profCardRef = await firstValueFrom(this.profCardRef$);
+      await (await firstValueFrom(profCardRef.slidesRef$)).slideTo(0);
+      profCardRef.updatePager(0);
+      await slidesRef.slideNext();
     } else if (page === "messenger") {
-      this.slides.slidePrev();
+      slidesRef.slidePrev();
     }
 
-    this.slides.lockSwipes(true);
+    slidesRef.lockSwipes(true);
+  }
+
+  async scrollToBottom() {
+    return firstValueFrom(this.ionContentRef$).then((ref) => {
+      console.log("ref is", ref);
+      return ref.scrollToBottom(this.SCROLL_SPEED);
+    });
   }
 
   backToChatboard(): void {

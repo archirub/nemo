@@ -56,7 +56,7 @@ export class ProfileAnswerComponent {
     this.renderer.setStyle(this.qHead.nativeElement, "display", "none"); //Hide text
     this.renderer.setStyle(this.qInput.nativeElement, "display", "flex"); //Show question select
 
-    this.qSelect.open(); //Open ionSelect immediately
+    this.qSelect?.open(); //Open ionSelect immediately
   }
 
   /**

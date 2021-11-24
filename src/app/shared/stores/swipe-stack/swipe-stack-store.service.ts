@@ -240,12 +240,17 @@ export class SwipeStackStore {
     return profileCards.changes.pipe(
       // listens to the user's swipping on that profile
       switchMap((list: QueryList<ProfileCardComponent>) =>
-        list.first.slides.ionSlideWillChange.pipe(
-          map((slides) => ({
-            slides,
-            uid: list.first.profile.uid,
-            profilePictures$: list.first.profilePictures$,
-          }))
+        list.first.slidesRef$.pipe(
+          first(),
+          switchMap((ref) =>
+            ref.ionSlideWillChange.pipe(
+              map((slides) => ({
+                slides,
+                uid: list.first.profile.uid,
+                profilePictures$: list.first.profilePictures$,
+              }))
+            )
+          )
         )
       ),
       // Gets index of new slide

@@ -13,17 +13,17 @@ import {
   Renderer2,
   OnDestroy,
 } from "@angular/core";
-import { IonContent, IonSlides } from "@ionic/angular";
+import { IonSlides } from "@ionic/angular";
 import { AngularFireAuth } from "@angular/fire/auth";
 
 import {
   BehaviorSubject,
   combineLatest,
   firstValueFrom,
-  Observable,
+  ReplaySubject,
   Subscription,
 } from "rxjs";
-import { filter, map, take, startWith } from "rxjs/operators";
+import { filter, map, take, startWith, first, switchMap } from "rxjs/operators";
 
 import { ReportUserComponent } from "../../../main/chats/report-user/report-user.component";
 
@@ -52,7 +52,7 @@ export class ProfileCardComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @Output() expanded = new EventEmitter();
   @Output() tapped = new EventEmitter();
-  @Input() moreInfo: boolean;
+  @Input() moreInfo: boolean = false;
   @Input() reportable: boolean = true;
   @Input() isOwnProfile: boolean = false;
   @Input() profile: Profile;
@@ -68,7 +68,7 @@ export class ProfileCardComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.profilePictures$.next(pics);
   }
-  @ViewChild(IonSlides) slides: IonSlides;
+
   @ViewChildren("bullets", { read: ElementRef }) bullets: QueryList<ElementRef>;
   @ViewChild("content", { read: ElementRef }) content: ElementRef;
   @ViewChild("yes", { read: ElementRef }) yesSwipe: ElementRef;
@@ -76,12 +76,18 @@ export class ProfileCardComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild("complete", { read: ElementRef, static: false }) complete: ElementRef; //info after expand
   @ViewChild("header", { read: ElementRef }) header: ElementRef; //name & department container
   @ViewChild("intSlides") intSlides: IonSlides;
+
+  slidesRef$ = new ReplaySubject<IonSlides>(1); // made public for use in swipe stack store and messenger page
+  @ViewChild(IonSlides) set slidesRefSetter(ref: IonSlides) {
+    if (ref) this.slidesRef$.next(ref);
+  }
+
   @HostListener("touchstart", ["$event"]) touchStart(event) {
     this.X = event.touches[0].clientX;
     this.Y = event.touches[0].clientY;
   }
 
-  isReady$ = new BehaviorSubject<boolean>(false); // used in parent page (created for use in ownProfile page)
+  // isReady$ = new BehaviorSubject<boolean>(false); // used in parent page (created for use in ownProfile page)
 
   // this format is used such that the pager is re-updated whenever we get a new input of pictures
   // this also allows for the initial update of the pager
@@ -90,7 +96,17 @@ export class ProfileCardComponent implements OnInit, AfterViewInit, OnDestroy {
   profilePicturesWithDefault$ = this.profilePictures$.pipe(
     map((pp) => pp ?? "/assets/icons/icon-192x192.png")
   );
-  pagerHandler$: Observable<void>;
+
+  pagerHandler$ = this.slidesRef$.pipe(
+    first(),
+    switchMap((slidesRef) =>
+      combineLatest([this.profilePictures$, slidesRef.ionSlideWillChange]).pipe(
+        map(([_, s]) => (s.target as any)?.swiper?.realIndex as number),
+        startWith(0), // for initial
+        map((index) => this.updatePager(index))
+      )
+    )
+  );
 
   get pictureCount(): number {
     return this.profile?.pictureCount ?? 0;
@@ -107,27 +123,12 @@ export class ProfileCardComponent implements OnInit, AfterViewInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    this.moreInfo = false;
     this.buildInterestSlides(this.profile);
   }
 
   ngAfterViewInit() {
-    this.slides?.lockSwipeToPrev(true);
-    this.isReady$.next(true);
-    setTimeout(() => {
-      console.log("slides is", this.slides);
-      this.pagerHandler$ = this.getPagerHandler$(); // this format is used as "slides" only gets init after view init
-      this.subs.add(this.pagerHandler$.subscribe());
-    }, 2000);
-  }
-
-  getPagerHandler$() {
-    console.log("slides is ", this.slides);
-    return combineLatest([this.profilePictures$, this.slides.ionSlideWillChange]).pipe(
-      map(([_, s]) => (s.target as any)?.swiper?.realIndex as number),
-      startWith(0), // for initial
-      map((index) => this.updatePager(index))
-    );
+    this.lockSwipeToPrev(true);
+    this.subs.add(this.pagerHandler$.subscribe());
   }
 
   async reportUser() {
@@ -263,8 +264,8 @@ export class ProfileCardComponent implements OnInit, AfterViewInit, OnDestroy {
 
   async onSlideChange() {
     const [slideIndex, slidesLength] = await Promise.all([
-      this.slides.getActiveIndex(),
-      this.slides.length(),
+      this.getSlidesIndex(),
+      this.getSlidesLength(),
     ]);
 
     await this.checkSlide(slideIndex, slidesLength);
@@ -272,20 +273,11 @@ export class ProfileCardComponent implements OnInit, AfterViewInit, OnDestroy {
 
   async checkSlide(slideIndex: number, slidesLength: number) {
     if (slideIndex === 0) {
-      await Promise.all([
-        this.slides.lockSwipeToPrev(true),
-        this.slides.lockSwipeToNext(false),
-      ]);
+      await Promise.all([this.lockSwipeToPrev(true), this.lockSwipeToNext(false)]);
     } else if (slideIndex === slidesLength - 1) {
-      await Promise.all([
-        this.slides.lockSwipeToPrev(false),
-        this.slides.lockSwipeToNext(true),
-      ]);
+      await Promise.all([this.lockSwipeToPrev(false), this.lockSwipeToNext(true)]);
     } else {
-      await Promise.all([
-        this.slides.lockSwipeToPrev(false),
-        this.slides.lockSwipeToNext(false),
-      ]);
+      await Promise.all([this.lockSwipeToPrev(false), this.lockSwipeToNext(false)]);
     }
   }
 
@@ -310,6 +302,22 @@ export class ProfileCardComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.interestSlideContent.push(pushArray); //pushes either last interests, or if less than three interests in total
     this.interestsBuilt = true;
+  }
+
+  async lockSwipeToPrev(bool: boolean) {
+    return firstValueFrom(this.slidesRef$).then((ref) => ref.lockSwipeToPrev(bool));
+  }
+
+  async lockSwipeToNext(bool: boolean) {
+    return firstValueFrom(this.slidesRef$).then((ref) => ref.lockSwipeToNext(bool));
+  }
+
+  async getSlidesIndex() {
+    return firstValueFrom(this.slidesRef$.pipe(switchMap((ref) => ref.getActiveIndex())));
+  }
+
+  async getSlidesLength() {
+    return firstValueFrom(this.slidesRef$.pipe(switchMap((ref) => ref.length())));
   }
 
   startSlides() {

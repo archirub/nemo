@@ -20,12 +20,14 @@ import {
   merge,
   Observable,
   of,
+  ReplaySubject,
   Subject,
   Subscription,
 } from "rxjs";
 import {
   exhaustMap,
   filter,
+  first,
   map,
   mergeMap,
   pairwise,
@@ -61,6 +63,7 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
   screenWidth: number;
   yesBubbleAnimation: Animation;
   noBubbleAnimation: Animation;
+  currentUser: AppUser;
 
   timeOfLatestCardTap = 0; // (ms) - set to 0 when we want the diff with current time to be larger than threshold
   DOUBLE_TAP_THRESHOLD = 800;
@@ -70,13 +73,21 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
 
   @Input() profiles$: Observable<Profile[]>;
   @Output() matched = new EventEmitter<Profile>();
+
   @ViewChildren("cards", { read: ElementRef }) cards: QueryList<ElementRef>;
   @ViewChild("yesBubble", { read: ElementRef }) yesBubble: ElementRef;
   @ViewChild("noBubble", { read: ElementRef }) noBubble: ElementRef;
   @ViewChild("likeEls", { read: ElementRef }) likeEls: ElementRef;
   @ViewChild("dislikeEls", { read: ElementRef }) dislikeEls: ElementRef;
   @ViewChild("profileComponent") profileComponent: ProfileCardComponent;
-  @ViewChildren("profileComponent") profCardStack: QueryList<ProfileCardComponent>;
+
+  private cardStackRef$ = new ReplaySubject<QueryList<ProfileCardComponent>>(1);
+  @ViewChildren("profileComponent") set cardStackRefSetter(
+    ref: QueryList<ProfileCardComponent>
+  ) {
+    if (ref) this.cardStackRef$.next(ref);
+  }
+
   @HostListener("window:resize", ["$event"])
   onResize() {
     this.screenWidth = window.innerWidth;
@@ -91,7 +102,12 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
 
   tapInProgress$ = new BehaviorSubject<boolean>(false);
 
-  currentUser: AppUser;
+  managePictureSwiping$ = this.cardStackRef$.pipe(
+    first(),
+    map((ref) =>
+      this.subs.add(this.swipeStackStore.managePictureSwiping(ref).subscribe())
+    )
+  );
 
   constructor(
     private swipeOutcomeStore: SwipeOutcomeStore,
@@ -104,9 +120,7 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
   ngOnInit() {}
 
   ngAfterViewInit() {
-    this.subs.add(
-      this.swipeStackStore.managePictureSwiping(this.profCardStack).subscribe()
-    );
+    this.subs.add(this.managePictureSwiping$.subscribe());
     this.subs.add(this.onCardTapLogic().subscribe());
     this.subs.add(this.handleTaps().subscribe());
   }
@@ -173,12 +187,18 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
   // do logic associated with it
   private doubleTapOnCard(choice: swipeChoice): Observable<void> {
     if (choice === "yes") {
-      //this.matched.emit(Array.from(this.profCardStack)[0].profile); // FOR DEVELOPMENT
-      return this.profiles$.pipe(
-        take(1),
-        withLatestFrom(of(SwipeAnimation(this.likeEls))),
-        switchMap(([profiles, swipeAnimation]) =>
-          concat(swipeAnimation.play(), this.onYesSwipe(profiles[0]))
+      return this.cardStackRef$.pipe(
+        //map(
+          //(ref) => this.matched.emit(Array.from(ref)[0].profile) // FOR DEVELOPMENT
+        //),
+        switchMap(() =>
+          this.profiles$.pipe(
+            take(1),
+            withLatestFrom(of(SwipeAnimation(this.likeEls))),
+            switchMap(([profiles, swipeAnimation]) =>
+              concat(swipeAnimation.play(), this.onYesSwipe(profiles[0]))
+            )
+          )
         )
       );
     }
