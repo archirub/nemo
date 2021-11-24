@@ -39,6 +39,39 @@ ion-content {
   z-index: 50;
 }
 
+//Swipe animation elements
+#likeEls, #dislikeEls {
+  display: none;
+  height: 100vh;
+  z-index: 105;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  background-color: #FFF;
+
+  ion-icon {
+    margin: 20vh auto;
+    font-size: 9vh;
+  }
+}
+
+.likeText {
+  justify-content: center;
+  width: 100vw;
+  position: absolute;
+  z-index: 101;
+  top: 27vh;
+
+  h2 {
+    padding: 15px;
+    color: #f07167;
+    text-align: center;
+    border-radius: 10px;
+    font-size: 3.5vh;
+  }
+}
+
 .swipe-cards {
   position: fixed;
   left: 0;

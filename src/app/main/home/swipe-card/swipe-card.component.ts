@@ -44,6 +44,7 @@ import { OtherProfilesStore, SwipeOutcomeStore, SwipeStackStore } from "@stores/
 import { Profile, AppUser } from "@classes/index";
 import { swipeChoice } from "@interfaces/index";
 import {
+  SwipeAnimation,
   SwipeYesAnimation,
   SwipeNoAnimation,
   YesBubbleAnimation,
@@ -72,6 +73,8 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
   @ViewChildren("cards", { read: ElementRef }) cards: QueryList<ElementRef>;
   @ViewChild("yesBubble", { read: ElementRef }) yesBubble: ElementRef;
   @ViewChild("noBubble", { read: ElementRef }) noBubble: ElementRef;
+  @ViewChild("likeEls", { read: ElementRef }) likeEls: ElementRef;
+  @ViewChild("dislikeEls", { read: ElementRef }) dislikeEls: ElementRef;
   @ViewChild("profileComponent") profileComponent: ProfileCardComponent;
   @ViewChildren("profileComponent") profCardStack: QueryList<ProfileCardComponent>;
   @HostListener("window:resize", ["$event"])
@@ -170,10 +173,10 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
   // do logic associated with it
   private doubleTapOnCard(choice: swipeChoice): Observable<void> {
     if (choice === "yes") {
-      this.matched.emit(Array.from(this.profCardStack)[0].profile); // FOR DEVELOPMENT
+      //this.matched.emit(Array.from(this.profCardStack)[0].profile); // FOR DEVELOPMENT
       return this.profiles$.pipe(
         take(1),
-        withLatestFrom(of(SwipeYesAnimation(this.cards.first, this.screenWidth))),
+        withLatestFrom(of(SwipeAnimation(this.likeEls))),
         switchMap(([profiles, swipeAnimation]) =>
           concat(swipeAnimation.play(), this.onYesSwipe(profiles[0]))
         )
@@ -182,7 +185,7 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
     if (choice === "no") {
       return this.profiles$.pipe(
         take(1),
-        withLatestFrom(of(SwipeNoAnimation(this.cards.first, this.screenWidth))),
+        withLatestFrom(of(SwipeAnimation(this.dislikeEls))),
         switchMap(([profiles, swipeAnimation]) =>
           concat(swipeAnimation.play(), this.onNoSwipe(profiles[0]))
         )
