@@ -92,7 +92,7 @@
           <!-- </div> -->
           <h2>My bio</h2>
           <div>
-            <div #bioClose class="close-button" (click)="clearInput('bio')">
+            <div #bioClose class="close-button" (click)="clearBio()">
               <ion-icon name="close-outline"></ion-icon>
             </div>
             <div class="bio">
@@ -103,7 +103,7 @@
                 (ngModelChange)="editingTriggered()"
                 autoGrow="true"
                 maxlength="150"
-                (ionInput)="displayExit('bio')"
+                (ionInput)="displayBioDelete()"
               ></ion-textarea>
             </div>
           </div>

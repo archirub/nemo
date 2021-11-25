@@ -17,8 +17,25 @@ import { ModalController } from "@ionic/angular";
 export class InterestsModalComponent implements OnInit {
   pictures = assetsInterestsPath; //Interest icons
   names = searchCriteriaOptions.interests; //Interest names
-  interestGrid: Array<Array<string>>;
-  pictureGrid: Array<Array<string>>;
+  
+  //DO NOT REMOVE THESE - DEV TEST - SEE IF QUICKER WHEN HARDCODED
+  interestGrid: Array<Array<string>> = [['Herb Friendly', 'Book Worm'],['Life Saver', 'Cafe Dweller'],
+                                        ['Astrologist', 'Chef'],['Model', 'Tik Toker'],
+                                        ['Library Fiend', 'Pub Crawler'],['Math Geek', 'Sports Knight'],
+                                        ['Club Goer', 'Casual Cupid'],['Spiritual', 'Activist'],
+                                        ['Hopeless Romantic', 'Radical'],['Raver', 'Music Nerd']];
+  
+  pictureGrid: Array<Array<string>> = [['/assets/interests/herbfriendly.svg', '/assets/interests/bookworm.svg'],
+                                      ['/assets/interests/lifesaver.svg', '/assets/interests/cafedweller.svg'],
+                                      ['/assets/interests/astrologist.svg', '/assets/interests/chef.svg'],
+                                      ['/assets/interests/model.svg', '/assets/interests/tiktoker.svg'],
+                                      ['/assets/interests/libraryfiend.svg', '/assets/interests/pubcrawler.svg'],
+                                      ['/assets/interests/mathgeek.svg', '/assets/interests/sportsknight.svg'],
+                                      ['/assets/interests/clubgoer.svg', '/assets/interests/casualcupid.svg'],
+                                      ['/assets/interests/spiritual.svg', '/assets/interests/activist.svg'],
+                                      ['/assets/interests/hopelessromantic.svg', '/assets/interests/radical.svg'],
+                                      ['/assets/interests/raver.svg', '/assets/interests/musicnerd.svg']];
+  
   viewReady: boolean = false;
 
   interests: Interests[];
@@ -41,7 +58,7 @@ export class InterestsModalComponent implements OnInit {
   constructor(private modalCtrl: ModalController) {}
 
   ngOnInit() {
-    this.buildInterestGrid();
+    //this.buildInterestGrid(); DO NOT REMOVE THIS
     this.viewReady = true;
   }
 
@@ -49,8 +66,11 @@ export class InterestsModalComponent implements OnInit {
     return await this.modalCtrl.dismiss(this.interests);
   }
 
+  //DO NOT REMOVE THIS - DEV TEST - SEE IF THERE IS AN IMPROVEMENT WHEN HARDCODED
+
   // builds the interest grid
-  buildInterestGrid() {
+  /*buildInterestGrid() {
+    console.log('building');
     this.interestGrid = []; //Array of arrays of interest triplets
     this.pictureGrid = []; //Arrays of icons to support
 
@@ -84,7 +104,10 @@ export class InterestsModalComponent implements OnInit {
     if (picPushArray.length != 0) {
       this.pictureGrid.push(picPushArray); //Pushes last picture array
     }
-  }
+
+    console.log(this.interestGrid);
+    console.log(this.pictureGrid);
+  }*/
 
   // changes the interest selection
   selectInterest(choice) {

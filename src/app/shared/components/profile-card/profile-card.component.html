@@ -84,14 +84,11 @@
           *ngIf="profile?.interests?.length > 0 && interestsBuilt === true"
           id="info-segment"
         >
-          <!--INTERESTS IN THE DATABASE DON'T CURRENTLY MATCH LOCAL, THIS IS NOT WIRED UP FOR ICONS -->
           <div id="interests-container">
             <ion-slides
               #intSlides
               class="interests-slides"
               *ngIf="this.interestsBuilt"
-              (ionSlideTouchStart)="stopSlides()"
-              [options]="{ autoplay: true }"
             >
               <ion-slide *ngFor="let slide of interestSlideContent">
                 <div id="interests-box" *ngFor="let interest of slide">

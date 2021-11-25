@@ -47,8 +47,6 @@ import { Profile, AppUser } from "@classes/index";
 import { swipeChoice } from "@interfaces/index";
 import {
   SwipeAnimation,
-  SwipeYesAnimation,
-  SwipeNoAnimation,
   YesBubbleAnimation,
   NoBubbleAnimation,
 } from "@animations/index";
@@ -188,9 +186,9 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
   private doubleTapOnCard(choice: swipeChoice): Observable<void> {
     if (choice === "yes") {
       return this.cardStackRef$.pipe(
-        //map(
-          //(ref) => this.matched.emit(Array.from(ref)[0].profile) // FOR DEVELOPMENT
-        //),
+        map(
+          (ref) => this.matched.emit(Array.from(ref)[0].profile) // FOR DEVELOPMENT
+        ),
         switchMap(() =>
           this.profiles$.pipe(
             take(1),

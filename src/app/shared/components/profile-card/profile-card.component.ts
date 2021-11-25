@@ -227,30 +227,18 @@ export class ProfileCardComponent implements OnInit, AfterViewInit, OnDestroy {
         console.log("No interest slides found."); //No interests selected on profile
       }
     }, 100);
-
-    try {
-      this.startSlides();
-    } catch (TypeError) {
-      console.log("No interest slides to autoplay.");
-    }
   }
 
   updatePager(currentIndex: number) {
-    this.bullets.forEach((bullet: ElementRef, i) => {
-      if (currentIndex === i) {
-        this.renderer.setStyle(
-          bullet.nativeElement,
-          "color",
-          "var(--ion-color-primary-contrast)"
-        ); //Add box shadow to header
-      } else {
-        this.renderer.setStyle(
-          bullet.nativeElement,
-          "color",
-          "var(--ion-color-dark-tint)"
-        ); //Add box shadow to header
-      }
-    });
+    var prev = document.getElementById('pagerActive');
+
+    if (prev != null) {
+      prev.removeAttribute('id'); //Remove colour class from previous icon
+    } else { //Case of no pager icon lit up (initialisation)
+      Array.from(this.bullets)[0].nativeElement.id = 'pagerActive' //This SHOULD colour the first icon if function is run at correct time
+    }
+
+    Array.from(this.bullets)[currentIndex].nativeElement.id = 'pagerActive' //Colour current icon
   }
 
   sizeSwipers() {
@@ -318,14 +306,6 @@ export class ProfileCardComponent implements OnInit, AfterViewInit, OnDestroy {
 
   async getSlidesLength() {
     return firstValueFrom(this.slidesRef$.pipe(switchMap((ref) => ref.length())));
-  }
-
-  startSlides() {
-    this.intSlides.startAutoplay();
-  }
-
-  stopSlides() {
-    this.intSlides.stopAutoplay();
   }
 
   findInterestIcon(interest: string) {

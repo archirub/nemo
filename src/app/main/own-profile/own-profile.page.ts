@@ -85,6 +85,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
   toggleDivEnterAnimation: Animation;
   toggleDivLeaveAnimation: Animation;
   sortableHolder: Sortable;
+  pageView: string; //Whether on view or edit
 
   // These intermediate variables (editableFields and profilePictures) are required
   // to allow the user to modify these fields without the backend being affected right away,
@@ -391,35 +392,32 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
   }
 
   // to show or not the close button of the biography
-  displayExit(section) {
-    if (section === "bio" && this.bio.value !== "") {
+  displayBioDelete() {
+    if (this.bio.value !== "") {
       this.renderer.setStyle(this.bioClose.nativeElement, "display", "block");
-    } else if (this.bio.value === "") {
+    } else {
       this.renderer.setStyle(this.bioClose.nativeElement, "display", "none");
     }
   }
 
   // to clear the input of the biography
-  clearInput(section) {
-    if (section === "bio") {
-      this.bio.value = "";
-      this.renderer.setStyle(this.bioClose.nativeElement, "display", "none");
-      //this.profile.biography = "";
-    }
+  clearBio() {
+    this.bio.value = "";
+    this.renderer.setStyle(this.bioClose.nativeElement, "display", "none");
   }
 
   // to make apperance changes when the option of the toggle is changed between edit and view
   async toggleChange(option) {
-    const editor = document.getElementById("editing");
-    const profile = document.getElementById("profile");
+     const editor = document.getElementById("editing");
+     const profile = document.getElementById("profile");
 
-    if (option == "edit") {
-      this.renderer.setStyle(editor, "display", "flex");
-      this.renderer.setStyle(profile, "display", "none");
-    } else if (option == "view") {
-      this.renderer.setStyle(editor, "display", "none");
-      this.renderer.setStyle(profile, "display", "flex");
-    }
+     if (option == "edit") {
+       this.renderer.setStyle(editor, "display", "flex");
+       this.renderer.setStyle(profile, "display", "none");
+     } else if (option == "view") {
+       this.renderer.setStyle(editor, "display", "none");
+       this.renderer.setStyle(profile, "display", "flex");
+     }
   }
 
   // watches whether there is a difference between the info the currentUserStore holds
@@ -461,7 +459,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
       )
     );
 
-    this.displayExit("bio");
+    this.displayBioDelete();
   }
 
   // checks whether any of the parts of the editable fields are invalid.
