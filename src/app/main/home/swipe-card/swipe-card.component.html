@@ -29,6 +29,17 @@
       "
       [ngStyle]="{ zIndex: profiles.length - i }"
     >
+      <!-- DEV -->
+      <div
+        class="devOtherProfileInfo"
+        *ngIf="DEV_other_profile_info | async as otherInfo"
+      >
+        {{ otherInfo | json }}
+      </div>
+      <!-- DEV -->
+      <div class="devOwnProfileInfo" *ngIf="DEV_own_profile_info | async as ownInfo">
+        {{ ownInfo | json }}
+      </div>
       <app-profile-card
         #profileComponent
         (tapped)="cardTap$.next($event)"

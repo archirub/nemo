@@ -17,6 +17,7 @@ import {
   BehaviorSubject,
   concat,
   forkJoin,
+  from,
   merge,
   Observable,
   of,
@@ -41,15 +42,27 @@ import {
 
 import { ProfileCardComponent } from "@components/index";
 
-import { OtherProfilesStore, SwipeOutcomeStore, SwipeStackStore } from "@stores/index";
+import {
+  CurrentUserStore,
+  OtherProfilesStore,
+  SearchCriteriaStore,
+  SwipeOutcomeStore,
+  SwipeStackStore,
+} from "@stores/index";
 
-import { Profile, AppUser } from "@classes/index";
-import { swipeChoice } from "@interfaces/index";
+import { Profile, AppUser, SearchCriteria } from "@classes/index";
+import { mdDatingPickingFromDatabase, swipeChoice, piStorage } from "@interfaces/index";
 import {
   SwipeAnimation,
   YesBubbleAnimation,
   NoBubbleAnimation,
 } from "@animations/index";
+import {
+  AngularFirestore,
+  DocumentSnapshot,
+  QuerySnapshot,
+} from "@angular/fire/firestore";
+import { ErrorHandler } from "@services/errors/error-handler.service";
 
 @Component({
   selector: "app-swipe-card",
@@ -57,6 +70,10 @@ import {
   styleUrls: ["./swipe-card.component.scss"],
 })
 export class SwipeCardComponent implements OnInit, OnDestroy {
+  // DEV
+  DEV_other_profile_info = new BehaviorSubject<Object>(null);
+  DEV_own_profile_info = new BehaviorSubject<Object>(null);
+
   screenHeight: number;
   screenWidth: number;
   yesBubbleAnimation: Animation;
@@ -110,7 +127,11 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
   constructor(
     private swipeOutcomeStore: SwipeOutcomeStore,
     private swipeStackStore: SwipeStackStore,
-    private otherProfilesStore: OtherProfilesStore
+    private otherProfilesStore: OtherProfilesStore,
+    private firestore: AngularFirestore,
+    private SCstore: SearchCriteriaStore, // for DEV
+    private currentUserStore: CurrentUserStore, // for DEV
+    private errorHandler: ErrorHandler
   ) {
     this.onResize();
   }
@@ -121,6 +142,97 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
     this.subs.add(this.managePictureSwiping$.subscribe());
     this.subs.add(this.onCardTapLogic().subscribe());
     this.subs.add(this.handleTaps().subscribe());
+
+    // DEV
+    this.currentUserStore.user$
+      .pipe(
+        filter((user) => !!user),
+        switchMap((user) => this.getPiStorageAndPickingData(user)),
+        map(([pickingData, piStorage, profile]) => {
+          const searchFeatures = pickingData.data().searchFeatures;
+          const piStorageData = piStorage.docs[0].data()[profile.uid];
+
+          this.DEV_own_profile_info.next({
+            own_percentile: piStorageData.percentile,
+          });
+        })
+      )
+      .subscribe();
+
+    // DEV
+    this.profiles$
+      .pipe(
+        filter((p) => p.length > 0),
+        map((p) => p[0]),
+        switchMap((profile) => this.getPiStorageAndPickingData(profile)),
+        withLatestFrom(this.SCstore.searchCriteria$),
+        map(
+          ([[pickingData, piStorage, profile], SC]: [
+            [
+              DocumentSnapshot<mdDatingPickingFromDatabase>,
+              QuerySnapshot<piStorage>,
+              Profile
+            ],
+            SearchCriteria
+          ]) => {
+            const searchFeatures = pickingData.data().searchFeatures;
+            const piStorageData = piStorage.docs[0].data()[profile.uid];
+
+            let SC_degreeOfMatch: number;
+
+            if (SC instanceof SearchCriteria) {
+              SC_degreeOfMatch = 0;
+              Object.keys(SC).forEach((key: keyof SearchCriteria) => {
+                const criteria = SC[key];
+                const feature = searchFeatures[key];
+
+                if (!criteria || !feature) return;
+
+                if (key !== "interests") {
+                  if (criteria === feature) SC_degreeOfMatch++;
+                } else {
+                  for (const f of feature) {
+                    if (criteria === f) {
+                      SC_degreeOfMatch++;
+                      break;
+                    }
+                  }
+                }
+              });
+
+              SC_degreeOfMatch /= Object.keys(SC).length;
+            }
+
+            this.DEV_other_profile_info.next({
+              percentile: piStorageData.percentile,
+              SC_degreeOfMatch,
+            });
+          }
+        )
+      )
+      .subscribe();
+  }
+
+  // DEV
+  getPiStorageAndPickingData(profile: Profile) {
+    const pickingData$ = this.firestore
+      .collection("matchData")
+      .doc(profile.uid)
+      .collection("pickingData")
+      .doc("dating")
+      .get()
+      .pipe(first());
+    const piStorage$ = from(
+      this.firestore.firestore
+        .collection("piStorage")
+        .where("uids", "array-contains", profile.uid)
+        .limit(1)
+        .get()
+    );
+
+    return forkJoin([pickingData$, piStorage$, of(profile)]) as Observable<
+      [DocumentSnapshot<mdDatingPickingFromDatabase>, QuerySnapshot<piStorage>, Profile]
+    >;
   }
 
   /**
