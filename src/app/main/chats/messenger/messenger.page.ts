@@ -18,7 +18,6 @@ import {
   firstValueFrom,
   forkJoin,
   from,
-  interval,
   lastValueFrom,
   Observable,
   of,
@@ -28,18 +27,20 @@ import {
   timer,
 } from "rxjs";
 import {
+  catchError,
   concatMap,
   delay,
   distinctUntilChanged,
   exhaustMap,
   filter,
+  finalize,
   first,
   map,
+  retry,
   shareReplay,
   switchMap,
   take,
   tap,
-  timeInterval,
   withLatestFrom,
 } from "rxjs/operators";
 import { isEqual } from "lodash";
@@ -55,7 +56,14 @@ import { UserReportingService } from "@services/user-reporting/user-reporting.se
 
 import { AppUser, Chat, Message } from "@classes/index";
 import { messageFromDatabase, messageMap } from "@interfaces/message.model";
-import { messengerMotivationMessages, sortUIDs, Timestamp } from "@interfaces/index";
+import {
+  messengerMotivationMessages,
+  sortUIDs,
+  TEST,
+  Timestamp,
+  UNAUTHENTICATED,
+} from "@interfaces/index";
+import { ErrorHandler } from "@services/errors/error-handler.service";
 
 @Component({
   selector: "app-messenger",
@@ -104,6 +112,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
 
   chat$ = new BehaviorSubject<Chat>(null); // used in template
   messages$ = new BehaviorSubject<Message[]>([]); // used in template
+  sendingMessage$ = new BehaviorSubject<boolean>(false);
   private pageIsReady = new BehaviorSubject<boolean>(false);
   private hasFullyScrolled = new Subject<"">();
 
@@ -203,18 +212,18 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
   }
 
   constructor(
+    private afAuth: AngularFireAuth,
+    private firestore: AngularFirestore,
     private route: ActivatedRoute,
     private navCtrl: NavController,
     private chatboardStore: ChatboardStore,
-    private afauth: AngularFireAuth,
-    private firestore: AngularFirestore,
     private profilesStore: OtherProfilesStore,
     private chatboardPictures: ChatboardPicturesStore,
     private format: FormatService,
     private userReporting: UserReportingService,
-    private afAuth: AngularFireAuth,
     private currentUser: CurrentUserStore,
-    private host: ElementRef
+    private host: ElementRef,
+    private errorHandler: ErrorHandler
   ) {}
 
   ngOnInit() {
@@ -329,17 +338,33 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
         error: (err) => console.error("error in database message listening", err),
       });
   }
+  counter = 0;
 
   // Sends the content of the input bar as a new message to the database
   sendMessage(): Observable<any> {
     const messageTime = new Date();
+    this.sendingMessage$.next(true);
 
-    return this.afauth.user.pipe(
+    return this.afAuth.user.pipe(
+      tap(() => console.log("here we go")),
       withLatestFrom(this.chat$.pipe(filter((c) => !!c))),
-      take(1),
+      first(),
       filter(() => !!this.latestChatInput), // prevents user from sending empty messages
+      // tap(() => console.log("now now")),
       switchMap(([user, thisChat]) => {
-        if (!user) throw "no user authenticated";
+        if (this.counter === 0 || this.counter === 1) {
+          console.log("right here fam");
+          this.counter++;
+          // console.log("throw unauthed");
+          throw UNAUTHENTICATED;
+        } else if (this.counter == 2) {
+          // console.log("throwing test");
+          return;
+          throw TEST;
+        }
+        return;
+
+        if (!user) throw UNAUTHENTICATED;
 
         const message: messageFromDatabase = {
           uids: sortUIDs([thisChat.recipient.uid, user.uid]),
@@ -359,15 +384,18 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
             .set(message)
         );
       }),
-      switchMap(() =>
-        this.messages$.pipe(
-          filter(
-            (msgs) => !!msgs.find((msg) => msg.time.getTime() === messageTime.getTime()) // filters out
-          ),
-          take(1),
-          switchMap(() => this.scrollToBottom())
-        )
-      )
+      // switchMap(() =>
+      //   // for scrolling to bottom as soon as the new message appears in messages object
+      //   this.messages$.pipe(
+      //     filter(
+      //       (msgs) => !!msgs.find((msg) => msg.time.getTime() === messageTime.getTime()) // filters out
+      //     ),
+      //     first(),
+      //     switchMap(() => this.scrollToBottom())
+      //   )
+      // ),
+      this.errorHandler.handleUnauthenticated(),
+      finalize(() => this.sendingMessage$.next(false))
     );
   }
 
@@ -412,10 +440,9 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
   }
 
   async scrollToBottom() {
-    return firstValueFrom(this.ionContentRef$).then((ref) => {
-      console.log("ref is", ref);
-      return ref.scrollToBottom(this.SCROLL_SPEED);
-    });
+    return firstValueFrom(this.ionContentRef$).then((ref) =>
+      ref.scrollToBottom(this.SCROLL_SPEED)
+    );
   }
 
   backToChatboard(): void {

@@ -101,6 +101,7 @@
                 fill="clear"
                 id="sendButton"
                 (click)="sendMessage().subscribe()"
+                [disabled]="sendingMessage$ | async"
               >
                 <ion-icon name="arrow-forward-circle"></ion-icon>
               </ion-button>

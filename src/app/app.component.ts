@@ -17,6 +17,7 @@ import { Capacitor } from "@capacitor/core";
 import { GlobalStateManagementService } from "@services/global-state-management/global-state-management.service";
 import { routerInitListenerService } from "@services/global-state-management/initial-url.service";
 import { StoreReadinessService } from "@services/store-readiness/store-readiness.service";
+import { ErrorHandler } from "@services/errors/error-handler.service";
 
 @Component({
   selector: "app-root",
@@ -35,7 +36,8 @@ export class AppComponent implements OnDestroy, OnInit {
     private afAuth: AngularFireAuth,
     private GlobalStateManagement: GlobalStateManagementService,
     private routerInitListener: routerInitListenerService,
-    private storeReadiness: StoreReadinessService
+    private storeReadiness: StoreReadinessService,
+    private errorHandler: ErrorHandler
   ) {
     this.initializeApp();
   }

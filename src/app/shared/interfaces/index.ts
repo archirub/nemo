@@ -11,3 +11,4 @@ export * from "./shared.model";
 export * from "./universities.model";
 export * from "./firebase.model";
 export * from "./user-report.models";
+export * from "./error-handling.model";
