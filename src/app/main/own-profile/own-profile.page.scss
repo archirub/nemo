@@ -89,22 +89,24 @@ save-cancel {
 }
 
 #editing {
-    // padding: 1vh 3vw;
     padding: 30px;
     width: 93%;
+
+    //Stops infinite scroll to the right for sortable pictures
+    max-width: 93%;
+    overflow-x: hidden;
+
     height: 91%;
     z-index: 3;
     background: white;
     position: absolute;
     top: 4.5vh;
     margin: 10px 14px;
-    //border-radius: 30px;
     flex-direction: column;
     justify-content: flex-start;
     overflow-y: scroll !important;
     --overflow-y: scroll !important;
 
-    //box-shadow: 0px 0px 20px -12px;
     .container {
         height: 97.5%;
     }
@@ -162,7 +164,6 @@ h2 {
     border-top: solid 1px var(--ion-color-light-shade);
     border-bottom: solid 1px var(--ion-color-light-shade);
     margin: 3vh 0;
-    //font-weight: bold;
     font-size: 2.75vh;
     ion-icon {
         margin: 3vh 0;
