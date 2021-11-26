@@ -11,6 +11,7 @@ import { SwipeCardComponent } from "./swipe-card/swipe-card.component";
 import { SearchCriteriaComponent } from "./search-criteria/search-criteria.component";
 import { ProfileCardModule } from "@components/profile-card/profile-card.component.module";
 import { AppToggleModule } from "@components/nemo-toggle/nemo-toggle.component.module";
+import { HomeTutorialComponent } from "@components/tutorials/home-tutorial/home-tutorial.component";
 
 @NgModule({
   imports: [
@@ -24,7 +25,7 @@ import { AppToggleModule } from "@components/nemo-toggle/nemo-toggle.component.m
     DirectivesModule,
     PipesModule,
   ],
-  declarations: [HomePage, SwipeCardComponent, SearchCriteriaComponent],
+  declarations: [HomePage, SwipeCardComponent, SearchCriteriaComponent, HomeTutorialComponent],
   providers: [SwipeCardComponent],
   // Seems to make sure the search criteria modal opening is much faster on the first try
   bootstrap: [SearchCriteriaComponent],

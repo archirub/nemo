@@ -6,6 +6,8 @@
   >Activate swipe stack (dev)</ion-button
 > -->
 
+<home-tutorial-slides *ngIf="homeTutorial" (exit)="exitHomeTutorial()"></home-tutorial-slides>
+
 <ng-container *ngIf="showLoading$ | async">
   <div class="fishAnim">
     <div class="flexcol">
@@ -44,7 +46,7 @@
   </div>
 </div>
 
-<ion-content #homeContainer>
+<ion-content #homeContainer [style.filter]="homeTutorial ? 'blur(30px)' : none">
   <div class="swipe-stack" #swipeCards>
     <div class="search">
       <ion-button #searchButton id="searchButton" (click)="showSearchCriteria()">

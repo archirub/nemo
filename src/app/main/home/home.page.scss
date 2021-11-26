@@ -177,6 +177,9 @@ h2.catchtext {
 ion-content {
   --ion-background-color: transparent;
   --overflow: hidden;
+  //position and top allow it to show behind transparent background overlaps
+  position: absolute;
+  top: 0;
   //Shadow root is also the cause of the right line shadow overlap on iOS, something that cannot be fixed this way
 }
 

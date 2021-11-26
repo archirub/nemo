@@ -71,6 +71,9 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
 
   loadingAnimation: Animation;
 
+  //TUTORIAL SETTING
+  homeTutorial = true;
+
   private subs = new Subscription();
 
   // All of these are for showing SC or match animation. Assuming that always happens sufficiently late that these refs can't be undefined
@@ -166,6 +169,11 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     this.subs.add(this.playLoadingAnimation$.subscribe());
 
     this.viewIsReady$.next(true);
+  }
+
+  //TUTORIAL EXIT
+  exitHomeTutorial() {
+    this.homeTutorial = false;
   }
 
   // For development, to avoid fetching the stack on each reload / document save
