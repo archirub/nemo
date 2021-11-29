@@ -1,0 +1,107 @@
+ion-content {
+    overflow: hidden;
+    --overflow: hidden;
+    background-color: rgba(0,0,0,0.8);
+    --background: transparent;
+    z-index: 400;
+    height: 100vh;
+    width: 100vw;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+ion-slides {
+    background: transparent;
+    width: 100vw;
+    height: 90vh;
+}
+
+ion-button {
+    text-transform: none;
+    width: fit-content;
+    margin: 20px auto 0;
+}
+
+h1 {
+    font-size: 5vh;
+    color: var(--ion-color-primary);
+}
+
+h2 {
+    font-size: 3.2vh;
+}
+
+.container {
+    width: 90vw;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    color: #FFF;
+}
+
+.homePage {
+    filter: contrast(10);
+    max-width: 50vw;
+    margin: 0 auto;
+}
+
+.profilePage {
+    filter: contrast(10);
+    max-width: 29vw;
+    margin: 0 auto;
+}
+
+.chatsPage {
+    filter: contrast(10);
+    max-width: 40vw;
+    margin: 0 auto;
+}
+
+/* Slide 2*/
+.highlighted {
+    margin: 20px auto;
+    max-width: 70vw;
+}
+
+/* Slides 3 & 4 */
+.imageMap {
+    margin: 25px 0;
+    height: 60%;
+}
+
+.arrow-1 {
+    position: absolute;
+    width: 20vw;
+    top: 40vh;
+    left: 40vw;
+}
+
+.arrow-2 {
+    position: absolute;
+    width: 12vw;
+    left: 22vw;
+    z-index: 1;
+    top: 31vh;
+    transform: rotate(-80deg);
+}
+
+.arrow-3 {
+    position: absolute;
+    width: 20vw;
+    top: 45vh;
+    left: 32vw;
+}
+
+.profile-small {
+    width: 36vw;
+}
+
+.left {
+    transform: rotate(-8deg);
+}
+
+.right {
+    transform: rotate(8deg);
+    margin-left: 17vw;
+}

@@ -105,6 +105,7 @@ ion-item-options {
   }
 
   img[name=fish] {
+    filter: invert(54%) sepia(19%) saturate(1629%) hue-rotate(314deg) brightness(129%) contrast(91%);
     height: 12vh;
   }
 }
