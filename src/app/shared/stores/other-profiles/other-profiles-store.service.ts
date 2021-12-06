@@ -132,12 +132,10 @@ export class OtherProfilesStore {
     return this.profiles$.pipe(
       take(1),
       map((holder) => {
-        if (holder.hasOwnProperty(uid)) {
-          holder[uid].pictureUrls = pictures;
+        holder[uid].pictureUrls = pictures;
 
-          this.profiles.next(holder);
-          return { uid, pictures };
-        }
+        this.profiles.next(holder);
+        return { uid, pictures };
       })
     );
   }

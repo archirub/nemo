@@ -146,14 +146,14 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
 
   editingAnimationHandler$ = this.editingInProgress$.pipe(
     switchMap((inProgress) =>
-      this.toggleDiv ? ToggleAppearAnimation(this.toggleDiv).play() : of()
+      this.toggleDiv ? ToggleAppearAnimation(this.toggleDiv).play() : of("")
     )
   );
 
   // this systems allows that, after each modification of the profilePictures array,
   // The current Sortable object is destroyed a new one is instanciated for that new array
   // Doing so completely removed the bugs present
-  pictureDragginHandler$ = this.profilePictures$.pipe(
+  pictureDraggingHandler$ = this.profilePictures$.pipe(
     switchMap(() => this.profilePicturesRef$.pipe(first())),
     tap((pPicturesRef) => this.resetPictureDragging(pPicturesRef)),
     share()
@@ -199,7 +199,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
       filter((isReady) => isReady),
       first(),
       tap(() => this.stopLoadingAnimation()),
-      tap(() => this.subs.add(this.pictureDragginHandler$.subscribe()))
+      tap(() => this.subs.add(this.pictureDraggingHandler$.subscribe()))
     );
   }
 

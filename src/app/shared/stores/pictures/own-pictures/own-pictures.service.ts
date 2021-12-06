@@ -135,7 +135,7 @@ export class OwnPicturesStore {
 
   private checkLocal(): Observable<ownPicturesStorage | null> {
     return from(Storage.get({ key: this.localStorageKey })).pipe(
-      first(),
+      take(1),
       map((v) => JSON.parse(v.value))
     );
   }
@@ -152,7 +152,7 @@ export class OwnPicturesStore {
     );
 
     return forkJoin(base64Pictures$).pipe(
-      first(),
+      take(1), // use take instead of first() here, this is because will "first () will emit exactly one item or throw an error, so calling it on an empty observable will cause an error"
       map((base64Pictures) => {
         let storageObject: ownPicturesStorage = {
           timestamp,
@@ -178,7 +178,7 @@ export class OwnPicturesStore {
     );
 
     return forkJoin(urlArray$).pipe(
-      first(),
+      take(1),
       tap((urls) => this.urls.next(urls))
     );
   }

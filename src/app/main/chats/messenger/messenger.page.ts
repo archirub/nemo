@@ -366,13 +366,14 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
     this.sendingMessage$.next(true);
 
     return this.afAuth.user.pipe(
+      tap((user) => {
+        if (!user) throw new CustomError("local/check-auth-state", "local");
+      }),
       tap(() => console.log("sendMessage - Start of chain")),
       withLatestFrom(this.chat$.pipe(filter((c) => !!c))),
       first(),
       filter(() => !!this.latestChatInput), // prevents user from sending empty messages
       switchMap(([user, thisChat]) => {
-        if (!user) throw CHECK_AUTH_STATE;
-
         const message: messageFromDatabase = {
           uids: sortUIDs([thisChat.recipient.uid, user.uid]),
           senderID: user.uid,
@@ -404,6 +405,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
           switchMap(() => this.scrollToBottom())
         )
       ),
+      this.errorHandler.handleErrors(),
       finalize(() => this.sendingMessage$.next(false))
     );
   }

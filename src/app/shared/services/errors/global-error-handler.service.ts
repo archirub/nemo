@@ -8,12 +8,7 @@ import { FirebaseAuthErrorHandler } from "./firebase-auth-error-handler.service"
 import { FirebaseStorageErrorHandler } from "./firebase-storage-error-handler.service";
 import { LocalErrorHandler } from "./local-error-handler.service";
 
-import {
-  CustomError,
-  CHECK_AUTH_STATE,
-  ErrorType,
-  CustomGlobalErrorHandler,
-} from "@interfaces/index";
+import { CustomError, ErrorType, CustomGlobalErrorHandler } from "@interfaces/index";
 
 // next to do (Dec 4th 2021):
 // - Create error converter in each error handler
@@ -55,34 +50,33 @@ export class GlobalErrorHandler implements CustomGlobalErrorHandler {
         this.errorConverterSafeguard<T>(),
         // DEV
         catchError<T, Observable<T>>((err: CustomError) => {
-          console.error("Error through:", err);
-          debugger;
+          console.error("Error through GlobalErrorHandler:", err);
           throw err;
         }),
 
         this.localEH.handleErrors<T>(),
-        catchError<T, Observable<T>>((err: CustomError) => {
-          debugger;
-          throw err;
-        }),
+        // catchError<T, Observable<T>>((err: CustomError) => {
+        //   debugger;
+        //   throw err;
+        // }),
 
         this.firestoreEH.handleErrors<T>(),
-        catchError<T, Observable<T>>((err: CustomError) => {
-          debugger;
-          throw err;
-        }),
+        // catchError<T, Observable<T>>((err: CustomError) => {
+        //   debugger;
+        //   throw err;
+        // }),
 
         this.fAuthEH.handleErrors<T>(),
-        catchError<T, Observable<T>>((err: CustomError) => {
-          debugger;
-          throw err;
-        }),
+        // catchError<T, Observable<T>>((err: CustomError) => {
+        //   debugger;
+        //   throw err;
+        // }),
 
         this.cloudFunctionsEH.handleErrors<T>(),
-        catchError<T, Observable<T>>((err: CustomError) => {
-          debugger;
-          throw err;
-        }),
+        // catchError<T, Observable<T>>((err: CustomError) => {
+        //   debugger;
+        //   throw err;
+        // }),
         this.fStorageEH.handleErrors<T>()
       ) as Observable<T>;
   }
@@ -91,6 +85,7 @@ export class GlobalErrorHandler implements CustomGlobalErrorHandler {
   // Create a error handler for local (or like custom errors or something)
   // and put it there?
   getCurrentUserWithErrorHandling(): Promise<firebase.default.User> {
+    console.log("getCurrentUserWithErrorHandling just used");
     return firstValueFrom(of("" as unknown as firebase.default.User));
     // return firstValueFrom(
     //   this.afAuth.user.pipe(

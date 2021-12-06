@@ -221,7 +221,7 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
       .doc("dating")
       .get()
       .pipe(
-        first(),
+        take(1),
         this.errorHandler.convertErrors("firestore"),
         this.errorHandler.handleErrors()
       );
@@ -369,7 +369,7 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
       exhaustMap(([_, __, choiceOfOtherUser]) => {
         if (choiceOfOtherUser === "yes" || choiceOfOtherUser === "super")
           return this.onMatch(profile);
-        return of();
+        return of("");
       })
     );
   }

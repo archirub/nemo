@@ -334,9 +334,9 @@ export class SignupauthPage implements OnInit {
         .pipe(
           this.errorHandler.convertErrors("cloud-functions"),
           map((res: checkEmailValidityResponse) => {
-            return !!res?.isValid;
+            return !!(res as any)?.successful;
           }),
-          this.errorHandler.handleErrors<boolean>()
+          this.errorHandler.handleErrors()
         ) as Observable<boolean>
     );
   }

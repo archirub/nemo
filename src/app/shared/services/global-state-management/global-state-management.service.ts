@@ -170,7 +170,7 @@ export class GlobalStateManagementService {
       tap(() => this.userState.next("unauthenticated")),
       concatMap((url) => {
         if (["/welcome/login", "/welcome/signupauth", "/welcome"].includes(url))
-          return of(); // do nothing of user is in login, signupauth or welcome page,
+          return of(""); // do nothing of user is in login, signupauth or welcome page,
         // as no auth is required for these three pages
         return concat(this.resetAppState(), this.router.navigateByUrl("/welcome"));
       })
@@ -292,7 +292,7 @@ export class GlobalStateManagementService {
   }
 
   private storesManagement(): Observable<void> {
-    // serves as notification for when the router has been initialised
+    // serves as notification for when the router has been initialized
     const initialUrl$ = this.routerInitListener.routerHasInit$.pipe(
       map(() => this.router.url)
     );

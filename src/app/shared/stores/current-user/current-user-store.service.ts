@@ -62,10 +62,11 @@ export class CurrentUserStore {
   /** Fetches info from database to update the User BehaviorSubject */
   private getFillStore() {
     return this.afAuth.user.pipe(
+      tap((user) => {
+        if (!user) throw new CustomError("local/check-auth-state", "local");
+      }),
       first(),
       switchMap((user) => {
-        if (!user) throw new CustomError("local/check-auth-state", "local");
-
         const profileParts$ = [
           this.fetchProfile(user.uid),
           this.fetchPrivateProfile(user.uid),
