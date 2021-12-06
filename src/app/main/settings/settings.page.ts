@@ -13,6 +13,7 @@ import { AngularFireFunctions } from "@angular/fire/functions";
 import {
   BehaviorSubject,
   concat,
+  EMPTY,
   firstValueFrom,
   forkJoin,
   from,
@@ -20,6 +21,7 @@ import {
   of,
   ReplaySubject,
   Subscription,
+  throwError,
 } from "rxjs";
 import {
   distinctUntilChanged,
@@ -45,6 +47,7 @@ import {
   sexualPreferenceOptions,
   changeShowProfileRequest,
 } from "@interfaces/index";
+import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 
 type GoUnder = "on" | "off";
 
@@ -94,13 +97,17 @@ export class SettingsPage implements AfterViewInit, OnDestroy, OnInit {
   );
 
   constructor(
+    private renderer: Renderer2,
     private navCtrl: NavController,
-    private currentUserStore: CurrentUserStore,
-    private firebaseAuth: FirebaseAuthService,
-    private afFunctions: AngularFireFunctions,
     private loadingCtrl: LoadingController,
-    private loadingService: LoadingService,
-    private renderer: Renderer2
+
+    private afFunctions: AngularFireFunctions,
+
+    private currentUserStore: CurrentUserStore,
+
+    private errorHandler: GlobalErrorHandler,
+    private firebaseAuth: FirebaseAuthService,
+    private loadingService: LoadingService
   ) {}
 
   ngOnInit() {
@@ -159,7 +166,14 @@ export class SettingsPage implements AfterViewInit, OnDestroy, OnInit {
         name: "sexualPreference",
         value: sexPrefStringToArray(this.sexualPreference),
       };
-      actionsToTake$.push(this.afFunctions.httpsCallable("updateGenderSexPref")(request));
+      actionsToTake$.push(
+        this.afFunctions
+          .httpsCallable("updateGenderSexPref")(request)
+          .pipe(
+            this.errorHandler.convertErrors("cloud-functions"),
+            this.errorHandler.handleErrors()
+          )
+      );
     }
 
     if (genderIsChanged) {
@@ -167,7 +181,14 @@ export class SettingsPage implements AfterViewInit, OnDestroy, OnInit {
         name: "gender",
         value: this.gender,
       };
-      actionsToTake$.push(this.afFunctions.httpsCallable("updateGenderSexPref")(request));
+      actionsToTake$.push(
+        this.afFunctions
+          .httpsCallable("updateGenderSexPref")(request)
+          .pipe(
+            this.errorHandler.convertErrors("cloud-functions"),
+            this.errorHandler.handleErrors()
+          )
+      );
     }
 
     await firstValueFrom(forkJoin(actionsToTake$));
@@ -197,8 +218,12 @@ export class SettingsPage implements AfterViewInit, OnDestroy, OnInit {
 
           return concat(
             loader.present(),
-            this.afFunctions.httpsCallable("changeShowProfile")(request),
-            this.currentUserStore.updateShowProfileInStore(newShowProfile)
+            concat(
+              this.afFunctions
+                .httpsCallable("changeShowProfile")(request)
+                .pipe(this.errorHandler.convertErrors("cloud-functions")),
+              this.currentUserStore.updateShowProfileInStore(newShowProfile)
+            ).pipe(this.errorHandler.handleErrors())
           );
         })
       )

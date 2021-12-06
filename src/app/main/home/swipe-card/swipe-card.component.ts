@@ -16,6 +16,7 @@ import {
 import {
   BehaviorSubject,
   concat,
+  EMPTY,
   forkJoin,
   from,
   merge,
@@ -52,17 +53,13 @@ import {
 
 import { Profile, AppUser, SearchCriteria } from "@classes/index";
 import { mdDatingPickingFromDatabase, swipeChoice, piStorage } from "@interfaces/index";
-import {
-  SwipeAnimation,
-  YesBubbleAnimation,
-  NoBubbleAnimation,
-} from "@animations/index";
+import { SwipeAnimation, YesBubbleAnimation, NoBubbleAnimation } from "@animations/index";
 import {
   AngularFirestore,
   DocumentSnapshot,
   QuerySnapshot,
 } from "@angular/fire/firestore";
-import { ErrorHandler } from "@services/errors/error-handler.service";
+import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 
 @Component({
   selector: "app-swipe-card",
@@ -125,13 +122,15 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
   );
 
   constructor(
+    private firestore: AngularFirestore,
+
     private swipeOutcomeStore: SwipeOutcomeStore,
     private swipeStackStore: SwipeStackStore,
     private otherProfilesStore: OtherProfilesStore,
-    private firestore: AngularFirestore,
     private SCstore: SearchCriteriaStore, // for DEV
     private currentUserStore: CurrentUserStore, // for DEV
-    private errorHandler: ErrorHandler
+
+    private errorHandler: GlobalErrorHandler
   ) {
     this.onResize();
   }
@@ -221,13 +220,20 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
       .collection("pickingData")
       .doc("dating")
       .get()
-      .pipe(first());
+      .pipe(
+        first(),
+        this.errorHandler.convertErrors("firestore"),
+        this.errorHandler.handleErrors()
+      );
     const piStorage$ = from(
       this.firestore.firestore
         .collection("piStorage")
         .where("uids", "array-contains", profile.uid)
         .limit(1)
         .get()
+    ).pipe(
+      this.errorHandler.convertErrors("firestore"),
+      this.errorHandler.handleErrors()
     );
 
     return forkJoin([pickingData$, piStorage$, of(profile)]) as Observable<

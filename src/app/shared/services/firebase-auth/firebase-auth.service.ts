@@ -5,13 +5,15 @@ import { AngularFireFunctions } from "@angular/fire/functions";
 import { AngularFireAuth } from "@angular/fire/auth";
 
 import { Storage } from "@capacitor/storage";
-import { firstValueFrom } from "rxjs";
+import { EMPTY, firstValueFrom } from "rxjs";
 
 import { EmptyStoresService } from "@services/global-state-management/empty-stores.service";
 import { LoadingOptions, LoadingService } from "@services/loading/loading.service";
 
 import { deleteAccountRequest } from "@interfaces/cloud-functions.model";
 import { EmailAuthProvider, FirebaseUser } from "@interfaces/index";
+import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
+import { FirebaseLogoutService } from "./firebase-logout.service";
 
 @Injectable({
   providedIn: "root",
@@ -19,39 +21,23 @@ import { EmailAuthProvider, FirebaseUser } from "@interfaces/index";
 export class FirebaseAuthService {
   constructor(
     private router: Router,
+    private zone: NgZone,
     private alertCtrl: AlertController,
+    private navCtrl: NavController,
+    private loadingController: LoadingController,
+
     private afAuth: AngularFireAuth,
     private afFunctions: AngularFireFunctions,
-    private navCtrl: NavController,
-    private zone: NgZone,
+
+    private firebaseLogout: FirebaseLogoutService,
+    // private errorHandler: GlobalErrorHandler,
     private loadingService: LoadingService,
-    private loadingController: LoadingController,
     private emptyStoresService: EmptyStoresService
   ) {}
 
-  // Entire log out procedure with
+  // lazy, could just import firebaseLogoutService whenever logout is needed instead of redirecting
   public async logOut() {
-    // have to explicitely do it this way instead of using directly "this.navCtrl.navigateRoot"
-    // otherwise it causes an error
-    // calling ngZone.run() is necessary otherwise we will get into trouble with changeDecection
-    // back at the welcome page (it seems like it's then not active), which cases problem for example
-    // while trying to log back in where the "log in" button doesn't get enabled when the email-password form becomes valid
-    const clearLocalCache = () => Storage.clear();
-    const clearStores = async () => this.emptyStoresService.emptyStores();
-    const logOut = () => this.afAuth.signOut();
-
-    const duringLoadingPromise = () =>
-      Promise.all([clearLocalCache(), clearStores()]).then(() => logOut());
-
-    const navigateToWelcome = async () =>
-      this.zone
-        .run(() => this.navCtrl.navigateRoot("/welcome"))
-        .then(() => window.location.reload());
-
-    await this.loadingService.presentLoader(
-      [{ promise: duringLoadingPromise, arguments: [] }],
-      [{ promise: navigateToWelcome, arguments: [] }]
-    );
+    return this.firebaseLogout.logOut();
   }
 
   // entire account deletion procedure
@@ -68,6 +54,8 @@ export class FirebaseAuthService {
     const deleteAccount = () =>
       firstValueFrom(
         this.afFunctions.httpsCallable("deleteAccount")({} as deleteAccountRequest)
+        // DEV - find solution: circular dependency issue between firebase.auth.service and errorHandler.service
+        // .pipe(this.errorHandler.handleErrors())
       );
 
     const loadingOptions: LoadingOptions = {
@@ -187,13 +175,15 @@ export class FirebaseAuthService {
   }
 
   public async reAuthenticationProcedure(
-    user: FirebaseUser,
+    user: FirebaseUser = null,
     message: string = null,
     cancelProcedureChosen: () => Promise<any> = null
   ): Promise<{
     user: FirebaseUser;
     outcome: "user-reauthenticated" | "user-canceled" | "auth-failed";
   }> {
+    if (!user) user = await firstValueFrom(this.afAuth.user);
+
     let outcome: "user-reauthenticated" | "user-canceled" | "auth-failed";
 
     const defaultCancelProcedure = () =>
@@ -271,7 +261,7 @@ export class FirebaseAuthService {
 
   // returns whatever the followUpPromise returns so that it can be chained easily
   public async wrongPasswordPopup<T>(
-    folowUpPromise: () => Promise<T> | null
+    followUpPromise: () => Promise<T> | null
   ): Promise<T> {
     let promiseReturn: T;
 
@@ -285,7 +275,7 @@ export class FirebaseAuthService {
     passAlert
       .onWillDismiss()
       .then(() => {
-        if (folowUpPromise) return folowUpPromise();
+        if (followUpPromise) return followUpPromise();
       })
       .then((r) => {
         promiseReturn = r;

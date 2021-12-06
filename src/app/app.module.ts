@@ -1,4 +1,4 @@
-import { GlobalErrorHandler } from "./shared/error-handling/global-error-handling";
+// import { GlobalErrorHandler } from "./shared/error-handling/global-error-handling";
 import { ErrorHandler, NgModule } from "@angular/core";
 import { BrowserModule } from "@angular/platform-browser";
 import { CommonModule } from "@angular/common";
@@ -44,11 +44,11 @@ import { SortablejsModule } from "ngx-sortablejs";
     StatusBar,
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     { provide: REGION, useValue: "europe-west2" },
-    {
-      // processes all errors
-      provide: ErrorHandler,
-      useClass: GlobalErrorHandler,
-    },
+    // {
+    //   // processes all errors
+    //   provide: ErrorHandler,
+    //   useClass: GlobalErrorHandler,
+    // },
   ],
   bootstrap: [AppComponent],
 })

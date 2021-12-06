@@ -5,7 +5,8 @@ import { BehaviorSubject, concat, Observable } from "rxjs";
 
 import { Profile } from "@classes/index";
 import { uidChoiceMap, profileChoiceMap, swipeChoice } from "@interfaces/index";
-import { exhaustMap, map, retry, take } from "rxjs/operators";
+import { exhaustMap, first, map, retry, take } from "rxjs/operators";
+import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 
 @Injectable({
   providedIn: "root",
@@ -17,11 +18,14 @@ export class SwipeOutcomeStore {
   swipeChoices$ = this.swipeChoices.asObservable();
   swipeAnswers$ = this.swipeAnswers.asObservable();
 
-  constructor(private afFunctions: AngularFireFunctions) {}
+  constructor(
+    private afFunctions: AngularFireFunctions,
+    private errorHandler: GlobalErrorHandler
+  ) {}
 
   public yesSwipe(profile: Profile): Observable<void> {
     return this.swipeChoices$.pipe(
-      take(1),
+      first(),
       map((choices) => {
         const newChoice: profileChoiceMap = { choice: "yes", profile };
         this.swipeChoices.next(choices.concat(newChoice));
@@ -84,7 +88,7 @@ export class SwipeOutcomeStore {
 
   public registerSwipeChoices(): Observable<void> {
     return this.swipeChoices$.pipe(
-      take(1),
+      first(),
       map((choices): uidChoiceMap[] =>
         choices.map((c) => {
           return { uid: c.profile.uid, choice: c.choice };
@@ -92,11 +96,15 @@ export class SwipeOutcomeStore {
       ),
       exhaustMap((choices) =>
         concat(
-          this.afFunctions.httpsCallable("registerSwipeChoices")({ choices }),
+          this.afFunctions
+            .httpsCallable("registerSwipeChoices")({ choices })
+            .pipe(
+              this.errorHandler.convertErrors("cloud-functions"),
+              this.errorHandler.handleErrors()
+            ),
           this.removeFromSwipeAnswers(choices)
         )
-      ),
-      retry(3)
+      )
     );
   }
 

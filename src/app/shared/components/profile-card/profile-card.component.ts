@@ -8,7 +8,6 @@ import {
   AfterViewInit,
   ViewChild,
   EventEmitter,
-  ViewChildren,
   HostListener,
   Renderer2,
   OnDestroy,
@@ -19,11 +18,12 @@ import { AngularFireAuth } from "@angular/fire/auth";
 import {
   BehaviorSubject,
   combineLatest,
+  EMPTY,
   firstValueFrom,
   ReplaySubject,
   Subscription,
 } from "rxjs";
-import { filter, map, take, startWith, first, switchMap } from "rxjs/operators";
+import { map, take, startWith, first, switchMap, tap } from "rxjs/operators";
 
 import { ReportUserComponent } from "../../../main/chats/report-user/report-user.component";
 
@@ -31,6 +31,8 @@ import { UserReportingService } from "@services/user-reporting/user-reporting.se
 
 import { Profile } from "@classes/index";
 import { LessInfoAnimation, MoreInfoAnimation } from "@animations/info.animation";
+import { CHECK_AUTH_STATE, CustomError } from "@interfaces/error-handling.model";
+import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 
 @Component({
   selector: "app-profile-card",
@@ -69,7 +71,6 @@ export class ProfileCardComponent implements OnInit, AfterViewInit, OnDestroy {
     this.profilePictures$.next(pics);
   }
 
-  @ViewChildren("bullets", { read: ElementRef }) bullets: QueryList<ElementRef>;
   @ViewChild("content", { read: ElementRef }) content: ElementRef;
   @ViewChild("yes", { read: ElementRef }) yesSwipe: ElementRef;
   @ViewChild("no", { read: ElementRef }) noSwipe: ElementRef;
@@ -77,7 +78,14 @@ export class ProfileCardComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild("header", { read: ElementRef }) header: ElementRef; //name & department container
   @ViewChild("intSlides") intSlides: IonSlides;
 
-  slidesRef$ = new ReplaySubject<IonSlides>(1); // made public for use in swipe stack store and messenger page
+  private bulletsRef$ = new ReplaySubject<QueryList<ElementRef>>(1); // made public for use in swipe stack store and messenger page
+  @ViewChild("bullets", { read: ElementRef }) set bulletsRefSetter(
+    ref: QueryList<ElementRef>
+  ) {
+    if (ref) this.bulletsRef$.next(ref);
+  }
+
+  public slidesRef$ = new ReplaySubject<IonSlides>(1); // made public for use in swipe stack store and messenger page
   @ViewChild(IonSlides) set slidesRefSetter(ref: IonSlides) {
     if (ref) this.slidesRef$.next(ref);
   }
@@ -97,13 +105,13 @@ export class ProfileCardComponent implements OnInit, AfterViewInit, OnDestroy {
     map((pp) => pp ?? "/assets/icons/icon-192x192.png")
   );
 
-  pagerHandler$ = this.slidesRef$.pipe(
+  pagerHandler$ = combineLatest([this.slidesRef$, this.bulletsRef$]).pipe(
     first(),
-    switchMap((slidesRef) =>
+    switchMap(([slidesRef, bulletsRef]) =>
       combineLatest([this.profilePictures$, slidesRef.ionSlideWillChange]).pipe(
         map(([_, s]) => (s.target as any)?.swiper?.realIndex as number),
         startWith(0), // for initial
-        map((index) => this.updatePager(index))
+        map((index) => this.updatePager(index, bulletsRef))
       )
     )
   );
@@ -119,6 +127,7 @@ export class ProfileCardComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(
     private renderer: Renderer2,
     private afAuth: AngularFireAuth,
+    private errorHandler: GlobalErrorHandler,
     private userReporting: UserReportingService
   ) {}
 
@@ -146,9 +155,12 @@ export class ProfileCardComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const getReportingInfo = firstValueFrom(
       this.afAuth.user.pipe(
-        filter((user) => !!user),
-        take(1),
-        map((user) => (userReportingID = user.uid))
+        tap((user) => {
+          if (!user) throw new CustomError("local/check-auth-state", "local");
+        }),
+        first(),
+        map((user) => (userReportingID = user.uid)),
+        this.errorHandler.handleErrors()
       )
     );
 
@@ -229,16 +241,19 @@ export class ProfileCardComponent implements OnInit, AfterViewInit, OnDestroy {
     }, 100);
   }
 
-  updatePager(currentIndex: number) {
-    var prev = document.getElementById('pagerActive');
+  updatePager(currentIndex: number, bulletsRef: QueryList<ElementRef>) {
+    const prev = document.getElementById("pagerActive");
 
     if (prev != null) {
-      prev.removeAttribute('id'); //Remove colour class from previous icon
-    } else { //Case of no pager icon lit up (initialisation)
-      Array.from(this.bullets)[0].nativeElement.id = 'pagerActive' //This SHOULD colour the first icon if function is run at correct time
+      prev.removeAttribute("id"); //Remove colour class from previous icon
+    } else {
+      //Case of no pager icon lit up (initialisation)
+      const firstBullet = Array.from(bulletsRef)?.[0];
+      if (firstBullet) firstBullet.nativeElement.id = "pagerActive"; //This SHOULD colour the first icon if function is run at correct time
     }
 
-    Array.from(this.bullets)[currentIndex].nativeElement.id = 'pagerActive' //Colour current icon
+    const currBullet = Array.from(bulletsRef)?.[currentIndex];
+    if (currBullet) currBullet.nativeElement.id = "pagerActive"; //Colour current icon
   }
 
   sizeSwipers() {

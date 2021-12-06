@@ -15,7 +15,6 @@ import {
 } from "@angular/core";
 import { FormControl, FormGroup, Validators } from "@angular/forms";
 import { Router } from "@angular/router";
-import { AngularFireAuth } from "@angular/fire/auth";
 import { AngularFireFunctions } from "@angular/fire/functions";
 
 import {
@@ -24,6 +23,7 @@ import {
   firstValueFrom,
   interval,
   lastValueFrom,
+  Observable,
   of,
   Subscription,
 } from "rxjs";
@@ -39,10 +39,12 @@ import {
 } from "rxjs/operators";
 
 import { UniversitiesStore } from "@stores/universities/universities.service";
+
 import { SignupService } from "@services/signup/signup.service";
 import { SignupAuthMethodSharer } from "./signupauth-method-sharer.service";
 import { EmailVerificationService } from "./email-verification.service";
 import { LoadingService } from "@services/loading/loading.service";
+import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 
 import { UserCredentialType } from "@interfaces/firebase.model";
 import { FlyingLetterAnimation } from "@animations/letter.animation";
@@ -53,13 +55,15 @@ import { FlyingLetterAnimation } from "@animations/letter.animation";
   styleUrls: ["../welcome.page.scss"],
 })
 export class SignupauthPage implements OnInit {
-  // for development purposes
+  // for DEV purposes
   async devVerifyEmail() {
     return firstValueFrom(
       this.afFunctions
         .httpsCallable("makeEmailVerified")({})
         .pipe(
-          tap((res) => console.log("makeEmailVerified cloud fucntion response: ", res))
+          tap((res) => console.log("makeEmailVerified cloud function response: ", res)),
+          this.errorHandler.convertErrors("cloud-functions"),
+          this.errorHandler.handleErrors()
         )
     );
   }
@@ -122,19 +126,22 @@ export class SignupauthPage implements OnInit {
   }
 
   constructor(
-    private alertCtrl: AlertController,
     private router: Router,
-    private signup: SignupService,
-    private afAuth: AngularFireAuth,
-    private SignupAuthMethodSharer: SignupAuthMethodSharer,
-    private navCtrl: NavController,
-    private emailService: EmailVerificationService,
-    private afFunctions: AngularFireFunctions,
-    private loadingCtrl: LoadingController,
-    private loading: LoadingService,
-    private universitiesStore: UniversitiesStore,
     private changeDetector: ChangeDetectorRef,
-    private renderer: Renderer2
+    private renderer: Renderer2,
+    private alertCtrl: AlertController,
+    private navCtrl: NavController,
+    private loadingCtrl: LoadingController,
+
+    private afFunctions: AngularFireFunctions,
+
+    private universitiesStore: UniversitiesStore,
+
+    private errorHandler: GlobalErrorHandler,
+    private signup: SignupService,
+    private emailService: EmailVerificationService,
+    private loading: LoadingService,
+    private SignupAuthMethodSharer: SignupAuthMethodSharer
   ) {
     this.authForm = this.emptyAuthForm;
   }
@@ -255,11 +262,13 @@ export class SignupauthPage implements OnInit {
   }
 
   async onSlideFromVerification() {
-    const user = await this.afAuth.currentUser;
+    const user = await this.errorHandler.getCurrentUserWithErrorHandling();
+    if (!user) return;
+
     await user.reload();
     await user.getIdToken(true); // to refresh the token
 
-    if (!user || !user.emailVerified) return;
+    if (!user.emailVerified) return;
 
     return this.navCtrl.navigateForward("/welcome/signuprequired");
   }
@@ -323,10 +332,12 @@ export class SignupauthPage implements OnInit {
       this.afFunctions
         .httpsCallable("checkEmailValidity")({ email })
         .pipe(
+          this.errorHandler.convertErrors("cloud-functions"),
           map((res: checkEmailValidityResponse) => {
             return !!res?.isValid;
-          })
-        )
+          }),
+          this.errorHandler.handleErrors<boolean>()
+        ) as Observable<boolean>
     );
   }
 
@@ -339,10 +350,10 @@ export class SignupauthPage implements OnInit {
    * in the middle of signing up
    */
   public async goStraightToEmailVerification(): Promise<void> {
-    const user = await this.afAuth.currentUser;
-    const slideIndex = await this.slidesRef.getActiveIndex();
+    const user = await this.errorHandler.getCurrentUserWithErrorHandling();
+    if (!user) return; // still necessary. In case of error, since the error is handled, the chain of logic will keep going
 
-    if (!user) return;
+    const slideIndex = await this.slidesRef.getActiveIndex();
 
     if (this.router.url === "/welcome/signupauth") {
       if (slideIndex === 2) {

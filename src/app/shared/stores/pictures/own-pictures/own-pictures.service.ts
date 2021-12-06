@@ -10,6 +10,7 @@ import {
   distinctUntilChanged,
   exhaustMap,
   filter,
+  first,
   map,
   share,
   switchMap,
@@ -18,6 +19,8 @@ import {
 } from "rxjs/operators";
 
 import { Base64ToUrl, urlToBase64 } from "../common-pictures-functions";
+import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
+import { CustomError } from "@interfaces/error-handling.model";
 
 interface picturesMap {
   [position: number]: string;
@@ -41,7 +44,11 @@ export class OwnPicturesStore {
 
   isReady$ = this.isReady.asObservable().pipe(distinctUntilChanged());
 
-  constructor(private afStorage: AngularFireStorage, private afAuth: AngularFireAuth) {}
+  constructor(
+    private afStorage: AngularFireStorage,
+    private afAuth: AngularFireAuth,
+    private errorHandler: GlobalErrorHandler
+  ) {}
 
   public activateStore$ = this.activateStore();
 
@@ -57,7 +64,7 @@ export class OwnPicturesStore {
 
   updatePictures(newPicturesArray: string[]) {
     return this.urls$.pipe(
-      take(1),
+      first(),
       map((urls) => {
         const currentArray = urls.filter(Boolean);
         const newArray = newPicturesArray.filter(Boolean);
@@ -116,7 +123,7 @@ export class OwnPicturesStore {
   }
 
   /**
-   * Listens on the urls obserable and stores the urls locally if they change
+   * Listens on the urls observable and stores the urls locally if they change
    */
   private activateLocalStorer(): Observable<void> {
     return this.urls$.pipe(
@@ -128,7 +135,7 @@ export class OwnPicturesStore {
 
   private checkLocal(): Observable<ownPicturesStorage | null> {
     return from(Storage.get({ key: this.localStorageKey })).pipe(
-      take(1),
+      first(),
       map((v) => JSON.parse(v.value))
     );
   }
@@ -145,7 +152,7 @@ export class OwnPicturesStore {
     );
 
     return forkJoin(base64Pictures$).pipe(
-      take(1),
+      first(),
       map((base64Pictures) => {
         let storageObject: ownPicturesStorage = {
           timestamp,
@@ -171,22 +178,25 @@ export class OwnPicturesStore {
     );
 
     return forkJoin(urlArray$).pipe(
-      take(1),
+      first(),
       tap((urls) => this.urls.next(urls))
     );
   }
 
   private nextFromFirebase(): Observable<string[]> {
     const uid$: Observable<string> = this.afAuth.user.pipe(
+      tap((user) => {
+        if (!user) throw new CustomError("local/check-auth-state", "local");
+      }),
       map((user) => user?.uid),
-      filter((uid) => !!uid),
-      take(1)
+      first(),
+      this.errorHandler.handleErrors()
     );
 
     // here we are using the switchMap operator (instead of concatMap or mergeMap for ex) as it allows
     // to, if either uid$ or pictureCount$ gets a new value, cancel the current profile picture fetching
-    // right away and start a new fetch with the new value. THis is also why take(1) comes after switchMap,
-    // that way, we only take(1) after we got the profilePictures
+    // right away and start a new fetch with the new value. THis is also why first() comes after switchMap,
+    // that way, we only first() after we got the profilePictures
     return uid$.pipe(
       switchMap((uid) => this.fetchProfilePictures(uid)),
       tap((urls) => this.urls.next(urls))
@@ -198,41 +208,49 @@ export class OwnPicturesStore {
       .ref("/profilePictures/" + uid)
       .listAll()
       .pipe(
+        this.errorHandler.convertErrors("firebase-storage"),
         exhaustMap(
           (list) =>
             list?.items?.length > 0
               ? forkJoin(list.items.map((i) => i.getDownloadURL()))
               : of([]) // important, forkJoin never completes if it is given an empty array
-        )
+        ),
+        this.errorHandler.handleErrors()
       );
   }
 
   private removePictureInDatabase(index: number): Observable<void> {
     return this.afAuth.user.pipe(
-      take(1),
+      first(),
       switchMap((user) => {
-        if (!user) return;
+        if (!user) throw new CustomError("local/check-auth-state", "local");
+
         const filePath = `profilePictures/${user.uid}/${index}`;
         const ref = this.afStorage.ref(filePath);
 
-        return ref.delete();
-      })
+        return ref.delete().pipe(this.errorHandler.convertErrors("firebase-storage"));
+      }),
+      this.errorHandler.handleErrors()
     );
   }
 
   private updatePictureInDatabase(photoUrl: string, index: number): Observable<void> {
     return this.afAuth.user.pipe(
-      take(1),
+      first(),
       switchMap(async (user) => {
-        if (!user) return;
+        if (!user) throw new CustomError("local/check-auth-state", "local");
 
         const filePath = `profilePictures/${user.uid}/${index}`;
         const ref = this.afStorage.ref(filePath);
-
-        const response = await fetch(photoUrl);
-        const blob = await response.blob();
-        await ref.put(blob);
-      })
+        try {
+          const response = await fetch(photoUrl);
+          const blob = await response.blob();
+          await ref.put(blob);
+        } catch (e) {
+          throw new CustomError(e?.code, "firebase-storage", e);
+        }
+      }),
+      this.errorHandler.handleErrors()
     );
   }
 

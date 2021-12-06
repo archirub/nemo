@@ -2,13 +2,15 @@ import { Injectable } from "@angular/core";
 import { AngularFirestore } from "@angular/fire/firestore";
 
 import { BehaviorSubject, Observable, of } from "rxjs";
-import { filter, map, switchMap, take } from "rxjs/operators";
+import { filter, first, map, switchMap, take } from "rxjs/operators";
 
 import {
   universitiesAllowedDocument,
   UniversityInfo,
   UniversityName,
 } from "@interfaces/universities.model";
+import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
+import { CustomError } from "@interfaces/error-handling.model";
 
 @Injectable({
   providedIn: "root",
@@ -21,11 +23,14 @@ export class UniversitiesStore {
     map((universities) => (universities ? universities.map((info) => info.name) : []))
   );
 
-  constructor(private firestore: AngularFirestore) {}
+  constructor(
+    private firestore: AngularFirestore,
+    private errorHandler: GlobalErrorHandler
+  ) {}
 
   fetchUniversities(): Observable<any> {
     return this.universities$.pipe(
-      take(1),
+      first(),
       switchMap((universities) => {
         if (Array.isArray(universities)) return of("");
 
@@ -34,12 +39,14 @@ export class UniversitiesStore {
           .doc("universitiesAllowed")
           .get()
           .pipe(
+            this.errorHandler.convertErrors("firestore"),
             map((snapshot) => (snapshot.exists ? snapshot.data() : null)),
             map((data: universitiesAllowedDocument) => {
-              if (!data) return console.error("Document does not exist.");
+              if (!data) throw new CustomError("local/cannot-recover", "local");
 
               this.universities.next(data.list);
-            })
+            }),
+            this.errorHandler.handleErrors()
           );
       })
     );

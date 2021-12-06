@@ -19,9 +19,10 @@ export class SignupToAppPage implements OnInit {
 
   constructor(
     private navCtrl: NavController,
+    private loadingCtrl: LoadingController,
+
     private globalStateManagement: GlobalStateManagementService,
     private readiness: StoreReadinessService,
-    private loadingCtrl: LoadingController,
     private loading: LoadingService,
     private notifications: NotificationsService
   ) {}

@@ -3,7 +3,7 @@ import { AngularFirestore, DocumentSnapshot } from "@angular/fire/firestore";
 import { AngularFireFunctions } from "@angular/fire/functions";
 import { AngularFireStorage } from "@angular/fire/storage";
 
-import { BehaviorSubject, forkJoin, merge, Observable, of } from "rxjs";
+import { BehaviorSubject, defer, EMPTY, forkJoin, merge, Observable, of } from "rxjs";
 import {
   concatMap,
   distinctUntilChanged,
@@ -34,6 +34,7 @@ import {
   generateSwipeStackResponse,
   profileFromDatabase,
 } from "@interfaces/index";
+import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 
 // loading is for when there is no one in the stack but we are fetching
 // empty is for the stack has been fetched and no one was found
@@ -80,9 +81,12 @@ export class SwipeStackStore {
     private firestore: AngularFirestore,
     private afFunctions: AngularFireFunctions,
     private afStorage: AngularFireStorage,
-    private format: FormatService,
+
     private SCstore: SearchCriteriaStore,
-    private swipeOutcomeStore: SwipeOutcomeStore
+    private swipeOutcomeStore: SwipeOutcomeStore,
+
+    private errorHandler: GlobalErrorHandler,
+    private format: FormatService
   ) {}
 
   /**
@@ -347,12 +351,20 @@ export class SwipeStackStore {
       .ref("/profilePictures/" + uid)
       .listAll()
       .pipe(
-        exhaustMap((list) => {
+        this.errorHandler.convertErrors("firebase-storage"),
+        this.errorHandler.handleErrors(),
+        exhaustMap((list: firebase.default.storage.ListResult) => {
           // done this way as the items in list.items might not be in order of picture #
           const index = list.items.map((i) => i.name).indexOf(pictureIndex.toString());
-          return index === -1 ? of("") : list.items[index].getDownloadURL();
+
+          if (index === -1) return EMPTY;
+
+          return defer(() => list.items[index].getDownloadURL()).pipe(
+            this.errorHandler.convertErrors("firebase-storage"),
+            this.errorHandler.handleErrors()
+          );
         })
-      );
+      ) as Observable<string>;
   }
 
   private addPictures(
@@ -400,7 +412,7 @@ export class SwipeStackStore {
   /** Removes a specific profile from the stack*/
   public removeProfile(profile: Profile): Observable<void | string[]> {
     return this.profiles$.pipe(
-      take(1),
+      first(),
       map((profiles) => {
         if (!profiles) return;
         let profileToRemove: Profile;
@@ -445,9 +457,12 @@ export class SwipeStackStore {
       }),
       exhaustMap(
         (request) =>
-          this.afFunctions.httpsCallable("generateSwipeStack")(
-            request
-          ) as Observable<generateSwipeStackResponse>
+          this.afFunctions
+            .httpsCallable("generateSwipeStack")(request)
+            .pipe(
+              this.errorHandler.convertErrors("cloud-functions"),
+              this.errorHandler.handleErrors()
+            ) as Observable<generateSwipeStackResponse>
       ),
       tap((response) => this.swipeOutcomeStore.addToSwipeAnswers(response.users)),
       map((response) => response.users.map((u) => u.uid))
@@ -460,12 +475,17 @@ export class SwipeStackStore {
     return forkJoin(
       uids.map(
         (uid) =>
-          this.firestore.collection("profiles").doc(uid).get() as Observable<
-            DocumentSnapshot<profileFromDatabase>
-          >
+          this.firestore
+            .collection("profiles")
+            .doc(uid)
+            .get()
+            .pipe(
+              this.errorHandler.convertErrors("firestore"),
+              this.errorHandler.handleErrors()
+            ) as Observable<DocumentSnapshot<profileFromDatabase>>
       )
     ).pipe(
-      // formating profiles and filtering out those which are null
+      // formatting profiles and filtering out those which are null
       map((profileSnapshots) =>
         profileSnapshots
           .map((s) => {
@@ -479,14 +499,17 @@ export class SwipeStackStore {
   }
 
   getPictureCounts(profiles: Profile[]): Observable<Profile[]> {
-    const getPictureCounts$ = profiles.map((p, i) =>
-      this.afStorage
-        .ref("/profilePictures/" + p.uid)
-        .listAll()
-        .pipe(
-          first(),
-          map((list) => list.items.length)
-        )
+    const getPictureCounts$ = profiles.map(
+      (p, i) =>
+        this.afStorage
+          .ref("/profilePictures/" + p.uid)
+          .listAll()
+          .pipe(
+            first(),
+            map((list) => list.items.length),
+            this.errorHandler.convertErrors("firebase-storage"),
+            this.errorHandler.handleErrors()
+          ) as Observable<number>
     );
 
     return forkJoin(getPictureCounts$).pipe(

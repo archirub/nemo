@@ -9,6 +9,7 @@ import { FormatService } from "@services/format/format.service";
 
 import { Profile } from "@classes/index";
 import { profileFromDatabase } from "@interfaces/index";
+import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 
 interface ProfileHolder {
   [uid: string]: Profile;
@@ -38,6 +39,8 @@ export class OtherProfilesStore {
   constructor(
     private afStorage: AngularFireStorage,
     private firestore: AngularFirestore,
+
+    private errorHandler: GlobalErrorHandler,
     private format: FormatService
   ) {}
 
@@ -80,7 +83,12 @@ export class OtherProfilesStore {
 
     return this.hasProfile(uid).pipe(
       filter((hasProfile) => !hasProfile), // continue only if profile is not in store
-      exhaustMap(() => profileSnapshot$), // fetch profile from database
+      exhaustMap(() =>
+        profileSnapshot$.pipe(
+          this.errorHandler.convertErrors("firestore"),
+          this.errorHandler.handleErrors()
+        )
+      ), // fetch profile from database
       map((doc) => {
         if (!doc.exists) return;
 
@@ -150,7 +158,11 @@ export class OtherProfilesStore {
     return this.afStorage
       .ref("/profilePictures/" + uid)
       .listAll()
-      .pipe(exhaustMap((list) => forkJoin(list.items.map((i) => i.getDownloadURL()))));
+      .pipe(
+        exhaustMap((list) => forkJoin(list.items.map((i) => i.getDownloadURL()))),
+        this.errorHandler.convertErrors("firebase-storage"),
+        this.errorHandler.handleErrors()
+      );
   }
 
   resetStore() {

@@ -57,7 +57,6 @@ export class ChatsPage implements OnDestroy {
 
   ngAfterViewInit() {
     this.subs.add(this.playLoadingAnimation$.subscribe());
-    this.chatboardStore.chats$.subscribe((chats) => console.log("chats are", chats));
   }
 
   onChatboardReady() {

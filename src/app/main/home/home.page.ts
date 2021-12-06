@@ -15,7 +15,6 @@ import {
   NavController,
 } from "@ionic/angular";
 
-import { AngularFireAuth } from "@angular/fire/auth";
 import {
   BehaviorSubject,
   combineLatest,
@@ -26,10 +25,10 @@ import {
   Subscription,
 } from "rxjs";
 import {
-  catchError,
   delay,
   distinctUntilChanged,
   filter,
+  finalize,
   first,
   map,
   switchMap,
@@ -55,6 +54,7 @@ import {
   CloseCatchAnimation,
   FishSwimAnimation,
 } from "@animations/index";
+import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 
 @Component({
   selector: "app-home",
@@ -143,17 +143,18 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
 
   constructor(
     private renderer: Renderer2,
-    private swipeStackStore: SwipeStackStore,
     private modalCtrl: ModalController,
-    private tabElementRef: TabElementRefService,
-    private ownPicturesService: OwnPicturesStore,
-
-    private storeReadiness: StoreReadinessService,
     private loadingCtrl: LoadingController,
-    private loading: LoadingService,
-    private afAuth: AngularFireAuth,
+    private navCtrl: NavController,
+
+    private swipeStackStore: SwipeStackStore,
+    private ownPicturesService: OwnPicturesStore,
     private chatboardStore: ChatboardStore,
-    private navCtrl: NavController
+
+    private errorHandler: GlobalErrorHandler,
+    private tabElementRef: TabElementRefService,
+    private storeReadiness: StoreReadinessService,
+    private loading: LoadingService
   ) {
     this.onResize();
   }
@@ -258,8 +259,8 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
   async goToNewCatchChat() {
     const maxTimeWaitingForChat = 6000; // 6 seconds
 
-    const user = await this.afAuth.currentUser;
-    if (!user) return console.error("no user authenticated");
+    const user = await this.errorHandler.getCurrentUserWithErrorHandling();
+    if (!user) return;
 
     const loader = await this.loadingCtrl.create({
       ...this.loading.defaultLoadingOptions,
@@ -271,7 +272,6 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
         map((matches) => matches?.[this.latestMatchedProfile.uid]),
         filter((chat) => !!chat),
         first(),
-        tap((chat) => console.log("got one right here", chat)),
         timeout(maxTimeWaitingForChat),
         switchMap((chat) =>
           concat(
@@ -280,10 +280,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
             this.destroyCatch()
           )
         ),
-        catchError(() => {
-          console.log("ah shit it fucking timed out");
-          return loader.dismiss();
-        })
+        finalize(() => loader.dismiss())
       )
     );
   }

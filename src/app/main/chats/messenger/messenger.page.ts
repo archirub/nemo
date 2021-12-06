@@ -8,13 +8,20 @@ import {
   ElementRef,
 } from "@angular/core";
 
-import { AngularFirestore } from "@angular/fire/firestore";
+import {
+  AngularFirestore,
+  DocumentChangeAction,
+  DocumentData,
+  QuerySnapshot,
+} from "@angular/fire/firestore";
 import { AngularFireAuth } from "@angular/fire/auth";
 import { ActivatedRoute } from "@angular/router";
 
 import {
   BehaviorSubject,
+  combineLatest,
   concat,
+  EMPTY,
   firstValueFrom,
   forkJoin,
   from,
@@ -27,8 +34,8 @@ import {
   timer,
 } from "rxjs";
 import {
-  catchError,
   concatMap,
+  concatMapTo,
   delay,
   distinctUntilChanged,
   exhaustMap,
@@ -36,9 +43,9 @@ import {
   finalize,
   first,
   map,
-  retry,
   shareReplay,
   switchMap,
+  switchMapTo,
   take,
   tap,
   withLatestFrom,
@@ -59,11 +66,12 @@ import { messageFromDatabase, messageMap } from "@interfaces/message.model";
 import {
   messengerMotivationMessages,
   sortUIDs,
-  TEST,
   Timestamp,
-  UNAUTHENTICATED,
+  CHECK_AUTH_STATE,
+  CustomError,
 } from "@interfaces/index";
-import { ErrorHandler } from "@services/errors/error-handler.service";
+import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
+import { FirestoreErrorHandler } from "@services/errors/firestore-error-handler.service";
 
 @Component({
   selector: "app-messenger",
@@ -80,6 +88,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
   private subs = new Subscription();
 
   private messagesDatabaseSub: () => void = null;
+  private newMessagesSub: Subscription = null;
   private loadingObserver: IntersectionObserver;
 
   latestChatInput: string; // Storing latest chat input functionality
@@ -183,7 +192,9 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
 
       return this.hasFullyScrolled$.pipe(
         withLatestFrom(this.firstBatchArrived$), // to make sure we are only loading more messages if the first batch has already arrived
-        exhaustMap(() => concat(timer(500), this.listenOnMoreMessages$))
+        tap(() => console.log("hasFullyScrolled")),
+        exhaustMap(() => timer(500).pipe(tap(() => console.log("TIMER")))),
+        this.listenOnMoreMessages$
       );
     })
   );
@@ -191,19 +202,18 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
   /**
    * Activates the listener for this chat's messages and fills the messages subject
    * when something changes in the messages collection
+   * (Making this an operator worked so much better all of a sudden
+   * It ensures the thing that triggers and drives the activation of the logic is the source itself, not some other
+   * random thingy like of("").pipe(first()) or something like that)
    */
-  listenOnMoreMessages$ = this.messages$.pipe(
-    withLatestFrom(this.currentUser.user$.pipe(filter((u) => !!u))),
-    first(),
-    map(([msgs, user]) => [msgs.length, user] as [number, AppUser]),
-    tap((arr) => console.log("here here", arr)),
-    map(([msgCount, user]) => {
-      const newMsgCount = msgCount + this.MSG_BATCH_SIZE;
-
-      this.messagesDatabaseSub?.();
-      this.messagesDatabaseSub = this.listenOnMessages(user.uid, newMsgCount, msgCount);
-    })
-  );
+  listenOnMoreMessages$ = (source: Observable<any>) =>
+    source.pipe(
+      withLatestFrom(this.messages$, this.currentUser.user$.pipe(filter((u) => !!u))),
+      map(([_, msgs, user]) => [msgs.length, user] as [number, AppUser]),
+      switchMap(([msgCount, user]) =>
+        this.listenOnMessages(user.uid, msgCount + this.MSG_BATCH_SIZE, msgCount)
+      )
+    );
 
   get randomMotivationMessage() {
     return messengerMotivationMessages[
@@ -212,25 +222,27 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
   }
 
   constructor(
-    private afAuth: AngularFireAuth,
-    private firestore: AngularFirestore,
     private route: ActivatedRoute,
     private navCtrl: NavController,
+    private host: ElementRef,
+
+    private afAuth: AngularFireAuth,
+    private firestore: AngularFirestore,
+
     private chatboardStore: ChatboardStore,
     private profilesStore: OtherProfilesStore,
     private chatboardPictures: ChatboardPicturesStore,
-    private format: FormatService,
-    private userReporting: UserReportingService,
     private currentUser: CurrentUserStore,
-    private host: ElementRef,
-    private errorHandler: ErrorHandler
+
+    private errorHandler: GlobalErrorHandler,
+    private format: FormatService,
+    private userReporting: UserReportingService
   ) {}
 
   ngOnInit() {
     this.subs.add(this.scrollHandler$.subscribe());
     this.subs.add(this.otherProfileHandler$.subscribe());
     this.pageInitialization();
-    this.messages$.subscribe((msgs) => console.log("msgs", msgs));
   }
 
   ngAfterViewInit() {
@@ -269,7 +281,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
         this.latestChatInput = chats[this.CHAT_ID].latestChatInput;
         return user.uid;
       }),
-      concatMap(() => this.listenOnMoreMessages$)
+      this.listenOnMoreMessages$
     );
   }
 
@@ -293,9 +305,12 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
 
     const getReportingInfo = lastValueFrom(
       this.afAuth.user.pipe(
-        filter((user) => !!user),
-        take(1),
-        map((user) => (userReportingID = user.uid))
+        tap((user) => {
+          if (!user) throw new CustomError("local/check-auth-state", "local");
+        }),
+        first(),
+        map((user) => (userReportingID = user.uid)),
+        this.errorHandler.handleErrors()
       )
     );
 
@@ -312,33 +327,38 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
     );
   }
 
-  listenOnMessages(uid: string, newMsgCount: number, currentMsgCount: number) {
-    return this.firestore.firestore
+  listenOnMessages(uid: string, newMsgCount: number, currMsgCount: number) {
+    return this.firestore
       .collection("chats")
       .doc(this.CHAT_ID)
-      .collection("messages")
-      .where("uids", "array-contains", uid)
-      .orderBy("time", "desc")
-      .limit(newMsgCount)
-      .onSnapshot({
-        next: (snapshot) => {
+      .collection("messages", (ref) =>
+        ref
+          .where("uids", "array-contains", uid)
+          .orderBy("time", "desc")
+          .limit(newMsgCount)
+      )
+      .snapshotChanges()
+      .pipe(
+        this.errorHandler.convertErrors("firestore"),
+        map((s: DocumentChangeAction<messageFromDatabase>[]) => {
+          const docs = s.map((v) => v.payload.doc);
+
           // this is necessary because on updating the batch size,
           // we sometimes only get 1 message at first for some reason,
           // and that makes the messages rerender weirdly in ngFor loop
-          if (currentMsgCount >= snapshot.docs.length) return;
+          if (currMsgCount > docs.length || docs.length <= 1) return;
 
-          this.messages$.next(
-            this.format.messagesDatabaseToClass(
-              snapshot.docs
-                .map((d) => ({ id: d.id, message: d.data() }))
-                .reverse() as messageMap[]
-            )
-          );
-        },
-        error: (err) => console.error("error in database message listening", err),
-      });
+          const messageMaps = docs
+            .map((d) => ({ id: d.id, message: d.data() }))
+            .reverse();
+
+          const messages = this.format.messagesDatabaseToClass(messageMaps);
+
+          this.messages$.next(messages);
+        }),
+        this.errorHandler.handleErrors()
+      );
   }
-  counter = 0;
 
   // Sends the content of the input bar as a new message to the database
   sendMessage(): Observable<any> {
@@ -346,25 +366,12 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
     this.sendingMessage$.next(true);
 
     return this.afAuth.user.pipe(
-      tap(() => console.log("here we go")),
+      tap(() => console.log("sendMessage - Start of chain")),
       withLatestFrom(this.chat$.pipe(filter((c) => !!c))),
       first(),
       filter(() => !!this.latestChatInput), // prevents user from sending empty messages
-      // tap(() => console.log("now now")),
       switchMap(([user, thisChat]) => {
-        if (this.counter === 0 || this.counter === 1) {
-          console.log("right here fam");
-          this.counter++;
-          // console.log("throw unauthed");
-          throw UNAUTHENTICATED;
-        } else if (this.counter == 2) {
-          // console.log("throwing test");
-          return;
-          throw TEST;
-        }
-        return;
-
-        if (!user) throw UNAUTHENTICATED;
+        if (!user) throw CHECK_AUTH_STATE;
 
         const message: messageFromDatabase = {
           uids: sortUIDs([thisChat.recipient.uid, user.uid]),
@@ -382,19 +389,21 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
             .collection("messages")
             .doc()
             .set(message)
+        ).pipe(
+          this.errorHandler.convertErrors("firestore"),
+          this.errorHandler.handleErrors()
         );
       }),
-      // switchMap(() =>
-      //   // for scrolling to bottom as soon as the new message appears in messages object
-      //   this.messages$.pipe(
-      //     filter(
-      //       (msgs) => !!msgs.find((msg) => msg.time.getTime() === messageTime.getTime()) // filters out
-      //     ),
-      //     first(),
-      //     switchMap(() => this.scrollToBottom())
-      //   )
-      // ),
-      this.errorHandler.handleUnauthenticated(),
+      switchMap(() =>
+        // for scrolling to bottom as soon as the new message appears in messages object
+        this.messages$.pipe(
+          filter(
+            (msgs) => !!msgs.find((msg) => msg.time.getTime() === messageTime.getTime()) // filters out
+          ),
+          first(),
+          switchMap(() => this.scrollToBottom())
+        )
+      ),
       finalize(() => this.sendingMessage$.next(false))
     );
   }
@@ -430,7 +439,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
     if (page === "profile") {
       const profCardRef = await firstValueFrom(this.profCardRef$);
       await (await firstValueFrom(profCardRef.slidesRef$)).slideTo(0);
-      profCardRef.updatePager(0);
+      // profCardRef.updatePager(0);
       await slidesRef.slideNext();
     } else if (page === "messenger") {
       slidesRef.slidePrev();

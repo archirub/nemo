@@ -1,17 +1,28 @@
 import { Injectable } from "@angular/core";
 import { AngularFireAuth } from "@angular/fire/auth";
 import { AngularFireFunctions } from "@angular/fire/functions";
-import { AngularFirestore, QueryDocumentSnapshot } from "@angular/fire/firestore";
+import {
+  AngularFirestore,
+  QueryDocumentSnapshot,
+  DocumentChangeAction,
+} from "@angular/fire/firestore";
 
-import { BehaviorSubject, ReplaySubject, Observable, combineLatest, Subject } from "rxjs";
+import {
+  BehaviorSubject,
+  ReplaySubject,
+  Observable,
+  combineLatest,
+  Subject,
+  forkJoin,
+} from "rxjs";
 import {
   map,
-  take,
   withLatestFrom,
   distinctUntilChanged,
   share,
   first,
   tap,
+  switchMap,
 } from "rxjs/operators";
 
 import { FormatService } from "@services/format/format.service";
@@ -21,8 +32,12 @@ import {
   chatDeletionByUserRequest,
   chatFromDatabase,
   FirebaseUser,
+  messageFromDatabase,
   messageMap,
+  CHECK_AUTH_STATE,
+  CustomError,
 } from "@interfaces/index";
+import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 
 // the store has this weird shape because of the Firestore's onSnapshot function which
 // takes an observer instead of simply being an observable. Because of that, I need
@@ -85,8 +100,10 @@ export class ChatboardStore {
   constructor(
     private afAuth: AngularFireAuth,
     private firestore: AngularFirestore,
-    private format: FormatService,
-    private afFunctions: AngularFireFunctions
+    private afFunctions: AngularFireFunctions,
+
+    private errorHandler: GlobalErrorHandler,
+    private format: FormatService
   ) {}
 
   public activateStore$ = this.activateStore();
@@ -100,79 +117,82 @@ export class ChatboardStore {
     ]).pipe(share());
   }
 
-  private activateChatDocsListening(): Observable<void> {
+  private activateChatDocsListening(): Observable<any> {
     return this.afAuth.user.pipe(
-      take(1),
-      map((user) => {
-        if (!user) throw "no user authenticated";
+      tap((user) => {
+        if (!user) throw new CustomError("local/check-auth-state", "local");
+      }),
+      first(),
+      switchMap((user) =>
+        this.firestore
+          .collection("chats", (ref) => ref.where("uids", "array-contains", user.uid))
+          .snapshotChanges()
+          .pipe(this.errorHandler.convertErrors("firestore"))
+      ),
+      tap((res: DocumentChangeAction<chatFromDatabase>[]) => {
+        const docs = res.map((r) => r.payload.doc);
 
-        this.chatDocsSub = this.firestore.firestore
-          .collection("chats")
-          .where("uids", "array-contains", user.uid)
-          .onSnapshot({
-            next: (snapshot) => {
-              snapshot.empty ? this.hasNoChats.next(true) : this.hasNoChats.next(false);
+        this.hasNoChats.next(docs?.length < 1);
 
-              const docs = snapshot.docs;
-
-              this.chatsFromDatabase.next(
-                snapshot.docs as QueryDocumentSnapshot<chatFromDatabase>[]
-              );
-            },
-            error: (err) => console.error("error in database chats listening", err),
-          });
-      })
+        this.chatsFromDatabase.next(docs);
+      }),
+      this.errorHandler.handleErrors()
     );
   }
 
-  private activateRecentMessageListening(): Observable<void> {
+  private activateRecentMessageListening(): Observable<void[]> {
     return this.chatsFromDatabase.asObservable().pipe(
       withLatestFrom(this.afAuth.user),
-      map(([chatsFromDb, user]) => {
-        if (!user) throw "no user authenticated";
+      tap(([chatsFromDb, user]) => {
+        if (!user) throw new CustomError("local/check-auth-state", "local");
+      }),
+      switchMap(([chatsFromDb, user]) =>
+        forkJoin(
+          chatsFromDb.map((chatDoc) => {
+            const recipientID = chatDoc.data().uids.filter((id) => id !== user.uid)[0];
 
-        chatsFromDb.forEach((chatDoc) => {
-          const recipientID = chatDoc
-            .data()
-            .uids.filter((id) => id !== (user as FirebaseUser).uid)[0];
+            return this.firestore
+              .collection("chats")
+              .doc(chatDoc.id)
+              .collection("messages", (ref) =>
+                ref
+                  // though useless wrt query content, necessary to pass security rules
+                  // (because for queries security rules aren't checked against each doc, they're checked
+                  // against the nature of the query)
+                  .where("uids", "array-contains", user.uid)
+                  .orderBy("time", "desc")
+                  .limit(1)
+              )
+              .snapshotChanges()
+              .pipe(
+                map((res: DocumentChangeAction<messageFromDatabase>[]) => {
+                  const msgDoc = res?.[0]?.payload?.doc;
+                  let msgData: messageMap | "no message documents";
 
-          // assuming that the below being non-falsy means a sub is already active so no action needs to be taken
-          if (this.recentMsgDocSubs[recipientID]) return;
-
-          this.recentMsgDocSubs[recipientID] = chatDoc.ref
-            .collection("messages")
-            // though useless wrt query content, necessary to pass security rules
-            // (as in queries, security rules aren't checked against each doc, they're checked
-            // against the nature of the query)
-            .where("uids", "array-contains", user.uid)
-            .orderBy("time", "desc")
-            .limit(1)
-            .onSnapshot({
-              next: (snapshot) => {
-                let msgData: messageMap | "no message documents";
-
-                if (snapshot.empty) {
                   // this is a way of marking that the listening has activated, and that
                   // it has found that no message documents were present in the collection.
                   // This allows us to place the chat in the matches array.
                   // If we didn't do that, there is no way to tell whether a chat has no
                   // recent message because it hasn't been loaded from the database yet,
                   // or whether there is simply no recent message to be loaded
-                  msgData = "no message documents";
-                } else {
-                  msgData = {
-                    id: snapshot.docs[0].id,
-                    message: snapshot.docs[0].data(),
-                  } as messageMap;
-                }
-                const doc = { data: msgData, chatID: chatDoc.id };
-                this.recentMsgToBeProcessed.next(doc);
-              },
-              error: (err) =>
-                console.error("error in database recent msg listening", err),
-            });
-        });
-      })
+                  if (msgDoc) {
+                    msgData = {
+                      id: msgDoc.id,
+                      message: msgDoc.data(),
+                    };
+                  } else {
+                    msgData = "no message documents";
+                  }
+
+                  const msgMap = { data: msgData, chatID: chatDoc.id };
+                  this.recentMsgToBeProcessed.next(msgMap);
+                }),
+                this.errorHandler.convertErrors("firestore")
+              );
+          })
+        )
+      ),
+      this.errorHandler.handleErrors()
     );
   }
 
@@ -198,10 +218,10 @@ export class ChatboardStore {
     return combineLatest([this.recentMsgsFromDatabase, this.chatsFromDatabase]).pipe(
       withLatestFrom(combineLatest([this.afAuth.user, this.allChats])),
       map(([[recentMsgs, chats], [user, currentChats]]) => {
-        if (!user) throw "no user authenticated";
+        if (!user) throw new CustomError("local/check-auth-state", "local");
 
         chats.forEach((chat) => {
-          const correspondingMsg = recentMsgs[chat.id];
+          const correspondingMsg = recentMsgs?.[chat.id];
 
           // Important; makes sure only those for which we got a response from both
           // the chat documents and the recent msg documents are processed
@@ -233,7 +253,8 @@ export class ChatboardStore {
         });
 
         this.allChats.next(currentChats);
-      })
+      }),
+      this.errorHandler.handleErrors()
     );
   }
 
@@ -274,7 +295,12 @@ export class ChatboardStore {
 
   public deleteChatOnDatabase(chatID: string) {
     const request: chatDeletionByUserRequest = { chatID };
-    return this.afFunctions.httpsCallable("chatDeletionByUser")(request);
+    return this.afFunctions
+      .httpsCallable("chatDeletionByUser")(request)
+      .pipe(
+        this.errorHandler.convertErrors("cloud-functions"),
+        this.errorHandler.handleErrors()
+      );
   }
 
   public deleteChatInStore(chatID: string) {
@@ -311,7 +337,7 @@ export class ChatboardStore {
   }
 
   public resetStore() {
-    console.log("reseting chatboard store", this.chatDocsSub);
+    console.log("resetting chatboard store", this.chatDocsSub);
     this.chatDocsSub ? this.chatDocsSub() : null;
 
     Object.keys(this.recentMsgDocSubs).forEach((recipientID) => {

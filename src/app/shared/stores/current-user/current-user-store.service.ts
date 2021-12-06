@@ -28,9 +28,11 @@ import {
   userInfoFromMatchData,
   editableProfileFields,
   profileEditingByUserRequest,
+  CustomError,
 } from "@interfaces/index";
 
 import { Gender, SexualPreference } from "./../../interfaces/match-data.model";
+import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 
 @Injectable({
   providedIn: "root",
@@ -51,8 +53,10 @@ export class CurrentUserStore {
     private afAuth: AngularFireAuth,
     private fs: AngularFirestore,
     private afFunctions: AngularFireFunctions,
+    private afStorage: AngularFireStorage,
+
     private format: FormatService,
-    private afStorage: AngularFireStorage
+    private errorHandler: GlobalErrorHandler
   ) {}
 
   /** Fetches info from database to update the User BehaviorSubject */
@@ -60,7 +64,7 @@ export class CurrentUserStore {
     return this.afAuth.user.pipe(
       first(),
       switchMap((user) => {
-        if (!user) throw "no user authenticated";
+        if (!user) throw new CustomError("local/check-auth-state", "local");
 
         const profileParts$ = [
           this.fetchProfile(user.uid),
@@ -74,7 +78,7 @@ export class CurrentUserStore {
 
         return forkJoin(profileParts$);
       }),
-
+      this.errorHandler.handleErrors(),
       switchMap(async ([profile, privateProfile, infoFromMatchData]) => {
         const successResponse: {
           profileSuccess: boolean;
@@ -128,18 +132,13 @@ export class CurrentUserStore {
             first(),
             map((list) => list.items.length),
             tap((count) => (user.pictureCount = count)),
-            map(() => user)
+            map(() => user),
+            this.errorHandler.convertErrors("firebase-storage"),
+            this.errorHandler.handleErrors()
           )
       ),
       tap((user) => this.user.next(user)),
-      catchError((error) => {
-        if (error === "no user authenticated")
-          return of({
-            profileSuccess: false,
-            privateProfileSuccess: false,
-            matchDataSuccess: false,
-          });
-      }),
+
       shareReplay()
       // tap(() => console.log("activating current user store"))
     );
@@ -176,10 +175,8 @@ export class CurrentUserStore {
                 this.user.next(user);
               });
             }),
-            catchError((err) => {
-              console.log("profile editing by user error");
-              return of(null);
-            })
+            this.errorHandler.convertErrors("cloud-functions"),
+            this.errorHandler.handleErrors()
           );
       })
     );
@@ -227,11 +224,8 @@ export class CurrentUserStore {
           return this.format.profileDatabaseToClass(snapshot.id, data);
         }
       }),
-
-      catchError((err) => {
-        console.log("error profile", err);
-        return of(null);
-      })
+      this.errorHandler.convertErrors("firestore"),
+      this.errorHandler.handleErrors()
     );
   }
 
@@ -254,11 +248,8 @@ export class CurrentUserStore {
           return data;
         }
       }),
-
-      catchError((err) => {
-        console.log("error private ", err);
-        return of(null);
-      })
+      this.errorHandler.convertErrors("firestore"),
+      this.errorHandler.handleErrors()
     );
   }
 
@@ -278,11 +269,8 @@ export class CurrentUserStore {
             return { gender, sexualPreference, swipeMode };
           }
         }),
-
-        catchError((err) => {
-          console.log("error match data info", err);
-          return of(null);
-        })
+        this.errorHandler.convertErrors("cloud-functions"),
+        this.errorHandler.handleErrors()
       );
   }
 

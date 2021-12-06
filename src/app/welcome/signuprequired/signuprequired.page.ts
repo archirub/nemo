@@ -12,7 +12,6 @@ import {
 import {
   AlertController,
   IonCheckbox,
-  IonSelect,
   IonSlides,
   LoadingController,
   NavController,
@@ -21,8 +20,8 @@ import { FormGroup, FormControl, Validators } from "@angular/forms";
 import { Router } from "@angular/router";
 import { AngularFireAuth } from "@angular/fire/auth";
 
-import { Subscription } from "rxjs";
-import { concatMap, delay, filter, map } from "rxjs/operators";
+import { firstValueFrom, Subscription } from "rxjs";
+import { concatMap, delay, map, tap } from "rxjs/operators";
 
 import { AppDatetimeComponent } from "@components/index";
 
@@ -39,9 +38,12 @@ import {
   sexualPreferenceOptions,
   genderOptions,
   MAX_PROFILE_PICTURES_COUNT,
+  CHECK_AUTH_STATE,
+  CustomError,
 } from "@interfaces/index";
 import { SignupRequired } from "@interfaces/signup.model";
 import { allowOptionalProp } from "@interfaces/index";
+import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 
 @Component({
   selector: "app-signuprequired",
@@ -82,7 +84,9 @@ export class SignuprequiredPage implements OnInit, OnDestroy {
   universityOptions$ = this.universitiesStore.optionsList$;
 
   universitySelectingHandler$ = this.afAuth.user.pipe(
-    filter((u) => !!u),
+    tap((user) => {
+      if (!user) throw new CustomError("local/check-auth-state", "local");
+    }),
     concatMap((user) => this.universitiesStore.getUniversityFromEmail(user.email)),
     delay(5000), // required otherwise it gets set too early and gets set back to null
     map((universityName) => {
@@ -96,7 +100,8 @@ export class SignuprequiredPage implements OnInit, OnDestroy {
       } else {
         this.universitySelectionDisabled = false;
       }
-    })
+    }),
+    this.errorHandler.handleErrors()
   );
 
   get blankForm() {
@@ -112,15 +117,19 @@ export class SignuprequiredPage implements OnInit, OnDestroy {
 
   constructor(
     private router: Router,
-    private signup: SignupService,
     private changeDetectorRef: ChangeDetectorRef,
-    private universitiesStore: UniversitiesStore,
-    private afAuth: AngularFireAuth,
     private renderer: Renderer2,
-    private loadingCtrl: LoadingController,
-    private loading: LoadingService,
     private alertCtrl: AlertController,
-    private navCtrl: NavController
+    private loadingCtrl: LoadingController,
+    private navCtrl: NavController,
+
+    private afAuth: AngularFireAuth,
+
+    private universitiesStore: UniversitiesStore,
+
+    private errorHandler: GlobalErrorHandler,
+    private signup: SignupService,
+    private loading: LoadingService
   ) {}
 
   ngOnInit() {
@@ -271,7 +280,7 @@ export class SignuprequiredPage implements OnInit, OnDestroy {
    */
   async fillFieldsAndGoToSlide() {
     const formFields = Object.keys(this.slideIndexes);
-    const currentSignupData = this.signup.signupData.value; // only getting a snapshot instead of subscribing as we only want to use this function once at the start, not change swipe whenever
+    const currentSignupData = await firstValueFrom(this.signup.signupData$); // only getting a snapshot instead of subscribing as we only want to use this function once at the start, not change swipe whenever
 
     // creating object with ONLY required fields and their values from signupData observable
     const requiredData = {};

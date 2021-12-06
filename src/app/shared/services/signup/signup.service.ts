@@ -11,14 +11,12 @@ import {
   Observable,
   from,
   forkJoin,
-  of,
-  throwError,
   concat,
   combineLatest,
   lastValueFrom,
   firstValueFrom,
 } from "rxjs";
-import { catchError, concatMap, first, last, switchMap } from "rxjs/operators";
+import { concatMapTo, first, last, switchMap, switchMapTo, tap } from "rxjs/operators";
 
 import { CurrentUserStore } from "@stores/index";
 
@@ -28,21 +26,24 @@ import {
   createAccountRequest,
   SignupOptional,
   allowOptionalProp,
+  CHECK_AUTH_STATE,
+  CustomError,
 } from "@interfaces/index";
 import { FirebaseUser, UserCredentialType } from "./../../interfaces/firebase.model";
+import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 
 @Injectable({
   providedIn: "root",
 })
 export class SignupService {
-  signupData = new BehaviorSubject<SignupDataHolder>(new SignupDataHolder({}));
+  signupData$ = new BehaviorSubject<SignupDataHolder>(new SignupDataHolder({}));
 
   /**
    * null indicates that the authentification hasn't be done, in other words,
    * that the signup process hasn't been initialized.
    */
   get signupStage(): null | "required" | "optional" {
-    const signupData = this.signupData.value;
+    const signupData = this.signupData$.value;
 
     const requiredProperties: (keyof SignupRequired)[] = [
       "firstName",
@@ -66,11 +67,15 @@ export class SignupService {
   }
 
   constructor(
+    private router: Router,
+
     private afAuth: AngularFireAuth,
     private afFunctions: AngularFireFunctions,
     private afStorage: AngularFireStorage,
-    private router: Router,
-    private currentUserStore: CurrentUserStore // private signupOptionalPage: SignupOptionalPage, // private signupRequiredPage: SignupRequiredPage
+
+    private currentUserStore: CurrentUserStore, // private signupOptionalPage: SignupOptionalPage, // private signupRequiredPage: SignupRequiredPage
+
+    private errorHandler: GlobalErrorHandler
   ) {}
 
   /**
@@ -79,13 +84,9 @@ export class SignupService {
    */
   createFirebaseAccount(email: string, password: string): Observable<UserCredentialType> {
     return from(this.afAuth.createUserWithEmailAndPassword(email, password)).pipe(
-      switchMap(
-        () =>
-          this.afAuth.signInWithEmailAndPassword(
-            email,
-            password
-          ) as unknown as Promise<UserCredentialType>
-      )
+      switchMapTo(this.afAuth.signInWithEmailAndPassword(email, password)),
+      this.errorHandler.convertErrors("firebase-auth"),
+      this.errorHandler.handleErrors()
     );
   }
 
@@ -96,55 +97,62 @@ export class SignupService {
    */
   async createFirestoreAccount(): Promise<any> {
     return lastValueFrom(
-      combineLatest([this.signupData, this.afAuth.user]).pipe(
-        first(),
-        switchMap(async ([dataStored, user]) => {
-          await user?.reload();
-          await user.getIdToken(true); // to refresh the token
-          return [dataStored, user] as [SignupDataHolder, FirebaseUser];
-        }),
-        switchMap(([dataStored, user]) => {
-          if (!user) {
-            console.error("Big mistake right here");
-            return throwError(() => new Error("NO USER AUTHENTICATED"));
-          }
-          const creationRequestData: createAccountRequest = {
-            firstName: dataStored.firstName,
-            sexualPreference: dataStored.sexualPreference,
-            gender: dataStored.gender,
-            dateOfBirth: new Date(dataStored.dateOfBirth).toISOString(),
-            university: dataStored.university,
-            degree: dataStored.degree,
-            biography: dataStored.biography,
-            course: dataStored.course,
-            society: dataStored.society,
-            areaOfStudy: dataStored.areaOfStudy,
-            societyCategory: dataStored.societyCategory,
-            interests: dataStored.interests,
-            questions: dataStored.questions,
-            socialMediaLinks: dataStored.socialMediaLinks,
-          };
+      combineLatest([this.signupData$, this.afAuth.user])
+        .pipe(
+          tap(([_, user]) => {
+            if (!user) throw new CustomError("local/check-auth-state", "local");
+          }),
+          first(),
+          switchMap(async ([dataStored, user]) => {
+            await user?.reload();
+            await user.getIdToken(true); // to refresh the token
+            return [dataStored, user] as [SignupDataHolder, FirebaseUser];
+          }),
+          switchMap(([dataStored, user]) => {
+            const creationRequestData: createAccountRequest = {
+              firstName: dataStored.firstName,
+              sexualPreference: dataStored.sexualPreference,
+              gender: dataStored.gender,
+              dateOfBirth: new Date(dataStored.dateOfBirth).toISOString(),
+              university: dataStored.university,
+              degree: dataStored.degree,
+              biography: dataStored.biography,
+              course: dataStored.course,
+              society: dataStored.society,
+              areaOfStudy: dataStored.areaOfStudy,
+              societyCategory: dataStored.societyCategory,
+              interests: dataStored.interests,
+              questions: dataStored.questions,
+              socialMediaLinks: dataStored.socialMediaLinks,
+            };
 
-          return concat(
-            this.storePictures(dataStored.pictures, user.uid),
-            this.afFunctions.httpsCallable("createAccount")(creationRequestData)
-          ).pipe(last());
-        })
-      )
+            return concat(
+              this.storePictures(dataStored.pictures, user.uid).pipe(
+                this.errorHandler.convertErrors("firebase-storage"),
+                this.errorHandler.handleErrors()
+              ),
+              this.afFunctions
+                .httpsCallable("createAccount")(creationRequestData)
+                .pipe(
+                  this.errorHandler.convertErrors("cloud-functions"),
+                  this.errorHandler.handleErrors()
+                )
+            ).pipe(last());
+          })
+        )
+        .pipe(this.errorHandler.handleErrors())
     );
   }
 
   initializeUser() {
     return firstValueFrom(
       this.afAuth.user.pipe(
+        tap((user) => {
+          if (!user) throw new CustomError("local/check-auth-state", "local");
+        }),
         first(),
-        concatMap((user) => {
-          if (!user) {
-            console.error("That's a big no no");
-            return of("");
-          }
-          return concat(this.removeLocalStorage(), this.currentUserStore.fillStore$);
-        })
+        concatMapTo(concat(this.removeLocalStorage(), this.currentUserStore.fillStore$)),
+        this.errorHandler.handleErrors()
       )
     );
   }
@@ -154,7 +162,7 @@ export class SignupService {
    * redirects to the correct signup stage
    */
   async checkAndRedirect() {
-    const user = await this.afAuth.currentUser;
+    const user = await this.errorHandler.getCurrentUserWithErrorHandling();
 
     if (!user) {
       return this.router.navigateByUrl("welcome/signupauth");
@@ -180,7 +188,7 @@ export class SignupService {
   async addToDataHolders(
     additionalData: allowOptionalProp<SignupRequired> & allowOptionalProp<SignupOptional>
   ) {
-    const observableData = this.signupData.value;
+    const observableData = await firstValueFrom(this.signupData$);
 
     for (let key of Object.keys(additionalData)) {
       observableData[key] = additionalData[key];
@@ -188,7 +196,7 @@ export class SignupService {
 
     await this.updateLocalStorage(observableData);
 
-    this.signupData.next(observableData);
+    this.signupData$.next(observableData);
   }
 
   /**
@@ -211,11 +219,8 @@ export class SignupService {
     });
 
     return forkJoin(pictureStorers$).pipe(
-      catchError((err) => {
-        // here we are assuming that if there is an error then that means
-        console.log("Error while attempting to store pictures: ", err);
-        return of([]);
-      })
+      this.errorHandler.convertErrors("firebase-storage"),
+      this.errorHandler.handleErrors()
     );
   }
 
@@ -245,7 +250,7 @@ export class SignupService {
     if (storageContent && Object.keys(storageContent).length > 0) {
       const data = new SignupDataHolder(storageContent);
 
-      this.signupData.next(data);
+      this.signupData$.next(data);
     }
   }
 
@@ -260,6 +265,6 @@ export class SignupService {
    * Resets the signup data holder by passing a new value to the behaviorSubject
    */
   resetDataHolder() {
-    this.signupData.next(new SignupDataHolder({}));
+    this.signupData$.next(new SignupDataHolder({}));
   }
 }

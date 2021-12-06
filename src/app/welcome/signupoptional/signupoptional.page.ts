@@ -197,7 +197,7 @@ export class SignupoptionalPage implements OnInit {
    */
   async fillFieldsAndGoToSlide() {
     const formFields = Object.keys(this.slideIndexes);
-    const currentSignupData = this.signup.signupData.value; // only getting a snapshot instead of subscribing as we only want to use this function once at the start, not change swipe whenever
+    const currentSignupData = this.signup.signupData$.value; // only getting a snapshot instead of subscribing as we only want to use this function once at the start, not change swipe whenever
 
     // creating object with ONLY required fields and their values from signupData observable
     const optionalData = {};

@@ -17,6 +17,7 @@ import {
 import { urlToBase64, Base64ToUrl } from "../common-pictures-functions";
 
 import { Chat } from "../../../classes/chat.class";
+import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 
 export interface pictureHolder {
   [uid: string]: string;
@@ -58,8 +59,10 @@ export class ChatboardPicturesStore {
   }
 
   constructor(
+    private rendererFactory: RendererFactory2,
     private afStorage: AngularFireStorage,
-    private rendererFactory: RendererFactory2
+
+    private errorHandler: GlobalErrorHandler
   ) {
     this.renderer = this.rendererFactory.createRenderer(null, null);
   }
@@ -261,6 +264,11 @@ export class ChatboardPicturesStore {
   private fetchMainPicture(uid: string): Observable<string> {
     const refString = "/profilePictures/" + uid + "/" + 0;
     const ref = this.afStorage.ref(refString);
-    return ref.getDownloadURL() as Observable<string>;
+    return ref
+      .getDownloadURL()
+      .pipe(
+        this.errorHandler.convertErrors("firebase-storage"),
+        this.errorHandler.handleErrors()
+      );
   }
 }

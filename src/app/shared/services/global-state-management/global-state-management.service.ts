@@ -6,16 +6,7 @@ import { AngularFireAuth } from "@angular/fire/auth";
 import { AngularFirestore } from "@angular/fire/firestore";
 
 import { Storage } from "@capacitor/storage";
-import {
-  BehaviorSubject,
-  concat,
-  forkJoin,
-  from,
-  merge,
-  Observable,
-  of,
-  Subject,
-} from "rxjs";
+import { concat, EMPTY, forkJoin, from, merge, Observable, of, Subject } from "rxjs";
 import {
   concatMap,
   distinctUntilChanged,
@@ -23,7 +14,6 @@ import {
   first,
   map,
   mergeMap,
-  retry,
   share,
   switchMap,
   tap,
@@ -46,6 +36,7 @@ import { NotificationsService } from "@services/notifications/notifications.serv
 import { EmptyStoresService } from "./empty-stores.service";
 
 import { FirebaseUser } from "./../../interfaces/firebase.model";
+import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 
 type pageName =
   | "chats"
@@ -75,8 +66,6 @@ type userState =
   providedIn: "root",
 })
 export class GlobalStateManagementService {
-  auth$ = new BehaviorSubject<FirebaseUser>(null);
-
   private userState = new Subject<userState>();
   userState$ = this.userState.asObservable().pipe(distinctUntilChanged());
 
@@ -89,6 +78,7 @@ export class GlobalStateManagementService {
     private afAuth: AngularFireAuth,
     private firestore: AngularFirestore,
 
+    private errorHandler: GlobalErrorHandler,
     private signupService: SignupService,
     private firebaseAuthService: FirebaseAuthService,
     private routerInitListener: routerInitListenerService,
@@ -105,10 +95,7 @@ export class GlobalStateManagementService {
     private OwnPicturesStore: OwnPicturesStore,
     private universitiesStore: UniversitiesStore,
     private searchCriteriaStore: SearchCriteriaStore
-  ) {
-    // format allows for this.auth$ to be a BehaviorSubject version of the Firebase.User observable
-    this.afAuth.user.subscribe(this.auth$);
-  }
+  ) {}
 
   public activate$ = this.connectionService.monitor().pipe(
     switchMap((isConnected) => {
@@ -143,7 +130,7 @@ export class GlobalStateManagementService {
   }
 
   private globalManagement(): Observable<void> {
-    return this.getFirebaseUser().pipe(
+    return this.afAuth.authState.pipe(
       switchMap((user) => forkJoin([of(user), this.isUserEmailVerified(user)])),
       switchMap(([user, emailIsVerified]) => {
         const observables$: Observable<any>[] = [];
@@ -393,10 +380,6 @@ export class GlobalStateManagementService {
     return false;
   }
 
-  private getFirebaseUser(): Observable<FirebaseUser | null> {
-    return this.afAuth.authState;
-  }
-
   private isUserEmailVerified(user: FirebaseUser): Observable<boolean> {
     return of(user).pipe(map((user) => !!user?.emailVerified));
   }
@@ -433,13 +416,18 @@ export class GlobalStateManagementService {
    */
   private doesProfileDocExist(uid: string): Observable<boolean | null> {
     return this.connectionService.emitWhenConnected().pipe(
-      switchMap(() => this.firestore.collection("profiles").doc(uid).get()),
+      switchMap(() =>
+        this.firestore
+          .collection("profiles")
+          .doc(uid)
+          .get()
+          .pipe(
+            this.errorHandler.convertErrors("firestore"),
+            this.errorHandler.handleErrors()
+          )
+      ),
       first(),
-      map((doc) => doc.exists),
-      // arbitrary, just so that I don't put infinity, but theoretically it shouldn't
-      // require any limit nor any retry at all in the first place.
-      // It is just in case you lose connectivity exactly after having regained it
-      retry(3)
+      map((doc) => doc.exists)
     );
   }
 

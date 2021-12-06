@@ -13,24 +13,23 @@ import { CurrentUserStore } from "@stores/current-user/current-user-store.servic
   providedIn: "root",
 })
 export class EmptyStoresService {
-  constructor(
-    private userStore: CurrentUserStore,
-    private chatboardStore: ChatboardStore,
-    //private chatboardPicturesStore: ChatboardPicturesStore,
-    private searchCriteriaStore: SearchCriteriaStore,
-    private otherProfilesStore: OtherProfilesStore,
-    private swipeOutcomeStore: SwipeOutcomeStore,
-    private swipeStackStore: SwipeStackStore
-  ) // private OwnPicturesStore: OwnPicturesStore
+  constructor() // private userStore: CurrentUserStore,
+  // private chatboardStore: ChatboardStore,
+  // //private chatboardPicturesStore: ChatboardPicturesStore,
+  // private searchCriteriaStore: SearchCriteriaStore,
+  // private otherProfilesStore: OtherProfilesStore,
+  // private swipeOutcomeStore: SwipeOutcomeStore,
+  // private swipeStackStore: SwipeStackStore // private OwnPicturesStore: OwnPicturesStore
   {}
 
   emptyStores() {
-    this.userStore.resetStore();
-    this.chatboardStore.resetStore();
-    this.searchCriteriaStore.resetStore();
-    this.swipeOutcomeStore.resetStore();
-    this.swipeStackStore.resetStore();
-    this.otherProfilesStore.resetStore();
+    console.error("emptyStores functionality deactivated due to dependency issues.");
+    // this.userStore.resetStore();
+    // this.chatboardStore.resetStore();
+    // this.searchCriteriaStore.resetStore();
+    // this.swipeOutcomeStore.resetStore();
+    // this.swipeStackStore.resetStore();
+    // this.otherProfilesStore.resetStore();
 
     console.log("stores emptied");
     // ANY OTHERS / NEW ONES ? Add them here

@@ -2,14 +2,24 @@ import { Injectable } from "@angular/core";
 import { AngularFireAuth } from "@angular/fire/auth";
 import { AngularFirestore } from "@angular/fire/firestore";
 
-import { BehaviorSubject, firstValueFrom, Observable } from "rxjs";
-import { distinctUntilChanged, exhaustMap, filter, map, take } from "rxjs/operators";
+import { BehaviorSubject, defer, firstValueFrom, Observable } from "rxjs";
+import {
+  distinctUntilChanged,
+  exhaustMap,
+  filter,
+  first,
+  map,
+  take,
+  tap,
+  withLatestFrom,
+} from "rxjs/operators";
 
 import { CurrentUserStore } from "@stores/current-user/current-user-store.service";
 import { FormatService } from "@services/format/format.service";
 
 import { SearchCriteria } from "@classes/index";
-import { privateProfileFromDatabase } from "@interfaces/index";
+import { CustomError, privateProfileFromDatabase } from "@interfaces/index";
+import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 
 @Injectable({
   providedIn: "root",
@@ -29,9 +39,12 @@ export class SearchCriteriaStore {
 
   constructor(
     private firestore: AngularFirestore,
-    private format: FormatService,
     private afAuth: AngularFireAuth,
-    private appUser: CurrentUserStore
+
+    private appUser: CurrentUserStore,
+
+    private errorHandler: GlobalErrorHandler,
+    private format: FormatService
   ) {}
 
   private activateStore() {
@@ -62,24 +75,27 @@ export class SearchCriteriaStore {
   }
 
   public async updateCriteriaOnDatabase(): Promise<void> {
-    const user = await this.afAuth.currentUser;
-
-    if (!user) return console.log("no user");
-
-    return firstValueFrom(
-      this.searchCriteria$.pipe(
-        take(1),
-        exhaustMap((SC) =>
-          this.firestore
-            .collection("profiles")
-            .doc(user.uid)
-            .collection("private")
-            .doc("private")
-            .update({
-              latestSearchCriteria: this.format.searchCriteriaClassToDatabase(SC),
-            })
+    this.afAuth.user.pipe(
+      tap((user) => {
+        if (!user) throw new CustomError("local/check-auth-state", "local");
+      }),
+      first(),
+      withLatestFrom(this.searchCriteria$),
+      exhaustMap(([user, SC]) =>
+        firstValueFrom(
+          defer(() =>
+            this.firestore
+              .collection("profiles")
+              .doc(user.uid)
+              .collection("private")
+              .doc("private")
+              .update({
+                latestSearchCriteria: this.format.searchCriteriaClassToDatabase(SC),
+              })
+          ).pipe(this.errorHandler.convertErrors("firestore"))
         )
-      )
+      ),
+      this.errorHandler.handleErrors()
     );
   }
 
@@ -102,7 +118,9 @@ export class SearchCriteriaStore {
             this.searchCriteria.next(latestSearchCriteria);
             this.isReady.next(true);
           }
-        })
+        }),
+        this.errorHandler.convertErrors("firestore"),
+        this.errorHandler.handleErrors()
       );
   }
 

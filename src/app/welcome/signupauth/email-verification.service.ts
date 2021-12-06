@@ -1,19 +1,22 @@
-import { ChangeDetectorRef, Injectable } from "@angular/core";
+import { Injectable } from "@angular/core";
 import { AngularFireAuth } from "@angular/fire/auth";
-import { BehaviorSubject, Observable } from "rxjs";
+
+import { BehaviorSubject, defer, firstValueFrom, Observable } from "rxjs";
 import {
   auditTime,
-  concatMap,
-  distinctUntilChanged,
   exhaustMap,
   filter,
+  first,
   map,
   share,
   switchMap,
-  take,
   takeUntil,
   tap,
 } from "rxjs/operators";
+
+import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
+
+import { CustomError } from "@interfaces/error-handling.model";
 
 export type EmailVerificationState = "not-sent" | "sent" | "resent" | "verified";
 
@@ -36,24 +39,36 @@ export class EmailVerificationService {
     // })
     ();
 
-  constructor(private afAuth: AngularFireAuth) {}
+  constructor(
+    private afAuth: AngularFireAuth,
+
+    private errorHandler: GlobalErrorHandler
+  ) {}
 
   public listenForVerification(intervalBetweenChecks = 2000): Observable<void> {
     return this.afAuth.user.pipe(
+      tap((user) => {
+        if (!user) throw new CustomError("local/check-auth-state", "local");
+      }),
       auditTime(intervalBetweenChecks),
       takeUntil(this.emailIsVerified()),
       exhaustMap(async (user) => {
-        await this.afAuth.updateCurrentUser(user);
+        await firstValueFrom(
+          defer(() => this.afAuth.updateCurrentUser(user)).pipe(
+            this.errorHandler.convertErrors("firebase-auth")
+          )
+        );
         await user?.reload();
         await user.getIdToken(true);
         console.log("Listening on email verification...");
         return user;
       }),
       filter((user) => !!user?.emailVerified),
-      take(1),
+      first(),
       map(() => this.emailVerificationState.next("verified")),
-      share()
-    );
+      share(),
+      this.errorHandler.handleErrors()
+    ) as Observable<void>;
   }
 
   /**
@@ -62,11 +77,18 @@ export class EmailVerificationService {
    */
   public sendVerificationToUser(state: "sent" | "resent"): Observable<void> {
     return this.afAuth.user.pipe(
-      take(1),
+      tap((user) => {
+        if (!user) throw new CustomError("local/check-auth-state", "local");
+      }),
+      first(),
       switchMap((user) =>
-        user?.sendEmailVerification().then(() => this.emailVerificationState.next(state))
-      )
-    );
+        defer(() => user.sendEmailVerification()).pipe(
+          this.errorHandler.convertErrors("firebase-auth"),
+          tap(() => this.emailVerificationState.next(state))
+        )
+      ),
+      this.errorHandler.handleErrors()
+    ) as Observable<void>;
   }
 
   private emailIsVerified() {

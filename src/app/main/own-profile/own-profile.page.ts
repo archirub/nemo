@@ -25,7 +25,6 @@ import {
   Observable,
   of,
   ReplaySubject,
-  Subject,
   Subscription,
 } from "rxjs";
 import {
@@ -40,7 +39,6 @@ import {
   delay,
   filter,
   startWith,
-  exhaustMap,
   share,
 } from "rxjs/operators";
 import { isEqual, isEqualWith } from "lodash";
@@ -206,15 +204,17 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
   }
 
   constructor(
-    private currentUserStore: CurrentUserStore,
     private router: Router,
-    private ownPicturesService: OwnPicturesStore,
-    private detector: ChangeDetectorRef,
-    private tabElementRef: TabElementRefService,
-    private modalCtrl: ModalController,
-    private loadingCtrl: LoadingController,
     private renderer: Renderer2,
+    private detector: ChangeDetectorRef,
+    private loadingCtrl: LoadingController,
     private alertCtrl: AlertController,
+    private modalCtrl: ModalController,
+
+    private currentUserStore: CurrentUserStore,
+    private ownPicturesService: OwnPicturesStore,
+
+    private tabElementRef: TabElementRefService,
     private storeReadiness: StoreReadinessService
   ) {}
 
@@ -411,16 +411,16 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
 
   // to make apperance changes when the option of the toggle is changed between edit and view
   async toggleChange(option) {
-     const editor = document.getElementById("editing");
-     const profile = document.getElementById("profile");
+    const editor = document.getElementById("editing");
+    const profile = document.getElementById("profile");
 
-     if (option == "edit") {
-       this.renderer.setStyle(editor, "display", "flex");
-       this.renderer.setStyle(profile, "display", "none");
-     } else if (option == "view") {
-       this.renderer.setStyle(editor, "display", "none");
-       this.renderer.setStyle(profile, "display", "flex");
-     }
+    if (option == "edit") {
+      this.renderer.setStyle(editor, "display", "flex");
+      this.renderer.setStyle(profile, "display", "none");
+    } else if (option == "view") {
+      this.renderer.setStyle(editor, "display", "none");
+      this.renderer.setStyle(profile, "display", "flex");
+    }
   }
 
   // watches whether there is a difference between the info the currentUserStore holds

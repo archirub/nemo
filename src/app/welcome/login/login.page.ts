@@ -5,6 +5,8 @@ import { AngularFireAuth } from "@angular/fire/auth";
 
 import { FirebaseAuthService } from "@services/firebase-auth/firebase-auth.service";
 import { LoadingService } from "@services/loading/loading.service";
+import { defer, firstValueFrom } from "rxjs";
+import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 
 @Component({
   selector: "app-login",
@@ -19,10 +21,12 @@ export class LoginPage {
 
   constructor(
     private alertCtrl: AlertController,
-    private afAuth: AngularFireAuth,
-    private authService: FirebaseAuthService,
-    private navCtrl: NavController,
     private loadingCtrl: LoadingController,
+    private navCtrl: NavController,
+
+    private afAuth: AngularFireAuth,
+
+    private errorHandler: GlobalErrorHandler,
     private loadingService: LoadingService
   ) {}
 
@@ -38,23 +42,15 @@ export class LoginPage {
 
     const email: string = this.loginForm.get("email").value;
     const password: string = this.loginForm.get("password").value;
-    try {
-      await this.afAuth.signInWithEmailAndPassword(email, password);
-      await loader.dismiss();
-    } catch (e) {
-      await loader.dismiss();
-      if (e.code === "auth/wrong-password") {
-        await this.authService.wrongPasswordPopup(null);
-      } else if (e.code === "auth/user-not-found") {
-        await this.authService.unknownUserPopup();
-      } else if (e.code === "auth/user-disabled") {
-        await this.authService.userDisabledPopup();
-      } else if (e.code === "auth/too-many-requests") {
-        await this.authService.wrongPasswordMaxAttemptsPopup(null);
-      } else {
-        await this.authService.unknownErrorPopup();
-      }
-    }
+
+    await firstValueFrom(
+      defer(() => this.afAuth.signInWithEmailAndPassword(email, password)).pipe(
+        this.errorHandler.convertErrors("firebase-auth"),
+        this.errorHandler.handleErrors()
+      )
+    );
+
+    await loader.dismiss();
   }
 
   private showAlert(message: string) {
