@@ -18,6 +18,9 @@ export class ChatsPage implements OnDestroy {
   TOP_SCROLL_SPEED = 100;
   fishSwimAnimation: Animation;
 
+  //TUTORIAL SETTING
+  chatsTutorial = true;
+
   private subs = new Subscription();
 
   private fishRef$ = new ReplaySubject<ElementRef>(1);
@@ -69,6 +72,11 @@ export class ChatsPage implements OnDestroy {
       (chat1, chat2) =>
         chat2?.recentMessage?.time?.getTime() - chat1?.recentMessage?.time?.getTime()
     );
+  }
+
+  //TUTORIAL EXIT
+  exitChatsTutorial() {
+    this.chatsTutorial = false;
   }
 
   ngOnDestroy() {
