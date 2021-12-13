@@ -11,8 +11,8 @@ import {
   CustomErrorHandler,
   ErrorText,
   defaultErrorText,
-  CloudFunctionsErrorType,
 } from "@interfaces/index";
+import { CloudFunctionsErrorType } from "@interfaces/firebase.model";
 
 export type CloudFunctionCode = typeof FirestoreErrorCodes[number];
 

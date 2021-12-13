@@ -76,7 +76,7 @@ export class CommonErrorFunctions {
   customRetryWhen<T>(
     errMatchChecker: (err: CustomError) => boolean, // checks whether the error coming in is supposed to be handled by this operator or not
     maxRetryCount: number,
-    customLastRetryTask$: (err: CustomError) => Observable<any> = null, // default is to show an error message with the error's text
+    customLastRetryTask$?: (err: CustomError) => Observable<any>, // default is to show an error message with the error's text
     defaultValue: any = null
   ) {
     const toDefault = "toDefault";

@@ -1,4 +1,5 @@
-import { AuthErrorType } from "@interfaces/index";
+import { AuthErrorType } from "@interfaces/firebase.model";
+
 import { AlertController } from "@ionic/angular";
 import { Observable, throwError } from "rxjs";
 import { catchError } from "rxjs/operators";

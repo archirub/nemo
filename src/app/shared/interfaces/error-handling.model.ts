@@ -68,8 +68,8 @@ export interface CustomErrorHandler<errType extends ErrorType, errCodeType> {
   };
   errorConverter: () => OperatorFunction<any, any>;
   handleErrors: () => (source: Observable<any>) => Observable<any>;
-  errorMatches: (error: CustomError, codes: readonly errCodeType[]) => boolean;
-  codeMatches: (code: any, codes: readonly errCodeType[]) => code is errCodeType;
+  errorMatches: (error: CustomError, codes: errCodeType[]) => boolean;
+  codeMatches: (code: any, codes: errCodeType[]) => code is errCodeType;
   typeMatches: (type: any) => type is errType;
   getErrorText: (code: errCodeType) => ErrorText;
 }

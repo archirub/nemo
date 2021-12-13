@@ -35,6 +35,7 @@ import {
   profileFromDatabase,
 } from "@interfaces/index";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
+import { IonSlides } from "@ionic/angular";
 
 // loading is for when there is no one in the stack but we are fetching
 // empty is for the stack has been fetched and no one was found
@@ -247,7 +248,7 @@ export class SwipeStackStore {
         list.first.slidesRef$.pipe(
           first(),
           switchMap((ref) =>
-            ref.ionSlideWillChange.pipe(
+            (ref as IonSlides).ionSlideWillChange.pipe(
               map((slides) => ({
                 slides,
                 uid: list.first.profile.uid,
@@ -261,7 +262,7 @@ export class SwipeStackStore {
       map((map) => ({
         picIndex: (map.slides.target as any)?.swiper?.realIndex as number,
         uid: map.uid,
-        profilePictures$: map.profilePictures$,
+        profilePictures$: (map as any).profilePictures$,
       })),
       // doesn't keep going if slide is the first one
       filter((m) => typeof m.picIndex === "number" && m.picIndex > 0),
@@ -473,16 +474,15 @@ export class SwipeStackStore {
   private fetchProfiles(uids: string[]): Observable<Profile[]> {
     if (uids.length < 1) return of([]);
     return forkJoin(
-      uids.map(
-        (uid) =>
-          this.firestore
-            .collection("profiles")
-            .doc(uid)
-            .get()
-            .pipe(
-              this.errorHandler.convertErrors("firestore"),
-              this.errorHandler.handleErrors()
-            ) as Observable<DocumentSnapshot<profileFromDatabase>>
+      uids.map((uid) =>
+        (
+          this.firestore.collection("profiles").doc(uid).get() as Observable<
+            DocumentSnapshot<profileFromDatabase>
+          >
+        ).pipe(
+          this.errorHandler.convertErrors("firestore"),
+          this.errorHandler.handleErrors()
+        )
       )
     ).pipe(
       // formatting profiles and filtering out those which are null

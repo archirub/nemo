@@ -9,7 +9,7 @@ admin.initializeApp({
 });
 
 export * from "./get-match-data-user-info.function";
-// export * from "./increment-md-uid-count";
+// export * from "./increment-md-uid-count"; // can deal with that later on (system for when you start getting a lot of users and so potential overflow of the limit size of individual Firestore documents)
 export * from "./profile-editing-by-user";
 export * from "./chat-deletion-by-user";
 export * from "./report-user";
