@@ -11,8 +11,8 @@ import {
   CustomErrorHandler,
   ErrorText,
   defaultErrorText,
-  FirestoreErrorType,
 } from "@interfaces/index";
+import { FirestoreErrorType } from "@interfaces/firebase.model";
 
 @Injectable({
   providedIn: "root",

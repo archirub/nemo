@@ -9,8 +9,8 @@ import {
   profileFromDatabase,
   searchCriteria,
   userSnippet,
-  Timestamp,
 } from "@interfaces/index";
+import { Timestamp } from "@interfaces/firebase.model";
 
 @Injectable({
   providedIn: "root",

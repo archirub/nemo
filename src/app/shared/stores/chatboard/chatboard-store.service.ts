@@ -31,12 +31,13 @@ import { Chat } from "@classes/index";
 import {
   chatDeletionByUserRequest,
   chatFromDatabase,
-  FirebaseUser,
   messageFromDatabase,
   messageMap,
   CHECK_AUTH_STATE,
   CustomError,
 } from "@interfaces/index";
+import { FirebaseUser } from "@interfaces/firebase.model";
+
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 
 // the store has this weird shape because of the Firestore's onSnapshot function which
@@ -124,12 +125,13 @@ export class ChatboardStore {
       }),
       first(),
       switchMap((user) =>
-        this.firestore
-          .collection("chats", (ref) => ref.where("uids", "array-contains", user.uid))
-          .snapshotChanges()
-          .pipe(this.errorHandler.convertErrors("firestore"))
+        (
+          this.firestore
+            .collection("chats", (ref) => ref.where("uids", "array-contains", user.uid))
+            .snapshotChanges() as Observable<DocumentChangeAction<chatFromDatabase>[]>
+        ).pipe(this.errorHandler.convertErrors("firestore"))
       ),
-      tap((res: DocumentChangeAction<chatFromDatabase>[]) => {
+      tap((res) => {
         const docs = res.map((r) => r.payload.doc);
 
         this.hasNoChats.next(docs?.length < 1);
@@ -151,44 +153,47 @@ export class ChatboardStore {
           chatsFromDb.map((chatDoc) => {
             const recipientID = chatDoc.data().uids.filter((id) => id !== user.uid)[0];
 
-            return this.firestore
-              .collection("chats")
-              .doc(chatDoc.id)
-              .collection("messages", (ref) =>
-                ref
-                  // though useless wrt query content, necessary to pass security rules
-                  // (because for queries security rules aren't checked against each doc, they're checked
-                  // against the nature of the query)
-                  .where("uids", "array-contains", user.uid)
-                  .orderBy("time", "desc")
-                  .limit(1)
-              )
-              .snapshotChanges()
-              .pipe(
-                map((res: DocumentChangeAction<messageFromDatabase>[]) => {
-                  const msgDoc = res?.[0]?.payload?.doc;
-                  let msgData: messageMap | "no message documents";
+            return (
+              this.firestore
+                .collection("chats")
+                .doc(chatDoc.id)
+                .collection("messages", (ref) =>
+                  ref
+                    // though useless wrt query content, necessary to pass security rules
+                    // (because for queries security rules aren't checked against each doc, they're checked
+                    // against the nature of the query)
+                    .where("uids", "array-contains", user.uid)
+                    .orderBy("time", "desc")
+                    .limit(1)
+                )
+                .snapshotChanges() as Observable<
+                DocumentChangeAction<messageFromDatabase>[]
+              >
+            ).pipe(
+              map((res) => {
+                const msgDoc = res?.[0]?.payload?.doc;
+                let msgData: messageMap | "no message documents";
 
-                  // this is a way of marking that the listening has activated, and that
-                  // it has found that no message documents were present in the collection.
-                  // This allows us to place the chat in the matches array.
-                  // If we didn't do that, there is no way to tell whether a chat has no
-                  // recent message because it hasn't been loaded from the database yet,
-                  // or whether there is simply no recent message to be loaded
-                  if (msgDoc) {
-                    msgData = {
-                      id: msgDoc.id,
-                      message: msgDoc.data(),
-                    };
-                  } else {
-                    msgData = "no message documents";
-                  }
+                // this is a way of marking that the listening has activated, and that
+                // it has found that no message documents were present in the collection.
+                // This allows us to place the chat in the matches array.
+                // If we didn't do that, there is no way to tell whether a chat has no
+                // recent message because it hasn't been loaded from the database yet,
+                // or whether there is simply no recent message to be loaded
+                if (msgDoc) {
+                  msgData = {
+                    id: msgDoc.id,
+                    message: msgDoc.data(),
+                  };
+                } else {
+                  msgData = "no message documents";
+                }
 
-                  const msgMap = { data: msgData, chatID: chatDoc.id };
-                  this.recentMsgToBeProcessed.next(msgMap);
-                }),
-                this.errorHandler.convertErrors("firestore")
-              );
+                const msgMap = { data: msgData, chatID: chatDoc.id };
+                this.recentMsgToBeProcessed.next(msgMap);
+              }),
+              this.errorHandler.convertErrors("firestore")
+            );
           })
         )
       ),

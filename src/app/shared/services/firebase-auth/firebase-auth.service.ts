@@ -11,7 +11,7 @@ import { EmptyStoresService } from "@services/global-state-management/empty-stor
 import { LoadingOptions, LoadingService } from "@services/loading/loading.service";
 
 import { deleteAccountRequest } from "@interfaces/cloud-functions.model";
-import { EmailAuthProvider, FirebaseUser } from "@interfaces/index";
+import { EmailAuthProvider, FirebaseUser } from "@interfaces/firebase.model";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 import { FirebaseLogoutService } from "./firebase-logout.service";
 

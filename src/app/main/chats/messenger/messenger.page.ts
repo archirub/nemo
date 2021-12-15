@@ -66,10 +66,11 @@ import { messageFromDatabase, messageMap } from "@interfaces/message.model";
 import {
   messengerMotivationMessages,
   sortUIDs,
-  Timestamp,
   CHECK_AUTH_STATE,
   CustomError,
 } from "@interfaces/index";
+import { Timestamp } from "@interfaces/firebase.model";
+
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 import { FirestoreErrorHandler } from "@services/errors/firestore-error-handler.service";
 

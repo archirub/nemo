@@ -12,20 +12,23 @@
       "@services/*": ["src/app/shared/services/*"],
       "@stores/*": ["src/app/shared/stores/*"],
       "@classes/*": ["src/app/shared/classes/*"],
+      "@components/*": ["src/app/shared/components/*"],
       "@pipes/*": ["src/app/shared/pipes/*"]
     },
 
 
-    "noImplicitReturns": true,
+    "noImplicitReturns": false,
     "noUnusedLocals": false,
     "outDir": "lib",
     "sourceMap": true,
     "strict": true,
     "target": "es2017",
     "strictPropertyInitialization": false,
+    "experimentalDecorators": true,
     "noImplicitThis": false,
     "noImplicitAny": false,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "strictNullChecks": false,
   },
   "compileOnSave": true,
   "include": [

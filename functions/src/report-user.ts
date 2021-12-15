@@ -3,9 +3,9 @@ import * as admin from "firebase-admin";
 import {
   reportUserRequest,
   dateMap,
-  TimestampType,
   UserReportOnDatabase,
 } from "./../../src/app/shared/interfaces/index";
+
 import { runWeakUserIdentityCheck } from "./supporting-functions/user-validation/user.checker";
 import { sanitizeData } from "./supporting-functions/data-validation/main";
 
@@ -59,7 +59,7 @@ export const reportUser = functions
 
     const reportedDateMap: dateMap = {
       exists: true,
-      date: admin.firestore.Timestamp.fromDate(new Date()) as TimestampType,
+      date: admin.firestore.Timestamp.fromDate(new Date()) as admin.firestore.Timestamp,
     };
 
     batch.update(newReportDocRef, reportDocumentData);

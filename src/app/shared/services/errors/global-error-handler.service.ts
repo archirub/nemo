@@ -37,10 +37,8 @@ export class GlobalErrorHandler implements CustomGlobalErrorHandler {
     if (type === "firestore") return this.firestoreEH.errorConverter<T>();
     if (type === "firebase-storage") return this.fStorageEH.errorConverter<T>();
     if (type === "cloud-functions") return this.cloudFunctionsEH.errorConverter<T>();
-    console.error(
-      "Type ",
-      type,
-      " is not allowed in errorConverter of GlobalErrorHandler."
+    throw new Error(
+      "Type " + type + " is not allowed in errorConverter of GlobalErrorHandler."
     );
   }
 
@@ -85,7 +83,7 @@ export class GlobalErrorHandler implements CustomGlobalErrorHandler {
   // Create a error handler for local (or like custom errors or something)
   // and put it there?
   getCurrentUserWithErrorHandling(): Promise<firebase.default.User> {
-    console.log("getCurrentUserWithErrorHandling just used");
+    console.error("getCurrentUserWithErrorHandling just used and UNIMPLEMENTED");
     return firstValueFrom(of("" as unknown as firebase.default.User));
     // return firstValueFrom(
     //   this.afAuth.user.pipe(
