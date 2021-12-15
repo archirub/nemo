@@ -1,6 +1,59 @@
-<svg width="1367" height="1232" viewBox="0 0 1367 1232" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M1206.92 187.001C1039.99 265.501 883.502 240 736.484 104.501" stroke="#F07167" stroke-width="45" stroke-linecap="round"/>
-<path d="M1207.5 191C1258.43 603.071 1158.57 884.005 736 1107.1" stroke="#F07167" stroke-width="45" stroke-linecap="round"/>
-<path d="M267.959 211.31C215.695 615.319 314.575 890.313 736.184 1107.56" stroke="#F07167" stroke-width="45" stroke-linecap="round"/>
-<path d="M264.146 206.54C434.13 278.194 589.451 246.358 730.844 105" stroke="#F07167" stroke-width="45" stroke-linecap="round"/>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="1009.4717"
+   height="1048.059"
+   viewBox="0 0 1009.4717 1048.059"
+   fill="none"
+   version="1.1"
+   id="svg832"
+   sodipodi:docname="reporticon.svg"
+   inkscape:version="1.1 (c4e8f9e, 2021-05-24)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs836" />
+  <sodipodi:namedview
+     id="namedview834"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     showgrid="false"
+     inkscape:zoom="0.46103896"
+     inkscape:cx="452.23944"
+     inkscape:cy="532.49296"
+     inkscape:window-width="1440"
+     inkscape:window-height="791"
+     inkscape:window-x="0"
+     inkscape:window-y="25"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg832" />
+  <path
+     d="m 974.22666,105 c -166.93,78.5 -323.418,52.999 -470.436,-82.5"
+     stroke="#f07167"
+     stroke-width="45"
+     stroke-linecap="round"
+     id="path824" />
+  <path
+     d="m 974.80666,108.999 c 50.93004,412.071 -48.93,693.005 -471.5,916.1"
+     stroke="#f07167"
+     stroke-width="45"
+     stroke-linecap="round"
+     id="path826" />
+  <path
+     d="m 35.265658,129.309 c -52.264,404.009 46.616,679.003 468.225002,896.25"
+     stroke="#f07167"
+     stroke-width="45"
+     stroke-linecap="round"
+     id="path828" />
+  <path
+     d="M 31.452658,124.539 C 201.43666,196.193 356.75766,164.357 498.15066,22.999"
+     stroke="#f07167"
+     stroke-width="45"
+     stroke-linecap="round"
+     id="path830" />
 </svg>

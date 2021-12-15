@@ -40,18 +40,6 @@ h2 {
     color: #FFF;
 }
 
-.homePage {
-    filter: contrast(10);
-    max-width: 50vw;
-    margin: 0 auto;
-}
-
-.profilePage {
-    filter: contrast(10);
-    max-width: 29vw;
-    margin: 0 auto;
-}
-
 .chatsPage {
     filter: contrast(10);
     max-width: 40vw;
@@ -64,37 +52,29 @@ h2 {
     max-width: 50vw;
 }
 
-/* Slides 3 & 4 */
-.imageMap {
-    margin: 25px 0;
-    height: 60%;
-}
-
 .arrow-1 {
     position: absolute;
-    width: 20vw;
-    top: 40vh;
-    left: 40vw;
-}
-
-.arrow-2 {
-    position: absolute;
-    width: 12vw;
-    left: 22vw;
-    z-index: 1;
-    top: 36vh;
     transform: rotate(-80deg);
+    height: 3vh;
+    left: 25vh;
+    top: 30vh;
 }
 
-.profile-small {
-    width: 36vw;
+ion-icon{
+    font-size: 6vh;
+    background: #F07167;
+    color: #FFF;
+    position: absolute;
+    z-index: 5;
+    top: 45vh;
+    border-radius: 50%;
+    --border-radius: 50%;
 }
 
-.left {
-    transform: rotate(-8deg);
+.forward {
+    right: 2vw;
 }
 
-.right {
-    transform: rotate(8deg);
-    margin-left: 17vw;
+.backward {
+    left: 2vw;
 }

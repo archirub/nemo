@@ -1,5 +1,5 @@
 <ion-content>
-  <ion-slides>
+  <ion-slides #slides>
     <ion-slide>
       <div class="container">
         <h1>Welcome to Nemo!</h1>
@@ -7,17 +7,21 @@
         <img class="homePage" src="/assets/swipeicon.svg"/>
         <h2>These are other people's profiles, which you can choose to like or pass on.</h2>
       </div>
+      <ion-icon class="forward" (click)="changeSlide('next')" name="chevron-forward-outline"></ion-icon>
     </ion-slide>
 
     <ion-slide>
+      <ion-icon class="backward" (click)="changeSlide('prev')" name="chevron-back-outline"></ion-icon>
       <div class="container">
         <h2>To like someone, double tap the right side of their profile.</h2>
         <img class="highlighted" src="/assets/tutorial/card_highlighted.png" alt="profile_card"/> 
         <h2>To pass on someone, double tap the left side of their profile.</h2>
       </div>
+      <ion-icon class="forward" (click)="changeSlide('next')" name="chevron-forward-outline"></ion-icon>
     </ion-slide>
 
     <ion-slide>
+      <ion-icon class="backward" (click)="changeSlide('prev')" name="chevron-back-outline"></ion-icon>
       <div class="container">
         <h2>You can find out more about someone by tapping on the banner with their name.</h2>
         <div class="imageMap">
@@ -27,9 +31,11 @@
         </div>
         <h2>Just tap on the banner again to close the info section.</h2>
       </div>
+      <ion-icon class="forward" (click)="changeSlide('next')" name="chevron-forward-outline"></ion-icon>
     </ion-slide>
 
     <ion-slide>
+      <ion-icon class="backward" (click)="changeSlide('prev')" name="chevron-back-outline"></ion-icon>
       <div class="container">
         <h2>To change the profiles appearing on your swipe stack, change your <span style="color: #F17607">nemo</span>search.</h2>
         <div class="imageMap">
@@ -41,9 +47,11 @@
         </div>
         <h2>You can get to it by clicking on the magnifying glass.</h2>
       </div>
+      <ion-icon class="forward" (click)="changeSlide('next')" name="chevron-forward-outline"></ion-icon>
     </ion-slide>
 
     <ion-slide>
+      <ion-icon class="backward" (click)="changeSlide('prev')" name="chevron-back-outline"></ion-icon>
       <div class="container">
         <h2>It's all up to you now,</h2>
         <h1 style="margin: 0;">good luck!</h1>

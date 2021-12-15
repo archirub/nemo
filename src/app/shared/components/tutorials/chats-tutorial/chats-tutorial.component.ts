@@ -1,4 +1,5 @@
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, ViewChild } from '@angular/core';
+import { IonSlides } from '@ionic/angular';
 
 @Component({
   selector: 'chats-tutorial-slides',
@@ -7,10 +8,19 @@ import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 })
 export class ChatsTutorialComponent implements OnInit {
   @Output() exit = new EventEmitter();
+  @ViewChild('slides') slides: IonSlides;
 
   constructor() { }
 
   ngOnInit() {}
+
+  changeSlide(dir) {
+    if(dir === 'next') {
+      this.slides.slideNext()
+    } else {
+      this.slides.slidePrev()
+    };
+  }
 
   exitChatsTutorial() {
     this.exit.emit('true');

@@ -105,3 +105,22 @@ h2 {
     transform: rotate(8deg);
     margin-left: 17vw;
 }
+
+ion-icon{
+    font-size: 6vh;
+    background: #F07167;
+    color: #FFF;
+    position: absolute;
+    z-index: 5;
+    top: 45vh;
+    border-radius: 50%;
+    --border-radius: 50%;
+}
+
+.forward {
+    right: 2vw;
+}
+
+.backward {
+    left: 2vw;
+}

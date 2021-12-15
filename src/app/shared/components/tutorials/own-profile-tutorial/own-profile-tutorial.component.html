@@ -1,14 +1,16 @@
 <ion-content>
-  <ion-slides>
+  <ion-slides #slides>
     <ion-slide>
       <div class="container">
         <h1>This is your profile page!</h1>
         <img class="profilePage" src="/assets/profileicon.svg"/>
         <h2>Here, you can edit the details about you that others see.</h2>
       </div>
+      <ion-icon class="forward" (click)="changeSlide('next')" name="chevron-forward-outline"></ion-icon>
     </ion-slide>
 
     <ion-slide>
+      <ion-icon class="backward" (click)="changeSlide('prev')" name="chevron-back-outline"></ion-icon>
       <div class="container">
         <h2>Under the view tab, you can see your profile exactly as others will see it.</h2>
         <div class="imageMap">
@@ -20,37 +22,45 @@
         </div>
         <h2>You can switch between editing and viewing your profile with the toggle in the top corner.</h2>
       </div>
+      <ion-icon class="forward" (click)="changeSlide('next')" name="chevron-forward-outline"></ion-icon>
     </ion-slide>
 
     <ion-slide>
+      <ion-icon class="backward" (click)="changeSlide('prev')" name="chevron-back-outline"></ion-icon>
       <div class="container">
         <h2>If you have more than one picture on your profile, you can drag the icons around to switch their order.</h2>
         <img class="arrow-3" src="/assets/tutorial/arrow.png" alt="arrow"/>
         <img class="highlighted" src="/assets/tutorial/edit_photos.png" alt="profile_edit_photos"/> 
         <h2>The top three will appear first, followed by the bottom three.</h2>
       </div>
+      <ion-icon class="forward" (click)="changeSlide('next')" name="chevron-forward-outline"></ion-icon>
     </ion-slide>
 
     <ion-slide>
+      <ion-icon class="backward" (click)="changeSlide('prev')" name="chevron-back-outline"></ion-icon>
       <div class="container">
         <h2>When you start editing, the save and cancel buttons will appear.</h2>
         <img class="highlighted" src="/assets/tutorial/save_cancel.png" alt="go_to_settings"/> 
         <h2>You won't be able to view your profile again until you save or cancel all of your changes.</h2>
       </div>
+      <ion-icon class="forward" (click)="changeSlide('next')" name="chevron-forward-outline"></ion-icon>
     </ion-slide>
 
     <ion-slide>
+      <ion-icon class="backward" (click)="changeSlide('prev')" name="chevron-back-outline"></ion-icon>
       <div class="container">
         <h2>Some details about your profile cannot be changed.</h2>
         <img class="highlighted" src="/assets/tutorial/go_to_settings.png" alt="go_to_settings"/> 
         <h2>Other details - for example your gender identity - can be changed under your settings.</h2>
       </div>
+      <ion-icon class="forward" (click)="changeSlide('next')" name="chevron-forward-outline"></ion-icon>
     </ion-slide>
 
     <ion-slide>
+      <ion-icon class="backward" (click)="changeSlide('prev')" name="chevron-back-outline"></ion-icon>
       <div class="container">
         <h2>Now you decide,</h2>
-        <h1 style="margin: 0;">what will people learn about you?</h1>
+        <h1 style="margin: 0;">how will you show yourself off?</h1>
         <ion-button (click)="exitOwnProfileTutorial()">Get editing</ion-button>
       </div>
     </ion-slide>
