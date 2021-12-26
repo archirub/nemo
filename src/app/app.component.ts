@@ -18,6 +18,7 @@ import { GlobalStateManagementService } from "@services/global-state-management/
 import { routerInitListenerService } from "@services/global-state-management/initial-url.service";
 import { StoreReadinessService } from "@services/store-readiness/store-readiness.service";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
+import { AngularFirestore } from "@angular/fire/firestore";
 
 @Component({
   selector: "app-root",
@@ -36,7 +37,8 @@ export class AppComponent implements OnDestroy, OnInit {
     private afAuth: AngularFireAuth,
     private GlobalStateManagement: GlobalStateManagementService,
     private routerInitListener: routerInitListenerService,
-    private storeReadiness: StoreReadinessService
+    private storeReadiness: StoreReadinessService,
+    private fs: AngularFirestore
   ) {
     this.initializeApp();
   }
@@ -46,9 +48,12 @@ export class AppComponent implements OnDestroy, OnInit {
   }
 
   async initializeApp() {
+    console.log("initializeApp");
     const SplashScreenAvailable = Capacitor.isPluginAvailable("SplashScreen");
     const splashScreenShowOptions: ShowOptions = { showDuration: 10000 };
     const splashScreenHideOptions: HideOptions = {};
+
+    // this.capacitorPushNotificationStuff();
 
     if (SplashScreenAvailable) await SplashScreen.show(splashScreenShowOptions);
 
@@ -78,43 +83,46 @@ export class AppComponent implements OnDestroy, OnInit {
     this.subs.unsubscribe();
   }
 
-  // capacitorPushNotificationStuff() {
-  //   // Request permission to use push notifications
-  //   // iOS will prompt user and return if they granted permission or not
-  //   // Android will just grant without prompting
-  //   PushNotifications.requestPermissions().then((result) => {
-  //     if (result.receive === "granted") {
-  //       // Register with Apple / Google to receive push via APNS/FCM
-  //       PushNotifications.register();
-  //     } else {
-  //       // Show some error
-  //     }
-  //   });
+  capacitorPushNotificationStuff() {
+    console.log("capacitorPushNotificationStuff", PushNotifications);
+    // Request permission to use push notifications
+    // iOS will prompt user and return if they granted permission or not
+    // Android will just grant without prompting
+    PushNotifications.requestPermissions().then((result) => {
+      if (result.receive === "granted") {
+        // Register with Apple / Google to receive push via APNS/FCM
+        PushNotifications.register();
+      } else {
+        // Show some error
+      }
+    });
 
-  //   // On success, we should be able to receive notifications
-  //   PushNotifications.addListener("registration", (token: Token) => {
-  //     alert("Push registration success, token: " + token.value);
-  //   });
+    // On success, we should be able to receive notifications
+    PushNotifications.addListener("registration", async (token: Token) => {
+      const user = await firstValueFrom(this.afAuth.user);
+      this.fs.collection("profiles").doc();
+      console.log("Push registration success, token: " + token.value);
+    });
 
-  //   // Some issue with our setup and push will not work
-  //   PushNotifications.addListener("registrationError", (error: any) => {
-  //     alert("Error on registration: " + JSON.stringify(error));
-  //   });
+    // Some issue with our setup and push will not work
+    PushNotifications.addListener("registrationError", (error: any) => {
+      console.log("Error on registration: " + JSON.stringify(error));
+    });
 
-  //   // Show us the notification payload if the app is open on our device
-  //   PushNotifications.addListener(
-  //     "pushNotificationReceived",
-  //     (notification: PushNotificationSchema) => {
-  //       alert("Push received: " + JSON.stringify(notification));
-  //     }
-  //   );
+    // Show us the notification payload if the app is open on our device
+    PushNotifications.addListener(
+      "pushNotificationReceived",
+      (notification: PushNotificationSchema) => {
+        console.log("Push received: " + JSON.stringify(notification));
+      }
+    );
 
-  //   // Method called when tapping on a notification
-  //   PushNotifications.addListener(
-  //     "pushNotificationActionPerformed",
-  //     (notification: ActionPerformed) => {
-  //       alert("Push action performed: " + JSON.stringify(notification));
-  //     }
-  //   );
-  // }
+    // Method called when tapping on a notification
+    PushNotifications.addListener(
+      "pushNotificationActionPerformed",
+      (notification: ActionPerformed) => {
+        console.log("Push action performed: " + JSON.stringify(notification));
+      }
+    );
+  }
 }

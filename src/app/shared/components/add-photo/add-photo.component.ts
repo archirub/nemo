@@ -63,7 +63,7 @@ export class AddPhotoComponent {
     // get image
     const photo = await Camera.getPhoto({
       quality: 50,
-      source: CameraSource.Prompt,
+      // source: CameraSource.Prompt, // if this is uncommented (only tested for the value "CameraSource.Prompt"), it doesn't work on web nor ios. But commented out, it makes the app crash on ios but works on web
       correctOrientation: true,
       height: 300,
       width: 300,

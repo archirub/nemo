@@ -3,7 +3,7 @@ import {
   Degree,
   Gender,
   mdDatingPickingFromDatabase,
-  mdFromDatabase,
+  mdMainFromDatabase,
   searchCriteria,
   SexualPreference,
   uidChoiceMap,
@@ -15,7 +15,7 @@ import { searchCriteriaGrouping } from "./search-criteria";
 
 export async function datingMode(
   uid: string,
-  matchDataMain: mdFromDatabase,
+  matchDataMain: mdMainFromDatabase,
   // eslint-disable-next-line no-shadow
   searchCriteria: searchCriteria,
   percentile: number | null,
@@ -108,7 +108,7 @@ export async function datingMode(
       !likeGroupChoiceMaps.hasOwnProperty(pickedUid)
   );
 
-  // REMOVE DUPLICATES IN LIKEGROUP
+  // REMOVE DUPLICATES IN LIKE-GROUP
   const likeGroupUsers: uidChoiceMap[] = removeDuplicates(
     Object.entries(likeGroupChoiceMaps).map((keyValue) => keyValue[1])
   );
@@ -234,7 +234,7 @@ function concatSameDemographics(
 // SOMETHING YOU FORGOT TO ADD, BUT ITS OKAY YOU CAN DO THAT AFTERWARDS, JUST FINISH THE ST Algo
 // You need to pick from a Gaussian around the user's position in the array of people
 // however, you don't have information on what people's PI is in the array, and your uid
-// is only in one of these arrays so you need some adaptative changes wrt that
+// is only in one of these arrays so you need some adaptive changes wrt that
 
 // What could work is to get person's uid, find person closest to that in the piStorage that has the right
 // degree, sexualPref, gender (so that they actually show up in the array you look through), find that person's
@@ -250,7 +250,7 @@ function concatSameDemographics(
 // demographic to the percentile in the demographic in which they are looking. So if I am a man and I am at position 930 out of 1400 in my demographic array,
 // then i am at the 66.4th percentile of my distribution, and if I am attracted to female attracted to male undergrad,
 // then the mean of the Gaussian that I need to pick from in that distribution is at the 66.4th percentile. So the only information
-// that is needed is one's own percentile. That shall be prestored in one of the matchData document, probably the main one
+// that is needed is one's own percentile. That shall be pre-stored in one of the matchData document, probably the main one
 
 function pickFromDemographicArrays(
   diffDemographicUidArrays: string[][],

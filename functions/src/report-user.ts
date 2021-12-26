@@ -9,7 +9,7 @@ import {
 import { runWeakUserIdentityCheck } from "./supporting-functions/user-validation/user.checker";
 import { sanitizeData } from "./supporting-functions/data-validation/main";
 
-// REQUIES MODIFICATION ONCE WE HAVE A COLLECTION WHERE REPORTED USERS GO, IT WILL SIMPLY
+// TODO - REQUIRES MODIFICATION ONCE WE HAVE A COLLECTION WHERE REPORTED USERS GO, IT WILL SIMPLY
 // NEED TO BE ADDED THERE IF "ADD", AND A PROPERTY OF THE DOC SUCH AS active SHOULD BE TURNED
 // TO FALSE IF IT SAYS "REMOVE"
 

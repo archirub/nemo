@@ -15,6 +15,7 @@ import {
   combineLatest,
   lastValueFrom,
   firstValueFrom,
+  defer,
 } from "rxjs";
 import { concatMapTo, first, last, switchMap, switchMapTo, tap } from "rxjs/operators";
 
@@ -26,7 +27,6 @@ import {
   createAccountRequest,
   SignupOptional,
   allowOptionalProp,
-  CHECK_AUTH_STATE,
   CustomError,
 } from "@interfaces/index";
 import { FirebaseUser, UserCredentialType } from "./../../interfaces/firebase.model";
@@ -83,8 +83,8 @@ export class SignupService {
    * the signData observable and stores its content on the local storage
    */
   createFirebaseAccount(email: string, password: string): Observable<UserCredentialType> {
-    return from(this.afAuth.createUserWithEmailAndPassword(email, password)).pipe(
-      switchMapTo(this.afAuth.signInWithEmailAndPassword(email, password)),
+    return defer(() => this.afAuth.createUserWithEmailAndPassword(email, password)).pipe(
+      switchMapTo(defer(() => this.afAuth.signInWithEmailAndPassword(email, password))),
       this.errorHandler.convertErrors("firebase-auth"),
       this.errorHandler.handleErrors()
     );

@@ -10,17 +10,24 @@ service cloud.firestore {
       allow read: if true;
     }
 
-    // DEV (for swipe stack info)
+    //  DEV (for swipe stack info)
     match /piStorage/{id} {
       allow read: if true;
     }
-    
+
+    match /general/{any} {
+      allow read
+    }
+  
 
     match /profiles/{profileID} {
       allow read: if userIsValid();
       allow update: if userIsValid() 
                     && profileWriteIsValid(profileID)
                     
+      match /private/notifications {
+        allow write: if userIsValid() && isDocumentOwner(profileID)
+      }
 
       match /private/private {
         allow read: if userIsValid() 

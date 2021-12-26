@@ -7,7 +7,7 @@ import * as admin from "firebase-admin";
 import {
   registerSwipeChoicesRequest,
   uidChoiceMap,
-  mdFromDatabase,
+  mdMainFromDatabase,
   SwipeMode,
   piStorage,
   SwipeUserInfo,
@@ -52,7 +52,7 @@ export const registerSwipeChoices = functions
     await admin.firestore().runTransaction(async (transaction) => {
       const targetMatchData = (await transaction.get(
         admin.firestore().collection("matchData").doc(currentUserID)
-      )) as FirebaseFirestore.DocumentSnapshot<mdFromDatabase>;
+      )) as FirebaseFirestore.DocumentSnapshot<mdMainFromDatabase>;
 
       if (!targetMatchData.exists)
         inexistentDocumentError("matchData", targetMatchData.id, currentUserID);
@@ -128,7 +128,7 @@ export const registerSwipeChoices = functions
         const targetMatchDataMainRef = admin
           .firestore()
           .collection("matchData")
-          .doc(currentUserID) as FirebaseFirestore.DocumentReference<mdFromDatabase>;
+          .doc(currentUserID) as FirebaseFirestore.DocumentReference<mdMainFromDatabase>;
 
         if (handleDatingYesChoicesReadReturn)
           handleDatingYesChoicesWRITE(
@@ -197,7 +197,7 @@ export const registerSwipeChoices = functions
         const targetMatchDataMainRef = admin
           .firestore()
           .collection("matchData")
-          .doc(currentUserID) as FirebaseFirestore.DocumentReference<mdFromDatabase>;
+          .doc(currentUserID) as FirebaseFirestore.DocumentReference<mdMainFromDatabase>;
 
         if (handleFriendYesChoicesReadReturn)
           handleFriendYesChoicesWRITE(
@@ -260,7 +260,7 @@ function separateChoices(choices: uidChoiceMap[]): {
 
 function UpdateNoChoicesWRITE(
   transaction: FirebaseFirestore.Transaction,
-  targetMatchDataMainRef: FirebaseFirestore.DocumentReference<mdFromDatabase>,
+  targetMatchDataMainRef: FirebaseFirestore.DocumentReference<mdMainFromDatabase>,
   swipeMode: SwipeMode,
   uids: string[],
   date: admin.firestore.Timestamp

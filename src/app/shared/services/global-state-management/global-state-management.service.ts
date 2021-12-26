@@ -6,7 +6,7 @@ import { AngularFireAuth } from "@angular/fire/auth";
 import { AngularFirestore } from "@angular/fire/firestore";
 
 import { Storage } from "@capacitor/storage";
-import { concat, EMPTY, forkJoin, from, merge, Observable, of, Subject } from "rxjs";
+import { concat, forkJoin, from, merge, Observable, of, Subject } from "rxjs";
 import {
   concatMap,
   distinctUntilChanged,

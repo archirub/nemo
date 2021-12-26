@@ -18,3 +18,4 @@ export * from "./duplicate-data-updating/index";
 export * from "./account-management/index";
 export * from "./app-development/index";
 export * from "./swipe-stack-management/index";
+export * from "./test-notification";

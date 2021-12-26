@@ -1,12 +1,15 @@
-<!-- <ion-button
+<ion-button
   style="z-index: 100; position: absolute"
   debounceClick
-  (debounceClick)="activateSwipeStack()"
+  (debounceClick)="sendNotification()"
   debounceTime="5000"
-  >Activate swipe stack (dev)</ion-button
-> -->
+  >Send notification (dev)</ion-button
+>
 
-<home-tutorial-slides *ngIf="homeTutorial" (exit)="exitHomeTutorial()"></home-tutorial-slides>
+<home-tutorial-slides
+  *ngIf="homeTutorial"
+  (exit)="exitHomeTutorial()"
+></home-tutorial-slides>
 
 <ng-container *ngIf="showLoading$ | async">
   <div class="fishAnim">

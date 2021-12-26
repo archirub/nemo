@@ -81,6 +81,10 @@ export interface privateProfileFromDatabase {
   latestSearchCriteria: allowOptionalProp<searchCriteria>;
 }
 
+export interface notificationsDocument {
+  tokens: string[];
+}
+
 // TO DEFINE BUT SHOWPROFILE MUST BE IN THERE
 const settingNameOption = ["showProfile"] as const;
 export type settingName = typeof settingNameOption[number];

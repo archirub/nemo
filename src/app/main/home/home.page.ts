@@ -55,6 +55,7 @@ import {
   FishSwimAnimation,
 } from "@animations/index";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
+import { AngularFireFunctions } from "@angular/fire/functions";
 
 @Component({
   selector: "app-home",
@@ -62,6 +63,13 @@ import { GlobalErrorHandler } from "@services/errors/global-error-handler.servic
   styleUrls: ["home.page.scss"],
 })
 export class HomePage implements OnInit, OnDestroy, AfterViewInit {
+  // DEV
+  sendNotification() {
+    return this.afFunctions
+      .httpsCallable("testNotification")({})
+      .subscribe((a) => console.log("NOTIFICATION", a));
+  }
+
   screenHeight: number;
   screenWidth: number;
 
@@ -146,6 +154,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     private modalCtrl: ModalController,
     private loadingCtrl: LoadingController,
     private navCtrl: NavController,
+    private afFunctions: AngularFireFunctions,
 
     private swipeStackStore: SwipeStackStore,
     private ownPicturesService: OwnPicturesStore,
@@ -156,6 +165,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     private storeReadiness: StoreReadinessService,
     private loading: LoadingService
   ) {
+    console.log("THIS IS WORKING");
     this.onResize();
   }
 

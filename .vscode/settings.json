@@ -2,6 +2,7 @@
     "eslint.lintTask.enable": true,
     "cSpell.words": [
         "firestore",
-        "Nemo"
+        "Nemo",
+        "Uids"
     ]
 }

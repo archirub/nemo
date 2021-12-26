@@ -1,6 +1,6 @@
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
-import { mdFromDatabase } from "../../src/app/shared/interfaces/index";
+import { mdMainFromDatabase } from "../../src/app/shared/interfaces/index";
 
 /**
  * Upon update detected in a matchData document:
@@ -14,7 +14,7 @@ export const updateUidCountMatchData = functions
   .firestore.document("matchData/{uid}")
   .onUpdate(async (change, context) => {
     const uid = context.params.uid;
-    const v = change.after.data() as mdFromDatabase;
+    const v = change.after.data() as mdMainFromDatabase;
 
     let totalCount = 0;
 

@@ -1,7 +1,7 @@
 import {
   generateSwipeStackRequest,
   generateSwipeStackResponse,
-  mdFromDatabase,
+  mdMainFromDatabase,
   piStorage,
   searchCriteria,
   SwipeMode,
@@ -16,6 +16,7 @@ import { sanitizeData } from "../../supporting-functions/data-validation/main";
 import {
   emptyCollectionOrQueryError,
   invalidDocumentError,
+  notFoundDocumentError,
 } from "../../supporting-functions/error-handling/generic-errors";
 
 // to test function locally:
@@ -85,9 +86,13 @@ export const generateSwipeStack = functions
         searchCriteriaGroup: 0.8,
       };
 
-      const matchDataMain = (
-        await admin.firestore().collection("matchData").doc(uid).get()
-      ).data() as mdFromDatabase;
+      const matchDataMainDoc = await admin
+        .firestore()
+        .collection("matchData")
+        .doc(uid)
+        .get();
+      if (!matchDataMainDoc.exists) notFoundDocumentError("matchData", uid, uid);
+      const matchDataMain = matchDataMainDoc.data() as mdMainFromDatabase;
 
       // const swipeMode: SwipeMode = matchDataMain.swipeMode;
       let pickedUsers: uidChoiceMap[] = [];

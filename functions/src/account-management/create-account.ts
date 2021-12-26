@@ -1,7 +1,7 @@
 import {
   createAccountRequest,
   mdDatingPickingFromDatabase,
-  mdFromDatabase,
+  mdMainFromDatabase,
   piStorage,
   privateProfileFromDatabase,
   profileFromDatabase,
@@ -91,7 +91,7 @@ export const createAccount = functions
         addToUidDatingStorage(transaction, uidStorageDocuments, uid);
       });
 
-      // TO DO
+      // TODO
       // DEGREE NEEDS TO BE PART OF REQUIRED FOR BACKEND, otherwise we put them in both categories
       // NEED TO FINALISE ALL DATA FORMAT INCLUDING PICTURES TO FINISH THIS PART
 
@@ -245,7 +245,7 @@ function addToMatchDataMain(
   data: createAccountRequest,
   uid: string
 ) {
-  const matchData: mdFromDatabase = {
+  const matchData: mdMainFromDatabase = {
     matchedUsers: {},
     dislikedUsers: {},
     fmatchedUsers: {},

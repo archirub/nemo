@@ -15,7 +15,7 @@ export interface dateMap {
   date: TimestampType;
 }
 
-export interface mdFromDatabase {
+export interface mdMainFromDatabase {
   matchedUsers: UidDateMap;
   dislikedUsers: UidDateMap;
 

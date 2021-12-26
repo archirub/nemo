@@ -3,7 +3,7 @@ import * as admin from "firebase-admin";
 import {
   getMatchDataUserInfoRequest,
   getMatchDataUserInfoResponse,
-  mdFromDatabase,
+  mdMainFromDatabase,
 } from "../../src/app/shared/interfaces/index";
 import { runWeakUserIdentityCheck } from "./supporting-functions/user-validation/user.checker";
 import { notFoundDocumentError } from "./supporting-functions/error-handling/generic-errors";
@@ -23,7 +23,7 @@ export const getMatchDataUserInfo = functions
 
       if (!snapshot.exists) notFoundDocumentError("matchData", snapshot.id, uid);
 
-      const data = snapshot.data() as mdFromDatabase;
+      const data = snapshot.data() as mdMainFromDatabase;
 
       const gender = data.gender;
       const sexualPreference = data.sexualPreference;

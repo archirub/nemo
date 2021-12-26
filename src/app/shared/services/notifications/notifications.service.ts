@@ -1,39 +1,93 @@
 import { Injectable } from "@angular/core";
-import { PushNotifications, PermissionStatus } from "@capacitor/push-notifications";
-import { BehaviorSubject, from, of } from "rxjs";
-import { map, switchMap } from "rxjs/operators";
+import { AngularFireAuth } from "@angular/fire/auth";
+import { AngularFirestore } from "@angular/fire/firestore";
+
+import {
+  PermissionStatus,
+  PushNotifications,
+  Token,
+} from "@capacitor/push-notifications";
+import { BehaviorSubject, defer, merge } from "rxjs";
+import {
+  distinctUntilChanged,
+  filter,
+  switchMap,
+  tap,
+  withLatestFrom,
+} from "rxjs/operators";
+
+import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
+
+import { CustomError } from "@interfaces/error-handling.model";
+import { FieldValue } from "@interfaces/firebase.model";
 
 @Injectable({ providedIn: "root" })
 export class NotificationsService {
   private permissionState = new BehaviorSubject<PermissionStatus["receive"]>(null);
   private permissionState$ = this.permissionState.asObservable();
 
-  constructor() {}
+  private token = new BehaviorSubject<Token>(null);
+  private token$ = this.token.asObservable().pipe(distinctUntilChanged());
+
+  constructor(
+    private afAuth: AngularFireAuth,
+    private fs: AngularFirestore,
+    private errorHandler: GlobalErrorHandler
+  ) {}
 
   activate() {
-    return of("");
-    return this.permissionState$.pipe(
-      switchMap((state) => {
-        if (state === null) return this.getPermissionState();
-        if (state === "prompt" || state === "prompt-with-rationale")
-          return this.requestPermission();
-        if (state === "granted") return this.startHandling();
-        return of("");
-      })
+    this.listenOnRegistration();
+    return merge(
+      this.handleTokenStorage(),
+      this.requestPermission() // TODO - this is just for development. When to request for notifications
+      // will need to be better placed, based on whether the user is going through the sign in process, etc.
     );
   }
 
   requestPermission() {
-    return from(PushNotifications.requestPermissions()).pipe(
-      map((permissions) => this.permissionState.next(permissions.receive))
+    return defer(() =>
+      PushNotifications.requestPermissions().then((result) => {
+        if (result.receive === "granted") {
+          // Register with Apple / Google to receive push via APNS/FCM
+          PushNotifications.register();
+        } else {
+          // Show some error
+        }
+      })
     );
   }
 
-  getPermissionState() {
-    return from(PushNotifications.checkPermissions()).pipe(
-      map((permissions) => this.permissionState.next(permissions.receive))
+  private listenOnRegistration() {
+    // On success, we should be able to receive notifications
+    PushNotifications.addListener("registration", (token: Token) =>
+      this.token.next(token)
     );
+
+    // Some issue with our setup and push will not work
+    PushNotifications.addListener("registrationError", (error: any) => {
+      console.log("Error on registration: " + JSON.stringify(error));
+    });
   }
 
-  async startHandling() {}
+  private handleTokenStorage() {
+    return this.token$.pipe(
+      filter((t) => !!t?.value),
+      withLatestFrom(
+        this.afAuth.user.pipe(
+          tap((u) => {
+            if (!u) throw new CustomError("local/check-auth-state", "local");
+          })
+        )
+      ),
+      switchMap(([token, user]) =>
+        this.fs
+          .collection("profiles")
+          .doc(user.uid)
+          .collection("private")
+          .doc("notifications")
+          .set({ tokens: FieldValue.arrayUnion(token.value) })
+      ),
+      this.errorHandler.handleErrors()
+    );
+  }
 }

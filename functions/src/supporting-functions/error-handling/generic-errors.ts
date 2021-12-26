@@ -34,13 +34,13 @@ export function invalidDocumentError(
 
 // used specifically when the document itself which was requested wasn't found
 export function notFoundDocumentError(
-  document: string,
+  collection: string,
   docid: string,
   calleruid: string
 ) {
   throw new https.HttpsError(
     "not-found",
-    `The ${document} document requested doesn't exist.    
+    `The ${collection} document requested doesn't exist.    
     doc id: ${docid}, 
     caller uid: ${calleruid}. `
   );

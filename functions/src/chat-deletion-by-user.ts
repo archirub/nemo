@@ -1,7 +1,7 @@
 import {
   chatDeletionByUserRequest,
   chatFromDatabase,
-  mdFromDatabase,
+  mdMainFromDatabase,
 } from "./../../src/app/shared/interfaces/index";
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { isEqual } from "lodash";
@@ -62,7 +62,7 @@ export const chatDeletionByUser = functions
 
       deleteMatch(
         batch,
-        matchDataSnapshot as FirebaseFirestore.DocumentSnapshot<mdFromDatabase>,
+        matchDataSnapshot as FirebaseFirestore.DocumentSnapshot<mdMainFromDatabase>,
         recipientuid
       );
       batch.delete(chatRef);
@@ -74,7 +74,7 @@ export const chatDeletionByUser = functions
 
 function deleteMatch(
   batch: FirebaseFirestore.WriteBatch,
-  matchDataSnapshot: FirebaseFirestore.DocumentSnapshot<mdFromDatabase>,
+  matchDataSnapshot: FirebaseFirestore.DocumentSnapshot<mdMainFromDatabase>,
   recipientuid: string
 ) {
   const matchData = matchDataSnapshot.data();

@@ -33,9 +33,8 @@ export class UniversitiesStore {
       first(),
       switchMap((universities) => {
         if (Array.isArray(universities)) return of("");
-
         return this.firestore
-          .collection("admin")
+          .collection("general")
           .doc("universitiesAllowed")
           .get()
           .pipe(

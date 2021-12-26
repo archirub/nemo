@@ -30,7 +30,7 @@ export const checkEmailValidity = functions
 
       const universitiesAllowed = (
         (
-          await admin.firestore().collection("admin").doc("universitiesAllowed").get()
+          await admin.firestore().collection("general").doc("universitiesAllowed").get()
         ).data() as universitiesAllowedDocument
       ).list;
 

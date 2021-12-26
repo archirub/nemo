@@ -1,6 +1,6 @@
 import { mdFriendPickingFromDatabase } from "./../../../../src/app/shared/interfaces/match-data.model";
 import {
-  mdFromDatabase,
+  mdMainFromDatabase,
   searchCriteria,
   UniversityName,
   AreaOfStudy,

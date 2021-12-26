@@ -224,8 +224,8 @@ export class SignupauthPage implements OnInit {
 
     const loader = await this.loadingCtrl.create(this.loading.defaultLoadingOptions);
     const alert = await this.alertCtrl.create({
-      header: "The email you have entered is invalid",
-      message: "You have been redirected to change it to one that's valid.",
+      header: "Invalid Email",
+      message: "Please change the email address you have provided.",
       buttons: ["Okay"],
     });
 
@@ -282,7 +282,7 @@ export class SignupauthPage implements OnInit {
     return firstValueFrom(
       this.signup.createFirebaseAccount(email, password).pipe(
         catchError((error) => {
-          // rethrowing error so that the chain of logic from "onSlideFromPassword" is stopped
+          // re-throwing error so that the chain of logic from "onSlideFromPassword" is stopped
           let messageToDisplay = "Could not sign you up. Please try again.";
           if (error?.message) messageToDisplay = error?.message;
           if (error?.code === "auth/email-already-in-use") {

@@ -37,9 +37,9 @@ import {
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 import { IonSlides } from "@ionic/angular";
 
-// loading is for when there is no one in the stack but we are fetching
-// empty is for the stack has been fetched and no one was found
-// filled is for when there is someone in the stack
+// - loading is for when there is no one in the stack but we are fetching
+// - empty is for the stack has been fetched and no one was found
+// - filled is for when there is someone in the stack
 export type StackState = "init" | "filled" | "loading" | "empty";
 
 export type PictureQueue = Array<{ uid: string; pictureIndex: number }>;
@@ -71,7 +71,7 @@ export class SwipeStackStore {
   private isReady = new BehaviorSubject<boolean>(false);
   private stackState = new BehaviorSubject<StackState>("init");
 
-  profiles$ = this.profiles.asObservable();
+  private profiles$ = this.profiles.asObservable();
   profilesToRender$ = this.profilesToRender.asObservable();
   isReady$ = this.isReady.asObservable().pipe(distinctUntilChanged());
   stackState$ = this.stackState.asObservable().pipe(distinctUntilChanged());
@@ -192,8 +192,8 @@ export class SwipeStackStore {
   }
 
   managePictureQueue() {
-    // this relies on a particular fact: that adding new urls to the profiles BehavioSubject
-    // triggers profilesToRender$ to reemit, thereby making it fetch the next batch of pictures on the priority list.
+    // this relies on a particular fact: that adding new urls to the profiles BehaviorSubject
+    // triggers profilesToRender$ to re-emit, thereby making it fetch the next batch of pictures on the priority list.
     // That is: it relies on the fact that finishing to fetch a given batch triggers the fetching of the next batch
     return this.profilesToRender$.pipe(
       filter((profiles) => Array.isArray(profiles) && profiles.length > 0),
@@ -225,7 +225,8 @@ export class SwipeStackStore {
               forkJoin(batch.map(([uid, picIndex]) => this.getUrl(uid, picIndex))).pipe(
                 // transforming to object whose shape fits the parameter of this.addPictures
                 // (note: this puts an empty string for url if there isn't any corresponding url
-                // there needs to be something there so that we don't attempt to fetch it everytime
+                // there needs to be something there so that we don't attempt to fetch it
+
                 // if we already know there is something there)
                 map((urls) =>
                   urls.map((url, i) => ({ uid: batch[i][0], picIndex: batch[i][1], url }))
@@ -243,7 +244,7 @@ export class SwipeStackStore {
     // triggers when there is a change to the array of rendered profiles
     // (usually means a profile has been added or removed)
     return profileCards.changes.pipe(
-      // listens to the user's swipping on that profile
+      // listens to the user's swiping on that profile
       switchMap((list: QueryList<ProfileCardComponent>) =>
         list.first.slidesRef$.pipe(
           first(),
@@ -403,7 +404,7 @@ export class SwipeStackStore {
     this.stackState.next("loading");
     return this.fetchUIDs(SC).pipe(
       //using exhaustMap s.t. other requests are not listened to while profiles are being fetched
-      // this is because it is a costly operation w.r.t backened and money-wise
+      // this is because it is a costly operation w.r.t backend and money-wise
       exhaustMap((uids) => this.fetchProfiles(uids)),
 
       concatMap((profiles) => this.addToQueue(profiles))

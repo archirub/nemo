@@ -1,6 +1,6 @@
 import * as admin from "firebase-admin";
 import {
-  mdFromDatabase,
+  mdMainFromDatabase,
   profileFromDatabase,
   userSnippet,
   chatFromDatabase,
@@ -12,7 +12,7 @@ import { inexistentDocumentError } from "../../supporting-functions/error-handli
 export interface uidDocRefMapFriend {
   uid: string;
   dateMap: dateMap;
-  mainRef: FirebaseFirestore.DocumentReference<mdFromDatabase>;
+  mainRef: FirebaseFirestore.DocumentReference<mdMainFromDatabase>;
   friendRef: FirebaseFirestore.DocumentReference<mdFriendPickingFromDatabase>;
 }
 
@@ -41,7 +41,7 @@ export async function handleFriendYesChoicesREAD(
       const matchDataMainRef = admin
         .firestore()
         .collection("matchData")
-        .doc(uid) as FirebaseFirestore.DocumentReference<mdFromDatabase>;
+        .doc(uid) as FirebaseFirestore.DocumentReference<mdMainFromDatabase>;
       if (!matchDataFriendDoc.exists)
         inexistentDocumentError("matchDataFriend", matchDataFriendDoc.id, currentUserID);
 
@@ -74,7 +74,7 @@ export async function handleFriendYesChoicesREAD(
 
 export function handleFriendYesChoicesWRITE(
   transaction: FirebaseFirestore.Transaction,
-  targetMatchDataMainRef: FirebaseFirestore.DocumentReference<mdFromDatabase>,
+  targetMatchDataMainRef: FirebaseFirestore.DocumentReference<mdMainFromDatabase>,
   targetMatchDataDatingRef: FirebaseFirestore.DocumentReference<mdFriendPickingFromDatabase>,
   currentUserID: string,
   notMatchedYesUsers: uidDocRefMapFriend[],
@@ -92,7 +92,7 @@ export function handleFriendYesChoicesWRITE(
 
 function handleFriendMatchUsers(
   transaction: FirebaseFirestore.Transaction,
-  targetMatchDataMainRef: FirebaseFirestore.DocumentReference<mdFromDatabase>,
+  targetMatchDataMainRef: FirebaseFirestore.DocumentReference<mdMainFromDatabase>,
   targetuid: string,
   uidRefs: uidDocRefMapFriend[]
 ) {

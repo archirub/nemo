@@ -1,4 +1,5 @@
 import { Injectable } from "@angular/core";
+import { AngularFireAuth } from "@angular/fire/auth";
 
 import { catchError, Observable, tap, firstValueFrom, OperatorFunction, of } from "rxjs";
 
@@ -24,7 +25,7 @@ import { CustomError, ErrorType, CustomGlobalErrorHandler } from "@interfaces/in
 })
 export class GlobalErrorHandler implements CustomGlobalErrorHandler {
   constructor(
-    // private afAuth: AngularFireAuth,
+    private afAuth: AngularFireAuth,
     private firestoreEH: FirestoreErrorHandler,
     private fAuthEH: FirebaseAuthErrorHandler,
     private fStorageEH: FirebaseStorageErrorHandler,
@@ -79,19 +80,19 @@ export class GlobalErrorHandler implements CustomGlobalErrorHandler {
       ) as Observable<T>;
   }
 
-  // Gonna have to move this its own service or something
+  // TODO - Gonna have to move this its own service or something
   // Create a error handler for local (or like custom errors or something)
   // and put it there?
   getCurrentUserWithErrorHandling(): Promise<firebase.default.User> {
-    console.error("getCurrentUserWithErrorHandling just used and UNIMPLEMENTED");
-    return firstValueFrom(of("" as unknown as firebase.default.User));
-    // return firstValueFrom(
-    //   this.afAuth.user.pipe(
-    //     tap((user) => {
-    //       if (!user) throw new CustomError("local/check-auth-state", "local");
-    //     }),
-    //     this.handleErrors()
-    //   )
+    // console.error("getCurrentUserWithErrorHandling just used and UNIMPLEMENTED");
+    // return firstValueFrom(of("" as unknown as firebase.default.User));
+    return firstValueFrom(this.afAuth.user);
+    // .pipe(
+    //   tap((user) => {
+    //     if (!user) throw new CustomError("local/check-auth-state", "local");
+    //   }),
+    //   this.handleErrors()
+    // )
     // );
   }
 

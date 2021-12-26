@@ -1,6 +1,6 @@
 import * as admin from "firebase-admin";
 import {
-  mdFromDatabase,
+  mdMainFromDatabase,
   profileFromDatabase,
   userSnippet,
   chatFromDatabase,
@@ -12,7 +12,7 @@ import { inexistentDocumentError } from "../../supporting-functions/error-handli
 export interface uidDocRefMapDating {
   uid: string;
   dateMap: dateMap;
-  mainRef: FirebaseFirestore.DocumentReference<mdFromDatabase>;
+  mainRef: FirebaseFirestore.DocumentReference<mdMainFromDatabase>;
   datingRef: FirebaseFirestore.DocumentReference<mdDatingPickingFromDatabase>;
 }
 
@@ -46,7 +46,7 @@ export async function handleDatingYesChoicesREAD(
       const matchDataMainRef = admin
         .firestore()
         .collection("matchData")
-        .doc(uid) as FirebaseFirestore.DocumentReference<mdFromDatabase>;
+        .doc(uid) as FirebaseFirestore.DocumentReference<mdMainFromDatabase>;
 
       if (!matchDataDatingDoc.exists)
         inexistentDocumentError("matchDataDating", matchDataDatingDoc.id, currentUserID);
@@ -91,7 +91,7 @@ export async function handleDatingYesChoicesREAD(
 
 export function handleDatingYesChoicesWRITE(
   transaction: FirebaseFirestore.Transaction,
-  targetMatchDataMainRef: FirebaseFirestore.DocumentReference<mdFromDatabase>,
+  targetMatchDataMainRef: FirebaseFirestore.DocumentReference<mdMainFromDatabase>,
   targetMatchDataDatingRef: FirebaseFirestore.DocumentReference<mdDatingPickingFromDatabase>,
   currentUserID: string,
   notMatchedYesUsers: uidDocRefMapDating[],
@@ -115,7 +115,7 @@ export function handleDatingYesChoicesWRITE(
 
 function handleDatingMatchUsers(
   transaction: FirebaseFirestore.Transaction,
-  targetMatchDataMainRef: FirebaseFirestore.DocumentReference<mdFromDatabase>,
+  targetMatchDataMainRef: FirebaseFirestore.DocumentReference<mdMainFromDatabase>,
   targetuid: string,
   uidRefs: uidDocRefMapDating[]
 ) {

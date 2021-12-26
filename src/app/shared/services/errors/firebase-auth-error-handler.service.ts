@@ -137,6 +137,13 @@ export class FirebaseAuthErrorHandler
           "This account has been disabled. This may happen if you have infringed on our code of conduct. Please contact Nemo if you believe this is a mistake.",
       };
 
+    if (code === "auth/weak-password")
+      return {
+        header: "Weak Password",
+        message:
+          "The password you provided is too weak. Try a more complex or longer password.",
+      };
+
     if (code === "auth/invalid-password")
       return {
         header: "Password Incorrect",
@@ -180,6 +187,7 @@ const firebaseAuthCodes = [
 
   // ACTION - Error message (password is invalid)
   "auth/invalid-password", // =	The provided value for the password user property is invalid. It must be a string with at least six characters.
+  "auth/weak-password",
 
   // ACTION - Error message (an error occurred)
   "auth/user-not-found", // =	There is no existing user record corresponding to the provided identifier.
