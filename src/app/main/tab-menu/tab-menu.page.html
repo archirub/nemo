@@ -1,5 +1,5 @@
 <ion-tabs #tabs (ionTabsWillChange)="colorIcon()">
-  <ion-tab-bar slot="bottom" id="tabs">
+  <ion-tab-bar slot="bottom" id="tabs" *ngIf="!this.hideTabs">
     <ion-tab-button tab="chats">
       <img id="chats" src="/assets/chatsicon.svg"/>
     </ion-tab-button>

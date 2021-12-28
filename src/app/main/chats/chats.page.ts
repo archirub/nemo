@@ -8,6 +8,7 @@ import { ChatboardStore } from "@stores/index";
 
 import { Chat } from "@classes/index";
 import { FishSwimAnimation } from "@animations/fish.animation";
+import { TutorialsService } from "@services/tutorials/tutorials.service";
 
 @Component({
   selector: "app-chats",
@@ -56,7 +57,10 @@ export class ChatsPage implements OnDestroy {
     map(() => this.fishSwimAnimation?.destroy())
   );
 
-  constructor(private chatboardStore: ChatboardStore) {}
+  constructor(
+    private chatboardStore: ChatboardStore,
+    private tutorials: TutorialsService
+  ) {}
 
   ngAfterViewInit() {
     this.subs.add(this.playLoadingAnimation$.subscribe());
@@ -77,6 +81,7 @@ export class ChatsPage implements OnDestroy {
   //TUTORIAL EXIT
   exitChatsTutorial() {
     this.chatsTutorial = false;
+    this.tutorials.finishTutorials('chats');
   }
 
   ngOnDestroy() {

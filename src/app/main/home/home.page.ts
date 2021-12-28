@@ -56,6 +56,7 @@ import {
 } from "@animations/index";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 import { AngularFireFunctions } from "@angular/fire/functions";
+import { TutorialsService } from "@services/tutorials/tutorials.service";
 
 @Component({
   selector: "app-home",
@@ -163,7 +164,8 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     private errorHandler: GlobalErrorHandler,
     private tabElementRef: TabElementRefService,
     private storeReadiness: StoreReadinessService,
-    private loading: LoadingService
+    private loading: LoadingService,
+    private tutorials: TutorialsService
   ) {
     console.log("THIS IS WORKING");
     this.onResize();
@@ -185,6 +187,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
   //TUTORIAL EXIT
   exitHomeTutorial() {
     this.homeTutorial = false;
+    this.tutorials.finishTutorials('home');
   }
 
   // For development, to avoid fetching the stack on each reload / document save

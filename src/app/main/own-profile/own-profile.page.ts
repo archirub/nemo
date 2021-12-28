@@ -69,6 +69,7 @@ import {
   MAX_PROFILE_PICTURES_COUNT,
   QuestionAndAnswer,
 } from "@interfaces/index";
+import { TutorialsService } from "@services/tutorials/tutorials.service";
 
 @Component({
   selector: "app-own-profile",
@@ -215,7 +216,8 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     private ownPicturesService: OwnPicturesStore,
 
     private tabElementRef: TabElementRefService,
-    private storeReadiness: StoreReadinessService
+    private storeReadiness: StoreReadinessService,
+    private tutorials: TutorialsService
   ) {}
 
   ngOnInit() {
@@ -549,6 +551,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
   //TUTORIAL EXIT
   exitOwnProfileTutorial() {
     this.ownProfileTutorial = false;
+    this.tutorials.finishTutorials('own-profile');
   }
 
   /**
