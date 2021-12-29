@@ -46,7 +46,7 @@ import { EmailVerificationService } from "./email-verification.service";
 import { LoadingService } from "@services/loading/loading.service";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 
-import { UserCredentialType } from "@interfaces/firebase.model";
+import { FireAuthUserCredential } from "@interfaces/firebase.model";
 import { FlyingLetterAnimation } from "@animations/letter.animation";
 
 @Component({
@@ -273,7 +273,7 @@ export class SignupauthPage implements OnInit {
     return this.navCtrl.navigateForward("/welcome/signuprequired");
   }
 
-  private requestAccountCreation(): Promise<void | UserCredentialType> {
+  private requestAccountCreation(): Promise<void | FireAuthUserCredential> {
     const email: string = this.authForm.get("email").value;
     const password: string = this.authForm.get("password").value;
 

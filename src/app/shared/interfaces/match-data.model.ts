@@ -1,4 +1,4 @@
-import { TimestampType } from "./firebase.model";
+import { FirestoreTimestamp } from "./firebase.model";
 import {
   AreaOfStudy,
   Degree,
@@ -12,7 +12,7 @@ export interface UidDateMap {
 
 export interface dateMap {
   exists: true;
-  date: TimestampType;
+  date: FirestoreTimestamp;
 }
 
 export interface mdMainFromDatabase {

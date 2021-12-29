@@ -30,7 +30,11 @@ export const testNotification = functions
       },
     };
 
-    const response = await admin.messaging().sendToDevice(tokens, payload);
+    const options: admin.messaging.MessagingOptions = {
+      collapseKey: "new_message",
+    };
+
+    const response = await admin.messaging().sendToDevice(tokens, payload, options);
 
     // If un-follow we exit the function.
     // if (!change.after.val()) {

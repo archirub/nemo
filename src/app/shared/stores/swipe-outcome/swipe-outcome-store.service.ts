@@ -1,11 +1,25 @@
 import { Injectable } from "@angular/core";
 import { AngularFireFunctions } from "@angular/fire/functions";
 
-import { BehaviorSubject, concat, Observable } from "rxjs";
+import { BehaviorSubject, concat, merge, Observable } from "rxjs";
 
 import { Profile } from "@classes/index";
-import { uidChoiceMap, profileChoiceMap, swipeChoice } from "@interfaces/index";
-import { exhaustMap, first, map, retry, take } from "rxjs/operators";
+import {
+  uidChoiceMap,
+  profileChoiceMap,
+  swipeChoice,
+  registerSwipeChoicesRequest,
+} from "@interfaces/index";
+import {
+  concatMapTo,
+  exhaustMap,
+  filter,
+  first,
+  map,
+  share,
+  take,
+  tap,
+} from "rxjs/operators";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 
 @Injectable({
@@ -62,14 +76,25 @@ export class SwipeOutcomeStore {
     );
   }
 
-  public removeFromSwipeAnswers(newAnswers: uidChoiceMap[]): Observable<void> {
+  public removeFromSwipeAnswers(answersToRemove: uidChoiceMap[]): Observable<void> {
     return this.swipeAnswers$.pipe(
       take(1),
       map((currentAnswers) => {
+        const uidsToRemove = answersToRemove.map((ans) => ans.uid);
         this.swipeAnswers.next(
-          currentAnswers.filter(
-            (answer) => !newAnswers.map((ans) => ans.uid).includes(answer.uid)
-          )
+          currentAnswers.filter((answer) => !uidsToRemove.includes(answer.uid))
+        );
+      })
+    );
+  }
+
+  public removeFromSwipeChoices(choicesToRemove: profileChoiceMap[]): Observable<void> {
+    return this.swipeChoices$.pipe(
+      take(1),
+      map((currChoices) => {
+        const uidsToRemove = choicesToRemove.map((c) => c.profile.uid);
+        this.swipeChoices.next(
+          currChoices.filter((choice) => !uidsToRemove.includes(choice.profile.uid))
         );
       })
     );
@@ -86,27 +111,36 @@ export class SwipeOutcomeStore {
     );
   }
 
-  public registerSwipeChoices(): Observable<void> {
-    return this.swipeChoices$.pipe(
-      first(),
-      map((choices): uidChoiceMap[] =>
-        choices.map((c) => {
-          return { uid: c.profile.uid, choice: c.choice };
-        })
-      ),
-      exhaustMap((choices) =>
-        concat(
-          this.afFunctions
-            .httpsCallable("registerSwipeChoices")({ choices })
-            .pipe(
-              this.errorHandler.convertErrors("cloud-functions"),
-              this.errorHandler.handleErrors()
-            ),
-          this.removeFromSwipeAnswers(choices)
-        )
-      )
-    );
-  }
+  public registerSwipeChoices$: Observable<void> = this.swipeChoices$.pipe(
+    first(),
+    filter((c) => c.length > 0),
+    tap(() => console.log("registerSwipeChoices$ observable triggered")),
+    exhaustMap((choices) => {
+      const uidChoiceMaps: uidChoiceMap[] = choices.map((c) => ({
+        uid: c.profile.uid,
+        choice: c.choice,
+      }));
+
+      const request: registerSwipeChoicesRequest = { choices: uidChoiceMaps };
+
+      return this.afFunctions
+        .httpsCallable("registerSwipeChoices")(request)
+        .pipe(
+          tap(() =>
+            console.info(`registerSwipeChoices triggered for ${choices.length} choices.`)
+          ),
+          concatMapTo(
+            merge(
+              this.removeFromSwipeAnswers(uidChoiceMaps),
+              this.removeFromSwipeChoices(choices)
+            )
+          ),
+          this.errorHandler.convertErrors("cloud-functions"),
+          this.errorHandler.handleErrors()
+        );
+    }),
+    share()
+  );
 
   resetStore() {
     this.swipeChoices.next([]);

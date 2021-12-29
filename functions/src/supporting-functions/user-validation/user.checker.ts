@@ -8,6 +8,12 @@ import { firestore } from "firebase-admin";
 import { emailIsAllowed } from "../../account-management";
 import { notFoundDocumentError } from "../error-handling/generic-errors";
 
+/**
+ * Checks for:
+ * - Authenticated
+ * - Email verified
+ * - Email from an allowed university or in additionalAllowedEmails
+ */
 export async function runStrongUserIdentityCheck(context: https.CallableContext) {
   const identityCheck = await strongUserIdentityCheck(context);
 
@@ -18,6 +24,11 @@ export async function runStrongUserIdentityCheck(context: https.CallableContext)
     );
 }
 
+/**
+ * Checks for:
+ * - Authenticated
+ * - Email verified
+ */
 export function runWeakUserIdentityCheck(context: https.CallableContext) {
   const identityCheck = weakUserIdentityCheck(context);
 

@@ -1,9 +1,6 @@
-import {
-  mdDatingPickingFromDatabase,
-  mdFriendPickingFromDatabase,
-} from "./../../../../src/app/shared/interfaces/match-data.model";
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
+
 import {
   registerSwipeChoicesRequest,
   uidChoiceMap,
@@ -27,6 +24,10 @@ import {
   handleFriendYesChoicesWRITE,
   uidDocRefMapFriend,
 } from "./friend-mode";
+import {
+  mdDatingPickingFromDatabase,
+  mdFriendPickingFromDatabase,
+} from "./../../../../src/app/shared/interfaces/match-data.model";
 import { runWeakUserIdentityCheck } from "../../supporting-functions/user-validation/user.checker";
 import { sanitizeData } from "../../supporting-functions/data-validation/main";
 import {
@@ -34,6 +35,7 @@ import {
   inexistentDocumentError,
   invalidDocumentError,
 } from "../../supporting-functions/error-handling/generic-errors";
+import { swipeCapREAD, swipeCapWRITE } from "./swipe-cap";
 
 export const registerSwipeChoices = functions
   .region("europe-west2")
@@ -49,6 +51,9 @@ export const registerSwipeChoices = functions
 
     const choices: uidChoiceMap[] = sanitizedRequest.choices;
 
+    if (choices.length < 1) return;
+
+    // In transactions, all reads must come before writes, hence the format below
     await admin.firestore().runTransaction(async (transaction) => {
       const targetMatchData = (await transaction.get(
         admin.firestore().collection("matchData").doc(currentUserID)
@@ -74,8 +79,10 @@ export const registerSwipeChoices = functions
         transaction,
         currentUserID,
         [...(superLike || []), ...(yes || [])],
-        no
+        no || []
       );
+
+      const swipeCapReadReturn = await swipeCapREAD(transaction, currentUserID);
 
       // DATING MODE HANDLING
       if (swipeMode === "dating") {
@@ -234,6 +241,8 @@ export const registerSwipeChoices = functions
         [...(superLike || []), ...(yes || [])],
         no
       );
+
+      swipeCapWRITE(transaction, currentUserID, choices.length, swipeCapReadReturn);
     });
   });
 

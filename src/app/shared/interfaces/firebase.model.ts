@@ -8,8 +8,8 @@ export const EmailAuthProvider = firebase.default.auth.EmailAuthProvider;
 export const FieldValue = firebase.default.firestore.FieldValue;
 
 export type FirebaseUser = firebase.default.User;
-export type UserCredentialType = firebase.default.auth.UserCredential;
-export type TimestampType = firebase.default.firestore.Timestamp;
+export type FireAuthUserCredential = firebase.default.auth.UserCredential;
+export type FirestoreTimestamp = firebase.default.firestore.Timestamp;
 
 export type FirestoreErrorType = firebase.default.firestore.FirestoreError;
 export type FirestoreErrorCodeType = firebase.default.firestore.FirestoreErrorCode;

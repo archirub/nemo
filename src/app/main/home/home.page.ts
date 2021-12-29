@@ -14,6 +14,7 @@ import {
   LoadingController,
   NavController,
 } from "@ionic/angular";
+import { AngularFireFunctions } from "@angular/fire/functions";
 
 import {
   BehaviorSubject,
@@ -35,12 +36,16 @@ import {
   tap,
   timeout,
 } from "rxjs/operators";
+import { PushNotifications } from "@capacitor/push-notifications";
 
 import { SearchCriteriaComponent } from "./search-criteria/search-criteria.component";
 
 import { LoadingService } from "@services/loading/loading.service";
 import { TabElementRefService } from "src/app/main/tab-menu/tab-element-ref.service";
 import { StoreReadinessService } from "@services/store-readiness/store-readiness.service";
+import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
+import { TutorialsService } from "@services/tutorials/tutorials.service";
+import { SwipeCapService } from "@stores/swipe-stack/swipe-cap.service";
 
 import { ChatboardStore, SwipeStackStore } from "@stores/index";
 import { OwnPicturesStore } from "@stores/pictures/own-pictures/own-pictures.service";
@@ -54,9 +59,6 @@ import {
   CloseCatchAnimation,
   FishSwimAnimation,
 } from "@animations/index";
-import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
-import { AngularFireFunctions } from "@angular/fire/functions";
-import { TutorialsService } from "@services/tutorials/tutorials.service";
 
 @Component({
   selector: "app-home",
@@ -69,6 +71,12 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     return this.afFunctions
       .httpsCallable("testNotification")({})
       .subscribe((a) => console.log("NOTIFICATION", a));
+  }
+
+  // DEV
+  removeNotifications() {
+    console.log("removing notifications");
+    return PushNotifications.removeAllDeliveredNotifications();
   }
 
   screenHeight: number;
@@ -165,7 +173,8 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     private tabElementRef: TabElementRefService,
     private storeReadiness: StoreReadinessService,
     private loading: LoadingService,
-    private tutorials: TutorialsService
+    private tutorials: TutorialsService,
+    private swipeCap: SwipeCapService
   ) {
     console.log("THIS IS WORKING");
     this.onResize();
@@ -174,6 +183,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
   ngOnInit() {
     this.subs.add(this.readinessHandler$.subscribe());
     this.subs.add(this.mainProfilePictureGetter$.subscribe());
+    this.swipeCap.swipesLeft$.subscribe((s) => console.log("# of swipes left:", s));
 
     this.swipeStackStore.stackState$.subscribe((c) => console.log("stack state:", c));
   }
@@ -187,7 +197,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
   //TUTORIAL EXIT
   exitHomeTutorial() {
     this.homeTutorial = false;
-    this.tutorials.finishTutorials('home');
+    this.tutorials.finishTutorials("home");
   }
 
   // For development, to avoid fetching the stack on each reload / document save

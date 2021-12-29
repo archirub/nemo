@@ -1,9 +1,9 @@
-import { TimestampType } from "./firebase.model";
+import { FirestoreTimestamp } from "./firebase.model";
 
 export interface messageFromDatabase {
   uids: string[]; // necessary for checking it is own message in firestore security rules
   senderID: string;
-  time: TimestampType;
+  time: FirestoreTimestamp;
   content: string;
   // reaction: messageReaction;
   // seen: boolean;

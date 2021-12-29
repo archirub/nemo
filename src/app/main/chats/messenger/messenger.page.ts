@@ -148,7 +148,8 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
   // profile of the person we're chatting with
   recipientProfile$ = this.profilesStore.profiles$.pipe(
     withLatestFrom(this.chat$),
-    map(([profiles, chat]) => profiles?.[chat?.recipient?.uid])
+    map(([profiles, chat]) => profiles?.[chat?.recipient?.uid]),
+    tap((p) => console.log("recipient profile", p))
   );
 
   /** Handles scrolling to bottom of messenger when there a new message is sent (on either side).

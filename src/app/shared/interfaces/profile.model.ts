@@ -11,7 +11,7 @@ import { allowOptionalProp } from "./shared.model";
 import { Gender, SexualPreference } from "./match-data.model";
 import { UniversityName } from "./universities.model";
 import { DocumentData, QueryDocumentSnapshot } from "@angular/fire/firestore";
-import { TimestampType } from "./firebase.model";
+import { FirestoreTimestamp } from "./firebase.model";
 
 // IF SUCH CONSTANTS ARE CHANGED, MAKE SURE TO CHANGE THE SECURITY RULES ACCORDINGLY
 export const MAX_PROFILE_PICTURES_COUNT = 6;
@@ -59,7 +59,7 @@ export interface appUser extends profile {
 
 export interface profileFromDatabase {
   firstName: string;
-  dateOfBirth: TimestampType;
+  dateOfBirth: FirestoreTimestamp;
   biography: string;
 
   university: UniversityName;
@@ -79,10 +79,21 @@ export interface profileFromDatabase {
 export interface privateProfileFromDatabase {
   settings: Settings;
   latestSearchCriteria: allowOptionalProp<searchCriteria>;
+  swipeCount: number;
 }
 
 export interface notificationsDocument {
   tokens: string[];
+}
+
+export interface SwipeCapDocument {
+  swipesLeft: number;
+  date: FirestoreTimestamp;
+}
+
+export interface SwipeCapGeneralDocument {
+  maxSwipes: number;
+  increaseRatePerHour: number;
 }
 
 // TO DEFINE BUT SHOWPROFILE MUST BE IN THERE

@@ -29,7 +29,7 @@ import {
   allowOptionalProp,
   CustomError,
 } from "@interfaces/index";
-import { FirebaseUser, UserCredentialType } from "./../../interfaces/firebase.model";
+import { FirebaseUser, FireAuthUserCredential } from "./../../interfaces/firebase.model";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 
 @Injectable({
@@ -82,7 +82,10 @@ export class SignupService {
    * Creates the account in Firebase authentification, initializes
    * the signData observable and stores its content on the local storage
    */
-  createFirebaseAccount(email: string, password: string): Observable<UserCredentialType> {
+  createFirebaseAccount(
+    email: string,
+    password: string
+  ): Observable<FireAuthUserCredential> {
     return defer(() => this.afAuth.createUserWithEmailAndPassword(email, password)).pipe(
       switchMapTo(defer(() => this.afAuth.signInWithEmailAndPassword(email, password))),
       this.errorHandler.convertErrors("firebase-auth"),

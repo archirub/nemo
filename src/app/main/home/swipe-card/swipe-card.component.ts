@@ -60,6 +60,7 @@ import {
   QuerySnapshot,
 } from "@angular/fire/firestore";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
+import { SwipeCapService } from "@stores/swipe-stack/swipe-cap.service";
 
 @Component({
   selector: "app-swipe-card",
@@ -130,7 +131,8 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
     private SCstore: SearchCriteriaStore, // for DEV
     private currentUserStore: CurrentUserStore, // for DEV
 
-    private errorHandler: GlobalErrorHandler
+    private errorHandler: GlobalErrorHandler,
+    private swipeCap: SwipeCapService
   ) {
     this.onResize();
   }
@@ -291,7 +293,7 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
     return this.doubleTap$.pipe(
       exhaustMap((choice) => {
         this.tapInProgress$.next(true);
-        return this.doubleTapOnCard(choice).pipe(
+        return concat(this.swipeCap.useSwipe(), this.doubleTapOnCard(choice)).pipe(
           tap(() => this.tapInProgress$.next(false))
         );
       })
@@ -394,7 +396,7 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
     return concat(
       of(this.matched.emit(profile)),
       this.otherProfilesStore.saveProfile(profile.uid, profile),
-      this.swipeOutcomeStore.registerSwipeChoices()
+      this.swipeOutcomeStore.registerSwipeChoices$
     );
   }
 

@@ -119,6 +119,7 @@ export class CurrentUserStore {
           profile?.socialMediaLinks,
           privateProfile?.settings,
           latestSearchCriteria ?? {},
+          privateProfile?.swipeCount ?? 0,
           infoFromMatchData?.gender,
           infoFromMatchData?.sexualPreference
         );

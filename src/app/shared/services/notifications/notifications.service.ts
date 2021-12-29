@@ -2,12 +2,15 @@ import { Injectable } from "@angular/core";
 import { AngularFireAuth } from "@angular/fire/auth";
 import { AngularFirestore } from "@angular/fire/firestore";
 
+import { Capacitor } from "@capacitor/core";
 import {
+  ActionPerformed,
   PermissionStatus,
   PushNotifications,
+  PushNotificationSchema,
   Token,
 } from "@capacitor/push-notifications";
-import { BehaviorSubject, defer, merge } from "rxjs";
+import { BehaviorSubject, defer, EMPTY, merge } from "rxjs";
 import {
   distinctUntilChanged,
   filter,
@@ -36,6 +39,11 @@ export class NotificationsService {
   ) {}
 
   activate() {
+    const isPushNotificationsAvailable = Capacitor.isPluginAvailable("PushNotifications");
+    if (!isPushNotificationsAvailable) {
+      return EMPTY;
+    }
+
     this.listenOnRegistration();
     return merge(
       this.handleTokenStorage(),
@@ -67,6 +75,24 @@ export class NotificationsService {
     PushNotifications.addListener("registrationError", (error: any) => {
       console.log("Error on registration: " + JSON.stringify(error));
     });
+
+    //DEV
+
+    // Show us the notification payload if the app is open on our device
+    PushNotifications.addListener(
+      "pushNotificationReceived",
+      (notification: PushNotificationSchema) => {
+        console.log("Push received: " + JSON.stringify(notification));
+      }
+    );
+
+    // Method called when tapping on a notification
+    PushNotifications.addListener(
+      "pushNotificationActionPerformed",
+      (notification: ActionPerformed) => {
+        console.log("Push action performed: " + JSON.stringify(notification));
+      }
+    );
   }
 
   private handleTokenStorage() {

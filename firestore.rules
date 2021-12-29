@@ -29,6 +29,10 @@ service cloud.firestore {
         allow write: if userIsValid() && isDocumentOwner(profileID)
       }
 
+      match /private/swipeCap {
+        allow read: if userIsValid() && isDocumentOwner(profileID) 
+      }
+
       match /private/private {
         allow read: if userIsValid() 
                     && isDocumentOwner(profileID);
@@ -59,7 +63,7 @@ service cloud.firestore {
 }
 
 function isGod() {
-  return request.auth.email in ["archibald.ruban@gmail.com"]
+  return request.auth.token.email.lower() in ["archibald.ruban@gmail.com"]
 }
 
 function userIsValid() {

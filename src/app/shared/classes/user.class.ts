@@ -42,6 +42,7 @@ export class AppUser extends Profile implements appUser {
     socialMediaLinks: SocialMediaLink[],
     settings: Settings,
     latestSearchCriteria: allowOptionalProp<searchCriteria>,
+    swipeCount: number,
     gender: Gender,
     sexualPreference: SexualPreference
     // swipeMode: SwipeMode

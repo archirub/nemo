@@ -36,17 +36,20 @@ import {
 } from "@interfaces/index";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 import { IonSlides } from "@ionic/angular";
+import { SwipeCapService } from "./swipe-cap.service";
 
 // - loading is for when there is no one in the stack but we are fetching
 // - empty is for the stack has been fetched and no one was found
 // - filled is for when there is someone in the stack
-export type StackState = "init" | "filled" | "loading" | "empty";
+// - limit-reached is for when the swipe capping limit has been reached
+export type StackState = "init" | "filled" | "loading" | "empty" | "cap-reached";
 
 export type PictureQueue = Array<{ uid: string; pictureIndex: number }>;
 @Injectable({
   providedIn: "root",
 })
 export class SwipeStackStore {
+  private readonly REGISTER_FREQUENCY = 4; // every how many swipe choices do we choose to register them on the database?
   private readonly MIN_PROFILE_COUNT = 4; // # of profiles in profiles$ below which we make another request
   private readonly MIN_RENDERED_COUNT = 2; // min # of profiles in profilesToRender$
   private readonly MAX_RENDERED_COUNT = 5; // max # of profiles in profilesToRender$
@@ -87,7 +90,8 @@ export class SwipeStackStore {
     private swipeOutcomeStore: SwipeOutcomeStore,
 
     private errorHandler: GlobalErrorHandler,
-    private format: FormatService
+    private format: FormatService,
+    private swipeCap: SwipeCapService
   ) {}
 
   /**
@@ -95,10 +99,12 @@ export class SwipeStackStore {
    */
   private activateStore(): Observable<any> {
     return merge(
+      this.swipeCap.activate(),
       this.manageSwipeStack(),
       this.manageRenderedProfiles(),
       this.managePictureQueue(),
-      this.manageStoreReadiness()
+      this.manageStoreReadiness(),
+      this.manageChoiceRegistration()
     ).pipe(share());
   }
 
@@ -106,12 +112,29 @@ export class SwipeStackStore {
     return this.profiles$.pipe(
       this.filterUnchangedLength(),
       map((profiles) => profiles.length),
+      tap((l) => console.log("profiles length:", l)),
       concatMap((count) => this.updateStackState(count)),
       this.filterBasedOnStackState(),
       filter((count) => count <= this.MIN_PROFILE_COUNT),
       switchMap(() => this.SCstore.searchCriteria$.pipe(first())), // using switchMap instead of withLatestFrom as SC might still be undefined at that point so we want to wait for it to have a value (which withLatestFrom doesn't do)
       exhaustMap((SC) => this.addToSwipeStackQueue(SC)) // exhaustMap is a must use here, makes sure we don't have multiple requests to fill the swipe stack
     );
+  }
+
+  private manageChoiceRegistration() {
+    const endOfStackStates: StackState[] = ["empty", "cap-reached"];
+
+    const typicalRegistration$ = this.swipeOutcomeStore.swipeChoices$.pipe(
+      filter((c) => c.length >= this.REGISTER_FREQUENCY),
+      exhaustMap(() => this.swipeOutcomeStore.registerSwipeChoices$)
+    );
+
+    const endOfStackRegistration$ = this.stackState$.pipe(
+      filter((state) => endOfStackStates.includes(state)),
+      exhaustMap(() => this.swipeOutcomeStore.registerSwipeChoices$)
+    );
+
+    return merge(typicalRegistration$, endOfStackRegistration$);
   }
 
   manageStoreReadiness() {
@@ -130,9 +153,10 @@ export class SwipeStackStore {
 
   manageRenderedProfiles() {
     return this.profiles$.pipe(
-      withLatestFrom(this.profilesToRender$),
-      filter(([allProfiles, profilesToRender]) => {
+      withLatestFrom(this.profilesToRender$, this.swipeCap.canUseSwipe()),
+      filter(([allProfiles, profilesToRender, canUseSwipe]) => {
         if (!Array.isArray(allProfiles) || !Array.isArray(profilesToRender)) return false;
+        if (!canUseSwipe) return false;
         if (profilesToRender.length === 0) return true;
         return !isEqual(
           profilesToRender.map((p) => [p.uid, ...p.pictureUrls]),
@@ -142,6 +166,15 @@ export class SwipeStackStore {
         );
         //  return !isEqual(profilesToRender, allProfiles.slice(0, profilesToRender.length));
       }),
+
+      // this deals with the swipe cap
+      withLatestFrom(this.swipeCap.swipesLeft$),
+      map(([[allProfiles, profilesToRender], swipesLeft]) => {
+        if (swipesLeft && swipesLeft.swipesLeft < profilesToRender.length)
+          return [allProfiles, profilesToRender.slice(0, swipesLeft.swipesLeft)];
+        return [allProfiles, profilesToRender];
+      }),
+
       // this deals with deleting rendered profiles that have been removed from allProfiles due
       // to user action (so only looks at the front of the array and operates in a very non-general way)
       map(([allProfiles, profilesToRender]) => {
@@ -312,14 +345,18 @@ export class SwipeStackStore {
 
   updateStackState(profilesCount: number): Observable<number> {
     return this.stackState$.pipe(
+      withLatestFrom(this.swipeCap.canUseSwipe()),
       first(),
-      map((currentState) => {
+      map(([currentState, canUseSwipe]) => {
+        if (!canUseSwipe) return this.stackState.next("cap-reached");
         if (currentState === "loading" && profilesCount > 0)
           return this.stackState.next("filled");
         if (currentState === "loading" && profilesCount === 0)
           return this.stackState.next("empty");
-        if (currentState === "filled" && profilesCount === 0)
+        if (currentState === "filled" && profilesCount === 0) {
+          console.log("says it should be loading", profilesCount);
           return this.stackState.next("loading");
+        }
       }),
       map(() => profilesCount)
     );
@@ -338,10 +375,12 @@ export class SwipeStackStore {
   }
 
   filterBasedOnStackState() {
+    const dontContinueStates: StackState[] = ["empty", "cap-reached"];
+
     return (source: Observable<number>) => {
       return source.pipe(
         withLatestFrom(this.stackState$),
-        filter(([profileCount, stackState]) => stackState !== "empty"),
+        filter(([profileCount, stackState]) => !dontContinueStates.includes(stackState)),
         map(([profileCount, stackState]) => profileCount)
       );
     };
@@ -401,7 +440,7 @@ export class SwipeStackStore {
 
   /** Adds profiles to the queue a.k.a. beginning of Profiles array */
   public addToSwipeStackQueue(SC: SearchCriteria) {
-    this.stackState.next("loading");
+    // this.stackState.next("loading");
     return this.fetchUIDs(SC).pipe(
       //using exhaustMap s.t. other requests are not listened to while profiles are being fetched
       // this is because it is a costly operation w.r.t backend and money-wise
