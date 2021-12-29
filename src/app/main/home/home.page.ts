@@ -47,7 +47,7 @@ import { GlobalErrorHandler } from "@services/errors/global-error-handler.servic
 import { TutorialsService } from "@services/tutorials/tutorials.service";
 import { SwipeCapService } from "@stores/swipe-stack/swipe-cap.service";
 
-import { ChatboardStore, SwipeStackStore } from "@stores/index";
+import { ChatboardStore, SwipeOutcomeStore, SwipeStackStore } from "@stores/index";
 import { OwnPicturesStore } from "@stores/pictures/own-pictures/own-pictures.service";
 
 import { Profile } from "@classes/index";
@@ -121,6 +121,14 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
   ]).pipe(
     map(([showLoading, stackState]) => stackState === "empty" && showLoading === false)
   );
+  showCapReachedPrompt$ = combineLatest([
+    this.showLoading$,
+    this.swipeStackStore.stackState$,
+  ]).pipe(
+    map(
+      ([showLoading, stackState]) => stackState === "cap-reached" && showLoading === false
+    )
+  );
 
   pageIsReady$ = combineLatest([this.viewIsReady$, this.storeReadiness.home$]).pipe(
     map(([a, b]) => a && b),
@@ -166,6 +174,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     private afFunctions: AngularFireFunctions,
 
     private swipeStackStore: SwipeStackStore,
+    private swipeOutcomeStore: SwipeOutcomeStore,
     private ownPicturesService: OwnPicturesStore,
     private chatboardStore: ChatboardStore,
 
@@ -176,7 +185,6 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     private tutorials: TutorialsService,
     private swipeCap: SwipeCapService
   ) {
-    console.log("THIS IS WORKING");
     this.onResize();
   }
 
@@ -184,8 +192,6 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     this.subs.add(this.readinessHandler$.subscribe());
     this.subs.add(this.mainProfilePictureGetter$.subscribe());
     this.swipeCap.swipesLeft$.subscribe((s) => console.log("# of swipes left:", s));
-
-    this.swipeStackStore.stackState$.subscribe((c) => console.log("stack state:", c));
   }
 
   ngAfterViewInit() {

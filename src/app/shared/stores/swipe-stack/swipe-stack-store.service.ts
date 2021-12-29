@@ -3,9 +3,20 @@ import { AngularFirestore, DocumentSnapshot } from "@angular/fire/firestore";
 import { AngularFireFunctions } from "@angular/fire/functions";
 import { AngularFireStorage } from "@angular/fire/storage";
 
-import { BehaviorSubject, defer, EMPTY, forkJoin, merge, Observable, of } from "rxjs";
+import {
+  BehaviorSubject,
+  combineLatest,
+  defer,
+  EMPTY,
+  forkJoin,
+  iif,
+  merge,
+  Observable,
+  of,
+} from "rxjs";
 import {
   concatMap,
+  delay,
   distinctUntilChanged,
   exhaustMap,
   filter,
@@ -126,11 +137,17 @@ export class SwipeStackStore {
 
     const typicalRegistration$ = this.swipeOutcomeStore.swipeChoices$.pipe(
       filter((c) => c.length >= this.REGISTER_FREQUENCY),
+      tap(() => console.log("typicalRegistration$")),
       exhaustMap(() => this.swipeOutcomeStore.registerSwipeChoices$)
     );
 
     const endOfStackRegistration$ = this.stackState$.pipe(
       filter((state) => endOfStackStates.includes(state)),
+      // simple fix to problem where stackState becomes "cap-reached" while the final
+      // choice has not been added yet, so the latter never gets registered.
+      // Since this is the last one of the session either way, it doesn't hurt at all to wait for a few seconds
+      delay(2000),
+      tap(() => console.log("endOfStackRegistration$")),
       exhaustMap(() => this.swipeOutcomeStore.registerSwipeChoices$)
     );
 
@@ -138,14 +155,22 @@ export class SwipeStackStore {
   }
 
   manageStoreReadiness() {
-    // waits for the swipe stack to have at least one profile and for the first picture of first profile to be loaded
-    return this.profilesToRender$.pipe(
-      filter(
-        (profiles) =>
-          Array.isArray(profiles) && profiles.length > 0 && !!profiles[0].pictureUrls[0]
-      ),
-      first(),
+    const isReadyRegardlessStates: StackState[] = ["cap-reached", "empty"];
 
+    return combineLatest([this.profilesToRender$, this.stackState$]).pipe(
+      filter(([profiles, state]) => {
+        // this is here because the states "empty" and "cap-reached" means that
+        // regardless of the content of the renderedProfiles, it being empty is still
+        // the store being ready (because it is normal if it is empty in these states)
+        const isReadyRegardless = isReadyRegardlessStates.includes(state);
+
+        // waits for the swipe stack to have at least one profile and for the first picture of first profile to be loaded
+        const renderedProfilesAreInit =
+          Array.isArray(profiles) && profiles.length > 0 && !!profiles[0].pictureUrls[0];
+
+        return isReadyRegardless || renderedProfilesAreInit;
+      }),
+      first(),
       tap((profiles) => console.log("swipe stack is ready:", profiles)),
       tap(() => this.isReady.next(true))
     );
@@ -167,18 +192,11 @@ export class SwipeStackStore {
         //  return !isEqual(profilesToRender, allProfiles.slice(0, profilesToRender.length));
       }),
 
-      // this deals with the swipe cap
-      withLatestFrom(this.swipeCap.swipesLeft$),
-      map(([[allProfiles, profilesToRender], swipesLeft]) => {
-        if (swipesLeft && swipesLeft.swipesLeft < profilesToRender.length)
-          return [allProfiles, profilesToRender.slice(0, swipesLeft.swipesLeft)];
-        return [allProfiles, profilesToRender];
-      }),
-
       // this deals with deleting rendered profiles that have been removed from allProfiles due
       // to user action (so only looks at the front of the array and operates in a very non-general way)
       map(([allProfiles, profilesToRender]) => {
-        if (profilesToRender.length !== 0) {
+        if (profilesToRender.length !== 0 && allProfiles.length !== 0) {
+          console.info("profilesToRender", allProfiles, profilesToRender);
           // skips this step if renderer contains no profiles
           const lastuid = allProfiles[0].uid;
           let indexInRendered = profilesToRender.length - 1; // default value everyone will be removed if user is not found
@@ -209,6 +227,25 @@ export class SwipeStackStore {
 
         return [allProfiles, profilesToRender];
       }),
+
+      // this deals with the swipe cap
+      withLatestFrom(this.swipeCap.swipesLeft$),
+      map(([[allProfiles, profilesToRender], swipesLeft]) => {
+        if (swipesLeft && swipesLeft.swipesLeft < profilesToRender.length) {
+          console.log(
+            "Math.floor(swipesLeft.swipesLeft)",
+            Math.floor(swipesLeft.swipesLeft),
+            swipesLeft.swipesLeft,
+            [allProfiles, profilesToRender.slice(0, Math.floor(swipesLeft.swipesLeft))]
+          );
+          return [
+            allProfiles,
+            profilesToRender.slice(0, Math.floor(swipesLeft.swipesLeft)),
+          ];
+        }
+        return [allProfiles, profilesToRender];
+      }),
+
       // submits updated profilesToRender version
       tap(([allProfiles, newProfilesToRender]) =>
         // deep cloning so that their pictureUrls have different references
@@ -277,6 +314,7 @@ export class SwipeStackStore {
     // triggers when there is a change to the array of rendered profiles
     // (usually means a profile has been added or removed)
     return profileCards.changes.pipe(
+      filter((list: QueryList<ProfileCardComponent>) => !!list.first),
       // listens to the user's swiping on that profile
       switchMap((list: QueryList<ProfileCardComponent>) =>
         list.first.slidesRef$.pipe(
@@ -440,8 +478,17 @@ export class SwipeStackStore {
 
   /** Adds profiles to the queue a.k.a. beginning of Profiles array */
   public addToSwipeStackQueue(SC: SearchCriteria) {
-    // this.stackState.next("loading");
     return this.fetchUIDs(SC).pipe(
+      take(1),
+      // takes care of case where generateSwipeStack returns an empty array
+      filter((uids) => {
+        if (uids.length < 1) {
+          this.stackState.next("empty");
+          return false;
+        }
+        return true;
+      }),
+
       //using exhaustMap s.t. other requests are not listened to while profiles are being fetched
       // this is because it is a costly operation w.r.t backend and money-wise
       exhaustMap((uids) => this.fetchProfiles(uids)),
@@ -496,14 +543,16 @@ export class SwipeStackStore {
         const request: generateSwipeStackRequest = { searchCriteria: SC };
         return request;
       }),
-      exhaustMap(
-        (request) =>
-          this.afFunctions
-            .httpsCallable("generateSwipeStack")(request)
-            .pipe(
-              this.errorHandler.convertErrors("cloud-functions"),
-              this.errorHandler.handleErrors()
-            ) as Observable<generateSwipeStackResponse>
+      tap(() => console.log("calling generateSwipeStack")),
+      exhaustMap((request) =>
+        this.afFunctions
+          .httpsCallable<generateSwipeStackRequest, generateSwipeStackResponse>(
+            "generateSwipeStack"
+          )(request)
+          .pipe(
+            this.errorHandler.convertErrors("cloud-functions"),
+            this.errorHandler.handleErrors()
+          )
       ),
       tap((response) => this.swipeOutcomeStore.addToSwipeAnswers(response.users)),
       map((response) => response.users.map((u) => u.uid))
