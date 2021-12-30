@@ -229,7 +229,11 @@ function addToPrivateProfile(transaction: admin.firestore.Transaction, uid: stri
       interests: null,
       // onCampus: null,
     },
-    swipeCount: 0,
+    hasSeenTutorial: {
+      home: false,
+      ownProfile: false,
+      chatBoard: false,
+    },
   };
   const ref = admin
     .firestore()

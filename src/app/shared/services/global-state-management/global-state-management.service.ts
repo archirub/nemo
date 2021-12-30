@@ -37,6 +37,7 @@ import { EmptyStoresService } from "./empty-stores.service";
 
 import { FirebaseUser } from "./../../interfaces/firebase.model";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
+import { TutorialsService } from "@services/tutorials/tutorials.service";
 
 type pageName =
   | "chats"
@@ -85,6 +86,7 @@ export class GlobalStateManagementService {
     private emptyStoresService: EmptyStoresService,
     private connectionService: ConnectionService,
     private notificationsService: NotificationsService,
+    private tutorialsService: TutorialsService,
 
     private signupauthMethodSharer: SignupAuthMethodSharer,
 
@@ -309,7 +311,11 @@ export class GlobalStateManagementService {
   private activateCorrespondingStores(page: pageName): Observable<any> {
     if (this.pageIsMain(page)) {
       console.log("activating stores for main pages");
-      return merge(this.activateAllStores(), this.notificationsService.activate());
+      return merge(
+        this.activateAllStores(),
+        this.notificationsService.activate(),
+        this.tutorialsService.activate()
+      );
     }
     return of("");
 

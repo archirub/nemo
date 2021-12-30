@@ -21,6 +21,7 @@ import {
   BehaviorSubject,
   combineLatest,
   concat,
+  defer,
   EMPTY,
   firstValueFrom,
   forkJoin,
@@ -385,7 +386,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
 
         this.latestChatInput = "";
 
-        return from(
+        return defer(() =>
           this.firestore.firestore
             .collection("chats")
             .doc(this.CHAT_ID)

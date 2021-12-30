@@ -93,9 +93,6 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
 
   subs = new Subscription();
 
-  //TUTORIAL SETTING
-  ownProfileTutorial = true;
-
   @ViewChild("bioInput") bio: IonTextarea;
   @ViewChild("bioClose", { read: ElementRef }) bioClose: ElementRef;
   @ViewChild("profileCard") profileCard: ProfileCardComponent;
@@ -159,6 +156,8 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     tap((pPicturesRef) => this.resetPictureDragging(pPicturesRef)),
     share()
   );
+
+  displayTutorial$ = this.tutorials.displayTutorial("ownProfile");
 
   get emptyEditableFields() {
     return {
@@ -549,9 +548,8 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
   }
 
   //TUTORIAL EXIT
-  exitOwnProfileTutorial() {
-    this.ownProfileTutorial = false;
-    this.tutorials.finishTutorials('own-profile');
+  onExitTutorial() {
+    this.tutorials.markAsSeen("ownProfile").subscribe();
   }
 
   /**

@@ -1,15 +1,15 @@
-<ion-tabs #tabs (ionTabsWillChange)="colorIcon()">
-  <ion-tab-bar slot="bottom" id="tabs" *ngIf="!this.hideTabs">
+<ion-tabs #tabs (ionTabsWillChange)="tabChanged$.emit('')">
+  <ion-tab-bar slot="bottom" id="tabs" [hidden]="!(showTab$ |async)">
     <ion-tab-button tab="chats">
-      <img id="chats" src="/assets/chatsicon.svg"/>
+      <img id="chats" src="/assets/chatsicon.svg" />
     </ion-tab-button>
 
     <ion-tab-button tab="home">
-      <img id="home" class="height32" src="/assets/swipeicon.svg"/>
+      <img id="home" class="height32" src="/assets/swipeicon.svg" />
     </ion-tab-button>
 
     <ion-tab-button tab="own-profile">
-      <img id="own-profile" src="/assets/profileicon.svg"/>
+      <img id="own-profile" src="/assets/profileicon.svg" />
     </ion-tab-button>
   </ion-tab-bar>
 </ion-tabs>

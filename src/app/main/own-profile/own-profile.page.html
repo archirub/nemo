@@ -7,9 +7,16 @@
   </div>
 </ng-container>
 
-<own-profile-tutorial-slides *ngIf="ownProfileTutorial" (exit)="exitOwnProfileTutorial()"></own-profile-tutorial-slides>
+<own-profile-tutorial-slides
+  *ngIf="displayTutorial$ | async"
+  (exit)="onExitTutorial()"
+></own-profile-tutorial-slides>
 
-<ion-content #profileContainer [hidden]="!(pageIsReady$ | async)"  [style.filter]="ownProfileTutorial ? 'blur(30px)' : none">
+<ion-content
+  #profileContainer
+  [hidden]="!(pageIsReady$ | async)"
+  [style.filter]="ownProfileTutorial ? 'blur(30px)' : none"
+>
   <!--div class="shadow"></div-->
 
   <form #editableFieldsForm="ngForm">

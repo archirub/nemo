@@ -86,7 +86,8 @@ function messageWriteIsValid(msg) {
 }
 
 function privateProfileWriteIsValid() {
-  return onlyPropertiesModifiedAre(["latestSearchCriteria"])
+  // hasSeenTutorial being not as important as SC structurally, no need for a data check
+  return onlyPropertiesModifiedAre(["latestSearchCriteria", "hasSeenTutorial"])
          && isValidSearchCriteria(request.resource.data["latestSearchCriteria"])
 }
 
@@ -130,6 +131,8 @@ function isValidSearchCriteria(SC) {
         && (SC.interests is string || SC.interests == null)
 
 }
+
+
 
 
 

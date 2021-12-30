@@ -82,7 +82,7 @@ export class SwipeCapService {
   }
 
   manageSwipeIncrement() {
-    return interval(5000).pipe(
+    return interval(10000).pipe(
       map(() => new Date()),
       withLatestFrom(this.swipesLeft$),
       filter(([_, swipesLeft]) => !!swipesLeft),
@@ -140,7 +140,7 @@ export class SwipeCapService {
       map((doc) => {
         if (!doc.exists) return this.defaultSwipeCapMap;
         const data = doc.data();
-        return { swipesLeft: data.swipesLeft, date: data.date.toDate() };
+        return this.getNewSwipesLeft(data.swipesLeft, data.date.toDate(), new Date());
       }),
       map((swipesLeft) => this.swipesLeft.next(swipesLeft))
     );

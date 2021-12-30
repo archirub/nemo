@@ -13,6 +13,7 @@ import {
   allowOptionalProp,
   AreaOfStudy,
   SocietyCategory,
+  HasSeenTutorial,
 } from "@interfaces/index";
 
 export class AppUser extends Profile implements appUser {
@@ -20,6 +21,7 @@ export class AppUser extends Profile implements appUser {
   private _latestSearchCriteria: allowOptionalProp<searchCriteria>;
   private _gender: Gender;
   private _sexualPreference: SexualPreference;
+  private _hasSeenTutorial: HasSeenTutorial;
 
   // private _swipeMode: SwipeMode;
 
@@ -42,7 +44,7 @@ export class AppUser extends Profile implements appUser {
     socialMediaLinks: SocialMediaLink[],
     settings: Settings,
     latestSearchCriteria: allowOptionalProp<searchCriteria>,
-    swipeCount: number,
+    hasSeenTutorial: HasSeenTutorial,
     gender: Gender,
     sexualPreference: SexualPreference
     // swipeMode: SwipeMode
@@ -71,7 +73,15 @@ export class AppUser extends Profile implements appUser {
     this.latestSearchCriteria = latestSearchCriteria;
     this.gender = gender;
     this.sexualPreference = sexualPreference;
+    this.hasSeenTutorial = hasSeenTutorial;
     // this.swipeMode = swipeMode;
+  }
+
+  public get hasSeenTutorial(): HasSeenTutorial {
+    return this._hasSeenTutorial;
+  }
+  public set hasSeenTutorial(value: HasSeenTutorial) {
+    this._hasSeenTutorial = value;
   }
 
   public get latestSearchCriteria(): allowOptionalProp<searchCriteria> {

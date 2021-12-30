@@ -9,7 +9,6 @@ import {
   defer,
   EMPTY,
   forkJoin,
-  iif,
   merge,
   Observable,
   of,
@@ -123,7 +122,6 @@ export class SwipeStackStore {
     return this.profiles$.pipe(
       this.filterUnchangedLength(),
       map((profiles) => profiles.length),
-      tap((l) => console.log("profiles length:", l)),
       concatMap((count) => this.updateStackState(count)),
       this.filterBasedOnStackState(),
       filter((count) => count <= this.MIN_PROFILE_COUNT),

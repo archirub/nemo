@@ -15,8 +15,8 @@
 >
 
 <home-tutorial-slides
-  *ngIf="homeTutorial"
-  (exit)="exitHomeTutorial()"
+  *ngIf="displayTutorial$ | async"
+  (exit)="onExitTutorial()"
 ></home-tutorial-slides>
 
 <ng-container *ngIf="showLoading$ | async">

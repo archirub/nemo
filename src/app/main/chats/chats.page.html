@@ -7,7 +7,10 @@
   </div>
 </ng-container>
 
-<chats-tutorial-slides *ngIf="chatsTutorial" (exit)="exitChatsTutorial()"></chats-tutorial-slides>
+<chats-tutorial-slides
+  *ngIf="displayTutorial$ | async"
+  (exit)="onExitTutorial()"
+></chats-tutorial-slides>
 
 <ion-content [style.filter]="chatsTutorial ? 'blur(30px)' : none">
   <div class="toolbar"></div>

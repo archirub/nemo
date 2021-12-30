@@ -19,9 +19,6 @@ export class ChatsPage implements OnDestroy {
   TOP_SCROLL_SPEED = 100;
   fishSwimAnimation: Animation;
 
-  //TUTORIAL SETTING
-  chatsTutorial = true;
-
   private subs = new Subscription();
 
   private fishRef$ = new ReplaySubject<ElementRef>(1);
@@ -40,6 +37,8 @@ export class ChatsPage implements OnDestroy {
   );
 
   numberOfChats$ = this.chats$.pipe(map((chats) => chats.length));
+
+  displayTutorial$ = this.tutorials.displayTutorial("chatBoard");
 
   playLoadingAnimation$ = this.fishRef$.pipe(
     first(),
@@ -79,9 +78,8 @@ export class ChatsPage implements OnDestroy {
   }
 
   //TUTORIAL EXIT
-  exitChatsTutorial() {
-    this.chatsTutorial = false;
-    this.tutorials.finishTutorials('chats');
+  onExitTutorial() {
+    this.tutorials.markAsSeen("chatBoard").subscribe();
   }
 
   ngOnDestroy() {

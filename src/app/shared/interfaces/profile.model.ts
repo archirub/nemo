@@ -52,6 +52,7 @@ export interface appUser extends profile {
   areaOfStudy: AreaOfStudy;
   sexualPreference: SexualPreference;
   gender: Gender;
+  hasSeenTutorial: HasSeenTutorial;
   // swipeMode: SwipeMode;
   settings: Settings;
   latestSearchCriteria: allowOptionalProp<searchCriteria>;
@@ -79,7 +80,14 @@ export interface profileFromDatabase {
 export interface privateProfileFromDatabase {
   settings: Settings;
   latestSearchCriteria: allowOptionalProp<searchCriteria>;
-  swipeCount: number;
+
+  hasSeenTutorial: HasSeenTutorial;
+}
+
+export interface HasSeenTutorial {
+  home: boolean;
+  ownProfile: boolean;
+  chatBoard: boolean;
 }
 
 export interface notificationsDocument {
