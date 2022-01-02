@@ -67,12 +67,12 @@ export const SCenterAnimation = () => {
   return animation;
 };
 
-export const SCleaveAnimation = (
-  tabComponent: ElementRef<any>,
-  homeComponent: ElementRef<any>
-) => {
-  const animation = (baseEl) => {
-    return SCenterAnimation()(baseEl).direction("reverse");
+export const SCleaveAnimation = () =>
+  // tabComponent: ElementRef<any>,
+  // homeComponent: ElementRef<any>
+  {
+    const animation = (baseEl) => {
+      return SCenterAnimation()(baseEl).direction("reverse");
+    };
+    return animation;
   };
-  return animation;
-};

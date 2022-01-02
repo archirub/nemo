@@ -5,7 +5,7 @@ import { AngularFireAuth } from "@angular/fire/auth";
 import { Storage } from "@capacitor/storage";
 
 import { EmptyStoresService } from "@services/global-state-management/empty-stores.service";
-import { LoadingService } from "@services/loading/loading.service";
+import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
 
 // this functionality was moved to a different service to solve some dependency issues between
 // global-error-handler -> firebase-auth-service -> firebase-auth-error-handler (|| other error handlers) -> global-error-handler
@@ -21,7 +21,7 @@ export class FirebaseLogoutService {
 
     private afAuth: AngularFireAuth,
 
-    private loadingService: LoadingService,
+    private loadingAlertManager: LoadingAndAlertManager,
     private emptyStoresService: EmptyStoresService
   ) {}
 
@@ -42,9 +42,12 @@ export class FirebaseLogoutService {
       this.zone.run(() => this.navCtrl.navigateRoot("/welcome"));
     // .then(() => window.location.reload());
 
-    await this.loadingService.presentLoader(
-      [{ promise: duringLoadingPromise, arguments: [] }],
-      [{ promise: navigateToWelcome, arguments: [] }]
-    );
+    const loader = await this.loadingAlertManager.createLoading();
+
+    await duringLoadingPromise();
+
+    await this.loadingAlertManager.dismissDisplayed();
+
+    return navigateToWelcome();
   }
 }

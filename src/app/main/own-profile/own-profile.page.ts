@@ -7,13 +7,7 @@ import {
   AfterViewInit,
   Renderer2,
 } from "@angular/core";
-import {
-  AlertController,
-  IonTextarea,
-  LoadingController,
-  ModalController,
-  Animation,
-} from "@ionic/angular";
+import { IonTextarea, ModalController, Animation } from "@ionic/angular";
 import { Router } from "@angular/router";
 
 import {
@@ -70,6 +64,7 @@ import {
   QuestionAndAnswer,
 } from "@interfaces/index";
 import { TutorialsService } from "@services/tutorials/tutorials.service";
+import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
 
 @Component({
   selector: "app-own-profile",
@@ -207,13 +202,12 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     private router: Router,
     private renderer: Renderer2,
     private detector: ChangeDetectorRef,
-    private loadingCtrl: LoadingController,
-    private alertCtrl: AlertController,
     private modalCtrl: ModalController,
 
     private currentUserStore: CurrentUserStore,
     private ownPicturesService: OwnPicturesStore,
 
+    private loadingAlertManager: LoadingAndAlertManager,
     private tabElementRef: TabElementRefService,
     private storeReadiness: StoreReadinessService,
     private tutorials: TutorialsService
@@ -487,13 +481,13 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     ${invalidParts.length === 1 ? "is" : "are"} invalid.
     `;
 
-    const alert = await this.alertCtrl.create({
+    const alert = await this.loadingAlertManager.createAlert({
       header,
       message,
       buttons: ["Okay"],
     });
 
-    return alert.present();
+    return this.loadingAlertManager.presentNew(alert, "replace-erase");
   }
 
   // used to confirm the editing of the profile. It first checks if there are
@@ -505,8 +499,10 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
 
     if (invalidParts.length > 0) return this.presentInvalidPartsMessage(invalidParts);
 
-    const loading = await this.loadingCtrl.create({ backdropDismiss: false });
-    await loading.present();
+    const loading = await this.loadingAlertManager.createLoading({
+      backdropDismiss: false,
+    });
+    await this.loadingAlertManager.presentNew(loading, "replace-erase");
 
     await lastValueFrom(
       forkJoin([
@@ -516,7 +512,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
         ),
       ]).pipe(
         map(() => this.editingInProgress.next(false)),
-        switchMap(() => loading.dismiss())
+        switchMap(() => this.loadingAlertManager.dismissDisplayed())
       )
     );
 

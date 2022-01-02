@@ -1,13 +1,13 @@
-import { AlertController, LoadingController, ModalController } from "@ionic/angular";
+import { ModalController } from "@ionic/angular";
 import { Component } from "@angular/core";
 
 import { lastValueFrom } from "rxjs";
 
 import { ChatboardStore } from "@stores/index";
-import { LoadingService } from "@services/loading/loading.service";
 import { UserReportingService } from "@services/user-reporting/user-reporting.service";
 
 import { UserReport } from "@interfaces/user-report.models";
+import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
 
 @Component({
   selector: "app-report-user",
@@ -15,7 +15,7 @@ import { UserReport } from "@interfaces/user-report.models";
   styleUrls: ["./report-user.component.scss"],
 })
 export class ReportUserComponent {
-  // values given from opening the modal
+  // values obtained from modalController
   userReportedID: string;
   userReportedName: string;
   userReportedPicture: string;
@@ -33,27 +33,25 @@ export class ReportUserComponent {
   constructor(
     private userReportingService: UserReportingService,
     private modalCtrl: ModalController,
-    private loadingCtrl: LoadingController,
-    private loading: LoadingService,
-    private alertCtrl: AlertController,
-    private chatboardStore: ChatboardStore
+    private chatboardStore: ChatboardStore,
+    private loadingAlertManager: LoadingAndAlertManager
   ) {}
 
   async reportUser() {
-    const loader = await this.loadingCtrl.create({
-      ...this.loading.defaultLoadingOptions,
+    const loader = await this.loadingAlertManager.createLoading({
       message: "Sending Report...",
     });
-    await loader.present();
+    await this.loadingAlertManager.presentNew(loader, "replace-erase");
+
     try {
       await this.userReportingService.reportUser(this.report);
     } catch (e) {
       console.error(e);
-      await loader.dismiss();
+
       return this.reportFailedAlert();
     }
 
-    await loader.dismiss();
+    await this.loadingAlertManager.dismissDisplayed();
 
     const chatID = await lastValueFrom(
       this.chatboardStore.userHasChatWith(this.userReportedID)
@@ -69,25 +67,25 @@ export class ReportUserComponent {
 
   // shows an alert saying the request failed
   async reportFailedAlert() {
-    const alert = await this.alertCtrl.create({
-      header: "An error occured...",
+    const alert = await this.loadingAlertManager.createAlert({
+      header: "An error occurred...",
       message: "We were unable to complete your request, please try again.",
       buttons: ["Okay"],
     });
 
-    return alert.present();
+    return this.loadingAlertManager.presentNew(alert, "replace-erase");
   }
 
   // shows an alert saying the the report was successful.
   // Shown if the reported user ISN'T part of the user's chats
   async reportSuccesfulNoChatAlert() {
-    const alert = await this.alertCtrl.create({
-      header: "The report was succesfully sent.",
+    const alert = await this.loadingAlertManager.createAlert({
+      header: "The report was successfully sent.",
       message: "We may contact you directly if we require more details from you.",
       buttons: ["Okay"],
     });
 
-    return alert.present();
+    return this.loadingAlertManager.presentNew(alert, "replace-erase");
   }
 
   // shows an alert saying the the report was successful.
@@ -96,26 +94,27 @@ export class ReportUserComponent {
     let choice: "keep" | "delete" = "keep";
 
     const deleteMatch = async () => {
-      const loader = await this.loadingCtrl.create({
-        ...this.loading.defaultLoadingOptions,
+      const loader = await this.loadingAlertManager.createLoading({
         message: "Deleting match...",
       });
-      await loader.present();
+
+      await this.loadingAlertManager.presentNew(loader, "replace-erase");
+
       try {
         await lastValueFrom(this.chatboardStore.deleteChatOnDatabase(chatID));
       } catch (e) {
         console.error(e);
-        await loader.dismiss();
+
         return this.reportFailedAlert();
       }
       await lastValueFrom(this.chatboardStore.deleteChatInStore(chatID));
-      return loader.dismiss();
+      return this.loadingAlertManager.dismissDisplayed();
     };
 
     const keepMatch = () => {};
 
-    const alert = await this.alertCtrl.create({
-      header: "The report was succesfully sent.",
+    const alert = await this.loadingAlertManager.createAlert({
+      header: "The report was successfully sent.",
       message: "Would you like to delete this match?",
       buttons: [
         {
@@ -136,6 +135,6 @@ export class ReportUserComponent {
 
     alert.onDidDismiss().then(() => (choice === "delete" ? deleteMatch() : keepMatch()));
 
-    return alert.present();
+    return this.loadingAlertManager.presentNew(alert, "replace-erase");
   }
 }

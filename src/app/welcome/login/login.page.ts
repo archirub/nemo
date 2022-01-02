@@ -1,12 +1,11 @@
-import { AlertController, LoadingController, NavController } from "@ionic/angular";
+import { NavController } from "@ionic/angular";
 import { Component } from "@angular/core";
 import { FormControl, FormGroup, Validators } from "@angular/forms";
 import { AngularFireAuth } from "@angular/fire/auth";
 
-import { FirebaseAuthService } from "@services/firebase-auth/firebase-auth.service";
-import { LoadingService } from "@services/loading/loading.service";
 import { defer, firstValueFrom } from "rxjs";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
+import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
 
 @Component({
   selector: "app-login",
@@ -20,14 +19,12 @@ export class LoginPage {
   });
 
   constructor(
-    private alertCtrl: AlertController,
-    private loadingCtrl: LoadingController,
     private navCtrl: NavController,
 
     private afAuth: AngularFireAuth,
 
-    private errorHandler: GlobalErrorHandler,
-    private loadingService: LoadingService
+    private loadingAlertManager: LoadingAndAlertManager,
+    private errorHandler: GlobalErrorHandler
   ) {}
 
   async onLogin() {
@@ -35,10 +32,8 @@ export class LoginPage {
       return this.showAlert("Your email address or password is incorrectly formatted!");
     }
 
-    const loader = await this.loadingCtrl.create(
-      this.loadingService.defaultLoadingOptions
-    );
-    await loader.present();
+    const loader = await this.loadingAlertManager.createLoading();
+    await this.loadingAlertManager.presentNew(loader, "replace-erase");
 
     const email: string = this.loginForm.get("email").value;
     const password: string = this.loginForm.get("password").value;
@@ -53,14 +48,14 @@ export class LoginPage {
     await loader.dismiss();
   }
 
-  private showAlert(message: string) {
-    this.alertCtrl
-      .create({
-        header: "Signup Failed",
-        message: message,
-        buttons: ["Okay"],
-      })
-      .then((alertEl) => alertEl.present());
+  private async showAlert(message: string) {
+    const alert = await this.loadingAlertManager.createAlert({
+      header: "Signup Failed",
+      message: message,
+      buttons: ["Okay"],
+    });
+
+    return this.loadingAlertManager.presentNew(alert, "replace-erase");
   }
 
   returnToLanding() {

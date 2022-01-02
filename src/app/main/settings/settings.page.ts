@@ -7,7 +7,7 @@ import {
   OnDestroy,
   OnInit,
 } from "@angular/core";
-import { IonSlides, LoadingController, NavController } from "@ionic/angular";
+import { IonSlides, NavController } from "@ionic/angular";
 import { AngularFireFunctions } from "@angular/fire/functions";
 
 import {
@@ -36,7 +36,6 @@ import { AppToggleComponent } from "@components/index";
 
 import { CurrentUserStore } from "@stores/index";
 import { FirebaseAuthService } from "@services/firebase-auth/firebase-auth.service";
-import { LoadingService } from "@services/loading/loading.service";
 
 import { AppUser } from "@classes/user.class";
 import {
@@ -48,6 +47,7 @@ import {
   changeShowProfileRequest,
 } from "@interfaces/index";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
+import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
 
 type GoUnder = "on" | "off";
 
@@ -99,15 +99,14 @@ export class SettingsPage implements AfterViewInit, OnDestroy, OnInit {
   constructor(
     private renderer: Renderer2,
     private navCtrl: NavController,
-    private loadingCtrl: LoadingController,
 
     private afFunctions: AngularFireFunctions,
 
     private currentUserStore: CurrentUserStore,
 
+    private loadingAlertManager: LoadingAndAlertManager,
     private errorHandler: GlobalErrorHandler,
-    private firebaseAuth: FirebaseAuthService,
-    private loadingService: LoadingService
+    private firebaseAuth: FirebaseAuthService
   ) {}
 
   ngOnInit() {
@@ -142,10 +141,8 @@ export class SettingsPage implements AfterViewInit, OnDestroy, OnInit {
   }
 
   private async onConfirmPreferenceModification(): Promise<any> {
-    const loader = await this.loadingCtrl.create(
-      this.loadingService.defaultLoadingOptions
-    );
-    await loader.present();
+    const loader = await this.loadingAlertManager.createLoading();
+    await this.loadingAlertManager.presentNew(loader, "replace-erase");
 
     const actionsToTake$: Observable<any>[] = [];
 
@@ -195,7 +192,7 @@ export class SettingsPage implements AfterViewInit, OnDestroy, OnInit {
 
     this.editingInProgress.next(false);
 
-    await loader.dismiss();
+    await this.loadingAlertManager.dismissDisplayed();
   }
 
   // For responding to a change in the "goUnder" property. It sends it to the database and
@@ -203,9 +200,7 @@ export class SettingsPage implements AfterViewInit, OnDestroy, OnInit {
   async actOnGoUnder(option: GoUnder) {
     const newShowProfile = formatGoUnderToShowProfile(option);
 
-    const loader = await this.loadingCtrl.create(
-      this.loadingService.defaultLoadingOptions
-    );
+    const loader = await this.loadingAlertManager.createLoading();
 
     await firstValueFrom(
       this.currentUserStore.user$.pipe(
@@ -217,7 +212,7 @@ export class SettingsPage implements AfterViewInit, OnDestroy, OnInit {
           };
 
           return concat(
-            loader.present(),
+            this.loadingAlertManager.presentNew(loader, "replace-erase"),
             concat(
               this.afFunctions
                 .httpsCallable("changeShowProfile")(request)
@@ -229,7 +224,7 @@ export class SettingsPage implements AfterViewInit, OnDestroy, OnInit {
       )
     );
 
-    await loader.dismiss();
+    await this.loadingAlertManager.dismissDisplayed();
   }
 
   async applyGoUnderStyling(goUnder: GoUnder) {

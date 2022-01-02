@@ -1,5 +1,5 @@
 import { Injectable, NgZone } from "@angular/core";
-import { AlertController, NavController, LoadingController } from "@ionic/angular";
+import { LoadingOptions, NavController } from "@ionic/angular";
 import { Router } from "@angular/router";
 import { AngularFireFunctions } from "@angular/fire/functions";
 import { AngularFireAuth } from "@angular/fire/auth";
@@ -8,12 +8,13 @@ import { Storage } from "@capacitor/storage";
 import { EMPTY, firstValueFrom } from "rxjs";
 
 import { EmptyStoresService } from "@services/global-state-management/empty-stores.service";
-import { LoadingOptions, LoadingService } from "@services/loading/loading.service";
+// import { LoadingOptions, LoadingService } from "@services/loading/loading.service";
 
 import { deleteAccountRequest } from "@interfaces/cloud-functions.model";
 import { EmailAuthProvider, FirebaseUser } from "@interfaces/firebase.model";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 import { FirebaseLogoutService } from "./firebase-logout.service";
+import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
 
 @Injectable({
   providedIn: "root",
@@ -22,16 +23,14 @@ export class FirebaseAuthService {
   constructor(
     private router: Router,
     private zone: NgZone,
-    private alertCtrl: AlertController,
     private navCtrl: NavController,
-    private loadingController: LoadingController,
 
     private afAuth: AngularFireAuth,
     private afFunctions: AngularFireFunctions,
 
+    private loadingAlertManager: LoadingAndAlertManager,
     private firebaseLogout: FirebaseLogoutService,
     // private errorHandler: GlobalErrorHandler,
-    private loadingService: LoadingService,
     private emptyStoresService: EmptyStoresService
   ) {}
 
@@ -59,10 +58,11 @@ export class FirebaseAuthService {
       );
 
     const loadingOptions: LoadingOptions = {
-      ...this.loadingService.defaultLoadingOptions,
       message: "Deleting account...",
     };
-    const accountDeletionLoading = await this.loadingController.create(loadingOptions);
+    const accountDeletionLoading = await this.loadingAlertManager.createLoading(
+      loadingOptions
+    );
 
     const cancelUserConfirmationAlert = () => {};
     const confirmUserConfirmationAlert = async () => {
@@ -76,14 +76,14 @@ export class FirebaseAuthService {
 
       if (outcome !== "user-reauthenticated") return;
 
-      await accountDeletionLoading.present();
+      await this.loadingAlertManager.presentNew(accountDeletionLoading, "replace-erase");
 
       await Promise.all([clearLocalCache(), clearStores()]);
 
-      const accountDeletionFailedPopup = await this.alertCtrl.create({
+      const accountDeletionFailedPopup = await this.loadingAlertManager.createAlert({
         header: "Account deletion failed",
         message: `
-        An error occured while we were trying to delete your account. 
+        An error occurred while we were trying to delete your account. 
         Please either log back in and try again, or contact support for assistance.
         `,
         backdropDismiss: false,
@@ -94,18 +94,20 @@ export class FirebaseAuthService {
         await deleteAccount();
       } catch (e) {
         await Promise.all([logOut(), navigateToWelcome()]);
-        await accountDeletionLoading.dismiss();
-        await accountDeletionFailedPopup.present();
-        return;
+
+        return this.loadingAlertManager.presentNew(
+          accountDeletionFailedPopup,
+          "replace-erase"
+        );
       }
 
       // must logout after deleteAccount, otherwise it fails (as delete account)
       // requires the user to be authenticated
       await Promise.all([logOut(), navigateToWelcome()]);
-      await accountDeletionLoading.dismiss();
+      return this.loadingAlertManager.dismissDisplayed();
     };
 
-    const userConfirmationAlert = await this.alertCtrl.create({
+    const userConfirmationAlert = await this.loadingAlertManager.createAlert({
       header: "Are you sure you'd like to permanently delete your account?",
       backdropDismiss: false,
       message: `
@@ -126,7 +128,7 @@ export class FirebaseAuthService {
       ],
     });
 
-    await userConfirmationAlert.present();
+    return this.loadingAlertManager.presentNew(userConfirmationAlert, "replace-erase");
   }
 
   public async changePasswordProcedure(): Promise<FirebaseUser> {
@@ -152,7 +154,7 @@ export class FirebaseAuthService {
       }
     };
 
-    const alert = await this.alertCtrl.create({
+    const alert = await this.loadingAlertManager.createAlert({
       header: "Password Modification",
       backdropDismiss: false,
       message: "Enter a new password below",
@@ -169,7 +171,7 @@ export class FirebaseAuthService {
       ],
     });
 
-    await alert.present();
+    await this.loadingAlertManager.presentNew(alert, "replace-erase");
 
     return user;
   }
@@ -226,7 +228,7 @@ export class FirebaseAuthService {
       }
     };
 
-    const alert = await this.alertCtrl.create({
+    const alert = await this.loadingAlertManager.createAlert({
       header: "Reauthentication required",
       backdropDismiss: false,
       message,
@@ -244,7 +246,7 @@ export class FirebaseAuthService {
       ],
     });
 
-    await alert.present();
+    await this.loadingAlertManager.presentNew(alert, "replace-erase");
 
     // format used to make sure function waits for outcome to have a value
     // before returning, otherwise the functions of the OkProcedure don't have
@@ -265,7 +267,7 @@ export class FirebaseAuthService {
   ): Promise<T> {
     let promiseReturn: T;
 
-    const passAlert = await this.alertCtrl.create({
+    const passAlert = await this.loadingAlertManager.createAlert({
       header: "Incorrect Password",
       backdropDismiss: false,
       message: "The password you have entered is incorrect, please try again.",
@@ -281,7 +283,7 @@ export class FirebaseAuthService {
         promiseReturn = r;
       });
 
-    await passAlert.present();
+    await this.loadingAlertManager.presentNew(passAlert, "replace-erase");
 
     return promiseReturn;
   }
@@ -289,7 +291,7 @@ export class FirebaseAuthService {
   public async wrongPasswordMaxAttemptsPopup(
     followUpPromise: Promise<any> | null
   ): Promise<void> {
-    const attemptsAlert = await this.alertCtrl.create({
+    const attemptsAlert = await this.loadingAlertManager.createAlert({
       header: "Maximum Number of Attempts",
       backdropDismiss: false,
       message:
@@ -301,7 +303,7 @@ export class FirebaseAuthService {
       if (followUpPromise) return followUpPromise;
     });
 
-    await attemptsAlert.present();
+    await this.loadingAlertManager.presentNew(attemptsAlert, "replace-erase");
   }
 
   public async unknownErrorPopup(message: string = null): Promise<void> {
@@ -309,45 +311,45 @@ export class FirebaseAuthService {
       message ??
       "An unknown error occurred. Please check your connection, or try again later.";
 
-    const unknownAlert = await this.alertCtrl.create({
+    const unknownAlert = await this.loadingAlertManager.createAlert({
       header: "Something went wrong",
       message,
       buttons: ["OK"],
     });
 
-    await unknownAlert.present();
+    await this.loadingAlertManager.presentNew(unknownAlert, "replace-erase");
   }
 
   public async successPopup(message: string = null): Promise<void> {
     message = message ?? "The operation was successful!";
 
-    const unknownAlert = await this.alertCtrl.create({
+    const unknownAlert = await this.loadingAlertManager.createAlert({
       header: "Successful Operation",
       message,
       buttons: ["OK"],
     });
 
-    await unknownAlert.present();
+    await this.loadingAlertManager.presentNew(unknownAlert, "replace-erase");
   }
 
   public async unknownUserPopup(): Promise<void> {
-    const userAlert = await this.alertCtrl.create({
+    const userAlert = await this.loadingAlertManager.createAlert({
       header: "User not found",
       message: "Sorry, we can't find a user for that account, please try again.",
       buttons: ["OK"],
     });
 
-    await userAlert.present();
+    await this.loadingAlertManager.presentNew(userAlert, "replace-erase");
   }
 
   public async userDisabledPopup(): Promise<void> {
-    const disabledAlert = await this.alertCtrl.create({
+    const disabledAlert = await this.loadingAlertManager.createAlert({
       header: "User disabled",
       message:
         "This account has been disabled. If you think this is an error, please contact support.",
       buttons: ["OK"],
     });
 
-    await disabledAlert.present();
+    await this.loadingAlertManager.presentNew(disabledAlert, "replace-erase");
   }
 }

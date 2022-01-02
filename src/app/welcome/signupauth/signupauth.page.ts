@@ -1,10 +1,5 @@
 import { checkEmailValidityResponse } from "./../../shared/interfaces/cloud-functions.model";
-import {
-  AlertController,
-  IonSlides,
-  LoadingController,
-  NavController,
-} from "@ionic/angular";
+import { IonSlides, NavController } from "@ionic/angular";
 import {
   Component,
   OnInit,
@@ -43,11 +38,11 @@ import { UniversitiesStore } from "@stores/universities/universities.service";
 import { SignupService } from "@services/signup/signup.service";
 import { SignupAuthMethodSharer } from "./signupauth-method-sharer.service";
 import { EmailVerificationService } from "./email-verification.service";
-import { LoadingService } from "@services/loading/loading.service";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 
 import { FireAuthUserCredential } from "@interfaces/firebase.model";
 import { FlyingLetterAnimation } from "@animations/letter.animation";
+import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
 
 @Component({
   selector: "app-signupauth",
@@ -129,18 +124,17 @@ export class SignupauthPage implements OnInit {
     private router: Router,
     private changeDetector: ChangeDetectorRef,
     private renderer: Renderer2,
-    private alertCtrl: AlertController,
     private navCtrl: NavController,
-    private loadingCtrl: LoadingController,
 
     private afFunctions: AngularFireFunctions,
 
     private universitiesStore: UniversitiesStore,
 
+    private loaderAlertManager: LoadingAndAlertManager,
     private errorHandler: GlobalErrorHandler,
     private signup: SignupService,
     private emailService: EmailVerificationService,
-    private loading: LoadingService,
+    // private loading: LoadingService,
     private SignupAuthMethodSharer: SignupAuthMethodSharer
   ) {
     this.authForm = this.emptyAuthForm;
@@ -182,37 +176,35 @@ export class SignupauthPage implements OnInit {
       return;
     }
 
-    const loader = await this.loadingCtrl.create({
-      ...this.loading.defaultLoadingOptions,
+    const loader = await this.loaderAlertManager.createLoading({
       message: "Checking validity...",
     });
-    const alert = await this.alertCtrl.create({
+
+    const alert = await this.loaderAlertManager.createAlert({
       header: "The email you have entered is invalid",
       message: "Make sure your university is on the list.",
       buttons: ["Okay"],
     });
 
     try {
-      await loader.present();
+      await this.loaderAlertManager.presentNew(loader, "replace-erase");
+
       const isValid = await this.isEmailValid(emailControl.value);
 
       if (isValid) {
-        await loader.dismiss();
+        await this.loaderAlertManager.dismissDisplayed();
         return this.slideToNext();
       }
 
-      await loader.dismiss();
-      return alert.present();
+      return this.loaderAlertManager.presentNew(alert, "replace-erase");
     } catch (e) {
-      await loader?.dismiss();
-      await alert?.dismiss();
-      return this.alertCtrl
-        .create({
-          header: "An unknown error occured",
-          message: "Please try again or come back later.",
-          buttons: ["Okay"],
-        })
-        .then((a) => a.present());
+      const errorAlert = await this.loaderAlertManager.createAlert({
+        header: "An unknown error occurred",
+        message: "Please try again or come back later.",
+        buttons: ["Okay"],
+      });
+
+      return this.loaderAlertManager.presentNew(errorAlert, "replace-erase");
     }
   }
 
@@ -222,42 +214,43 @@ export class SignupauthPage implements OnInit {
 
     if (!emailControl.valid || !passwordControl.valid) return;
 
-    const loader = await this.loadingCtrl.create(this.loading.defaultLoadingOptions);
-    const alert = await this.alertCtrl.create({
+    const loader = await this.loaderAlertManager.createLoading();
+    const alert = await this.loaderAlertManager.createAlert({
       header: "Invalid Email",
       message: "Please change the email address you have provided.",
       buttons: ["Okay"],
     });
 
     try {
-      await loader.present();
+      await this.loaderAlertManager.presentNew(loader, "replace-erase");
 
       const isValid = await this.isEmailValid(emailControl.value);
 
       if (!isValid) {
-        await loader.dismiss();
+        await this.loaderAlertManager.dismissDisplayed();
         await this.goToSlide(0);
-        return alert.present();
+
+        return this.loaderAlertManager.presentNew(alert, "replace-erase");
       }
+
       try {
         await this.requestAccountCreation();
       } catch {
-        return loader.dismiss(); // logic to handle in case of error here is all in requestAccountCreation()
+        return this.loaderAlertManager.dismissDisplayed(); // logic to handle in case of error here is all in requestAccountCreation()
       }
+
+      await this.loaderAlertManager.dismissDisplayed();
       await this.slideToNext();
       await lastValueFrom(this.emailService.sendVerificationToUser("sent"));
       await lastValueFrom(this.emailService.listenForVerification());
     } catch (e) {
-      console.error(String(e));
-      await loader?.dismiss();
-      await alert?.dismiss();
-      return this.alertCtrl
-        .create({
-          header: "An unknown error occured",
-          message: "Please try again or come back later.",
-          buttons: ["Okay"],
-        })
-        .then((a) => a.present());
+      const errorAlert = await this.loaderAlertManager.createAlert({
+        header: "An unknown error occurred",
+        message: "Please try again or come back later.",
+        buttons: ["Okay"],
+      });
+
+      return this.loaderAlertManager.presentNew(errorAlert, "replace-erase");
     }
   }
 
@@ -368,7 +361,8 @@ export class SignupauthPage implements OnInit {
     }
 
     console.log("user on wrong page and wrong slide for email verification");
-    const alert = await this.alertCtrl.create({
+
+    const alert = await this.loaderAlertManager.createAlert({
       header: "Email Verification Required",
       message: `
         We have detected that your account doesn't have its email verified yet.
@@ -376,13 +370,14 @@ export class SignupauthPage implements OnInit {
         `,
       buttons: ["Okay"],
     });
+
     alert.onDidDismiss().then(() => this.router.navigateByUrl("/welcome/signupauth"));
 
-    return alert.present();
+    return this.loaderAlertManager.presentNew(alert, "replace-erase");
   }
 
   async onWeakPassword() {
-    const alert = await this.alertCtrl.create({
+    const alert = await this.loaderAlertManager.createAlert({
       header: "Password too weak",
       message:
         "The password you provided is too weak. Try a more complex or longer password.",
@@ -393,12 +388,13 @@ export class SignupauthPage implements OnInit {
         },
       ],
     });
+
     alert.onDidDismiss().then(() => {
       this.authForm.reset(this.emptyAuthForm);
       return this.goToSlide(1);
     });
 
-    return alert.present();
+    return this.loaderAlertManager.presentNew(alert, "replace-erase");
   }
 
   async onEmailAlreadyInUse() {
@@ -409,7 +405,7 @@ export class SignupauthPage implements OnInit {
     };
     const signInProcedure = () => this.navCtrl.navigateRoot("/welcome/login");
 
-    const alert = await this.alertCtrl.create({
+    const alert = await this.loaderAlertManager.createAlert({
       header: "This email is already in use",
       message: `
       The email you provided already has an account associated with it.
@@ -439,7 +435,7 @@ export class SignupauthPage implements OnInit {
       if (outcome === "signIn") return signInProcedure().then(() => {});
     });
 
-    return alert.present();
+    return this.loaderAlertManager.presentNew(alert, "replace-erase");
   }
 
   private async emailSentAnimation() {
@@ -458,13 +454,13 @@ export class SignupauthPage implements OnInit {
     message: string,
     header?: string
   ): Promise<void> {
-    const alert = await this.alertCtrl.create({
+    const alert = await this.loaderAlertManager.createAlert({
       header: header ?? "Signup Failed",
       message: message,
       buttons: ["Okay"],
     });
 
-    return alert.present();
+    return this.loaderAlertManager.presentNew(alert, "replace-erase");
   }
 
   private async updatePager() {

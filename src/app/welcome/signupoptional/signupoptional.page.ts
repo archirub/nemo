@@ -8,19 +8,13 @@ import {
   QueryList,
   Renderer2,
 } from "@angular/core";
-import {
-  AlertController,
-  IonSlides,
-  LoadingController,
-  NavController,
-} from "@ionic/angular";
+import { IonSlides, NavController } from "@ionic/angular";
 import { FormGroup, FormControl, FormArray, FormBuilder } from "@angular/forms";
 
 import { intersection } from "lodash";
 
 import { QuestionSlidesComponent } from "@components/index";
 
-import { LoadingService } from "@services/loading/loading.service";
 import { SignupService } from "@services/signup/signup.service";
 
 import {
@@ -34,6 +28,7 @@ import {
   SocialMediaLink,
   allowOptionalProp,
 } from "@interfaces/index";
+import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
 
 @Component({
   selector: "app-signupoptional",
@@ -87,11 +82,10 @@ export class SignupoptionalPage implements OnInit {
     private signup: SignupService,
     private changeDetectorRef: ChangeDetectorRef,
     private formBuilder: FormBuilder,
-    private loadingCtrl: LoadingController,
-    private loading: LoadingService,
-    private alertCtrl: AlertController,
     private navCtrl: NavController,
-    private renderer: Renderer2
+    private renderer: Renderer2,
+
+    private loadingAlertManager: LoadingAndAlertManager
   ) {}
 
   ngOnInit() {
@@ -136,25 +130,26 @@ export class SignupoptionalPage implements OnInit {
    * if it is, then save the data and direct to signupoptional
    */
   async onSubmit() {
-    const loader = await this.loadingCtrl.create({
-      ...this.loading.defaultLoadingOptions,
+    const loader = await this.loadingAlertManager.createLoading({
       message: "Setting up your account...",
     });
-    await loader.present();
+    await this.loadingAlertManager.presentNew(loader, "replace-erase");
 
     const slideCount = await this.slides.length();
     const invalidSlide = await this.getFirstInvalidSlideIndex();
     // go to slide if invalidSlide is non null and that it isn't the last slide
     if (invalidSlide && invalidSlide + 1 !== slideCount) {
-      const alert = await this.alertCtrl.create({
+      const alert = await this.loadingAlertManager.createAlert({
         backdropDismiss: false,
         header: "We found some invalid data...",
         buttons: ["Go to field"],
       });
 
-      await loader.dismiss();
+      await this.loadingAlertManager.dismissDisplayed();
+
       alert.onDidDismiss().then(() => this.unlockAndSlideTo(invalidSlide));
-      return alert.present();
+
+      return this.loadingAlertManager.presentNew(alert, "replace-erase");
     }
 
     await this.updateData();
@@ -162,19 +157,19 @@ export class SignupoptionalPage implements OnInit {
     try {
       await this.signup.createFirestoreAccount();
     } catch (e) {
-      await loader.dismiss();
+      await this.loadingAlertManager.dismissDisplayed();
       await this.onAccountCreationFailure();
     }
 
     await this.signup.initializeUser();
 
-    await loader.dismiss();
+    await this.loadingAlertManager.dismissDisplayed();
 
     return this.navCtrl.navigateForward("/welcome/signup-to-app");
   }
 
   async onAccountCreationFailure() {
-    const alert = await this.alertCtrl.create({
+    const alert = await this.loadingAlertManager.createAlert({
       header: "Account creation failed",
       message: `We couldn't complete the creation of your account. 
       Please try to close and reopen the app, and check your internet connection. 
@@ -184,7 +179,7 @@ export class SignupoptionalPage implements OnInit {
       backdropDismiss: false,
     });
 
-    return alert.present();
+    return this.loadingAlertManager.presentNew(alert, "replace-erase");
   }
 
   /**

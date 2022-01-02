@@ -8,12 +8,7 @@ import {
   Renderer2,
   AfterViewInit,
 } from "@angular/core";
-import {
-  ModalController,
-  Animation,
-  LoadingController,
-  NavController,
-} from "@ionic/angular";
+import { ModalController, Animation, NavController } from "@ionic/angular";
 import { AngularFireFunctions } from "@angular/fire/functions";
 
 import {
@@ -40,7 +35,6 @@ import { PushNotifications } from "@capacitor/push-notifications";
 
 import { SearchCriteriaComponent } from "./search-criteria/search-criteria.component";
 
-import { LoadingService } from "@services/loading/loading.service";
 import { TabElementRefService } from "src/app/main/tab-menu/tab-element-ref.service";
 import { StoreReadinessService } from "@services/store-readiness/store-readiness.service";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
@@ -59,6 +53,7 @@ import {
   CloseCatchAnimation,
   FishSwimAnimation,
 } from "@animations/index";
+import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
 
 @Component({
   selector: "app-home",
@@ -168,7 +163,6 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
   constructor(
     private renderer: Renderer2,
     private modalCtrl: ModalController,
-    private loadingCtrl: LoadingController,
     private navCtrl: NavController,
     private afFunctions: AngularFireFunctions,
 
@@ -177,10 +171,10 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     private ownPicturesService: OwnPicturesStore,
     private chatboardStore: ChatboardStore,
 
+    private loadingAlertManager: LoadingAndAlertManager,
     private errorHandler: GlobalErrorHandler,
     private tabElementRef: TabElementRefService,
     private storeReadiness: StoreReadinessService,
-    private loading: LoadingService,
     private tutorials: TutorialsService,
     private swipeCap: SwipeCapService
   ) {
@@ -213,7 +207,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     const modal = await this.modalCtrl.create({
       component: SearchCriteriaComponent,
       enterAnimation: SCenterAnimation(),
-      leaveAnimation: SCleaveAnimation(this.tabElementRef.tabsRef, this.homeContainer),
+      leaveAnimation: SCleaveAnimation(),
     });
 
     return modal.present();
@@ -289,10 +283,8 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     const user = await this.errorHandler.getCurrentUserWithErrorHandling();
     if (!user) return;
 
-    const loader = await this.loadingCtrl.create({
-      ...this.loading.defaultLoadingOptions,
-    });
-    await loader.present();
+    const loader = await this.loadingAlertManager.createLoading({});
+    await this.loadingAlertManager.presentNew(loader, "replace-erase");
 
     return firstValueFrom(
       this.chatboardStore.matches$.pipe(
@@ -302,12 +294,12 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
         timeout(maxTimeWaitingForChat),
         switchMap((chat) =>
           concat(
-            loader.dismiss(),
+            this.loadingAlertManager.dismissDisplayed(),
             this.navCtrl.navigateForward(["main/messenger/" + chat.id]),
             this.destroyCatch()
           )
         ),
-        finalize(() => loader.dismiss())
+        finalize(() => this.loadingAlertManager.dismissDisplayed())
       )
     );
   }

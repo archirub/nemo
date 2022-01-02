@@ -9,13 +9,7 @@ import {
   Renderer2,
   OnDestroy,
 } from "@angular/core";
-import {
-  AlertController,
-  IonCheckbox,
-  IonSlides,
-  LoadingController,
-  NavController,
-} from "@ionic/angular";
+import { IonCheckbox, IonSlides, NavController } from "@ionic/angular";
 import { FormGroup, FormControl, Validators } from "@angular/forms";
 import { Router } from "@angular/router";
 import { AngularFireAuth } from "@angular/fire/auth";
@@ -27,7 +21,6 @@ import { AppDatetimeComponent } from "@components/index";
 
 import { UniversitiesStore } from "@stores/universities/universities.service";
 import { SignupService } from "@services/signup/signup.service";
-import { LoadingService } from "@services/loading/loading.service";
 
 import {
   Degree,
@@ -44,6 +37,7 @@ import {
 import { SignupRequired } from "@interfaces/signup.model";
 import { allowOptionalProp } from "@interfaces/index";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
+import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
 
 @Component({
   selector: "app-signuprequired",
@@ -119,17 +113,15 @@ export class SignuprequiredPage implements OnInit, OnDestroy {
     private router: Router,
     private changeDetectorRef: ChangeDetectorRef,
     private renderer: Renderer2,
-    private alertCtrl: AlertController,
-    private loadingCtrl: LoadingController,
     private navCtrl: NavController,
 
     private afAuth: AngularFireAuth,
 
     private universitiesStore: UniversitiesStore,
 
+    private loadingAlertManager: LoadingAndAlertManager,
     private errorHandler: GlobalErrorHandler,
-    private signup: SignupService,
-    private loading: LoadingService
+    private signup: SignupService
   ) {}
 
   ngOnInit() {
@@ -233,25 +225,24 @@ export class SignuprequiredPage implements OnInit, OnDestroy {
 
   // copy paste from signup optional's onSubmit() method
   async skipToApp() {
-    const loader = await this.loadingCtrl.create({
-      ...this.loading.defaultLoadingOptions,
+    const loader = await this.loadingAlertManager.createLoading({
       message: "Setting up your account...",
     });
-    await loader.present();
+    await this.loadingAlertManager.presentNew(loader, "replace-erase");
 
     const slideCount = await this.slides.length();
-    const invalidSlide = await this.getfirstInvalidSlideIndex();
+    const invalidSlide = this.getfirstInvalidSlideIndex();
     // go to slide if invalidSlide is non null and that it isn't the last slide
     if (invalidSlide && invalidSlide + 1 !== slideCount) {
-      const alert = await this.alertCtrl.create({
+      const alert = await this.loadingAlertManager.createAlert({
         backdropDismiss: false,
         header: "We found some invalid data...",
         buttons: ["Go to field"],
       });
 
-      await loader.dismiss();
       alert.onDidDismiss().then(() => this.unlockAndSlideTo(invalidSlide));
-      return alert.present();
+
+      return this.loadingAlertManager.presentNew(alert, "replace-erase");
     }
 
     await this.updateData();
@@ -259,13 +250,13 @@ export class SignuprequiredPage implements OnInit, OnDestroy {
     try {
       await this.signup.createFirestoreAccount();
     } catch (e) {
-      await loader.dismiss();
+      await this.loadingAlertManager.dismissDisplayed();
       await this.onAccountCreationFailure();
     }
 
     await this.signup.initializeUser();
 
-    await loader.dismiss();
+    await this.loadingAlertManager.dismissDisplayed();
 
     return this.navCtrl.navigateForward("/welcome/signup-to-app");
   }
@@ -462,7 +453,7 @@ export class SignuprequiredPage implements OnInit, OnDestroy {
   }
 
   async onAccountCreationFailure() {
-    const alert = await this.alertCtrl.create({
+    const alert = await this.loadingAlertManager.createAlert({
       header: "Account creation failed",
       message: `We couldn't complete the creation of your account. 
         Please try to close and reopen the app, and check your internet connection. 
@@ -472,7 +463,7 @@ export class SignuprequiredPage implements OnInit, OnDestroy {
       backdropDismiss: false,
     });
 
-    return alert.present();
+    return this.loadingAlertManager.presentNew(alert, "replace-erase");
   }
 
   validateAndSlidePictures() {

@@ -1,10 +1,4 @@
-import {
-  AlertController,
-  IonContent,
-  IonItemSliding,
-  LoadingController,
-  NavController,
-} from "@ionic/angular";
+import { IonContent, IonItemSliding, NavController } from "@ionic/angular";
 import {
   Component,
   Input,
@@ -30,6 +24,7 @@ import { StoreReadinessService } from "@services/store-readiness/store-readiness
 
 import { Chat } from "@classes/index";
 import { FadeOutAnimation } from "@animations/fade-out.animation";
+import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
 
 @Component({
   selector: "app-chat-board",
@@ -64,8 +59,7 @@ export class ChatBoardComponent implements OnInit, AfterViewInit {
     private chatboardPicturesService: ChatboardPicturesStore,
     private storeReadiness: StoreReadinessService,
     private chatboardStore: ChatboardStore,
-    private loadingCtrl: LoadingController,
-    private alertCtrl: AlertController
+    private loadingAlertManager: LoadingAndAlertManager
   ) {}
 
   ngOnInit() {
@@ -82,29 +76,29 @@ export class ChatBoardComponent implements OnInit, AfterViewInit {
     await this.chatDeleteRef.close();
 
     // create loader
-    const loader = await this.loadingCtrl.create({
+    const loader = await this.loadingAlertManager.createLoading({
       message: "Deleting chat with " + chat.recipient.name,
       spinner: "bubbles",
       backdropDismiss: false,
     });
 
     // show loader
-    await loader.present();
+    await this.loadingAlertManager.presentNew(loader, "replace-erase");
 
     // attempt to delete the chat on the database
     try {
       await firstValueFrom(this.chatboardStore.deleteChatOnDatabase(chat.id));
     } catch {
       // if unsuccesful, dismiss loader and show alert saying there was an error
-      await loader.dismiss();
+      await this.loadingAlertManager.dismissDisplayed();
 
-      return this.alertCtrl
-        .create({
-          header: "An error occured",
-          message: "Your chat with " + chat.recipient.name + " could not be deleted... ",
-          buttons: ["Okay"],
-        })
-        .then((a) => a.present());
+      const errorAlert = await this.loadingAlertManager.createAlert({
+        header: "An error occured",
+        message: "Your chat with " + chat.recipient.name + " could not be deleted... ",
+        buttons: ["Okay"],
+      });
+
+      return this.loadingAlertManager.presentNew(errorAlert, "replace-erase");
     }
 
     // get element for fadeOut animation
@@ -114,7 +108,7 @@ export class ChatBoardComponent implements OnInit, AfterViewInit {
       target = target.parentElement;
     }
 
-    await loader.dismiss();
+    await this.loadingAlertManager.dismissDisplayed();
 
     //Fades out the chatboard list element which just got deleted
     await FadeOutAnimation(target, 300).play();
