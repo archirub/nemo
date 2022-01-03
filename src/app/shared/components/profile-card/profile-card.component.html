@@ -66,7 +66,9 @@
 
     <div #complete id="completeInfo" [style.bottom]="headerBottom + '%'">
       <!--[hidden]="!moreInfo"-->
-      <ion-card-header #header class="name-age sticky" (click)="expandProfile()">
+      <ion-card-header #header class="name-age sticky" (click)="expandProfile()" 
+      [style.position]="fixedHeader ? 'fixed' : 'initial'">
+      <!-- AFTER RELEASE THIS HEADER POSITIONING NEEDS TO BE FIXED-->
         <ion-card-title
           >{{ profile?.firstName }}, {{ profile?.dateOfBirth | age }}
         </ion-card-title>
@@ -75,7 +77,8 @@
           }}{{ profile?.degree | degrees }}</ion-card-subtitle
         >
       </ion-card-header>
-      <div #content id="content">
+      <div #content id="content" [style.marginTop]="fixedHeader ? '13vh' : '0'">
+        <!-- FIX LINE ABOVE AFTER RELEASE -->
         <!-- DIVS FOR DOUBLE TAPPING YES/NO -->
         <div #yes class="yesSwipeInfo" (click)="this.tapped.emit('yes')"></div>
         <div #no class="noSwipeInfo" (click)="this.tapped.emit('no')"></div>

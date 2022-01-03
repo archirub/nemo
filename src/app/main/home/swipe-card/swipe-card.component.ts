@@ -92,6 +92,8 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
   @ViewChild("noBubble", { read: ElementRef }) noBubble: ElementRef;
   @ViewChild("likeEls", { read: ElementRef }) likeEls: ElementRef;
   @ViewChild("dislikeEls", { read: ElementRef }) dislikeEls: ElementRef;
+  @ViewChild("likeText", { read: ElementRef }) likeText: ElementRef;
+  @ViewChild("dislikeText", { read: ElementRef }) dislikeText: ElementRef;
   @ViewChild("profileComponent") profileComponent: ProfileCardComponent;
 
   private cardStackRef$ = new ReplaySubject<QueryList<ProfileCardComponent>>(1);
@@ -305,27 +307,32 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
   // do logic associated with it
   private doubleTapOnCard(choice: swipeChoice): Observable<void> {
     if (choice === "yes") {
-      return this.cardStackRef$.pipe(
-        map(
-          (ref) => this.matched.emit(Array.from(ref)[0].profile) // FOR DEVELOPMENT
-        ),
-        switchMap(() =>
-          this.profiles$.pipe(
+      //return this.cardStackRef$.pipe(
+        //switchMap(() =>
+          return this.profiles$.pipe(
             take(1),
             withLatestFrom(of(SwipeAnimation(this.likeEls))),
             switchMap(([profiles, swipeAnimation]) =>
-              concat(swipeAnimation.play(), this.onYesSwipe(profiles[0]))
-            )
-          )
-        )
-      );
+              concat(
+                this.onYesSwipe(profiles[0]),
+                swipeAnimation.play(),  
+                this.likeText.nativeElement.innerHTML = `You liked ${profiles[0].firstName}!`
+              )
+            ),
+          );
+        //)
+      //);
     }
     if (choice === "no") {
       return this.profiles$.pipe(
         take(1),
         withLatestFrom(of(SwipeAnimation(this.dislikeEls))),
         switchMap(([profiles, swipeAnimation]) =>
-          concat(swipeAnimation.play(), this.onNoSwipe(profiles[0]))
+          concat( 
+            this.onNoSwipe(profiles[0]),
+            swipeAnimation.play(),
+            this.dislikeText.nativeElement.innerHTML = `You passed on ${profiles[0].firstName}.`
+          )
         )
       );
     }

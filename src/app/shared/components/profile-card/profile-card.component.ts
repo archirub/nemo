@@ -59,6 +59,7 @@ export class ProfileCardComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() isOwnProfile: boolean = false;
   @Input() profile: Profile;
   @Input() headerBottom: number; //in %
+  @Input() fixedHeader: boolean = true; //THIS IS A LAST MINUTE FIX BECAUSE I DON'T HAVE THE TIME TO FIGURE OUT WHAT'S GOING ON??
   @Input() set profilePictures(value: string[]) {
     if (!Array.isArray(value)) return;
 
@@ -200,7 +201,7 @@ export class ProfileCardComponent implements OnInit, AfterViewInit, OnDestroy {
       this.collapseAnimation = LessInfoAnimation(
         this.complete,
         14,
-        this.getContentHeight()
+        this.getContentHeight(),
       ); //Have to reinitialise animation every time
       this.collapseAnimation.play();
 
@@ -217,7 +218,7 @@ export class ProfileCardComponent implements OnInit, AfterViewInit, OnDestroy {
       this.expandAnimation = MoreInfoAnimation(
         this.complete,
         14,
-        this.getContentHeight()
+        this.getContentHeight(),
       ); //Have to reinitialise animation every time
       this.expandAnimation.play();
 

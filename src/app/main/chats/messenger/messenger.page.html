@@ -125,6 +125,7 @@
           [profile]="recipientProfile$ | async"
           [profilePictures]="(recipientProfile$ | async)?.pictureUrls"
           [headerBottom]="2"
+          [fixedHeader]="false"
         ></app-profile-card>
       </ion-content>
     </ion-slide>

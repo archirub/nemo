@@ -7,14 +7,14 @@
   ></nemo-toggle>
 
   <ion-content *ngIf="view === 'catches'" #chatContainer>
-    <div *ngIf="this.chats.length < 1" class="noChats">
+    <div *ngIf="this.matches.length < 1" class="noChats">
       <p>
-        Sorry, looks like you don't have any chats yet. Head to the catch tab to find
-        someone new!
+        Sorry, you haven't caught anyone yet! Try the catch tab to find a possible
+        catch!
       </p>
 
       <div class="fish" (click)="goToHome()">
-        <img name="fish" src="/assets/swipeicon-orange.svg" />
+        <img name="fish" src="/assets/swipeicon.svg" />
 
         <h1>Catch</h1>
       </div>
