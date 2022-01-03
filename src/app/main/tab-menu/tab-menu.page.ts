@@ -1,4 +1,11 @@
-import { Component, ElementRef, EventEmitter, OnDestroy, ViewChild } from "@angular/core";
+import {
+  Component,
+  ElementRef,
+  EventEmitter,
+  OnDestroy,
+  Renderer2,
+  ViewChild,
+} from "@angular/core";
 import { IonTabs } from "@ionic/angular";
 
 import { combineLatest, filter, map, startWith, Subscription } from "rxjs";
@@ -37,18 +44,16 @@ export class TabMenuPage implements OnDestroy {
     filter(() => !!this.tabs),
     map(() => this.tabs.getSelected()),
     map((tabName) => {
-      var prev = document.getElementsByClassName("fillColor"); //Remove class from previous tab
-      Array.from(prev).forEach((el) => {
-        el.classList.remove("fillColor");
-      });
+      const prev = document.getElementsByClassName("fillColor"); //Remove class from previous tab
+      Array.from(prev).forEach((el) => this.renderer.removeClass(el, "fillColor"));
 
-      let target = document.getElementById(tabName);
-
-      target.classList.add("fillColor"); //Class is a filter that very closely approximates primary color
+      const target = document.getElementById(tabName);
+      this.renderer.addClass(target, "fillColor"); //Class is a filter that very closely approximates primary color
     })
   );
 
   constructor(
+    private renderer: Renderer2,
     private tutorials: TutorialsService,
     private tabElementRef: TabElementRefService
   ) {

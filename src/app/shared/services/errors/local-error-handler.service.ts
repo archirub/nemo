@@ -14,7 +14,6 @@ import {
   LocalErrorCode,
   TRY_AGAIN,
 } from "@interfaces/index";
-import { OverlayEventDetail } from "@ionic/core";
 
 @Injectable({
   providedIn: "root",

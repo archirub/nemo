@@ -11,6 +11,7 @@ import {
   HostListener,
   Renderer2,
   OnDestroy,
+  ViewChildren,
 } from "@angular/core";
 import { IonSlides } from "@ionic/angular";
 import { AngularFireAuth } from "@angular/fire/auth";
@@ -23,7 +24,16 @@ import {
   ReplaySubject,
   Subscription,
 } from "rxjs";
-import { map, take, startWith, first, switchMap, tap } from "rxjs/operators";
+import {
+  map,
+  take,
+  startWith,
+  first,
+  switchMap,
+  tap,
+  exhaustMap,
+  delay,
+} from "rxjs/operators";
 
 import { ReportUserComponent } from "../../../main/chats/report-user/report-user.component";
 
@@ -80,10 +90,13 @@ export class ProfileCardComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild("intSlides") intSlides: IonSlides;
 
   private bulletsRef$ = new ReplaySubject<QueryList<ElementRef>>(1); // made public for use in swipe stack store and messenger page
-  @ViewChild("bullets", { read: ElementRef }) set bulletsRefSetter(
+  @ViewChildren("bullets", { read: ElementRef }) set bulletsRefSetter(
     ref: QueryList<ElementRef>
   ) {
-    if (ref) this.bulletsRef$.next(ref);
+    if (ref) {
+      // console.log("bulletsRef$ is ", ref, Array.from(ref));
+      this.bulletsRef$.next(ref);
+    }
   }
 
   public slidesRef$ = new ReplaySubject<IonSlides>(1); // made public for use in swipe stack store and messenger page
@@ -103,7 +116,7 @@ export class ProfileCardComponent implements OnInit, AfterViewInit, OnDestroy {
   profilePictures$ = new BehaviorSubject<string[]>([]);
 
   profilePicturesWithDefault$ = this.profilePictures$.pipe(
-    map((pp) => pp ?? "/assets/icons/icon-192x192.png")
+    map((pics) => pics.map((url) => url ?? "/assets/icons/icon-192x192.png"))
   );
 
   pagerHandler$ = combineLatest([this.slidesRef$, this.bulletsRef$]).pipe(
@@ -242,19 +255,21 @@ export class ProfileCardComponent implements OnInit, AfterViewInit, OnDestroy {
     }, 100);
   }
 
-  updatePager(currentIndex: number, bulletsRef: QueryList<ElementRef>) {
-    const prev = document.getElementById("pagerActive");
+  updatePager(newIndex: number, bulletsRef: QueryList<ElementRef>) {
+    console.log("updatePager triggered");
+    const currActiveEl = document.getElementById("pagerActive");
+    const newActiveRef = Array.from(bulletsRef)?.[newIndex];
 
-    if (prev != null) {
-      prev.removeAttribute("id"); //Remove colour class from previous icon
-    } else {
-      //Case of no pager icon lit up (initialisation)
-      const firstBullet = Array.from(bulletsRef)?.[0];
-      if (firstBullet) firstBullet.nativeElement.id = "pagerActive"; //This SHOULD colour the first icon if function is run at correct time
-    }
+    if (currActiveEl) this.renderer.removeAttribute(currActiveEl, "id"); //Remove colour class from previous icon
 
-    const currBullet = Array.from(bulletsRef)?.[currentIndex];
-    if (currBullet) currBullet.nativeElement.id = "pagerActive"; //Colour current icon
+    if (newActiveRef)
+      // all we need is for that "setAttribute" to occur after the "removeAttribute" so that
+      // the attribute that is removed isn't the one that just got added (this is what was happening
+      // before)
+      setTimeout(
+        () => this.renderer.setAttribute(newActiveRef.nativeElement, "id", "pagerActive"),
+        1
+      );
   }
 
   sizeSwipers() {

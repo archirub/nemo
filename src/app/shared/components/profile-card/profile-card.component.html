@@ -1,7 +1,7 @@
 <div #fullCard id="swipe-card" *ngIf="profile">
   <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script> -->
   <div class="img-container">
-    <div class="pager">
+    <div class="pager" [hidden]="(profilePictures$ | async).length < 2">
       <ion-icon #bullets name="ellipse" *ngFor="let path of pictureCountArray"></ion-icon>
     </div>
     <ion-slides
@@ -88,11 +88,7 @@
           id="info-segment"
         >
           <div id="interests-container">
-            <ion-slides
-              #intSlides
-              class="interests-slides"
-              *ngIf="this.interestsBuilt"
-            >
+            <ion-slides #intSlides class="interests-slides" *ngIf="this.interestsBuilt">
               <ion-slide *ngFor="let slide of interestSlideContent">
                 <div id="interests-box" *ngFor="let interest of slide">
                   <img

@@ -7,7 +7,7 @@ import {
   LocalErrorCode,
   localErrorCodes,
 } from "@interfaces/error-handling.model";
-import { AlertController } from "@ionic/angular";
+import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
 
 import {
   Observable,
@@ -27,7 +27,10 @@ import {
   providedIn: "root",
 })
 export class CommonErrorFunctions {
-  constructor(protected zone: NgZone, protected alertCtrl: AlertController) {}
+  constructor(
+    protected zone: NgZone,
+    protected loadingAlertManager: LoadingAndAlertManager
+  ) {}
 
   // DEV (writing that just to get my attention before release)
   // THIS THING RETURNING OBSERVABLE<T> IS A BIG LIE. IT IS JUST A TRICK SO THAT I DON'T
@@ -37,13 +40,13 @@ export class CommonErrorFunctions {
     // using defer so that promise isn't read right away (thereby presenting the error message)
     return defer(() =>
       this.zone.run(async () => {
-        const alert = await this.alertCtrl.create({
+        const alert = await this.loadingAlertManager.createAlert({
           header: errorText?.header ?? defaultErrorText.header,
           message: errorText?.message ?? defaultErrorText.message,
           buttons: ["Okay"],
         });
 
-        await alert.present();
+        await this.loadingAlertManager.presentNew(alert, "replace-erase");
 
         // returns this so that the following actions are only taken once the alert is dismissed
         return alert.onDidDismiss();

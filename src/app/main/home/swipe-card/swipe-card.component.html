@@ -9,7 +9,7 @@
         <h2 class="catchtext" #likeText>You liked USER!</h2>
       </div>
     </div>
-    
+
     <div #dislikeEls id="dislikeEls">
       <ion-icon name="close-outline"></ion-icon>
       <div class="likeText">
@@ -30,16 +30,16 @@
       [ngStyle]="{ zIndex: profiles.length - i }"
     >
       <!-- DEV -->
-      <div
+      <!-- <div
         class="devOtherProfileInfo"
         *ngIf="DEV_other_profile_info | async as otherInfo"
       >
         {{ otherInfo | json }}
-      </div>
+      </div> -->
       <!-- DEV -->
-      <div class="devOwnProfileInfo" *ngIf="DEV_own_profile_info | async as ownInfo">
+      <!-- <div class="devOwnProfileInfo" *ngIf="DEV_own_profile_info | async as ownInfo">
         {{ ownInfo | json }}
-      </div>
+      </div> -->
       <app-profile-card
         #profileComponent
         (tapped)="cardTap$.next($event)"
