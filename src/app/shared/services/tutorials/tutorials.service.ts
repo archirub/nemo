@@ -12,6 +12,7 @@ import {
   map,
   Observable,
   pairwise,
+  share,
   startWith,
   switchMap,
   take,
@@ -40,6 +41,8 @@ export class TutorialsService {
     map((hst) => this.hasSeenTutorial.next(hst))
   );
 
+  activate$ = this.activate().pipe(share());
+
   get defaultTutorialState(): HasSeenTutorial {
     return { home: false, ownProfile: false, chatBoard: false };
   }
@@ -51,14 +54,13 @@ export class TutorialsService {
     private errorHandler: GlobalErrorHandler
   ) {}
 
-  activate() {
+  private activate() {
     return concat(this.fillTutorial$, this.manageStoringOnDatabase());
   }
 
   displayTutorial(tutorial: keyof HasSeenTutorial): Observable<boolean> {
     return this.hasSeenTutorial$.pipe(
       filter((hst) => !!hst),
-      tap(() => console.log("displayTutorial")),
       map((hst) => hst[tutorial]),
       distinctUntilChanged(),
       map((hst) => !hst) // since we want to display the tutorial if the user hasn't seen it

@@ -1,5 +1,4 @@
 import { Injectable } from "@angular/core";
-import { AlertController } from "@ionic/angular";
 import { NavigationStart, Router } from "@angular/router";
 
 import { AngularFireAuth } from "@angular/fire/auth";
@@ -38,6 +37,7 @@ import { EmptyStoresService } from "./empty-stores.service";
 import { FirebaseUser } from "./../../interfaces/firebase.model";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 import { TutorialsService } from "@services/tutorials/tutorials.service";
+import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
 
 type pageName =
   | "chats"
@@ -47,7 +47,8 @@ type pageName =
   | "messenger"
   | "welcome"
   | "login"
-  | "signup";
+  | "signup"
+  | "signup-to-app";
 
 type userState =
   | "unauthenticated"
@@ -74,12 +75,12 @@ export class GlobalStateManagementService {
 
   constructor(
     private router: Router,
-    private alertCtrl: AlertController,
 
     private afAuth: AngularFireAuth,
     private firestore: AngularFirestore,
 
     private errorHandler: GlobalErrorHandler,
+    private loadingAlertManager: LoadingAndAlertManager,
     private signupService: SignupService,
     private firebaseAuthService: FirebaseAuthService,
     private routerInitListener: routerInitListenerService,
@@ -260,7 +261,7 @@ export class GlobalStateManagementService {
     };
 
     const alertOptions = {
-      header: "We found an incomplete account",
+      header: "Incomplete Account",
       message: `
       The account with which you're signed in is incomplete, you can choose to
       finish signing up or abort and be taken back to the welcome page. 
@@ -278,14 +279,14 @@ export class GlobalStateManagementService {
       ],
     };
 
-    return from(this.alertCtrl.create(alertOptions)).pipe(
-      switchMap((alert) => alert.present())
+    return from(this.loadingAlertManager.createAlert(alertOptions)).pipe(
+      switchMap((alert) => this.loadingAlertManager.presentNew(alert, "replace-erase"))
     );
   }
 
   private hasDocumentsRoutine() {
     // case where person is in signupToApp
-    if (this.router.url === "/welcome/signup-to-app") return of("");
+    if (this.getPageFromUrl(this.router.url) === "signup-to-app") return of("");
     // makes it such that we only navigate to home if the user is not in main
     // such that it doesn't infringe on the user experience
     if (this.pageIsMain(this.getPageFromUrl(this.router.url)))
@@ -301,6 +302,7 @@ export class GlobalStateManagementService {
 
     return concat(initialUrl$, this.router.events).pipe(
       filter((event) => event instanceof NavigationStart || typeof event === "string"),
+      tap((ev) => console.log("storesManagement event: ", ev)),
       map((event: NavigationStart) =>
         this.getPageFromUrl(event instanceof NavigationStart ? event.url : event)
       ),
@@ -310,11 +312,10 @@ export class GlobalStateManagementService {
 
   private activateCorrespondingStores(page: pageName): Observable<any> {
     if (this.pageIsMain(page)) {
-      console.log("activating stores for main pages");
       return merge(
         this.activateAllStores(),
-        this.notificationsService.activate(),
-        this.tutorialsService.activate()
+        this.notificationsService.activate$,
+        this.tutorialsService.activate$
       );
     }
     return of("");
@@ -364,6 +365,7 @@ export class GlobalStateManagementService {
     if (url.includes("messenger")) return "messenger";
     if (url.includes("login")) return "login";
     if (url.includes("signup")) return "signup";
+    if (url.includes("signup-to-app")) return "signup-to-app";
     if (url === "/welcome") return "welcome";
     return null;
   }

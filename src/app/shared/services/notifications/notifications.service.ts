@@ -14,6 +14,7 @@ import { BehaviorSubject, defer, EMPTY, merge } from "rxjs";
 import {
   distinctUntilChanged,
   filter,
+  share,
   switchMap,
   tap,
   withLatestFrom,
@@ -32,13 +33,15 @@ export class NotificationsService {
   private token = new BehaviorSubject<Token>(null);
   private token$ = this.token.asObservable().pipe(distinctUntilChanged());
 
+  activate$ = this.activate().pipe(share());
+
   constructor(
     private afAuth: AngularFireAuth,
     private fs: AngularFirestore,
     private errorHandler: GlobalErrorHandler
   ) {}
 
-  activate() {
+  private activate() {
     const isPushNotificationsAvailable = Capacitor.isPluginAvailable("PushNotifications");
     if (!isPushNotificationsAvailable) {
       return EMPTY;

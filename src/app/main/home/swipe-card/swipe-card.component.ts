@@ -69,8 +69,8 @@ import { SwipeCapService } from "@stores/swipe-stack/swipe-cap.service";
 })
 export class SwipeCardComponent implements OnInit, OnDestroy {
   // DEV
-  DEV_other_profile_info = new BehaviorSubject<Object>(null);
-  DEV_own_profile_info = new BehaviorSubject<Object>(null);
+  // DEV_other_profile_info = new BehaviorSubject<Object>(null);
+  // DEV_own_profile_info = new BehaviorSubject<Object>(null);
 
   screenHeight: number;
   screenWidth: number;
@@ -145,103 +145,103 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
     this.subs.add(this.handleTaps().subscribe());
 
     // DEV
-    this.currentUserStore.user$
-      .pipe(
-        filter((user) => !!user),
-        switchMap((user) => this.getPiStorageAndPickingData(user)),
-        map(([pickingData, piStorage, profile]) => {
-          const searchFeatures = pickingData.data().searchFeatures;
-          const piStorageData = piStorage.docs[0].data()[profile.uid];
+    // this.currentUserStore.user$
+    //   .pipe(
+    //     filter((user) => !!user),
+    //     switchMap((user) => this.getPiStorageAndPickingData(user)),
+    //     map(([pickingData, piStorage, profile]) => {
+    //       const searchFeatures = pickingData.data().searchFeatures;
+    //       const piStorageData = piStorage.docs[0].data()[profile.uid];
 
-          this.DEV_own_profile_info.next({
-            own_percentile: piStorageData.percentile,
-          });
-        })
-      )
-      .subscribe();
+    //       this.DEV_own_profile_info.next({
+    //         own_percentile: piStorageData.percentile,
+    //       });
+    //     })
+    //   )
+    //   .subscribe();
 
     // DEV
-    this.profiles$
-      .pipe(
-        filter((p) => p.length > 0),
-        map((p) => p[0]),
-        switchMap((profile) => this.getPiStorageAndPickingData(profile)),
-        withLatestFrom(this.SCstore.searchCriteria$),
-        map(
-          ([[pickingData, piStorage, profile], SC]: [
-            [
-              DocumentSnapshot<mdDatingPickingFromDatabase>,
-              QuerySnapshot<piStorage>,
-              Profile
-            ],
-            SearchCriteria
-          ]) => {
-            const searchFeatures = pickingData.data().searchFeatures;
-            const piStorageData = piStorage.docs[0].data()[profile.uid];
+    // this.profiles$
+    //   .pipe(
+    //     filter((p) => p.length > 0),
+    //     map((p) => p[0]),
+    //     switchMap((profile) => this.getPiStorageAndPickingData(profile)),
+    //     withLatestFrom(this.SCstore.searchCriteria$),
+    //     map(
+    //       ([[pickingData, piStorage, profile], SC]: [
+    //         [
+    //           DocumentSnapshot<mdDatingPickingFromDatabase>,
+    //           QuerySnapshot<piStorage>,
+    //           Profile
+    //         ],
+    //         SearchCriteria
+    //       ]) => {
+    //         const searchFeatures = pickingData.data().searchFeatures;
+    //         const piStorageData = piStorage.docs[0].data()[profile.uid];
 
-            let SC_degreeOfMatch: number;
+    //         let SC_degreeOfMatch: number;
 
-            if (SC instanceof SearchCriteria) {
-              SC_degreeOfMatch = 0;
-              Object.keys(SC).forEach((key: keyof SearchCriteria) => {
-                const criteria = SC[key];
-                const feature = searchFeatures[key];
+    //         if (SC instanceof SearchCriteria) {
+    //           SC_degreeOfMatch = 0;
+    //           Object.keys(SC).forEach((key: keyof SearchCriteria) => {
+    //             const criteria = SC[key];
+    //             const feature = searchFeatures[key];
 
-                if (!criteria || !feature) return;
+    //             if (!criteria || !feature) return;
 
-                if (key !== "interests") {
-                  if (criteria === feature) SC_degreeOfMatch++;
-                } else {
-                  for (const f of feature) {
-                    if (criteria === f) {
-                      SC_degreeOfMatch++;
-                      break;
-                    }
-                  }
-                }
-              });
+    //             if (key !== "interests") {
+    //               if (criteria === feature) SC_degreeOfMatch++;
+    //             } else {
+    //               for (const f of feature) {
+    //                 if (criteria === f) {
+    //                   SC_degreeOfMatch++;
+    //                   break;
+    //                 }
+    //               }
+    //             }
+    //           });
 
-              SC_degreeOfMatch /= Object.keys(SC).length;
-            }
+    //           SC_degreeOfMatch /= Object.keys(SC).length;
+    //         }
 
-            this.DEV_other_profile_info.next({
-              percentile: piStorageData.percentile,
-              SC_degreeOfMatch,
-            });
-          }
-        )
-      )
-      .subscribe();
+    //         this.DEV_other_profile_info.next({
+    //           percentile: piStorageData.percentile,
+    //           SC_degreeOfMatch,
+    //         });
+    //       }
+    //     )
+    //   )
+    //   .subscribe();
   }
 
   // DEV
-  getPiStorageAndPickingData(profile: Profile) {
-    const pickingData$ = this.firestore
-      .collection("matchData")
-      .doc(profile.uid)
-      .collection("pickingData")
-      .doc("dating")
-      .get()
-      .pipe(
-        take(1),
-        this.errorHandler.convertErrors("firestore"),
-        this.errorHandler.handleErrors()
-      );
-    const piStorage$ = from(
-      this.firestore.firestore
-        .collection("piStorage")
-        .where("uids", "array-contains", profile.uid)
-        .limit(1)
-        .get()
-    ).pipe(
-      this.errorHandler.convertErrors("firestore"),
-      this.errorHandler.handleErrors()
-    );
+  // getPiStorageAndPickingData(profile: Profile) {
+  //   const pickingData$ = this.firestore
+  //     .collection("matchData")
+  //     .doc(profile.uid)
+  //     .collection("pickingData")
+  //     .doc("dating")
+  //     .get()
+  //     .pipe(
+  //       take(1),
+  //       this.errorHandler.convertErrors("firestore"),
+  //       this.errorHandler.handleErrors()
+  //     );
+  //   const piStorage$ = from(
+  //     this.firestore.firestore
+  //       .collection("piStorage")
+  //       .where("uids", "array-contains", profile.uid)
+  //       .limit(1)
+  //       .get()
+  //   ).pipe(
+  //     this.errorHandler.convertErrors("firestore"),
+  //     this.errorHandler.handleErrors()
+  //   );
 
-    return forkJoin([pickingData$, piStorage$, of(profile)]) as Observable<
-      [DocumentSnapshot<mdDatingPickingFromDatabase>, QuerySnapshot<piStorage>, Profile]
-    >;
-  }
+  //   return forkJoin([pickingData$, piStorage$, of(profile)]) as Observable<
+  //     [DocumentSnapshot<mdDatingPickingFromDatabase>, QuerySnapshot<piStorage>, Profile]
+  //   >;
+  // }
 
   /**
    * Subscribe to this method to listen to the user's choice on the swipe cards and activate the
