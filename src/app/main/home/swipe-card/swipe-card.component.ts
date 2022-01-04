@@ -305,33 +305,35 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
   // This contains what should be done when the card is double tapped. That is check whether
   // the tap the double tap was a yes or a no or a super, and subsequently animate it and
   // do logic associated with it
-  private doubleTapOnCard(choice: swipeChoice): Observable<void> {
+  private doubleTapOnCard(choice: swipeChoice): Observable<any> {
     if (choice === "yes") {
       //return this.cardStackRef$.pipe(
-        //switchMap(() =>
-          return this.profiles$.pipe(
-            take(1),
-            withLatestFrom(of(SwipeAnimation(this.likeEls))),
-            switchMap(([profiles, swipeAnimation]) =>
-              concat(
-                this.onYesSwipe(profiles[0]),
-                swipeAnimation.play(),  
-                this.likeText.nativeElement.innerHTML = `You liked ${profiles[0].firstName}!`
-              )
-            ),
-          );
-        //)
+      //switchMap(() =>
+      return this.profiles$.pipe(
+        take(1),
+        // withLatestFrom(of(SwipeAnimation(this.likeEls))),
+        switchMap((profiles) =>
+          concat(
+            // this.onYesSwipe(profiles[0]),
+            // swipeAnimation.play(),
+            SwipeAnimation(this.onYesSwipe.bind(this), profiles[0], this.likeEls)(),
+            (this.likeText.nativeElement.innerHTML = `You liked ${profiles[0].firstName}!`)
+          )
+        )
+      );
+      //)
       //);
     }
     if (choice === "no") {
       return this.profiles$.pipe(
         take(1),
-        withLatestFrom(of(SwipeAnimation(this.dislikeEls))),
-        switchMap(([profiles, swipeAnimation]) =>
-          concat( 
-            this.onNoSwipe(profiles[0]),
-            swipeAnimation.play(),
-            this.dislikeText.nativeElement.innerHTML = `You passed on ${profiles[0].firstName}.`
+        // withLatestFrom(of(SwipeAnimation(this.dislikeEls))),
+        switchMap((profiles) =>
+          concat(
+            // this.onNoSwipe(profiles[0]),
+            // swipeAnimation.play(),
+            SwipeAnimation(this.onNoSwipe.bind(this), profiles[0], this.likeEls)(),
+            (this.dislikeText.nativeElement.innerHTML = `You passed on ${profiles[0].firstName}.`)
           )
         )
       );
