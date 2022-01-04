@@ -194,7 +194,6 @@ export class SwipeStackStore {
       // to user action (so only looks at the front of the array and operates in a very non-general way)
       map(([allProfiles, profilesToRender]) => {
         if (profilesToRender.length !== 0 && allProfiles.length !== 0) {
-          console.info("profilesToRender", allProfiles, profilesToRender);
           // skips this step if renderer contains no profiles
           const lastuid = allProfiles[0].uid;
           let indexInRendered = profilesToRender.length - 1; // default value everyone will be removed if user is not found
@@ -526,7 +525,7 @@ export class SwipeStackStore {
    * Returns an observable of the new profiles
    */
   private addToQueue(newProfiles: Profile[]): Observable<Profile[]> {
-    return this.getPictureCounts(newProfiles).pipe(
+    return this.addPictureCounts(newProfiles).pipe(
       switchMap(() => this.profiles$),
       first(),
       tap((profiles) => this.profiles.next(newProfiles.concat(profiles))),
@@ -553,7 +552,7 @@ export class SwipeStackStore {
           )
       ),
       tap((response) => this.swipeOutcomeStore.addToSwipeAnswers(response.users)),
-      map((response) => response.users.map((u) => u.uid))
+      map((response) => (response?.users ?? []).map((u) => u.uid))
     );
   }
 
@@ -585,7 +584,7 @@ export class SwipeStackStore {
     );
   }
 
-  getPictureCounts(profiles: Profile[]): Observable<Profile[]> {
+  addPictureCounts(profiles: Profile[]): Observable<Profile[]> {
     const getPictureCounts$ = profiles.map(
       (p, i) =>
         this.afStorage

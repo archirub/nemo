@@ -9,6 +9,7 @@ import {
   PushNotifications,
   Token,
 } from "@capacitor/push-notifications";
+import { App } from "@capacitor/app";
 
 import { firstValueFrom, Subscription } from "rxjs";
 import { filter, first } from "rxjs/operators";
@@ -19,6 +20,7 @@ import { routerInitListenerService } from "@services/global-state-management/ini
 import { StoreReadinessService } from "@services/store-readiness/store-readiness.service";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 import { AngularFirestore } from "@angular/fire/firestore";
+import { ChatboardPicturesStore } from "@stores/pictures/chatboard-pictures/chatboard-pictures.service";
 
 @Component({
   selector: "app-root",
@@ -38,9 +40,15 @@ export class AppComponent implements OnDestroy, OnInit {
     private GlobalStateManagement: GlobalStateManagementService,
     private routerInitListener: routerInitListenerService,
     private storeReadiness: StoreReadinessService,
-    private fs: AngularFirestore
+    private fs: AngularFirestore,
+
+    private chatboardPictures: ChatboardPicturesStore
   ) {
     this.initializeApp();
+
+    // this.chatboardPictures.holder$.subscribe((a) =>
+    //   console.log("chatboardPictures.holder$:", a)
+    // );
   }
 
   ngOnInit() {

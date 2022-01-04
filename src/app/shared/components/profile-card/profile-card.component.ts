@@ -41,7 +41,7 @@ import { UserReportingService } from "@services/user-reporting/user-reporting.se
 
 import { Profile } from "@classes/index";
 import { LessInfoAnimation, MoreInfoAnimation } from "@animations/info.animation";
-import { CHECK_AUTH_STATE, CustomError } from "@interfaces/error-handling.model";
+import { CustomError } from "@interfaces/error-handling.model";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 
 @Component({
@@ -78,6 +78,12 @@ export class ProfileCardComponent implements OnInit, AfterViewInit, OnDestroy {
     // there being an empty string is necessary to signify to the swipeStackStore that it has already tried fetching that pic with no results
     let pics = value.slice(0, this.pictureCount);
     pics = [...pics, ...Array(this.pictureCount - pics.length).fill("")];
+
+    // DEV - replace this by the real default thing
+    if (pics.length === 0)
+      pics = [
+        "https://gravatar.com/avatar/dba6bae8c566f9d4041fb9cd9ada7741?d=identicon&f=y",
+      ];
 
     this.profilePictures$.next(pics);
   }
@@ -214,7 +220,7 @@ export class ProfileCardComponent implements OnInit, AfterViewInit, OnDestroy {
       this.collapseAnimation = LessInfoAnimation(
         this.complete,
         14,
-        this.getContentHeight(),
+        this.getContentHeight()
       ); //Have to reinitialise animation every time
       this.collapseAnimation.play();
 
@@ -231,7 +237,7 @@ export class ProfileCardComponent implements OnInit, AfterViewInit, OnDestroy {
       this.expandAnimation = MoreInfoAnimation(
         this.complete,
         14,
-        this.getContentHeight(),
+        this.getContentHeight()
       ); //Have to reinitialise animation every time
       this.expandAnimation.play();
 
@@ -256,11 +262,13 @@ export class ProfileCardComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   updatePager(newIndex: number, bulletsRef: QueryList<ElementRef>) {
-    console.log("updatePager triggered");
-    const currActiveEl = document.getElementById("pagerActive");
-    const newActiveRef = Array.from(bulletsRef)?.[newIndex];
+    // finding all refs within the "bulletsRef" array that has "pagerActive" as id
+    const activeRefs = bulletsRef.filter((ref) => ref.nativeElement.id === "pagerActive");
 
-    if (currActiveEl) this.renderer.removeAttribute(currActiveEl, "id"); //Remove colour class from previous icon
+    // removing all currently active bullets
+    activeRefs.forEach((ref) => this.renderer.removeAttribute(ref.nativeElement, "id"));
+
+    const newActiveRef = Array.from(bulletsRef)?.[newIndex];
 
     if (newActiveRef)
       // all we need is for that "setAttribute" to occur after the "removeAttribute" so that

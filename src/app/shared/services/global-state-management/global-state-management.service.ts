@@ -5,7 +5,7 @@ import { AngularFireAuth } from "@angular/fire/auth";
 import { AngularFirestore } from "@angular/fire/firestore";
 
 import { Storage } from "@capacitor/storage";
-import { concat, forkJoin, from, merge, Observable, of, Subject } from "rxjs";
+import { concat, defer, forkJoin, from, merge, Observable, of, Subject } from "rxjs";
 import {
   concatMap,
   distinctUntilChanged,
@@ -25,6 +25,7 @@ import { SwipeStackStore } from "@stores/swipe-stack/swipe-stack-store.service";
 import { CurrentUserStore } from "@stores/current-user/current-user-store.service";
 import { ChatboardPicturesStore } from "@stores/pictures/chatboard-pictures/chatboard-pictures.service";
 import { UniversitiesStore } from "@stores/universities/universities.service";
+import { SwipeOutcomeStore } from "@stores/swipe-outcome/swipe-outcome-store.service";
 
 import { SignupService } from "@services/signup/signup.service";
 import { FirebaseAuthService } from "@services/firebase-auth/firebase-auth.service";
@@ -38,6 +39,7 @@ import { FirebaseUser } from "./../../interfaces/firebase.model";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 import { TutorialsService } from "@services/tutorials/tutorials.service";
 import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
+import { App } from "@capacitor/app";
 
 type pageName =
   | "chats"
@@ -91,6 +93,7 @@ export class GlobalStateManagementService {
 
     private signupauthMethodSharer: SignupAuthMethodSharer,
 
+    private swipeOutcomeStore: SwipeOutcomeStore,
     private userStore: CurrentUserStore,
     private chatboardStore: ChatboardStore,
     private chatboardPicturesStore: ChatboardPicturesStore,
@@ -290,8 +293,25 @@ export class GlobalStateManagementService {
     // makes it such that we only navigate to home if the user is not in main
     // such that it doesn't infringe on the user experience
     if (this.pageIsMain(this.getPageFromUrl(this.router.url)))
-      return this.storesManagement();
-    return merge(this.storesManagement(), this.router.navigateByUrl("main/tabs/home"));
+      return merge(this.storesManagement(), this.activateAppLifecycleHooks());
+    return merge(
+      this.storesManagement(),
+      this.activateAppLifecycleHooks(),
+      this.router.navigateByUrl("main/tabs/home")
+    );
+  }
+
+  private activateAppLifecycleHooks() {
+    const actions = async () => {
+      await App.removeAllListeners();
+
+      await App.addListener("appStateChange", ({ isActive }) => {
+        // this ensures the swipe choices are registered when the user leaves the app
+        if (!isActive) this.swipeOutcomeStore.registerSwipeChoices$.subscribe();
+      });
+    };
+
+    return defer(() => actions());
   }
 
   private storesManagement(): Observable<void> {

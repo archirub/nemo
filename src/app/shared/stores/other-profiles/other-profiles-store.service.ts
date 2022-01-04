@@ -3,7 +3,7 @@ import { AngularFireStorage } from "@angular/fire/storage";
 import { AngularFirestore, DocumentSnapshot } from "@angular/fire/firestore";
 
 import { BehaviorSubject, forkJoin, Observable, EMPTY } from "rxjs";
-import { exhaustMap, filter, map, take } from "rxjs/operators";
+import { exhaustMap, filter, first, map, take, tap } from "rxjs/operators";
 
 import { FormatService } from "@services/format/format.service";
 
@@ -95,6 +95,11 @@ export class OtherProfilesStore {
         return this.format.profileDatabaseToClass(uid, doc.data());
       }), // modify format
       exhaustMap((profile) => {
+        if (!!profile) return this.addPictureCount(profile);
+
+        return EMPTY;
+      }), // fetching the picture count for the profile
+      exhaustMap((profile) => {
         if (!!profile) return this.saveProfile(uid, profile);
 
         return EMPTY;
@@ -158,6 +163,21 @@ export class OtherProfilesStore {
       .listAll()
       .pipe(
         exhaustMap((list) => forkJoin(list.items.map((i) => i.getDownloadURL()))),
+        this.errorHandler.convertErrors("firebase-storage"),
+        this.errorHandler.handleErrors()
+      );
+  }
+
+  // This was copied and adapted straight from the currentUserStore on January 4th 2022
+  addPictureCount(profile: Profile): Observable<Profile> {
+    return this.afStorage
+      .ref("/profilePictures/" + profile.uid)
+      .listAll()
+      .pipe(
+        first(),
+        map((list) => list.items.length),
+        tap((count) => (profile.pictureCount = count)),
+        map(() => profile),
         this.errorHandler.convertErrors("firebase-storage"),
         this.errorHandler.handleErrors()
       );
