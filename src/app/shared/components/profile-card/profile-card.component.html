@@ -120,9 +120,9 @@
           </div>
         </div>
 
-        <div id="info-segment">
+        <div id="info-segment" *ngIf="profile?.areaOfStudy || profile?.society">
           <div id="interests-container" class="centered">
-            <div id="interests-box-soc">
+            <div id="interests-box-soc" *ngIf="profile?.areaOfStudy">
               <ion-icon
                 name="school"
                 id="bottom-icon"
@@ -143,7 +143,7 @@
               </div>
             </div>
 
-            <div id="interests-box-soc">
+            <div id="interests-box-soc" *ngIf="profile?.society">
               <ion-icon
                 name="people"
                 id="bottom-icon"

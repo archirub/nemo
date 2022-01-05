@@ -126,7 +126,7 @@
             [questionsNotPicked]="questionsNotPicked"
           ></profile-answer>
 
-          <ng-container *ngIf="this.answers">
+          <!--ng-container *ngIf="this.answers"-->
             <div class="noQuestions" *ngIf="editableFields.questions.length < 1">
               <span>Click the button below to answer some questions!</span>
             </div>
@@ -142,7 +142,7 @@
             <div class="noQuestions" *ngIf="reachedMaxQuestionsCount">
               <span>Sorry, there's no space for any more questions!</span>
             </div>
-          </ng-container>
+          <!--/ng-container-->
 
           <h2>My course</h2>
           <profile-course

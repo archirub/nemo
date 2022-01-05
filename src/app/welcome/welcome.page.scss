@@ -4,6 +4,13 @@
   height: 100vh;
 }
 
+#interBackVideo {
+  position: absolute;
+  z-index: 0;
+  height: 100vh;
+  left: 0;
+}
+
 .signInUpContainer {
   display: flex;
   flex-direction: column;
@@ -66,18 +73,9 @@ ion-slides {
   font-size: 5vh;
 }
 
-h1.center {
-  text-align: center;
-}
-
 .background-gradient {
-  background-image: linear-gradient(to right bottom,#f07167,#ffffff);
-  z-index: 0;
   position: absolute;
-  top: -5vh;
-  padding-top: 10vh;
-  height: 115vh;
-  width: 100%;
+  top: 9vh;
 }
 
 .skip-to {
@@ -111,6 +109,7 @@ h1.center {
 ion-button.optional {
   position: absolute;
   bottom: -6vh;
+  left: -2px;
   overflow: visible;
   width: 100%;
   border-radius: 0;
@@ -652,4 +651,12 @@ ion-content {
   h3 {
       text-align: center;
   }
+}
+
+h1.center {
+  text-align: center;
+}
+
+h1.inter-text.center {
+  margin: 7vh 0;
 }

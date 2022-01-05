@@ -278,24 +278,23 @@
       </ion-slide>
 
       <ion-slide class="inter-slide">
+        <video autoplay="true" muted="muted" loop="true" id="interBackVideo">
+          <source src="/assets/welcome-background.mp4" type="video/mp4" />
+        </video>
         <div class="skip-to" (click)="skipToApp()">
           <p>Skip to the app</p>
           <ion-icon name="chevron-forward-outline"></ion-icon>
         </div>
 
         <div class="background-gradient">
-          <h1 class="inter-text">You're all set!</h1>
-          <h1 class="inter-text">So feel free to dive</h1>
-          <h1 class="inter-text">straight in...</h1>
+          <h1 class="inter-text">You're all set! So feel free to dive straight in...</h1>
 
           <h1 class="inter-text center">or</h1>
 
-          <h1 class="inter-text">Enter some basic info</h1>
-          <h1 class="inter-text">so you can catch</h1>
-          <h1 class="inter-text">plenty more fish...</h1>
+          <h1 class="inter-text">Enter some basic info so you can catch plenty more fish...</h1>
         </div>
 
-        <img class="corner-fish" src="/assets/singlefish-orange.png"/>
+        <!--img class="corner-fish" src="/assets/singlefish-orange.png"/-->
 
         <ion-button (click)="onSubmit()" class="optional">Enter basic info</ion-button>
       </ion-slide>
