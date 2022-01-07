@@ -55,6 +55,12 @@ export class SignupToAppPage implements OnInit {
     );
   }
 
+  toggleChange(option) {
+    if (option == 'on') {
+      this.requestNotificationsPermission();
+    };
+  }
+
   async requestNotificationsPermission() {
     return lastValueFrom(this.notifications.requestPermission());
   }

@@ -277,14 +277,37 @@ export class SettingsPage implements AfterViewInit, OnDestroy, OnInit {
     }, 200);
   }
 
+  returnToParentSlide(slide) {
+    /** Slide back to first inside slide for further nested slide,
+     * e.g. go back to legal from privacy/terms
+     **/
+    const toHide = document.getElementById(`${slide}`);
+
+    this.unlockAndSwipe("prev");
+    setTimeout(() => {
+      this.renderer.setStyle(toHide, "display", "none");
+    }, 200);
+  }
+
   selectSlide(slide) {
     /** For this function to work, the input 'slide' should be the same as the slide id
      * Hides placeholder slide and displays selected slide by id
      * Swipes to the targeted slide
      **/
 
-    const placeholder = document.getElementById("placeholder");
-    this.renderer.setStyle(placeholder, "display", "none");
+    console.log('Moving to slide', slide);
+    const slidesToHide = [document.getElementById("legal"),
+                          document.getElementById("preferences"),
+                          document.getElementById("support"),
+                          document.getElementById("placeholder"),
+                          document.getElementById("privacy")];
+    slidesToHide.forEach(s => {
+      this.renderer.setStyle(s, "display", "none");
+    });
+
+    if (slide == "privacy" || slide == "terms") {
+      this.renderer.setStyle(slidesToHide[0], "display", "block");
+    }
 
     const target = document.getElementById(`${slide}`); //get slide by id from input
     this.renderer.setStyle(target, "display", "block");

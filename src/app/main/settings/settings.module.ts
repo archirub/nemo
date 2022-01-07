@@ -9,6 +9,8 @@ import { SettingsPageRoutingModule } from "./settings-routing.module";
 
 import { SettingsPage } from "./settings.page";
 import { AppToggleModule } from "@components/nemo-toggle/nemo-toggle.component.module";
+import { PdfViewerModule } from "ng2-pdf-viewer";
+import { platformBrowserDynamic } from "@angular/platform-browser-dynamic";
 
 @NgModule({
   imports: [
@@ -19,7 +21,10 @@ import { AppToggleModule } from "@components/nemo-toggle/nemo-toggle.component.m
     SettingsPageRoutingModule,
     AppToggleModule,
     PipesModule,
+    PdfViewerModule
   ],
   declarations: [SettingsPage],
 })
 export class SettingsPageModule {}
+
+//platformBrowserDynamic().bootstrapModule(SettingsPageModule);

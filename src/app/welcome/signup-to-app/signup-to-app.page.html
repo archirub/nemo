@@ -15,10 +15,18 @@
       </h2>
     </div>
 
+    <h4>Notifications</h4>
+
     <div class="flexcenter">
-      <ion-button class="notifs" (click)="requestNotificationsPermission()">
+      <nemo-toggle
+          (valueChange)="toggleChange($event)"
+          [buttonWidth]="15"
+          [fontSize]="4"
+          [selections]="['off', 'on']"
+        ></nemo-toggle>
+      <!--ion-button class="notifs" (click)="requestNotificationsPermission()">
         Allow Notifications
-      </ion-button>
+      </ion-button-->
     </div>
 
     <div class="flexcenter">

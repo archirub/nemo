@@ -58,7 +58,7 @@ nemo-toggle {
 #back {
     height: 3vh;
     width: 3vh;
-    padding: 2vh 0 1vh 0;
+    padding: 2.5vh 0 1vh 0;
 }
 
 .slide-button {
@@ -113,10 +113,39 @@ h1 {
     font-size: 5vh;
 }
 
+h2 {
+    font-size: 4vh;
+    color: var(--ion-color-primary);
+}
+
+h2.subheading {
+    font-size: 3vh;
+    color: black;
+    margin: 0;
+}
+
 h3 {
     font-size: 2vh;
     color: var(--ion-color-medium-tint);
     margin: 5px;
+}
+
+.left {
+    text-align: left;
+}
+
+div.pdf-view {
+    width: 95%;
+    height: 70%;
+    border-radius: 20px;
+    border: solid 2px var(--ion-color-primary);
+    margin: 0 auto;
+    padding: 10px;
+}
+
+pdf-viewer {
+    width: 100%;
+    height: 100%;
 }
 
 a:focus {

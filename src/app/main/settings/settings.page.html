@@ -77,12 +77,12 @@
         </div>
 
         <div class="flexstart-col">
-          <div class="slide-button">
+          <div class="slide-button" (click)="selectSlide('privacy')">
             <p>Privacy Policy</p>
             <ion-icon name="chevron-forward-outline"></ion-icon>
           </div>
 
-          <div class="slide-button">
+          <div class="slide-button" (click)="selectSlide('terms')">
             <p>Terms & Conditions</p>
             <ion-icon name="chevron-forward-outline"></ion-icon>
           </div>
@@ -209,6 +209,48 @@
             <span style="color: var(--ion-color-primary)">nemo</span>
             a better place for everyone!
           </p>
+        </div>
+      </div>
+    </ion-slide>
+
+    <ion-slide id="privacy" class="noScroll">
+      <div class="container">
+        <div class="flexbetween-row">
+          <div class="left">
+            <h2>nemo</h2>
+            <h2 class="subheading">Privacy Policy</h2>
+          </div>
+          <a (click)="goBack()"><ion-icon name="close-outline"></ion-icon></a>
+        </div>
+
+        <div class="flexstart-row" (click)="returnToParentSlide('privacy')">
+          <ion-icon id="back" name="chevron-back-outline"></ion-icon>
+          <p class="return">Return to Settings</p>
+        </div>
+
+        <div class="pdf-view">
+          <pdf-viewer [src]="'/assets/docs/nemo_privacy_policy.pdf'" [original-size]="false" [fit-to-page]="true"></pdf-viewer>
+        </div>
+      </div>
+    </ion-slide>
+
+    <ion-slide id="terms" class="noScroll">
+      <div class="container">
+        <div class="flexbetween-row">
+          <div class="left">
+            <h2>nemo</h2>
+            <h2 class="subheading">Terms and Conditions</h2>
+          </div>
+          <a (click)="goBack()"><ion-icon name="close-outline"></ion-icon></a>
+        </div>
+
+        <div class="flexstart-row" (click)="returnToParentSlide('terms')">
+          <ion-icon id="back" name="chevron-back-outline"></ion-icon>
+          <p class="return">Return to Settings</p>
+        </div>
+
+        <div class="pdf-view">
+          <pdf-viewer [src]="'/assets/docs/nemo_terms_of_use.pdf'" [original-size]="false" [fit-to-page]="true"></pdf-viewer>
         </div>
       </div>
     </ion-slide>

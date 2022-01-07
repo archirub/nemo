@@ -37,6 +37,7 @@
     "animejs": "^3.2.1",
     "firebase": "^8.10.0",
     "lodash": "^4.17.21",
+    "ng2-pdf-viewer": "^7.0.2",
     "ngx-sortablejs": "^11.1.0",
     "rxjs": "^7.0.0",
     "sortablejs": "^1.14.0",
