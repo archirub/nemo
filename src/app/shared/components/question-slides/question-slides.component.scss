@@ -31,6 +31,7 @@ ion-select {
     --background: var(--ion-color-primary-contrast);
     --placeholder-color: var(--ion-color-light);
     --placeholder-opacity: 1;
+    word-break: break-all;
 }
 
 //Allows select to expand to accommodate multi-line questions
@@ -52,7 +53,7 @@ ion-textarea {
     color: var(--ion-color-primary-contrast);
     background: var(--ion-color-primary);
     border-radius: 50%;
-    font-size: 4vh;
+    font-size: 3.6vh;
     width: 4vh;
     justify-content: center;
     display: flex;

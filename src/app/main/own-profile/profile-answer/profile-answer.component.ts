@@ -1,4 +1,4 @@
-import { IonSelect } from "@ionic/angular";
+import { IonSelect, IonTextarea } from "@ionic/angular";
 import {
   EventEmitter,
   Component,
@@ -26,6 +26,7 @@ export class ProfileAnswerComponent {
   @ViewChild("qHead", { read: ElementRef }) qHead: ElementRef;
   @ViewChild("qInput", { read: ElementRef }) qInput: ElementRef;
   @ViewChild("qInput") qSelect: IonSelect;
+  @ViewChild("answerInput") answerInput: IonTextarea;
 
   constructor(private renderer: Renderer2) {}
 
@@ -86,14 +87,6 @@ export class ProfileAnswerComponent {
   cancelQuestion() {
     this.renderer.setStyle(this.qHead.nativeElement, "display", "block"); //Change UI from select to text
     this.renderer.setStyle(this.qInput.nativeElement, "display", "none");
-  }
-
-  /**
-   * Update answer from textarea when adding new answer
-   **/
-  answerQuestion(a) {
-    this.questionAndAnswer.answer = a.target.value;
-    this.questionAndAnswerChange.emit(this.questionAndAnswer);
   }
 
   // for trackBy property of ngFor on questions in template

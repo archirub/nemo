@@ -27,7 +27,7 @@ ion-toolbar {
 
 
 ion-header {
-  padding-top: 50px;
+  padding-top: 30px;
   background: white;
   position: absolute;
 
@@ -40,7 +40,7 @@ ion-header {
 ion-content {
   position: absolute;
   bottom: 3vh;
-  height: calc(100% - 135px);
+  height: calc(100% - 125px);
 }
 
 app-profile-card {
@@ -78,15 +78,20 @@ p.tip {
   width: 100%;
 }
 
-ion-button.chat-slide {
-  --background: transparent;
-  color: var(--ion-color-primary);
-  top: 4vh;
+div.chat-slide {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: var(--ion-color-primary);
+  color: var(--ion-color-primary-contrast);
+  top: 6vh;
+  z-index: 10;
+  left: 3vw;
   position: absolute;
-  --box-shadow: none;
-  --ripple-color: transparent;
-  --background-activated: transparent;
-  text-transform: none;
+  border-radius: 50%;
+  width: 7vh;
+  height: 7vh;
+  font-size: 3.5vh;
 }
 
 .flexcolumn {
@@ -209,7 +214,7 @@ ion-button.back-button {
 #messageInputContainer {
   position: fixed;
   bottom: 0;
-  padding-bottom: 3vh;
+  padding-bottom: 2vh;
   background: var(--ion-color-primary-contrast);
   width: 100vw;
 
