@@ -23,7 +23,7 @@ export interface chat {
 export const messengerMotivationMessages = [
   "Go ahead, send that message. You've got to say something!",
   "Make sure you don't just say 'hey'!",
-  "We can't think of what to say either...",
+  "Time to set the vibe!",
   "Have fun with it, you can always try again!",
   "What is it they say... 'Speak from the heart'?",
 ];

@@ -21,10 +21,15 @@ ion-avatar {
   height: 45px;
 }
 
-ion-toolbar {
+ion-toolbar.chat-toolbar {
   padding: 0px;
+  height: 80px;
 }
 
+ion-content {
+  width: calc(100vw + 15px);
+  --padding-end: 15px;
+}
 
 ion-header {
   padding-top: 30px;
@@ -37,10 +42,12 @@ ion-header {
   }
 }
 
-ion-content {
+.messenger-container {
+  display: flex;
+  flex-direction: column;
   position: absolute;
-  bottom: 3vh;
-  height: calc(100% - 125px);
+  height: calc(100% - 110px); //This should be equivalent to toolbar height + header top padding
+  bottom: 0;
 }
 
 app-profile-card {
@@ -157,6 +164,7 @@ ion-button.back-button {
   width: fit-content;
   white-space: pre-wrap;
   display: flex;
+  word-break: break-word;
 }
 
 .ownMessage {
@@ -214,7 +222,6 @@ ion-button.back-button {
 #messageInputContainer {
   position: fixed;
   bottom: 0;
-  padding-bottom: 2vh;
   background: var(--ion-color-primary-contrast);
   width: 100vw;
 
