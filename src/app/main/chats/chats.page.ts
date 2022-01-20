@@ -79,7 +79,7 @@ export class ChatsPage implements OnDestroy {
 
   //TUTORIAL EXIT
   onExitTutorial() {
-    //this.tutorials.markAsSeen("chatBoard").subscribe();
+    this.tutorials.markAsSeen("chatBoard").subscribe();
   }
 
   ngOnDestroy() {
