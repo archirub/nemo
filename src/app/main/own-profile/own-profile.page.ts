@@ -545,7 +545,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
 
   //TUTORIAL EXIT
   onExitTutorial() {
-    this.tutorials.markAsSeen("ownProfile").subscribe();
+    //this.tutorials.markAsSeen("ownProfile").subscribe();
   }
 
   /**

@@ -21,11 +21,13 @@ ion-button {
     text-transform: none;
     width: fit-content;
     margin: 20px auto 0;
+    --padding-start: 50px;
+    --padding-end: 50px;
+    font-size: 2.5vh;
 }
 
 h1 {
     font-size: 5vh;
-    color: var(--ion-color-primary);
 }
 
 h2 {
@@ -33,6 +35,7 @@ h2 {
 }
 
 .container {
+    margin-top: 8vh;
     width: 90vw;
     display: flex;
     flex-direction: column;
@@ -40,22 +43,21 @@ h2 {
     color: #FFF;
 }
 
+.flexstretch {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    width: 100%;
+}
+
 .homePage {
-    filter: contrast(10);
     max-width: 50vw;
     margin: 0 auto;
 }
 
-.profilePage {
-    filter: contrast(10);
+.loadIcon {
     max-width: 29vw;
-    margin: 0 auto;
-}
-
-.chatsPage {
-    filter: contrast(10);
-    max-width: 40vw;
-    margin: 0 auto;
+    margin: 10vh auto;
 }
 
 /* Slide 2*/
@@ -68,22 +70,6 @@ h2 {
 .imageMap {
     margin: 25px 0;
     height: 60%;
-}
-
-.arrow-1 {
-    position: absolute;
-    width: 20vw;
-    top: 40vh;
-    left: 40vw;
-}
-
-.arrow-2 {
-    position: absolute;
-    width: 12vw;
-    left: 22vw;
-    z-index: 1;
-    top: 36vh;
-    transform: rotate(-80deg);
 }
 
 .profile-small {

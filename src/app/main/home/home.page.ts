@@ -195,7 +195,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
 
   //TUTORIAL EXIT
   onExitTutorial() {
-    this.tutorials.markAsSeen("home").subscribe();
+    //this.tutorials.markAsSeen("home").subscribe();
   }
 
   // For development, to avoid fetching the stack on each reload / document save
