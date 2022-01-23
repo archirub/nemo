@@ -15,7 +15,9 @@ import {
 
 import {
   BehaviorSubject,
+  combineLatest,
   concat,
+  defer,
   EMPTY,
   forkJoin,
   from,
@@ -305,8 +307,32 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
   // This contains what should be done when the card is double tapped. That is check whether
   // the tap the double tap was a yes or a no or a super, and subsequently animate it and
   // do logic associated with it
-  private doubleTapOnCard(choice: swipeChoice): Observable<any> {
-    if (choice === "yes") {
+  private doubleTapOnCard(ownChoice: swipeChoice): Observable<any> {
+    return this.profiles$.pipe(
+      take(1),
+      exhaustMap((profiles) =>
+        combineLatest([
+          of(profiles[0]),
+          this.swipeOutcomeStore.getChoiceOf(profiles[0].uid),
+        ])
+      ),
+      exhaustMap(([profile, otherChoice]) => {
+        if (ownChoice === "no") return this.onNoSwipe(profile);
+
+        if (["yes", "super"].includes(ownChoice) && otherChoice === "no")
+          return this.onYesSwipe(profile);
+
+        if (
+          ["yes", "super"].includes(ownChoice) &&
+          ["yes", "super"].includes(otherChoice)
+        )
+          return this.onMatch(profile);
+
+        return of("");
+      })
+    );
+
+    if (ownChoice === "yes") {
       //return this.cardStackRef$.pipe(
       //switchMap(() =>
       return this.profiles$.pipe(
@@ -324,7 +350,7 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
       //)
       //);
     }
-    if (choice === "no") {
+    if (ownChoice === "no") {
       return this.profiles$.pipe(
         take(1),
         // withLatestFrom(of(SwipeAnimation(this.dislikeEls))),
@@ -338,7 +364,7 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
         )
       );
     }
-    if (choice === "super") {
+    if (ownChoice === "super") {
       console.log("No super swipe logic for double tap");
     }
   }
@@ -372,16 +398,20 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
    * - Checks whether other user likes as well, triggers onMatch method if match
    */
   onYesSwipe(profile: Profile): Observable<any> {
-    return forkJoin([
-      this.swipeStackStore.removeProfile(profile),
-      this.swipeOutcomeStore.yesSwipe(profile),
-      this.swipeOutcomeStore.getChoiceOf(profile.uid),
-    ]).pipe(
-      exhaustMap(([_, __, choiceOfOtherUser]) => {
-        if (choiceOfOtherUser === "yes" || choiceOfOtherUser === "super")
-          return this.onMatch(profile);
-        return of("");
-      })
+    const storeTasks$ = (p: Profile) =>
+      forkJoin([
+        this.swipeStackStore.removeProfile(p),
+        this.swipeOutcomeStore.yesSwipe(p),
+      ]);
+    const changeText = () => {
+      this.likeText.nativeElement.innerHTML = `You liked ${profile.firstName}!`;
+    };
+
+    const animateSwipe = SwipeAnimation(storeTasks$.bind(this), profile, this.likeEls);
+
+    return concat(
+      defer(() => animateSwipe()),
+      of(changeText())
     );
   }
 
@@ -390,9 +420,20 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
    * - registers swipe choice in swipeOutcomeStore
    * */
   onNoSwipe(profile: Profile): Observable<any> {
+    const storeTasks$ = (p: Profile) =>
+      forkJoin([
+        this.swipeStackStore.removeProfile(p),
+        this.swipeOutcomeStore.noSwipe(p),
+      ]);
+    const changeText = () => {
+      this.dislikeText.nativeElement.innerHTML = `You passed on ${profile.firstName}.`;
+    };
+
+    const animateSwipe = SwipeAnimation(storeTasks$.bind(this), profile, this.likeEls);
+
     return concat(
-      this.swipeStackStore.removeProfile(profile),
-      this.swipeOutcomeStore.noSwipe(profile)
+      defer(() => animateSwipe()),
+      of(changeText())
     );
   }
 
@@ -407,6 +448,18 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
       this.otherProfilesStore.saveProfile(profile.uid, profile),
       this.swipeOutcomeStore.registerSwipeChoices$
     );
+
+    // REPLACEMENT CODE ONCE THE MATCH ANIMATION LOGIC IS MOVED TO THIS COMPONENT
+
+    // const storeTasks$ = (p: Profile) =>
+    //   forkJoin([
+    //     this.otherProfilesStore.saveProfile(profile.uid, profile),
+    //   this.swipeOutcomeStore.registerSwipeChoices$
+    //   ]);
+
+    // const animateMatch = MatchAnimation(storeTasks$.bind(this), profile, this.likeEls);
+
+    // return defer(()=> animateMatch())
   }
 
   // this is for trackBy of ngFor on profiles in template

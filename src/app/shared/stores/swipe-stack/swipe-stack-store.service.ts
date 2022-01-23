@@ -475,6 +475,7 @@ export class SwipeStackStore {
 
   /** Adds profiles to the queue a.k.a. beginning of Profiles array */
   public addToSwipeStackQueue(SC: SearchCriteria) {
+    console.log("addToSwipeStack search critertia", SC);
     return this.fetchUIDs(SC).pipe(
       take(1),
       // takes care of case where generateSwipeStack returns an empty array

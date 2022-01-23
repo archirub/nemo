@@ -322,7 +322,6 @@ export class GlobalStateManagementService {
 
     return concat(initialUrl$, this.router.events).pipe(
       filter((event) => event instanceof NavigationStart || typeof event === "string"),
-      tap((ev) => console.log("storesManagement event: ", ev)),
       map((event: NavigationStart) =>
         this.getPageFromUrl(event instanceof NavigationStart ? event.url : event)
       ),

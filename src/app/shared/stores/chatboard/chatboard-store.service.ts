@@ -24,6 +24,7 @@ import {
   tap,
   switchMap,
 } from "rxjs/operators";
+import { cloneDeep, isEqual } from "lodash";
 
 import { FormatService } from "@services/format/format.service";
 
@@ -73,7 +74,8 @@ export class ChatboardStore {
     QueryDocumentSnapshot<chatFromDatabase>[]
   >([]);
 
-  private recentMsgsFromDatabase = new BehaviorSubject<{
+  // used in chats page to give to chatboard component as input
+  recentMsgsFromDatabase = new BehaviorSubject<{
     [chatID: string]: messageMap | "no message documents";
   }>({});
 
@@ -222,19 +224,19 @@ export class ChatboardStore {
   private activateMsgAndChatDocumentsProcessing(): Observable<void> {
     return combineLatest([this.recentMsgsFromDatabase, this.chatsFromDatabase]).pipe(
       withLatestFrom(combineLatest([this.afAuth.user, this.allChats])),
-      map(([[recentMsgs, chats], [user, currentChats]]) => {
+      map(([[recentMsgs, chats], [user, allChats]]) => {
         if (!user) throw new CustomError("local/check-auth-state", "local");
+        const newAllChats = cloneDeep(allChats); // for change detection etc., it can't modify the same object otherwise the change won't be recorded
 
         chats.forEach((chat) => {
           const correspondingMsg = recentMsgs?.[chat.id];
-
           // Important; makes sure only those for which we got a response from both
           // the chat documents and the recent msg documents are processed
           if (!correspondingMsg) return;
 
           // case where the chat should go in the match section
           if (correspondingMsg === "no message documents") {
-            currentChats[chat.id] = {
+            newAllChats[chat.id] = {
               nature: "match",
               chat: this.format.chatDatabaseToClass(
                 (user as FirebaseUser).uid,
@@ -245,7 +247,7 @@ export class ChatboardStore {
             };
             // case where the chat should go in the chatboard section
           } else {
-            currentChats[chat.id] = {
+            newAllChats[chat.id] = {
               nature: "chat",
               chat: this.format.chatDatabaseToClass(
                 (user as FirebaseUser).uid,
@@ -256,8 +258,7 @@ export class ChatboardStore {
             };
           }
         });
-
-        this.allChats.next(currentChats);
+        this.allChats.next(newAllChats);
       }),
       this.errorHandler.handleErrors()
     );
@@ -276,9 +277,7 @@ export class ChatboardStore {
         });
         return chats;
       }),
-      distinctUntilChanged(
-        (prev, curr) => Object.keys(prev).length === Object.keys(curr).length
-      )
+      distinctUntilChanged((prev, curr) => isEqual(prev, curr))
     );
   }
 

@@ -1,4 +1,6 @@
 import * as admin from "firebase-admin";
+// DEV - remove functions import
+import * as functions from "firebase-functions";
 import {
   Degree,
   Gender,
@@ -80,6 +82,9 @@ export async function datingMode(
     )
     .map((doc) => doc?.data());
 
+  functions.logger.log("uidStorageDocuments");
+  functions.logger.log(uidStorageDocuments);
+
   // CONCAT DOCUMENTS OF SAME DEMOGRAPHIC
   const DemographicArrays: string[][] = concatSameDemographics(
     uidStorageDocuments,
@@ -127,7 +132,7 @@ export async function datingMode(
           .get()) as FirebaseFirestore.DocumentSnapshot<mdDatingPickingFromDatabase>;
       })
     )
-  ).filter((doc) => {
+  ).filter((doc, i) => {
     // REMOVE IF DOC DOESN'T EXIST
     if (!doc.exists) return false;
     // REMOVE USERS WITH TARGET IN THEIR REPORTED

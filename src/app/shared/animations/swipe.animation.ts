@@ -5,7 +5,7 @@ import { firstValueFrom, Observable, delay } from "rxjs";
 // import * as anime from "animejs"
 
 export const SwipeAnimation = (
-  onYesSwipe: (profile: Profile) => Observable<any>,
+  storeTasks$: (profile: Profile) => Observable<any>,
   profile: Profile,
   likeDiv: ElementRef<any>
 ) => {
@@ -32,7 +32,7 @@ export const SwipeAnimation = (
 
   const playAnimation = async () => {
     await appearAnimation.play();
-    await firstValueFrom(onYesSwipe(profile).pipe(delay(300)));
+    await firstValueFrom(storeTasks$(profile).pipe(delay(300)));
     await disappearAnimation.play();
   };
 

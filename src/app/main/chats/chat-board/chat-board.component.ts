@@ -1,4 +1,4 @@
-import { IonContent, IonItemSliding, NavController } from "@ionic/angular";
+import { IonItemSliding, NavController } from "@ionic/angular";
 import {
   Component,
   Input,
@@ -13,6 +13,7 @@ import {
   BehaviorSubject,
   combineLatest,
   firstValueFrom,
+  interval,
   Subscription,
   timer,
 } from "rxjs";
@@ -153,6 +154,6 @@ export class ChatBoardComponent implements OnInit, AfterViewInit {
 
   // for trackBy of ngFor loop on chats
   trackChat(index: number, chat: Chat) {
-    return chat.id;
+    return chat?.id;
   }
 }

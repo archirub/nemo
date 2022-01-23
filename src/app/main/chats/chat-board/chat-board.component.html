@@ -36,7 +36,10 @@
     <h1 class="title">Catches</h1>
 
     <ion-list *ngIf="this.matches.length > 0">
-      <ion-item-sliding class="parent" *ngFor="let chat of matches; index as i">
+      <ion-item-sliding
+        class="parent"
+        *ngFor="let chat of matches; index as i; trackBy: trackChat"
+      >
         <ion-item detail="true" button (click)="goToMessenger(chat.id)">
           <ion-avatar slot="start">
             <img [src]="(chatboardPictures$ | async)[chat?.recipient?.uid]" />

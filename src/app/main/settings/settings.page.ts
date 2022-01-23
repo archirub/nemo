@@ -13,10 +13,12 @@ import { AngularFireFunctions } from "@angular/fire/functions";
 import {
   BehaviorSubject,
   concat,
+  defer,
   EMPTY,
   firstValueFrom,
   forkJoin,
   from,
+  lastValueFrom,
   Observable,
   of,
   ReplaySubject,
@@ -199,29 +201,36 @@ export class SettingsPage implements AfterViewInit, OnDestroy, OnInit {
   // updates the profile locally
   async actOnGoUnder(option: GoUnder) {
     const newShowProfile = formatGoUnderToShowProfile(option);
+    console.log("newShowProfile", newShowProfile);
 
     const loader = await this.loadingAlertManager.createLoading();
 
-    await firstValueFrom(
-      this.currentUserStore.user$.pipe(
-        map((u) => u?.settings?.showProfile),
-        filter((currentShowProfile) => currentShowProfile !== newShowProfile),
-        exhaustMap((user) => {
-          const request: changeShowProfileRequest = {
-            showProfile: newShowProfile,
-          };
+    const request: changeShowProfileRequest = {
+      showProfile: newShowProfile,
+    };
 
-          return concat(
-            this.loadingAlertManager.presentNew(loader, "replace-erase"),
-            concat(
-              this.afFunctions
-                .httpsCallable("changeShowProfile")(request)
-                .pipe(this.errorHandler.convertErrors("cloud-functions")),
-              this.currentUserStore.updateShowProfileInStore(newShowProfile)
-            ).pipe(this.errorHandler.handleErrors())
-          );
-        })
+    // safeguard, as to not show any loading nor use the cloud function if we
+    // are trying to change to the option it is currently at
+    const currentShowProfile = await firstValueFrom(
+      this.currentUserStore.user$.pipe(
+        filter((u) => !!u),
+        map((u) => u?.settings?.showProfile)
       )
+    );
+    if (newShowProfile === currentShowProfile) return;
+
+    await this.loadingAlertManager.presentNew(loader, "replace-erase");
+    await lastValueFrom(
+      this.afFunctions
+        .httpsCallable("changeShowProfile")(request)
+        .pipe(
+          this.errorHandler.convertErrors("cloud-functions"),
+          // this must only occur if the cloud function doesn't error out, hence why its location
+          switchMap(() =>
+            defer(() => this.currentUserStore.updateShowProfileInStore(newShowProfile))
+          ),
+          this.errorHandler.handleErrors()
+        )
     );
 
     await this.loadingAlertManager.dismissDisplayed();
@@ -295,13 +304,15 @@ export class SettingsPage implements AfterViewInit, OnDestroy, OnInit {
      * Swipes to the targeted slide
      **/
 
-    console.log('Moving to slide', slide);
-    const slidesToHide = [document.getElementById("legal"),
-                          document.getElementById("preferences"),
-                          document.getElementById("support"),
-                          document.getElementById("placeholder"),
-                          document.getElementById("privacy")];
-    slidesToHide.forEach(s => {
+    console.log("Moving to slide", slide);
+    const slidesToHide = [
+      document.getElementById("legal"),
+      document.getElementById("preferences"),
+      document.getElementById("support"),
+      document.getElementById("placeholder"),
+      document.getElementById("privacy"),
+    ];
+    slidesToHide.forEach((s) => {
       this.renderer.setStyle(s, "display", "none");
     });
 

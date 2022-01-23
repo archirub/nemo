@@ -33,7 +33,7 @@ type demographicMap<T> = {
 interface distributionParameters {
   mean: number | null;
   variance: number | null;
-  occurences: number;
+  occurrences: number;
 }
 
 interface uid_score {
@@ -76,7 +76,7 @@ export const updatePISystem = functions
       const distribParamMaps = initialiseDemographicMap<distributionParameters>({
         mean: null,
         variance: null,
-        occurences: 0,
+        occurrences: 0,
       });
       const swipeUserInfo: SwipeUserInfoMap[] = piStorageDocs.docs.map((doc) => {
         const data = doc.data() as SwipeUserInfoMap;
@@ -141,7 +141,7 @@ export const updatePISystem = functions
       if (!Array.isArray(newUidStorageDocuments) || newUidStorageDocuments.length < 1)
         throw new functions.https.HttpsError(
           "aborted",
-          "Anomality concerning number of new uidStorageDocuments, the PI system update was aborted."
+          "Abnormality concerning number of new uidStorageDocuments, the PI system update was aborted."
         );
 
       currentUidStorageDocs.docs.forEach((doc) => transaction.delete(doc.ref));
@@ -324,12 +324,12 @@ function updateDistributionParameters(
     if (
       distributionParameters[demographicPropName].mean == null ||
       distributionParameters[demographicPropName].variance == null ||
-      distributionParameters[demographicPropName].occurences === 0
+      distributionParameters[demographicPropName].occurrences === 0
     ) {
       distributionParameters[demographicPropName] = {
         mean: PI,
         variance: 0,
-        occurences: 1,
+        occurrences: 1,
       };
       return;
     }
@@ -339,7 +339,7 @@ function updateDistributionParameters(
     const currentVariance: number = distributionParameters[demographicPropName]
       .variance as number;
     const currentOccurences: number =
-      distributionParameters[demographicPropName].occurences;
+      distributionParameters[demographicPropName].occurrences;
 
     const newMean: number = updateMean(currentMean, PI, currentOccurences);
     const newVariance: number = updateVariance(
@@ -352,7 +352,7 @@ function updateDistributionParameters(
     distributionParameters[demographicPropName] = {
       mean: newMean,
       variance: newVariance,
-      occurences: currentOccurences + 1,
+      occurrences: currentOccurences + 1,
     };
   });
 }

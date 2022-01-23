@@ -54,20 +54,28 @@ export const generateSwipeStack = functions
       request: generateSwipeStackRequest,
       context
     ): Promise<generateSwipeStackResponse> => {
-      runWeakUserIdentityCheck(context);
+      // DEV - uncomment
+      // runWeakUserIdentityCheck(context);
 
-      const uid = context?.auth?.uid as string;
+      // DEV - uncomment
+      // const uid = context?.auth?.uid as string;
+
+      // DEV - remove
+      const uid = "15Ch7byvH0YEcXO6aYI62eruRAx1";
 
       const sanitizedRequest = sanitizeData(
         "generateSwipeStack",
         request
       ) as generateSwipeStackRequest;
 
+      functions.logger.log("sanitizedRequest:", JSON.stringify(sanitizedRequest));
+      // return "" as any as generateSwipeStackResponse;
+
       // eslint-disable-next-line no-shadow
       const searchCriteria: searchCriteria = sanitizedRequest.searchCriteria;
 
       // DATA FOR TESTING <-> UNCOMMENT BELOW AND COMMENT ABOVE
-      // const targetuid: string = "oY6HiUHmUvcKbFQQnb88t3U4Zew1";
+      // const uid: string = "oY6HiUHmUvcKbFQQnb88t3U4Zew1";
       // const searchCriteria: searchCriteria = {
       //   university: null,
       //   areaOfStudy: "biology",
@@ -135,6 +143,7 @@ export const generateSwipeStack = functions
         SCPickingVariance,
         profilesPerWave
       );
+
       // } else if (swipeMode === "friend") {
       //   pickedUsers = await friendMode(
       //     uid,
