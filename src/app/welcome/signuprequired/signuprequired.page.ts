@@ -12,7 +12,6 @@ import {
 import { IonCheckbox, IonSlides, NavController } from "@ionic/angular";
 import { FormGroup, FormControl, Validators } from "@angular/forms";
 import { Router } from "@angular/router";
-import { AngularFireAuth } from "@angular/fire/auth";
 
 import { firstValueFrom, Subscription } from "rxjs";
 import { concatMap, delay, map, tap } from "rxjs/operators";
@@ -77,10 +76,7 @@ export class SignuprequiredPage implements OnInit, OnDestroy {
 
   universityOptions$ = this.universitiesStore.optionsList$;
 
-  universitySelectingHandler$ = this.afAuth.user.pipe(
-    tap((user) => {
-      if (!user) throw new CustomError("local/check-auth-state", "local");
-    }),
+  universitySelectingHandler$ = this.errorHandler.getCurrentUser$().pipe(
     concatMap((user) => this.universitiesStore.getUniversityFromEmail(user.email)),
     delay(5000), // required otherwise it gets set too early and gets set back to null
     map((universityName) => {
@@ -94,8 +90,7 @@ export class SignuprequiredPage implements OnInit, OnDestroy {
       } else {
         this.universitySelectionDisabled = false;
       }
-    }),
-    this.errorHandler.handleErrors()
+    })
   );
 
   get blankForm() {
@@ -114,8 +109,6 @@ export class SignuprequiredPage implements OnInit, OnDestroy {
     private changeDetectorRef: ChangeDetectorRef,
     private renderer: Renderer2,
     private navCtrl: NavController,
-
-    private afAuth: AngularFireAuth,
 
     private universitiesStore: UniversitiesStore,
 

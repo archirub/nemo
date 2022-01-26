@@ -9,7 +9,6 @@ import {
 } from "@angular/core";
 
 import { AngularFirestore, DocumentChangeAction } from "@angular/fire/firestore";
-import { AngularFireAuth } from "@angular/fire/auth";
 import { ActivatedRoute } from "@angular/router";
 
 import {
@@ -257,7 +256,6 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
     private navCtrl: NavController,
     private host: ElementRef,
 
-    private afAuth: AngularFireAuth,
     private firestore: AngularFirestore,
 
     private chatboardStore: ChatboardStore,
@@ -346,7 +344,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
     let userReportingID: string;
     let userReportedPicture: string;
 
-    const getReportedInfo = lastValueFrom(
+    await lastValueFrom(
       this.recipientProfile$.pipe(
         take(1),
         map((profile) => {
@@ -357,18 +355,8 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
       )
     );
 
-    const getReportingInfo = lastValueFrom(
-      this.afAuth.user.pipe(
-        tap((user) => {
-          if (!user) throw new CustomError("local/check-auth-state", "local");
-        }),
-        first(),
-        map((user) => (userReportingID = user.uid)),
-        this.errorHandler.handleErrors()
-      )
-    );
-
-    await Promise.all([getReportedInfo, getReportingInfo]);
+    const user = await this.errorHandler.getCurrentUser();
+    userReportingID = user.uid;
 
     if (!userReportedID || !userReportingID || !userReportedName) return;
 
@@ -419,10 +407,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
     const messageTime = new Date(); // this MUST be the same date sent to db as is checked below
     this.sendingMessage$.next(true);
 
-    return this.afAuth.user.pipe(
-      tap((user) => {
-        if (!user) throw new CustomError("local/check-auth-state", "local");
-      }),
+    return this.errorHandler.getCurrentUser$().pipe(
       take(1),
       tap(() => console.log("sendMessage - Start of chain")),
       switchMap((u) => combineLatest([of(u), this.chat$.pipe(filter((c) => !!c))])),

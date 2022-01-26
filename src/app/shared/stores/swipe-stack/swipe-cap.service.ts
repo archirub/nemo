@@ -15,7 +15,6 @@ import {
 } from "rxjs";
 import { Injectable } from "@angular/core";
 import { AngularFirestore } from "@angular/fire/firestore";
-import { AngularFireAuth } from "@angular/fire/auth";
 import { CustomError } from "@interfaces/error-handling.model";
 import {
   privateProfileFromDatabase,
@@ -46,7 +45,6 @@ export class SwipeCapService {
 
   constructor(
     private fs: AngularFirestore,
-    private afAuth: AngularFireAuth,
 
     private errorHandler: GlobalErrorHandler
   ) {}
@@ -118,7 +116,7 @@ export class SwipeCapService {
   }
 
   fetchSwipeCapUser() {
-    const uid$ = this.afAuth.user.pipe(
+    const uid$ = this.errorHandler.getCurrentUser$().pipe(
       tap((u) => {
         if (!u) throw new CustomError("local/check-auth-state", "local");
       }),

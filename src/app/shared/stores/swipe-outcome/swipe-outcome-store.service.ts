@@ -102,6 +102,7 @@ export class SwipeOutcomeStore {
 
   public getChoiceOf(uid: string): Observable<swipeChoice | null> {
     return this.swipeAnswers.pipe(
+      tap((p) => console.log("swipeAnswers: ", p)),
       take(1),
       map((answers) => {
         const index = answers.findIndex((a) => a.uid === uid);

@@ -255,7 +255,7 @@ export class SignupauthPage implements OnInit {
   }
 
   async onSlideFromVerification() {
-    const user = await this.errorHandler.getCurrentUserWithErrorHandling();
+    const user = await this.errorHandler.getCurrentUser();
     if (!user) return;
 
     await user.reload();
@@ -343,7 +343,7 @@ export class SignupauthPage implements OnInit {
    * in the middle of signing up
    */
   public async goStraightToEmailVerification(): Promise<void> {
-    const user = await this.errorHandler.getCurrentUserWithErrorHandling();
+    const user = await this.errorHandler.getCurrentUser();
     if (!user) return; // still necessary. In case of error, since the error is handled, the chain of logic will keep going
 
     const slideIndex = await this.slidesRef.getActiveIndex();

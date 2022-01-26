@@ -42,7 +42,8 @@ export class AppComponent implements OnDestroy, OnInit {
     private storeReadiness: StoreReadinessService,
     private fs: AngularFirestore,
 
-    private chatboardPictures: ChatboardPicturesStore
+    private chatboardPictures: ChatboardPicturesStore,
+    private errorHandler: GlobalErrorHandler
   ) {
     this.initializeApp();
 
@@ -107,7 +108,7 @@ export class AppComponent implements OnDestroy, OnInit {
 
     // On success, we should be able to receive notifications
     PushNotifications.addListener("registration", async (token: Token) => {
-      const user = await firstValueFrom(this.afAuth.user);
+      const user = await this.errorHandler.getCurrentUser();
       this.fs.collection("profiles").doc();
       console.log("Push registration success, token: " + token.value);
     });

@@ -41,7 +41,12 @@ import { GlobalErrorHandler } from "@services/errors/global-error-handler.servic
 import { TutorialsService } from "@services/tutorials/tutorials.service";
 import { SwipeCapService } from "@stores/swipe-stack/swipe-cap.service";
 
-import { ChatboardStore, SwipeOutcomeStore, SwipeStackStore } from "@stores/index";
+import {
+  ChatboardStore,
+  CurrentUserStore,
+  SwipeOutcomeStore,
+  SwipeStackStore,
+} from "@stores/index";
 import { OwnPicturesStore } from "@stores/pictures/own-pictures/own-pictures.service";
 
 import { Profile } from "@classes/index";
@@ -280,7 +285,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
   async goToNewCatchChat() {
     const maxTimeWaitingForChat = 6000; // 6 seconds
 
-    const user = await this.errorHandler.getCurrentUserWithErrorHandling();
+    const user = await this.errorHandler.getCurrentUser();
     if (!user) return;
 
     const loader = await this.loadingAlertManager.createLoading({});

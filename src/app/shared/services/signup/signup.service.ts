@@ -38,7 +38,7 @@ export class SignupService {
   signupData$ = new BehaviorSubject<SignupDataHolder>(new SignupDataHolder({}));
 
   /**
-   * null indicates that the authentification hasn't be done, in other words,
+   * null indicates that the authentication hasn't be done, in other words,
    * that the signup process hasn't been initialized.
    */
   get signupStage(): null | "required" | "optional" {
@@ -164,7 +164,7 @@ export class SignupService {
    * redirects to the correct signup stage
    */
   async checkAndRedirect() {
-    const user = await this.errorHandler.getCurrentUserWithErrorHandling();
+    const user = await this.errorHandler.getCurrentUser();
 
     if (!user) {
       return this.router.navigateByUrl("welcome/signupauth");

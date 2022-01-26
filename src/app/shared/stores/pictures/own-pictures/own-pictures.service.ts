@@ -1,7 +1,6 @@
 import { isEqual } from "lodash";
 import { Injectable } from "@angular/core";
 import { AngularFireStorage } from "@angular/fire/storage";
-import { AngularFireAuth } from "@angular/fire/auth";
 import { Storage } from "@capacitor/storage";
 
 import { BehaviorSubject, combineLatest, forkJoin, from, Observable, of } from "rxjs";
@@ -46,7 +45,6 @@ export class OwnPicturesStore {
 
   constructor(
     private afStorage: AngularFireStorage,
-    private afAuth: AngularFireAuth,
     private errorHandler: GlobalErrorHandler
   ) {}
 
@@ -184,7 +182,7 @@ export class OwnPicturesStore {
   }
 
   private nextFromFirebase(): Observable<string[]> {
-    const uid$: Observable<string> = this.afAuth.user.pipe(
+    const uid$: Observable<string> = this.errorHandler.getCurrentUser$().pipe(
       tap((user) => {
         if (!user) throw new CustomError("local/check-auth-state", "local");
       }),
@@ -220,7 +218,7 @@ export class OwnPicturesStore {
   }
 
   private removePictureInDatabase(index: number): Observable<void> {
-    return this.afAuth.user.pipe(
+    return this.errorHandler.getCurrentUser$().pipe(
       first(),
       switchMap((user) => {
         if (!user) throw new CustomError("local/check-auth-state", "local");
@@ -235,7 +233,7 @@ export class OwnPicturesStore {
   }
 
   private updatePictureInDatabase(photoUrl: string, index: number): Observable<void> {
-    return this.afAuth.user.pipe(
+    return this.errorHandler.getCurrentUser$().pipe(
       first(),
       switchMap(async (user) => {
         if (!user) throw new CustomError("local/check-auth-state", "local");

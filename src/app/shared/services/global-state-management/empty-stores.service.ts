@@ -13,13 +13,13 @@ import { CurrentUserStore } from "@stores/current-user/current-user-store.servic
   providedIn: "root",
 })
 export class EmptyStoresService {
-  constructor() // private userStore: CurrentUserStore,
-  // private chatboardStore: ChatboardStore,
+  constructor() // private chatboardStore: ChatboardStore, // private userStore: CurrentUserStore,
   // //private chatboardPicturesStore: ChatboardPicturesStore,
   // private searchCriteriaStore: SearchCriteriaStore,
   // private otherProfilesStore: OtherProfilesStore,
   // private swipeOutcomeStore: SwipeOutcomeStore,
-  // private swipeStackStore: SwipeStackStore // private OwnPicturesStore: OwnPicturesStore
+  // private swipeStackStore: SwipeStackStore
+  // private OwnPicturesStore: OwnPicturesStore
   {}
 
   emptyStores() {

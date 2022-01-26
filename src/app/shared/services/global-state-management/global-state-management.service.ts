@@ -1,7 +1,6 @@
 import { Injectable } from "@angular/core";
 import { NavigationStart, Router } from "@angular/router";
 
-import { AngularFireAuth } from "@angular/fire/auth";
 import { AngularFirestore } from "@angular/fire/firestore";
 
 import { Storage } from "@capacitor/storage";
@@ -78,7 +77,6 @@ export class GlobalStateManagementService {
   constructor(
     private router: Router,
 
-    private afAuth: AngularFireAuth,
     private firestore: AngularFirestore,
 
     private errorHandler: GlobalErrorHandler,
@@ -136,7 +134,7 @@ export class GlobalStateManagementService {
   }
 
   private globalManagement(): Observable<void> {
-    return this.afAuth.authState.pipe(
+    return this.errorHandler.getCurrentUser$().pipe(
       switchMap((user) => forkJoin([of(user), this.isUserEmailVerified(user)])),
       switchMap(([user, emailIsVerified]) => {
         const observables$: Observable<any>[] = [];
@@ -251,7 +249,7 @@ export class GlobalStateManagementService {
 
           await new Promise((resolve) => {
             const interval = setInterval(async () => {
-              const u = await this.afAuth.currentUser;
+              const u = await this.errorHandler.getCurrentUser();
 
               if (!u) {
                 clearInterval(interval);

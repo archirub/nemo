@@ -1,4 +1,5 @@
 import { Component } from "@angular/core";
+import { CurrentUserStore } from "@stores/index";
 
 @Component({
   selector: "app-main",

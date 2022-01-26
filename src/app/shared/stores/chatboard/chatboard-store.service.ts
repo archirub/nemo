@@ -1,5 +1,4 @@
 import { Injectable } from "@angular/core";
-import { AngularFireAuth } from "@angular/fire/auth";
 import { AngularFireFunctions } from "@angular/fire/functions";
 import {
   AngularFirestore,
@@ -101,7 +100,6 @@ export class ChatboardStore {
   );
 
   constructor(
-    private afAuth: AngularFireAuth,
     private firestore: AngularFirestore,
     private afFunctions: AngularFireFunctions,
 
@@ -121,10 +119,7 @@ export class ChatboardStore {
   }
 
   private activateChatDocsListening(): Observable<any> {
-    return this.afAuth.user.pipe(
-      tap((user) => {
-        if (!user) throw new CustomError("local/check-auth-state", "local");
-      }),
+    return this.errorHandler.getCurrentUser$().pipe(
       first(),
       switchMap((user) =>
         (
@@ -146,7 +141,7 @@ export class ChatboardStore {
 
   private activateRecentMessageListening(): Observable<void[]> {
     return this.chatsFromDatabase.asObservable().pipe(
-      withLatestFrom(this.afAuth.user),
+      withLatestFrom(this.errorHandler.getCurrentUser$()),
       tap(([chatsFromDb, user]) => {
         if (!user) throw new CustomError("local/check-auth-state", "local");
       }),
@@ -223,7 +218,7 @@ export class ChatboardStore {
    */
   private activateMsgAndChatDocumentsProcessing(): Observable<void> {
     return combineLatest([this.recentMsgsFromDatabase, this.chatsFromDatabase]).pipe(
-      withLatestFrom(combineLatest([this.afAuth.user, this.allChats])),
+      withLatestFrom(combineLatest([this.errorHandler.getCurrentUser$(), this.allChats])),
       map(([[recentMsgs, chats], [user, allChats]]) => {
         if (!user) throw new CustomError("local/check-auth-state", "local");
         const newAllChats = cloneDeep(allChats); // for change detection etc., it can't modify the same object otherwise the change won't be recorded

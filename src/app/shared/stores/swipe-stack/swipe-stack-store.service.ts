@@ -21,6 +21,7 @@ import {
   filter,
   first,
   map,
+  mapTo,
   pairwise,
   share,
   startWith,
@@ -552,8 +553,11 @@ export class SwipeStackStore {
             this.errorHandler.handleErrors()
           )
       ),
-      tap((response) => this.swipeOutcomeStore.addToSwipeAnswers(response.users)),
-      map((response) => (response?.users ?? []).map((u) => u.uid))
+      concatMap((r) =>
+        this.swipeOutcomeStore
+          .addToSwipeAnswers(r.users)
+          .pipe(mapTo((r?.users ?? []).map((u) => u.uid)))
+      )
     );
   }
 

@@ -15,6 +15,8 @@ import { EmailAuthProvider, FirebaseUser } from "@interfaces/firebase.model";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 import { FirebaseLogoutService } from "./firebase-logout.service";
 import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
+import { CloudFunctionsErrorHandler } from "@services/errors/cloud-functions-error-handler.service";
+import { LocalErrorHandler } from "@services/errors/local-error-handler.service";
 
 @Injectable({
   providedIn: "root",
@@ -30,7 +32,8 @@ export class FirebaseAuthService {
 
     private loadingAlertManager: LoadingAndAlertManager,
     private firebaseLogout: FirebaseLogoutService,
-    // private errorHandler: GlobalErrorHandler,
+    private localEH: LocalErrorHandler, // importing the local one directly to avoid circular dependency
+    private cfEH: CloudFunctionsErrorHandler, // importing the cf one directly to avoid circular dependency
     private emptyStoresService: EmptyStoresService
   ) {}
 
@@ -41,7 +44,7 @@ export class FirebaseAuthService {
 
   // entire account deletion procedure
   public async deleteAccount() {
-    const user = await this.afAuth.currentUser;
+    const user = await this.localEH.getCurrentUser();
 
     if (!user) return;
 
@@ -52,9 +55,9 @@ export class FirebaseAuthService {
     const logOut = () => this.afAuth.signOut();
     const deleteAccount = () =>
       firstValueFrom(
-        this.afFunctions.httpsCallable("deleteAccount")({} as deleteAccountRequest)
-        // DEV - find solution: circular dependency issue between firebase.auth.service and errorHandler.service
-        // .pipe(this.errorHandler.handleErrors())
+        this.afFunctions
+          .httpsCallable("deleteAccount")({} as deleteAccountRequest)
+          .pipe(this.cfEH.errorConverter(), this.cfEH.handleErrors())
       );
 
     const loadingOptions: LoadingOptions = {
@@ -132,7 +135,7 @@ export class FirebaseAuthService {
   }
 
   public async changePasswordProcedure(): Promise<FirebaseUser> {
-    const user = await this.afAuth.currentUser;
+    const user = await this.localEH.getCurrentUser();
 
     if (!user) return;
 
@@ -184,7 +187,7 @@ export class FirebaseAuthService {
     user: FirebaseUser;
     outcome: "user-reauthenticated" | "user-canceled" | "auth-failed";
   }> {
-    if (!user) user = await firstValueFrom(this.afAuth.user);
+    if (!user) user = await this.localEH.getCurrentUser();
 
     let outcome: "user-reauthenticated" | "user-canceled" | "auth-failed";
 
@@ -223,13 +226,13 @@ export class FirebaseAuthService {
           // outcome = nestedReauthReturn?.outcome;
         } else if (err?.code === "auth/too-many-requests") {
           outcome = "auth-failed";
-          await this.wrongPasswordMaxAttemptsPopup(this.afAuth.signOut());
+          await this.wrongPasswordMaxAttemptsPopup(this.afAuth.signOut);
         }
       }
     };
 
     const alert = await this.loadingAlertManager.createAlert({
-      header: "Reauthentication required",
+      header: "Re-authentication required",
       backdropDismiss: false,
       message,
       inputs: [{ name: "password", type: "password" }],
@@ -289,7 +292,7 @@ export class FirebaseAuthService {
   }
 
   public async wrongPasswordMaxAttemptsPopup(
-    followUpPromise: Promise<any> | null
+    followUpPromise: () => Promise<any> | null
   ): Promise<void> {
     const attemptsAlert = await this.loadingAlertManager.createAlert({
       header: "Maximum Number of Attempts",
@@ -300,7 +303,7 @@ export class FirebaseAuthService {
     });
 
     attemptsAlert.onDidDismiss().then(() => {
-      if (followUpPromise) return followUpPromise;
+      if (followUpPromise) return followUpPromise();
     });
 
     await this.loadingAlertManager.presentNew(attemptsAlert, "replace-erase");

@@ -17,6 +17,7 @@ import { ModalController } from "@ionic/angular";
 export class InterestsModalComponent implements OnInit {
   pictures = assetsInterestsPath; //Interest icons
   names = searchCriteriaOptions.interests; //Interest names
+  interests: Interests[] = [];
 
   //DO NOT REMOVE THESE - DEV TEST - SEE IF QUICKER WHEN HARDCODED
   interestGrid: Array<Array<string>> = [
@@ -46,8 +47,6 @@ export class InterestsModalComponent implements OnInit {
   ];
 
   viewReady: boolean = false;
-
-  interests: Interests[];
 
   @Output() interestsChange = new EventEmitter<Interests[]>();
 
@@ -120,6 +119,7 @@ export class InterestsModalComponent implements OnInit {
 
   // changes the interest selection
   selectInterest(choice) {
+    console.log("interests", this.interests);
     if (this.interests.includes(choice)) {
       const index = this.interests.indexOf(choice);
       this.interests.splice(index, 1);
