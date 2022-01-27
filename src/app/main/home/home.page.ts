@@ -183,6 +183,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     private swipeCap: SwipeCapService
   ) {
     this.onResize();
+    //
   }
 
   ngOnInit() {
