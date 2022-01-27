@@ -2,14 +2,16 @@ import { Injectable } from "@angular/core";
 import { AngularFireStorage } from "@angular/fire/storage";
 import { AngularFirestore, DocumentSnapshot } from "@angular/fire/firestore";
 
-import { BehaviorSubject, forkJoin, Observable, EMPTY } from "rxjs";
-import { exhaustMap, filter, first, map, take, tap } from "rxjs/operators";
+import { BehaviorSubject, forkJoin, Observable, EMPTY, combineLatest, of } from "rxjs";
+import { exhaustMap, filter, first, map, share, take, tap } from "rxjs/operators";
 
 import { FormatService } from "@services/format/format.service";
 
 import { Profile } from "@classes/index";
 import { profileFromDatabase } from "@interfaces/index";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
+import { StoreResetter } from "@services/global-state-management/store-resetter.service";
+import { AbstractStoreService } from "@interfaces/stores.model";
 
 interface ProfileHolder {
   [uid: string]: Profile;
@@ -32,17 +34,38 @@ interface ProfileHolder {
 @Injectable({
   providedIn: "root",
 })
-export class OtherProfilesStore {
+export class OtherProfilesStore extends AbstractStoreService {
   private profiles = new BehaviorSubject<ProfileHolder>({});
   profiles$ = this.profiles.asObservable();
+
+  isReady$ = null;
 
   constructor(
     private afStorage: AngularFireStorage,
     private firestore: AngularFirestore,
 
     private errorHandler: GlobalErrorHandler,
-    private format: FormatService
-  ) {}
+    private format: FormatService,
+    protected resetter: StoreResetter
+  ) {
+    super(resetter);
+  }
+
+  protected systemsToActivate() {
+    return EMPTY;
+  }
+
+  resetStore() {
+    const profiles = this.profiles.value;
+
+    Object.keys(profiles).forEach((uid) => {
+      this.revokeUrls(profiles[uid].pictureUrls);
+    });
+
+    this.profiles.next({});
+
+    console.log("other-profiles store reset.");
+  }
 
   /**
    * saves the profile to the store, emits the profile
@@ -181,15 +204,5 @@ export class OtherProfilesStore {
         this.errorHandler.convertErrors("firebase-storage"),
         this.errorHandler.handleErrors()
       );
-  }
-
-  resetStore() {
-    const profiles = this.profiles.value;
-
-    Object.keys(profiles).forEach((uid) => {
-      this.revokeUrls(profiles[uid].pictureUrls);
-    });
-
-    this.profiles.next({});
   }
 }

@@ -20,18 +20,18 @@ import { FormatService } from "@services/format/format.service";
 import { SearchCriteria } from "@classes/index";
 import { CustomError, privateProfileFromDatabase } from "@interfaces/index";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
+import { AbstractStoreService } from "@interfaces/stores.model";
+import { StoreResetter } from "@services/global-state-management/store-resetter.service";
 
 @Injectable({
   providedIn: "root",
 })
-export class SearchCriteriaStore {
+export class SearchCriteriaStore extends AbstractStoreService {
   private searchCriteria = new BehaviorSubject<SearchCriteria>(this.emptySearchCriteria);
   private isReady = new BehaviorSubject<boolean>(false);
 
   searchCriteria$ = this.searchCriteria.asObservable();
   isReady$ = this.isReady.asObservable().pipe(distinctUntilChanged());
-
-  activateStore$ = this.activateStore();
 
   get emptySearchCriteria() {
     return new SearchCriteria({});
@@ -44,10 +44,22 @@ export class SearchCriteriaStore {
     private appUser: CurrentUserStore,
 
     private errorHandler: GlobalErrorHandler,
-    private format: FormatService
-  ) {}
+    private format: FormatService,
+    protected resetter: StoreResetter
+  ) {
+    super(resetter);
+  }
 
-  private activateStore() {
+  protected systemsToActivate(): Observable<any> {
+    return this.fillStore();
+  }
+
+  protected resetStore() {
+    this.searchCriteria.next(this.emptySearchCriteria);
+    console.log("search criteria store reset.");
+  }
+
+  fillStore() {
     return this.appUser.user$.pipe(
       filter((user) => !!user),
       map((user) => {
@@ -122,9 +134,5 @@ export class SearchCriteriaStore {
         this.errorHandler.convertErrors("firestore"),
         this.errorHandler.handleErrors()
       );
-  }
-
-  resetStore() {
-    this.searchCriteria.next(this.emptySearchCriteria);
   }
 }

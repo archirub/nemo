@@ -11,11 +11,14 @@ import {
 } from "@interfaces/universities.model";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 import { CustomError } from "@interfaces/error-handling.model";
+import { AbstractStoreService } from "@interfaces/stores.model";
+import { StoreResetter } from "@services/global-state-management/store-resetter.service";
 
 @Injectable({
   providedIn: "root",
 })
-export class UniversitiesStore {
+export class UniversitiesStore extends AbstractStoreService {
+  public isReady$: Observable<boolean> = null;
   private universities = new BehaviorSubject<UniversityInfo[]>(null);
   universities$ = this.universities.asObservable();
 
@@ -25,10 +28,20 @@ export class UniversitiesStore {
 
   constructor(
     private firestore: AngularFirestore,
-    private errorHandler: GlobalErrorHandler
-  ) {}
+    private errorHandler: GlobalErrorHandler,
+    protected resetter: StoreResetter
+  ) {
+    super(resetter);
+  }
 
-  fetchUniversities(): Observable<any> {
+  protected systemsToActivate(): Observable<any> {
+    return this.fetchUniversities();
+  }
+  protected resetStore(): void {
+    // state not user specific, so no need to refetch
+  }
+
+  private fetchUniversities(): Observable<any> {
     return this.universities$.pipe(
       first(),
       switchMap((universities) => {

@@ -14,6 +14,14 @@
   >Remove notifications (dev)</ion-button
 > -->
 
+<!-- <ion-button
+  style="z-index: 100; position: absolute"
+  debounceClick
+  (debounceClick)="resetStores()"
+  debounceTime="5000"
+  >Reset stores (dev)</ion-button
+> -->
+
 <home-tutorial-slides
   *ngIf="displayTutorial$ | async"
   (exit)="onExitTutorial()"

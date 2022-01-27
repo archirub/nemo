@@ -23,6 +23,8 @@ import {
 } from "@interfaces/profile.model";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 import { CurrentUserStore } from "..";
+import { AbstractStoreService } from "@interfaces/stores.model";
+import { StoreResetter } from "@services/global-state-management/store-resetter.service";
 
 type SwipeState = "init" | "";
 type SwipeCapMap = { swipesLeft: number; date: Date };
@@ -30,7 +32,9 @@ type SwipeCapMap = { swipesLeft: number; date: Date };
 @Injectable({
   providedIn: "root",
 })
-export class SwipeCapService {
+export class SwipeCapService extends AbstractStoreService {
+  public isReady$: Observable<boolean> = null;
+
   private minSwipes = 0;
   private maxSwipes = 20; // default value (max of the gauge)
   private increaseRateMillis = 1 / (3600 * 1000); // default value (1 per hour)
@@ -46,15 +50,24 @@ export class SwipeCapService {
   constructor(
     private fs: AngularFirestore,
 
-    private errorHandler: GlobalErrorHandler
-  ) {}
+    private errorHandler: GlobalErrorHandler,
+    protected resetter: StoreResetter
+  ) {
+    super(resetter);
+  }
 
-  activate() {
+  protected systemsToActivate(): Observable<any> {
     return concat(
       this.fetchSwipeCapGeneral(),
       this.fetchSwipeCapUser(),
       this.manageSwipeIncrement()
     );
+  }
+
+  protected resetStore(): void {
+    this.state$.next("init");
+    this.swipesLeft.next(null);
+    console.log("swipes-cap store reset.");
   }
 
   useSwipe() {

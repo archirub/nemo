@@ -6,6 +6,7 @@ import { AngularFireStorage } from "@angular/fire/storage";
 import {
   BehaviorSubject,
   combineLatest,
+  concat,
   defer,
   EMPTY,
   forkJoin,
@@ -48,6 +49,8 @@ import {
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 import { IonSlides } from "@ionic/angular";
 import { SwipeCapService } from "./swipe-cap.service";
+import { AbstractStoreService } from "@interfaces/stores.model";
+import { StoreResetter } from "@services/global-state-management/store-resetter.service";
 
 // - loading is for when there is no one in the stack but we are fetching
 // - empty is for the stack has been fetched and no one was found
@@ -59,7 +62,7 @@ export type PictureQueue = Array<{ uid: string; pictureIndex: number }>;
 @Injectable({
   providedIn: "root",
 })
-export class SwipeStackStore {
+export class SwipeStackStore extends AbstractStoreService {
   private readonly REGISTER_FREQUENCY = 4; // every how many swipe choices do we choose to register them on the database?
   private readonly MIN_PROFILE_COUNT = 4; // # of profiles in profiles$ below which we make another request
   private readonly MIN_RENDERED_COUNT = 2; // min # of profiles in profilesToRender$
@@ -90,8 +93,6 @@ export class SwipeStackStore {
   isReady$ = this.isReady.asObservable().pipe(distinctUntilChanged());
   stackState$ = this.stackState.asObservable().pipe(distinctUntilChanged());
 
-  activateStore$ = this.activateStore();
-
   constructor(
     private firestore: AngularFirestore,
     private afFunctions: AngularFireFunctions,
@@ -102,21 +103,29 @@ export class SwipeStackStore {
 
     private errorHandler: GlobalErrorHandler,
     private format: FormatService,
-    private swipeCap: SwipeCapService
-  ) {}
+    private swipeCap: SwipeCapService,
+    protected resetter: StoreResetter
+  ) {
+    super(resetter);
+  }
 
-  /**
-   * Have to subscribe to this to activate the chain of logic that fills the store etc.
-   */
-  private activateStore(): Observable<any> {
-    return merge(
-      this.swipeCap.activate(),
+  protected systemsToActivate(): Observable<any> {
+    return combineLatest([
+      this.swipeCap.activate$,
       this.manageSwipeStack(),
       this.manageRenderedProfiles(),
       this.managePictureQueue(),
       this.manageStoreReadiness(),
-      this.manageChoiceRegistration()
-    ).pipe(share());
+      this.manageChoiceRegistration(),
+    ]);
+  }
+
+  protected resetStore() {
+    this.isReady.next(false);
+    this.stackState.next("init");
+    this.profiles.next([]);
+    this.profilesToRender.next([]);
+    console.log("swipe-stack store reset.");
   }
 
   manageSwipeStack() {
@@ -609,9 +618,5 @@ export class SwipeStackStore {
       ),
       map(() => profiles)
     );
-  }
-
-  resetStore() {
-    this.profiles.next([]);
   }
 }

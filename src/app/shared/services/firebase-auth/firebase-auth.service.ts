@@ -7,7 +7,7 @@ import { AngularFireAuth } from "@angular/fire/auth";
 import { Storage } from "@capacitor/storage";
 import { EMPTY, firstValueFrom } from "rxjs";
 
-import { EmptyStoresService } from "@services/global-state-management/empty-stores.service";
+import { StoreResetter } from "@services/global-state-management/store-resetter.service";
 // import { LoadingOptions, LoadingService } from "@services/loading/loading.service";
 
 import { deleteAccountRequest } from "@interfaces/cloud-functions.model";
@@ -34,7 +34,7 @@ export class FirebaseAuthService {
     private firebaseLogout: FirebaseLogoutService,
     private localEH: LocalErrorHandler, // importing the local one directly to avoid circular dependency
     private cfEH: CloudFunctionsErrorHandler, // importing the cf one directly to avoid circular dependency
-    private emptyStoresService: EmptyStoresService
+    private storeResetter: StoreResetter
   ) {}
 
   // lazy, could just import firebaseLogoutService whenever logout is needed instead of redirecting
@@ -51,7 +51,7 @@ export class FirebaseAuthService {
     const navigateToWelcome = async () =>
       this.zone.run(() => this.navCtrl.navigateRoot("/welcome"));
     const clearLocalCache = () => Storage.clear();
-    const clearStores = async () => this.emptyStoresService.emptyStores();
+    const clearStores = async () => this.storeResetter.resetStores();
     const logOut = () => this.afAuth.signOut();
     const deleteAccount = () =>
       firstValueFrom(
@@ -192,7 +192,7 @@ export class FirebaseAuthService {
     let outcome: "user-reauthenticated" | "user-canceled" | "auth-failed";
 
     const defaultCancelProcedure = () =>
-      this.afAuth.signOut().then(() => {
+      this.firebaseLogout.logOut().then(() => {
         return this.router.navigateByUrl("/welcome");
       });
 
@@ -226,7 +226,7 @@ export class FirebaseAuthService {
           // outcome = nestedReauthReturn?.outcome;
         } else if (err?.code === "auth/too-many-requests") {
           outcome = "auth-failed";
-          await this.wrongPasswordMaxAttemptsPopup(this.afAuth.signOut);
+          await this.wrongPasswordMaxAttemptsPopup(this.firebaseLogout.logOut);
         }
       }
     };

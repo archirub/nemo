@@ -32,7 +32,7 @@ import { routerInitListenerService } from "./initial-url.service";
 import { SignupAuthMethodSharer } from "../../../welcome/signupauth/signupauth-method-sharer.service";
 import { ConnectionService } from "@services/connection/connection.service";
 import { NotificationsService } from "@services/notifications/notifications.service";
-import { EmptyStoresService } from "./empty-stores.service";
+import { StoreResetter } from "./store-resetter.service";
 
 import { FirebaseUser } from "./../../interfaces/firebase.model";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
@@ -84,7 +84,7 @@ export class GlobalStateManagementService {
     private signupService: SignupService,
     private firebaseAuthService: FirebaseAuthService,
     private routerInitListener: routerInitListenerService,
-    private emptyStoresService: EmptyStoresService,
+    private storeResetter: StoreResetter,
     private connectionService: ConnectionService,
     private notificationsService: NotificationsService,
     private tutorialsService: TutorialsService,
@@ -118,16 +118,14 @@ export class GlobalStateManagementService {
   );
 
   public activateAllStores(): Observable<any> {
+    console.log("activateAllStores");
     const storesToActivate$: Observable<any>[] = [
-      this.userStore.fillStore$,
-      this.swipeStackStore.activateStore$,
-      this.searchCriteriaStore.activateStore$,
-      this.chatboardStore.activateStore$,
-      this.OwnPicturesStore.activateStore$,
-      this.chatboardPicturesStore.activateStore(
-        this.chatboardStore.allChats$,
-        this.chatboardStore.hasNoChats$
-      ),
+      this.userStore.activate$,
+      this.swipeStackStore.activate$,
+      this.searchCriteriaStore.activate$,
+      this.chatboardStore.activate$,
+      this.OwnPicturesStore.activate$,
+      this.chatboardPicturesStore.activate$,
     ];
 
     return merge(...storesToActivate$);
@@ -159,9 +157,7 @@ export class GlobalStateManagementService {
   }
 
   private activateDefaultStores() {
-    const storesToActivate$: Observable<any>[] = [
-      this.universitiesStore.fetchUniversities(),
-    ];
+    const storesToActivate$: Observable<any>[] = [this.universitiesStore.activate$];
 
     return merge(...storesToActivate$);
   }
@@ -231,11 +227,11 @@ export class GlobalStateManagementService {
    */
   private noDocumentsRoutine(user: FirebaseUser): Observable<void> {
     const finishProfileProcedure = () => {
-      this.emptyStoresService.emptyStores(); // to be safe
+      this.storeResetter.resetStores(); // to be safe
       return this.signupService.checkAndRedirect();
     };
     const abortProfileProcedure = async () => {
-      this.emptyStoresService.emptyStores(); // to be safe
+      this.storeResetter.resetStores(); // to be safe
 
       try {
         await Storage.clear();
@@ -460,6 +456,6 @@ export class GlobalStateManagementService {
    * Resets the content of the stores and clears the local storage
    */
   public resetAppState() {
-    return forkJoin([of(this.emptyStoresService.emptyStores()), Storage.clear()]);
+    return forkJoin([of(this.storeResetter.resetStores()), Storage.clear()]);
   }
 }

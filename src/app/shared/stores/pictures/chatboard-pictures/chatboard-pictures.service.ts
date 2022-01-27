@@ -18,6 +18,9 @@ import { urlToBase64, Base64ToUrl } from "../common-pictures-functions";
 
 import { Chat } from "../../../classes/chat.class";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
+import { AbstractStoreService } from "@interfaces/stores.model";
+import { ChatboardStore } from "@stores/index";
+import { StoreResetter } from "@services/global-state-management/store-resetter.service";
 
 export interface pictureHolder {
   [uid: string]: string;
@@ -26,18 +29,17 @@ export interface pictureHolder {
 @Injectable({
   providedIn: "root",
 })
-export class ChatboardPicturesStore {
+export class ChatboardPicturesStore extends AbstractStoreService {
   private uidsStorageKey = "chatboard_picture_uids";
   private picture_width = 300;
   private picture_height = 300;
   private renderer: Renderer2;
 
   private holder: BehaviorSubject<pictureHolder> = new BehaviorSubject({});
-  private isReady = new BehaviorSubject<boolean>(false);
+  protected isReady = new BehaviorSubject<boolean>(false);
+  isReady$ = this.isReady.asObservable().pipe(distinctUntilChanged());
 
   holder$: Observable<pictureHolder> = this.holder.asObservable();
-
-  public isReady$ = this.isReady.asObservable().pipe(distinctUntilChanged());
 
   private storageKey(uid: string): string {
     return "chatboard_picture_" + uid;
@@ -61,26 +63,30 @@ export class ChatboardPicturesStore {
   constructor(
     private rendererFactory: RendererFactory2,
     private afStorage: AngularFireStorage,
+    private chatboardStore: ChatboardStore,
 
-    private errorHandler: GlobalErrorHandler
+    private errorHandler: GlobalErrorHandler,
+    protected resetter: StoreResetter
   ) {
+    super(resetter);
     this.renderer = this.rendererFactory.createRenderer(null, null);
   }
 
-  /**
-   * Gotta subscribe to this to activate the chain of logic that fills the store etc.
-   */
-  public activateStore(
-    chats: Observable<{ [chatID: string]: Chat }>,
-    hasNoChats: Observable<boolean>
-  ): Observable<any> {
+  protected systemsToActivate(): Observable<any> {
     return combineLatest([
-      this.activateHolderFillingLogic(chats),
-      this.activateReadinessListener(chats, hasNoChats),
-    ]).pipe(
-      // tap(() => console.log("activating chatboard pictures store")),
-      share()
-    );
+      this.activateHolderFillingLogic(this.chatboardStore.allChats$),
+      this.activateReadinessListener(
+        this.chatboardStore.allChats$,
+        this.chatboardStore.hasNoChats$
+      ),
+    ]);
+  }
+
+  protected resetStore(): void {
+    this.isReady.next(false);
+    this.holder.next({});
+
+    console.log("chatboard-pictures store reset.");
   }
 
   public storeInLocal(

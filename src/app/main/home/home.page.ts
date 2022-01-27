@@ -59,6 +59,7 @@ import {
   FishSwimAnimation,
 } from "@animations/index";
 import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
+import { StoreResetter } from "@services/global-state-management/store-resetter.service";
 
 @Component({
   selector: "app-home",
@@ -172,13 +173,11 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     private afFunctions: AngularFireFunctions,
 
     private swipeStackStore: SwipeStackStore,
-    private swipeOutcomeStore: SwipeOutcomeStore,
     private ownPicturesService: OwnPicturesStore,
     private chatboardStore: ChatboardStore,
 
     private loadingAlertManager: LoadingAndAlertManager,
     private errorHandler: GlobalErrorHandler,
-    private tabElementRef: TabElementRefService,
     private storeReadiness: StoreReadinessService,
     private tutorials: TutorialsService,
     private swipeCap: SwipeCapService
@@ -205,7 +204,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
 
   // For development, to avoid fetching the stack on each reload / document save
   activateSwipeStack() {
-    this.subs.add(this.swipeStackStore.activateStore$.subscribe());
+    this.subs.add(this.swipeStackStore.activate$.subscribe());
   }
 
   async showSearchCriteria(): Promise<void> {

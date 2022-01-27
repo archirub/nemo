@@ -22,6 +22,7 @@ import {
   first,
   tap,
   switchMap,
+  mapTo,
 } from "rxjs/operators";
 import { cloneDeep, isEqual } from "lodash";
 
@@ -33,12 +34,13 @@ import {
   chatFromDatabase,
   messageFromDatabase,
   messageMap,
-  CHECK_AUTH_STATE,
   CustomError,
 } from "@interfaces/index";
 import { FirebaseUser } from "@interfaces/firebase.model";
 
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
+import { StoreResetter } from "@services/global-state-management/store-resetter.service";
+import { AbstractStoreService } from "@interfaces/stores.model";
 
 // the store has this weird shape because of the Firestore's onSnapshot function which
 // takes an observer instead of simply being an observable. Because of that, I need
@@ -62,7 +64,7 @@ interface chatNatureMap {
 @Injectable({
   providedIn: "root",
 })
-export class ChatboardStore {
+export class ChatboardStore extends AbstractStoreService {
   // object containing the listeners for recent messages.
   // has to be done with multiple listeners instead of one (like for the chat docs) as
   // firebase doesn't allow us to do it in one listener
@@ -104,18 +106,35 @@ export class ChatboardStore {
     private afFunctions: AngularFireFunctions,
 
     private errorHandler: GlobalErrorHandler,
-    private format: FormatService
-  ) {}
+    private format: FormatService,
+    protected resetter: StoreResetter
+  ) {
+    // format that enables passing methods from child to parent
+    super(resetter);
+  }
 
-  public activateStore$ = this.activateStore();
-
-  private activateStore() {
+  protected systemsToActivate() {
     return combineLatest([
       this.activateChatDocsListening(),
       this.activateRecentMessageListening(),
       this.activateRecentMessagePreprocessing(),
       this.activateMsgAndChatDocumentsProcessing(),
-    ]).pipe(share());
+    ]);
+  }
+
+  protected resetStore() {
+    this.chatDocsSub ? this.chatDocsSub() : null;
+
+    Object.keys(this.recentMsgDocSubs).forEach((recipientID) => {
+      const sub = this.recentMsgDocSubs[recipientID];
+      sub ? sub() : null;
+    });
+
+    this.allChats.next({});
+    this.chatsFromDatabase.next([]);
+    this.recentMsgsFromDatabase.next({});
+
+    console.log("Chat-board store reset.");
   }
 
   private activateChatDocsListening(): Observable<any> {
@@ -333,15 +352,5 @@ export class ChatboardStore {
         return theChatID;
       })
     );
-  }
-
-  public resetStore() {
-    console.log("resetting chatboard store", this.chatDocsSub);
-    this.chatDocsSub ? this.chatDocsSub() : null;
-
-    Object.keys(this.recentMsgDocSubs).forEach((recipientID) => {
-      const sub = this.recentMsgDocSubs[recipientID];
-      sub ? sub() : null;
-    });
   }
 }

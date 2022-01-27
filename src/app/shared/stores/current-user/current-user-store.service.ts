@@ -9,12 +9,22 @@ import {
   filter,
   first,
   map,
+  mapTo,
+  share,
   shareReplay,
   switchMap,
   take,
   tap,
 } from "rxjs/operators";
-import { BehaviorSubject, firstValueFrom, forkJoin, from, Observable, of } from "rxjs";
+import {
+  BehaviorSubject,
+  combineLatest,
+  firstValueFrom,
+  forkJoin,
+  from,
+  Observable,
+  of,
+} from "rxjs";
 import { cloneDeep, isEqual } from "lodash";
 
 import { FormatService } from "@services/format/format.service";
@@ -32,16 +42,15 @@ import {
 
 import { Gender, SexualPreference } from "./../../interfaces/match-data.model";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
+import { StoreResetter } from "@services/global-state-management/store-resetter.service";
+import { AbstractStoreService } from "@interfaces/stores.model";
 
 @Injectable({
   providedIn: "root",
 })
-export class CurrentUserStore {
+export class CurrentUserStore extends AbstractStoreService {
   private user: BehaviorSubject<AppUser> = new BehaviorSubject<AppUser>(null);
-
   public user$: Observable<AppUser> = this.user.asObservable();
-
-  public fillStore$ = this.getFillStore();
 
   public isReady$ = this.user$.pipe(
     map((user) => user instanceof AppUser),
@@ -54,13 +63,24 @@ export class CurrentUserStore {
     private afStorage: AngularFireStorage,
 
     private format: FormatService,
-    private errorHandler: GlobalErrorHandler
+    private errorHandler: GlobalErrorHandler,
+    protected resetter: StoreResetter
   ) {
-    this.user.subscribe((a) => console.log("USER FROM CURRENTUSERSTORE:", a));
+    super(resetter);
+  }
+
+  protected systemsToActivate() {
+    return this.fillStore();
+  }
+
+  protected resetStore() {
+    this.user.next(null);
+
+    console.log("current user store reset.");
   }
 
   /** Fetches info from database to update the User BehaviorSubject */
-  private getFillStore() {
+  private fillStore() {
     return this.errorHandler.getCurrentUser$().pipe(
       first(),
       switchMap((user) => {
@@ -274,9 +294,5 @@ export class CurrentUserStore {
         this.errorHandler.convertErrors("cloud-functions"),
         this.errorHandler.handleErrors()
       );
-  }
-
-  public resetStore() {
-    this.user.next(null);
   }
 }
