@@ -59,15 +59,7 @@ export class ChatsPage implements OnDestroy {
   constructor(
     private chatboardStore: ChatboardStore,
     private tutorials: TutorialsService
-  ) {
-    // this.chatboardStore.recentMsgToBeProcessed.subscribe((a) =>
-    //   console.log("recentMsgToBeProcessed", a)
-    // );
-    // this.chatboardStore.recentMsgsFromDatabase.subscribe((a) =>
-    //   console.log("recentMsgsFromDatabase", a)
-    // );
-    this.chatboardStore.allChats$.subscribe((a) => console.log("allChats", a));
-  }
+  ) {}
 
   ngAfterViewInit() {
     this.subs.add(this.playLoadingAnimation$.subscribe());

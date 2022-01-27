@@ -20,6 +20,8 @@ import {
 import { Base64ToUrl, urlToBase64 } from "../common-pictures-functions";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 import { CustomError } from "@interfaces/error-handling.model";
+import { AbstractStoreService } from "@interfaces/stores.model";
+import { StoreResetter } from "@services/global-state-management/store-resetter.service";
 
 interface picturesMap {
   [position: number]: string;
@@ -32,7 +34,7 @@ interface ownPicturesStorage {
 @Injectable({
   providedIn: "root",
 })
-export class OwnPicturesStore {
+export class OwnPicturesStore extends AbstractStoreService {
   private localStorageKey: string = "own_pictures";
   private MAX_STORAGE_TIME: number = 2 * 24 * 3600; // = 2 days in ms, completely arbitrary
 
@@ -45,19 +47,19 @@ export class OwnPicturesStore {
 
   constructor(
     private afStorage: AngularFireStorage,
-    private errorHandler: GlobalErrorHandler
-  ) {}
+    private errorHandler: GlobalErrorHandler,
+    protected resetter: StoreResetter
+  ) {
+    super(resetter);
+  }
 
-  public activateStore$ = this.activateStore();
-
-  /**
-   * Subscribe to this method to activate the logic that manages the store
-   */
-  private activateStore(): Observable<any> {
-    return combineLatest([this.fillStore(), this.activateLocalStorer()]).pipe(
-      // tap(() => console.log("activating own pictures store")),
-      share()
-    );
+  protected systemsToActivate(): Observable<any> {
+    return combineLatest([this.fillStore(), this.activateLocalStorer()]);
+  }
+  protected resetStore(): void {
+    this.isReady.next(false);
+    this.urls.next([]);
+    console.log("own-pictures store reset.");
   }
 
   updatePictures(newPicturesArray: string[]) {

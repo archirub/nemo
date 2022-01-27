@@ -153,7 +153,7 @@ export class SignupService {
           if (!user) throw new CustomError("local/check-auth-state", "local");
         }),
         first(),
-        concatMapTo(concat(this.removeLocalStorage(), this.currentUserStore.fillStore$)),
+        concatMapTo(concat(this.removeLocalStorage(), this.currentUserStore.activate$)),
         this.errorHandler.handleErrors()
       )
     );
