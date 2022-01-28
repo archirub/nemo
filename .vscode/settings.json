@@ -1,6 +1,7 @@
 {
     "eslint.lintTask.enable": true,
     "cSpell.words": [
+        "chatboard",
         "firestore",
         "Millis",
         "Nemo",

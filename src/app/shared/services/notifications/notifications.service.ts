@@ -1,5 +1,4 @@
 import { Injectable } from "@angular/core";
-import { AngularFireAuth } from "@angular/fire/auth";
 import { AngularFirestore } from "@angular/fire/firestore";
 
 import { Capacitor } from "@capacitor/core";
@@ -35,11 +34,7 @@ export class NotificationsService {
 
   activate$ = this.activate().pipe(share());
 
-  constructor(
-    private afAuth: AngularFireAuth,
-    private fs: AngularFirestore,
-    private errorHandler: GlobalErrorHandler
-  ) {}
+  constructor(private fs: AngularFirestore, private errorHandler: GlobalErrorHandler) {}
 
   private activate() {
     const isPushNotificationsAvailable = Capacitor.isPluginAvailable("PushNotifications");
@@ -101,22 +96,20 @@ export class NotificationsService {
   private handleTokenStorage() {
     return this.token$.pipe(
       filter((t) => !!t?.value),
-      withLatestFrom(
-        this.afAuth.user.pipe(
-          tap((u) => {
-            if (!u) throw new CustomError("local/check-auth-state", "local");
-          })
-        )
-      ),
+      withLatestFrom(this.errorHandler.getCurrentUser$()),
       switchMap(([token, user]) =>
-        this.fs
-          .collection("profiles")
-          .doc(user.uid)
-          .collection("private")
-          .doc("notifications")
-          .set({ tokens: FieldValue.arrayUnion(token.value) })
-      ),
-      this.errorHandler.handleErrors()
+        defer(() =>
+          this.fs
+            .collection("profiles")
+            .doc(user.uid)
+            .collection("private")
+            .doc("notifications")
+            .set({ tokens: FieldValue.arrayUnion(token.value) })
+        ).pipe(
+          this.errorHandler.convertErrors("firestore"),
+          this.errorHandler.handleErrors()
+        )
+      )
     );
   }
 }

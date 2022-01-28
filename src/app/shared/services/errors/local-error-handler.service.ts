@@ -1,10 +1,8 @@
 import { Injectable } from "@angular/core";
 
-import { Observable, catchError, concatMapTo, defer } from "rxjs";
+import { Observable, catchError, concatMapTo, defer, firstValueFrom, tap } from "rxjs";
 
 import { CommonErrorFunctions } from "./common-error-functions";
-
-import { FirebaseAuthService } from "@services/firebase-auth/firebase-auth.service";
 
 import {
   CANNOT_RECOVER,
@@ -14,6 +12,8 @@ import {
   LocalErrorCode,
   TRY_AGAIN,
 } from "@interfaces/index";
+import { FirebaseLogoutService } from "@services/firebase-auth/firebase-logout.service";
+import { AngularFireAuth } from "@angular/fire/auth";
 
 @Injectable({
   providedIn: "root",
@@ -21,7 +21,8 @@ import {
 export class LocalErrorHandler implements CustomErrorHandler<"local", LocalErrorCode> {
   constructor(
     private errFunctions: CommonErrorFunctions,
-    private firebaseAuth: FirebaseAuthService
+    private firebaseLogout: FirebaseLogoutService,
+    private afAuth: AngularFireAuth
   ) {}
   errorType = "local" as const;
   errorCodes = {
@@ -42,6 +43,23 @@ export class LocalErrorHandler implements CustomErrorHandler<"local", LocalError
       );
   }
 
+  // this function provides a way to obtain the current user with error handling attached to it
+  // (import it from global error handler, only import from here if important from global
+  // leads to circular dependency)
+  getCurrentUser$(): Observable<firebase.default.User> {
+    return this.afAuth.user.pipe(
+      tap((user) => {
+        if (!user) throw new CustomError("local/check-auth-state", "local");
+      }),
+      this.handleErrors()
+    );
+  }
+
+  // promise version
+  getCurrentUser(): Promise<firebase.default.User> {
+    return firstValueFrom(this.getCurrentUser$());
+  }
+
   private handleRetry<T>() {
     const errorMatches = (err: CustomError) =>
       this.errorMatches(err, this.errorCodes.retry as any);
@@ -56,7 +74,7 @@ export class LocalErrorHandler implements CustomErrorHandler<"local", LocalError
     const lastRetryTask$ = (err: CustomError) =>
       this.errFunctions
         .presentErrorMessage(err.text)
-        .pipe(concatMapTo(defer(() => this.firebaseAuth.logOut())));
+        .pipe(concatMapTo(defer(() => this.firebaseLogout.logOut())));
 
     return this.errFunctions.customRetryWhen<T>(errorMatches, 4, lastRetryTask$);
   }

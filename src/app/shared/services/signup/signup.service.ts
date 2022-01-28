@@ -38,7 +38,7 @@ export class SignupService {
   signupData$ = new BehaviorSubject<SignupDataHolder>(new SignupDataHolder({}));
 
   /**
-   * null indicates that the authentification hasn't be done, in other words,
+   * null indicates that the authentication hasn't be done, in other words,
    * that the signup process hasn't been initialized.
    */
   get signupStage(): null | "required" | "optional" {
@@ -153,7 +153,7 @@ export class SignupService {
           if (!user) throw new CustomError("local/check-auth-state", "local");
         }),
         first(),
-        concatMapTo(concat(this.removeLocalStorage(), this.currentUserStore.fillStore$)),
+        concatMapTo(concat(this.removeLocalStorage(), this.currentUserStore.activate$)),
         this.errorHandler.handleErrors()
       )
     );
@@ -164,7 +164,7 @@ export class SignupService {
    * redirects to the correct signup stage
    */
   async checkAndRedirect() {
-    const user = await this.errorHandler.getCurrentUserWithErrorHandling();
+    const user = await this.errorHandler.getCurrentUser();
 
     if (!user) {
       return this.router.navigateByUrl("welcome/signupauth");

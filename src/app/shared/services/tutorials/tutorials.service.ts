@@ -1,5 +1,4 @@
 import { Injectable } from "@angular/core";
-import { AngularFireAuth } from "@angular/fire/auth";
 import { AngularFirestore } from "@angular/fire/firestore";
 
 import { cloneDeep } from "lodash";
@@ -25,7 +24,6 @@ import { CurrentUserStore } from "@stores/index";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 
 import { HasSeenTutorial, privateProfileFromDatabase } from "@interfaces/profile.model";
-import { CustomError } from "@interfaces/error-handling.model";
 @Injectable({
   providedIn: "root",
 })
@@ -48,7 +46,6 @@ export class TutorialsService {
   }
 
   constructor(
-    private afAuth: AngularFireAuth,
     private fs: AngularFirestore,
     private appUser: CurrentUserStore,
     private errorHandler: GlobalErrorHandler
@@ -80,11 +77,7 @@ export class TutorialsService {
   }
 
   private manageStoringOnDatabase() {
-    const authUser$ = this.afAuth.user.pipe(
-      tap((u) => {
-        if (!u) throw new CustomError("local/check-auth-state", "local");
-      })
-    );
+    const authUser$ = this.errorHandler.getCurrentUser$();
 
     const updateOnDatabase$ = (uid: string, hst: HasSeenTutorial) =>
       defer(() =>

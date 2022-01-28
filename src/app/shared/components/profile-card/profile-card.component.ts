@@ -14,7 +14,6 @@ import {
   ViewChildren,
 } from "@angular/core";
 import { IonSlides } from "@ionic/angular";
-import { AngularFireAuth } from "@angular/fire/auth";
 
 import {
   BehaviorSubject,
@@ -146,7 +145,6 @@ export class ProfileCardComponent implements OnInit, AfterViewInit, OnDestroy {
 
   constructor(
     private renderer: Renderer2,
-    private afAuth: AngularFireAuth,
     private errorHandler: GlobalErrorHandler,
     private userReporting: UserReportingService
   ) {}
@@ -161,30 +159,14 @@ export class ProfileCardComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   async reportUser() {
-    let userReportedID: string;
-    let userReportedName: string;
-    let userReportedPicture;
-    let userReportingID: string;
-
-    userReportedID = this.profile.uid;
-    userReportedName = this.profile.firstName;
-
-    this.profilePictures$.subscribe((res) => {
-      userReportedPicture = res[0];
-    });
-
-    const getReportingInfo = firstValueFrom(
-      this.afAuth.user.pipe(
-        tap((user) => {
-          if (!user) throw new CustomError("local/check-auth-state", "local");
-        }),
-        first(),
-        map((user) => (userReportingID = user.uid)),
-        this.errorHandler.handleErrors()
-      )
+    const userReportedID = this.profile.uid;
+    const userReportedName = this.profile.firstName;
+    const userReportedPicture = await firstValueFrom(
+      this.profilePictures$.pipe(map((pp) => pp[0]))
     );
 
-    await Promise.all([getReportingInfo]);
+    const userReporting = await this.errorHandler.getCurrentUser();
+    const userReportingID = userReporting.uid;
 
     if (!userReportedID || !userReportingID || !userReportedName) return;
 

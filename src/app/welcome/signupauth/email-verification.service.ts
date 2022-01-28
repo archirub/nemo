@@ -46,7 +46,7 @@ export class EmailVerificationService {
   ) {}
 
   public listenForVerification(intervalBetweenChecks = 2000): Observable<void> {
-    return this.afAuth.user.pipe(
+    return this.errorHandler.getCurrentUser$().pipe(
       tap((user) => {
         if (!user) throw new CustomError("local/check-auth-state", "local");
       }),
@@ -76,7 +76,7 @@ export class EmailVerificationService {
    * select state = "resent" if we are resending
    */
   public sendVerificationToUser(state: "sent" | "resent"): Observable<void> {
-    return this.afAuth.user.pipe(
+    return this.errorHandler.getCurrentUser$().pipe(
       tap((user) => {
         if (!user) throw new CustomError("local/check-auth-state", "local");
       }),

@@ -35,7 +35,7 @@ import {
   startWith,
   share,
 } from "rxjs/operators";
-import { isEqual, isEqualWith } from "lodash";
+import { cloneDeep, isEqual, isEqualWith } from "lodash";
 import Sortable, { Options as SortableOptions } from "sortablejs";
 
 import { ProfileCardComponent } from "@components/index";
@@ -129,7 +129,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     map((urls) => this.updateProfilePictures(urls))
   );
 
-  dataFillingHandler$ = combineLatest([
+  dataFilledChecker$ = combineLatest([
     this.fillUserFromStoreHandler$,
     this.fillPicturesFromStoreHandler$,
   ]).pipe(
@@ -179,7 +179,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
   getPageIsReady() {
     return combineLatest([
       this.viewIsReady$,
-      this.dataFillingHandler$,
+      this.dataFilledChecker$,
       this.storeReadiness.ownProfile$,
     ]).pipe(
       map(([a, b, c]) => !!a && !!b && !!c),
@@ -213,8 +213,11 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     private tutorials: TutorialsService
   ) {}
 
+  // DEV
+  logger = (name) => (log) => console.log(name, ": ", log);
+
   ngOnInit() {
-    this.subs.add(this.dataFillingHandler$.subscribe());
+    this.editingInProgress$.subscribe(this.logger("editingInProgress$"));
   }
 
   ngAfterViewInit() {
@@ -313,7 +316,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
 
   updateEditableFields(data: AppUser | Profile | editableProfileFields): void {
     Object.keys(this.editableFields).forEach((field) => {
-      if (!data?.[field]) return;
+      if (!data?.hasOwnProperty(field)) return;
 
       this.editableFields[field] =
         typeof data[field] === "object"
@@ -323,7 +326,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
   }
 
   // takes a User object and returns an editableProfileFields object with the User object's values
-  userToEditableFields(user: AppUser): editableProfileFields {
+  convertUserToEditable(user: AppUser): editableProfileFields {
     const fields = this.emptyEditableFields;
 
     Object.keys(fields).forEach((field) => {
@@ -342,6 +345,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
   onPicturePicked($event: { photoUrl: string; index: number }) {
     return firstValueFrom(
       this.profilePicturesWithEmpty$.pipe(
+        take(1),
         map((profilePictures) => {
           profilePictures[$event.index] = $event.photoUrl;
           this.profilePictures.next(profilePictures);
@@ -404,7 +408,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     this.renderer.setStyle(this.bioClose.nativeElement, "display", "none");
   }
 
-  // to make apperance changes when the option of the toggle is changed between edit and view
+  // to make appearance changes when the option of the toggle is changed between edit and view
   async toggleChange(option) {
     const editor = document.getElementById("editing");
     const profile = document.getElementById("profile");
@@ -421,9 +425,9 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
   // watches whether there is a difference between the info the currentUserStore holds
   // and what is shown in the template. Marks editingInProgress as true or false accordingly
   async editingTriggered() {
-    return lastValueFrom(
+    return firstValueFrom(
       this.userFromStore$.pipe(
-        map((user) => this.userToEditableFields(user)),
+        map((user) => this.convertUserToEditable(user)),
         withLatestFrom(this.profilePicturesWithEmpty$, this.ownPicturesService.urls$),
         map(
           ([fieldsInStore, pictures, picturesFromStore]) =>
@@ -500,13 +504,13 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     if (invalidParts.length > 0) return this.presentInvalidPartsMessage(invalidParts);
 
     const loading = await this.loadingAlertManager.createLoading({
-      backdropDismiss: false,
+      backdropDismiss: false, // enforcing
     });
     await this.loadingAlertManager.presentNew(loading, "replace-erase");
 
     await lastValueFrom(
       forkJoin([
-        this.currentUserStore.updateFieldsOnDatabase(this.editableFields),
+        this.currentUserStore.updateFieldsOnDatabase(cloneDeep(this.editableFields)), // deep cloning to prevent interference
         this.ownPicturesService.updatePictures(
           await firstValueFrom(this.profilePicturesWithEmpty$)
         ),
@@ -567,8 +571,6 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
   async addQuestion() {
     if (this.reachedMaxQuestionsCount) return;
 
-    await ToggleAppearAnimation(this.toggleDiv).play();
-
     this.editableFields.questions.push({ question: null, answer: null });
 
     await this.editingTriggered();
@@ -603,7 +605,10 @@ function getUrlFromHTML(element: Element): string | null {
 
 // for comparator function in Lodash's isEqual function in "editingTriggered"
 function nullAndEmptyStrEquiv(value1, value2) {
-  if ((value1 == null || value1 === "") && (value2 == null || value2 === "")) {
+  if (
+    (value1 == null || value1 === "" || isEqual(value1, [])) &&
+    (value2 == null || value2 === "" || isEqual(value2, []))
+  ) {
     return true;
   }
 }

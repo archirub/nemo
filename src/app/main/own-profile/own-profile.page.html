@@ -127,22 +127,22 @@
           ></profile-answer>
 
           <!--ng-container *ngIf="this.answers"-->
-            <div class="noQuestions" *ngIf="editableFields.questions.length < 1">
-              <span>Click the button below to answer some questions!</span>
-            </div>
+          <div class="noQuestions" *ngIf="editableFields?.questions?.length < 1">
+            <span>Click the button below to answer some questions!</span>
+          </div>
 
-            <div *ngIf="!reachedMaxQuestionsCount" class="flexcenter">
-              <ion-icon
-                id="addQuestion"
-                name="add-circle"
-                (click)="addQuestion()"
-              ></ion-icon>
-            </div>
+          <div *ngIf="!reachedMaxQuestionsCount" class="flexcenter">
+            <ion-icon
+              id="addQuestion"
+              name="add-circle"
+              (click)="addQuestion()"
+            ></ion-icon>
+          </div>
 
-            <div class="noQuestions" *ngIf="reachedMaxQuestionsCount">
-              <span>Sorry, there's no space for any more questions!</span>
-            </div>
-          <!--/ng-container-->
+          <div class="noQuestions" *ngIf="reachedMaxQuestionsCount">
+            <span>Sorry, there's no space for any more questions!</span>
+          </div>
+          <!-- /ng-container -->
 
           <h2>My course</h2>
           <profile-course
@@ -177,13 +177,13 @@
             (interestsChange)="editingTriggered()"
             [listed]="false"
           ></interests-slides-->
-          <div class="flexgrid" *ngIf="editableFields?.interests.length > 0">
+          <div class="flexgrid" *ngIf="editableFields?.interests?.length > 0">
             <div class="interest" *ngFor="let interest of editableFields?.interests">
               <img [src]="getPicturePath(interest)" />
             </div>
           </div>
 
-          <h2 class="no-interests" *ngIf="editableFields?.interests.length < 1">
+          <h2 class="no-interests" *ngIf="editableFields?.interests?.length < 1">
             You haven't selected any interests!
           </h2>
 

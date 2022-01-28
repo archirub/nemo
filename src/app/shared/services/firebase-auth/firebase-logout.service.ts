@@ -4,7 +4,7 @@ import { AngularFireAuth } from "@angular/fire/auth";
 
 import { Storage } from "@capacitor/storage";
 
-import { EmptyStoresService } from "@services/global-state-management/empty-stores.service";
+import { StoreResetter } from "@services/global-state-management/store-resetter.service";
 import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
 
 // this functionality was moved to a different service to solve some dependency issues between
@@ -22,7 +22,7 @@ export class FirebaseLogoutService {
     private afAuth: AngularFireAuth,
 
     private loadingAlertManager: LoadingAndAlertManager,
-    private emptyStoresService: EmptyStoresService
+    private storeResetter: StoreResetter
   ) {}
 
   public async logOut() {
@@ -32,7 +32,7 @@ export class FirebaseLogoutService {
     // back at the welcome page (it seems like it's then not active), which cases problem for example
     // while trying to log back in where the "log in" button doesn't get enabled when the email-password form becomes valid
     const clearLocalCache = () => Storage.clear();
-    const clearStores = async () => this.emptyStoresService.emptyStores();
+    const clearStores = async () => this.storeResetter.resetStores();
     const logOut = () => this.afAuth.signOut();
 
     const duringLoadingPromise = () =>

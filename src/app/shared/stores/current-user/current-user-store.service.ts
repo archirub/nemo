@@ -1,6 +1,5 @@
 import { AngularFireFunctions } from "@angular/fire/functions";
 import { Injectable } from "@angular/core";
-import { AngularFireAuth } from "@angular/fire/auth";
 import { AngularFirestore } from "@angular/fire/firestore";
 import { AngularFireStorage } from "@angular/fire/storage";
 
@@ -10,13 +9,23 @@ import {
   filter,
   first,
   map,
+  mapTo,
+  share,
   shareReplay,
   switchMap,
   take,
   tap,
 } from "rxjs/operators";
-import { BehaviorSubject, firstValueFrom, forkJoin, from, Observable, of } from "rxjs";
-import { isEqual } from "lodash";
+import {
+  BehaviorSubject,
+  combineLatest,
+  firstValueFrom,
+  forkJoin,
+  from,
+  Observable,
+  of,
+} from "rxjs";
+import { cloneDeep, isEqual } from "lodash";
 
 import { FormatService } from "@services/format/format.service";
 
@@ -33,16 +42,15 @@ import {
 
 import { Gender, SexualPreference } from "./../../interfaces/match-data.model";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
+import { StoreResetter } from "@services/global-state-management/store-resetter.service";
+import { AbstractStoreService } from "@interfaces/stores.model";
 
 @Injectable({
   providedIn: "root",
 })
-export class CurrentUserStore {
+export class CurrentUserStore extends AbstractStoreService {
   private user: BehaviorSubject<AppUser> = new BehaviorSubject<AppUser>(null);
-
   public user$: Observable<AppUser> = this.user.asObservable();
-
-  public fillStore$ = this.getFillStore();
 
   public isReady$ = this.user$.pipe(
     map((user) => user instanceof AppUser),
@@ -50,21 +58,30 @@ export class CurrentUserStore {
   );
 
   constructor(
-    private afAuth: AngularFireAuth,
     private fs: AngularFirestore,
     private afFunctions: AngularFireFunctions,
     private afStorage: AngularFireStorage,
 
     private format: FormatService,
-    private errorHandler: GlobalErrorHandler
-  ) {}
+    private errorHandler: GlobalErrorHandler,
+    protected resetter: StoreResetter
+  ) {
+    super(resetter);
+  }
+
+  protected systemsToActivate() {
+    return this.fillStore();
+  }
+
+  protected resetStore() {
+    this.user.next(null);
+
+    console.log("current user store reset.");
+  }
 
   /** Fetches info from database to update the User BehaviorSubject */
-  private getFillStore() {
-    return this.afAuth.user.pipe(
-      tap((user) => {
-        if (!user) throw new CustomError("local/check-auth-state", "local");
-      }),
+  private fillStore() {
+    return this.errorHandler.getCurrentUser$().pipe(
       first(),
       switchMap((user) => {
         const profileParts$ = [
@@ -105,7 +122,7 @@ export class CurrentUserStore {
           profile?.uid,
           profile?.firstName,
           profile?.dateOfBirth,
-          profile?.pictureUrls,
+          profile?.pictureUrls ?? [],
           profile?.pictureCount,
           profile?.biography,
           profile?.university,
@@ -113,10 +130,10 @@ export class CurrentUserStore {
           profile?.society,
           profile?.societyCategory,
           profile?.areaOfStudy,
-          profile?.interests,
-          profile?.questions,
+          profile?.interests ?? [], // important that it defaults to an array instead of null (own-profile / interests component)
+          profile?.questions ?? [], // important that it defaults to an array instead of null (own-profile)
           profile?.degree,
-          profile?.socialMediaLinks,
+          profile?.socialMediaLinks ?? [],
           privateProfile?.settings,
           latestSearchCriteria ?? {},
           privateProfile?.hasSeenTutorial ?? {
@@ -176,10 +193,9 @@ export class CurrentUserStore {
           .pipe(
             map(() => {
               Object.keys(editableFields).forEach((field) => {
-                user[field] = JSON.parse(JSON.stringify(editableFields[field]));
-
-                this.user.next(user);
+                user[field] = editableFields[field];
               });
+              this.user.next(user);
             }),
             this.errorHandler.convertErrors("cloud-functions"),
             this.errorHandler.handleErrors()
@@ -278,9 +294,5 @@ export class CurrentUserStore {
         this.errorHandler.convertErrors("cloud-functions"),
         this.errorHandler.handleErrors()
       );
-  }
-
-  public resetStore() {
-    this.user.next(null);
   }
 }

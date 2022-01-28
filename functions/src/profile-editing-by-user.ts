@@ -50,7 +50,7 @@ export const profileEditingByUser = functions
 
       const batch = admin.firestore().batch();
 
-      batch.update(profileRef, sanitizedRequest);
+      batch.update(profileRef, sanitizedRequest.data);
 
       mdUpdateNeeded = matchDataUpdateNeeded(
         sanitizedRequest.data,

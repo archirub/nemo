@@ -1,8 +1,9 @@
 import { Injectable } from "@angular/core";
 
-import { catchError, concatMapTo, defer, mapTo, Observable } from "rxjs";
+import { catchError, concatMapTo, defer, Observable } from "rxjs";
 
-import { FirebaseAuthService } from "@services/firebase-auth/firebase-auth.service";
+import { FirebaseLogoutService } from "@services/firebase-auth/firebase-logout.service";
+
 import { CommonErrorFunctions } from "./common-error-functions";
 
 import { FirestoreErrorCodes } from "./firestore-error-handler.service";
@@ -51,7 +52,7 @@ export class CloudFunctionsErrorHandler
 
   constructor(
     private errFunctions: CommonErrorFunctions,
-    private firebaseAuth: FirebaseAuthService
+    private firebaseLogout: FirebaseLogoutService
   ) {}
 
   errorConverter<T>() {
@@ -99,7 +100,7 @@ export class CloudFunctionsErrorHandler
     const lastRetryTask$ = (err: CustomError) =>
       this.errFunctions
         .presentErrorMessage(this.getErrorText(err?.code as FirestoreCode))
-        .pipe(concatMapTo(defer(() => this.firebaseAuth.logOut())));
+        .pipe(concatMapTo(defer(() => this.firebaseLogout.logOut())));
 
     return this.errFunctions.customRetryWhen<T>(errorMatches, 4, lastRetryTask$);
   }

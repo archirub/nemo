@@ -1,7 +1,6 @@
 import { isEqual } from "lodash";
 import { Injectable } from "@angular/core";
 import { AngularFireStorage } from "@angular/fire/storage";
-import { AngularFireAuth } from "@angular/fire/auth";
 import { Storage } from "@capacitor/storage";
 
 import { BehaviorSubject, combineLatest, forkJoin, from, Observable, of } from "rxjs";
@@ -21,6 +20,8 @@ import {
 import { Base64ToUrl, urlToBase64 } from "../common-pictures-functions";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 import { CustomError } from "@interfaces/error-handling.model";
+import { AbstractStoreService } from "@interfaces/stores.model";
+import { StoreResetter } from "@services/global-state-management/store-resetter.service";
 
 interface picturesMap {
   [position: number]: string;
@@ -33,7 +34,7 @@ interface ownPicturesStorage {
 @Injectable({
   providedIn: "root",
 })
-export class OwnPicturesStore {
+export class OwnPicturesStore extends AbstractStoreService {
   private localStorageKey: string = "own_pictures";
   private MAX_STORAGE_TIME: number = 2 * 24 * 3600; // = 2 days in ms, completely arbitrary
 
@@ -46,20 +47,19 @@ export class OwnPicturesStore {
 
   constructor(
     private afStorage: AngularFireStorage,
-    private afAuth: AngularFireAuth,
-    private errorHandler: GlobalErrorHandler
-  ) {}
+    private errorHandler: GlobalErrorHandler,
+    protected resetter: StoreResetter
+  ) {
+    super(resetter);
+  }
 
-  public activateStore$ = this.activateStore();
-
-  /**
-   * Subscribe to this method to activate the logic that manages the store
-   */
-  private activateStore(): Observable<any> {
-    return combineLatest([this.fillStore(), this.activateLocalStorer()]).pipe(
-      // tap(() => console.log("activating own pictures store")),
-      share()
-    );
+  protected systemsToActivate(): Observable<any> {
+    return combineLatest([this.fillStore(), this.activateLocalStorer()]);
+  }
+  protected resetStore(): void {
+    this.isReady.next(false);
+    this.urls.next([]);
+    console.log("own-pictures store reset.");
   }
 
   updatePictures(newPicturesArray: string[]) {
@@ -184,7 +184,7 @@ export class OwnPicturesStore {
   }
 
   private nextFromFirebase(): Observable<string[]> {
-    const uid$: Observable<string> = this.afAuth.user.pipe(
+    const uid$: Observable<string> = this.errorHandler.getCurrentUser$().pipe(
       tap((user) => {
         if (!user) throw new CustomError("local/check-auth-state", "local");
       }),
@@ -220,7 +220,7 @@ export class OwnPicturesStore {
   }
 
   private removePictureInDatabase(index: number): Observable<void> {
-    return this.afAuth.user.pipe(
+    return this.errorHandler.getCurrentUser$().pipe(
       first(),
       switchMap((user) => {
         if (!user) throw new CustomError("local/check-auth-state", "local");
@@ -235,7 +235,7 @@ export class OwnPicturesStore {
   }
 
   private updatePictureInDatabase(photoUrl: string, index: number): Observable<void> {
-    return this.afAuth.user.pipe(
+    return this.errorHandler.getCurrentUser$().pipe(
       first(),
       switchMap(async (user) => {
         if (!user) throw new CustomError("local/check-auth-state", "local");

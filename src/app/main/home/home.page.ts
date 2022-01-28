@@ -41,7 +41,12 @@ import { GlobalErrorHandler } from "@services/errors/global-error-handler.servic
 import { TutorialsService } from "@services/tutorials/tutorials.service";
 import { SwipeCapService } from "@stores/swipe-stack/swipe-cap.service";
 
-import { ChatboardStore, SwipeOutcomeStore, SwipeStackStore } from "@stores/index";
+import {
+  ChatboardStore,
+  CurrentUserStore,
+  SwipeOutcomeStore,
+  SwipeStackStore,
+} from "@stores/index";
 import { OwnPicturesStore } from "@stores/pictures/own-pictures/own-pictures.service";
 
 import { Profile } from "@classes/index";
@@ -54,6 +59,7 @@ import {
   FishSwimAnimation,
 } from "@animations/index";
 import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
+import { StoreResetter } from "@services/global-state-management/store-resetter.service";
 
 @Component({
   selector: "app-home",
@@ -167,18 +173,17 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     private afFunctions: AngularFireFunctions,
 
     private swipeStackStore: SwipeStackStore,
-    private swipeOutcomeStore: SwipeOutcomeStore,
     private ownPicturesService: OwnPicturesStore,
     private chatboardStore: ChatboardStore,
 
     private loadingAlertManager: LoadingAndAlertManager,
     private errorHandler: GlobalErrorHandler,
-    private tabElementRef: TabElementRefService,
     private storeReadiness: StoreReadinessService,
     private tutorials: TutorialsService,
     private swipeCap: SwipeCapService
   ) {
     this.onResize();
+    //
   }
 
   ngOnInit() {
@@ -200,7 +205,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
 
   // For development, to avoid fetching the stack on each reload / document save
   activateSwipeStack() {
-    this.subs.add(this.swipeStackStore.activateStore$.subscribe());
+    this.subs.add(this.swipeStackStore.activate$.subscribe());
   }
 
   async showSearchCriteria(): Promise<void> {
@@ -280,7 +285,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
   async goToNewCatchChat() {
     const maxTimeWaitingForChat = 6000; // 6 seconds
 
-    const user = await this.errorHandler.getCurrentUserWithErrorHandling();
+    const user = await this.errorHandler.getCurrentUser();
     if (!user) return;
 
     const loader = await this.loadingAlertManager.createLoading({});

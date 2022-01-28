@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { AngularFireFunctions } from "@angular/fire/functions";
 
-import { BehaviorSubject, concat, merge, Observable } from "rxjs";
+import { BehaviorSubject, concat, EMPTY, merge, Observable } from "rxjs";
 
 import { Profile } from "@classes/index";
 import {
@@ -21,11 +21,14 @@ import {
   tap,
 } from "rxjs/operators";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
+import { AbstractStoreService } from "@interfaces/stores.model";
+import { StoreResetter } from "@services/global-state-management/store-resetter.service";
 
 @Injectable({
   providedIn: "root",
 })
-export class SwipeOutcomeStore {
+export class SwipeOutcomeStore extends AbstractStoreService {
+  public isReady$: Observable<boolean> = null;
   private swipeChoices = new BehaviorSubject<profileChoiceMap[]>([]);
   private swipeAnswers = new BehaviorSubject<uidChoiceMap[]>([]);
 
@@ -34,8 +37,21 @@ export class SwipeOutcomeStore {
 
   constructor(
     private afFunctions: AngularFireFunctions,
-    private errorHandler: GlobalErrorHandler
-  ) {}
+    private errorHandler: GlobalErrorHandler,
+    protected resetter: StoreResetter
+  ) {
+    super(resetter);
+  }
+
+  protected systemsToActivate(): Observable<any> {
+    return EMPTY;
+  }
+
+  protected resetStore() {
+    this.swipeChoices.next([]);
+    this.swipeAnswers.next([]);
+    console.log("swipe-outcome store reset.");
+  }
 
   public yesSwipe(profile: Profile): Observable<void> {
     return this.swipeChoices$.pipe(
@@ -102,6 +118,7 @@ export class SwipeOutcomeStore {
 
   public getChoiceOf(uid: string): Observable<swipeChoice | null> {
     return this.swipeAnswers.pipe(
+      tap((p) => console.log("swipeAnswers: ", p)),
       take(1),
       map((answers) => {
         const index = answers.findIndex((a) => a.uid === uid);
@@ -141,9 +158,4 @@ export class SwipeOutcomeStore {
     }),
     share()
   );
-
-  resetStore() {
-    this.swipeChoices.next([]);
-    this.swipeAnswers.next([]);
-  }
 }
