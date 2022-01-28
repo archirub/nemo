@@ -11,6 +11,7 @@ import {
   ElementRef,
   Output,
   EventEmitter,
+  Renderer2
 } from "@angular/core";
 
 import {
@@ -44,6 +45,7 @@ import {
 } from "rxjs/operators";
 
 import { ProfileCardComponent } from "@components/index";
+import { matchMessages } from "@interfaces/profile.model";
 
 import {
   CurrentUserStore,
@@ -55,7 +57,7 @@ import {
 
 import { Profile, AppUser, SearchCriteria } from "@classes/index";
 import { mdDatingPickingFromDatabase, swipeChoice, piStorage } from "@interfaces/index";
-import { SwipeAnimation, YesBubbleAnimation, NoBubbleAnimation } from "@animations/index";
+import { SwipeAnimation, YesBubbleAnimation, NoBubbleAnimation, OpenCatchAnimation, CloseCatchAnimation } from "@animations/index";
 import {
   AngularFirestore,
   DocumentSnapshot,
@@ -84,10 +86,25 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
   DOUBLE_TAP_THRESHOLD = 800;
   choiceOfLatestTap: swipeChoice = null;
 
+  mainProfilePicture: string;
+  latestMatchedProfile: Profile | null;
+  chosenCatchMsg: string;
+
+
   subs = new Subscription();
 
   @Input() profiles$: Observable<Profile[]>;
+  @Input() homeContainer: ElementRef;
   @Output() matched = new EventEmitter<Profile>();
+
+  // All of these are for showing SC or match animation. Assuming that always happens sufficiently late that these refs can't be undefined
+  //@ViewChild("homeContainer", { read: ElementRef }) homeContainer: ElementRef;
+  @ViewChild("pic1", { read: ElementRef }) pic1: ElementRef;
+  @ViewChild("pic2", { read: ElementRef }) pic2: ElementRef;
+  @ViewChild("catchText", { read: ElementRef }) catchText: ElementRef;
+  @ViewChild("swipeCards", { read: ElementRef }) swipeCards: ElementRef;
+  @ViewChild("backdrop", { read: ElementRef }) backdrop: ElementRef;
+  @ViewChild("catchEls", { read: ElementRef }) catchEls: ElementRef;
 
   @ViewChildren("cards", { read: ElementRef }) cards: QueryList<ElementRef>;
   @ViewChild("yesBubble", { read: ElementRef }) yesBubble: ElementRef;
@@ -127,6 +144,7 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
   );
 
   constructor(
+    private renderer: Renderer2,
     private firestore: AngularFirestore,
 
     private swipeOutcomeStore: SwipeOutcomeStore,
@@ -147,6 +165,7 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
     this.subs.add(this.managePictureSwiping$.subscribe());
     this.subs.add(this.onCardTapLogic().subscribe());
     this.subs.add(this.handleTaps().subscribe());
+    console.log(this.homeContainer);
 
     // DEV
     // this.currentUserStore.user$
@@ -418,7 +437,7 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
         this.swipeOutcomeStore.yesSwipe(p),
       ]);
     // HERE REPLACE WITH THE APPROPRIATE ANIMATION
-    const animateSwipe = SwipeAnimation(midAnimTasks$.bind(this), profile, this.likeEls);
+    const animateSwipe = SwipeAnimation(midAnimTasks$.bind(this), profile, this.catchEls);
 
     const changeText = () => {
       // this.likeText.nativeElement.innerHTML = `You liked ${profile.firstName}!`;
@@ -434,6 +453,70 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
       defer(() => animateSwipe()),
       postAnimTasks$(profile)
     );
+  }
+
+  changeCatchMessage() {
+    this.chosenCatchMsg = matchMessages[Math.floor(Math.random() * matchMessages.length)];
+  }
+
+  async playCatch(matchedProfile: Profile) {
+    const catchItems = document.getElementById("catchEls");
+    const closeButton = document.getElementById("closeAnimation");
+    const messageText = document.getElementById("messageText");
+    const messageText2 = document.getElementById("messageText2");
+
+    this.latestMatchedProfile = matchedProfile;
+    this.changeCatchMessage();
+
+    // own picture styling
+    this.renderer.setStyle(
+      this.pic1.nativeElement,
+      "background",
+      `url(${this.mainProfilePicture})`
+    );
+    this.renderer.setStyle(this.pic1.nativeElement, "backgroundSize", "cover");
+
+    // match's picture styling
+    this.renderer.setStyle(
+      this.pic2.nativeElement,
+      "background",
+      `url(${matchedProfile.pictureUrls[0]})`
+    );
+    this.renderer.setStyle(this.pic2.nativeElement, "backgroundSize", "cover");
+
+    // other stylings
+    this.renderer.setStyle(catchItems, "display", "block");
+    this.renderer.setStyle(closeButton, "display", "block");
+    this.renderer.setStyle(messageText, "display", "flex");
+    this.renderer.setStyle(messageText2, "display", "flex");
+
+    // catch animation
+    return OpenCatchAnimation(
+      this.screenHeight,
+      this.screenWidth,
+      this.pic1,
+      this.pic2,
+      this.catchText,
+      this.backdrop,
+      this.swipeCards
+    ).play();
+  }
+
+  async closeCatch() {
+    const catchItems = document.getElementById("catchEls");
+
+    await CloseCatchAnimation(
+      this.screenHeight,
+      this.screenWidth,
+      this.pic1,
+      this.pic2,
+      this.catchText,
+      this.backdrop,
+      this.swipeCards
+    ).play();
+
+    this.renderer.setStyle(catchItems, "display", "none");
+    this.renderer.setStyle(this.pic2.nativeElement, "background", "black");
   }
 
   // this is for trackBy of ngFor on profiles in template

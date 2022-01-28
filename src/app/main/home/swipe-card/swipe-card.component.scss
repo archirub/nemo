@@ -85,6 +85,7 @@ ion-content {
     text-align: center;
     border-radius: 10px;
     font-size: 3.5vh;
+    margin: 10px auto;
   }
 }
 
@@ -107,6 +108,137 @@ ion-content {
   display: inline-block;
   overflow-y: hidden;
 }
+
+/* 'IT'S A CATCH' animation elements */
+.picholder {
+  top: 5vh;
+  position: absolute;
+  display: none;
+  width: 100px;
+  height: 160px;
+  z-index: 100;
+  border-radius: 10px;
+  background-size: cover;
+
+  &.left {
+    background: red;
+  }
+
+  &.right {
+    background: black;
+  }
+}
+
+.textholder {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  z-index: 100;
+  position: absolute;
+  top: 11vh;
+}
+
+.textholder-2 {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  z-index: 100;
+  position: absolute;
+  top: 21vh;
+}
+
+h1.catchtext {
+  font-family: 'Grand Hotel';
+  font-size: 6vh;
+  color: #FFF
+}
+
+h2.catchtext {
+  text-align: center;
+  font-size: 3.5vh;
+  color: #FFF;
+  width: 70%;
+}
+
+.backdrop {
+  z-index: 99;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  pointer-events: none;
+}
+
+#closeAnimation {
+  color: #FFF;
+  --background: transparent;
+  --background-activated: transparent;
+  position: absolute;
+  font-size: 3.5vh;
+  right: 0vw;
+  top: 2vh;
+  display: none;
+  z-index: 100;
+  box-shadow: none;
+  --box-shadow: none;
+  --ripple-color: transparent;
+}
+
+#messageText {
+  display: none;
+  justify-content: center;
+  width: 100vw;
+  position: absolute;
+  z-index: 102;
+  bottom: 27vh;
+
+  h2 {
+    background: #FFF;
+    padding: 15px;
+    color: #f07167;
+    width: 62%;
+    text-align: center;
+    border-radius: 10px;
+    font-size: 3vh;
+  }
+}
+
+#messageText2 {
+  display: none;
+  justify-content: center;
+  width: 100vw;
+  position: absolute;
+  z-index: 102;
+  bottom: 17vh;
+
+  h2 {
+    background: rgb(253, 216, 176);
+    padding: 15px;
+    color: seagreen;
+    width: 62%;
+    text-align: center;
+    border-radius: 10px;
+    font-size: 3vh;
+  }
+}
+
+
+.fish {
+  display: none;
+  height: 20vh;
+  position: absolute;
+  z-index: 98;
+  top: 60vh;
+}
+
+//This is here to stop click throughs to swipe stack on match event
+#catchEls {
+  display: none;
+  height: 100vh;
+  z-index: 99;
+  position: absolute;
+  width: 100vw;
+}
+
 
 @media only screen and (max-device-height: 650px) {
   .shadow {
