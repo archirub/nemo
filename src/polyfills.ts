@@ -63,3 +63,6 @@ import "zone.js"; // Included with Angular CLI.
 /***************************************************************************************************
  * APPLICATION IMPORTS
  */
+
+// for pinch Gesture of image cropper
+import "hammerjs";

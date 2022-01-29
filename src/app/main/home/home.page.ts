@@ -41,12 +41,7 @@ import { GlobalErrorHandler } from "@services/errors/global-error-handler.servic
 import { TutorialsService } from "@services/tutorials/tutorials.service";
 import { SwipeCapService } from "@stores/swipe-stack/swipe-cap.service";
 
-import {
-  ChatboardStore,
-  CurrentUserStore,
-  SwipeOutcomeStore,
-  SwipeStackStore,
-} from "@stores/index";
+import { ChatboardStore, SwipeStackStore } from "@stores/index";
 import { OwnPicturesStore } from "@stores/pictures/own-pictures/own-pictures.service";
 
 import { Profile } from "@classes/index";
@@ -59,8 +54,6 @@ import {
   FishSwimAnimation,
 } from "@animations/index";
 import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
-import { StoreResetter } from "@services/global-state-management/store-resetter.service";
-
 @Component({
   selector: "app-home",
   templateUrl: "home.page.html",
@@ -179,17 +172,14 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     private loadingAlertManager: LoadingAndAlertManager,
     private errorHandler: GlobalErrorHandler,
     private storeReadiness: StoreReadinessService,
-    private tutorials: TutorialsService,
-    private swipeCap: SwipeCapService
+    private tutorials: TutorialsService
   ) {
     this.onResize();
-    //
   }
 
   ngOnInit() {
     this.subs.add(this.readinessHandler$.subscribe());
     this.subs.add(this.mainProfilePictureGetter$.subscribe());
-    this.swipeCap.swipesLeft$.subscribe((s) => console.log("# of swipes left:", s));
   }
 
   ngAfterViewInit() {

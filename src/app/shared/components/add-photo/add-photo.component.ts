@@ -9,7 +9,10 @@ import {
 } from "@angular/core";
 
 import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
+
 import { Capacitor } from "@capacitor/core";
+import { ImageCropperComponent } from "@components/image-cropper/image-cropper.component";
+import { ModalController, ModalOptions } from "@ionic/angular";
 
 @Component({
   selector: "add-photo",
@@ -53,7 +56,7 @@ export class AddPhotoComponent {
     img.src = src;
   }
 
-  constructor(private renderer: Renderer2) {}
+  constructor(private renderer: Renderer2, private modalCtrl: ModalController) {}
 
   async pickPicture() {
     if (!Capacitor.isPluginAvailable("Camera")) {
@@ -74,7 +77,26 @@ export class AddPhotoComponent {
     const blob = await (await fetch(photo.webPath)).blob();
     const url = URL.createObjectURL(blob);
 
+    const croppedImageURL = await this.presentCropper(url);
+
     // send to parent component
-    this.onPhotoPicked.emit({ photoUrl: url, index: this.photoIndex });
+    this.onPhotoPicked.emit({ photoUrl: croppedImageURL, index: this.photoIndex });
+  }
+
+  async presentCropper(url: string) {
+    const modalOptions: ModalOptions = {
+      component: ImageCropperComponent,
+      componentProps: { imageURL: url }, // sending url to cropper
+    };
+
+    // creating and presenting modal
+    const modal = await this.modalCtrl.create(modalOptions);
+    await modal.present();
+
+    // waiting for the model to be dismissed and obtaining the URL for the cropped image
+    const { data } = await modal.onWillDismiss();
+    const croppedImageURL: string = data.croppedImageURL;
+
+    return croppedImageURL;
   }
 }

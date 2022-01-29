@@ -25,7 +25,12 @@ import { HomeTutorialComponent } from "@components/tutorials/home-tutorial/home-
     DirectivesModule,
     PipesModule,
   ],
-  declarations: [HomePage, SwipeCardComponent, SearchCriteriaComponent, HomeTutorialComponent],
+  declarations: [
+    HomePage,
+    SwipeCardComponent,
+    SearchCriteriaComponent,
+    HomeTutorialComponent,
+  ],
   providers: [SwipeCardComponent],
   // Seems to make sure the search criteria modal opening is much faster on the first try
   bootstrap: [SearchCriteriaComponent],

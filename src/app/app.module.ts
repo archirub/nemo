@@ -22,6 +22,7 @@ import { pageTransition } from "./shared/animations/page-transition.animation";
 import { PipesModule } from "@pipes/pipes.module";
 import { DirectivesModule } from "./shared/directives/directives.module";
 import { SortablejsModule } from "ngx-sortablejs";
+import { ImageCropperModule } from "ngx-image-cropper";
 
 @NgModule({
   declarations: [AppComponent],
@@ -39,6 +40,7 @@ import { SortablejsModule } from "ngx-sortablejs";
     PipesModule,
     DirectivesModule,
     SortablejsModule.forRoot({}),
+    // ImageCropperModule,
   ],
   providers: [
     StatusBar,

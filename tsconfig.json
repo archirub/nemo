@@ -22,7 +22,8 @@
     "target": "es2019",
     "lib": ["es2019", "dom"],
     "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true, // this is for an error that shows up in npm run build from "node_modules/@angular/fire/angularfire2.d.ts." 
   },
   "angularCompilerOptions": {
     "fullTemplateTypeCheck": true,

@@ -1,0 +1,20 @@
+<!-- <input type="file" (change)="fileChangeEvent($event)" /> -->
+<image-cropper
+  [imageChangedEvent]="imageChangedEvent"
+  [imageURL]="imageURL"
+  [maintainAspectRatio]="true"
+  [aspectRatio]="9 / 16"
+  format="png"
+  (imageCropped)="imageCropped($event)"
+  (imageLoaded)="imageLoaded($event)"
+  (cropperReady)="cropperReady()"
+  (loadImageFailed)="loadImageFailed()"
+></image-cropper>
+
+<div style="width: 100px">
+  <img [src]="croppedImage" />
+</div>
+
+<ion-button (click)="dismissCropper()" expand="block" fill="clear" shape="round">
+  Confirm Cropping
+</ion-button>

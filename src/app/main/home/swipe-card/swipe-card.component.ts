@@ -11,7 +11,7 @@ import {
   ElementRef,
   Output,
   EventEmitter,
-  Renderer2
+  Renderer2,
 } from "@angular/core";
 
 import {
@@ -20,6 +20,7 @@ import {
   concat,
   defer,
   EMPTY,
+  firstValueFrom,
   forkJoin,
   from,
   merge,
@@ -57,7 +58,13 @@ import {
 
 import { Profile, AppUser, SearchCriteria } from "@classes/index";
 import { mdDatingPickingFromDatabase, swipeChoice, piStorage } from "@interfaces/index";
-import { SwipeAnimation, YesBubbleAnimation, NoBubbleAnimation, OpenCatchAnimation, CloseCatchAnimation } from "@animations/index";
+import {
+  SwipeAnimation,
+  YesBubbleAnimation,
+  NoBubbleAnimation,
+  OpenCatchAnimation,
+  CloseCatchAnimation,
+} from "@animations/index";
 import {
   AngularFirestore,
   DocumentSnapshot,
@@ -89,7 +96,6 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
   mainProfilePicture: string;
   latestMatchedProfile: Profile | null;
   chosenCatchMsg: string;
-
 
   subs = new Subscription();
 
@@ -457,6 +463,19 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
 
   changeCatchMessage() {
     this.chosenCatchMsg = matchMessages[Math.floor(Math.random() * matchMessages.length)];
+  }
+
+  async CatchAnimation(
+    midAnimTasks$: (p: Profile) => Observable<any>,
+    matchedProfile: Profile
+  ) {
+    // this is wrong, the midAnimTasks should go at the appropriate place within playCatch
+    // then closeCatch should only be played once an action is taken (like continue swiping or go to catch)
+    await this.playCatch(matchedProfile);
+
+    await firstValueFrom(midAnimTasks$(matchedProfile));
+
+    // return this.closeCatch
   }
 
   async playCatch(matchedProfile: Profile) {
