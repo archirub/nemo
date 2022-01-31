@@ -1,4 +1,9 @@
 <!-- <input type="file" (change)="fileChangeEvent($event)" /> -->
+<h1>Crop your photo</h1>
+<h2>Make it look how you want it!</h2>
+
+<div class="separator"></div>
+
 <image-cropper
   [imageChangedEvent]="imageChangedEvent"
   [imageURL]="imageURL"
@@ -11,7 +16,11 @@
   (loadImageFailed)="loadImageFailed()"
 ></image-cropper>
 
-<div style="width: 100px">
+<div class="separator"></div>
+
+<h2>What they'll see</h2>
+
+<div class="shown">
   <img [src]="croppedImage" />
 </div>
 
