@@ -28,6 +28,7 @@
       maxlength="70"
       [ngModel]="questionAndAnswer?.answer"
       (ngModelChange)="onAnswerChange($event)"
+      [ngModelOptions]="{ standalone: true }"
     ></ion-textarea>
   </div>
 </div>

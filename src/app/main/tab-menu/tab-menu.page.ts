@@ -12,6 +12,8 @@ import { combineLatest, filter, map, startWith, Subscription } from "rxjs";
 
 import { TutorialsService } from "@services/tutorials/tutorials.service";
 import { TabElementRefService } from "./tab-element-ref.service";
+import { ChatboardStore } from "@stores/index";
+import { Chat } from "@classes/chat.class";
 
 @Component({
   selector: "app-tab-menu",
@@ -26,6 +28,21 @@ export class TabMenuPage implements OnDestroy {
 
   // template emits to this when tabs change
   tabChanged$ = new EventEmitter<any>();
+
+  unreadChats: Chat[];
+  matches: Chat[];
+
+  chats$ = this.chatboardStore.chats$.pipe(
+    map((chatsObject) => {
+      this.unreadChats = this.sortUnreadChats(chatsObject)
+    })
+  );
+
+  matches$ = this.chatboardStore.matches$.pipe(
+    map((chatsObject) => {
+      this.matches = Array.from(Object.values(chatsObject))
+    })
+  );
 
   // subscribed in template to show/hide tabs
   showTab$ = combineLatest([this.tabChanged$, this.tutorials.hasSeenTutorial$]).pipe(
@@ -55,9 +72,26 @@ export class TabMenuPage implements OnDestroy {
   constructor(
     private renderer: Renderer2,
     private tutorials: TutorialsService,
-    private tabElementRef: TabElementRefService
+    private tabElementRef: TabElementRefService,
+    private chatboardStore: ChatboardStore
   ) {
     this.subs.add(this.manageIconColoring$.subscribe());
+  }
+
+  /** Build array of chats that are unread (last message not from current user)
+   * 1. unwrap chats sub object
+   * 2. filter for last sender ID not being recipient ID
+   **/
+  private sortUnreadChats(chats: { [chatID: string]: Chat }): Chat[] {
+    let incomingChats = Array.from(Object.values(chats));
+    let unreadChats = incomingChats.filter(c => c.recentMessage?.senderID === c.recipient?.uid);
+
+    return unreadChats;
+  }
+
+  ngOnInit() {
+    this.subs.add(this.chats$.subscribe());
+    this.subs.add(this.matches$.subscribe());
   }
 
   ngAfterViewInit() {

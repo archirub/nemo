@@ -10,6 +10,17 @@ img {
     height: 27px;
 }
 
+ion-badge {
+    z-index: 2000;
+    width: 12px;
+    height: 12px;
+    margin-left: 3px;
+}
+
+ion-badge.overlay {
+    margin-left: 12px;
+}
+
 .fillColor {
     filter: invert(54%) sepia(19%) saturate(1629%) hue-rotate(314deg) brightness(129%) contrast(91%)
 }

@@ -26,6 +26,7 @@ import { StoreReadinessService } from "@services/store-readiness/store-readiness
 import { Chat } from "@classes/index";
 import { FadeOutAnimation } from "@animations/fade-out.animation";
 import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
+import { AppToggleComponent } from "@components/index";
 
 @Component({
   selector: "app-chat-board",
@@ -41,6 +42,7 @@ export class ChatBoardComponent implements OnInit, AfterViewInit {
   @Input() matches: Chat[];
   @Output() chatboardReady = new EventEmitter();
   @ViewChild("chatDeleteRef") chatDeleteRef: IonItemSliding;
+  @ViewChild("chatToggle") chatToggle: AppToggleComponent;
 
   chatboardPictures$ = this.chatboardPicturesService.holder$; // used in template
 
@@ -139,6 +141,11 @@ export class ChatBoardComponent implements OnInit, AfterViewInit {
 
   // For use in template. To toggle between chats and catches (should really be a behaviorSubject)
   setView(event: "chats" | "catches") {
+    if (event === "chats") {
+      this.chatToggle.catchToggle = false;
+    } else {
+      this.chatToggle.catchToggle = true;
+    }
     this.view = event;
   }
 

@@ -20,7 +20,7 @@
 }
 
 ion-content.welcome {
-  --background: grey; /*To be replaced with slides of images*/
+  --background: url('/assets/splash.svg');
 
   ion-button {
     height: 38px;

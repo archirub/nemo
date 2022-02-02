@@ -1,12 +1,14 @@
 <div *ngIf="chatboardReady | async">
   <nemo-toggle
+    #chatToggle
     (valueChange)="setView($event)"
     [buttonWidth]="16"
     [fontSize]="4"
     [selections]="['chats', 'catches']"
+    [catchToggle]='false'
   ></nemo-toggle>
 
-  <ion-content *ngIf="view === 'catches'" #chatContainer>
+  <ion-content *ngIf="view === 'catches'" id='catchContainer' #chatContainer>
     <!--Never matched before and no catches currently available-->
     <div *ngIf="this.matches.length < 1 && this.chats.length < 1" class="noChats">
       <p>
@@ -15,7 +17,6 @@
 
       <div class="fish" (click)="goToHome()">
         <img name="fish" src="/assets/swipeicon.svg" />
-
         <h1>Catch</h1>
       </div>
     </div>
@@ -28,7 +29,6 @@
 
       <div class="fish" (click)="goToHome()">
         <img name="fish" src="/assets/swipeicon.svg" />
-
         <h1>Catch</h1>
       </div>
     </div>
@@ -45,7 +45,7 @@
             <img [src]="(chatboardPictures$ | async)[chat?.recipient?.uid]" />
           </ion-avatar>
           <div class="text-container">
-            <ion-label color="primary" class="text-container name">
+            <ion-label color="secondary" class="text-container name">
               {{ chat?.recipient?.name }}</ion-label
             >
             <ion-label

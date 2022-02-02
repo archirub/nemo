@@ -578,7 +578,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
 
   // for trackBy of ngFor on questions in template
   trackQuestion(index: number, question: QuestionAndAnswer) {
-    return question.question + question.answer;
+    return index; //MUST RETURN INDEX TO TRACK PROPERLY
   }
 
   ngOnDestroy() {

@@ -32,6 +32,7 @@ export class AppToggleComponent
   @Input() selections: Array<string>;
   @Input() buttonWidth: number;
   @Input() fontSize: number;
+  @Input() catchToggle: boolean = false;
 
   disabled = false;
 

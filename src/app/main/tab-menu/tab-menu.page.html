@@ -2,6 +2,14 @@
   <ion-tab-bar slot="bottom" id="tabs" [hidden]="!(showTab$ |async)">
     <ion-tab-button tab="chats">
       <img id="chats" src="/assets/chatsicon.svg" />
+      <ion-badge 
+      *ngIf="unreadChats.length > 0"
+      color="primary">&nbsp;</ion-badge>
+      <ion-badge 
+      *ngIf="matches.length > 0"
+      [style.marginLeft] = "unreadChats.length > 0 ? '12px' : '3px'"
+      class="overlay" 
+      color="secondary">&nbsp;</ion-badge>
     </ion-tab-button>
 
     <ion-tab-button tab="home">
