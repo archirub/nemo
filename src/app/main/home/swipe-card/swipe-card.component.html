@@ -26,9 +26,9 @@
       <div #catchText class="textholder-2">
         <h2 class="catchtext">{{ chosenCatchMsg }}</h2>
       </div>
-    
+
       <div #backdrop class="backdrop"></div>
-    
+
       <ion-button id="closeAnimation" (click)="closeCatch()"
         ><ion-icon name="close-outline"></ion-icon
       ></ion-button>
@@ -43,6 +43,7 @@
     <div
       #cards
       class="swipe-cards"
+      [hidden]="hideCards$ | async"
       *ngFor="
         let profile of profiles$ | async as profiles;
         index as i;

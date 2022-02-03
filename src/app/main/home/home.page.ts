@@ -120,6 +120,15 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
       ([showLoading, stackState]) => stackState === "cap-reached" && showLoading === false
     )
   );
+  showNotShowingProfilePrompt$ = combineLatest([
+    this.showLoading$,
+    this.swipeStackStore.stackState$,
+  ]).pipe(
+    map(
+      ([showLoading, stackState]) =>
+        stackState === "not-showing-profile" && showLoading === false
+    )
+  );
 
   pageIsReady$ = combineLatest([this.viewIsReady$, this.storeReadiness.home$]).pipe(
     map(([a, b]) => a && b),

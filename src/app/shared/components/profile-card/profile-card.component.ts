@@ -76,13 +76,22 @@ export class ProfileCardComponent implements OnInit, AfterViewInit, OnDestroy {
     // in the array when the swipeStackStore has attempted to fetch that picture but hasn't found anything
     // there being an empty string is necessary to signify to the swipeStackStore that it has already tried fetching that pic with no results
     let pics = value.slice(0, this.pictureCount);
-    pics = [...pics, ...Array(this.pictureCount - pics.length).fill("")];
+    pics = [
+      ...value,
+      ...Array(this.pictureCount - pics.length).fill(
+        "https://gravatar.com/avatar/dba6bae8c566f9d4041fb9cd9ada7741?d=identicon&f=y"
+      ),
+    ];
 
     // DEV - replace this by the real default thing
     if (pics.length === 0)
       pics = [
         "https://gravatar.com/avatar/dba6bae8c566f9d4041fb9cd9ada7741?d=identicon&f=y",
       ];
+
+    if (this.isOwnProfile) {
+      console.log("profilePictures", value, pics);
+    }
 
     this.profilePictures$.next(pics);
   }

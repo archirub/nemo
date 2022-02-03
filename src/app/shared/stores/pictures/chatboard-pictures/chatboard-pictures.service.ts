@@ -82,7 +82,7 @@ export class ChatboardPicturesStore extends AbstractStoreService {
     ]);
   }
 
-  protected resetStore(): void {
+  protected async resetStore() {
     this.isReady.next(false);
     this.holder.next({});
 

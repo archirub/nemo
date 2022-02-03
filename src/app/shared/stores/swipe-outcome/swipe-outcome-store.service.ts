@@ -47,7 +47,7 @@ export class SwipeOutcomeStore extends AbstractStoreService {
     return EMPTY;
   }
 
-  protected resetStore() {
+  protected async resetStore() {
     this.swipeChoices.next([]);
     this.swipeAnswers.next([]);
     console.log("swipe-outcome store reset.");

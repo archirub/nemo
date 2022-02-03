@@ -558,6 +558,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
    * Either way triggers editing
    **/
   questionsEdit(emitted: any) {
+    console.log("questionsEdit", emitted);
     if (emitted[0] === "delete") {
       //Event signifies delete question
       let loc = this.editableFields.questions.indexOf(emitted);

@@ -49,6 +49,14 @@
     </p>
   </div>
 </div>
+<div *ngIf="showNotShowingProfilePrompt$ | async" class="noSwipes">
+  <div class="overlap">
+    <p>
+      You are Under. You cannot see people if they're not allowed to see you! Go to your
+      settings to switch back.
+    </p>
+  </div>
+</div>
 
 <!--div id="catchEls">
   <div #pic1 class="picholder left"></div>

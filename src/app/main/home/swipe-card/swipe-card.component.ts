@@ -52,6 +52,7 @@ import {
   CurrentUserStore,
   OtherProfilesStore,
   SearchCriteriaStore,
+  StackState,
   SwipeOutcomeStore,
   SwipeStackStore,
 } from "@stores/index";
@@ -147,6 +148,18 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
     map((ref) =>
       this.subs.add(this.swipeStackStore.managePictureSwiping(ref).subscribe())
     )
+  );
+
+  // enforces that the cards don't show if the stack is in one of those states
+  // this is in particular for the case where profiles have already been fetched
+  // and are contained in profilesToRender$, and the user does something (e.g. goes "Under")
+  // which changes the stackState to one of those. It is therefore required for that scenario
+  // for showProfile and is more of a safety net for cap-reached and empty.
+  hideCards$ = this.swipeStackStore.stackState$.pipe(
+    map((ss) => {
+      const hideStates: StackState[] = ["cap-reached", "not-showing-profile", "empty"];
+      return hideStates.includes(ss);
+    })
   );
 
   constructor(

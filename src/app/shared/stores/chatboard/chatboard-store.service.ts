@@ -122,7 +122,7 @@ export class ChatboardStore extends AbstractStoreService {
     ]);
   }
 
-  protected resetStore() {
+  protected async resetStore() {
     this.chatDocsSub ? this.chatDocsSub() : null;
 
     Object.keys(this.recentMsgDocSubs).forEach((recipientID) => {

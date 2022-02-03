@@ -15,7 +15,7 @@ export abstract class AbstractStoreService {
   }
   // these are the only functions to define within the child class
   protected abstract systemsToActivate(): Observable<any>;
-  protected abstract resetStore(): void;
+  protected abstract resetStore(): Promise<void>;
   public abstract isReady$: Observable<boolean>;
 
   // these functions are not to be touched in the child class

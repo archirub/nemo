@@ -45,6 +45,8 @@ export class LoginPage {
       )
     );
 
+    await this.navCtrl.navigateForward("main/tabs/home");
+
     await loader.dismiss();
   }
 

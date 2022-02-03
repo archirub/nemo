@@ -2,7 +2,15 @@ import { Injectable } from "@angular/core";
 import { AngularFireStorage } from "@angular/fire/storage";
 import { AngularFirestore, DocumentSnapshot } from "@angular/fire/firestore";
 
-import { BehaviorSubject, forkJoin, Observable, EMPTY, combineLatest, of } from "rxjs";
+import {
+  BehaviorSubject,
+  forkJoin,
+  Observable,
+  EMPTY,
+  combineLatest,
+  of,
+  firstValueFrom,
+} from "rxjs";
 import { exhaustMap, filter, first, map, share, take, tap } from "rxjs/operators";
 
 import { FormatService } from "@services/format/format.service";
@@ -55,8 +63,8 @@ export class OtherProfilesStore extends AbstractStoreService {
     return EMPTY;
   }
 
-  resetStore() {
-    const profiles = this.profiles.value;
+  async resetStore() {
+    const profiles = await firstValueFrom(this.profiles);
 
     Object.keys(profiles).forEach((uid) => {
       this.revokeUrls(profiles[uid].pictureUrls);

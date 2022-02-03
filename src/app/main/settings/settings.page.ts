@@ -246,6 +246,8 @@ export class SettingsPage implements AfterViewInit, OnDestroy, OnInit {
       tabStyle.color = "var(--ion-color-light-contrast)";
       tabStyle.fontWeight = "normal";
     }
+
+    return goUnder; // for next in styling chain
   }
 
   /* Finds preferences from profile and fills form with each control's value */
