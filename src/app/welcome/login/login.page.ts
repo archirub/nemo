@@ -47,7 +47,7 @@ export class LoginPage {
 
     await this.navCtrl.navigateForward("main/tabs/home");
 
-    await loader.dismiss();
+    await this.loadingAlertManager.dismissDisplayed();
   }
 
   private async showAlert(message: string) {

@@ -27,7 +27,7 @@ import { HasSeenTutorial, privateProfileFromDatabase } from "@interfaces/profile
 @Injectable({
   providedIn: "root",
 })
-export class TutorialsService {
+export class TutorialsStore {
   private hasSeenTutorial = new BehaviorSubject<HasSeenTutorial>(null);
   hasSeenTutorial$ = this.hasSeenTutorial.asObservable();
 

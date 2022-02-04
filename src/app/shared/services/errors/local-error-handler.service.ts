@@ -49,7 +49,9 @@ export class LocalErrorHandler implements CustomErrorHandler<"local", LocalError
   getCurrentUser$(): Observable<firebase.default.User> {
     return this.afAuth.user.pipe(
       tap((user) => {
-        if (!user) throw new CustomError("local/check-auth-state", "local");
+        if (!user) {
+          throw new CustomError("local/check-auth-state", "local");
+        }
       }),
       this.handleErrors()
     );

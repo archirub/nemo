@@ -63,7 +63,7 @@ import {
   MAX_PROFILE_PICTURES_COUNT,
   QuestionAndAnswer,
 } from "@interfaces/index";
-import { TutorialsService } from "@services/tutorials/tutorials.service";
+import { TutorialsStore } from "@stores/tutorials/tutorials.service";
 import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
 
 @Component({
@@ -210,7 +210,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     private loadingAlertManager: LoadingAndAlertManager,
     private tabElementRef: TabElementRefService,
     private storeReadiness: StoreReadinessService,
-    private tutorials: TutorialsService
+    private tutorials: TutorialsStore
   ) {}
 
   // DEV

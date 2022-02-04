@@ -51,7 +51,6 @@ export class FirebaseAuthService {
     const navigateToWelcome = async () =>
       this.zone.run(() => this.navCtrl.navigateRoot("/welcome"));
     const clearLocalCache = () => Storage.clear();
-    const clearStores = async () => this.storeResetter.resetStores();
     const logOut = () => this.afAuth.signOut();
     const deleteAccount = () =>
       firstValueFrom(
@@ -81,8 +80,6 @@ export class FirebaseAuthService {
 
       await this.loadingAlertManager.presentNew(accountDeletionLoading, "replace-erase");
 
-      await Promise.all([clearLocalCache(), clearStores()]);
-
       const accountDeletionFailedPopup = await this.loadingAlertManager.createAlert({
         header: "Account deletion failed",
         message: `
@@ -96,7 +93,11 @@ export class FirebaseAuthService {
       try {
         await deleteAccount();
       } catch (e) {
-        await Promise.all([logOut(), navigateToWelcome()]);
+        await Promise.all([
+          clearLocalCache(),
+          this.storeResetter.resetStores(logOut),
+          navigateToWelcome(),
+        ]);
 
         return this.loadingAlertManager.presentNew(
           accountDeletionFailedPopup,
@@ -106,7 +107,12 @@ export class FirebaseAuthService {
 
       // must logout after deleteAccount, otherwise it fails (as delete account)
       // requires the user to be authenticated
-      await Promise.all([logOut(), navigateToWelcome()]);
+
+      await Promise.all([
+        clearLocalCache(),
+        this.storeResetter.resetStores(logOut),
+        navigateToWelcome(),
+      ]);
       return this.loadingAlertManager.dismissDisplayed();
     };
 

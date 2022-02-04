@@ -18,7 +18,7 @@ import { FieldValue } from "@interfaces/firebase.model";
 import { AbstractStoreService } from "@interfaces/stores.model";
 
 @Injectable({ providedIn: "root" })
-export class NotificationsService extends AbstractStoreService {
+export class NotificationsStore extends AbstractStoreService {
   public isReady$: Observable<boolean> = null;
 
   private token = new BehaviorSubject<Token>(null);

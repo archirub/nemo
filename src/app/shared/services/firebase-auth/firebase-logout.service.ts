@@ -32,11 +32,10 @@ export class FirebaseLogoutService {
     // back at the welcome page (it seems like it's then not active), which cases problem for example
     // while trying to log back in where the "log in" button doesn't get enabled when the email-password form becomes valid
     const clearLocalCache = () => Storage.clear();
-    const clearStores = async () => this.storeResetter.resetStores();
     const logOut = () => this.afAuth.signOut();
 
     const duringLoadingPromise = () =>
-      Promise.all([clearLocalCache(), clearStores()]).then(() => logOut());
+      Promise.all([clearLocalCache(), this.storeResetter.resetStores(logOut)]);
 
     const navigateToWelcome = async () =>
       this.zone.run(() => this.navCtrl.navigateRoot("/welcome"));

@@ -89,10 +89,6 @@ export class ProfileCardComponent implements OnInit, AfterViewInit, OnDestroy {
         "https://gravatar.com/avatar/dba6bae8c566f9d4041fb9cd9ada7741?d=identicon&f=y",
       ];
 
-    if (this.isOwnProfile) {
-      console.log("profilePictures", value, pics);
-    }
-
     this.profilePictures$.next(pics);
   }
 

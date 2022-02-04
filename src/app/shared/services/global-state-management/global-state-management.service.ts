@@ -1,10 +1,20 @@
 import { Injectable } from "@angular/core";
-import { NavigationStart, Router } from "@angular/router";
+import { NavigationEnd, NavigationStart, Router } from "@angular/router";
 
 import { AngularFirestore } from "@angular/fire/firestore";
 
 import { Storage } from "@capacitor/storage";
-import { concat, defer, forkJoin, from, merge, Observable, of, Subject } from "rxjs";
+import {
+  concat,
+  defer,
+  EMPTY,
+  forkJoin,
+  from,
+  merge,
+  Observable,
+  of,
+  Subject,
+} from "rxjs";
 import {
   concatMap,
   distinctUntilChanged,
@@ -17,28 +27,20 @@ import {
   tap,
 } from "rxjs/operators";
 
-import { OwnPicturesStore } from "@stores/pictures/own-pictures/own-pictures.service";
-import { ChatboardStore } from "@stores/chatboard/chatboard-store.service";
-import { SearchCriteriaStore } from "@stores/search-criteria/search-criteria-store.service";
-import { SwipeStackStore } from "@stores/swipe-stack/swipe-stack-store.service";
-import { CurrentUserStore } from "@stores/current-user/current-user-store.service";
-import { ChatboardPicturesStore } from "@stores/pictures/chatboard-pictures/chatboard-pictures.service";
-import { UniversitiesStore } from "@stores/universities/universities.service";
-import { SwipeOutcomeStore } from "@stores/swipe-outcome/swipe-outcome-store.service";
-
 import { SignupService } from "@services/signup/signup.service";
 import { FirebaseAuthService } from "@services/firebase-auth/firebase-auth.service";
 import { routerInitListenerService } from "./initial-url.service";
 import { SignupAuthMethodSharer } from "../../../welcome/signupauth/signupauth-method-sharer.service";
 import { ConnectionService } from "@services/connection/connection.service";
-import { NotificationsService } from "@services/notifications/notifications.service";
 import { StoreResetter } from "./store-resetter.service";
 
 import { FirebaseUser } from "./../../interfaces/firebase.model";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
-import { TutorialsService } from "@services/tutorials/tutorials.service";
 import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
 import { App } from "@capacitor/app";
+import { StoreStateManager } from "./store-state-manager.service";
+import { FilterFalsy, LogValue } from "../../functions/custom-rxjs";
+import { AngularFireAuth } from "@angular/fire/auth";
 
 type pageName =
   | "chats"
@@ -78,7 +80,9 @@ export class GlobalStateManagementService {
     private router: Router,
 
     private firestore: AngularFirestore,
+    private afAuth: AngularFireAuth,
 
+    private storeStateManager: StoreStateManager,
     private errorHandler: GlobalErrorHandler,
     private loadingAlertManager: LoadingAndAlertManager,
     private signupService: SignupService,
@@ -86,59 +90,42 @@ export class GlobalStateManagementService {
     private routerInitListener: routerInitListenerService,
     private storeResetter: StoreResetter,
     private connectionService: ConnectionService,
-    private notificationsService: NotificationsService,
-    private tutorialsService: TutorialsService,
 
-    private signupauthMethodSharer: SignupAuthMethodSharer,
-
-    private swipeOutcomeStore: SwipeOutcomeStore,
-    private userStore: CurrentUserStore,
-    private chatboardStore: ChatboardStore,
-    private chatboardPicturesStore: ChatboardPicturesStore,
-    private swipeStackStore: SwipeStackStore,
-    private OwnPicturesStore: OwnPicturesStore,
-    private universitiesStore: UniversitiesStore,
-    private searchCriteriaStore: SearchCriteriaStore
+    private signupauthMethodSharer: SignupAuthMethodSharer
   ) {}
 
   public activate$ = this.connectionService.monitor().pipe(
+    LogValue("connectionServiceMonitor$"),
     switchMap((isConnected) => {
       if (isConnected && !this.alreadyConnectedOnce) {
+        console.log("option A");
         this.alreadyConnectedOnce = true;
-        return this.globalManagement();
+        return this.globalManagement$();
       } else if (isConnected && this.alreadyConnectedOnce) {
+        console.log("option B");
+
         return from(this.connectionService.displayBackOnlineToast()).pipe(
-          switchMap(() => this.globalManagement())
+          switchMap(() => this.globalManagement$())
         );
       } else {
+        console.log("option C");
+
         return this.connectionService.displayOfflineToast();
       }
     }),
     share()
   );
 
-  public activateAllStores(): Observable<any> {
-    console.log("activateAllStores");
-    const storesToActivate$: Observable<any>[] = [
-      this.userStore.activate$,
-      this.swipeStackStore.activate$,
-      this.searchCriteriaStore.activate$,
-      this.chatboardStore.activate$,
-      this.OwnPicturesStore.activate$,
-      this.chatboardPicturesStore.activate$,
-    ];
-
-    return merge(...storesToActivate$);
-  }
-
-  private globalManagement(): Observable<void> {
-    return this.errorHandler.getCurrentUser$().pipe(
+  private globalManagement$(): Observable<void> {
+    return this.afAuth.user.pipe(
+      FilterFalsy(),
+      LogValue("globalManagement$"),
       switchMap((user) => forkJoin([of(user), this.isUserEmailVerified(user)])),
       switchMap(([user, emailIsVerified]) => {
-        const observables$: Observable<any>[] = [];
-
         // to always activate
-        observables$.push(this.activateDefaultStores());
+        this.storeStateManager.activateDefault();
+
+        const observables$: Observable<any>[] = [];
 
         if (!user) {
           // if user isn't authenticated, do the corresponding routine
@@ -156,12 +143,6 @@ export class GlobalStateManagementService {
     );
   }
 
-  private activateDefaultStores() {
-    const storesToActivate$: Observable<any>[] = [this.universitiesStore.activate$];
-
-    return merge(...storesToActivate$);
-  }
-
   /**
    * Procedure followed when there is no one authenticated
    */
@@ -172,7 +153,10 @@ export class GlobalStateManagementService {
         if (["/welcome/login", "/welcome/signupauth", "/welcome"].includes(url))
           return of(""); // do nothing of user is in login, signupauth or welcome page,
         // as no auth is required for these three pages
-        return concat(this.resetAppState(), this.router.navigateByUrl("/welcome"));
+        return concat(
+          this.resetAppState(async () => {}),
+          this.router.navigateByUrl("/welcome")
+        );
       })
     );
   }
@@ -213,7 +197,7 @@ export class GlobalStateManagementService {
               return this.noDocumentsRoutine(user);
             }
             this.userState.next("full");
-            return this.hasDocumentsRoutine();
+            return this.hasDocumentsRoutine$();
           })
         );
       })
@@ -227,12 +211,9 @@ export class GlobalStateManagementService {
    */
   private noDocumentsRoutine(user: FirebaseUser): Observable<void> {
     const finishProfileProcedure = () => {
-      this.storeResetter.resetStores(); // to be safe
       return this.signupService.checkAndRedirect();
     };
     const abortProfileProcedure = async () => {
-      this.storeResetter.resetStores(); // to be safe
-
       try {
         await Storage.clear();
         await user.delete();
@@ -281,7 +262,7 @@ export class GlobalStateManagementService {
     );
   }
 
-  private hasDocumentsRoutine() {
+  private hasDocumentsRoutine$() {
     // case where person is in signupToApp
     if (this.getPageFromUrl(this.router.url) === "signup-to-app") return of("");
     // makes it such that we only navigate to home if the user is not in main
@@ -301,7 +282,7 @@ export class GlobalStateManagementService {
 
       await App.addListener("appStateChange", ({ isActive }) => {
         // this ensures the swipe choices are registered when the user leaves the app
-        if (!isActive) this.swipeOutcomeStore.registerSwipeChoices$.subscribe();
+        if (!isActive) this.storeStateManager.onInactiveAppState();
       });
     };
 
@@ -315,21 +296,21 @@ export class GlobalStateManagementService {
     );
 
     return concat(initialUrl$, this.router.events).pipe(
-      filter((event) => event instanceof NavigationStart || typeof event === "string"),
-      map((event: NavigationStart) =>
-        this.getPageFromUrl(event instanceof NavigationStart ? event.url : event)
+      tap((a) => console.log("storesManagement urls", a)),
+      filter((event) => event instanceof NavigationEnd || typeof event === "string"),
+      tap((a) => console.log("passed through filter", a)),
+      map((event: NavigationEnd) =>
+        this.getPageFromUrl(event instanceof NavigationEnd ? event.url : event)
       ),
+      tap((a) => console.log("name of page:", a)),
       mergeMap((page) => this.activateCorrespondingStores(page))
     );
   }
 
   private activateCorrespondingStores(page: pageName): Observable<any> {
     if (this.pageIsMain(page)) {
-      return merge(
-        this.activateAllStores(),
-        this.notificationsService.activate$,
-        this.tutorialsService.activate$
-      );
+      console.log("activating stores");
+      return of(this.storeStateManager.activateUserDependent());
     }
     return of("");
 
@@ -455,7 +436,7 @@ export class GlobalStateManagementService {
   /**
    * Resets the content of the stores and clears the local storage
    */
-  public resetAppState() {
-    return forkJoin([of(this.storeResetter.resetStores()), Storage.clear()]);
+  public resetAppState(midResetTask: () => Promise<any>) {
+    return forkJoin([of(this.storeResetter.resetStores(midResetTask)), Storage.clear()]);
   }
 }

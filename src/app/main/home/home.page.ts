@@ -38,7 +38,7 @@ import { SearchCriteriaComponent } from "./search-criteria/search-criteria.compo
 import { TabElementRefService } from "src/app/main/tab-menu/tab-element-ref.service";
 import { StoreReadinessService } from "@services/store-readiness/store-readiness.service";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
-import { TutorialsService } from "@services/tutorials/tutorials.service";
+import { TutorialsStore } from "@stores/tutorials/tutorials.service";
 import { SwipeCapService } from "@stores/swipe-stack/swipe-cap.service";
 
 import { ChatboardStore, SwipeStackStore } from "@stores/index";
@@ -181,7 +181,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     private loadingAlertManager: LoadingAndAlertManager,
     private errorHandler: GlobalErrorHandler,
     private storeReadiness: StoreReadinessService,
-    private tutorials: TutorialsService
+    private tutorials: TutorialsStore
   ) {
     this.onResize();
   }

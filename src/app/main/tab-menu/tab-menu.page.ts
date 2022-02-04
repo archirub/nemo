@@ -10,7 +10,7 @@ import { IonTabs } from "@ionic/angular";
 
 import { combineLatest, filter, map, startWith, Subscription } from "rxjs";
 
-import { TutorialsService } from "@services/tutorials/tutorials.service";
+import { TutorialsStore } from "@stores/tutorials/tutorials.service";
 import { TabElementRefService } from "./tab-element-ref.service";
 import { ChatboardStore } from "@stores/index";
 import { Chat } from "@classes/chat.class";
@@ -34,13 +34,13 @@ export class TabMenuPage implements OnDestroy {
 
   chats$ = this.chatboardStore.chats$.pipe(
     map((chatsObject) => {
-      this.unreadChats = this.sortUnreadChats(chatsObject)
+      this.unreadChats = this.sortUnreadChats(chatsObject);
     })
   );
 
   matches$ = this.chatboardStore.matches$.pipe(
     map((chatsObject) => {
-      this.matches = Array.from(Object.values(chatsObject))
+      this.matches = Array.from(Object.values(chatsObject));
     })
   );
 
@@ -71,7 +71,7 @@ export class TabMenuPage implements OnDestroy {
 
   constructor(
     private renderer: Renderer2,
-    private tutorials: TutorialsService,
+    private tutorials: TutorialsStore,
     private tabElementRef: TabElementRefService,
     private chatboardStore: ChatboardStore
   ) {
@@ -84,7 +84,9 @@ export class TabMenuPage implements OnDestroy {
    **/
   private sortUnreadChats(chats: { [chatID: string]: Chat }): Chat[] {
     let incomingChats = Array.from(Object.values(chats));
-    let unreadChats = incomingChats.filter(c => c.recentMessage?.senderID === c.recipient?.uid);
+    let unreadChats = incomingChats.filter(
+      (c) => c.recentMessage?.senderID === c.recipient?.uid
+    );
 
     return unreadChats;
   }
