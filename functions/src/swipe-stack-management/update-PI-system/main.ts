@@ -302,7 +302,7 @@ function updateDistributionParameters(
     let gender = info.gender;
 
     // if person's gender is other, then they need to be added to both "male" and "female" genders
-    if (gender === "other") {
+    if (gender === "trans") {
       gender = "male";
       const piStorageInfoCopy = { ...info };
       piStorageInfoCopy.gender = "female";
@@ -414,9 +414,9 @@ function computeScore(
   const means: number[] = [];
   const variances: number[] = [];
   // taking average mean and variance in case where person has multiple sexual preferences
-  // and/or gender is "other"
+  // and/or gender is "trans"
   info.sexualPreference.forEach((sexualPreference) => {
-    if (info.gender === "other") {
+    if (info.gender === "trans") {
       (["male", "female"] as const).forEach((g) => {
         const demoString = demographicCombineString(info.degree, g, sexualPreference);
 
@@ -474,8 +474,8 @@ function addToDemographicArrays(
 
   // Iterate over sexualPreference (since it's an array and you want to cover all of its options)
   info.sexualPreference.forEach((sexPref) => {
-    // if person has gender "other", then add that person to both gender demographic
-    if (info.gender === "other") {
+    // if person has gender "trans", then add that person to both gender demographic
+    if (info.gender === "trans") {
       demographicString = demographicCombineString(info.degree, "male", sexPref);
       newDemographicScoreMaps[demographicString].push({ uid, score });
 

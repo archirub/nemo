@@ -20,6 +20,7 @@ import { profileFromDatabase } from "@interfaces/index";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 import { StoreResetter } from "@services/global-state-management/store-resetter.service";
 import { AbstractStoreService } from "@interfaces/stores.model";
+import { cloneDeep } from "lodash";
 
 interface ProfileHolder {
   [uid: string]: Profile;
@@ -78,12 +79,13 @@ export class OtherProfilesStore extends AbstractStoreService {
   /**
    * saves the profile to the store, emits the profile
    */
-  public saveProfile(uid: string, profile: Profile): Observable<Profile> {
+  public saveProfile(profile: Profile): Observable<Profile> {
     return this.profiles$.pipe(
       take(1),
       map((holder) => {
-        holder[uid] = profile;
-        this.profiles.next(holder);
+        const newHolder = cloneDeep(holder);
+        newHolder[profile.uid] = profile;
+        this.profiles.next(newHolder);
         return profile;
       })
     );
@@ -131,7 +133,7 @@ export class OtherProfilesStore extends AbstractStoreService {
         return EMPTY;
       }), // fetching the picture count for the profile
       exhaustMap((profile) => {
-        if (!!profile) return this.saveProfile(uid, profile);
+        if (!!profile) return this.saveProfile(profile);
 
         return EMPTY;
       }), // save profile to store

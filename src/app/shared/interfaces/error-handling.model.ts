@@ -76,5 +76,7 @@ export interface CustomErrorHandler<errType extends ErrorType, errCodeType> {
 
 export interface CustomGlobalErrorHandler {
   convertErrors: (type: Exclude<ErrorType, "local">) => OperatorFunction<any, any>;
-  handleErrors: () => (source: Observable<any>) => Observable<any>;
+  handleErrors: () => // defaultValue: any,
+  // fallback$: Observable<any>
+  (source: Observable<any>) => Observable<any>;
 }

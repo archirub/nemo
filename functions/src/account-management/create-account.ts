@@ -178,7 +178,7 @@ function addToUidDatingStorage(
 }
 
 function getDemographics(data: createAccountRequest): demographicMap {
-  if (data.gender === "other") {
+  if (data.gender === "trans") {
     return {
       sexualPreference: data.sexualPreference,
       gender: ["male", "female"],

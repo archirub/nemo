@@ -9,6 +9,7 @@ import {
   profileChoiceMap,
   swipeChoice,
   registerSwipeChoicesRequest,
+  registerSwipeChoicesResponse,
 } from "@interfaces/index";
 import {
   concatMapTo,
@@ -141,7 +142,9 @@ export class SwipeOutcomeStore extends AbstractStoreService {
       const request: registerSwipeChoicesRequest = { choices: uidChoiceMaps };
 
       return this.afFunctions
-        .httpsCallable("registerSwipeChoices")(request)
+        .httpsCallable<registerSwipeChoicesRequest, registerSwipeChoicesResponse>(
+          "registerSwipeChoices"
+        )(request)
         .pipe(
           tap(() =>
             console.info(`registerSwipeChoices triggered for ${choices.length} choices.`)

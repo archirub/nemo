@@ -120,7 +120,7 @@ export class SwipeStackStore extends AbstractStoreService {
     super(resetter);
     // this.profilesToRender$.subscribe((a) => console.log("profilesToRender$", a));
     // this.isReady$.subscribe((a) => console.log("isReady$", a));
-    // this.stackState$.subscribe((a) => console.log("stackState$", a));
+    this.stackState$.subscribe((a) => console.log("stackState$:", a));
   }
 
   protected systemsToActivate(): Observable<any> {

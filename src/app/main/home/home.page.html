@@ -90,7 +90,7 @@
     </div>
     <app-swipe-card
       [profiles$]="swipeProfiles$"
-      (matched)="playCatch($event)"
+      [swipeCardsRef]="swipeCardsRef"
       [homeContainer]="this.homeContainer"
     ></app-swipe-card>
   </div>

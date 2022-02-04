@@ -93,10 +93,8 @@ export const BackAnimation = (backdrop: any) => {
     .addElement(backdrop.nativeElement)
     .duration(500)
     .easing("ease-in")
-    .fromTo('opacity', '0', '1')
-    .fromTo("background", 
-    "transparent", 
-    "linear-gradient(to top, #F07167, #F0B067)");
+    .fromTo("opacity", "0", "1")
+    .fromTo("background", "transparent", "linear-gradient(to top, #F07167, #F0B067)");
 
   return backAnimation;
 };
@@ -112,7 +110,15 @@ export const OpenCatchAnimation = (
 ) => {
   return new AnimationController()
     .create()
-    .addElement([viewHeight, viewWidth, leftPicture, rightPicture, text, backdrop, baseEl])
+    .addElement([
+      viewHeight,
+      viewWidth,
+      leftPicture,
+      rightPicture,
+      text,
+      backdrop,
+      baseEl,
+    ])
     .addAnimation([
       LeftPicAnimation(viewHeight, viewWidth, leftPicture),
       RightPicAnimation(viewHeight, viewWidth, rightPicture),
@@ -132,7 +138,15 @@ export const CloseCatchAnimation = (
 ) => {
   return new AnimationController()
     .create()
-    .addElement([viewHeight, viewWidth, leftPicture, rightPicture, text, backdrop, baseEl])
+    .addElement([
+      viewHeight,
+      viewWidth,
+      leftPicture,
+      rightPicture,
+      text,
+      backdrop,
+      baseEl,
+    ])
     .addAnimation([
       LeftPicAnimation(viewHeight, viewWidth, leftPicture),
       RightPicAnimation(viewHeight, viewWidth, rightPicture),
