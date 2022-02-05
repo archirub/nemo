@@ -18,11 +18,9 @@ import {
   map,
   withLatestFrom,
   distinctUntilChanged,
-  share,
   first,
   tap,
   switchMap,
-  mapTo,
 } from "rxjs/operators";
 import { cloneDeep, isEqual } from "lodash";
 
@@ -133,8 +131,6 @@ export class ChatboardStore extends AbstractStoreService {
     this.allChats.next({});
     this.chatsFromDatabase.next([]);
     this.recentMsgsFromDatabase.next({});
-
-    console.log("Chat-board store reset.");
   }
 
   private activateChatDocsListening(): Observable<any> {

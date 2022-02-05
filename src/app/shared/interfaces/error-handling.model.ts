@@ -74,9 +74,23 @@ export interface CustomErrorHandler<errType extends ErrorType, errCodeType> {
   getErrorText: (code: errCodeType) => ErrorText;
 }
 
+export const SIGNAL_ERROR_WAS_HANDLED = "signal_error_was_handled";
+export type SignalErrorWasHandled = typeof SIGNAL_ERROR_WAS_HANDLED;
+
+// explanation of strategies -  in case of error:
+// "endStream" just ends the stream after the error was handled
+// "fallback" switches to the observable provided
+// "defaultValue" spits out a defaultValue
+export interface GlobalErrorHandlerOptions {
+  strategy: "endStream" | "fallback" | "defaultValue";
+  debugMsg?: string;
+  fallback$?: Observable<any>;
+  defaultValue?: any;
+}
+
 export interface CustomGlobalErrorHandler {
   convertErrors: (type: Exclude<ErrorType, "local">) => OperatorFunction<any, any>;
-  handleErrors: () => // defaultValue: any,
+  handleErrors: (options?: GlobalErrorHandlerOptions) => // defaultValue: any,
   // fallback$: Observable<any>
   (source: Observable<any>) => Observable<any>;
 }

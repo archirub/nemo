@@ -3,7 +3,7 @@ import { Component } from "@angular/core";
 import { FormControl, FormGroup, Validators } from "@angular/forms";
 import { AngularFireAuth } from "@angular/fire/auth";
 
-import { defer, firstValueFrom } from "rxjs";
+import { defer, firstValueFrom, switchMap } from "rxjs";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
 
@@ -41,11 +41,10 @@ export class LoginPage {
     await firstValueFrom(
       defer(() => this.afAuth.signInWithEmailAndPassword(email, password)).pipe(
         this.errorHandler.convertErrors("firebase-auth"),
+        switchMap(() => defer(() => this.navCtrl.navigateForward("main/tabs/home"))),
         this.errorHandler.handleErrors()
       )
     );
-
-    await this.navCtrl.navigateForward("main/tabs/home");
 
     await this.loadingAlertManager.dismissDisplayed();
   }

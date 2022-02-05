@@ -183,7 +183,6 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
     this.subs.add(this.managePictureSwiping$.subscribe());
     this.subs.add(this.onCardTapLogic().subscribe());
     this.subs.add(this.handleTaps().subscribe());
-    console.log(this.homeContainer);
 
     // DEV
     // this.currentUserStore.user$
@@ -354,8 +353,6 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
         ])
       ),
       exhaustMap(([profile, otherChoice]) => {
-        console.log("ownChoice: ", ownChoice);
-        console.log("otherChoice: ", otherChoice);
         if (ownChoice === "no") return this.onNoSwipe(profile);
 
         // DEV
@@ -393,7 +390,7 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
       ).pipe(switchMap((animation) => animation.play()));
     }
     if (choice === "super") {
-      console.log("No super swipe logic for single tap");
+      console.error("No super swipe logic for single tap");
     }
   }
 
@@ -403,7 +400,6 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
    * - Checks whether other user likes as well, triggers onMatch method if match
    */
   onYesSwipe(profile: Profile): Observable<any> {
-    console.log("swipe-card component: onYesSwipe function running");
     const storeTasks$ = (p: Profile) =>
       forkJoin([
         this.swipeStackStore.removeProfile(p),
@@ -426,7 +422,6 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
    * - registers swipe choice in swipeOutcomeStore
    * */
   onNoSwipe(profile: Profile): Observable<any> {
-    console.log("swipe-card component: onNoSwipe function running");
     const storeTasks$ = (p: Profile) =>
       forkJoin([
         this.swipeStackStore.removeProfile(p),
@@ -450,8 +445,6 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
    * saves them on the database, new doc is created backened
    */
   private onMatch(matchedProfile: Profile) {
-    console.log("swipe-card component: onMatch function running");
-
     const postAnimTasks$ = (p) =>
       concat(
         this.swipeStackStore.removeProfile(p),
@@ -513,17 +506,6 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
     this.renderer.setStyle(closeButton, "display", "block");
     this.renderer.setStyle(messageText, "display", "flex");
     this.renderer.setStyle(messageText2, "display", "flex");
-
-    console.log(
-      "aa",
-      this.screenHeight,
-      this.screenWidth,
-      this.pic1,
-      this.pic2,
-      this.catchText,
-      this.backdrop,
-      this.swipeCardsRef
-    );
 
     // catch animation
     return OpenCatchAnimation(

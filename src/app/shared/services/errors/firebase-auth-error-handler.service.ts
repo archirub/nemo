@@ -30,6 +30,7 @@ export class FirebaseAuthErrorHandler
       "auth/user-disabled",
       "auth/invalid-password",
       "auth/user-not-found",
+      "auth/wrong-password",
     ] as const,
     reauthenticate: ["auth/requires-recent-login"] as const,
     retry: ["auth/network-request-failed"] as const,
@@ -143,7 +144,7 @@ export class FirebaseAuthErrorHandler
           "The password you provided is too weak. Try a more complex or longer password.",
       };
 
-    if (code === "auth/invalid-password")
+    if (code === "auth/invalid-password" || code === "auth/wrong-password")
       return {
         header: "Password Incorrect",
         message:
@@ -186,6 +187,7 @@ const firebaseAuthCodes = [
 
   // ACTION - Error message (password is invalid)
   "auth/invalid-password", // =	The provided value for the password user property is invalid. It must be a string with at least six characters.
+  "auth/wrong-password",
   "auth/weak-password",
 
   // ACTION - Error message (an error occurred)

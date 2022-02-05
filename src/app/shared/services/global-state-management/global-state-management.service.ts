@@ -1,3 +1,4 @@
+import { FirebaseLogoutService } from "@services/firebase-auth/firebase-logout.service";
 import { Injectable } from "@angular/core";
 import { NavigationEnd, NavigationStart, Router } from "@angular/router";
 
@@ -21,9 +22,11 @@ import {
   filter,
   first,
   map,
+  mapTo,
   mergeMap,
   share,
   switchMap,
+  take,
   tap,
 } from "rxjs/operators";
 
@@ -39,7 +42,7 @@ import { GlobalErrorHandler } from "@services/errors/global-error-handler.servic
 import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
 import { App } from "@capacitor/app";
 import { StoreStateManager } from "./store-state-manager.service";
-import { FilterFalsy, LogValue } from "../../functions/custom-rxjs";
+import { FilterFalsy, Logger } from "../../functions/custom-rxjs";
 import { AngularFireAuth } from "@angular/fire/auth";
 
 type pageName =
@@ -90,36 +93,43 @@ export class GlobalStateManagementService {
     private routerInitListener: routerInitListenerService,
     private storeResetter: StoreResetter,
     private connectionService: ConnectionService,
+    private firebaseLogout: FirebaseLogoutService,
 
     private signupauthMethodSharer: SignupAuthMethodSharer
   ) {}
 
   public activate$ = this.connectionService.monitor().pipe(
-    LogValue("connectionServiceMonitor$"),
     switchMap((isConnected) => {
       if (isConnected && !this.alreadyConnectedOnce) {
-        console.log("option A");
         this.alreadyConnectedOnce = true;
         return this.globalManagement$();
       } else if (isConnected && this.alreadyConnectedOnce) {
-        console.log("option B");
-
         return from(this.connectionService.displayBackOnlineToast()).pipe(
           switchMap(() => this.globalManagement$())
         );
       } else {
-        console.log("option C");
-
         return this.connectionService.displayOfflineToast();
       }
     }),
     share()
   );
 
+  checkLoggingOut =
+    <T>() =>
+    (source: Observable<T>) =>
+      source.pipe(
+        switchMap((val) =>
+          this.firebaseLogout.isLoggingOut$.pipe(
+            filter((isLoggingOut) => !isLoggingOut),
+            take(1),
+            mapTo(val)
+          )
+        )
+      );
+
   private globalManagement$(): Observable<void> {
     return this.afAuth.user.pipe(
-      FilterFalsy(),
-      LogValue("globalManagement$"),
+      this.checkLoggingOut(), // makes sure we aren't logging out (see firebase logout service for reason)
       switchMap((user) => forkJoin([of(user), this.isUserEmailVerified(user)])),
       switchMap(([user, emailIsVerified]) => {
         // to always activate
@@ -296,20 +306,16 @@ export class GlobalStateManagementService {
     );
 
     return concat(initialUrl$, this.router.events).pipe(
-      tap((a) => console.log("storesManagement urls", a)),
       filter((event) => event instanceof NavigationEnd || typeof event === "string"),
-      tap((a) => console.log("passed through filter", a)),
       map((event: NavigationEnd) =>
         this.getPageFromUrl(event instanceof NavigationEnd ? event.url : event)
       ),
-      tap((a) => console.log("name of page:", a)),
       mergeMap((page) => this.activateCorrespondingStores(page))
     );
   }
 
   private activateCorrespondingStores(page: pageName): Observable<any> {
     if (this.pageIsMain(page)) {
-      console.log("activating stores");
       return of(this.storeStateManager.activateUserDependent());
     }
     return of("");

@@ -32,15 +32,12 @@ export class ProfileAnswerComponent {
 
   // for when the answer changes
   onAnswerChange(value) {
-    console.log("onAnswerChange,", value);
     this.questionAndAnswer.answer = value;
     // this.questionAndAnswerChange.emit(this.questionAndAnswer);
   }
 
   // for when the question changes
   onQuestionChange(event) {
-    console.log("onQuestionChange,", event);
-
     this.questionAndAnswer.question = event.target.value;
     // this.questionAndAnswerChange.emit(this.questionAndAnswer);
     this.hideInput();
@@ -50,8 +47,6 @@ export class ProfileAnswerComponent {
    * Removes question on click of cross
    **/
   clearInput() {
-    console.log("clearInput,", event);
-
     // this.questionAndAnswerChange.emit(["delete", this.questionAndAnswer]);
   }
 

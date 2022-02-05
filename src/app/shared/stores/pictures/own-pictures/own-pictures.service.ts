@@ -63,7 +63,6 @@ export class OwnPicturesStore extends AbstractStoreService {
   protected async resetStore() {
     this.isReady.next(false);
     this.urls.next([]);
-    console.log("own-pictures store reset.");
   }
 
   updatePictures(newPicturesArray: string[]) {

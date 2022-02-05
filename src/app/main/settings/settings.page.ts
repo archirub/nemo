@@ -201,7 +201,6 @@ export class SettingsPage implements AfterViewInit, OnDestroy, OnInit {
   // updates the profile locally
   async actOnGoUnder(option: GoUnder) {
     const newShowProfile = formatGoUnderToShowProfile(option);
-    console.log("newShowProfile", newShowProfile);
 
     const loader = await this.loadingAlertManager.createLoading();
 
@@ -306,7 +305,6 @@ export class SettingsPage implements AfterViewInit, OnDestroy, OnInit {
      * Swipes to the targeted slide
      **/
 
-    console.log("Moving to slide", slide);
     const slidesToHide = [
       document.getElementById("legal"),
       document.getElementById("preferences"),

@@ -243,7 +243,7 @@ export class ProfileCardComponent implements OnInit, AfterViewInit, OnDestroy {
       try {
         this.intSlides.update(); //Fixes broken swiper mechanism that ruins IonSlides snap-swiping
       } catch (TypeError) {
-        console.log("No interest slides found."); //No interests selected on profile
+        console.error("No interest slides found."); //No interests selected on profile
       }
     }, 100);
   }

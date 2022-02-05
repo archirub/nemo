@@ -183,14 +183,12 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
       this.storeReadiness.ownProfile$,
     ]).pipe(
       map(([a, b, c]) => !!a && !!b && !!c),
-      distinctUntilChanged(),
-      tap((a) => console.log("page is ready", a))
+      distinctUntilChanged()
     );
   }
 
   getOnPageReadyHandler() {
     return this.pageIsReady$.pipe(
-      tap((a) => console.log("isReady a", a)),
       filter((isReady) => isReady),
       first(),
       tap(() => this.stopLoadingAnimation()),
@@ -213,12 +211,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     private tutorials: TutorialsStore
   ) {}
 
-  // DEV
-  logger = (name) => (log) => console.log(name, ": ", log);
-
-  ngOnInit() {
-    this.editingInProgress$.subscribe(this.logger("editingInProgress$"));
-  }
+  ngOnInit() {}
 
   ngAfterViewInit() {
     this.pageIsReady$ = this.getPageIsReady(); // this format is needed because the ViewChild "profileCard" only gets defined after view init
@@ -558,7 +551,6 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
    * Either way triggers editing
    **/
   questionsEdit(emitted: any) {
-    console.log("questionsEdit", emitted);
     if (emitted[0] === "delete") {
       //Event signifies delete question
       let loc = this.editableFields.questions.indexOf(emitted);

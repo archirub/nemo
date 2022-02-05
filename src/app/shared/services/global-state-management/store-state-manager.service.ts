@@ -1,4 +1,5 @@
 import { Injectable } from "@angular/core";
+import { AbstractStoreService } from "@interfaces/stores.model";
 
 import { StoreResetter } from "@services/global-state-management/store-resetter.service";
 
@@ -16,34 +17,56 @@ import { TutorialsStore } from "@stores/tutorials/tutorials.service";
 import { UniversitiesStore } from "@stores/universities/universities.service";
 import { combineLatest, map, Observable, of, Subscription } from "rxjs";
 
+interface Subs {
+  userDependentActivate$: Subscription;
+  userDependentReset$: Subscription;
+  defaultActivate$: Subscription;
+  defaultReset$: Subscription;
+  deactivationListener: Subscription;
+}
+
+interface Stores {
+  default: AbstractStoreService[];
+  userDependent: AbstractStoreService[];
+}
 @Injectable({
   providedIn: "root",
 })
 export class StoreStateManager {
   // subscriptions
-  private userRelatedSub: Subscription = null;
-  private defaultSub: Subscription = null;
-  private resetListenerSub: Subscription = null;
+  private subs: Subs = {
+    userDependentActivate$: null,
+    userDependentReset$: null,
+    defaultActivate$: null,
+    defaultReset$: null,
+    deactivationListener: null,
+  };
+
+  private stores: Stores = {
+    default: [this.universitiesStore],
+    userDependent: [
+      this.notificationsStore,
+      this.tutorialsStore,
+      this.userStore,
+      this.swipeStackStore,
+      this.searchCriteriaStore,
+      this.chatboardStore,
+      this.OwnPicturesStore,
+      this.chatboardPicturesStore,
+    ],
+  };
+
+  private activateStores$(storeType: keyof Stores): Observable<any> {
+    return combineLatest(this.stores[storeType].map((store) => store.activate$));
+  }
+
+  private listenOnStoreResets$(storeType: keyof Stores): Observable<any> {
+    return combineLatest(this.stores[storeType].map((store) => store.listenOnReset$));
+  }
 
   // observables
-  private get default$() {
-    return combineLatest([this.universitiesStore.activate$]);
-  }
-  private get userRelated$() {
-    return combineLatest([
-      this.notificationsStore.activate$,
-      this.tutorialsStore.activate$,
-      this.userStore.activate$,
-      this.swipeStackStore.activate$,
-      this.searchCriteriaStore.activate$,
-      this.chatboardStore.activate$,
-      this.OwnPicturesStore.activate$,
-      this.chatboardPicturesStore.activate$,
-      // this.swipeCapStore.activate$
-    ]);
-  }
-  private resetListener$ = this.storeResetter.deactivateOnEmit$.pipe(
-    map(() => this.deactivateComponent(this.userRelatedSub))
+  private listenOnUserDependentDeactivation$ = this.storeResetter.deactivateOnEmit$.pipe(
+    map(() => this.deactivateComponent("userDependentActivate$"))
   );
 
   constructor(
@@ -68,24 +91,32 @@ export class StoreStateManager {
   }
 
   public activateDefault() {
-    console.log("activateDefault");
-    this.activateComponent(this.default$, this.defaultSub);
+    this.activateComponent(this.activateStores$("default"), "defaultReset$");
+    this.activateComponent(this.listenOnStoreResets$("default"), "defaultReset$");
   }
 
   public activateUserDependent() {
-    console.log("activateUserDependent");
-    this.activateComponent(this.userRelated$, this.userRelatedSub);
-    this.activateComponent(this.resetListener$, this.resetListenerSub);
+    this.activateComponent(
+      this.activateStores$("userDependent"),
+      "userDependentActivate$"
+    );
+    this.activateComponent(
+      this.listenOnStoreResets$("userDependent"),
+      "userDependentReset$"
+    );
+    this.activateComponent(
+      this.listenOnUserDependentDeactivation$,
+      "deactivationListener"
+    );
   }
 
-  private activateComponent(obs$: Observable<any>, sub: Subscription) {
-    if (sub) return;
-    sub = obs$.subscribe();
+  private activateComponent(obs$: Observable<any>, subName: keyof Subs) {
+    if (this.subs[subName]) return;
+    this.subs[subName] = obs$.subscribe();
   }
 
-  private deactivateComponent(sub: Subscription) {
-    console.log("deactivateComponent");
-    sub?.unsubscribe();
-    sub = null;
+  private deactivateComponent(subName: keyof Subs) {
+    this.subs[subName]?.unsubscribe();
+    this.subs[subName] = null;
   }
 }

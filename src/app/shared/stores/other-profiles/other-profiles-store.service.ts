@@ -72,8 +72,6 @@ export class OtherProfilesStore extends AbstractStoreService {
     });
 
     this.profiles.next({});
-
-    console.log("other-profiles store reset.");
   }
 
   /**

@@ -56,7 +56,6 @@ export class SearchCriteriaStore extends AbstractStoreService {
 
   protected async resetStore() {
     this.searchCriteria.next(this.emptySearchCriteria);
-    console.log("search criteria store reset.");
   }
 
   fillStore() {

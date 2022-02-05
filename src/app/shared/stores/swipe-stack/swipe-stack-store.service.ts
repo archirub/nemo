@@ -51,6 +51,7 @@ import { SwipeCapService } from "./swipe-cap.service";
 import { AbstractStoreService } from "@interfaces/stores.model";
 import { StoreResetter } from "@services/global-state-management/store-resetter.service";
 import { CurrentUserStore } from "..";
+import { Logger, SubscribeAndLog } from "../../functions/custom-rxjs";
 
 // - null is for when a state for the swipe stack hasn't been set yet
 // - "initialLoading" is for the very first load. Must be distinct from "loading"
@@ -118,9 +119,6 @@ export class SwipeStackStore extends AbstractStoreService {
     protected resetter: StoreResetter
   ) {
     super(resetter);
-    // this.profilesToRender$.subscribe((a) => console.log("profilesToRender$", a));
-    // this.isReady$.subscribe((a) => console.log("isReady$", a));
-    this.stackState$.subscribe((a) => console.log("stackState$:", a));
   }
 
   protected systemsToActivate(): Observable<any> {
@@ -150,7 +148,6 @@ export class SwipeStackStore extends AbstractStoreService {
     this.stackState.next(null);
     this.profiles.next([]);
     this.profilesToRender.next([]);
-    console.log("swipe-stack store reset.");
   }
 
   manageSwipeStack() {
@@ -203,11 +200,13 @@ export class SwipeStackStore extends AbstractStoreService {
     ]).pipe(
       withLatestFrom<[number, boolean, boolean], [StackState]>(this.stackState$),
       map(([[profilesCount, canUseSwipe, showsProfile], currentStackState]) => {
-        if (!canUseSwipe) return this.stackState.next("cap-reached");
+        if (canUseSwipe === false) return this.stackState.next("cap-reached");
 
-        if (!showsProfile) return this.stackState.next("not-showing-profile");
+        if (showsProfile === false) return this.stackState.next("not-showing-profile");
 
-        if (canUseSwipe !== null && showsProfile !== null && currentStackState === null)
+        // if both canUseSwipe and showsProfile are initialized (and both true) but that the stackState
+        // still isn't, then this is the initial load
+        if (canUseSwipe === true && showsProfile === true && currentStackState === null)
           return this.stackState.next("initialLoading");
 
         // case where the user wasn't showing profile but now does
@@ -545,26 +544,13 @@ export class SwipeStackStore extends AbstractStoreService {
   public addToSwipeStackQueue() {
     return this.SCstore.searchCriteria$.pipe(
       take(1),
-      // exhaustMap is a must use here, makes sure we don't have multiple requests to fill the swipe stack
-      exhaustMap((SC) =>
-        this.fetchUIDs(SC).pipe(
-          take(1),
-          // takes care of case where generateSwipeStack returns an empty array
-          filter((uids) => {
-            if (uids.length < 1) {
-              this.stackState.next("empty");
-              return false;
-            }
-            return true;
-          }),
+      switchMap((SC) => this.fetchUIDs(SC)),
+      switchMap((uids) => {
+        // takes care of case where generateSwipeStack returns an empty array
+        if (!uids || uids.length < 1) return of(this.stackState.next("empty"));
 
-          //using exhaustMap s.t. other requests are not listened to while profiles are being fetched
-          // this is because it is a costly operation w.r.t backend and money-wise
-          exhaustMap((uids) => this.fetchProfiles(uids)),
-
-          concatMap((profiles) => this.addToQueue(profiles))
-        )
-      )
+        return this.fetchProfiles(uids).pipe(concatMap((p) => this.addToQueue(p)));
+      })
     );
   }
 

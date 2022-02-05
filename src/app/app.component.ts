@@ -5,7 +5,7 @@ import { AngularFireAuth } from "@angular/fire/auth";
 import { HideOptions, ShowOptions, SplashScreen } from "@capacitor/splash-screen";
 
 import { firstValueFrom, Subscription } from "rxjs";
-import { filter, first } from "rxjs/operators";
+import { filter, first, map } from "rxjs/operators";
 import { Capacitor } from "@capacitor/core";
 
 import { GlobalStateManagementService } from "@services/global-state-management/global-state-management.service";
@@ -34,18 +34,12 @@ export class AppComponent implements OnDestroy, OnInit {
     private storeReadiness: StoreReadinessService
   ) {
     this.initializeApp();
-
-    // this.chatboardPictures.holder$.subscribe((a) =>
-    //   console.log("chatboardPictures.holder$:", a)
-    // );
+    SubscribeAndLog(this.afAuth.authState, "authState$");
   }
 
-  ngOnInit() {
-    SubscribeAndLog(this.afAuth.authState, "afAuth.authState");
-  }
+  ngOnInit() {}
 
   async initializeApp() {
-    console.log("initializeApp");
     const SplashScreenAvailable = Capacitor.isPluginAvailable("SplashScreen");
     const splashScreenShowOptions: ShowOptions = { showDuration: 10000 };
     const splashScreenHideOptions: HideOptions = {};
@@ -62,7 +56,6 @@ export class AppComponent implements OnDestroy, OnInit {
   }
 
   startGlobalStateManagement() {
-    console.log("STARTING GLOBAL STATE MANAGEMENT");
     this.subs.add(this.GlobalStateManagement.activate$.subscribe());
   }
 

@@ -75,8 +75,6 @@ export class CurrentUserStore extends AbstractStoreService {
 
   protected async resetStore() {
     this.user.next(null);
-
-    console.log("current user store reset.");
   }
 
   public showsProfile$ = this.user$.pipe(
@@ -168,7 +166,6 @@ export class CurrentUserStore extends AbstractStoreService {
       tap((user) => this.user.next(user)),
 
       shareReplay()
-      // tap(() => console.log("activating current user store"))
     );
   }
 

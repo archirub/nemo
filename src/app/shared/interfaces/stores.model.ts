@@ -2,6 +2,7 @@ import { StoreResetter } from "@services/global-state-management/store-resetter.
 import {
   BehaviorSubject,
   combineLatest,
+  concatMap,
   distinctUntilChanged,
   map,
   mapTo,
@@ -20,20 +21,17 @@ export abstract class AbstractStoreService {
 
   // these functions are not to be touched in the child class
   public activate$: Observable<any>;
-
-  // these functions are internal to the abstract class (and are unaccessible by the child)
-  private activate() {
-    return combineLatest([this.systemsToActivate(), this.listenOnReset$]).pipe(
-      mapTo(null),
-      share()
-    );
-  }
-  private listenOnReset$ = this.resetter.resetOnEmit$.pipe(
-    map(() => {
-      this.resetStore();
+  public listenOnReset$ = this.resetter.resetOnEmit$.pipe(
+    concatMap(async () => {
+      await this.resetStore();
       this.activate$ = this.activate();
     })
   );
+
+  // these functions are internal to the abstract class (and are unaccessible by the child)
+  private activate() {
+    return this.systemsToActivate().pipe(mapTo(null), share());
+  }
 
   private initChildDependentProperties() {
     // setTimeout used so that this is done after initialization to not get error

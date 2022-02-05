@@ -56,6 +56,7 @@ import { messengerMotivationMessages, sortUIDs, CustomError } from "@interfaces/
 import { Timestamp } from "@interfaces/firebase.model";
 
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
+import { StoreResetter } from "@services/global-state-management/store-resetter.service";
 
 @Component({
   selector: "app-messenger",
@@ -222,6 +223,17 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
         this.listenOnMessages(user.uid, msgCount + this.MSG_BATCH_SIZE, msgCount)
       )
     );
+
+  // // this is temporary until you make the logic within this component into a singleton
+  // // store, where that will just go in resetStore
+  // handleOnLogout$ = this.storeResetter.deactivateOnEmit$.pipe(
+  //   map(() => {
+  //     this.subs.unsubscribe();
+  //     this.loadingObserver?.disconnect();
+  //     this.messagesDatabaseSub?.();
+  //   })
+  // );
+
   // scrollTop$ = new BehaviorSubject<number>(0);
 
   // showLoading$ = new BehaviorSubject<boolean>(false);
@@ -265,7 +277,8 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
 
     private errorHandler: GlobalErrorHandler,
     private format: FormatService,
-    private userReporting: UserReportingService
+    private userReporting: UserReportingService,
+    private storeResetter: StoreResetter
   ) {
     // this.ionContentRef$.pipe(delay(4000)).subscribe((a) => {
     //   this.instantScroll(100);
@@ -290,6 +303,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
   ngOnInit() {
     this.subs.add(this.scrollHandler$.subscribe());
     this.subs.add(this.otherProfileHandler$.subscribe());
+    // this.subs.add(this.handleOnLogout$.subscribe());
     // this.subs.add(this.handleShowLoading$.subscribe());
     this.pageInitialization();
   }

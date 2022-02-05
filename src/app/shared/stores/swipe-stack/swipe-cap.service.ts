@@ -25,6 +25,7 @@ import { GlobalErrorHandler } from "@services/errors/global-error-handler.servic
 import { CurrentUserStore } from "..";
 import { AbstractStoreService } from "@interfaces/stores.model";
 import { StoreResetter } from "@services/global-state-management/store-resetter.service";
+import { Logger } from "../../functions/custom-rxjs";
 
 type SwipeState = "init" | "";
 type SwipeCapMap = { swipesLeft: number; date: Date };
@@ -75,7 +76,6 @@ export class SwipeCapService extends AbstractStoreService {
   protected async resetStore() {
     this.state$.next("init");
     this.swipesLeft.next(null);
-    console.log("swipes-cap store reset.");
   }
 
   useSwipe() {

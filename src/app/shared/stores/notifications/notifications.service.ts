@@ -8,8 +8,24 @@ import {
   PushNotificationSchema,
   Token,
 } from "@capacitor/push-notifications";
-import { BehaviorSubject, defer, EMPTY, firstValueFrom, merge, Observable } from "rxjs";
-import { distinctUntilChanged, filter, switchMap, withLatestFrom } from "rxjs/operators";
+import {
+  BehaviorSubject,
+  defer,
+  EMPTY,
+  firstValueFrom,
+  merge,
+  Observable,
+  of,
+} from "rxjs";
+import {
+  distinctUntilChanged,
+  filter,
+  map,
+  switchMap,
+  take,
+  tap,
+  withLatestFrom,
+} from "rxjs/operators";
 
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 import { StoreResetter } from "@services/global-state-management/store-resetter.service";
@@ -24,10 +40,14 @@ export class NotificationsStore extends AbstractStoreService {
   private token = new BehaviorSubject<Token>(null);
   private token$ = this.token.asObservable().pipe(distinctUntilChanged());
 
+  // for ugly logic for removing token on store reset (which happens after the user was logged out,
+  // and for which we need the user's uid)
+  private uid: string = null;
+
   constructor(
     private fs: AngularFirestore,
     private errorHandler: GlobalErrorHandler,
-    resetter: StoreResetter
+    protected resetter: StoreResetter
   ) {
     super(resetter);
   }
@@ -39,11 +59,11 @@ export class NotificationsStore extends AbstractStoreService {
     }
 
     this.listenOnRegistration();
-    return merge(this.handleTokenStorage("add"), this.requestPermission());
+    return merge(this.handleStorageAddition$, this.requestPermission());
   }
 
   protected async resetStore(): Promise<void> {
-    await firstValueFrom(this.handleTokenStorage("remove"));
+    await firstValueFrom(this.removeFromStorage());
     this.token.next(null);
   }
 
@@ -90,11 +110,27 @@ export class NotificationsStore extends AbstractStoreService {
     );
   }
 
-  private handleTokenStorage(action: "add" | "remove") {
+  handleStorageAddition$ = this.token$.pipe(
+    filter((t) => !!t?.value),
+    switchMap((t) =>
+      this.errorHandler.getCurrentUser$().pipe(
+        take(1),
+        map((u) => [t, u] as const)
+      )
+    ),
+    tap(([_, u]) => {
+      this.uid = u.uid;
+    }),
+    switchMap(([token, user]) => this.updateToken(token.value, user.uid, "add"))
+  );
+
+  removeFromStorage() {
     return this.token$.pipe(
-      filter((t) => !!t?.value),
-      withLatestFrom(this.errorHandler.getCurrentUser$()),
-      switchMap(([token, user]) => this.updateToken(token.value, user.uid, action))
+      take(1),
+      switchMap((token) => {
+        if (!token?.value || !this.uid) return of("");
+        return this.updateToken(token.value, this.uid, "remove");
+      })
     );
   }
 

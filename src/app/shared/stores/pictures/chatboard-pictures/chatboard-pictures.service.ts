@@ -85,8 +85,6 @@ export class ChatboardPicturesStore extends AbstractStoreService {
   protected async resetStore() {
     this.isReady.next(false);
     this.holder.next({});
-
-    console.log("chatboard-pictures store reset.");
   }
 
   public storeInLocal(

@@ -54,6 +54,7 @@ import {
   FishSwimAnimation,
 } from "@animations/index";
 import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
+import { SubscribeAndLog } from "src/app/shared/functions/custom-rxjs";
 @Component({
   selector: "app-home",
   templateUrl: "home.page.html",

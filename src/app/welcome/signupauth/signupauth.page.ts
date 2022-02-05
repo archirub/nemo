@@ -166,7 +166,6 @@ export class SignupauthPage implements OnInit {
     const emailControl = this.authForm.get("email");
 
     if (!emailControl.valid) {
-      console.log("yo", this.renderer);
       this.renderer.setStyle(
         this.testingRef.nativeElement,
         "border",

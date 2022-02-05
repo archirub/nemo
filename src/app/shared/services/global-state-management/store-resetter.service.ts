@@ -21,17 +21,21 @@ export class StoreResetter {
   private resetOnEmit = new Subject<"">();
   private deactivateOnEmit = new Subject<"">();
 
-  resetOnEmit$ = this.resetOnEmit.pipe(debounceTime(1000), delay(10000)); // for resetting stores
+  resetOnEmit$ = this.resetOnEmit.pipe(debounceTime(1000)); // for resetting stores
   deactivateOnEmit$ = this.deactivateOnEmit.pipe(debounceTime(1000)); // for unsubscribing from stores
 
   constructor() {}
 
   async resetStores(midTask: () => Promise<any>): Promise<void> {
-    console.log("this is", this);
     this.deactivateOnEmit.next("");
+
+    await later(1000);
+
     await midTask();
-    await later(200);
+
     this.resetOnEmit.next("");
+
+    await later(200);
   }
 }
 
