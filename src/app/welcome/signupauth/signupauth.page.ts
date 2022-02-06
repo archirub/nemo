@@ -63,7 +63,7 @@ export class SignupauthPage implements OnInit {
     );
   }
 
-  emailSendingInterval = 30; // (s)
+  emailSendingInterval = 60; // (s) (note!!: if it is too low it throws an error saying "too many requests", hence why it is high)
   slidesLeft: number;
   validatorChecks: object;
   authForm: FormGroup;
@@ -241,7 +241,7 @@ export class SignupauthPage implements OnInit {
       await this.loaderAlertManager.dismissDisplayed();
       await this.slideToNext();
       await lastValueFrom(this.emailService.sendVerificationToUser("sent"));
-      await lastValueFrom(this.emailService.listenForVerification());
+      await lastValueFrom(this.emailService.listenForVerification$);
     } catch (e) {
       const errorAlert = await this.loaderAlertManager.createAlert({
         header: "An unknown error occurred",
@@ -348,15 +348,12 @@ export class SignupauthPage implements OnInit {
     const slideIndex = await this.slidesRef.getActiveIndex();
 
     if (this.router.url === "/welcome/signupauth") {
-      if (slideIndex === 2) {
-        console.log("user already on right slide and page for email verification");
-        return;
-      }
+      if (slideIndex === 2) return; // case where user already on right slide
 
-      console.log("user on right page but wrong slide for email verification");
+      // case where we must go to slide and listen for verif and send verif
       await this.goToSlide(2);
       await lastValueFrom(this.emailService.sendVerificationToUser("sent"));
-      return lastValueFrom(this.emailService.listenForVerification());
+      return lastValueFrom(this.emailService.listenForVerification$);
     }
 
     console.log("user on wrong page and wrong slide for email verification");
@@ -370,7 +367,10 @@ export class SignupauthPage implements OnInit {
       buttons: ["Okay"],
     });
 
-    alert.onDidDismiss().then(() => this.router.navigateByUrl("/welcome/signupauth"));
+    alert
+      .onDidDismiss()
+      .then(() => this.router.navigateByUrl("/welcome/signupauth"))
+      .then(() => this.goToSlide(2));
 
     return this.loaderAlertManager.presentNew(alert, "replace-erase");
   }

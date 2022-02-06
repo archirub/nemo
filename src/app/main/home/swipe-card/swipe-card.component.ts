@@ -536,6 +536,10 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
     this.renderer.setStyle(this.pic2.nativeElement, "background", "black");
   }
 
+  goToNewCatchChat() {
+    console.error("goToNewCatchChat not yet implemented");
+  }
+
   // this is for trackBy of ngFor on profiles in template
   trackProfile(index: number, profile: Profile) {
     return profile.uid;

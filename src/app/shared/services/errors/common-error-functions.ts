@@ -41,7 +41,6 @@ export class CommonErrorFunctions {
     // using defer so that promise isn't read right away (thereby presenting the error message)
     return defer(() =>
       this.zone.run(async () => {
-        console.log("yo yo ", errorText);
         const alert = await this.loadingAlertManager.createAlert({
           header: errorText?.header ?? defaultErrorText.header,
           message: errorText?.message ?? defaultErrorText.message,

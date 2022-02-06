@@ -172,18 +172,20 @@ export class GlobalStateManagementService {
   }
 
   private requiresEmailVerificationRoutine(): Observable<any> {
+    const goToEmailVerification = async () => {
+      await this.router.navigateByUrl("/welcome/signupauth");
+
+      await this.signupauthMethodSharer?.goStraightToEmailVerification?.();
+    };
+
     return of(this.router.url).pipe(
       tap(() => this.userState.next("authenticated")),
-      concatMap((url) =>
-        url !== "/welcome/signupauth"
-          ? this.router.navigateByUrl("/welcome/signupauth")
-          : of("")
-      ),
-      concatMap(() =>
-        !!this.signupauthMethodSharer.goStraightToEmailVerification
-          ? this.signupauthMethodSharer.goStraightToEmailVerification()
-          : of("")
-      )
+      concatMap((url) => {
+        // default for now, easiest thing.
+        // logic in there made so that it can be called many times like that without
+        // hindering anything
+        return defer(() => goToEmailVerification());
+      })
     );
   }
 

@@ -91,12 +91,6 @@ export class LocalErrorHandler implements CustomErrorHandler<"local", LocalError
 
   private handleDefault<T>() {
     return catchError<T, Observable<T>>((err: CustomError) => {
-      console.log(
-        "hello there bro here",
-        err.type,
-        this.errorType,
-        this.typeMatches(err.type)
-      );
       if (!this.typeMatches(err.type)) throw err;
 
       return this.errFunctions.presentErrorMessage(err.text);
