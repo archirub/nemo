@@ -55,6 +55,7 @@ import {
 } from "@animations/index";
 import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
 import { SubscribeAndLog } from "src/app/shared/functions/custom-rxjs";
+import { MessageBoardComponent } from "src/app/main/chats/messenger/message-board/message-board.component";
 @Component({
   selector: "app-home",
   templateUrl: "home.page.html",
@@ -185,6 +186,14 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     private tutorials: TutorialsStore
   ) {
     this.onResize();
+  }
+
+  showTestModel() {
+    this.modalCtrl
+      .create({
+        component: MessageBoardComponent,
+      })
+      .then((m) => m.present());
   }
 
   ngOnInit() {

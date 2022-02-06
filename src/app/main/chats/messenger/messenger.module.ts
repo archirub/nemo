@@ -11,6 +11,8 @@ import { PipesModule } from "@pipes/pipes.module";
 import { ReportUserComponent } from "../report-user/report-user.component";
 import { ReportUserModule } from "../report-user/report-user.module";
 import { InfiniteScrollModule } from "@components/infinite-scroll/infinite-scroll.component.module";
+import { MessageBoardComponent } from "src/app/main/chats/messenger/message-board/message-board.component";
+import { MessagesService } from "./messages.service";
 
 @NgModule({
   imports: [
@@ -23,6 +25,7 @@ import { InfiniteScrollModule } from "@components/infinite-scroll/infinite-scrol
     ReportUserModule,
     // InfiniteScrollModule,
   ],
-  declarations: [MessengerPage],
+  declarations: [MessengerPage, MessageBoardComponent],
+  providers: [MessagesService],
 })
 export class MessengerPageModule {}

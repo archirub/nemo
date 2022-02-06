@@ -8,6 +8,7 @@ import {
   messageMap,
   profileFromDatabase,
   searchCriteria,
+  sortUIDs,
   userSnippet,
 } from "@interfaces/index";
 import { Timestamp } from "@interfaces/firebase.model";
@@ -164,11 +165,12 @@ export class FormatService {
     });
   }
 
-  private messageClassToDatabase(msg: Message, uids: string[]): messageFromDatabase {
+  public messageClassToDatabase(msg: Message, uids: string[]): messageFromDatabase {
     if (!msg) return;
     const content = msg.content;
     const senderID = msg.senderID;
     const time = Timestamp.fromDate(msg.time);
+    uids = sortUIDs(uids);
 
     return { senderID, time, content, uids };
   }

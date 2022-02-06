@@ -1,0 +1,235 @@
+ion-slides {
+    height: 100vh;
+    width: 100vw;
+  }
+  
+  ion-slide {
+    width: 100vw !important;
+    text-align: left;
+    display: block;
+  }
+  
+  
+  ion-avatar {
+    height: 45px;
+    width: 45px;
+    margin: 5px auto 0 auto;
+  }
+  
+  .profile-icon {
+    width: 45px;
+    height: 45px;
+  }
+  
+  ion-toolbar.chat-toolbar {
+    padding: 0px;
+    height: 80px;
+  }
+  
+  ion-content {
+    width: calc(100vw + 15px);
+    --padding-end: 15px;
+  }
+  
+  ion-header {
+    padding-top: 30px;
+    background: white;
+    position: absolute;
+  
+    ion-col {
+      padding: 0;
+      margin: 0;
+    }
+  }
+  
+  .messenger-container {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    height: calc(100% - 110px); //This should be equivalent to toolbar height + header top padding
+    bottom: 0;
+  }
+  
+  app-profile-card {
+    font-family: var(--ion-font-family);
+  }
+  
+  .profile-container {
+    left: 3px;
+    height: 88%;
+    bottom: -9vh;
+    --overflow: hidden;
+  }
+  
+  .shadow {
+    position: absolute;
+    box-shadow: 0 0 20px -12px;
+    width: 92.1%;
+    height: 84.8%;
+    left: 4.3%;
+    top: 10.7%;
+    border-radius: 30px;
+    overflow: hidden;
+    z-index: 5;
+    pointer-events: none;
+  }
+  
+  p.tip {
+    position: absolute;
+    bottom: 9%;
+    color: var(--ion-color-light);
+    font-size: 2vh;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  }
+  
+  div.chat-slide {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: var(--ion-color-primary);
+    color: var(--ion-color-primary-contrast);
+    top: 6vh;
+    z-index: 10;
+    left: 3vw;
+    position: absolute;
+    border-radius: 50%;
+    width: 7vh;
+    height: 7vh;
+    font-size: 3.5vh;
+  }
+  
+  .flexcolumn {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .messenger-header {
+    padding-top: 3px;
+    margin-top: 0;
+    text-align: center;
+    margin-bottom: 10px;
+    font-size: 2.3vh;
+  }
+  
+  img[name="shield"] {
+    height: 4.3vh;
+    padding: 0 4vw;
+    margin-top: 2vh;
+  }
+  
+  ion-button.back-button {
+    --background: transparent;
+    --background-activated: transparent;
+    --box-shadow: none;
+    --ripple-color: transparent;
+    margin-top: 1vh;
+  
+  
+    ion-icon {
+      color: var(--ion-color-primary);
+    };
+  }
+  
+  
+  #header-grid {
+    margin-bottom: -10px;
+    margin-top: -10px;
+  }
+  
+  .message-col {
+    padding: 0px;
+    display: flex;
+  }
+  
+  .col-sent {
+    justify-content: right;
+    text-align: flex-end;
+    justify-content: flex-end;
+  }
+  
+  .col-recieved {
+    justify-content: flex-start;
+    text-align: flex-start;
+    text-align: left;
+  }
+  
+  .message {
+    margin-top: 3px;
+    margin-bottom: 3px;
+    padding: 10px;
+    border-radius: 17px;
+    width: fit-content;
+    white-space: pre-wrap;
+    display: flex;
+    word-break: break-word;
+  }
+  
+  .ownMessage {
+    background: rgba(#F07167, 0.8);
+    color: #000;
+    text-align: left;
+    align-items: right;
+    align-content: right;
+    margin-left: 0px;
+    margin-right: 6px;
+    font-size: 2.4vh;
+  }
+  
+  .notOwnMessage {
+    background: var(--ion-color-light-tint);
+    color: #000;
+    text-align: left;
+    margin-right: 0px;
+    margin-left: 6px;
+    font-size: 2.4vh;
+  }
+  
+  .failedToSend {
+    background: var(--ion-color-medium-shade)
+  }
+  
+  .isSending {
+    background: red;
+  }
+  
+  #messageInput {
+    order: 1;
+    flex: 9;
+    padding: 0px;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-left: 10px;
+    margin-right: 0px;
+    --box-shadow: none;
+    --border-radius: 25px;
+  }
+  
+  #sendButton {
+    order: 2;
+    flex: 2;
+    margin-left: -10px;
+  }
+  
+  #boxBelowInput {
+    display: flex;
+    height: 52px;
+    width: 367px;
+  }
+  
+  #messageInputContainer {
+    position: fixed;
+    bottom: 0;
+    background: var(--ion-color-primary-contrast);
+    width: 100vw;
+  
+    ion-searchbar {
+      font-size: 2.4vh;
+    }
+  }
+  
+  ::-webkit-scrollbar, *::-webkit-scrollbar {
+    display: none !important;
+  }

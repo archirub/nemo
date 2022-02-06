@@ -42,60 +42,56 @@
       </ion-header>
 
       <div class="messenger-container">
-        <ion-content
-          #messageContent
-          [scrollEvents]="true"
-          (ionScroll)="registerScrolling($event)"
-        >
-          <!-- <ng-container *ngIf="showLoading$ | async">
-            <div class="fishAnim">
-              <div class="flexcol">
-                <img src="/assets/nemo_load.svg" #fish />
-                <h2 class="load">Loading swipe stack</h2>
-              </div>
-            </div>
-          </ng-container> -->
-          <div #loadingTrigger>
+        <ion-row *ngIf="(messages$ | async).length < 1">
+          <p class="tip">{{ chosenPopup }}</p>
+        </ion-row>
+
+        <ion-content #messageContent [scrollEvents]="true">
+          <!-- (ionScroll)="registerScrolling($event)" -->
+          <!-- <div #loadingTrigger>
             <ion-spinner name="bubbles" *ngIf="!(firstBatchArrived$ | async)">
             </ion-spinner>
           </div>
-          <!-- <ion-refresher
-          slot="fixed"
-          pullFactor="1"
-          pullMin="100"
-          pullMax="200"
-          (ionRefresh)="refreshing($event)"
-        ></ion-refresher>
-        <ion-refresher-content
-          pullingIcon="chevron-down-circle-outline"
-          pullingText="Pull to refresh"
-          refreshingSpinner="circles"
-          refreshingText="Refreshing..."
-        > -->
-          <ion-row *ngIf="(messages$ | async).length < 1">
-            <p class="tip">{{ chosenPopup }}</p>
-          </ion-row>
-          <!-- <div *ngIf="!(showLoading$ | async)"> -->
-          <ion-row
-            *ngFor="let message of messages$ | async; index as i; let last='last'; trackBy: trackMessage"
-          >
-            <ion-col
-              size="8"
-              *ngIf="message?.senderID === (chat$ | async)?.recipient?.uid"
-              class="message-col col-recieved"
-            >
-              <div class="message notOwnMessage">{{message?.content}}</div>
-            </ion-col>
+          <ion-button (click)="scrollingTest()">
+            <ion-icon slot="start" name="add"></ion-icon>
+            Load more messages
+          </ion-button> -->
 
-            <ion-col
-              size="8"
-              offset="4"
-              *ngIf="message?.senderID !== (chat$ | async)?.recipient?.uid"
-              class="message-col col-sent"
+          <app-message-board [messages$]="messages$"></app-message-board>
+          <!-- <ion-infinite-scroll
+            position="top"
+            threshold="100px"
+            (ionInfinite)="loadData($event)"
+          >
+            <ion-infinite-scroll-content
+              loadingSpinner="bubbles"
+              loadingText="Loading more data..."
             >
-              <div class="message ownMessage">{{message?.content}}</div>
-            </ion-col>
-          </ion-row>
+            </ion-infinite-scroll-content>
+          </ion-infinite-scroll>
+          <ion-list> -->
+          <!-- <div *ngIf="!(showLoading$ | async)"> -->
+          <!-- <ion-row
+              *ngFor="let message of messages$ | async; index as i; let last='last'; trackBy: trackMessage"
+            >
+              <ion-col
+                size="8"
+                *ngIf="message?.senderID === (chat$ | async)?.recipient?.uid"
+                class="message-col col-recieved"
+              >
+                <div class="message notOwnMessage">{{message?.content}}</div>
+              </ion-col>
+
+              <ion-col
+                size="8"
+                offset="4"
+                *ngIf="message?.senderID !== (chat$ | async)?.recipient?.uid"
+                class="message-col col-sent"
+              >
+                <div class="message ownMessage">{{message?.content}}</div>
+              </ion-col>
+            </ion-row>
+          </ion-list> -->
           <!-- </div> -->
 
           <!-- <div id="boxBelowInput"></div>
@@ -128,30 +124,30 @@
 
         <div id="boxBelowInput"></div>
 
-          <div id="messageInputContainer">
-            <ion-toolbar>
-              <ion-searchbar
-                [(ngModel)]="latestChatInput"
-                #searchBar
-                showCancelButton="never"
-                searchIcon="none"
-                placeholder=""
-                type="text"
-                id="messageInput"
+        <div id="messageInputContainer">
+          <ion-toolbar>
+            <ion-searchbar
+              [(ngModel)]="userInput"
+              #searchBar
+              showCancelButton="never"
+              searchIcon="none"
+              placeholder=""
+              type="text"
+              id="messageInput"
+            >
+              <ion-button
+                icon-only
+                fill="clear"
+                id="sendButton"
+                (click)="onSendMessage()"
+                [disabled]="sendingMessage$ | async"
               >
-                <ion-button
-                  icon-only
-                  fill="clear"
-                  id="sendButton"
-                  (click)="sendMessage().subscribe()"
-                  [disabled]="sendingMessage$ | async"
-                >
-                  <ion-icon name="arrow-forward-circle"></ion-icon>
-                </ion-button>
-              </ion-searchbar>
-            </ion-toolbar>
-          </div>
+                <ion-icon name="arrow-forward-circle"></ion-icon>
+              </ion-button>
+            </ion-searchbar>
+          </ion-toolbar>
         </div>
+      </div>
     </ion-slide>
 
     <ion-slide #profSlide>

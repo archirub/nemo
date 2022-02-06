@@ -1,0 +1,42 @@
+<ion-infinite-scroll
+  position="top"
+  threshold="200px"
+  [disabled]="true"
+  (ionInfinite)="loadMoreMessages($event)"
+>
+  <ion-infinite-scroll-content
+    loadingSpinner="bubbles"
+    loadingText="Loading more data..."
+  >
+  </ion-infinite-scroll-content>
+</ion-infinite-scroll>
+
+<ion-list>
+  <!-- <ion-item *ngFor="let item of messages">{{ item }}</ion-item> -->
+
+  <ion-row
+    *ngFor="
+      let message of messages$ | async;
+      index as i;
+      let last = last;
+      trackBy: trackMessage
+    "
+  >
+    <ion-col
+      size="8"
+      *ngIf="message?.senderID === (chat$ | async)?.recipient?.uid"
+      class="message-col col-recieved"
+    >
+      <div class="message notOwnMessage">{{ message?.content }}</div>
+    </ion-col>
+
+    <ion-col
+      size="8"
+      offset="4"
+      *ngIf="message?.senderID !== (chat$ | async)?.recipient?.uid"
+      class="message-col col-sent"
+    >
+      <div class="message ownMessage">{{ message?.content }}</div>
+    </ion-col>
+  </ion-row>
+</ion-list>
