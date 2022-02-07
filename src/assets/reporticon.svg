@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg
-   width="1009.4717"
-   height="1048.059"
-   viewBox="0 0 1009.4717 1048.059"
+   width="242.2"
+   height="249.8"
+   viewBox="0 0 242.2 249.8"
    fill="none"
    version="1.1"
-   id="svg832"
+   id="svg1052"
    sodipodi:docname="reporticon.svg"
    inkscape:version="1.1 (c4e8f9e, 2021-05-24)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
@@ -13,9 +13,9 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:svg="http://www.w3.org/2000/svg">
   <defs
-     id="defs836" />
+     id="defs1056" />
   <sodipodi:namedview
-     id="namedview834"
+     id="namedview1054"
      pagecolor="#ffffff"
      bordercolor="#666666"
      borderopacity="1.0"
@@ -23,37 +23,31 @@
      inkscape:pageopacity="0.0"
      inkscape:pagecheckerboard="0"
      showgrid="false"
-     inkscape:zoom="0.46103896"
-     inkscape:cx="452.23944"
-     inkscape:cy="532.49296"
+     inkscape:zoom="0.32574648"
+     inkscape:cx="1235.6235"
+     inkscape:cy="371.45452"
      inkscape:window-width="1440"
-     inkscape:window-height="791"
+     inkscape:window-height="792"
      inkscape:window-x="0"
      inkscape:window-y="25"
      inkscape:window-maximized="1"
-     inkscape:current-layer="svg832" />
+     inkscape:current-layer="svg1052" />
   <path
-     d="m 974.22666,105 c -166.93,78.5 -323.418,52.999 -470.436,-82.5"
-     stroke="#f07167"
-     stroke-width="45"
-     stroke-linecap="round"
-     id="path824" />
-  <path
-     d="m 974.80666,108.999 c 50.93004,412.071 -48.93,693.005 -471.5,916.1"
-     stroke="#f07167"
-     stroke-width="45"
-     stroke-linecap="round"
+     d="m 121.1,249.3 c 66.6,0 120.6,-55.7 120.6,-124.4 C 241.7,56.2 187.7,0.5 121.1,0.5 54.5,0.5 0.5,56.2 0.5,124.9 c 0,68.7 54,124.4 120.6,124.4 z"
+     fill="#ffffff"
+     stroke="#ed726a"
+     stroke-miterlimit="10"
      id="path826" />
   <path
-     d="m 35.265658,129.309 c -52.264,404.009 46.616,679.003 468.225002,896.25"
-     stroke="#f07167"
-     stroke-width="45"
-     stroke-linecap="round"
-     id="path828" />
+     d="m 189.6,54.3 -10.9,6.5 c -17.6,10.1 -39.4,7.2 -55.6,-5 -0.6,-0.4 -1.9,-1.6 -1.9,-1.6 0,0 -1.3,1.2 -1.9,1.6 -16.2,12.2 -38.1,15.1 -55.6,5 L 52.8,54.3 c 0,0 0,4.6 0,5.7 v 56.6 c 0,13.8 2.2,24.8 8.2,37.2 6,12.5 16,23.2 26.8,31.8 l 31.5,21.6 2,1.3 2,-1.3 31.5,-21.6 c 10.9,-8.6 20.8,-19.4 26.8,-31.8 6,-12.5 8.2,-23.4 8.2,-37.2 V 59.7 c -0.2,-1.1 -0.2,-5.4 -0.2,-5.4 z m -6.3,62.3 c 0,26.4 -11.9,46.7 -32.6,63.1 l -29.5,20 -29.5,-20 C 71,163.3 59.1,143 59.1,116.6 V 65.2 l 1.4,0.8 c 8.9,5.1 18,7 27.8,7 11.3,0 23.2,-4.4 32.9,-11 18,12.4 41.6,15.1 60.7,4 l 1.4,-0.8 z"
+     fill="#ed726a"
+     id="path1030" />
   <path
-     d="M 31.452658,124.539 C 201.43666,196.193 356.75766,164.357 498.15066,22.999"
-     stroke="#f07167"
-     stroke-width="45"
-     stroke-linecap="round"
-     id="path830" />
+     d="m 99.197,97.97 -4.525,4.526 48.295,48.295 4.525,-4.526 z"
+     fill="#ed726a"
+     id="path1032" />
+  <path
+     d="m 94.715,146.315 4.525,4.525 48.295,-48.295 -4.525,-4.525 z"
+     fill="#ed726a"
+     id="path1034" />
 </svg>

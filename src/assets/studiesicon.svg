@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="242.2"
+   height="249.8"
+   viewBox="0 0 242.2 249.8"
+   fill="none"
+   version="1.1"
+   id="svg1052"
+   sodipodi:docname="studiesicon.svg"
+   inkscape:version="1.1 (c4e8f9e, 2021-05-24)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1056" />
+  <sodipodi:namedview
+     id="namedview1054"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     showgrid="false"
+     inkscape:zoom="0.32574648"
+     inkscape:cx="486.57472"
+     inkscape:cy="405.22311"
+     inkscape:window-width="1440"
+     inkscape:window-height="792"
+     inkscape:window-x="0"
+     inkscape:window-y="25"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg1052" />
+  <path
+     d="m 121.1,249.3 c 66.6,0 120.6,-55.7 120.6,-124.4 C 241.7,56.2 187.7,0.5 121.1,0.5 54.5,0.5 0.5,56.2 0.5,124.9 c 0,68.7 54,124.4 120.6,124.4 z"
+     fill="#ffffff"
+     stroke="#1aafb8"
+     stroke-miterlimit="10"
+     id="path910" />
+  <path
+     d="m 152,189.5 -5.9,10.5 5.1,2.8 5.9,-10.5 z"
+     fill="#1aafb8"
+     id="path1036" />
+  <path
+     d="m 155,156.6 c -0.4,0.2 -5.4,2.6 -5.9,2.8 -5.6,2.6 -14.5,5.4 -26.7,5.8 h -5.8 C 80.3,164 68.6,142 66.9,138.4 v -19.6 l -5.8,-2.3 v 22.6 c 0,0.4 0.1,0.7 0.2,1.1 0.5,1.3 13,31.1 58.3,31.1 14.7,0 25.4,-3.3 32,-6.4 0.5,-0.2 3,-1.5 3.5,-1.8 z"
+     fill="#1aafb8"
+     id="path1038" />
+  <path
+     d="m 160.4,194.2 v 12.4 h 5.8 v -12.4 z"
+     fill="#1aafb8"
+     id="path1040" />
+  <path
+     d="m 166.3,122.4 39.1,-16.2 6.5,-2.7 -6.5,-2.7 -84.8,-35.1 -1.1,-0.4 -1.1,0.4 -84.8,35.1 -6.5,2.7 6.5,2.7 85.9,35.5 35.5,-14.7 -8,-3 -27.5,11.5 -77.1,-32 77.1,-31.9 77.1,31.9 -33.5,13.9 -32.2,-12 c 0.2,-0.6 0.3,-1.2 0.3,-1.9 0,-4.9 -5.1,-8.8 -11.7,-8.8 -6.6,0 -11.7,3.9 -11.7,8.8 0,4.9 5.1,8.8 11.7,8.8 2.9,0 5.5,-0.8 7.6,-2.1 l 33.4,12.5 v 49 c -3.4,1.2 -5.8,4.4 -5.8,8.2 0,4.8 3.9,8.8 8.8,8.8 4.8,0 8.8,-3.9 8.8,-8.8 0,-3.8 -2.5,-7 -5.8,-8.2 v -16.6 c 8.4,-6.3 11.4,-14.8 11.5,-15.1 0.1,-0.3 0.2,-0.6 0.2,-1 v -22.6 l -5.8,2.3 v 19.7 c -0.5,1.2 -2.3,5.1 -5.8,8.8 z m -46.8,-15 c -4.8,0 -5.8,-2.6 -5.8,-3.8 0,-1.7 1.1,-4.2 5.8,-4.2 5.3,0 5.8,3 5.8,4.2 0.1,1.1 -1,3.8 -5.8,3.8 z m 43.9,75.4 c -1.6,0 -2.9,-1.3 -2.9,-2.9 0,-1.6 1.3,-2.9 2.9,-2.9 1.6,0 2.9,1.3 2.9,2.9 0,1.6 -1.3,2.9 -2.9,2.9 z"
+     fill="#1aafb8"
+     id="path1042" />
+  <path
+     d="m 174.8,189.5 -5.1,2.8 5.9,10.5 5.1,-2.8 z"
+     fill="#1aafb8"
+     id="path1044" />
+</svg>

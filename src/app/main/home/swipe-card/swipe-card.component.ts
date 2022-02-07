@@ -72,6 +72,7 @@ import {
 } from "@angular/fire/firestore";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 import { SwipeCapService } from "@stores/swipe-stack/swipe-cap.service";
+import { AnalyticsService } from "@services/analytics/analytics.service";
 
 @Component({
   selector: "app-swipe-card",
@@ -152,6 +153,7 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
   constructor(
     private renderer: Renderer2,
     private firestore: AngularFirestore,
+    private fbAnalytics: AnalyticsService,
 
     private swipeOutcomeStore: SwipeOutcomeStore,
     private swipeStackStore: SwipeStackStore,
@@ -541,6 +543,13 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
   // this is for trackBy of ngFor on profiles in template
   trackProfile(index: number, profile: Profile) {
     return profile.uid;
+  }
+
+  async openedProfileAnalytics(profileUID: string) {
+    this.fbAnalytics.logEvent("profile_expanded", {
+      profileOpened: profileUID, //UID of profile expanded
+      timestamp: Date.now() //Time since epoch
+    });
   }
 
   ngOnDestroy() {

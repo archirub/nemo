@@ -123,11 +123,10 @@
         <div id="info-segment" *ngIf="profile?.areaOfStudy || profile?.society">
           <div id="interests-container" class="centered">
             <div id="interests-box-soc" *ngIf="profile?.areaOfStudy">
-              <ion-icon
-                name="school"
+              <img
+                src="/assets/studiesicon.svg"
                 id="bottom-icon"
-                style="color: var(--ion-color-primary)"
-              ></ion-icon>
+              />
               <br />
               <div class="interests-text">
                 <ion-label
@@ -144,11 +143,10 @@
             </div>
 
             <div id="interests-box-soc" *ngIf="profile?.society">
-              <ion-icon
-                name="people"
+              <img
+                src="/assets/societiesicon.svg"
                 id="bottom-icon"
-                style="color: var(--ion-color-primary)"
-              ></ion-icon>
+              />
               <br />
               <div class="interests-text">
                 <ion-label id="interests-label">{{ profile?.society }}</ion-label>

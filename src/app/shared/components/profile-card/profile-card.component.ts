@@ -229,8 +229,9 @@ export class ProfileCardComponent implements OnInit, AfterViewInit, OnDestroy {
         "boxShadow",
         "0px 30px 10px -20px rgb(251 251 251)"
       ); //Add box shadow to header
+
+      this.expanded.emit(this.profile.uid);
     }
-    this.expanded.emit(this.moreInfo);
 
     setTimeout(() => {
       this.sizeSwipers();

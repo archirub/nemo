@@ -37,6 +37,7 @@ import { SignupRequired } from "@interfaces/signup.model";
 import { allowOptionalProp } from "@interfaces/index";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
+import { AnalyticsService } from "@services/analytics/analytics.service";
 
 @Component({
   selector: "app-signuprequired",
@@ -110,6 +111,8 @@ export class SignuprequiredPage implements OnInit, OnDestroy {
     private renderer: Renderer2,
     private navCtrl: NavController,
 
+    private fbAnalytics: AnalyticsService,
+
     private universitiesStore: UniversitiesStore,
 
     private loadingAlertManager: LoadingAndAlertManager,
@@ -144,6 +147,12 @@ export class SignuprequiredPage implements OnInit, OnDestroy {
     if (typeof invalidSlide === "number") return this.unlockAndSlideTo(invalidSlide);
 
     await this.updateData(); // may not be necessary, but last check to make sure data we have in logic exactly reflects that in the UI
+
+    //Req must be complete by this point, log analytics
+    await this.errorHandler.getCurrentUser$().pipe(
+      map((user) => this.fbAnalytics.logEvent("signupreq_complete", user)),
+    );
+
     return this.router.navigateByUrl("/welcome/signupoptional");
   }
 
@@ -250,6 +259,11 @@ export class SignuprequiredPage implements OnInit, OnDestroy {
     await this.signup.initializeUser();
 
     await this.loadingAlertManager.dismissDisplayed();
+
+    //Log analytics event for skip to app
+    await this.errorHandler.getCurrentUser$().pipe(
+      map((user) => this.fbAnalytics.logEvent("skip_to_app", user)),
+    );
 
     return this.navCtrl.navigateForward("/welcome/signup-to-app");
   }

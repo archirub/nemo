@@ -21,6 +21,7 @@
     "@angular/platform-browser": "~12.2.5",
     "@angular/platform-browser-dynamic": "~12.2.5",
     "@angular/router": "~12.2.5",
+    "@capacitor-community/firebase-analytics": "^1.0.1",
     "@capacitor/android": "^3.2.4",
     "@capacitor/app": "^1.0.7",
     "@capacitor/camera": "^1.1.0",

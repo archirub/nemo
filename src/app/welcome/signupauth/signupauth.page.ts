@@ -43,6 +43,7 @@ import { GlobalErrorHandler } from "@services/errors/global-error-handler.servic
 import { FireAuthUserCredential } from "@interfaces/firebase.model";
 import { FlyingLetterAnimation } from "@animations/letter.animation";
 import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
+import { AnalyticsService } from "@services/analytics/analytics.service";
 
 @Component({
   selector: "app-signupauth",
@@ -127,6 +128,7 @@ export class SignupauthPage implements OnInit {
     private navCtrl: NavController,
 
     private afFunctions: AngularFireFunctions,
+    private fbAnalytics: AnalyticsService,
 
     private universitiesStore: UniversitiesStore,
 
@@ -239,6 +241,18 @@ export class SignupauthPage implements OnInit {
         return this.loaderAlertManager.dismissDisplayed(); // logic to handle in case of error here is all in requestAccountCreation()
       }
 
+      try {
+        let enteredEmail: string = emailControl.value; //Force typeset to string just in case
+
+        //Successful account creation, log analytics
+        await this.fbAnalytics.logEvent("account_creation", {
+          email: enteredEmail, 
+          timestamp: Date.now()
+        })
+      } catch {
+        console.log('Analytics log failed. Email could not be parsed as a string.');
+      }
+
       await this.loaderAlertManager.dismissDisplayed();
       await this.slideToNext();
       await lastValueFrom(this.emailService.sendVerificationToUser("sent"));
@@ -263,6 +277,8 @@ export class SignupauthPage implements OnInit {
 
     if (!user.emailVerified) return;
 
+    //Assumed at this point email is verified, send to analytics
+    this.fbAnalytics.logEvent("email_verified", user)
     return this.navCtrl.navigateForward("/welcome/signuprequired");
   }
 

@@ -40,6 +40,7 @@ import { StoreReadinessService } from "@services/store-readiness/store-readiness
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 import { TutorialsService } from "@services/tutorials/tutorials.service";
 import { SwipeCapService } from "@stores/swipe-stack/swipe-cap.service";
+import { AnalyticsService } from "@services/analytics/analytics.service";
 
 import { ChatboardStore, SwipeStackStore } from "@stores/index";
 import { OwnPicturesStore } from "@stores/pictures/own-pictures/own-pictures.service";
@@ -164,6 +165,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     private modalCtrl: ModalController,
     private navCtrl: NavController,
     private afFunctions: AngularFireFunctions,
+    private fbAnalytics: AnalyticsService,
 
     private swipeStackStore: SwipeStackStore,
     private ownPicturesService: OwnPicturesStore,
@@ -199,6 +201,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
   }
 
   async showSearchCriteria(): Promise<void> {
+    this.fbAnalytics.logEvent('sc_open', {});
     const modal = await this.modalCtrl.create({
       component: SearchCriteriaComponent,
       enterAnimation: SCenterAnimation(),
