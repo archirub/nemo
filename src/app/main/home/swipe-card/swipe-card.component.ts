@@ -52,6 +52,7 @@ import {
   CurrentUserStore,
   OtherProfilesStore,
   SearchCriteriaStore,
+  StackState,
   SwipeOutcomeStore,
   SwipeStackStore,
 } from "@stores/index";
@@ -102,14 +103,15 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
 
   @Input() profiles$: Observable<Profile[]>;
   @Input() homeContainer: ElementRef;
-  @Output() matched = new EventEmitter<Profile>();
+
+  @Input() swipeCardsRef: ElementRef;
 
   // All of these are for showing SC or match animation. Assuming that always happens sufficiently late that these refs can't be undefined
   //@ViewChild("homeContainer", { read: ElementRef }) homeContainer: ElementRef;
   @ViewChild("pic1", { read: ElementRef }) pic1: ElementRef;
   @ViewChild("pic2", { read: ElementRef }) pic2: ElementRef;
   @ViewChild("catchText", { read: ElementRef }) catchText: ElementRef;
-  @ViewChild("swipeCards", { read: ElementRef }) swipeCards: ElementRef;
+  // @ViewChild("swipeCards", { read: ElementRef }) swipeCards: ElementRef;
   @ViewChild("backdrop", { read: ElementRef }) backdrop: ElementRef;
   @ViewChild("catchEls", { read: ElementRef }) catchEls: ElementRef;
 
@@ -150,6 +152,16 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
     )
   );
 
+  // enforces that the cards don't show if the stack is in one of those states
+  // this is in particular for the case where profiles have already been fetched
+  // and are contained in profilesToRender$, and the user does something (e.g. goes "Under")
+  // which changes the stackState to one of those. It is therefore required for that scenario
+  // for showProfile and is more of a safety net for cap-reached and empty.
+  hideCardStates: StackState[] = ["cap-reached", "not-showing-profile", "empty"];
+  hideCards$ = this.swipeStackStore.stackState$.pipe(
+    map((ss) => this.hideCardStates.includes(ss))
+  );
+
   constructor(
     private renderer: Renderer2,
     private firestore: AngularFirestore,
@@ -173,7 +185,6 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
     this.subs.add(this.managePictureSwiping$.subscribe());
     this.subs.add(this.onCardTapLogic().subscribe());
     this.subs.add(this.handleTaps().subscribe());
-    console.log(this.homeContainer);
 
     // DEV
     // this.currentUserStore.user$
@@ -344,12 +355,12 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
         ])
       ),
       exhaustMap(([profile, otherChoice]) => {
-        console.log("ownChoice: ", ownChoice);
-        console.log("otherChoice: ", otherChoice);
         if (ownChoice === "no") return this.onNoSwipe(profile);
 
+        // DEV
         if (["yes", "super"].includes(ownChoice) && otherChoice === "no")
-          return this.onYesSwipe(profile);
+          return this.onMatch(profile);
+        // return this.onYesSwipe(profile);
 
         if (
           ["yes", "super"].includes(ownChoice) &&
@@ -381,7 +392,7 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
       ).pipe(switchMap((animation) => animation.play()));
     }
     if (choice === "super") {
-      console.log("No super swipe logic for single tap");
+      console.error("No super swipe logic for single tap");
     }
   }
 
@@ -391,7 +402,6 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
    * - Checks whether other user likes as well, triggers onMatch method if match
    */
   onYesSwipe(profile: Profile): Observable<any> {
-    console.log("swipe-card component: onYesSwipe function running");
     const storeTasks$ = (p: Profile) =>
       forkJoin([
         this.swipeStackStore.removeProfile(p),
@@ -414,7 +424,6 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
    * - registers swipe choice in swipeOutcomeStore
    * */
   onNoSwipe(profile: Profile): Observable<any> {
-    console.log("swipe-card component: onNoSwipe function running");
     const storeTasks$ = (p: Profile) =>
       forkJoin([
         this.swipeStackStore.removeProfile(p),
@@ -437,29 +446,18 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
    * - triggers "registerSwipeChoices" from swipeOutcomeStore, which removes swipeOutcome list and
    * saves them on the database, new doc is created backened
    */
-  private onMatch(profile: Profile) {
-    console.log("swipe-card component: onMatch function running");
-    const midAnimTasks$ = (p: Profile) =>
-      forkJoin([
-        this.swipeStackStore.removeProfile(p),
-        this.swipeOutcomeStore.yesSwipe(p),
-      ]);
-    // HERE REPLACE WITH THE APPROPRIATE ANIMATION
-    const animateSwipe = SwipeAnimation(midAnimTasks$.bind(this), profile, this.catchEls);
-
-    const changeText = () => {
-      // this.likeText.nativeElement.innerHTML = `You liked ${profile.firstName}!`;
-    };
+  private onMatch(matchedProfile: Profile) {
     const postAnimTasks$ = (p) =>
       concat(
-        of(changeText()),
-        this.otherProfilesStore.saveProfile(p.uid, p),
+        this.swipeStackStore.removeProfile(p),
+        this.swipeOutcomeStore.yesSwipe(p),
+        this.otherProfilesStore.saveProfile(p),
         this.swipeOutcomeStore.registerSwipeChoices$
       );
 
     return concat(
-      defer(() => animateSwipe()),
-      postAnimTasks$(profile)
+      defer(() => this.playCatch(matchedProfile)),
+      postAnimTasks$(matchedProfile)
     );
   }
 
@@ -519,7 +517,7 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
       this.pic2,
       this.catchText,
       this.backdrop,
-      this.swipeCards
+      this.swipeCardsRef
     ).play();
   }
 
@@ -533,11 +531,15 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
       this.pic2,
       this.catchText,
       this.backdrop,
-      this.swipeCards
+      this.swipeCardsRef
     ).play();
 
     this.renderer.setStyle(catchItems, "display", "none");
     this.renderer.setStyle(this.pic2.nativeElement, "background", "black");
+  }
+
+  goToNewCatchChat() {
+    console.error("goToNewCatchChat not yet implemented");
   }
 
   // this is for trackBy of ngFor on profiles in template

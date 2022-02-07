@@ -1,6 +1,7 @@
+import { GlobalErrorHandlerOptions } from "./../../interfaces/error-handling.model";
 import { Injectable } from "@angular/core";
 
-import { catchError, Observable, OperatorFunction, of } from "rxjs";
+import { catchError, Observable, OperatorFunction, of, tap } from "rxjs";
 
 import { CloudFunctionsErrorHandler } from "./cloud-functions-error-handler.service";
 import { FirestoreErrorHandler } from "./firestore-error-handler.service";
@@ -41,13 +42,15 @@ export class GlobalErrorHandler implements CustomGlobalErrorHandler {
     );
   }
 
-  handleErrors<T>() {
+  handleErrors<T>(opts?: GlobalErrorHandlerOptions) {
     return (source: Observable<T>) =>
       source.pipe(
         this.errorConverterSafeguard<T>(),
         // DEV
         catchError<T, Observable<T>>((err: CustomError) => {
           console.error("Error through GlobalErrorHandler:", err);
+          console.error("Error through GlobalErrorHandler:");
+
           throw err;
         }),
 
@@ -74,7 +77,11 @@ export class GlobalErrorHandler implements CustomGlobalErrorHandler {
         //   debugger;
         //   throw err;
         // }),
-        this.fStorageEH.handleErrors<T>()
+        this.fStorageEH.handleErrors<T>(),
+
+        tap(() => {
+          if (opts?.defaultValue) console.log("the default value is", opts.defaultValue);
+        })
       ) as Observable<T>;
   }
 

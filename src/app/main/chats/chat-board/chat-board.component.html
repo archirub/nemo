@@ -5,10 +5,10 @@
     [buttonWidth]="16"
     [fontSize]="4"
     [selections]="['chats', 'catches']"
-    [catchToggle]='false'
+    [catchToggle]="false"
   ></nemo-toggle>
 
-  <ion-content *ngIf="view === 'catches'" id='catchContainer' #chatContainer>
+  <ion-content *ngIf="view === 'catches'" id="catchContainer" #chatContainer>
     <!--Never matched before and no catches currently available-->
     <div *ngIf="this.matches.length < 1 && this.chats.length < 1" class="noChats">
       <p>
@@ -23,9 +23,7 @@
 
     <!--Matched before, but no catches currently available-->
     <div *ngIf="this.matches.length < 1 && this.chats.length >= 1" class="noChats">
-      <p>
-        There's no one here right now, keep swiping to find more catches!
-      </p>
+      <p>There's no one here right now, keep swiping to find more catches!</p>
 
       <div class="fish" (click)="goToHome()">
         <img name="fish" src="/assets/swipeicon.svg" />
@@ -93,7 +91,7 @@
         someone new!
       </p>
 
-      <div class="fish" (click)="goToCatch()">
+      <div class="fish" (click)="goToChats()">
         <img name="fish" src="/assets/swipeicon.svg" />
 
         <h1>Catch</h1>

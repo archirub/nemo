@@ -6,6 +6,7 @@ import { Storage } from "@capacitor/storage";
 
 import { StoreResetter } from "@services/global-state-management/store-resetter.service";
 import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
+import { BehaviorSubject } from "rxjs";
 
 // this functionality was moved to a different service to solve some dependency issues between
 // global-error-handler -> firebase-auth-service -> firebase-auth-error-handler (|| other error handlers) -> global-error-handler
@@ -15,6 +16,15 @@ import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loade
   providedIn: "root",
 })
 export class FirebaseLogoutService {
+  // the sole purpose of this thing is to tell the app component
+  // to unsubscribe from the global state management service while logging out
+  // is happening, and to wait until we have at least navigated to "welcome" page
+  // to start again. Otherwise a "null" value comes in from afAuth.user in global state management
+  // and it sees no one is authenticated + we are in settings page so it triggers navigation
+  // back to welcome (a second time) and store reset (a second time) which is quite inefficient
+  private isLoggingOut = new BehaviorSubject<boolean>(false);
+  public isLoggingOut$ = this.isLoggingOut.asObservable();
+
   constructor(
     private zone: NgZone,
     private navCtrl: NavController,
@@ -32,11 +42,13 @@ export class FirebaseLogoutService {
     // back at the welcome page (it seems like it's then not active), which cases problem for example
     // while trying to log back in where the "log in" button doesn't get enabled when the email-password form becomes valid
     const clearLocalCache = () => Storage.clear();
-    const clearStores = async () => this.storeResetter.resetStores();
-    const logOut = () => this.afAuth.signOut();
+    const logOut = async () => {
+      this.isLoggingOut.next(true);
+      return this.afAuth.signOut();
+    };
 
     const duringLoadingPromise = () =>
-      Promise.all([clearLocalCache(), clearStores()]).then(() => logOut());
+      Promise.all([clearLocalCache(), this.storeResetter.resetStores(logOut)]);
 
     const navigateToWelcome = async () =>
       this.zone.run(() => this.navCtrl.navigateRoot("/welcome"));
@@ -44,10 +56,14 @@ export class FirebaseLogoutService {
 
     const loader = await this.loadingAlertManager.createLoading();
 
+    await this.loadingAlertManager.presentNew(loader, "replace-erase");
+
     await duringLoadingPromise();
 
     await this.loadingAlertManager.dismissDisplayed();
 
-    return navigateToWelcome();
+    await navigateToWelcome();
+
+    this.isLoggingOut.next(false);
   }
 }

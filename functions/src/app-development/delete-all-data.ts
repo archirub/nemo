@@ -3,21 +3,33 @@ import * as admin from "firebase-admin";
 
 export const deleteAllData = functions
   .region("europe-west2")
-  .https.onCall(async (data, context): Promise<{ succesful: boolean }> => {
+  .https.onCall(async (data, context): Promise<{ successful: boolean }> => {
     const firebase_config =
       process.env.FIREBASE_CONFIG && JSON.parse(process.env.FIREBASE_CONFIG);
     const projectId = firebase_config?.projectId;
 
-    if (!projectId) return { succesful: false };
+    if (!projectId) return { successful: false };
 
     if (projectId !== "nemo-dev-1b0bc") {
       functions.logger.error(
         "An attempt was made to delete all data from project with projectId" + projectId
       );
-      return { succesful: false };
+      return { successful: false };
     }
 
-    const collectionsToKeep = ["admin"];
+    if (!isGodlike(context))
+      throw new functions.https.HttpsError("permission-denied", "Unauthorized user.");
+
+    // const collectionsToKeep = ["admin", "general"];
+    const collectionsToDelete = [
+      "chats",
+      "matchData",
+      "piStorage",
+      "profiles",
+      "uidDatingStorage",
+      "uidFriendStorage",
+    ];
+    const subCollectionsToDelete = ["private", "messages", "pickingData"];
 
     const flatten = (ary) =>
       ary.reduce((a, b) => a.concat(Array.isArray(b) ? flatten(b) : b), []);
@@ -25,7 +37,7 @@ export const deleteAllData = functions
     try {
       let collections = await admin.firestore().listCollections();
 
-      collections = collections.filter((c) => !collectionsToKeep.includes(c.id));
+      collections = collections.filter((c) => collectionsToDelete.includes(c.id));
 
       const rootDocuments = flatten(
         await Promise.all(collections.map(async (c) => c.listDocuments()))
@@ -35,7 +47,9 @@ export const deleteAllData = functions
         await Promise.all(rootDocuments.map((doc) => doc.listCollections()))
       ) as FirebaseFirestore.CollectionReference<FirebaseFirestore.DocumentData>[];
 
-      subCollections = subCollections.filter((c) => !collectionsToKeep.includes(c.id));
+      subCollections = subCollections.filter((c) =>
+        subCollectionsToDelete.includes(c.id)
+      );
 
       const docsFromSubcollections = flatten(
         await Promise.all(subCollections.map(async (c) => c.listDocuments()))
@@ -47,7 +61,21 @@ export const deleteAllData = functions
       ]);
     } catch (e) {
       functions.logger.error("An error occured; firebase error msg: " + e);
-      return { succesful: false };
+      return { successful: false };
     }
-    return { succesful: true };
+    return { successful: true };
   });
+
+function isGodlike(context: functions.https.CallableContext): boolean {
+  const godLikeEmails = ["archibald.ruban@gmail.com"];
+
+  if (!context || !context?.auth) return false;
+
+  const callerEmail = context?.auth?.token?.email;
+
+  if (!callerEmail) return false;
+
+  if (godLikeEmails.includes(callerEmail)) return true;
+
+  return false;
+}

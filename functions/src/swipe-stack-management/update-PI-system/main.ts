@@ -41,124 +41,126 @@ interface uid_score {
   score: number;
 }
 
-export const updatePISystem = functions.region("europe-west2");
-
 // FOR DEVELOPMENT
 // .https.onCall(async (dataRequest, context) => {
 // FOR PRODUCTION
-functions.pubsub.schedule("every two days 05:00").onRun(async (context) => {
-  await admin.firestore().runTransaction(async (transaction) => {
-    // FETCHING UID AND PI STORAGE DOCUMENTS
-    const [currentUidStorageDocs, piStorageDocs] = await Promise.all([
-      transaction.get(admin.firestore().collection("uidDatingStorage")) as Promise<
-        FirebaseFirestore.QuerySnapshot<uidDatingStorage>
-      >,
-      transaction.get(admin.firestore().collection("piStorage")) as Promise<
-        FirebaseFirestore.QuerySnapshot<piStorage>
-      >,
-    ]);
+export const updatePISystem = functions
+  .region("europe-west2")
+  .pubsub.schedule("every day 05:00")
+  .onRun(async (context) => {
+    await admin.firestore().runTransaction(async (transaction) => {
+      // FETCHING UID AND PI STORAGE DOCUMENTS
+      const [currentUidStorageDocs, piStorageDocs] = await Promise.all([
+        transaction.get(admin.firestore().collection("uidDatingStorage")) as Promise<
+          FirebaseFirestore.QuerySnapshot<uidDatingStorage>
+        >,
+        transaction.get(admin.firestore().collection("piStorage")) as Promise<
+          FirebaseFirestore.QuerySnapshot<piStorage>
+        >,
+      ]);
 
-    if (currentUidStorageDocs.empty)
-      emptyCollectionOrQueryError("uidDatingStorage", "none; pubsub function");
-    if (piStorageDocs.empty)
-      emptyCollectionOrQueryError("piStorage", "none; pubsub function");
+      if (currentUidStorageDocs.empty)
+        emptyCollectionOrQueryError("uidDatingStorage", "none; pubsub function");
+      if (piStorageDocs.empty)
+        emptyCollectionOrQueryError("piStorage", "none; pubsub function");
 
-    // MERGING UIDSTORAGE ARRAYS THAT HAVE SAME COMBINATION DEGREE/GENDER/SEXPREF
-    const uidStorageArrays: Omit<uidDatingStorage, "volume">[] =
-      concatSameDemographicDocs(currentUidStorageDocs.docs.map((doc) => doc.data()));
+      // MERGING UIDSTORAGE ARRAYS THAT HAVE SAME COMBINATION DEGREE/GENDER/SEXPREF
+      const uidStorageArrays: Omit<uidDatingStorage, "volume">[] =
+        concatSameDemographicDocs(currentUidStorageDocs.docs.map((doc) => doc.data()));
 
-    // CALCULATE MEAN AND VARIANCE OF PI DISTRIBUTIONS
-    // (removed those who don't want to show their profiles or that are not in dating mode)
-    const distribParamMaps = initialiseDemographicMap<distributionParameters>({
-      mean: null,
-      variance: null,
-      occurrences: 0,
-    });
-    const swipeUserInfo: SwipeUserInfoMap[] = piStorageDocs.docs.map((doc) => {
-      const data = doc.data() as SwipeUserInfoMap;
-      delete data.uids;
-      for (const uid_ in data) {
-        // if user is in "dating" mode and shows their profile, then they are accounted for in the
-        // mean and variance of the distribution, and left in the object, otherwise they are deleted from the object
-        if (data[uid_].swipeMode === "dating" && data[uid_].showProfile === true) {
-          updateDistributionParameters(distribParamMaps, data[uid_]);
-        } else {
-          delete data[uid_];
+      // CALCULATE MEAN AND VARIANCE OF PI DISTRIBUTIONS
+      // (removed those who don't want to show their profiles or that are not in dating mode)
+      const distribParamMaps = getNewDemographicMap<distributionParameters>({
+        mean: null,
+        variance: null,
+        occurrences: 0,
+      });
+      const swipeUserInfo: SwipeUserInfoMap[] = piStorageDocs.docs.map((doc) => {
+        const data = doc.data() as SwipeUserInfoMap;
+        delete data.uids;
+        for (const uid_ in data) {
+          // if user is in "dating" mode and shows their profile, then they are accounted for in the
+          // mean and variance of the distribution, and left in the object, otherwise they are deleted from the object
+          if (data[uid_].swipeMode === "dating" && data[uid_].showProfile === true) {
+            updateDistributionParameters(distribParamMaps, data[uid_]);
+          } else {
+            delete data[uid_];
+          }
         }
-      }
-      return data;
-    });
+        return data;
+      });
 
-    // CALCULATE SCORES OF USERS & SUBSEQUENTLY ADD USERS TO RESPECTIVE DEMOGRAPHIC ARRAYS
-    const newDemographicScoreMaps = initialiseDemographicMap<uid_score[]>([]);
+      // CALCULATE SCORES OF USERS & SUBSEQUENTLY ADD USERS TO RESPECTIVE DEMOGRAPHIC ARRAYS
+      const newDemographicScoreMaps = getNewDemographicMap<uid_score[]>([]);
 
-    swipeUserInfo.forEach((swipeUserInfoMap) => {
-      for (const uid in swipeUserInfoMap) {
-        const info = swipeUserInfoMap[uid];
+      swipeUserInfo.forEach((swipeUserInfoMap) => {
+        for (const uid in swipeUserInfoMap) {
+          const info = swipeUserInfoMap[uid];
 
-        const score = computeScore(info, distribParamMaps);
-        addToDemographicArrays(uid, score, info, newDemographicScoreMaps);
-      }
-    });
-
-    // ORDER ARRAYS IN ASCENDING ORDER OF SCORE, REGISTER NEW PERCENTILE, RESET LIKE/SEEN COUNTS
-    const newUIDStorageArrays = initialiseDemographicMap<string[]>([]);
-    for (const demographic in newDemographicScoreMaps) {
-      const peopleCount =
-        newDemographicScoreMaps[demographic as keyof demographicMap<any>].length;
-
-      newUIDStorageArrays[demographic as keyof demographicMap<any>] =
-        newDemographicScoreMaps[demographic as keyof demographicMap<any>]
-          .sort((a, b) => a.score - b.score)
-          .map((user, index) => {
-            const i = swipeUserInfo.findIndex((map) => map.hasOwnProperty(user.uid));
-
-            if (i === -1)
-              invalidDocumentError(
-                "uidDatingStorage",
-                "user uid",
-                `User with uid ${user.uid} was not found.`,
-                "none: pubsub function"
-              );
-
-            swipeUserInfo[i][user.uid].percentile = (index + 1) / peopleCount;
-            swipeUserInfo[i][user.uid].seenCount = 0;
-            swipeUserInfo[i][user.uid].likeCount = 0;
-
-            return user.uid;
-          });
-    }
-
-    // FORMATS DEMOGRAPHIC ARRAYS TO DATABASE DOC FORMAT
-    const newUidStorageDocuments: uidDatingStorage[] = toUidStorage(newUIDStorageArrays);
-
-    // BATCH WRITE THE CHANGES FOR UIDSTORAGE AND PISTORAGE
-    if (!Array.isArray(newUidStorageDocuments) || newUidStorageDocuments.length < 1)
-      throw new functions.https.HttpsError(
-        "aborted",
-        "Abnormality concerning number of new uidStorageDocuments, the PI system update was aborted."
-      );
-
-    currentUidStorageDocs.docs.forEach((doc) => transaction.delete(doc.ref));
-    newUidStorageDocuments.forEach((doc) => {
-      transaction.set(admin.firestore().collection("uidDatingStorage").doc(), doc);
-    });
-    swipeUserInfo.forEach((swipeUserInfoMap) => {
-      for (const uid in swipeUserInfoMap) {
-        // find which doc that uid is in
-        const i = piStorageDocs.docs.findIndex((doc) => doc.data().hasOwnProperty(uid));
-        // update the property of that doc
-        if (i !== -1) {
-          transaction.update(piStorageDocs.docs[i].ref, {
-            [`${uid}`]: swipeUserInfoMap[uid],
-          });
+          const score = computeScore(info, distribParamMaps);
+          addToDemographicArrays(uid, score, info, newDemographicScoreMaps);
         }
+      });
+
+      // ORDER ARRAYS IN ASCENDING ORDER OF SCORE, REGISTER NEW PERCENTILE, RESET LIKE/SEEN COUNTS
+      const newUIDStorageArrays = getNewDemographicMap<string[]>([]);
+      for (const demographic in newDemographicScoreMaps) {
+        const peopleCount =
+          newDemographicScoreMaps[demographic as keyof demographicMap<any>].length;
+
+        newUIDStorageArrays[demographic as keyof demographicMap<any>] =
+          newDemographicScoreMaps[demographic as keyof demographicMap<any>]
+            .sort((a, b) => a.score - b.score)
+            .map((user, index) => {
+              const i = swipeUserInfo.findIndex((map) => map.hasOwnProperty(user.uid));
+
+              if (i === -1)
+                invalidDocumentError(
+                  "uidDatingStorage",
+                  "user uid",
+                  `User with uid ${user.uid} was not found.`,
+                  "none: pubsub function"
+                );
+
+              swipeUserInfo[i][user.uid].percentile = (index + 1) / peopleCount;
+              swipeUserInfo[i][user.uid].seenCount = 0;
+              swipeUserInfo[i][user.uid].likeCount = 0;
+
+              return user.uid;
+            });
       }
+
+      // FORMATS DEMOGRAPHIC ARRAYS TO DATABASE DOC FORMAT
+      const newUidStorageDocuments: uidDatingStorage[] =
+        toUidStorage(newUIDStorageArrays);
+
+      // BATCH WRITE THE CHANGES FOR UIDSTORAGE AND PISTORAGE
+      if (!Array.isArray(newUidStorageDocuments) || newUidStorageDocuments.length < 1)
+        throw new functions.https.HttpsError(
+          "aborted",
+          "Abnormality concerning number of new uidStorageDocuments, the PI system update was aborted."
+        );
+
+      currentUidStorageDocs.docs.forEach((doc) => transaction.delete(doc.ref));
+      newUidStorageDocuments.forEach((doc) => {
+        transaction.set(admin.firestore().collection("uidDatingStorage").doc(), doc);
+      });
+      swipeUserInfo.forEach((swipeUserInfoMap) => {
+        for (const uid in swipeUserInfoMap) {
+          // find which doc that uid is in
+          const i = piStorageDocs.docs.findIndex((doc) => doc.data().hasOwnProperty(uid));
+          // update the property of that doc
+          if (i !== -1) {
+            transaction.update(piStorageDocs.docs[i].ref, {
+              [`${uid}`]: swipeUserInfoMap[uid],
+            });
+          }
+        }
+      });
     });
+
+    functions.logger.info("updatePIsystem successfully triggered.");
   });
-
-  functions.logger.info("updatePIsystem successfully triggered.");
-});
 
 /**
  * Converts arrays that are separated per degree/gender/sexPref combination into format
@@ -213,7 +215,7 @@ function toUidStorage(uidStorageArrays: demographicMap<string[]>): uidDatingStor
  * Creates a demographic map that has "c" for all of its properties
  * @param c content of each property
  */
-function initialiseDemographicMap<T>(c: T): demographicMap<T> {
+function getNewDemographicMap<T>(c: T): demographicMap<T> {
   return {
     undergrad_female_female: JSON.parse(JSON.stringify(c)),
     undergrad_female_male: JSON.parse(JSON.stringify(c)),
@@ -302,7 +304,7 @@ function updateDistributionParameters(
     let gender = info.gender;
 
     // if person's gender is other, then they need to be added to both "male" and "female" genders
-    if (gender === "other") {
+    if (gender === "trans") {
       gender = "male";
       const piStorageInfoCopy = { ...info };
       piStorageInfoCopy.gender = "female";
@@ -414,9 +416,9 @@ function computeScore(
   const means: number[] = [];
   const variances: number[] = [];
   // taking average mean and variance in case where person has multiple sexual preferences
-  // and/or gender is "other"
+  // and/or gender is "trans"
   info.sexualPreference.forEach((sexualPreference) => {
-    if (info.gender === "other") {
+    if (info.gender === "trans") {
       (["male", "female"] as const).forEach((g) => {
         const demoString = demographicCombineString(info.degree, g, sexualPreference);
 
@@ -474,8 +476,8 @@ function addToDemographicArrays(
 
   // Iterate over sexualPreference (since it's an array and you want to cover all of its options)
   info.sexualPreference.forEach((sexPref) => {
-    // if person has gender "other", then add that person to both gender demographic
-    if (info.gender === "other") {
+    // if person has gender "trans", then add that person to both gender demographic
+    if (info.gender === "trans") {
       demographicString = demographicCombineString(info.degree, "male", sexPref);
       newDemographicScoreMaps[demographicString].push({ uid, score });
 

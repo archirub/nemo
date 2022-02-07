@@ -73,11 +73,14 @@ export class CurrentUserStore extends AbstractStoreService {
     return this.fillStore();
   }
 
-  protected resetStore() {
+  protected async resetStore() {
     this.user.next(null);
-
-    console.log("current user store reset.");
   }
+
+  public showsProfile$ = this.user$.pipe(
+    map((u) => u?.settings?.showProfile),
+    distinctUntilChanged()
+  ); // null as default (important for swipe stack to know it hasn't been defined yet)
 
   /** Fetches info from database to update the User BehaviorSubject */
   private fillStore() {
@@ -163,7 +166,18 @@ export class CurrentUserStore extends AbstractStoreService {
       tap((user) => this.user.next(user)),
 
       shareReplay()
-      // tap(() => console.log("activating current user store"))
+    );
+  }
+
+  updatePictureCount(count: number) {
+    return this.user$.pipe(
+      filter((u) => !!u),
+      take(1),
+      map((user) => {
+        const newUser = cloneDeep(user);
+        newUser.pictureCount = count;
+        this.user.next(newUser);
+      })
     );
   }
 

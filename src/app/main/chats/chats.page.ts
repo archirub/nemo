@@ -8,7 +8,7 @@ import { ChatboardStore } from "@stores/index";
 
 import { Chat } from "@classes/index";
 import { FishSwimAnimation } from "@animations/fish.animation";
-import { TutorialsService } from "@services/tutorials/tutorials.service";
+import { TutorialsStore } from "@stores/tutorials/tutorials.service";
 
 @Component({
   selector: "app-chats",
@@ -58,7 +58,7 @@ export class ChatsPage implements OnDestroy {
 
   constructor(
     private chatboardStore: ChatboardStore,
-    private tutorials: TutorialsService
+    private tutorials: TutorialsStore
   ) {}
 
   ngAfterViewInit() {

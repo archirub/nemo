@@ -9,6 +9,7 @@ import {
   profileChoiceMap,
   swipeChoice,
   registerSwipeChoicesRequest,
+  registerSwipeChoicesResponse,
 } from "@interfaces/index";
 import {
   concatMapTo,
@@ -47,10 +48,9 @@ export class SwipeOutcomeStore extends AbstractStoreService {
     return EMPTY;
   }
 
-  protected resetStore() {
+  protected async resetStore() {
     this.swipeChoices.next([]);
     this.swipeAnswers.next([]);
-    console.log("swipe-outcome store reset.");
   }
 
   public yesSwipe(profile: Profile): Observable<void> {
@@ -118,7 +118,6 @@ export class SwipeOutcomeStore extends AbstractStoreService {
 
   public getChoiceOf(uid: string): Observable<swipeChoice | null> {
     return this.swipeAnswers.pipe(
-      tap((p) => console.log("swipeAnswers: ", p)),
       take(1),
       map((answers) => {
         const index = answers.findIndex((a) => a.uid === uid);
@@ -131,7 +130,6 @@ export class SwipeOutcomeStore extends AbstractStoreService {
   public registerSwipeChoices$: Observable<void> = this.swipeChoices$.pipe(
     first(),
     filter((c) => c.length > 0),
-    tap(() => console.log("registerSwipeChoices$ observable triggered")),
     exhaustMap((choices) => {
       const uidChoiceMaps: uidChoiceMap[] = choices.map((c) => ({
         uid: c.profile.uid,
@@ -141,7 +139,9 @@ export class SwipeOutcomeStore extends AbstractStoreService {
       const request: registerSwipeChoicesRequest = { choices: uidChoiceMaps };
 
       return this.afFunctions
-        .httpsCallable("registerSwipeChoices")(request)
+        .httpsCallable<registerSwipeChoicesRequest, registerSwipeChoicesResponse>(
+          "registerSwipeChoices"
+        )(request)
         .pipe(
           tap(() =>
             console.info(`registerSwipeChoices triggered for ${choices.length} choices.`)

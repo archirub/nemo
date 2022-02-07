@@ -24,10 +24,13 @@ import { CurrentUserStore } from "@stores/index";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 
 import { HasSeenTutorial, privateProfileFromDatabase } from "@interfaces/profile.model";
+import { AbstractStoreService } from "@interfaces/stores.model";
+import { StoreResetter } from "@services/global-state-management/store-resetter.service";
 @Injectable({
   providedIn: "root",
 })
-export class TutorialsService {
+export class TutorialsStore extends AbstractStoreService {
+  public isReady$: Observable<boolean>;
   private hasSeenTutorial = new BehaviorSubject<HasSeenTutorial>(null);
   hasSeenTutorial$ = this.hasSeenTutorial.asObservable();
 
@@ -39,8 +42,6 @@ export class TutorialsService {
     map((hst) => this.hasSeenTutorial.next(hst))
   );
 
-  activate$ = this.activate().pipe(share());
-
   get defaultTutorialState(): HasSeenTutorial {
     return { home: false, ownProfile: false, chatBoard: false };
   }
@@ -48,11 +49,18 @@ export class TutorialsService {
   constructor(
     private fs: AngularFirestore,
     private appUser: CurrentUserStore,
-    private errorHandler: GlobalErrorHandler
-  ) {}
+    private errorHandler: GlobalErrorHandler,
+    protected resetter: StoreResetter
+  ) {
+    super(resetter);
+  }
 
-  private activate() {
+  protected systemsToActivate(): Observable<any> {
     return concat(this.fillTutorial$, this.manageStoringOnDatabase());
+  }
+
+  protected async resetStore(): Promise<void> {
+    this.hasSeenTutorial.next(null);
   }
 
   displayTutorial(tutorial: keyof HasSeenTutorial): Observable<boolean> {

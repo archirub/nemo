@@ -12,6 +12,7 @@ import { SearchCriteriaComponent } from "./search-criteria/search-criteria.compo
 import { ProfileCardModule } from "@components/profile-card/profile-card.component.module";
 import { AppToggleModule } from "@components/nemo-toggle/nemo-toggle.component.module";
 import { HomeTutorialComponent } from "@components/tutorials/home-tutorial/home-tutorial.component";
+import { MessageBoardComponent } from "src/app/main/chats/messenger/message-board/message-board.component";
 
 @NgModule({
   imports: [

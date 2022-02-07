@@ -191,8 +191,8 @@ function getDemographicsToFetch(
   const genderToFetch: SexualPreference = sexualPreference_;
   let sexualPreferenceToFetch: SexualPreference;
 
-  if (gender_ === "other") {
-    // In the case where someone's gender is "other", then only their
+  if (gender_ === "trans") {
+    // In the case where someone's gender is "trans", then only their
     // own sexual preference and their own degree preference should determine who they are shown
     // hence, the sexual preference of the other person's does not matter in this
     sexualPreferenceToFetch = ["male", "female"];
@@ -325,7 +325,7 @@ function pickFromDemographicArrays(
     }
   });
 
-  // to remove duplicates but is it even necessary? I think only people with "other"
+  // to remove duplicates but is it even necessary? I think only people with "trans"
   // as their gender can be in different arrays, so maybe just do that at the very very end
   // and just once
   return uidsPicked;

@@ -2,11 +2,11 @@ import { Injectable, QueryList } from "@angular/core";
 import { AngularFirestore, DocumentSnapshot } from "@angular/fire/firestore";
 import { AngularFireFunctions } from "@angular/fire/functions";
 import { AngularFireStorage } from "@angular/fire/storage";
+import { IonSlides } from "@ionic/angular";
 
 import {
   BehaviorSubject,
   combineLatest,
-  concat,
   defer,
   EMPTY,
   forkJoin,
@@ -24,9 +24,9 @@ import {
   map,
   mapTo,
   pairwise,
-  share,
   startWith,
   switchMap,
+  switchMapTo,
   take,
   tap,
   throttle,
@@ -47,16 +47,27 @@ import {
   profileFromDatabase,
 } from "@interfaces/index";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
-import { IonSlides } from "@ionic/angular";
 import { SwipeCapService } from "./swipe-cap.service";
 import { AbstractStoreService } from "@interfaces/stores.model";
 import { StoreResetter } from "@services/global-state-management/store-resetter.service";
+import { CurrentUserStore } from "..";
+import { Logger, SubscribeAndLog } from "../../functions/custom-rxjs";
 
-// - loading is for when there is no one in the stack but we are fetching
-// - empty is for the stack has been fetched and no one was found
-// - filled is for when there is someone in the stack
-// - limit-reached is for when the swipe capping limit has been reached
-export type StackState = "init" | "filled" | "loading" | "empty" | "cap-reached";
+// - null is for when a state for the swipe stack hasn't been set yet
+// - "initialLoading" is for the very first load. Must be distinct from "loading"
+// - "filled" is for when there is someone in the stack
+// - "loading" is for when there is no one in the stack but we are fetching
+// - "empty" is for the stack has been fetched and no one was found
+// - "cap-reached "is for when the swipe capping limit has been reached
+// - "not-showing-profile" is for when the user has showProfile set to false
+export type StackState =
+  | null
+  | "initialLoading"
+  | "filled"
+  | "loading"
+  | "empty"
+  | "cap-reached"
+  | "not-showing-profile";
 
 export type PictureQueue = Array<{ uid: string; pictureIndex: number }>;
 @Injectable({
@@ -86,7 +97,7 @@ export class SwipeStackStore extends AbstractStoreService {
   private profiles = new BehaviorSubject<Profile[]>([]);
   private profilesToRender = new BehaviorSubject<Profile[]>([]); // for performance - this is a subset of profiles, and contains just profiles to render on the page
   private isReady = new BehaviorSubject<boolean>(false);
-  private stackState = new BehaviorSubject<StackState>("init");
+  private stackState = new BehaviorSubject<StackState>(null);
 
   private profiles$ = this.profiles.asObservable();
   profilesToRender$ = this.profilesToRender.asObservable();
@@ -100,6 +111,7 @@ export class SwipeStackStore extends AbstractStoreService {
 
     private SCstore: SearchCriteriaStore,
     private swipeOutcomeStore: SwipeOutcomeStore,
+    private currentUser: CurrentUserStore,
 
     private errorHandler: GlobalErrorHandler,
     private format: FormatService,
@@ -110,38 +122,56 @@ export class SwipeStackStore extends AbstractStoreService {
   }
 
   protected systemsToActivate(): Observable<any> {
+    const postStackStateInit$ = this.stackState$.pipe(
+      filter((ss) => !!ss),
+      take(1),
+      switchMapTo(
+        combineLatest([
+          this.manageSwipeStack(),
+          this.manageRenderedProfiles(),
+          this.managePictureQueue(),
+          this.manageStoreReadiness(),
+          this.manageChoiceRegistration(),
+        ])
+      )
+    );
+
     return combineLatest([
       this.swipeCap.activate$,
-      this.manageSwipeStack(),
-      this.manageRenderedProfiles(),
-      this.managePictureQueue(),
-      this.manageStoreReadiness(),
-      this.manageChoiceRegistration(),
+      this.manageStackState(),
+      postStackStateInit$,
     ]);
   }
 
-  protected resetStore() {
+  protected async resetStore() {
     this.isReady.next(false);
-    this.stackState.next("init");
+    this.stackState.next(null);
     this.profiles.next([]);
     this.profilesToRender.next([]);
-    console.log("swipe-stack store reset.");
   }
 
   manageSwipeStack() {
-    return this.profiles$.pipe(
+    const goOnStates: StackState[] = ["loading", "initialLoading"];
+    const stackStateIsGood$ = this.stackState$.pipe(map((ss) => goOnStates.includes(ss)));
+    const minProfilesCountReached$ = this.profiles$.pipe(
       this.filterUnchangedLength(),
-      map((profiles) => profiles.length),
-      concatMap((count) => this.updateStackState(count)),
-      this.filterBasedOnStackState(),
-      filter((count) => count <= this.MIN_PROFILE_COUNT),
-      switchMap(() => this.SCstore.searchCriteria$.pipe(first())), // using switchMap instead of withLatestFrom as SC might still be undefined at that point so we want to wait for it to have a value (which withLatestFrom doesn't do)
-      exhaustMap((SC) => this.addToSwipeStackQueue(SC)) // exhaustMap is a must use here, makes sure we don't have multiple requests to fill the swipe stack
+      map((profiles) => profiles.length <= this.MIN_PROFILE_COUNT)
     );
+
+    const fetchNewProfiles$ = combineLatest([
+      stackStateIsGood$,
+      minProfilesCountReached$,
+    ]).pipe(filter((arr) => arr.every((v) => v === true)));
+
+    return fetchNewProfiles$.pipe(switchMapTo(this.addToSwipeStackQueue()));
   }
 
   private manageChoiceRegistration() {
-    const endOfStackStates: StackState[] = ["empty", "cap-reached"];
+    const endOfStackStates: StackState[] = [
+      "empty",
+      "cap-reached",
+      "not-showing-profile",
+    ];
 
     const typicalRegistration$ = this.swipeOutcomeStore.swipeChoices$.pipe(
       filter((c) => c.length >= this.REGISTER_FREQUENCY),
@@ -162,31 +192,77 @@ export class SwipeStackStore extends AbstractStoreService {
     return merge(typicalRegistration$, endOfStackRegistration$);
   }
 
+  manageStackState() {
+    return combineLatest([
+      this.profiles$.pipe(map((p) => p.length)),
+      this.swipeCap.canUseSwipe$,
+      this.currentUser.showsProfile$,
+    ]).pipe(
+      withLatestFrom<[number, boolean, boolean], [StackState]>(this.stackState$),
+      map(([[profilesCount, canUseSwipe, showsProfile], currentStackState]) => {
+        if (canUseSwipe === false) return this.stackState.next("cap-reached");
+
+        if (showsProfile === false) return this.stackState.next("not-showing-profile");
+
+        // if both canUseSwipe and showsProfile are initialized (and both true) but that the stackState
+        // still isn't, then this is the initial load
+        if (canUseSwipe === true && showsProfile === true && currentStackState === null)
+          return this.stackState.next("initialLoading");
+
+        // case where the user wasn't showing profile but now does
+        if (currentStackState === "not-showing-profile" && showsProfile) {
+          if (profilesCount > 0) return this.stackState.next("filled");
+          // giving initialLoading value so that the algo doesn't think the stack
+          // is empty because there is no profiles in the stack
+          if (profilesCount === 0) return this.stackState.next("initialLoading");
+        }
+
+        if (
+          (currentStackState === "loading" || currentStackState === "initialLoading") &&
+          profilesCount > 0
+        )
+          return this.stackState.next("filled");
+
+        if (currentStackState === "loading" && profilesCount === 0)
+          return this.stackState.next("empty");
+
+        if (currentStackState === "filled" && profilesCount === 0) {
+          return this.stackState.next("loading");
+        }
+
+        // return this.stackState.next("loading");
+      })
+    );
+  }
+
   manageStoreReadiness() {
-    const isReadyRegardlessStates: StackState[] = ["cap-reached", "empty"];
+    const isReadyRegardlessStates: StackState[] = [
+      "cap-reached",
+      "empty",
+      "not-showing-profile",
+    ];
 
     return combineLatest([this.profilesToRender$, this.stackState$]).pipe(
       filter(([profiles, state]) => {
-        // this is here because the states "empty" and "cap-reached" means that
+        // this is here because the states "empty", "cap-reached" or "not-showing-profile" means that
         // regardless of the content of the renderedProfiles, it being empty is still
         // the store being ready (because it is normal if it is empty in these states)
         const isReadyRegardless = isReadyRegardlessStates.includes(state);
 
         // waits for the swipe stack to have at least one profile and for the first picture of first profile to be loaded
         const renderedProfilesAreInit =
-          Array.isArray(profiles) && profiles.length > 0 && !!profiles[0].pictureUrls[0];
+          Array.isArray(profiles) && profiles.length > 0 && !!profiles[0]?.pictureUrls[0];
 
         return isReadyRegardless || renderedProfilesAreInit;
       }),
-      first(),
-      tap((profiles) => console.log("swipe stack is ready:", profiles)),
+      take(1),
       tap(() => this.isReady.next(true))
     );
   }
 
   manageRenderedProfiles() {
     return this.profiles$.pipe(
-      withLatestFrom(this.profilesToRender$, this.swipeCap.canUseSwipe()),
+      withLatestFrom(this.profilesToRender$, this.swipeCap.canUseSwipe$),
       filter(([allProfiles, profilesToRender, canUseSwipe]) => {
         if (!Array.isArray(allProfiles) || !Array.isArray(profilesToRender)) return false;
         if (!canUseSwipe) return false;
@@ -239,12 +315,6 @@ export class SwipeStackStore extends AbstractStoreService {
       withLatestFrom(this.swipeCap.swipesLeft$),
       map(([[allProfiles, profilesToRender], swipesLeft]) => {
         if (swipesLeft && swipesLeft.swipesLeft < profilesToRender.length) {
-          console.log(
-            "Math.floor(swipesLeft.swipesLeft)",
-            Math.floor(swipesLeft.swipesLeft),
-            swipesLeft.swipesLeft,
-            [allProfiles, profilesToRender.slice(0, Math.floor(swipesLeft.swipesLeft))]
-          );
           return [
             allProfiles,
             profilesToRender.slice(0, Math.floor(swipesLeft.swipesLeft)),
@@ -252,7 +322,7 @@ export class SwipeStackStore extends AbstractStoreService {
         }
         return [allProfiles, profilesToRender];
       }),
-
+      // withLatestFrom(this.profilesToRender$),
       // submits updated profilesToRender version
       tap(([allProfiles, newProfilesToRender]) =>
         // deep cloning so that their pictureUrls have different references
@@ -263,7 +333,11 @@ export class SwipeStackStore extends AbstractStoreService {
         // as well, we wouldn't inform the subscribers of profilesToRender$ that there has been an update
         // and so for example the readiness observer would never get the info that the first pic of first profile
         // has been fetched
-        this.profilesToRender.next(cloneDeep(newProfilesToRender))
+        {
+          // newProfilesToRender = cloneDeep(newProfilesToRender);
+          // if (!isEqual(currProfilesToRender, newProfilesToRender))
+          this.profilesToRender.next(cloneDeep(newProfilesToRender));
+        }
       )
     );
   }
@@ -388,25 +462,6 @@ export class SwipeStackStore extends AbstractStoreService {
     );
   }
 
-  updateStackState(profilesCount: number): Observable<number> {
-    return this.stackState$.pipe(
-      withLatestFrom(this.swipeCap.canUseSwipe()),
-      first(),
-      map(([currentState, canUseSwipe]) => {
-        if (!canUseSwipe) return this.stackState.next("cap-reached");
-        if (currentState === "loading" && profilesCount > 0)
-          return this.stackState.next("filled");
-        if (currentState === "loading" && profilesCount === 0)
-          return this.stackState.next("empty");
-        if (currentState === "filled" && profilesCount === 0) {
-          console.log("says it should be loading", profilesCount);
-          return this.stackState.next("loading");
-        }
-      }),
-      map(() => profilesCount)
-    );
-  }
-
   filterUnchangedLength() {
     return (source: Observable<Profile[]>) => {
       return source.pipe(
@@ -420,13 +475,15 @@ export class SwipeStackStore extends AbstractStoreService {
   }
 
   filterBasedOnStackState() {
-    const dontContinueStates: StackState[] = ["empty", "cap-reached"];
+    const dontContinueStates: StackState[] = [
+      "empty",
+      "cap-reached",
+      "not-showing-profile",
+    ];
 
-    return (source: Observable<number>) => {
+    return (source: Observable<StackState>) => {
       return source.pipe(
-        withLatestFrom(this.stackState$),
-        filter(([profileCount, stackState]) => !dontContinueStates.includes(stackState)),
-        map(([profileCount, stackState]) => profileCount)
+        filter((stackState) => !dontContinueStates.includes(stackState))
       );
     };
   }
@@ -484,31 +541,23 @@ export class SwipeStackStore extends AbstractStoreService {
   }
 
   /** Adds profiles to the queue a.k.a. beginning of Profiles array */
-  public addToSwipeStackQueue(SC: SearchCriteria) {
-    console.log("addToSwipeStack search critertia", SC);
-    return this.fetchUIDs(SC).pipe(
+  public addToSwipeStackQueue() {
+    return this.SCstore.searchCriteria$.pipe(
       take(1),
-      // takes care of case where generateSwipeStack returns an empty array
-      filter((uids) => {
-        if (uids.length < 1) {
-          this.stackState.next("empty");
-          return false;
-        }
-        return true;
-      }),
+      switchMap((SC) => this.fetchUIDs(SC)),
+      switchMap((uids) => {
+        // takes care of case where generateSwipeStack returns an empty array
+        if (!uids || uids.length < 1) return of(this.stackState.next("empty"));
 
-      //using exhaustMap s.t. other requests are not listened to while profiles are being fetched
-      // this is because it is a costly operation w.r.t backend and money-wise
-      exhaustMap((uids) => this.fetchProfiles(uids)),
-
-      concatMap((profiles) => this.addToQueue(profiles))
+        return this.fetchProfiles(uids).pipe(concatMap((p) => this.addToQueue(p)));
+      })
     );
   }
 
   /** Removes a specific profile from the stack*/
   public removeProfile(profile: Profile): Observable<void | string[]> {
     return this.profiles$.pipe(
-      first(),
+      take(1),
       map((profiles) => {
         if (!profiles) return;
         let profileToRemove: Profile;
@@ -521,7 +570,7 @@ export class SwipeStackStore extends AbstractStoreService {
             }
           })
         );
-        return profileToRemove.pictureUrls;
+        return profileToRemove?.pictureUrls;
       }),
       tap((urls) => {
         if (!Array.isArray(urls)) return;
@@ -551,7 +600,6 @@ export class SwipeStackStore extends AbstractStoreService {
         const request: generateSwipeStackRequest = { searchCriteria: SC };
         return request;
       }),
-      tap(() => console.log("calling generateSwipeStack")),
       exhaustMap((request) =>
         this.afFunctions
           .httpsCallable<generateSwipeStackRequest, generateSwipeStackResponse>(

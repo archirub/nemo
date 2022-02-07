@@ -151,7 +151,11 @@ export class ChatBoardComponent implements OnInit, AfterViewInit {
 
   // go to messenger of chat with chat id = chatID
   goToMessenger(chatID: String) {
-    this.navCtrl.navigateForward(["main/messenger/" + chatID]);
+    return this.navCtrl.navigateForward(["main/messenger/" + chatID]);
+  }
+
+  goToChats() {
+    return this.navCtrl.navigateRoot("main/tabs/chats");
   }
 
   // go to home page

@@ -50,6 +50,7 @@ import {
 } from "@interfaces/index";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
+import { pageTransitionFromSettings } from "@animations/page-transition.animation";
 
 type GoUnder = "on" | "off";
 
@@ -201,7 +202,6 @@ export class SettingsPage implements AfterViewInit, OnDestroy, OnInit {
   // updates the profile locally
   async actOnGoUnder(option: GoUnder) {
     const newShowProfile = formatGoUnderToShowProfile(option);
-    console.log("newShowProfile", newShowProfile);
 
     const loader = await this.loadingAlertManager.createLoading();
 
@@ -246,6 +246,8 @@ export class SettingsPage implements AfterViewInit, OnDestroy, OnInit {
       tabStyle.color = "var(--ion-color-light-contrast)";
       tabStyle.fontWeight = "normal";
     }
+
+    return goUnder; // for next in styling chain
   }
 
   /* Finds preferences from profile and fills form with each control's value */
@@ -304,7 +306,6 @@ export class SettingsPage implements AfterViewInit, OnDestroy, OnInit {
      * Swipes to the targeted slide
      **/
 
-    console.log("Moving to slide", slide);
     const slidesToHide = [
       document.getElementById("legal"),
       document.getElementById("preferences"),
@@ -327,7 +328,9 @@ export class SettingsPage implements AfterViewInit, OnDestroy, OnInit {
   }
 
   async goBack() {
-    return this.navCtrl.navigateBack("/main/tabs/own-profile");
+    return this.navCtrl.navigateForward("/main/tabs/own-profile", {
+      animation: pageTransitionFromSettings,
+    });
   }
 
   async logOut() {

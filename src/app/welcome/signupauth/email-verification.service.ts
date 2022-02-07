@@ -4,12 +4,14 @@ import { AngularFireAuth } from "@angular/fire/auth";
 import { BehaviorSubject, defer, firstValueFrom, Observable } from "rxjs";
 import {
   auditTime,
+  debounceTime,
   exhaustMap,
   filter,
   first,
   map,
   share,
   switchMap,
+  take,
   takeUntil,
   tap,
 } from "rxjs/operators";
@@ -39,54 +41,52 @@ export class EmailVerificationService {
     // })
     ();
 
+  intervalBetweenChecks = 2000;
+
   constructor(
     private afAuth: AngularFireAuth,
 
     private errorHandler: GlobalErrorHandler
   ) {}
 
-  public listenForVerification(intervalBetweenChecks = 2000): Observable<void> {
-    return this.errorHandler.getCurrentUser$().pipe(
-      tap((user) => {
-        if (!user) throw new CustomError("local/check-auth-state", "local");
-      }),
-      auditTime(intervalBetweenChecks),
-      takeUntil(this.emailIsVerified()),
-      exhaustMap(async (user) => {
-        await firstValueFrom(
-          defer(() => this.afAuth.updateCurrentUser(user)).pipe(
-            this.errorHandler.convertErrors("firebase-auth")
-          )
-        );
-        await user?.reload();
-        await user.getIdToken(true);
-        console.log("Listening on email verification...");
-        return user;
-      }),
-      filter((user) => !!user?.emailVerified),
-      first(),
-      map(() => this.emailVerificationState.next("verified")),
-      share(),
-      this.errorHandler.handleErrors()
-    ) as Observable<void>;
-  }
+  public listenForVerification$ = this.errorHandler.getCurrentUser$().pipe(
+    auditTime(this.intervalBetweenChecks),
+    takeUntil(this.emailIsVerified()),
+    exhaustMap(async (user) => {
+      await firstValueFrom(
+        defer(() => this.afAuth.updateCurrentUser(user)).pipe(
+          this.errorHandler.convertErrors("firebase-auth")
+        )
+      );
+      await user?.reload();
+      await user.getIdToken(true);
+      console.log("Listening on email verification...");
+      return user;
+    }),
+    filter((user) => !!user?.emailVerified),
+    first(),
+    map(() => this.emailVerificationState.next("verified")),
+    share(),
+    this.errorHandler.handleErrors()
+  ) as Observable<void>;
+
+  sendEmailVerification$ = this.errorHandler.getCurrentUser$().pipe(
+    take(1),
+    switchMap((user) =>
+      defer(() => user.sendEmailVerification()).pipe(
+        this.errorHandler.convertErrors("firebase-auth")
+      )
+    ),
+    share()
+  );
 
   /**
    * Select state = "sent" if it is the first time we are sending an email verification,
    * select state = "resent" if we are resending
    */
   public sendVerificationToUser(state: "sent" | "resent"): Observable<void> {
-    return this.errorHandler.getCurrentUser$().pipe(
-      tap((user) => {
-        if (!user) throw new CustomError("local/check-auth-state", "local");
-      }),
-      first(),
-      switchMap((user) =>
-        defer(() => user.sendEmailVerification()).pipe(
-          this.errorHandler.convertErrors("firebase-auth"),
-          tap(() => this.emailVerificationState.next(state))
-        )
-      ),
+    return this.sendEmailVerification$.pipe(
+      tap(() => this.emailVerificationState.next(state)),
       this.errorHandler.handleErrors()
     ) as Observable<void>;
   }

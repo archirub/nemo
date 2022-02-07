@@ -1,4 +1,4 @@
-import { isEqual } from "lodash";
+import { cloneDeep, isEqual } from "lodash";
 import { Injectable } from "@angular/core";
 import { AngularFireStorage } from "@angular/fire/storage";
 import { Storage } from "@capacitor/storage";
@@ -13,8 +13,10 @@ import {
   map,
   share,
   switchMap,
+  switchMapTo,
   take,
   tap,
+  withLatestFrom,
 } from "rxjs/operators";
 
 import { Base64ToUrl, urlToBase64 } from "../common-pictures-functions";
@@ -22,6 +24,7 @@ import { GlobalErrorHandler } from "@services/errors/global-error-handler.servic
 import { CustomError } from "@interfaces/error-handling.model";
 import { AbstractStoreService } from "@interfaces/stores.model";
 import { StoreResetter } from "@services/global-state-management/store-resetter.service";
+import { CurrentUserStore } from "@stores/index";
 
 interface picturesMap {
   [position: number]: string;
@@ -48,6 +51,7 @@ export class OwnPicturesStore extends AbstractStoreService {
   constructor(
     private afStorage: AngularFireStorage,
     private errorHandler: GlobalErrorHandler,
+    private currentUser: CurrentUserStore,
     protected resetter: StoreResetter
   ) {
     super(resetter);
@@ -56,35 +60,35 @@ export class OwnPicturesStore extends AbstractStoreService {
   protected systemsToActivate(): Observable<any> {
     return combineLatest([this.fillStore(), this.activateLocalStorer()]);
   }
-  protected resetStore(): void {
+  protected async resetStore() {
     this.isReady.next(false);
     this.urls.next([]);
-    console.log("own-pictures store reset.");
   }
 
   updatePictures(newPicturesArray: string[]) {
+    const newPics = newPicturesArray.filter(Boolean);
+
     return this.urls$.pipe(
-      first(),
+      take(1),
       map((urls) => {
-        const currentArray = urls.filter(Boolean);
-        const newArray = newPicturesArray.filter(Boolean);
+        const currentPics = urls.filter(Boolean);
+        // const newArray = newPicturesArray.filter(Boolean);
 
         const tasks$: Observable<void>[] = [];
+
         // addition tasks
-        newArray.forEach((newUrl, index) => {
-          const currentUrl = currentArray[index];
-
-          if (newUrl === currentUrl) return;
-
-          tasks$.push(this.updatePictureInDatabase(newUrl, index));
+        newPics.forEach((newUrlAtIndex, index) => {
+          const currUrlAtIndex = currentPics[index];
+          if (newUrlAtIndex === currUrlAtIndex) return; // case where the pic is the same
+          tasks$.push(this.updatePictureInDatabase(newUrlAtIndex, index));
         });
 
         // deleting tasks
-        if (currentArray.length > newArray.length) {
-          const startIndex = newArray.length;
-          const deletesToDo = currentArray.length - newArray.length;
+        if (currentPics.length > newPics.length) {
+          const startIndex = newPics.length;
+          const deletesToDo = currentPics.length - newPics.length;
           const endIndex = startIndex + deletesToDo;
-          const indexes = Array.from({ length: endIndex - startIndex + 1 }).map(
+          const indexes = Array.from({ length: endIndex - startIndex }).map(
             (_, idx) => startIndex + idx
           );
 
@@ -96,11 +100,16 @@ export class OwnPicturesStore extends AbstractStoreService {
       exhaustMap((tasks) => {
         if (tasks.length > 0)
           return forkJoin(tasks).pipe(
-            map(() => this.urls.next(newPicturesArray.filter(Boolean)))
+            switchMapTo(this.updatePictureCount(newPics.length)),
+            map(() => this.urls.next(newPics))
           );
-        return of(""); // needs to be none null otherwise forkJoin doesn't get it
+        return of(""); // needs to be not null otherwise forkJoin doesn't get it
       })
     );
+  }
+
+  updatePictureCount(count: number) {
+    return this.currentUser.updatePictureCount(count);
   }
 
   /**

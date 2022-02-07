@@ -1,25 +1,9 @@
 <!-- <ion-button
   style="z-index: 100; position: absolute"
   debounceClick
-  (debounceClick)="sendNotification()"
+  (debounceClick)="showTestModel()"
   debounceTime="5000"
-  >Send notification (dev)</ion-button
->
-
-<ion-button
-  style="z-index: 100; position: absolute"
-  debounceClick
-  (debounceClick)="removeNotifications()"
-  debounceTime="5000"
-  >Remove notifications (dev)</ion-button
-> -->
-
-<!-- <ion-button
-  style="z-index: 100; position: absolute"
-  debounceClick
-  (debounceClick)="showCropper()"
-  debounceTime="5000"
-  >Show Image cropper (dev)</ion-button
+  >Test message board (dev)</ion-button
 > -->
 
 <home-tutorial-slides
@@ -49,6 +33,14 @@
     </p>
   </div>
 </div>
+<div *ngIf="showNotShowingProfilePrompt$ | async" class="noSwipes">
+  <div class="overlap">
+    <p>
+      You are Under. You cannot see people if they're not allowed to see you! Go to your
+      settings to switch back.
+    </p>
+  </div>
+</div>
 
 <!--div id="catchEls">
   <div #pic1 class="picholder left"></div>
@@ -73,7 +65,7 @@
   </div>
 </div-->
 
-<ion-content #homeContainer [style.filter]="homeTutorial ? 'blur(30px)' : none">
+<ion-content #homeContainer>
   <div class="swipe-stack" #swipeCards>
     <div class="search">
       <ion-button #searchButton id="searchButton" (click)="showSearchCriteria()">
@@ -82,7 +74,7 @@
     </div>
     <app-swipe-card
       [profiles$]="swipeProfiles$"
-      (matched)="playCatch($event)"
+      [swipeCardsRef]="swipeCardsRef"
       [homeContainer]="this.homeContainer"
     ></app-swipe-card>
   </div>

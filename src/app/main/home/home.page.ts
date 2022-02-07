@@ -38,7 +38,7 @@ import { SearchCriteriaComponent } from "./search-criteria/search-criteria.compo
 import { TabElementRefService } from "src/app/main/tab-menu/tab-element-ref.service";
 import { StoreReadinessService } from "@services/store-readiness/store-readiness.service";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
-import { TutorialsService } from "@services/tutorials/tutorials.service";
+import { TutorialsStore } from "@stores/tutorials/tutorials.service";
 import { SwipeCapService } from "@stores/swipe-stack/swipe-cap.service";
 import { AnalyticsService } from "@services/analytics/analytics.service";
 
@@ -55,6 +55,8 @@ import {
   FishSwimAnimation,
 } from "@animations/index";
 import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
+import { SubscribeAndLog } from "src/app/shared/functions/custom-rxjs";
+import { MessageBoardComponent } from "src/app/main/chats/messenger/message-board/message-board.component";
 @Component({
   selector: "app-home",
   templateUrl: "home.page.html",
@@ -90,7 +92,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild("pic1", { read: ElementRef }) pic1: ElementRef;
   @ViewChild("pic2", { read: ElementRef }) pic2: ElementRef;
   @ViewChild("catchText", { read: ElementRef }) catchText: ElementRef;
-  @ViewChild("swipeCards", { read: ElementRef }) swipeCards: ElementRef;
+  @ViewChild("swipeCards", { read: ElementRef }) swipeCardsRef: ElementRef;
   @ViewChild("backdrop", { read: ElementRef }) backdrop: ElementRef;
 
   private fishRef$ = new ReplaySubject<ElementRef>(1);
@@ -119,6 +121,15 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
   ]).pipe(
     map(
       ([showLoading, stackState]) => stackState === "cap-reached" && showLoading === false
+    )
+  );
+  showNotShowingProfilePrompt$ = combineLatest([
+    this.showLoading$,
+    this.swipeStackStore.stackState$,
+  ]).pipe(
+    map(
+      ([showLoading, stackState]) =>
+        stackState === "not-showing-profile" && showLoading === false
     )
   );
 
@@ -174,7 +185,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     private loadingAlertManager: LoadingAndAlertManager,
     private errorHandler: GlobalErrorHandler,
     private storeReadiness: StoreReadinessService,
-    private tutorials: TutorialsService
+    private tutorials: TutorialsStore
   ) {
     this.onResize();
   }
@@ -211,69 +222,69 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     return modal.present();
   }
 
-  changeCatchMessage() {
-    this.chosenCatchMsg = matchMessages[Math.floor(Math.random() * matchMessages.length)];
-  }
+  // changeCatchMessage() {
+  //   this.chosenCatchMsg = matchMessages[Math.floor(Math.random() * matchMessages.length)];
+  // }
 
-  async playCatch(matchedProfile: Profile) {
-    const catchItems = document.getElementById("catchEls");
-    const closeButton = document.getElementById("closeAnimation");
-    const messageText = document.getElementById("messageText");
-    const messageText2 = document.getElementById("messageText2");
+  // async playCatch(matchedProfile: Profile) {
+  //   const catchItems = document.getElementById("catchEls");
+  //   const closeButton = document.getElementById("closeAnimation");
+  //   const messageText = document.getElementById("messageText");
+  //   const messageText2 = document.getElementById("messageText2");
 
-    this.latestMatchedProfile = matchedProfile;
-    this.changeCatchMessage();
+  //   this.latestMatchedProfile = matchedProfile;
+  //   this.changeCatchMessage();
 
-    // own picture styling
-    this.renderer.setStyle(
-      this.pic1.nativeElement,
-      "background",
-      `url(${this.mainProfilePicture})`
-    );
-    this.renderer.setStyle(this.pic1.nativeElement, "backgroundSize", "cover");
+  //   // own picture styling
+  //   this.renderer.setStyle(
+  //     this.pic1.nativeElement,
+  //     "background",
+  //     `url(${this.mainProfilePicture})`
+  //   );
+  //   this.renderer.setStyle(this.pic1.nativeElement, "backgroundSize", "cover");
 
-    // match's picture styling
-    this.renderer.setStyle(
-      this.pic2.nativeElement,
-      "background",
-      `url(${matchedProfile.pictureUrls[0]})`
-    );
-    this.renderer.setStyle(this.pic2.nativeElement, "backgroundSize", "cover");
+  //   // match's picture styling
+  //   this.renderer.setStyle(
+  //     this.pic2.nativeElement,
+  //     "background",
+  //     `url(${matchedProfile.pictureUrls[0]})`
+  //   );
+  //   this.renderer.setStyle(this.pic2.nativeElement, "backgroundSize", "cover");
 
-    // other stylings
-    this.renderer.setStyle(catchItems, "display", "block");
-    this.renderer.setStyle(closeButton, "display", "block");
-    this.renderer.setStyle(messageText, "display", "flex");
-    this.renderer.setStyle(messageText2, "display", "flex");
+  //   // other stylings
+  //   this.renderer.setStyle(catchItems, "display", "block");
+  //   this.renderer.setStyle(closeButton, "display", "block");
+  //   this.renderer.setStyle(messageText, "display", "flex");
+  //   this.renderer.setStyle(messageText2, "display", "flex");
 
-    // catch animation
-    return OpenCatchAnimation(
-      this.screenHeight,
-      this.screenWidth,
-      this.pic1,
-      this.pic2,
-      this.catchText,
-      this.backdrop,
-      this.swipeCards
-    ).play();
-  }
+  //   // catch animation
+  //   return OpenCatchAnimation(
+  //     this.screenHeight,
+  //     this.screenWidth,
+  //     this.pic1,
+  //     this.pic2,
+  //     this.catchText,
+  //     this.backdrop,
+  //     this.swipeCards
+  //   ).play();
+  // }
 
-  async closeCatch() {
-    const catchItems = document.getElementById("catchEls");
+  // async closeCatch() {
+  //   const catchItems = document.getElementById("catchEls");
 
-    await CloseCatchAnimation(
-      this.screenHeight,
-      this.screenWidth,
-      this.pic1,
-      this.pic2,
-      this.catchText,
-      this.backdrop,
-      this.swipeCards
-    ).play();
+  //   await CloseCatchAnimation(
+  //     this.screenHeight,
+  //     this.screenWidth,
+  //     this.pic1,
+  //     this.pic2,
+  //     this.catchText,
+  //     this.backdrop,
+  //     this.swipeCards
+  //   ).play();
 
-    this.renderer.setStyle(catchItems, "display", "none");
-    this.renderer.setStyle(this.pic2.nativeElement, "background", "black");
-  }
+  //   this.renderer.setStyle(catchItems, "display", "none");
+  //   this.renderer.setStyle(this.pic2.nativeElement, "background", "black");
+  // }
 
   async goToNewCatchChat() {
     const maxTimeWaitingForChat = 6000; // 6 seconds

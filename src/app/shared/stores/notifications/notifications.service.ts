@@ -4,50 +4,81 @@ import { AngularFirestore } from "@angular/fire/firestore";
 import { Capacitor } from "@capacitor/core";
 import {
   ActionPerformed,
-  PermissionStatus,
   PushNotifications,
   PushNotificationSchema,
   Token,
 } from "@capacitor/push-notifications";
-import { BehaviorSubject, defer, EMPTY, merge } from "rxjs";
+import {
+  BehaviorSubject,
+  defer,
+  EMPTY,
+  firstValueFrom,
+  merge,
+  Observable,
+  of,
+} from "rxjs";
 import {
   distinctUntilChanged,
   filter,
-  share,
+  map,
   switchMap,
+  take,
   tap,
   withLatestFrom,
 } from "rxjs/operators";
 
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
+import { StoreResetter } from "@services/global-state-management/store-resetter.service";
 
-import { CustomError } from "@interfaces/error-handling.model";
 import { FieldValue } from "@interfaces/firebase.model";
+import { AbstractStoreService } from "@interfaces/stores.model";
 
 @Injectable({ providedIn: "root" })
-export class NotificationsService {
-  private permissionState = new BehaviorSubject<PermissionStatus["receive"]>(null);
-  private permissionState$ = this.permissionState.asObservable();
+export class NotificationsStore extends AbstractStoreService {
+  public isReady$: Observable<boolean> = null;
 
   private token = new BehaviorSubject<Token>(null);
   private token$ = this.token.asObservable().pipe(distinctUntilChanged());
 
-  activate$ = this.activate().pipe(share());
+  // for ugly logic for removing token on store reset (which happens after the user was logged out,
+  // and for which we need the user's uid)
+  private uid: string = null;
 
-  constructor(private fs: AngularFirestore, private errorHandler: GlobalErrorHandler) {}
+  handleStorageAddition$ = this.token$.pipe(
+    filter((t) => !!t?.value),
+    switchMap((t) =>
+      this.errorHandler.getCurrentUser$().pipe(
+        take(1),
+        map((u) => [t, u] as const)
+      )
+    ),
+    tap(([_, u]) => {
+      this.uid = u.uid;
+    }),
+    switchMap(([token, user]) => this.updateToken(token.value, user.uid, "add"))
+  );
 
-  private activate() {
+  constructor(
+    private fs: AngularFirestore,
+    private errorHandler: GlobalErrorHandler,
+    protected resetter: StoreResetter
+  ) {
+    super(resetter);
+  }
+
+  protected systemsToActivate(): Observable<any> {
     const isPushNotificationsAvailable = Capacitor.isPluginAvailable("PushNotifications");
     if (!isPushNotificationsAvailable) {
       return EMPTY;
     }
 
     this.listenOnRegistration();
-    return merge(
-      this.handleTokenStorage(),
-      this.requestPermission() // TODO - this is just for development. When to request for notifications
-      // will need to be better placed, based on whether the user is going through the sign in process, etc.
-    );
+    return merge(this.handleStorageAddition$, this.requestPermission());
+  }
+
+  protected async resetStore(): Promise<void> {
+    await firstValueFrom(this.removeFromStorage());
+    this.token.next(null);
   }
 
   requestPermission() {
@@ -93,23 +124,33 @@ export class NotificationsService {
     );
   }
 
-  private handleTokenStorage() {
+  removeFromStorage() {
     return this.token$.pipe(
-      filter((t) => !!t?.value),
-      withLatestFrom(this.errorHandler.getCurrentUser$()),
-      switchMap(([token, user]) =>
-        defer(() =>
-          this.fs
-            .collection("profiles")
-            .doc(user.uid)
-            .collection("private")
-            .doc("notifications")
-            .set({ tokens: FieldValue.arrayUnion(token.value) })
-        ).pipe(
-          this.errorHandler.convertErrors("firestore"),
-          this.errorHandler.handleErrors()
-        )
-      )
+      take(1),
+      switchMap((token) => {
+        console.log("removing token from firebase:", token, this.uid);
+        if (!token?.value || !this.uid) return of("");
+        return this.updateToken(token.value, this.uid, "remove");
+      })
+    );
+  }
+
+  private updateToken(tokenValue: string, uid: string, action: "add" | "remove") {
+    const fieldValueAction =
+      action === "add"
+        ? FieldValue.arrayUnion(tokenValue)
+        : FieldValue.arrayRemove(tokenValue);
+
+    return defer(() =>
+      this.fs
+        .collection("profiles")
+        .doc(uid)
+        .collection("private")
+        .doc("notifications")
+        .set({ tokens: fieldValueAction })
+    ).pipe(
+      this.errorHandler.convertErrors("firestore"),
+      this.errorHandler.handleErrors()
     );
   }
 }

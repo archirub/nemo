@@ -25,6 +25,7 @@ import { GlobalErrorHandler } from "@services/errors/global-error-handler.servic
 import { CurrentUserStore } from "..";
 import { AbstractStoreService } from "@interfaces/stores.model";
 import { StoreResetter } from "@services/global-state-management/store-resetter.service";
+import { Logger } from "../../functions/custom-rxjs";
 
 type SwipeState = "init" | "";
 type SwipeCapMap = { swipesLeft: number; date: Date };
@@ -40,8 +41,16 @@ export class SwipeCapService extends AbstractStoreService {
   private increaseRateMillis = 1 / (3600 * 1000); // default value (1 per hour)
 
   private swipesLeft = new BehaviorSubject<SwipeCapMap>(null);
-  swipesLeft$ = this.swipesLeft.asObservable().pipe(distinctUntilChanged());
+  swipesLeft$ = this.swipesLeft.asObservable().pipe(
+    distinctUntilChanged()
+    // map((a) => ({ ...a, swipesLeft: 19 })) // DEV
+  );
   state$ = new BehaviorSubject<SwipeState>("init");
+
+  canUseSwipe$ = this.swipesLeft$.pipe(
+    map((sl) => (sl?.swipesLeft ? sl.swipesLeft >= 1 : true)),
+    distinctUntilChanged()
+  ); // provides true as default option if swipesLeft is undefined
 
   get defaultSwipeCapMap(): SwipeCapMap {
     return { swipesLeft: this.maxSwipes, date: new Date() };
@@ -64,10 +73,9 @@ export class SwipeCapService extends AbstractStoreService {
     );
   }
 
-  protected resetStore(): void {
+  protected async resetStore() {
     this.state$.next("init");
     this.swipesLeft.next(null);
-    console.log("swipes-cap store reset.");
   }
 
   useSwipe() {
@@ -82,13 +90,6 @@ export class SwipeCapService extends AbstractStoreService {
           date: s.date,
         })
       )
-    );
-  }
-
-  canUseSwipe(): Observable<boolean> {
-    return this.swipesLeft$.pipe(
-      take(1),
-      map((sl) => (sl?.swipesLeft ? sl.swipesLeft >= 1 : true))
     );
   }
 

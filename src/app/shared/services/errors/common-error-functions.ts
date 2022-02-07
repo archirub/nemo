@@ -22,6 +22,7 @@ import {
   delay,
   defer,
 } from "rxjs";
+import { Logger } from "../../functions/custom-rxjs";
 
 @Injectable({
   providedIn: "root",
@@ -79,10 +80,10 @@ export class CommonErrorFunctions {
   customRetryWhen<T>(
     errMatchChecker: (err: CustomError) => boolean, // checks whether the error coming in is supposed to be handled by this operator or not
     maxRetryCount: number,
-    customLastRetryTask$?: (err: CustomError) => Observable<any>, // default is to show an error message with the error's text
-    defaultValue: any = null
+    // signalErrorWasHandled: string,
+    customLastRetryTask$?: (err: CustomError) => Observable<any> // default is to show an error message with the error's text
   ) {
-    const toDefault = "toDefault";
+    const exitRetryLogic = "toDefault";
     const retryDelay = 2000;
     let retryCount = 0;
 
@@ -102,14 +103,14 @@ export class CommonErrorFunctions {
               return this.presentErrorMessage(err?.text);
             }), // if last retry, do final task
             tap((err) => {
-              if (defaultValue && retryCount === maxRetryCount) throw toDefault;
+              if (retryCount === maxRetryCount) throw exitRetryLogic;
             }), // to continue stream and send a default value if one was provided
             delay(retryDelay) // delay at the end so that presenting error message is not delayed
           )
         ),
-        catchError<T, Observable<T>>((err) => {
-          if (err === toDefault) return of(defaultValue); // to send default value to subscriber
-          throw err; // to pass on error to next error handler
+        catchError<T, Observable<T | string>>((err) => {
+          if (err === exitRetryLogic) return of(""); // to send value on to subscriber
+          throw err; // to pass on error to next error handler (case where errMatchChecker returned false)
         })
       );
   }

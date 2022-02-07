@@ -2,7 +2,15 @@ import { Injectable } from "@angular/core";
 import { AngularFireStorage } from "@angular/fire/storage";
 import { AngularFirestore, DocumentSnapshot } from "@angular/fire/firestore";
 
-import { BehaviorSubject, forkJoin, Observable, EMPTY, combineLatest, of } from "rxjs";
+import {
+  BehaviorSubject,
+  forkJoin,
+  Observable,
+  EMPTY,
+  combineLatest,
+  of,
+  firstValueFrom,
+} from "rxjs";
 import { exhaustMap, filter, first, map, share, take, tap } from "rxjs/operators";
 
 import { FormatService } from "@services/format/format.service";
@@ -12,6 +20,7 @@ import { profileFromDatabase } from "@interfaces/index";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 import { StoreResetter } from "@services/global-state-management/store-resetter.service";
 import { AbstractStoreService } from "@interfaces/stores.model";
+import { cloneDeep } from "lodash";
 
 interface ProfileHolder {
   [uid: string]: Profile;
@@ -55,27 +64,26 @@ export class OtherProfilesStore extends AbstractStoreService {
     return EMPTY;
   }
 
-  resetStore() {
-    const profiles = this.profiles.value;
+  async resetStore() {
+    const profiles = await firstValueFrom(this.profiles);
 
     Object.keys(profiles).forEach((uid) => {
       this.revokeUrls(profiles[uid].pictureUrls);
     });
 
     this.profiles.next({});
-
-    console.log("other-profiles store reset.");
   }
 
   /**
    * saves the profile to the store, emits the profile
    */
-  public saveProfile(uid: string, profile: Profile): Observable<Profile> {
+  public saveProfile(profile: Profile): Observable<Profile> {
     return this.profiles$.pipe(
       take(1),
       map((holder) => {
-        holder[uid] = profile;
-        this.profiles.next(holder);
+        const newHolder = cloneDeep(holder);
+        newHolder[profile.uid] = profile;
+        this.profiles.next(newHolder);
         return profile;
       })
     );
@@ -123,7 +131,7 @@ export class OtherProfilesStore extends AbstractStoreService {
         return EMPTY;
       }), // fetching the picture count for the profile
       exhaustMap((profile) => {
-        if (!!profile) return this.saveProfile(uid, profile);
+        if (!!profile) return this.saveProfile(profile);
 
         return EMPTY;
       }), // save profile to store

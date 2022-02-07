@@ -272,7 +272,7 @@ export function pickFromSCArray(
     uidsPicked.push(uids[i]);
   }
 
-  // to remove duplicates but is it even necessary? I think only people with "other"
+  // to remove duplicates but is it even necessary? I think only people with "trans"
   // as their gender can be in different arrays, so maybe just do that at the very very end
   // and just once
   return uidsPicked;

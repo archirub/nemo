@@ -37,7 +37,7 @@ export class UniversitiesStore extends AbstractStoreService {
   protected systemsToActivate(): Observable<any> {
     return this.fetchUniversities();
   }
-  protected resetStore(): void {
+  protected async resetStore() {
     // state not user specific, so no need to refetch
   }
 

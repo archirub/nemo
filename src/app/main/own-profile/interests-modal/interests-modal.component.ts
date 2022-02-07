@@ -119,7 +119,6 @@ export class InterestsModalComponent implements OnInit {
 
   // changes the interest selection
   selectInterest(choice) {
-    console.log("interests", this.interests);
     if (this.interests.includes(choice)) {
       const index = this.interests.indexOf(choice);
       this.interests.splice(index, 1);

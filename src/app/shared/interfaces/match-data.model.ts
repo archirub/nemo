@@ -93,7 +93,10 @@ export interface piStorageUidMaps {
 }
 export type piStorage = piStorageDefault & piStorageUidMaps;
 
-export const genderOptions = ["male" as const, "female" as const, "other" as const];
+export const swipeModeOptions = ["friend" as const, "dating" as const];
+export type SwipeMode = typeof swipeModeOptions[number];
+
+export const genderOptions = ["male" as const, "female" as const, "trans" as const];
 export type Gender = typeof genderOptions[number];
 export const sexualPreferenceOptions = [
   ["male" as const],
@@ -102,5 +105,24 @@ export const sexualPreferenceOptions = [
 ];
 export type SexualPreference = typeof sexualPreferenceOptions[number];
 
-export const swipeModeOptions = ["friend" as const, "dating" as const];
-export type SwipeMode = typeof swipeModeOptions[number];
+export const genderFunctionalOptions = [
+  "male" as const,
+  "female" as const,
+  "trans" as const,
+];
+export const genderAppearanceOptions = [
+  "male" as const,
+  "female" as const,
+  "trans" as const,
+  "non-binary" as const,
+];
+export type GenderFunctional = typeof genderFunctionalOptions[number];
+export type GenderAppearance = typeof genderAppearanceOptions[number];
+
+// export function genderFunctionalToAppearance(gFunc: GenderFunctional): GenderAppearance {
+//   if (gFunc === "male" || )
+// }
+export function genderAppearanceToFunctional(gApp: GenderAppearance): GenderFunctional {
+  if (gApp === "non-binary" || gApp === "trans") return "trans";
+  if (gApp === "female" || gApp === "male") return gApp;
+}
