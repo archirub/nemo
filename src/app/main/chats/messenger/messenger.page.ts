@@ -54,7 +54,7 @@ import { MessagesService } from "./messages.service";
   selector: "app-messenger",
   templateUrl: "./messenger.page.html",
   styleUrls: ["./messenger.page.scss"],
-  providers: [],
+  providers: [MessagesService],
 })
 export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
   // Constants

@@ -12,6 +12,7 @@ import {
   shareReplay,
   switchMap,
   take,
+  tap,
 } from "rxjs/operators";
 
 import { Chat, Message } from "@classes/index";
@@ -22,7 +23,7 @@ import { Timestamp } from "@interfaces/firebase.model";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 import { FormatService } from "@services/format/format.service";
 import { Injectable } from "@angular/core";
-import { FilterFalsy } from "src/app/shared/functions/custom-rxjs";
+import { FilterFalsy, Logger } from "src/app/shared/functions/custom-rxjs";
 
 @Injectable()
 export class MessagesService {
@@ -30,14 +31,15 @@ export class MessagesService {
 
   private messages = new BehaviorSubject<Message[]>([]);
   private chat = new BehaviorSubject<Chat>(null);
+  private allMessagesLoaded = new BehaviorSubject<boolean>(false);
+  private sendingMessage = new BehaviorSubject<boolean>(false);
 
   // distinctUntilEqual here is super important (because of listenOnMoreMessages$ having as source observable messages$)
   // (and also because of handleShowLoading$)
   messages$ = this.messages.pipe(distinctUntilChanged((x, y) => isEqual(x, y)));
-
   chat$ = this.chat.pipe(distinctUntilChanged((x, y) => isEqual(x, y)));
-
-  sendingMessage$ = new BehaviorSubject<boolean>(false);
+  sendingMessage$ = this.sendingMessage.pipe(distinctUntilChanged());
+  allMessagesLoaded$ = this.allMessagesLoaded.pipe(distinctUntilChanged());
 
   // emits once the first batch of messages has arrived.
   // this is for the moreMessagesLoadingHandler
@@ -61,7 +63,7 @@ export class MessagesService {
   // Sends the content of the input bar as a new message to the database
   // returns the time of the message
   sendMessage(msgToSend: string): Observable<Date> {
-    this.sendingMessage$.next(true);
+    this.sendingMessage.next(true);
 
     const messageTime = new Date(); // this MUST be the same date sent to db as is checked below
 
@@ -85,7 +87,7 @@ export class MessagesService {
       ),
       mapTo(messageTime),
       this.errorHandler.handleErrors(),
-      finalize(() => this.sendingMessage$.next(false))
+      finalize(() => this.sendingMessage.next(false))
     );
   }
 
@@ -123,12 +125,18 @@ export class MessagesService {
           map((s) => s.map((v) => v.payload.doc)),
           filter((docs) => docs.length >= currMsgCount && docs.length > 1), // because sometimes only 1 msg is obtained from snapshotChanges
           take(1),
+          tap((docs) => this.checkForAllLoaded(currMsgCount, docs.length)),
           map((docs) => this.messages.next(this.docsToMsgs(docs))),
           this.errorHandler.convertErrors("firestore"),
           this.errorHandler.handleErrors()
         )
       )
     );
+  }
+
+  // for use in "listen to more messages"
+  private checkForAllLoaded(currMsgCount: number, newMsgCount: number): void {
+    if (currMsgCount === newMsgCount) this.allMessagesLoaded.next(true);
   }
 
   private docsToMsgs(docs: QueryDocumentSnapshot<messageFromDatabase>[]): Message[] {

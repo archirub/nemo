@@ -188,14 +188,6 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     this.onResize();
   }
 
-  showTestModel() {
-    this.modalCtrl
-      .create({
-        component: MessageBoardComponent,
-      })
-      .then((m) => m.present());
-  }
-
   ngOnInit() {
     this.subs.add(this.readinessHandler$.subscribe());
     this.subs.add(this.mainProfilePictureGetter$.subscribe());

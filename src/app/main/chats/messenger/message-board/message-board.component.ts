@@ -1,9 +1,12 @@
-import { SubscribeAndLog } from "../../../../shared/functions/custom-rxjs";
-import { Message } from "../../../../shared/classes/message.class";
-import { Component, Input, OnInit, ViewChild, ViewEncapsulation } from "@angular/core";
-import { filter, firstValueFrom, interval, map, Observable, ReplaySubject } from "rxjs";
+import { Component, OnInit, ViewChild } from "@angular/core";
 import { IonInfiniteScroll } from "@ionic/angular";
+
+import { filter, firstValueFrom, ReplaySubject } from "rxjs";
+
 import { MessagesService } from "../messages.service";
+
+import { Message } from "@classes/index";
+import { SubscribeAndLog } from "src/app/shared/functions/custom-rxjs";
 
 @Component({
   selector: "app-message-board",
@@ -11,7 +14,9 @@ import { MessagesService } from "../messages.service";
   styleUrls: ["./message-board.component.scss"],
 })
 export class MessageBoardComponent implements OnInit {
-  @Input() messages$: Observable<Message[]>;
+  messages$ = this.msgService.messages$;
+  chat$ = this.msgService.chat$;
+  allMessagesLoaded$ = this.msgService.allMessagesLoaded$;
 
   private infiniteScrollRef$ = new ReplaySubject<IonInfiniteScroll>(1);
   @ViewChild(IonInfiniteScroll) set infiniteScrollSetter(ref: IonInfiniteScroll) {
@@ -21,8 +26,8 @@ export class MessageBoardComponent implements OnInit {
   constructor(private msgService: MessagesService) {}
 
   ngOnInit() {
-    SubscribeAndLog(this.messages$, "messages$");
     this.manageInfiniteScroll();
+    SubscribeAndLog(this.allMessagesLoaded$, " allMessagesLoaded$");
   }
 
   async manageInfiniteScroll() {
