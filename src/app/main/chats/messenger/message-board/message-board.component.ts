@@ -7,6 +7,7 @@ import { MessagesService } from "../messages.service";
 
 import { Message } from "@classes/index";
 import { SubscribeAndLog } from "src/app/shared/functions/custom-rxjs";
+import { wait } from "src/app/shared/functions/common";
 
 @Component({
   selector: "app-message-board",
@@ -35,7 +36,7 @@ export class MessageBoardComponent implements OnInit {
     // waits at least for first batch to arrive before
     await this.returnOnFirstBatchArrived();
     // waits for additional 2 seconds this is only to leave it time to scroll down
-    await later(2000);
+    await wait(2000);
     // only then disables the infinite scroll
     infiniteScrollRef.disabled = false;
   }
@@ -57,9 +58,4 @@ export class MessageBoardComponent implements OnInit {
   trackMessage(index: number, message: Message) {
     return message.messageID;
   }
-}
-function later(delay) {
-  return new Promise(function (resolve) {
-    setTimeout(resolve, delay);
-  });
 }

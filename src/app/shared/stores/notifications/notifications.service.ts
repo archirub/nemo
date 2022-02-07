@@ -44,6 +44,20 @@ export class NotificationsStore extends AbstractStoreService {
   // and for which we need the user's uid)
   private uid: string = null;
 
+  handleStorageAddition$ = this.token$.pipe(
+    filter((t) => !!t?.value),
+    switchMap((t) =>
+      this.errorHandler.getCurrentUser$().pipe(
+        take(1),
+        map((u) => [t, u] as const)
+      )
+    ),
+    tap(([_, u]) => {
+      this.uid = u.uid;
+    }),
+    switchMap(([token, user]) => this.updateToken(token.value, user.uid, "add"))
+  );
+
   constructor(
     private fs: AngularFirestore,
     private errorHandler: GlobalErrorHandler,
@@ -110,24 +124,11 @@ export class NotificationsStore extends AbstractStoreService {
     );
   }
 
-  handleStorageAddition$ = this.token$.pipe(
-    filter((t) => !!t?.value),
-    switchMap((t) =>
-      this.errorHandler.getCurrentUser$().pipe(
-        take(1),
-        map((u) => [t, u] as const)
-      )
-    ),
-    tap(([_, u]) => {
-      this.uid = u.uid;
-    }),
-    switchMap(([token, user]) => this.updateToken(token.value, user.uid, "add"))
-  );
-
   removeFromStorage() {
     return this.token$.pipe(
       take(1),
       switchMap((token) => {
+        console.log("removing token from firebase:", token, this.uid);
         if (!token?.value || !this.uid) return of("");
         return this.updateToken(token.value, this.uid, "remove");
       })

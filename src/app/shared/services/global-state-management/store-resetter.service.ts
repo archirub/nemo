@@ -12,6 +12,7 @@ import {
   switchMapTo,
   tap,
 } from "rxjs";
+import { wait } from "../../functions/common";
 
 @Injectable({
   providedIn: "root",
@@ -29,18 +30,12 @@ export class StoreResetter {
   async resetStores(midTask: () => Promise<any>): Promise<void> {
     this.deactivateOnEmit.next("");
 
-    await later(1000);
+    await wait(1000);
 
     await midTask();
 
     this.resetOnEmit.next("");
 
-    await later(200);
+    await wait(200);
   }
-}
-
-function later(delay) {
-  return new Promise(function (resolve) {
-    setTimeout(resolve, delay);
-  });
 }

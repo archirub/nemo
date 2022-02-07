@@ -13,7 +13,7 @@ export const SwipeAnimation = (
   appearAnimation
     .addElement(likeDiv.nativeElement)
     .easing("cubic-bezier(0.5, 1, 0.89, 1)")
-    .duration(1000)
+    .duration(400)
     .beforeStyles({
       display: "flex",
     })
@@ -24,7 +24,7 @@ export const SwipeAnimation = (
   disappearAnimation
     .addElement(likeDiv.nativeElement)
     .easing("cubic-bezier(0.5, 0, 0.75, 0)")
-    .duration(1000)
+    .duration(600)
     .fromTo("opacity", "1", "0")
     .afterStyles({
       display: "none",
@@ -32,7 +32,7 @@ export const SwipeAnimation = (
 
   const playAnimation = async () => {
     await appearAnimation.play();
-    await firstValueFrom(storeTasks$(profile).pipe(delay(300)));
+    await firstValueFrom(storeTasks$(profile).pipe(delay(800)));
     await disappearAnimation.play();
   };
 

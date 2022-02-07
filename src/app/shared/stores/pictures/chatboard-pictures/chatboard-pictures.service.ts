@@ -124,7 +124,8 @@ export class ChatboardPicturesStore extends AbstractStoreService {
         Array(obj.uids.length)
           .fill(null)
           .map((_, i) => {
-            holder[obj.uids[i]] = obj.urls[i];
+            holder[obj.uids[i]] =
+              obj.urls[i] ?? "src/assets/default-chatboard-picture.svg";
           });
         this.holder.next(holder);
 

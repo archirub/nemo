@@ -126,7 +126,7 @@ function addToUidDatingStorage(
   uid: string
 ) {
   // that step is the most complex, since the uidDatingStorage uid arrays are ordered
-  // in percentile, and their may me multiple uidDatingStorage arrays, for which, if we add
+  // in percentile, and there may me multiple uidDatingStorage arrays, for which, if we add
   // together their uid arrays, they form the full uid distribution for that particular demographic
   // so, for each demographic, we need to find the total number of uids there, and insert the person's uid
   // in the middle of that, and where the middle is depends on the length of the array of each volume, and whether

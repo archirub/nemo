@@ -42,8 +42,8 @@ export class SwipeCapService extends AbstractStoreService {
 
   private swipesLeft = new BehaviorSubject<SwipeCapMap>(null);
   swipesLeft$ = this.swipesLeft.asObservable().pipe(
-    distinctUntilChanged(),
-    map((a) => ({ ...a, swipesLeft: 19 })) // DEV
+    distinctUntilChanged()
+    // map((a) => ({ ...a, swipesLeft: 19 })) // DEV
   );
   state$ = new BehaviorSubject<SwipeState>("init");
 

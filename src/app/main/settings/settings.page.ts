@@ -50,6 +50,7 @@ import {
 } from "@interfaces/index";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
+import { pageTransitionFromSettings } from "@animations/page-transition.animation";
 
 type GoUnder = "on" | "off";
 
@@ -327,7 +328,9 @@ export class SettingsPage implements AfterViewInit, OnDestroy, OnInit {
   }
 
   async goBack() {
-    return this.navCtrl.navigateBack("/main/tabs/own-profile");
+    return this.navCtrl.navigateForward("/main/tabs/own-profile", {
+      animation: pageTransitionFromSettings,
+    });
   }
 
   async logOut() {

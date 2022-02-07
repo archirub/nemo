@@ -6,12 +6,6 @@ import {
   notificationsDocument,
 } from "../../../src/app/shared/interfaces/index";
 
-// FIXME - notification sent to both users, instead of only the person who didn't make the match
-// This is because we don't have the uid of the user that made the match or vice-versa.
-// So we are counting on the fact that, when this cloud function is triggered, the user
-// making the match will still be on the app and hence will not receive the notification
-// sent to him about the match he just made.
-
 export const newMatchNotification = functions
   .region("europe-west2")
   .firestore.document("chats/{chatId}")
@@ -43,7 +37,7 @@ export const newMatchNotification = functions
     const payload: admin.messaging.MessagingPayload = {
       notification: {
         title: `New Match!`,
-        body: `Go to the app to start talking with them.`,
+        body: `Who could that be?`,
       },
     };
     const options: admin.messaging.MessagingOptions = {

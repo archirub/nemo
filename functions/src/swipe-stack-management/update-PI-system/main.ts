@@ -70,7 +70,7 @@ export const updatePISystem = functions
 
       // CALCULATE MEAN AND VARIANCE OF PI DISTRIBUTIONS
       // (removed those who don't want to show their profiles or that are not in dating mode)
-      const distribParamMaps = initialiseDemographicMap<distributionParameters>({
+      const distribParamMaps = getNewDemographicMap<distributionParameters>({
         mean: null,
         variance: null,
         occurrences: 0,
@@ -91,7 +91,7 @@ export const updatePISystem = functions
       });
 
       // CALCULATE SCORES OF USERS & SUBSEQUENTLY ADD USERS TO RESPECTIVE DEMOGRAPHIC ARRAYS
-      const newDemographicScoreMaps = initialiseDemographicMap<uid_score[]>([]);
+      const newDemographicScoreMaps = getNewDemographicMap<uid_score[]>([]);
 
       swipeUserInfo.forEach((swipeUserInfoMap) => {
         for (const uid in swipeUserInfoMap) {
@@ -103,7 +103,7 @@ export const updatePISystem = functions
       });
 
       // ORDER ARRAYS IN ASCENDING ORDER OF SCORE, REGISTER NEW PERCENTILE, RESET LIKE/SEEN COUNTS
-      const newUIDStorageArrays = initialiseDemographicMap<string[]>([]);
+      const newUIDStorageArrays = getNewDemographicMap<string[]>([]);
       for (const demographic in newDemographicScoreMaps) {
         const peopleCount =
           newDemographicScoreMaps[demographic as keyof demographicMap<any>].length;
@@ -215,7 +215,7 @@ function toUidStorage(uidStorageArrays: demographicMap<string[]>): uidDatingStor
  * Creates a demographic map that has "c" for all of its properties
  * @param c content of each property
  */
-function initialiseDemographicMap<T>(c: T): demographicMap<T> {
+function getNewDemographicMap<T>(c: T): demographicMap<T> {
   return {
     undergrad_female_female: JSON.parse(JSON.stringify(c)),
     undergrad_female_male: JSON.parse(JSON.stringify(c)),

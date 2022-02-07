@@ -7,7 +7,7 @@ import {
   AfterViewInit,
   Renderer2,
 } from "@angular/core";
-import { IonTextarea, ModalController, Animation } from "@ionic/angular";
+import { IonTextarea, ModalController, Animation, NavController } from "@ionic/angular";
 import { Router } from "@angular/router";
 
 import {
@@ -42,11 +42,15 @@ import { ProfileCardComponent } from "@components/index";
 import { InterestsModalComponent } from "./interests-modal/interests-modal.component";
 
 import { CurrentUserStore } from "@stores/index";
+import { TutorialsStore } from "@stores/tutorials/tutorials.service";
 import { OwnPicturesStore } from "@stores/pictures/own-pictures/own-pictures.service";
 import { StoreReadinessService } from "@services/store-readiness/store-readiness.service";
 import { TabElementRefService } from "../tab-menu/tab-element-ref.service";
+import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
 
 import { AppUser, Profile } from "@classes/index";
+import { pageTransitionToSettings } from "../../shared/animations/page-transition.animation";
+
 import {
   FishSwimAnimation,
   ToggleAppearAnimation,
@@ -63,8 +67,6 @@ import {
   MAX_PROFILE_PICTURES_COUNT,
   QuestionAndAnswer,
 } from "@interfaces/index";
-import { TutorialsStore } from "@stores/tutorials/tutorials.service";
-import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
 
 @Component({
   selector: "app-own-profile",
@@ -197,10 +199,10 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
   }
 
   constructor(
-    private router: Router,
     private renderer: Renderer2,
     private detector: ChangeDetectorRef,
     private modalCtrl: ModalController,
+    private navCtrl: NavController,
 
     private currentUserStore: CurrentUserStore,
     private ownPicturesService: OwnPicturesStore,
@@ -380,7 +382,11 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
       this.editingInProgress$.pipe(
         first(),
         switchMap((inProgress) =>
-          !inProgress ? this.router.navigateByUrl("/main/settings") : of("")
+          !inProgress
+            ? this.navCtrl.navigateForward("/main/settings", {
+                animation: pageTransitionToSettings,
+              })
+            : of("")
         )
       )
     );
