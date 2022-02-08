@@ -7,6 +7,8 @@ import {
   Output,
   ViewChild,
   Renderer2,
+  AfterViewInit,
+  AfterContentChecked,
 } from "@angular/core";
 
 import { Question, QuestionAndAnswer } from "@interfaces/profile.model";
@@ -32,13 +34,15 @@ export class ProfileAnswerComponent {
 
   // for when the answer changes
   onAnswerChange(value) {
+    console.log("onAnswerChange", value);
     this.questionAndAnswer.answer = value;
-    // this.questionAndAnswerChange.emit(this.questionAndAnswer);
+    this.questionAndAnswerChange.emit(this.questionAndAnswer);
   }
 
   // for when the question changes
   onQuestionChange(event) {
-    this.questionAndAnswer.question = event.target.value;
+    const newValue = event.target.value;
+    if (newValue) this.questionAndAnswer.question = newValue;
     // this.questionAndAnswerChange.emit(this.questionAndAnswer);
     this.hideInput();
   }
@@ -53,11 +57,11 @@ export class ProfileAnswerComponent {
   /**
    * Show question replace UI to edit already included questions
    **/
-  showInput() {
+  async showInput() {
     this.renderer.setStyle(this.qHead.nativeElement, "display", "none"); //Hide text
     this.renderer.setStyle(this.qInput.nativeElement, "display", "flex"); //Show question select
 
-    this.qSelect?.open(); //Open ionSelect immediately
+    await this.qSelect?.open(); //Open ionSelect immediately
   }
 
   /**

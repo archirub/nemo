@@ -7,6 +7,8 @@ import { Storage } from "@capacitor/storage";
 import { StoreResetter } from "@services/global-state-management/store-resetter.service";
 import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
 import { BehaviorSubject } from "rxjs";
+import { pageTransition } from "@animations/page-transition.animation";
+import { wait } from "../../functions/common";
 
 // this functionality was moved to a different service to solve some dependency issues between
 // global-error-handler -> firebase-auth-service -> firebase-auth-error-handler (|| other error handlers) -> global-error-handler
@@ -51,7 +53,10 @@ export class FirebaseLogoutService {
       Promise.all([clearLocalCache(), this.storeResetter.resetStores(logOut)]);
 
     const navigateToWelcome = async () =>
-      this.zone.run(() => this.navCtrl.navigateRoot("/welcome"));
+      this.zone.run(() => {
+        console.log("navigateToWelcome");
+        return this.navCtrl.navigateForward("/welcome");
+      });
     // .then(() => window.location.reload());
 
     const loader = await this.loadingAlertManager.createLoading();
@@ -61,6 +66,8 @@ export class FirebaseLogoutService {
     await duringLoadingPromise();
 
     await this.loadingAlertManager.dismissDisplayed();
+
+    await wait(100);
 
     await navigateToWelcome();
 

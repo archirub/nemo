@@ -1,8 +1,8 @@
 // import { GlobalErrorHandler } from "./shared/error-handling/global-error-handling";
-import { ErrorHandler, NgModule } from "@angular/core";
+import { NgModule } from "@angular/core";
 import { BrowserModule } from "@angular/platform-browser";
 import { CommonModule } from "@angular/common";
-import { HttpClientModule, HTTP_INTERCEPTORS } from "@angular/common/http";
+import { HttpClientModule } from "@angular/common/http";
 import { RouteReuseStrategy } from "@angular/router";
 
 import { IonicModule, IonicRouteStrategy } from "@ionic/angular";
@@ -22,7 +22,7 @@ import { pageTransition } from "./shared/animations/page-transition.animation";
 import { PipesModule } from "@pipes/pipes.module";
 import { DirectivesModule } from "./shared/directives/directives.module";
 import { SortablejsModule } from "ngx-sortablejs";
-import { ImageCropperModule } from "ngx-image-cropper";
+import { SwiperModule } from "swiper/angular";
 
 @NgModule({
   declarations: [AppComponent],
@@ -40,7 +40,7 @@ import { ImageCropperModule } from "ngx-image-cropper";
     PipesModule,
     DirectivesModule,
     SortablejsModule.forRoot({}),
-    // ImageCropperModule,
+    SwiperModule,
   ],
   providers: [
     StatusBar,

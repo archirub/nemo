@@ -29,6 +29,7 @@ import {
   allowOptionalProp,
 } from "@interfaces/index";
 import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
+import { wait } from "src/app/shared/functions/common";
 
 @Component({
   selector: "app-signupoptional",
@@ -145,9 +146,9 @@ export class SignupoptionalPage implements OnInit {
         buttons: ["Go to field"],
       });
 
-      await this.loadingAlertManager.dismissDisplayed();
-
       alert.onDidDismiss().then(() => this.unlockAndSlideTo(invalidSlide));
+
+      await this.loadingAlertManager.dismissDisplayed();
 
       return this.loadingAlertManager.presentNew(alert, "replace-erase");
     }
@@ -163,7 +164,11 @@ export class SignupoptionalPage implements OnInit {
 
     await this.signup.initializeUser();
 
+    await wait(200);
+
     await this.loadingAlertManager.dismissDisplayed();
+
+    await wait(200);
 
     return this.navCtrl.navigateForward("/welcome/signup-to-app");
   }

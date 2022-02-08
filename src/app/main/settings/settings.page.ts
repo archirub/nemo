@@ -204,7 +204,6 @@ export class SettingsPage implements AfterViewInit, OnDestroy, OnInit {
     const newShowProfile = formatGoUnderToShowProfile(option);
 
     const loader = await this.loadingAlertManager.createLoading();
-
     const request: changeShowProfileRequest = {
       showProfile: newShowProfile,
     };
@@ -233,6 +232,7 @@ export class SettingsPage implements AfterViewInit, OnDestroy, OnInit {
         )
     );
 
+    this.goUnderToggle.applyStyling(option);
     await this.loadingAlertManager.dismissDisplayed();
   }
 

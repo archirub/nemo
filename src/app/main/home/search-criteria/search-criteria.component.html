@@ -4,7 +4,7 @@
       <ion-icon name="close-outline"></ion-icon>
     </div>
 
-    <div class="image" *ngIf="!viewEntered">
+    <div class="image" *ngIf="!(viewIsReady$ | async)">
       <div class="flex loading">
         <img #fish src="/assets/nemo_load.svg" class="fish" />
       </div>
@@ -101,7 +101,7 @@
             <h4>Back</h4>
           </div>
           <ion-list>
-            <ng-container *ngFor="let option of (universityOptions$ | async)">
+            <ng-container *ngFor="let option of universityOptions$ | async">
               <!--NGIF=OPTION IS IMPORTANT - stops it showing null values-->
               <ion-item
                 *ngIf="option"
@@ -135,7 +135,7 @@
           <ion-list>
             <ng-container *ngFor="let option of degreeOptions">
               <!--NGIF=OPTION IS IMPORTANT - stops it showing null values-->
-                <ion-item
+              <ion-item
                 *ngIf="option"
                 (click)="selectReplace(option, 'chosenDegree')"
                 lines="none"

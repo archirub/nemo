@@ -9,8 +9,6 @@ import {
   ViewChildren,
   ViewChild,
   ElementRef,
-  Output,
-  EventEmitter,
   Renderer2,
 } from "@angular/core";
 
@@ -57,8 +55,8 @@ import {
   SwipeStackStore,
 } from "@stores/index";
 
-import { Profile, AppUser, SearchCriteria } from "@classes/index";
-import { mdDatingPickingFromDatabase, swipeChoice, piStorage } from "@interfaces/index";
+import { Profile, AppUser } from "@classes/index";
+import { swipeChoice } from "@interfaces/index";
 import {
   SwipeAnimation,
   YesBubbleAnimation,
@@ -66,11 +64,7 @@ import {
   OpenCatchAnimation,
   CloseCatchAnimation,
 } from "@animations/index";
-import {
-  AngularFirestore,
-  DocumentSnapshot,
-  QuerySnapshot,
-} from "@angular/fire/firestore";
+import { AngularFirestore } from "@angular/fire/firestore";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 import { SwipeCapService } from "@stores/swipe-stack/swipe-cap.service";
 import { AnalyticsService } from "@services/analytics/analytics.service";

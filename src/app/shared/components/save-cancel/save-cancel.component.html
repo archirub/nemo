@@ -1,0 +1,17 @@
+<div class="flexeven">
+  <ion-button
+    class="button"
+    [ngStyle]="{ width: buttonWidth + 'vw' }"
+    (click)="setValue('save')"
+  >
+    <p>{{ saveName }}</p>
+  </ion-button>
+
+  <ion-button
+    class="button"
+    [ngStyle]="{ width: buttonWidth + 'vw' }"
+    (click)="setValue('cancel')"
+  >
+    <p>{{ cancelName }}</p>
+  </ion-button>
+</div>

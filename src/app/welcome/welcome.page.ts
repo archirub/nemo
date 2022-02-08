@@ -12,10 +12,10 @@ export class WelcomePage implements OnInit {
   ngOnInit() {}
 
   goToSignup() {
-    this.navCtrl.navigateForward("welcome/signupauth");
+    return this.navCtrl.navigateForward("welcome/signupauth");
   }
 
   goToLogin() {
-    this.navCtrl.navigateForward("welcome/login");
+    return this.navCtrl.navigateForward("welcome/login");
   }
 }

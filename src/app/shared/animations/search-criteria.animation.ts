@@ -5,20 +5,36 @@ import { AnimationController } from "@ionic/angular";
 export const SCenterAnimation = () => {
   const animation = (baseEl: any) => {
     // MODAL
-    const wrapperAnimation = new AnimationController()
+    // const wrapperAnimation = new AnimationController()
+    //   .create()
+    //   .addElement(baseEl.querySelector(".modal-wrapper")!)
+    //   .duration(0)
+    //   .beforeStyles({
+    //     height: "90vh",
+    //     width: "90vw",
+    //     "--border-radius": "20px",
+    //     "border-radius": "20px",
+    //     // opacity: "1",
+    //     overflow: "inherit",
+    //   })
+    //   .fromTo("transform", "translateY(-100vh)", "translateY(0vh)");
+
+    const anim2 = new AnimationController()
       .create()
       .addElement(baseEl.querySelector(".modal-wrapper")!)
-      .duration(350)
-      .easing("ease-in-out")
+      .duration(200)
+      .easing("cubic-bezier(0.5, 1, 0.89, 1)")
       .beforeStyles({
+        transform: "translateX(0)",
+        opacity: 0,
         height: "90vh",
-        width: "90vw",
+        width: "95vw",
         "--border-radius": "20px",
         "border-radius": "20px",
-        opacity: "1",
+        // opacity: "1",
         overflow: "inherit",
       })
-      .fromTo("transform", "translateY(-100vh)", "translateY(0vh)");
+      .fromTo("opacity", "0", "1");
 
     // SHADOW IOS
     const shadowIOSAnimation = new AnimationController()
@@ -55,13 +71,13 @@ export const SCenterAnimation = () => {
       .create()
       .addElement(baseEl)
       .easing("ease-out")
-      .duration(200)
+      .duration(300)
       .addAnimation([
         backdropAnimation,
         shadowIOSAnimation,
         shadowAndroidAnimation,
-        wrapperAnimation,
-        //contentAnimation,
+        // wrapperAnimation,
+        anim2,
       ]);
   };
   return animation;

@@ -21,6 +21,7 @@
                 [buttonWidth]="15"
                 [fontSize]="3.5"
                 [selections]="['off','on']"
+                handleStylingInParent="true"
               ></nemo-toggle>
             </div>
             <h3 #goUnderH3>
@@ -97,13 +98,11 @@
           <a (click)="goBack()"><ion-icon name="close-outline"></ion-icon></a>
         </div>
 
-        <nemo-toggle
+        <save-cancel
           *ngIf="editingInProgress$ | async"
           (valueChange)="actOnEditing($event)"
-          [buttonWidth]="15"
-          [fontSize]="4"
-          [selections]="['cancel', 'confirm']"
-        ></nemo-toggle>
+          [buttonWidth]="22"
+        ></save-cancel>
 
         <div class="flexstart-row" (click)="returnToSettings()">
           <ion-icon id="back" name="chevron-back-outline"></ion-icon>
@@ -229,7 +228,11 @@
         </div>
 
         <div class="pdf-view">
-          <pdf-viewer [src]="'/assets/docs/nemo_privacy_policy.pdf'" [original-size]="false" [fit-to-page]="true"></pdf-viewer>
+          <pdf-viewer
+            [src]="'/assets/docs/nemo_privacy_policy.pdf'"
+            [original-size]="false"
+            [fit-to-page]="true"
+          ></pdf-viewer>
         </div>
       </div>
     </ion-slide>
@@ -250,7 +253,11 @@
         </div>
 
         <div class="pdf-view">
-          <pdf-viewer [src]="'/assets/docs/nemo_terms_of_use.pdf'" [original-size]="false" [fit-to-page]="true"></pdf-viewer>
+          <pdf-viewer
+            [src]="'/assets/docs/nemo_terms_of_use.pdf'"
+            [original-size]="false"
+            [fit-to-page]="true"
+          ></pdf-viewer>
         </div>
       </div>
     </ion-slide>

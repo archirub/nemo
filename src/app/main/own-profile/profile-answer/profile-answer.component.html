@@ -13,6 +13,7 @@
         interface="action-sheet"
         placeholder="Choose a question"
         (ionChange)="onQuestionChange($event)"
+        (ionCancel)="hideInput()"
       >
         <ion-select-option
           *ngFor="let q of questionsNotPicked; trackBy: trackQuestion"
@@ -22,13 +23,12 @@
         </ion-select-option>
       </ion-select>
     </div>
-    <ion-textarea
+
+    <textarea
       #answerInput
-      autoGrow="true"
       maxlength="70"
       [ngModel]="questionAndAnswer?.answer"
       (ngModelChange)="onAnswerChange($event)"
-      [ngModelOptions]="{ standalone: true }"
-    ></ion-textarea>
+    ></textarea>
   </div>
 </div>

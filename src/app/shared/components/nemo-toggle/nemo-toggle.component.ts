@@ -13,6 +13,14 @@ import {
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { IonButton } from "@ionic/angular";
 
+// for best consistency, this component will need to be modified so that its internal state
+// can be dictated by the parent component.
+// I mean a problem right now with the logic (as of 08/02/2022) is the logic that the
+// toggle is supposed to trigger fails and the real state is therefore what it was before
+// the toggling, then it is not reflected in the template, it becomes inconsistent and the component fails
+// ideally we would need ot be able to give feedback from the parent component to this component
+// about whether it was successful and when it happened
+
 @Component({
   selector: "nemo-toggle",
   templateUrl: "./nemo-toggle.component.html",
@@ -33,6 +41,9 @@ export class AppToggleComponent
   @Input() buttonWidth: number;
   @Input() fontSize: number;
   @Input() catchToggle: boolean = false;
+  //created for the go under toggle so that the
+  // animation can be synchronized with after the loading
+  @Input() handleStylingInParent = false;
 
   disabled = false;
 
@@ -54,7 +65,7 @@ export class AppToggleComponent
   ngAfterViewInit() {}
 
   selectOption(option) {
-    this.applyStyling(option);
+    if (!this.handleStylingInParent) this.applyStyling(option);
     this.value = option;
     this.valueChange.emit(option);
   }

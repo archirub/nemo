@@ -44,6 +44,7 @@ import { App } from "@capacitor/app";
 import { StoreStateManager } from "./store-state-manager.service";
 import { FilterFalsy, Logger } from "../../functions/custom-rxjs";
 import { AngularFireAuth } from "@angular/fire/auth";
+import { NavController } from "@ionic/angular";
 
 type pageName =
   | "chats"
@@ -81,6 +82,7 @@ export class GlobalStateManagementService {
 
   constructor(
     private router: Router,
+    private navCtrl: NavController,
 
     private firestore: AngularFirestore,
     private afAuth: AngularFireAuth,
@@ -165,7 +167,7 @@ export class GlobalStateManagementService {
         // as no auth is required for these three pages
         return concat(
           this.resetAppState(async () => {}),
-          this.router.navigateByUrl("/welcome")
+          this.navCtrl.navigateForward("/welcome")
         );
       })
     );
@@ -173,7 +175,7 @@ export class GlobalStateManagementService {
 
   private requiresEmailVerificationRoutine(): Observable<any> {
     const goToEmailVerification = async () => {
-      await this.router.navigateByUrl("/welcome/signupauth");
+      await this.navCtrl.navigateForward("/welcome/signupauth");
 
       await this.signupauthMethodSharer?.goStraightToEmailVerification?.();
     };
@@ -229,7 +231,7 @@ export class GlobalStateManagementService {
       try {
         await Storage.clear();
         await user.delete();
-        await this.router.navigateByUrl("/welcome");
+        await this.navCtrl.navigateForward("/welcome");
       } catch (err) {
         if (err?.code === "auth/requires-recent-login") {
           await this.firebaseAuthService.reAuthenticationProcedure(user);
@@ -245,7 +247,7 @@ export class GlobalStateManagementService {
                 resolve({ user: u });
               }
             }, 250);
-          }).then(() => this.router.navigateByUrl("/welcome"));
+          }).then(() => this.navCtrl.navigateForward("/welcome"));
         }
       }
     };
@@ -284,7 +286,7 @@ export class GlobalStateManagementService {
     return merge(
       this.storesManagement(),
       this.activateAppLifecycleHooks(),
-      this.router.navigateByUrl("main/tabs/home")
+      this.navCtrl.navigateForward("main/tabs/home")
     );
   }
 

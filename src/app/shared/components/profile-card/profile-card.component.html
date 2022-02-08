@@ -4,6 +4,7 @@
     <div class="pager" [hidden]="(profilePictures$ | async).length < 2">
       <ion-icon #bullets name="ellipse" *ngFor="let path of pictureCountArray"></ion-icon>
     </div>
+
     <ion-slides
       #picSlides
       (ionSlideWillChange)="onSlideChange()"
@@ -18,14 +19,17 @@
           'background-image': 'url(' + path + ')'
         }"
       >
-        <!-- <img [src]="path" /> -->
-        <!-- <div
-          [ngStyle]="{
-            'background-image': 'url(' + path + ')',
-            'background-size': 'cover',
-            'background-position': 'center'
-          }"
-        > -->
+        <!-- <swiper #picSlides (swiper)="onSwiper($event)" (slideChange)="onSlideChange2()">
+      <div
+        #pic
+        *ngFor="let path of profilePicturesWithDefault$ | async; index as i"
+        swiperSlide
+        [ngStyle]="{
+          'background-size': 'cover',
+          'background-position': 'center',
+          'background-image': 'url(' + path + ')'
+        }"
+      > -->
         <div class="yesSwipe" (click)="this.tapped.emit('yes')"></div>
         <div class="noSwipe" (click)="this.tapped.emit('no')"></div>
         <div
@@ -40,9 +44,10 @@
           }}</ion-card-subtitle>
         </div>
         <div #shadow class="img-shadow"></div>
-        <!-- </div> -->
-      </ion-slide>
-    </ion-slides>
+        <!-- </div>
+    </swiper> -->
+      </ion-slide></ion-slides
+    >
     <!--div #QandA class="question" [hidden]="moreInfo">
       <ion-card-title #question>{{ profile?.questions[0].question }}</ion-card-title>
       <ion-card-subtitle #answer>{{ profile?.questions[0].answer }}</ion-card-subtitle>
@@ -66,9 +71,13 @@
 
     <div #complete id="completeInfo" [style.bottom]="headerBottom + '%'">
       <!--[hidden]="!moreInfo"-->
-      <ion-card-header #header class="name-age sticky" (click)="expandProfile()" 
-      [style.position]="fixedHeader ? 'fixed' : 'initial'">
-      <!-- AFTER RELEASE THIS HEADER POSITIONING NEEDS TO BE FIXED-->
+      <ion-card-header
+        #header
+        class="name-age sticky"
+        (click)="expandProfile()"
+        [style.position]="fixedHeader ? 'fixed' : 'initial'"
+      >
+        <!-- AFTER RELEASE THIS HEADER POSITIONING NEEDS TO BE FIXED-->
         <ion-card-title
           >{{ profile?.firstName }}, {{ profile?.dateOfBirth | age }}
         </ion-card-title>

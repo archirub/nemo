@@ -16,9 +16,9 @@ import { ProfileCourseComponent } from "./profile-course/profile-course.componen
 
 import { InterestSlidesModule } from "@components/interests-slides/interests-slides.component.module";
 import { InterestsModalComponent } from "./interests-modal/interests-modal.component";
-import { SaveCancelComponent } from "./save-cancel/save-cancel.component";
 import { SortablejsModule } from "ngx-sortablejs";
 import { OwnProfileTutorialComponent } from "@components/tutorials/own-profile-tutorial/own-profile-tutorial.component";
+import { SaveCancelComponentModule } from "../../shared/components/save-cancel/save-cancel.component.module";
 
 @NgModule({
   imports: [
@@ -34,14 +34,14 @@ import { OwnProfileTutorialComponent } from "@components/tutorials/own-profile-t
     InterestSlidesModule,
     PipesModule,
     SortablejsModule,
+    SaveCancelComponentModule,
   ],
   declarations: [
     OwnProfilePage,
     ProfileAnswerComponent,
     ProfileCourseComponent,
     InterestsModalComponent,
-    SaveCancelComponent,
-    OwnProfileTutorialComponent
+    OwnProfileTutorialComponent,
   ],
 })
 export class OwnProfilePageModule {}

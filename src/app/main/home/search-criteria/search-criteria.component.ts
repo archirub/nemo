@@ -1,4 +1,4 @@
-import { IonSlides, IonContent, ModalController } from "@ionic/angular";
+import { IonSlides, IonContent, ModalController, Animation } from "@ionic/angular";
 import {
   Component,
   OnInit,
@@ -9,13 +9,23 @@ import {
 } from "@angular/core";
 import { FormControl, FormGroup } from "@angular/forms";
 
-import { Subscription, tap } from "rxjs";
+import {
+  BehaviorSubject,
+  delay,
+  first,
+  map,
+  ReplaySubject,
+  Subscription,
+  switchMap,
+  tap,
+} from "rxjs";
 
 import { SearchCriteriaStore } from "@stores/search-criteria/search-criteria-store.service";
 import { UniversitiesStore } from "@stores/universities/universities.service";
 
 import { SearchCriteria } from "@classes/index";
 import { searchCriteria, searchCriteriaOptions } from "@interfaces/search-criteria.model";
+import { FishSwimAnimation } from "@animations/fish.animation";
 
 @Component({
   selector: "app-search-criteria",
@@ -29,6 +39,7 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
   optionsOriginalPos: number;
   viewEntered: boolean = false;
   form: FormGroup;
+  loadingAnimation: Animation;
 
   degreeOptions = searchCriteriaOptions.degree;
   areaOfStudyOptions = searchCriteriaOptions.areaOfStudy;
@@ -42,6 +53,13 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
   interestSelection: string;
 
   private subs = new Subscription();
+
+  viewIsReady$ = new BehaviorSubject<boolean>(false);
+
+  private fishRef$ = new ReplaySubject<ElementRef>(1);
+  @ViewChild("fish", { read: ElementRef }) set fishRefSetter(ref: ElementRef) {
+    if (ref) this.fishRef$.next(ref);
+  }
 
   @ViewChild("options", { read: ElementRef }) options: ElementRef;
   @ViewChild("clear", { read: ElementRef }) clear: ElementRef;
@@ -76,6 +94,20 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
     });
   }
 
+  playLoadingAnimation$ = this.fishRef$.pipe(
+    first(),
+    switchMap((ref) => {
+      this.loadingAnimation = FishSwimAnimation(ref);
+      return this.loadingAnimation.play();
+    })
+  );
+
+  stopLoadingAnimation$ = this.fishRef$.pipe(
+    first(),
+    delay(200),
+    map(() => this.loadingAnimation?.destroy())
+  );
+
   constructor(
     private SCstore: SearchCriteriaStore,
     private modalCtrl: ModalController,
@@ -87,12 +119,13 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.subs.add(this.searchCriteriaHandler$.subscribe());
+    this.subs.add(this.playLoadingAnimation$.subscribe());
   }
 
-  ionViewDidEnter() {
+  async ionViewDidEnter() {
     //This initialises slide heights, for some unknown reason
     //USER DOESN'T SEE THIS, KEEP IT HERE
-    this.moveTo("studies").then(() => this.returnTo());
+    await this.moveTo("studies").then(() => this.returnTo());
     this.modalSlides.lockSwipes(true);
     this.optionsOriginalPos = this.options.nativeElement.getBoundingClientRect().y;
     this.gridHeight = this.grid.nativeElement.getBoundingClientRect().height;
@@ -101,9 +134,8 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
 
     // setTimeout to allow for the time for the template to be setup (particularly for
     // the nemo-toggle animations to play out)
-    setTimeout(() => {
-      this.viewEntered = true;
-    }, 350);
+    this.subs.add(this.stopLoadingAnimation$.subscribe());
+    this.viewIsReady$.next(true);
   }
 
   // saves the new choices to the store, as well as to the database, and then closes the modal

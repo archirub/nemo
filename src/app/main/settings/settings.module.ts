@@ -11,6 +11,7 @@ import { SettingsPage } from "./settings.page";
 import { AppToggleModule } from "@components/nemo-toggle/nemo-toggle.component.module";
 import { PdfViewerModule } from "ng2-pdf-viewer";
 import { platformBrowserDynamic } from "@angular/platform-browser-dynamic";
+import { SaveCancelComponentModule } from "../../shared/components/save-cancel/save-cancel.component.module";
 
 @NgModule({
   imports: [
@@ -21,7 +22,8 @@ import { platformBrowserDynamic } from "@angular/platform-browser-dynamic";
     SettingsPageRoutingModule,
     AppToggleModule,
     PipesModule,
-    PdfViewerModule
+    PdfViewerModule,
+    SaveCancelComponentModule,
   ],
   declarations: [SettingsPage],
 })

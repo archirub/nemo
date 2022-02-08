@@ -13,11 +13,11 @@
     -o-background-size: cover;
     background-size: cover;
 
-    -webkit-animation: myfirst 0.7s ; /* Chrome, Safari, Opera */
-    animation: myfirst 0.7s ;
+    // -webkit-animation: myfirst 0.7s ; /* Chrome, Safari, Opera */
+    // animation: myfirst 0.7s ;
   }
 
-  /* Chrome, Safari, Opera */
+  // /* Chrome, Safari, Opera */
   @-webkit-keyframes myfirst {
     from {opacity: 0.2;}
     to {opacity: 1;}

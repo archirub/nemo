@@ -12,6 +12,8 @@ import {
   Renderer2,
   OnDestroy,
   ViewChildren,
+  AfterContentChecked,
+  ViewEncapsulation,
 } from "@angular/core";
 import { IonSlides } from "@ionic/angular";
 
@@ -23,16 +25,7 @@ import {
   ReplaySubject,
   Subscription,
 } from "rxjs";
-import {
-  map,
-  take,
-  startWith,
-  first,
-  switchMap,
-  tap,
-  exhaustMap,
-  delay,
-} from "rxjs/operators";
+import { map, startWith, first, switchMap } from "rxjs/operators";
 
 import { ReportUserComponent } from "../../../main/chats/report-user/report-user.component";
 
@@ -40,8 +33,10 @@ import { UserReportingService } from "@services/user-reporting/user-reporting.se
 
 import { Profile } from "@classes/index";
 import { LessInfoAnimation, MoreInfoAnimation } from "@animations/info.animation";
-import { CustomError } from "@interfaces/error-handling.model";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
+
+import SwiperCore from "swiper";
+import { SwiperComponent } from "swiper/angular";
 
 @Component({
   selector: "app-profile-card",
@@ -70,6 +65,7 @@ export class ProfileCardComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() headerBottom: number; //in %
   @Input() fixedHeader: boolean = true; //THIS IS A LAST MINUTE FIX BECAUSE I DON'T HAVE THE TIME TO FIGURE OUT WHAT'S GOING ON??
   @Input() set profilePictures(value: string[]) {
+    if (this.isOwnProfile) console.log("profilePictures", value);
     if (!Array.isArray(value)) return;
 
     // absolutely necessary. This is because empty strings can be coming in
@@ -78,20 +74,32 @@ export class ProfileCardComponent implements OnInit, AfterViewInit, OnDestroy {
     let pics = value.slice(0, this.pictureCount);
     pics = [
       ...value,
-      ...Array(this.pictureCount - pics.length).fill(
-        "https://gravatar.com/avatar/dba6bae8c566f9d4041fb9cd9ada7741?d=identicon&f=y"
-      ),
+      ...Array(this.pictureCount - pics.length).fill("/assets/icons/icon-192x192.png"),
     ];
 
     // DEV - replace this by the real default thing
-    if (pics.length === 0)
-      pics = [
-        "https://gravatar.com/avatar/dba6bae8c566f9d4041fb9cd9ada7741?d=identicon&f=y",
-      ];
+    if (pics.length === 0) pics = ["/assets/icons/icon-192x192.png"];
 
     this.profilePictures$.next(pics);
   }
 
+  // DEV
+  ngAfterContentChecked(): void {
+    if (this.picSlides) {
+      // if (this.isOwnProfile) console.log("picSlides", this.picSlides);
+      // console.log(this.picSlides.swiperRef);
+      // this.picSlides.updateSwiper({});
+    }
+  }
+
+  onSwiper(swiper: SwiperComponent) {
+    console.log("swiper", swiper.activeSlides);
+  }
+  onSlideChange2() {
+    console.log("slide change");
+  }
+
+  @ViewChild("picSlides") picSlides: SwiperComponent;
   @ViewChild("content", { read: ElementRef }) content: ElementRef;
   @ViewChild("yes", { read: ElementRef }) yesSwipe: ElementRef;
   @ViewChild("no", { read: ElementRef }) noSwipe: ElementRef;
