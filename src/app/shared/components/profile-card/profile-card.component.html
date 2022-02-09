@@ -5,7 +5,7 @@
       <ion-icon #bullets name="ellipse" *ngFor="let path of pictureCountArray"></ion-icon>
     </div>
 
-    <ion-slides
+    <!-- <ion-slides
       #picSlides
       (ionSlideWillChange)="onSlideChange()"
       *ngIf="profilePicturesWithDefault$ | async as profilePictures"
@@ -18,36 +18,41 @@
           'background-position': 'center',
           'background-image': 'url(' + path + ')'
         }"
-      >
-        <!-- <swiper #picSlides (swiper)="onSwiper($event)" (slideChange)="onSlideChange2()">
-      <div
+      > -->
+    <swiper #picSlides (swiper)="onSwiper($event)" (slideChange)="onSlideChange2()">
+      <ng-template
+        swiperSlide
         #pic
         *ngFor="let path of profilePicturesWithDefault$ | async; index as i"
-        swiperSlide
-        [ngStyle]="{
-          'background-size': 'cover',
-          'background-position': 'center',
-          'background-image': 'url(' + path + ')'
-        }"
-      > -->
-        <div class="yesSwipe" (click)="this.tapped.emit('yes')"></div>
-        <div class="noSwipe" (click)="this.tapped.emit('no')"></div>
-        <div
-          *ngIf="profile?.questions && profile?.questions[i]"
-          #QandA
-          class="question"
-          [hidden]="moreInfo"
+        ><div
+          [ngStyle]="{
+            'background-size': 'cover',
+            'background-position': 'center',
+            'background-image': 'url(' + path + ')'
+          }"
         >
-          <ion-card-title #question>{{ profile?.questions[i].question }}</ion-card-title>
-          <ion-card-subtitle #answer>{{
-            profile?.questions[i].answer
-          }}</ion-card-subtitle>
+          Hellooooooo
+          <div class="yesSwipe" (click)="this.tapped.emit('yes')"></div>
+          <div class="noSwipe" (click)="this.tapped.emit('no')"></div>
+          <div
+            *ngIf="profile?.questions && profile?.questions[i]"
+            #QandA
+            class="question"
+            [hidden]="moreInfo"
+          >
+            <ion-card-title #question>{{
+              profile?.questions[i].question
+            }}</ion-card-title>
+            <ion-card-subtitle #answer>{{
+              profile?.questions[i].answer
+            }}</ion-card-subtitle>
+          </div>
+          <div #shadow class="img-shadow"></div>
         </div>
-        <div #shadow class="img-shadow"></div>
-        <!-- </div>
-    </swiper> -->
-      </ion-slide></ion-slides
-    >
+      </ng-template>
+    </swiper>
+    <!-- </ion-slide></ion-slides
+    > -->
     <!--div #QandA class="question" [hidden]="moreInfo">
       <ion-card-title #question>{{ profile?.questions[0].question }}</ion-card-title>
       <ion-card-subtitle #answer>{{ profile?.questions[0].answer }}</ion-card-subtitle>
@@ -132,10 +137,7 @@
         <div id="info-segment" *ngIf="profile?.areaOfStudy || profile?.society">
           <div id="interests-container" class="centered">
             <div id="interests-box-soc" *ngIf="profile?.areaOfStudy">
-              <img
-                src="/assets/studiesicon.svg"
-                id="bottom-icon"
-              />
+              <img src="/assets/studiesicon.svg" id="bottom-icon" />
               <br />
               <div class="interests-text">
                 <ion-label
@@ -152,10 +154,7 @@
             </div>
 
             <div id="interests-box-soc" *ngIf="profile?.society">
-              <img
-                src="/assets/societiesicon.svg"
-                id="bottom-icon"
-              />
+              <img src="/assets/societiesicon.svg" id="bottom-icon" />
               <br />
               <div class="interests-text">
                 <ion-label id="interests-label">{{ profile?.society }}</ion-label>

@@ -43,7 +43,9 @@ import { SwiperComponent } from "swiper/angular";
   templateUrl: "./profile-card.component.html",
   styleUrls: ["./profile-card.component.scss"],
 })
-export class ProfileCardComponent implements OnInit, AfterViewInit, OnDestroy {
+export class ProfileCardComponent
+  implements OnInit, AfterViewInit, OnDestroy, AfterContentChecked
+{
   counter = 0;
   expandAnimation: any;
   collapseAnimation: any;
@@ -83,12 +85,10 @@ export class ProfileCardComponent implements OnInit, AfterViewInit, OnDestroy {
     this.profilePictures$.next(pics);
   }
 
-  // DEV
-  ngAfterContentChecked(): void {
+  ngAfterContentChecked() {
+    // necessary / work around for proper initialization of swiper
     if (this.picSlides) {
-      // if (this.isOwnProfile) console.log("picSlides", this.picSlides);
-      // console.log(this.picSlides.swiperRef);
-      // this.picSlides.updateSwiper({});
+      this.picSlides.updateSwiper({});
     }
   }
 
