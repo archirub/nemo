@@ -100,6 +100,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild("catchText", { read: ElementRef }) catchText: ElementRef;
   @ViewChild("swipeCards", { read: ElementRef }) swipeCardsRef: ElementRef;
   @ViewChild("backdrop", { read: ElementRef }) backdrop: ElementRef;
+  @ViewChild("searchButton", { read: ElementRef }) searchButton: ElementRef;
 
   private fishRef$ = new ReplaySubject<ElementRef>(1);
   @ViewChild("fish", { read: ElementRef }) set fishRefSetter(ref: ElementRef) {
@@ -317,6 +318,15 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
         finalize(() => this.loadingAlertManager.dismissDisplayed())
       )
     );
+  }
+
+  hideSCButton(event) {
+    console.log(event);
+    if (event === 'open') {
+      this.renderer.setStyle(this.searchButton.nativeElement, "display", "none");
+    } else if (event === 'close') {
+      this.renderer.setStyle(this.searchButton.nativeElement, "display", "flex");
+    }
   }
 
   async destroyCatch() {

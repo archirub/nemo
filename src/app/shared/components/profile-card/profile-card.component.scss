@@ -1,8 +1,3 @@
-.swiper-container {
-  width:100%;
-  height:100%
-}
-
 // .pic {
 //   display:flex;
 //   flex-direction:column;
@@ -54,12 +49,12 @@ img {
   top: 55vh;
 }
 
-ion-slides {
+.swiper-container, .swiperSizer {
   border-radius: 25px;
   width: 92vw;
   height: 85vh;
 
-  ion-slide {
+  ng-template {
     overflow: hidden;
     --overflow: hidden;
   };

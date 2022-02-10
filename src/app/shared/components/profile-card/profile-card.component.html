@@ -24,14 +24,16 @@
         swiperSlide
         #pic
         *ngFor="let path of profilePicturesWithDefault$ | async; index as i"
-        ><div
+        >
+        <!-- THIS DIV NEEDS TO BE SIZED MANUALLY TO SHOW CONTENT IN SWIPER -->
+        <div
+        class="swiperSizer"
           [ngStyle]="{
             'background-size': 'cover',
             'background-position': 'center',
             'background-image': 'url(' + path + ')'
           }"
         >
-          Hellooooooo
           <div class="yesSwipe" (click)="this.tapped.emit('yes')"></div>
           <div class="noSwipe" (click)="this.tapped.emit('no')"></div>
           <div

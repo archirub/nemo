@@ -4,12 +4,14 @@ import {
   OnInit,
   OnDestroy,
   Input,
+  Output,
   QueryList,
   HostListener,
   ViewChildren,
   ViewChild,
   ElementRef,
   Renderer2,
+  EventEmitter
 } from "@angular/core";
 
 import {
@@ -97,13 +99,13 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
 
   @Input() profiles$: Observable<Profile[]>;
   @Input() homeContainer: ElementRef;
-
   @Input() swipeCardsRef: ElementRef;
+  @Output() matchEvent = new EventEmitter();
 
   // All of these are for showing SC or match animation. Assuming that always happens sufficiently late that these refs can't be undefined
   //@ViewChild("homeContainer", { read: ElementRef }) homeContainer: ElementRef;
-  @ViewChild("pic1", { read: ElementRef }) pic1: ElementRef;
-  @ViewChild("pic2", { read: ElementRef }) pic2: ElementRef;
+  // @ViewChild("pic1", { read: ElementRef }) pic1: ElementRef;
+  // @ViewChild("pic2", { read: ElementRef }) pic2: ElementRef;
   @ViewChild("catchText", { read: ElementRef }) catchText: ElementRef;
   // @ViewChild("swipeCards", { read: ElementRef }) swipeCards: ElementRef;
   @ViewChild("backdrop", { read: ElementRef }) backdrop: ElementRef;
@@ -476,39 +478,32 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
     const catchItems = document.getElementById("catchEls");
     const closeButton = document.getElementById("closeAnimation");
     const messageText = document.getElementById("messageText");
-    const messageText2 = document.getElementById("messageText2");
+    //const messageText2 = document.getElementById("messageText2");
 
     this.latestMatchedProfile = matchedProfile;
     this.changeCatchMessage();
 
-    // own picture styling
+    // match's picture styling for backdrop
     this.renderer.setStyle(
-      this.pic1.nativeElement,
-      "background",
-      `url(${this.mainProfilePicture})`
-    );
-    this.renderer.setStyle(this.pic1.nativeElement, "backgroundSize", "cover");
-
-    // match's picture styling
-    this.renderer.setStyle(
-      this.pic2.nativeElement,
+      this.backdrop.nativeElement,
       "background",
       `url(${matchedProfile.pictureUrls[0]})`
     );
-    this.renderer.setStyle(this.pic2.nativeElement, "backgroundSize", "cover");
+    this.renderer.setStyle(this.backdrop.nativeElement, "backgroundSize", "cover");
+    this.renderer.setStyle(this.backdrop.nativeElement, "backgroundPosition", "center");
 
     // other stylings
     this.renderer.setStyle(catchItems, "display", "block");
-    this.renderer.setStyle(closeButton, "display", "block");
+    this.renderer.setStyle(closeButton, "display", "flex");
     this.renderer.setStyle(messageText, "display", "flex");
-    this.renderer.setStyle(messageText2, "display", "flex");
+    //this.renderer.setStyle(messageText2, "display", "flex");
+
+    this.matchEvent.emit('open');
 
     // catch animation
     return OpenCatchAnimation(
       this.screenHeight,
       this.screenWidth,
-      this.pic1,
-      this.pic2,
       this.catchText,
       this.backdrop,
       this.swipeCardsRef
@@ -518,18 +513,17 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
   async closeCatch() {
     const catchItems = document.getElementById("catchEls");
 
+    this.matchEvent.emit('close');
+
     await CloseCatchAnimation(
       this.screenHeight,
       this.screenWidth,
-      this.pic1,
-      this.pic2,
       this.catchText,
       this.backdrop,
       this.swipeCardsRef
     ).play();
 
     this.renderer.setStyle(catchItems, "display", "none");
-    this.renderer.setStyle(this.pic2.nativeElement, "background", "black");
   }
 
   goToNewCatchChat() {

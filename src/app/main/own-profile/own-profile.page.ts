@@ -4,6 +4,8 @@ import {
   ElementRef,
   OnInit,
   ViewChild,
+  ViewChildren,
+  QueryList,
   AfterViewInit,
   Renderer2,
 } from "@angular/core";
@@ -40,6 +42,7 @@ import Sortable, { Options as SortableOptions } from "sortablejs";
 
 import { ProfileCardComponent } from "@components/index";
 import { InterestsModalComponent } from "./interests-modal/interests-modal.component";
+import { ProfileAnswerComponent } from "./profile-answer/profile-answer.component";
 
 import { CurrentUserStore } from "@stores/index";
 import { TutorialsStore } from "@stores/tutorials/tutorials.service";
@@ -96,6 +99,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
   @ViewChild("profileContainer", { read: ElementRef }) profileContainer: ElementRef;
   @ViewChild("fish", { read: ElementRef }) fishRef: ElementRef;
   @ViewChild("toggleDiv", { read: ElementRef }) toggleDiv: ElementRef;
+  @ViewChildren("answers") answers: QueryList<ProfileAnswerComponent>;
 
   private profilePicturesRef$ = new ReplaySubject<ElementRef>(1);
   @ViewChild("profilePictures", { read: ElementRef }) set profilePicturesRefSetter(
@@ -461,6 +465,9 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     );
 
     this.displayBioDelete();
+    this.answers.toArray().forEach(ans => {
+      ans.resizeTextarea();
+    });
   }
 
   // checks whether any of the parts of the editable fields are invalid.

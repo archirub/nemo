@@ -2,72 +2,72 @@ import { ElementRef } from "@angular/core";
 import { AnimationController } from "@ionic/angular";
 // import * as anime from "animejs"
 
-export const LeftPicAnimation = (
-  viewHeight: number,
-  viewWidth: number,
-  picture: ElementRef
-) => {
-  const startXPosition = -100; //picture width off screen left
-  const startYPosition = viewHeight / 2 - 160; //picture height
-  const endXPosition = viewWidth / 2 - 105; //picture width - 25
-  const endYPosition = viewHeight / 2 - 140; //picture height + 20
-  const startRotation = -15;
-  const endRotation = 15;
+// export const LeftPicAnimation = (
+//   viewHeight: number,
+//   viewWidth: number,
+//   picture: ElementRef
+// ) => {
+//   const startXPosition = -100; //picture width off screen left
+//   const startYPosition = viewHeight / 2 - 160; //picture height
+//   const endXPosition = viewWidth / 2 - 105; //picture width - 25
+//   const endYPosition = viewHeight / 2 - 140; //picture height + 20
+//   const startRotation = -15;
+//   const endRotation = 15;
 
-  // Moving on from left
-  const picAnimation = new AnimationController().create("picAnimation");
+//   // Moving on from left
+//   const picAnimation = new AnimationController().create("picAnimation");
 
-  picAnimation
-    .addElement(picture.nativeElement)
-    .easing("ease-out")
-    .duration(500)
-    .beforeStyles({
-      display: "block",
-    })
-    .fromTo(
-      "transform",
-      `translate(${startXPosition}px, ${startYPosition}px) rotate(${startRotation}deg)`,
-      `translate(${endXPosition}px, ${endYPosition}px) rotate(${endRotation}deg)`
-    )
-    .afterStyles({
-      display: "block",
-    });
+//   picAnimation
+//     .addElement(picture.nativeElement)
+//     .easing("ease-out")
+//     .duration(500)
+//     .beforeStyles({
+//       display: "block",
+//     })
+//     .fromTo(
+//       "transform",
+//       `translate(${startXPosition}px, ${startYPosition}px) rotate(${startRotation}deg)`,
+//       `translate(${endXPosition}px, ${endYPosition}px) rotate(${endRotation}deg)`
+//     )
+//     .afterStyles({
+//       display: "block",
+//     });
 
-  return picAnimation;
-};
+//   return picAnimation;
+// };
 
-export const RightPicAnimation = (
-  viewHeight: number,
-  viewWidth: number,
-  picture: ElementRef
-) => {
-  const startXPosition = viewWidth; //picture width off right
-  const startYPosition = viewHeight / 2 - 160; //picture height
-  const endXPosition = viewWidth / 2 + 5;
-  const endYPosition = viewHeight / 2 - 140; //picture height + 20
-  const startRotation = 15;
-  const endRotation = -15;
+// export const RightPicAnimation = (
+//   viewHeight: number,
+//   viewWidth: number,
+//   picture: ElementRef
+// ) => {
+//   const startXPosition = viewWidth; //picture width off right
+//   const startYPosition = viewHeight / 2 - 160; //picture height
+//   const endXPosition = viewWidth / 2 + 5;
+//   const endYPosition = viewHeight / 2 - 140; //picture height + 20
+//   const startRotation = 15;
+//   const endRotation = -15;
 
-  // Moving on from right
-  const picAnimation = new AnimationController().create("picAnimation");
+//   // Moving on from right
+//   const picAnimation = new AnimationController().create("picAnimation");
 
-  picAnimation
-    .addElement(picture.nativeElement)
-    .easing("ease-out")
-    .duration(500)
-    .beforeStyles({
-      display: "block",
-    })
-    .fromTo(
-      "transform",
-      `translate(${startXPosition}px, ${startYPosition}px) rotate(${startRotation}deg)`,
-      `translate(${endXPosition}px, ${endYPosition}px) rotate(${endRotation}deg)`
-    )
-    .afterStyles({
-      display: "block",
-    });
-  return picAnimation;
-};
+//   picAnimation
+//     .addElement(picture.nativeElement)
+//     .easing("ease-out")
+//     .duration(500)
+//     .beforeStyles({
+//       display: "block",
+//     })
+//     .fromTo(
+//       "transform",
+//       `translate(${startXPosition}px, ${startYPosition}px) rotate(${startRotation}deg)`,
+//       `translate(${endXPosition}px, ${endYPosition}px) rotate(${endRotation}deg)`
+//     )
+//     .afterStyles({
+//       display: "block",
+//     });
+//   return picAnimation;
+// };
 
 export const TextAnimation = (text: ElementRef) => {
   const textAnimation = new AnimationController().create("textAnimation");
@@ -93,8 +93,7 @@ export const BackAnimation = (backdrop: any) => {
     .addElement(backdrop.nativeElement)
     .duration(500)
     .easing("ease-in")
-    .fromTo("opacity", "0", "1")
-    .fromTo("background", "transparent", "linear-gradient(to top, #F07167, #F0B067)");
+    .fromTo("opacity", "0", "1");
 
   return backAnimation;
 };
@@ -102,8 +101,8 @@ export const BackAnimation = (backdrop: any) => {
 export const OpenCatchAnimation = (
   viewHeight: number,
   viewWidth: number,
-  leftPicture: ElementRef,
-  rightPicture: ElementRef,
+  //leftPicture: ElementRef,
+  //rightPicture: ElementRef,
   text: ElementRef,
   backdrop: ElementRef,
   baseEl: any
@@ -113,15 +112,15 @@ export const OpenCatchAnimation = (
     .addElement([
       viewHeight,
       viewWidth,
-      leftPicture,
-      rightPicture,
+      //leftPicture,
+      //rightPicture,
       text,
       backdrop,
       baseEl,
     ])
     .addAnimation([
-      LeftPicAnimation(viewHeight, viewWidth, leftPicture),
-      RightPicAnimation(viewHeight, viewWidth, rightPicture),
+      //LeftPicAnimation(viewHeight, viewWidth, leftPicture),
+      //RightPicAnimation(viewHeight, viewWidth, rightPicture),
       TextAnimation(text),
       BackAnimation(backdrop),
     ]);
@@ -130,8 +129,8 @@ export const OpenCatchAnimation = (
 export const CloseCatchAnimation = (
   viewHeight: number,
   viewWidth: number,
-  leftPicture: ElementRef,
-  rightPicture: ElementRef,
+  //leftPicture: ElementRef,
+  //rightPicture: ElementRef,
   text: ElementRef,
   backdrop: ElementRef,
   baseEl: any
@@ -141,15 +140,15 @@ export const CloseCatchAnimation = (
     .addElement([
       viewHeight,
       viewWidth,
-      leftPicture,
-      rightPicture,
+      //leftPicture,
+      //rightPicture,
       text,
       backdrop,
       baseEl,
     ])
     .addAnimation([
-      LeftPicAnimation(viewHeight, viewWidth, leftPicture),
-      RightPicAnimation(viewHeight, viewWidth, rightPicture),
+      //LeftPicAnimation(viewHeight, viewWidth, leftPicture),
+      //RightPicAnimation(viewHeight, viewWidth, rightPicture),
       TextAnimation(text),
       BackAnimation(backdrop),
     ])

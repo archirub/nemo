@@ -95,8 +95,18 @@ export class ProfileCardComponent
   onSwiper(swiper: SwiperComponent) {
     console.log("swiper", swiper.activeSlides);
   }
-  onSlideChange2() {
-    console.log("slide change");
+  async onSlideChange2() {
+    console.log('Archi i changed this');
+    const [slideIndex, slidesLength] = await Promise.all([
+      this.getSlidesIndex(),
+      this.getSlidesLength(),
+    ]);
+
+    await this.checkSlide(slideIndex, slidesLength);
+    this.bulletsRef$.pipe(
+      map((bulletsRef) => {
+        this.updatePager(slideIndex, bulletsRef);
+      }));
   }
 
   @ViewChild("picSlides") picSlides: SwiperComponent;

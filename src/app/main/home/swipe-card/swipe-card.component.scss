@@ -136,21 +136,23 @@ ion-content {
   justify-content: center;
   z-index: 100;
   position: absolute;
-  top: 11vh;
+  top: 4vh;
+  text-align: center;
 }
 
 .textholder-2 {
   display: flex;
   width: 100%;
-  justify-content: center;
+  align-items: center;
+  flex-direction: column;
   z-index: 100;
   position: absolute;
-  top: 21vh;
+  bottom: 18vh;
 }
 
-h1.catchtext {
-  font-family: 'Grand Hotel';
-  font-size: 6vh;
+h1.itsACatch {
+  font-family: 'Carter One';
+  font-size: 3vh;
   color: #FFF
 }
 
@@ -158,7 +160,14 @@ h2.catchtext {
   text-align: center;
   font-size: 3.5vh;
   color: #FFF;
-  width: 70%;
+  width: 90%;
+}
+
+h3.catchtext {
+  text-align: center;
+  font-size: 2.5vh;
+  color: #FFF;
+  width: 90%;
 }
 
 .backdrop {
@@ -167,16 +176,23 @@ h2.catchtext {
   height: 100%;
   position: absolute;
   pointer-events: none;
+  background-size: cover;
+  background-position: center;
+  border-radius: 25px;
 }
 
 #closeAnimation {
   color: #FFF;
-  --background: transparent;
-  --background-activated: transparent;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 50%;
+  width: 15vw;
+  height: 15vw;
+  justify-content: center;
+  align-items: center;
   position: absolute;
   font-size: 3.5vh;
-  right: 0vw;
-  top: 2vh;
+  right: 4vw;
+  top: 1.5vh;
   display: none;
   z-index: 100;
   box-shadow: none;
@@ -187,41 +203,32 @@ h2.catchtext {
 #messageText {
   display: none;
   justify-content: center;
-  width: 100vw;
+  width: 100%;
   position: absolute;
   z-index: 102;
-  bottom: 27vh;
+  bottom: 6vh;
 
   h2 {
-    background: #FFF;
     padding: 15px;
-    color: #f07167;
-    width: 62%;
+    background-color: var(--ion-color-primary);
+    color: #FFF;
+    width: 70%;
     text-align: center;
     border-radius: 10px;
     font-size: 3vh;
   }
 }
 
-#messageText2 {
-  display: none;
-  justify-content: center;
-  width: 100vw;
-  position: absolute;
-  z-index: 102;
-  bottom: 17vh;
-
-  h2 {
-    background: rgb(253, 216, 176);
-    padding: 15px;
-    color: seagreen;
-    width: 62%;
-    text-align: center;
-    border-radius: 10px;
-    font-size: 3vh;
-  }
+.catch-word {
+  color: var(--ion-color-secondary);
+  font-size: 6vh;
 }
 
+span {
+  font-weight: bold;
+  color: var(--ion-color-primary);
+  font-family: 'Carter One';
+}
 
 .fish {
   display: none;
@@ -234,10 +241,13 @@ h2.catchtext {
 //This is here to stop click throughs to swipe stack on match event
 #catchEls {
   display: none;
-  height: 100vh;
-  z-index: 99;
+  height: 85.5vh;
+  z-index: 100;
   position: absolute;
-  width: 100vw;
+  width: 92vw;
+  top: 5.7vh;
+  left: 4vw;
+  border-radius: 25px;
 }
 
 

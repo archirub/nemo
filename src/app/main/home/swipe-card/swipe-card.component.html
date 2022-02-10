@@ -18,25 +18,21 @@
     </div>
 
     <div #catchEls id="catchEls">
-      <div #pic1 class="picholder left"></div>
-      <div #pic2 class="picholder right"></div>
       <div #catchText class="textholder">
-        <h1 class="catchtext">It's a Catch!</h1>
+        <h1 class="itsACatch">It's a<br/><span class="catch-word">Catch!</span></h1>
       </div>
       <div #catchText class="textholder-2">
-        <h2 class="catchtext">{{ chosenCatchMsg }}</h2>
+        <h3 class="catchtext">{{ chosenCatchMsg }}</h3>
+        <h2 class="catchtext">You've caught <span>{{ latestMatchedProfile?.firstName }}</span></h2>
       </div>
 
       <div #backdrop class="backdrop"></div>
 
-      <ion-button id="closeAnimation" (click)="closeCatch()"
+      <div id="closeAnimation" (click)="closeCatch()"
         ><ion-icon name="close-outline"></ion-icon
-      ></ion-button>
+      ></div>
       <div #messageText id="messageText" (click)="goToNewCatchChat()">
-        <h2 class="catchtext">Chat with {{ latestMatchedProfile?.firstName }}</h2>
-      </div>
-      <div #messageText2 id="messageText2" (click)="closeCatch()">
-        <h2 class="catchtext">Keep fishing</h2>
+        <h2 class="catchtext">Message them now!</h2>
       </div>
     </div>
 

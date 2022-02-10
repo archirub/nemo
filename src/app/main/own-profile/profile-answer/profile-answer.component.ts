@@ -28,13 +28,17 @@ export class ProfileAnswerComponent {
   @ViewChild("qHead", { read: ElementRef }) qHead: ElementRef;
   @ViewChild("qInput", { read: ElementRef }) qInput: ElementRef;
   @ViewChild("qInput") qSelect: IonSelect;
-  @ViewChild("answerInput") answerInput: IonTextarea;
+  @ViewChild("answerInput", { read: ElementRef }) answerInput: ElementRef;
 
   constructor(private renderer: Renderer2) {}
 
+  ngAfterViewInit() {
+    this.resizeTextarea();
+  }
+
   // for when the answer changes
   onAnswerChange(value) {
-    console.log("onAnswerChange", value);
+    this.resizeTextarea()
     this.questionAndAnswer.answer = value;
     this.questionAndAnswerChange.emit(this.questionAndAnswer);
   }
@@ -91,6 +95,17 @@ export class ProfileAnswerComponent {
   cancelQuestion() {
     this.renderer.setStyle(this.qHead.nativeElement, "display", "block"); //Change UI from select to text
     this.renderer.setStyle(this.qInput.nativeElement, "display", "none");
+  }
+  
+  /**
+   * Resizes textarea with each input to mimic autogrow
+   **/
+  resizeTextarea() {
+    //setTimeout is necessary for answer value updates
+    setTimeout(() => {
+      let newHeight = this.answerInput.nativeElement.scrollHeight;
+      this.renderer.setStyle(this.answerInput.nativeElement, "height", `${newHeight}px`);
+    }, 20);
   }
 
   // for trackBy property of ngFor on questions in template
