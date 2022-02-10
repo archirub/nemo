@@ -376,9 +376,9 @@ function computePercentileChange(
   // for one who has been seen 100 times!
   const percentileChange = (SDFromMean / 3) * 0.2;
 
-  // Assuming that we consider that we need at least 100 people seeing the profile
+  // Assuming that we consider that we need at least 20 people seeing the profile
   // to give full relevance to the percentileChange
-  const seenCountWeight = Math.abs(Math.min(1, seenCount / 100));
+  const seenCountWeight = Math.abs(Math.min(1, seenCount / 20));
 
   return percentileChange * seenCountWeight;
 }

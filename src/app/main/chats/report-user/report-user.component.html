@@ -11,13 +11,14 @@
     <p>Please tell us a little about why you're reporting this user.</p>
   </div>
 
-  <ion-textarea
+  <textarea
+    name="description"
     [(ngModel)]="description"
     maxlength="150"
     class="input"
     autogrow="true"
     placeholder="The problem is..."
-  ></ion-textarea>
+  ></textarea>
 
   <div class="flexcenter">
     <p>We're sorry this happened. Hopefully we can get it resolved soon.</p>

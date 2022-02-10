@@ -13,6 +13,7 @@ import {
   merge,
   Observable,
   of,
+  Subject,
 } from "rxjs";
 import {
   concatMap,
@@ -52,6 +53,8 @@ import { AbstractStoreService } from "@interfaces/stores.model";
 import { StoreResetter } from "@services/global-state-management/store-resetter.service";
 import { CurrentUserStore } from "..";
 import { Logger, SubscribeAndLog } from "../../functions/custom-rxjs";
+import Swiper from "swiper";
+import { SwiperComponent } from "swiper/angular";
 
 // - null is for when a state for the swipe stack hasn't been set yet
 // - "initialLoading" is for the very first load. Must be distinct from "loading"
@@ -391,6 +394,17 @@ export class SwipeStackStore extends AbstractStoreService {
     );
   }
 
+  slideChangeListener$(ref: SwiperComponent): Observable<Swiper> {
+    const slideChange$ = new Subject<Swiper>();
+    const uniqueID = Math.random();
+    // ref.swiperRef.on("")
+    ref.swiperRef.on("slideChange", (swiper) => {
+      console.log("slideChange", uniqueID);
+      slideChange$.next(swiper);
+    });
+    return slideChange$;
+  }
+
   managePictureSwiping(profileCards: QueryList<ProfileCardComponent>) {
     // triggers when there is a change to the array of rendered profiles
     // (usually means a profile has been added or removed)
@@ -398,12 +412,12 @@ export class SwipeStackStore extends AbstractStoreService {
       filter((list: QueryList<ProfileCardComponent>) => !!list.first),
       // listens to the user's swiping on that profile
       switchMap((list: QueryList<ProfileCardComponent>) =>
-        list.first.slidesRef$.pipe(
+        list.first.picSlides$.pipe(
           first(),
           switchMap((ref) =>
-            (ref as IonSlides).ionSlideWillChange.pipe(
-              map((slides) => ({
-                slides,
+            this.slideChangeListener$(ref).pipe(
+              map((swiper) => ({
+                picIndex: swiper.realIndex,
                 uid: list.first.profile.uid,
                 profilePictures$: list.first.profilePictures$,
               }))
@@ -412,11 +426,11 @@ export class SwipeStackStore extends AbstractStoreService {
         )
       ),
       // Gets index of new slide
-      map((map) => ({
-        picIndex: (map.slides.target as any)?.swiper?.realIndex as number,
-        uid: map.uid,
-        profilePictures$: (map as any).profilePictures$,
-      })),
+      // map((map) => ({
+      //   picIndex: (map.slides.target as any)?.swiper?.realIndex as number,
+      //   uid: map.uid,
+      //   profilePictures$: (map as any).profilePictures$,
+      // })),
       // doesn't keep going if slide is the first one
       filter((m) => typeof m.picIndex === "number" && m.picIndex > 0),
       switchMap((m) =>

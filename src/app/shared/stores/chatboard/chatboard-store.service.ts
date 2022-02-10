@@ -322,8 +322,9 @@ export class ChatboardStore extends AbstractStoreService {
       first(),
       tap((chats) => {
         if (chats[chatID]) {
-          delete chats[chatID];
-          this.allChats.next(chats);
+          const newChats = cloneDeep(chats);
+          delete newChats[chatID];
+          this.allChats.next(newChats);
         }
       })
     );

@@ -82,7 +82,7 @@ export class CommonErrorFunctions {
     maxRetryCount: number,
     // signalErrorWasHandled: string,
     customLastRetryTask$?: (err: CustomError) => Observable<any> // default is to show an error message with the error's text
-  ) {
+  ): (source: Observable<T>) => Observable<T> {
     const exitRetryLogic = "toDefault";
     const retryDelay = 2000;
     let retryCount = 0;
@@ -108,8 +108,8 @@ export class CommonErrorFunctions {
             delay(retryDelay) // delay at the end so that presenting error message is not delayed
           )
         ),
-        catchError<T, Observable<T | string>>((err) => {
-          if (err === exitRetryLogic) return of(""); // to send value on to subscriber
+        catchError<T, Observable<T>>((err) => {
+          if (err === exitRetryLogic) return of("") as unknown as Observable<T>; // to send value on to subscriber
           throw err; // to pass on error to next error handler (case where errMatchChecker returned false)
         })
       );

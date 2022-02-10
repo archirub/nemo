@@ -1,7 +1,18 @@
 import { GlobalErrorHandlerOptions } from "./../../interfaces/error-handling.model";
 import { Injectable } from "@angular/core";
 
-import { catchError, Observable, OperatorFunction, of, tap } from "rxjs";
+import {
+  catchError,
+  Observable,
+  OperatorFunction,
+  of,
+  tap,
+  switchMap,
+  takeUntil,
+  interval,
+  timer,
+  EMPTY,
+} from "rxjs";
 
 import { CloudFunctionsErrorHandler } from "./cloud-functions-error-handler.service";
 import { FirestoreErrorHandler } from "./firestore-error-handler.service";
@@ -43,11 +54,16 @@ export class GlobalErrorHandler implements CustomGlobalErrorHandler {
   }
 
   handleErrors<T>(opts?: GlobalErrorHandlerOptions) {
+    let isFromError = false; // for the post error handling strategy
     return (source: Observable<T>) =>
       source.pipe(
         this.errorConverterSafeguard<T>(),
         // DEV
         catchError<T, Observable<T>>((err: CustomError) => {
+          isFromError = true;
+
+          if (opts.strategy === "dontHandle") return EMPTY;
+
           console.error("Error through GlobalErrorHandler:", err);
           console.error("Error through GlobalErrorHandler:");
 
@@ -79,10 +95,18 @@ export class GlobalErrorHandler implements CustomGlobalErrorHandler {
         // }),
         this.fStorageEH.handleErrors<T>(),
 
-        tap(() => {
-          if (opts?.defaultValue) console.log("the default value is", opts.defaultValue);
+        switchMap((val) => {
+          // if (isFromError) {
+          //   console.log("error went through the last tap", opts);
+          //   if (opts.strategy === "endStream") return EMPTY.pipe(takeUntil(timer(1))); // complete false, just to make it shut up
+          //   if (opts.strategy === "fallback") return opts.fallback$; // complete false, just to make it shut up
+          //   if (opts.strategy === "propagateError" || opts.strategy === "dontHandle")
+          //     throw new Error("");
+          // }
+
+          return of(val);
         })
-      ) as Observable<T>;
+      );
   }
 
   // added here so that other services and components can always only import the

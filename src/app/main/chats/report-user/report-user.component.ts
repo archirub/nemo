@@ -1,4 +1,4 @@
-import { ModalController } from "@ionic/angular";
+import { ModalController, NavController } from "@ionic/angular";
 import { Component } from "@angular/core";
 
 import { lastValueFrom } from "rxjs";
@@ -34,22 +34,28 @@ export class ReportUserComponent {
     private userReportingService: UserReportingService,
     private modalCtrl: ModalController,
     private chatboardStore: ChatboardStore,
-    private loadingAlertManager: LoadingAndAlertManager
+    private loadingAlertManager: LoadingAndAlertManager,
+    private navCtrl: NavController
   ) {}
 
   async reportUser() {
     const loader = await this.loadingAlertManager.createLoading({
       message: "Sending Report...",
     });
+
+    console.log("this.report", this.report);
+
     await this.loadingAlertManager.presentNew(loader, "replace-erase");
 
     try {
-      await this.userReportingService.reportUser(this.report);
+      await this.userReportingService.reportUser(this.report, "dontHandle");
     } catch (e) {
       console.error(e);
 
       return this.reportFailedAlert();
     }
+
+    this.description = "";
 
     await this.loadingAlertManager.dismissDisplayed();
 
@@ -57,8 +63,13 @@ export class ReportUserComponent {
       this.chatboardStore.userHasChatWith(this.userReportedID)
     );
 
-    if (chatID === false) return this.reportSuccesfulNoChatAlert();
-    return this.reportSuccessfulHasChatAlert(chatID);
+    if (chatID === false) {
+      this.reportSuccesfulNoChatAlert();
+    } else {
+      await this.reportSuccessfulHasChatAlert(chatID);
+    }
+
+    return this.closeModal();
   }
 
   async closeModal() {
@@ -108,7 +119,10 @@ export class ReportUserComponent {
         return this.reportFailedAlert();
       }
       await lastValueFrom(this.chatboardStore.deleteChatInStore(chatID));
-      return this.loadingAlertManager.dismissDisplayed();
+
+      await this.loadingAlertManager.dismissDisplayed();
+
+      return this.navCtrl.navigateForward("main/tabs/chats");
     };
 
     const keepMatch = () => {};
