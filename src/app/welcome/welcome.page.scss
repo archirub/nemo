@@ -203,11 +203,12 @@ p {
 }
 
 .buttons {
-  width: 90%;
+  width: 100%;
   display: flex;
   justify-content: space-between;
   position: absolute;
-  top: 75vh;
+  left: 0;
+  top: 70vh;
 }
 
 .first {
@@ -229,6 +230,7 @@ ion-button.scroll {
   height: $button-width;
   width: $button-width;
   z-index: 4;
+  margin: 5vw;
   border-radius: 100%; //This is purely for dropshadow
   box-shadow: 0 2px 5px -3px var(--ion-color-light-contrast);
 }

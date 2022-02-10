@@ -109,18 +109,6 @@
               [photoIndex]="i"
               [photoDisplayedUrl]="picturesHolder[i]"
             ></add-photo>
-
-            <!-- <add-photo></add-photo>
-            <add-photo></add-photo>
-            <add-photo></add-photo> -->
-            <!-- <ion-button
-              (click)="onPickPicture()"
-              expand="block"
-              fill="clear"
-              shape="round"
-            >
-              Get me to my photo gallery
-            </ion-button> -->
           </div>
 
           <div class="skipdiv">
@@ -248,11 +236,15 @@
             <div class="terms">
               <div class="terms-singular">
                 <ion-checkbox #tcbox mode="ios" name="terms"></ion-checkbox>
-                <h2>I have read and understood the terms and conditions</h2>
+                <h2
+                (click)="this.presentTermsModal()"
+                >I have read and understood the terms and conditions</h2>
               </div>
               <div class="terms-singular">
                 <ion-checkbox #ppbox mode="ios" name="privacy"></ion-checkbox>
-                <h2>I consent to the data and privacy policies of this app</h2>
+                <h2
+                (click)="this.presentPrivacyModal()"
+                >I consent to the data and privacy policies of this app</h2>
               </div>
             </div>
 

@@ -9,7 +9,7 @@ import {
   Renderer2,
   OnDestroy,
 } from "@angular/core";
-import { IonCheckbox, IonSlides, NavController } from "@ionic/angular";
+import { IonCheckbox, IonSlides, ModalController, NavController } from "@ionic/angular";
 import { FormGroup, FormControl, Validators } from "@angular/forms";
 import { Router } from "@angular/router";
 
@@ -38,6 +38,10 @@ import { allowOptionalProp } from "@interfaces/index";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
 import { AnalyticsService } from "@services/analytics/analytics.service";
+import { PrivacyModalComponent } from "./privacy-modal/privacy-modal.component";
+import { SCenterAnimation } from "@animations/index";
+import { SCleaveAnimation } from "@animations/index";
+import { TermsModalComponent } from "./terms-modal/terms-modal.component";
 
 @Component({
   selector: "app-signuprequired",
@@ -117,7 +121,9 @@ export class SignuprequiredPage implements OnInit, OnDestroy {
 
     private loadingAlertManager: LoadingAndAlertManager,
     private errorHandler: GlobalErrorHandler,
-    private signup: SignupService
+    private signup: SignupService,
+
+    private modalCtrl: ModalController
   ) {}
 
   ngOnInit() {
@@ -471,6 +477,28 @@ export class SignuprequiredPage implements OnInit, OnDestroy {
     });
 
     return this.loadingAlertManager.presentNew(alert, "replace-erase");
+  }
+
+  async presentPrivacyModal(): Promise<void> {
+    const modal = await this.modalCtrl.create({
+      component: PrivacyModalComponent,
+
+      enterAnimation: SCenterAnimation(),
+      leaveAnimation: SCleaveAnimation(),
+    });
+
+    return modal.present();
+  }
+
+  async presentTermsModal(): Promise<void> {
+    const modal = await this.modalCtrl.create({
+      component: TermsModalComponent,
+
+      enterAnimation: SCenterAnimation(),
+      leaveAnimation: SCleaveAnimation(),
+    });
+
+    return modal.present();
   }
 
   validateAndSlidePictures() {

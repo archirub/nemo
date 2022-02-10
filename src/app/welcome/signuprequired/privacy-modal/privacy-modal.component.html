@@ -1,0 +1,18 @@
+<div class="container">
+  <div class="close" (click)="closeModal()">
+    <ion-icon name="close-outline"></ion-icon>
+  </div>
+
+  <div class="flextitle">
+    <h1>nemo</h1>
+    <h2>Privacy Policy</h2>
+  </div>
+
+  <div class="pdf-view">
+    <pdf-viewer
+      [src]="'/assets/docs/nemo_privacy_policy.pdf'"
+      [original-size]="false"
+      [fit-to-page]="true"
+    ></pdf-viewer>
+  </div>
+</div>

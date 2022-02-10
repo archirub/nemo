@@ -21,7 +21,7 @@ import {
 
 import { Question } from "@interfaces/index";
 import { questionsOptions } from "@interfaces/index";
-import { IonSelect, IonSlides, IonTextarea } from "@ionic/angular";
+import { IonSelect, IonSlides } from "@ionic/angular";
 
 @Component({
   selector: "question-slides",
@@ -42,7 +42,7 @@ export class QuestionSlidesComponent implements OnInit, ControlValueAccessor {
   @ViewChildren("pagerDot", { read: ElementRef }) dots: QueryList<ElementRef>;
 
   @ViewChildren("selects") selects: QueryList<IonSelect>;
-  @ViewChildren("texts") texts: QueryList<IonTextarea>;
+  @ViewChildren("texts") texts: QueryList<HTMLTextAreaElement>;
 
   @Output() questionAnswered = new EventEmitter();
   @Output() questionDeleted = new EventEmitter();

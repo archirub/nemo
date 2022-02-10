@@ -9,5 +9,9 @@
 			"launchAutoHide": true
 		}
 	},
-	"cordova": {}
+	"cordova": {},
+	"server": {
+		"url": "http://localhost:8101",
+		"cleartext": true
+	}
 }

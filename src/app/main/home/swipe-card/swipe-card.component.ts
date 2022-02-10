@@ -100,7 +100,7 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
   @Input() profiles$: Observable<Profile[]>;
   @Input() homeContainer: ElementRef;
   @Input() swipeCardsRef: ElementRef;
-  @Output() matchEvent = new EventEmitter();
+  @Output() swipeEvent = new EventEmitter();
 
   // All of these are for showing SC or match animation. Assuming that always happens sufficiently late that these refs can't be undefined
   //@ViewChild("homeContainer", { read: ElementRef }) homeContainer: ElementRef;
@@ -407,7 +407,7 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
       this.likeText.nativeElement.innerHTML = `You liked ${profile.firstName}!`;
     };
 
-    const animateSwipe = SwipeAnimation(storeTasks$.bind(this), profile, this.likeEls);
+    const animateSwipe = SwipeAnimation(storeTasks$.bind(this), profile, this.likeEls, this.swipeEvent);
 
     return concat(
       of(changeText()),
@@ -429,7 +429,7 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
       this.dislikeText.nativeElement.innerHTML = `You passed on ${profile.firstName}.`;
     };
 
-    const animateSwipe = SwipeAnimation(storeTasks$.bind(this), profile, this.dislikeEls);
+    const animateSwipe = SwipeAnimation(storeTasks$.bind(this), profile, this.dislikeEls, this.swipeEvent);
 
     return concat(
       of(changeText()),
@@ -498,7 +498,7 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
     this.renderer.setStyle(messageText, "display", "flex");
     //this.renderer.setStyle(messageText2, "display", "flex");
 
-    this.matchEvent.emit('open');
+    this.swipeEvent.emit('open');
 
     // catch animation
     return OpenCatchAnimation(
@@ -513,7 +513,7 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
   async closeCatch() {
     const catchItems = document.getElementById("catchEls");
 
-    this.matchEvent.emit('close');
+    this.swipeEvent.emit('close');
 
     await CloseCatchAnimation(
       this.screenHeight,

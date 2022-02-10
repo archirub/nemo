@@ -103,7 +103,7 @@
               <ion-icon name="close-outline"></ion-icon>
             </div>
             <div class="bio">
-              <ion-textarea
+              <textarea
                 #bioInput
                 name="biography"
                 [(ngModel)]="editableFields.biography"
@@ -111,7 +111,7 @@
                 autoGrow="true"
                 maxlength="150"
                 (ionInput)="displayBioDelete()"
-              ></ion-textarea>
+              ></textarea>
             </div>
           </div>
 
@@ -132,7 +132,7 @@
           <div *ngIf="!reachedMaxQuestionsCount" class="flexcenter">
             <ion-icon
               id="addQuestion"
-              name="add-circle"
+              name="add-outline"
               (click)="addQuestion()"
             ></ion-icon>
           </div>

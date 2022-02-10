@@ -27,8 +27,8 @@ export const SCenterAnimation = () => {
       .beforeStyles({
         transform: "translateX(0)",
         opacity: 0,
-        height: "90vh",
-        width: "95vw",
+        height: "89vh",
+        width: "92vw",
         "--border-radius": "20px",
         "border-radius": "20px",
         // opacity: "1",

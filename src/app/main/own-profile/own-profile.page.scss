@@ -66,8 +66,10 @@ p.unchangeable {
 
 #addQuestion {
     margin-top: -2vh;
-    font-size: 4vh;
-    color: var(--ion-color-primary);
+    font-size: 3vh;
+    padding: 5px;
+    background: var(--ion-color-medium);
+    border-radius: 50%;
 }
 
 nemo-toggle {
@@ -100,7 +102,7 @@ save-cancel {
     z-index: 3;
     background: white;
     position: absolute;
-    top: 4.5vh;
+    top: 4.8vh;
     margin: 10px 14px;
     flex-direction: column;
     justify-content: flex-start;
@@ -216,9 +218,9 @@ app-profile-card {
 .bio {
     padding-bottom: 5vh;
 
-    ion-textarea {
+    textarea {
         width: 100%;
-        --background: var(--ion-color-light-tint);
+        background: var(--ion-color-light-tint);
         border: 2px solid var(--ion-color-light-shade);
         padding: 1vh;
         border-radius: 15px;

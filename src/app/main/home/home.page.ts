@@ -321,11 +321,13 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
   }
 
   hideSCButton(event) {
-    console.log(event);
+    //These are the same as display flex/none, but allow for transition time so LEAVE THEM ALONE
     if (event === 'open') {
-      this.renderer.setStyle(this.searchButton.nativeElement, "display", "none");
+      this.renderer.setStyle(this.searchButton.nativeElement, "opacity", "0");
+      this.renderer.setStyle(this.searchButton.nativeElement, "pointerEvents", "none");
     } else if (event === 'close') {
-      this.renderer.setStyle(this.searchButton.nativeElement, "display", "flex");
+      this.renderer.setStyle(this.searchButton.nativeElement, "opacity", "1");
+      this.renderer.setStyle(this.searchButton.nativeElement, "pointerEvents", "all");
     }
   }
 

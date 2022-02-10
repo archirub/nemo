@@ -1,4 +1,4 @@
-import { ElementRef } from "@angular/core";
+import { ElementRef, EventEmitter } from "@angular/core";
 import { Profile } from "@classes/profile.class";
 import { AnimationController } from "@ionic/angular";
 import { firstValueFrom, Observable, delay } from "rxjs";
@@ -7,7 +7,8 @@ import { firstValueFrom, Observable, delay } from "rxjs";
 export const SwipeAnimation = (
   storeTasks$: (profile: Profile) => Observable<any>,
   profile: Profile,
-  likeDiv: ElementRef<any>
+  likeDiv: ElementRef<any>,
+  swipeEvent: EventEmitter<any>,
 ) => {
   const appearAnimation = new AnimationController().create("appearAnimation");
   appearAnimation
@@ -31,9 +32,11 @@ export const SwipeAnimation = (
     });
 
   const playAnimation = async () => {
+    swipeEvent.emit('open');
     await appearAnimation.play();
     await firstValueFrom(storeTasks$(profile).pipe(delay(800)));
     await disappearAnimation.play();
+    swipeEvent.emit('close');
   };
 
   return playAnimation;

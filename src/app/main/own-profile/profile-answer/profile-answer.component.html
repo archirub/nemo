@@ -1,11 +1,10 @@
 <div>
   <div class="text">
     <div class="flex">
-      <ion-icon class="edit" name="pencil" (click)="showInput()"></ion-icon>
-      <h2 #qHead id="question">{{ questionAndAnswer?.question }}</h2>
-      <div #answerClose class="close-button" (click)="clearInput()">
-        <ion-icon name="close-outline"></ion-icon>
+      <div class="supercenter">
+        <ion-icon class="edit" name="pencil" (click)="showInput()"></ion-icon>
       </div>
+      <h2 #qHead id="question">{{ questionAndAnswer?.question }}</h2>
 
       <ion-select
         #qInput
@@ -22,6 +21,10 @@
           {{ q }}
         </ion-select-option>
       </ion-select>
+
+      <div #answerClose class="close-button" (click)="clearInput()">
+        <ion-icon name="close-outline"></ion-icon>
+      </div>
     </div>
 
     <textarea

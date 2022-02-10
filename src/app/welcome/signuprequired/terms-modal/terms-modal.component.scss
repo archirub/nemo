@@ -1,0 +1,45 @@
+.container {
+    display: flex;
+    flex-direction: column;
+}
+
+.close {
+    position: absolute;
+    top: 5vw;
+    right: 5vw;
+
+    ion-icon {
+        font-size: 4vh;
+    }
+}
+
+.flextitle {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    h1 {
+        color: var(--ion-color-primary);
+        font-size: 4vh;
+    }
+
+    h2 {
+        font-size: 3vh;
+    }
+}
+
+.pdf-view {
+    border: solid 2px var(--ion-color-primary);
+    width: 80vw;
+    height: 70vh;
+    margin: 0 auto;
+    border-radius: 15px;
+    flex-grow: 1;
+}
+
+pdf-viewer {
+    padding: 10px;
+    height: 98%;
+    width: 95%;
+}

@@ -55,7 +55,7 @@ export class ProfileAnswerComponent {
    * Removes question on click of cross
    **/
   clearInput() {
-    // this.questionAndAnswerChange.emit(["delete", this.questionAndAnswer]);
+    this.questionAndAnswerChange.emit(["delete", this.questionAndAnswer]);
   }
 
   /**

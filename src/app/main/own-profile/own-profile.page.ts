@@ -93,7 +93,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
 
   subs = new Subscription();
 
-  @ViewChild("bioInput") bio: IonTextarea;
+  @ViewChild("bioInput") bio: HTMLTextAreaElement;
   @ViewChild("bioClose", { read: ElementRef }) bioClose: ElementRef;
   @ViewChild("profileCard") profileCard: ProfileCardComponent;
   @ViewChild("profileContainer", { read: ElementRef }) profileContainer: ElementRef;
