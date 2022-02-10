@@ -26,8 +26,8 @@ export const reportUser = functions
 
     const report = sanitizedRequest.report;
 
-    const user = await admin.auth().getUser(uid);
-    const reporteduser = await admin.auth().getUser(report.userReportedID);
+    // const user = await admin.auth().getUser(uid);
+    // const reporteduser = await admin.auth().getUser(report.userReportedID);
 
     const mdMainRef = admin.firestore().collection("matchData").doc(uid);
     const mdDatingRef = admin
@@ -62,7 +62,7 @@ export const reportUser = functions
       date: admin.firestore.Timestamp.fromDate(new Date()) as admin.firestore.Timestamp,
     };
 
-    batch.update(newReportDocRef, reportDocumentData);
+    batch.set(newReportDocRef, reportDocumentData);
 
     batch.update(mdMainRef, {
       [`reportedUsers.${report.userReportedID}`]: reportedDateMap,

@@ -19,15 +19,20 @@
           'background-image': 'url(' + path + ')'
         }"
       > -->
-    <swiper #picSlides (swiper)="onSwiper($event)" (slideChange)="onSlideChange2()">
+    <swiper
+      #picSlides
+      [config]="swiperConfig"
+      (swiper)="onSwiper($event)"
+      (slideChange)="onSlideChange()"
+    >
       <ng-template
         swiperSlide
         #pic
         *ngFor="let path of profilePicturesWithDefault$ | async; index as i"
-        >
+      >
         <!-- THIS DIV NEEDS TO BE SIZED MANUALLY TO SHOW CONTENT IN SWIPER -->
         <div
-        class="swiperSizer"
+          class="swiperSizer"
           [ngStyle]="{
             'background-size': 'cover',
             'background-position': 'center',
@@ -52,6 +57,7 @@
           <div #shadow class="img-shadow"></div>
         </div>
       </ng-template>
+      <div swiperPagination></div>
     </swiper>
     <!-- </ion-slide></ion-slides
     > -->

@@ -298,7 +298,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
 
     if (page === "profile") {
       const profCardRef = await firstValueFrom(this.profCardRef$);
-      await (await firstValueFrom(profCardRef.slidesRef$)).slideTo(0);
+      (await firstValueFrom(profCardRef.picSlides$)).swiperRef.slideTo(0);
       // profCardRef.updatePager(0);
       await slidesRef.slideNext();
     } else if (page === "messenger") {

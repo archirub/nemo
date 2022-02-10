@@ -25,7 +25,7 @@ import {
   ReplaySubject,
   Subscription,
 } from "rxjs";
-import { map, startWith, first, switchMap } from "rxjs/operators";
+import { map, startWith, first, switchMap, tap } from "rxjs/operators";
 
 import { ReportUserComponent } from "../../../main/chats/report-user/report-user.component";
 
@@ -35,17 +35,20 @@ import { Profile } from "@classes/index";
 import { LessInfoAnimation, MoreInfoAnimation } from "@animations/info.animation";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 
-import SwiperCore from "swiper";
+import SwiperCore, { Pagination } from "swiper";
 import { SwiperComponent } from "swiper/angular";
+import { SwiperOptions } from "swiper";
 
 @Component({
   selector: "app-profile-card",
   templateUrl: "./profile-card.component.html",
   styleUrls: ["./profile-card.component.scss"],
 })
-export class ProfileCardComponent
-  implements OnInit, AfterViewInit, OnDestroy, AfterContentChecked
-{
+export class ProfileCardComponent implements OnInit, AfterViewInit, OnDestroy {
+  swiperConfig: SwiperOptions = {
+    pagination: true,
+  };
+
   counter = 0;
   expandAnimation: any;
   collapseAnimation: any;
@@ -85,31 +88,15 @@ export class ProfileCardComponent
     this.profilePictures$.next(pics);
   }
 
-  ngAfterContentChecked() {
-    // necessary / work around for proper initialization of swiper
-    if (this.picSlides) {
-      this.picSlides.updateSwiper({});
-    }
+  // necessary / work around for proper initialization of swiper
+  async initPicSlides() {
+    return firstValueFrom(this.picSlides$.pipe(map((ps) => ps.updateSwiper({}))));
   }
 
   onSwiper(swiper: SwiperComponent) {
-    console.log("swiper", swiper.activeSlides);
-  }
-  async onSlideChange2() {
-    console.log('Archi i changed this');
-    const [slideIndex, slidesLength] = await Promise.all([
-      this.getSlidesIndex(),
-      this.getSlidesLength(),
-    ]);
-
-    await this.checkSlide(slideIndex, slidesLength);
-    this.bulletsRef$.pipe(
-      map((bulletsRef) => {
-        this.updatePager(slideIndex, bulletsRef);
-      }));
+    console.log("swiper", swiper);
   }
 
-  @ViewChild("picSlides") picSlides: SwiperComponent;
   @ViewChild("content", { read: ElementRef }) content: ElementRef;
   @ViewChild("yes", { read: ElementRef }) yesSwipe: ElementRef;
   @ViewChild("no", { read: ElementRef }) noSwipe: ElementRef;
@@ -127,9 +114,9 @@ export class ProfileCardComponent
     }
   }
 
-  public slidesRef$ = new ReplaySubject<IonSlides>(1); // made public for use in swipe stack store and messenger page
-  @ViewChild(IonSlides) set slidesRefSetter(ref: IonSlides) {
-    if (ref) this.slidesRef$.next(ref);
+  public picSlides$ = new ReplaySubject<SwiperComponent>(1); // made public for use in swipe stack store and messenger page
+  @ViewChild(SwiperComponent) set picSlidesSetter(ref: SwiperComponent) {
+    if (ref) this.picSlides$.next(ref);
   }
 
   @HostListener("touchstart", ["$event"]) touchStart(event) {
@@ -147,13 +134,16 @@ export class ProfileCardComponent
     map((pics) => pics.map((url) => url ?? "/assets/icons/icon-192x192.png"))
   );
 
-  pagerHandler$ = combineLatest([this.slidesRef$, this.bulletsRef$]).pipe(
+  pagerHandler$ = combineLatest([
+    this.picSlides$,
+    this.profilePictures$,
+    this.bulletsRef$,
+  ]).pipe(
     first(),
-    switchMap(([slidesRef, bulletsRef]) =>
-      combineLatest([this.profilePictures$, slidesRef.ionSlideWillChange]).pipe(
-        map(([_, s]) => (s.target as any)?.swiper?.realIndex as number),
-        startWith(0), // for initial
-        map((index) => this.updatePager(index, bulletsRef))
+    tap(([_, __, bulletsRef]) => this.updatePager(0, bulletsRef)), // for pager init
+    map(([slidesRef, _, bulletsRef]) =>
+      slidesRef.swiperRef.on("slideChange", (swiper) =>
+        this.updatePager(swiper.realIndex, bulletsRef)
       )
     )
   );
@@ -174,6 +164,7 @@ export class ProfileCardComponent
 
   ngOnInit() {
     this.buildInterestSlides(this.profile);
+    this.initPicSlides();
   }
 
   ngAfterViewInit() {
@@ -338,19 +329,27 @@ export class ProfileCardComponent
   }
 
   async lockSwipeToPrev(bool: boolean) {
-    return firstValueFrom(this.slidesRef$).then((ref) => ref.lockSwipeToPrev(bool));
+    // return firstValueFrom(this.picSlides$).then((ref) => {
+    //   console.log("lockSwipeToPrev", ref.swiperRef.allowSlideNext, bool);
+    //   ref.swiperRef.allowSlidePrev = bool;
+    // });
   }
 
   async lockSwipeToNext(bool: boolean) {
-    return firstValueFrom(this.slidesRef$).then((ref) => ref.lockSwipeToNext(bool));
+    // return firstValueFrom(this.picSlides$).then((ref) => {
+    //   console.log("lockSwipeToNext", ref.swiperRef.allowSlideNext, bool);
+    //   ref.swiperRef.allowSlideNext = bool;
+    // });
   }
 
   async getSlidesIndex() {
-    return firstValueFrom(this.slidesRef$.pipe(switchMap((ref) => ref.getActiveIndex())));
+    return firstValueFrom(this.picSlides$.pipe(map((ref) => ref.swiperRef.activeIndex)));
   }
 
   async getSlidesLength() {
-    return firstValueFrom(this.slidesRef$.pipe(switchMap((ref) => ref.length())));
+    return firstValueFrom(
+      this.picSlides$.pipe(map((ref) => ref.swiperRef.slides.length))
+    );
   }
 
   findInterestIcon(interest: string) {
@@ -360,7 +359,12 @@ export class ProfileCardComponent
     return `/assets/interests/${interest}.svg`;
   }
 
+  async swiperRemoveListeners() {
+    return (await firstValueFrom(this.picSlides$)).swiperRef.detachEvents();
+  }
+
   ngOnDestroy() {
     this.subs.unsubscribe();
+    // this.swiperRemoveListeners();
   }
 }

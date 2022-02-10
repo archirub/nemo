@@ -57,8 +57,8 @@ export interface ErrorText {
 }
 
 export const defaultErrorText = {
-  header: "Uh oh :/",
-  message: "Something went wrong, please try again or contact Nemo for assistance.",
+  header: "An error occurred...",
+  message: "We were unable to complete your request, please try again.",
 };
 
 export interface CustomErrorHandler<errType extends ErrorType, errCodeType> {
@@ -80,17 +80,23 @@ export type SignalErrorWasHandled = typeof SIGNAL_ERROR_WAS_HANDLED;
 // explanation of strategies -  in case of error:
 // "endStream" just ends the stream after the error was handled
 // "fallback" switches to the observable provided
-// "defaultValue" spits out a defaultValue
+// "propagateError" makes it go through the error handling system but then returns an error at the end
+// "dontHandle" makes it skip the error handling system and return an error
+
+export type ErrorHandlingStrategy =
+  | "endStream"
+  | "fallback"
+  | "propagateError"
+  | "dontHandle";
 export interface GlobalErrorHandlerOptions {
-  strategy: "endStream" | "fallback" | "defaultValue";
+  strategy: ErrorHandlingStrategy;
   debugMsg?: string;
   fallback$?: Observable<any>;
-  defaultValue?: any;
 }
 
 export interface CustomGlobalErrorHandler {
   convertErrors: (type: Exclude<ErrorType, "local">) => OperatorFunction<any, any>;
-  handleErrors: (options?: GlobalErrorHandlerOptions) => // defaultValue: any,
+  handleErrors: <T>(options?: GlobalErrorHandlerOptions) => // defaultValue: any,
   // fallback$: Observable<any>
   (source: Observable<any>) => Observable<any>;
 }

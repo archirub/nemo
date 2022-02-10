@@ -8,6 +8,7 @@ import { GlobalErrorHandler } from "@services/errors/global-error-handler.servic
 
 import { reportUserRequest } from "@interfaces/cloud-functions.model";
 import { UserReport } from "@interfaces/user-report.models";
+import { ErrorHandlingStrategy } from "@interfaces/error-handling.model";
 
 @Injectable({
   providedIn: "root",
@@ -19,7 +20,7 @@ export class UserReportingService {
     private errorHandler: GlobalErrorHandler
   ) {}
 
-  reportUser(report: UserReport) {
+  reportUser(report: UserReport, errorHandleStrategy: ErrorHandlingStrategy) {
     const request: reportUserRequest = { report };
 
     return firstValueFrom(
@@ -27,7 +28,7 @@ export class UserReportingService {
         .httpsCallable("reportUser")(request)
         .pipe(
           this.errorHandler.convertErrors("cloud-functions"),
-          this.errorHandler.handleErrors()
+          this.errorHandler.handleErrors({ strategy: errorHandleStrategy })
         )
     );
   }
