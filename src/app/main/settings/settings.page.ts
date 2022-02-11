@@ -47,6 +47,8 @@ import {
   genderOptions,
   sexualPreferenceOptions,
   changeShowProfileRequest,
+  appPackages,
+  appVersion
 } from "@interfaces/index";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
@@ -64,6 +66,10 @@ export class SettingsPage implements AfterViewInit, OnDestroy, OnInit {
   genderOptions: Gender[] = genderOptions;
   sexualPreference: "female" | "male" | "both";
   gender: Gender;
+
+  //Data for licences page
+  packages = appPackages;
+  version = appVersion;
 
   profile: AppUser;
 
@@ -312,6 +318,8 @@ export class SettingsPage implements AfterViewInit, OnDestroy, OnInit {
       document.getElementById("support"),
       document.getElementById("placeholder"),
       document.getElementById("privacy"),
+      document.getElementById("licenses"),
+      document.getElementById("terms")
     ];
     slidesToHide.forEach((s) => {
       this.renderer.setStyle(s, "display", "none");
@@ -319,6 +327,10 @@ export class SettingsPage implements AfterViewInit, OnDestroy, OnInit {
 
     if (slide == "privacy" || slide == "terms") {
       this.renderer.setStyle(slidesToHide[0], "display", "block");
+    }
+
+    if (slide == "legal") {
+      this.renderer.setStyle(slidesToHide[3], "display", "block");
     }
 
     const target = document.getElementById(`${slide}`); //get slide by id from input

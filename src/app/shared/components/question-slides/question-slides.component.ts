@@ -21,7 +21,7 @@ import {
 
 import { Question } from "@interfaces/index";
 import { questionsOptions } from "@interfaces/index";
-import { IonSelect, IonSlides } from "@ionic/angular";
+import { IonSelect, IonSlides, IonTextarea } from "@ionic/angular";
 
 @Component({
   selector: "question-slides",
@@ -286,15 +286,15 @@ export class QuestionSlidesComponent implements OnInit, ControlValueAccessor {
     this.formAQM();
   }
 
-  updateAnswerArray(index, $event) {
+  updateAnswerArray(index, event) {
     /**
      *  Update answer array when one is selected, with inputs
      * index (number): slide of chosen answer to change correct index in answerArray
      * $event: used to target the value of the ion-textarea where the answer is entered
      **/
-    this.answerArray[index] = $event.target.value; //How to target textarea's value, same as ion-select
+    this.answerArray[index] = event.target.value; //How to target textarea's value, same as ion-select
 
-    if ($event.target.value === "") {
+    if (event.target.value === "") {
       //Don't allow empty answers in answerArray
       this.answerArray[index] = null;
     }

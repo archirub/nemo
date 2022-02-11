@@ -12,3 +12,4 @@ export * from "./universities.model";
 // export * from "./firebase.model"; // commented out because otherwise it fucks up cloud function error deployment (due to "firebase/app" being imported in this space)
 export * from "./user-report.models";
 export * from "./error-handling.model";
+export * from "./app-data.model";

@@ -85,7 +85,7 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
   screenWidth: number;
   yesBubbleAnimation: Animation;
   noBubbleAnimation: Animation;
-  currentUser: AppUser;
+  currentUser: any;
 
   timeOfLatestCardTap = 0; // (ms) - set to 0 when we want the diff with current time to be larger than threshold
   DOUBLE_TAP_THRESHOLD = 800;
@@ -175,7 +175,9 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
     this.onResize();
   }
 
-  ngOnInit() {}
+  async ngOnInit() {
+    this.currentUser = await this.errorHandler.getCurrentUser();
+  }
 
   ngAfterViewInit() {
     this.subs.add(this.managePictureSwiping$.subscribe());
@@ -407,6 +409,12 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
       this.likeText.nativeElement.innerHTML = `You liked ${profile.firstName}!`;
     };
 
+    this.fbAnalytics.logEvent("yes_swipe", { 
+      swiperUID: this.currentUser.uid,//UID of person swiping
+      likedUID: profile.uid,
+      timestamp: Date.now() //Time since epoch
+    });
+
     const animateSwipe = SwipeAnimation(storeTasks$.bind(this), profile, this.likeEls, this.swipeEvent);
 
     return concat(
@@ -429,6 +437,12 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
       this.dislikeText.nativeElement.innerHTML = `You passed on ${profile.firstName}.`;
     };
 
+    this.fbAnalytics.logEvent("no_swipe", { 
+      swiperUID: this.currentUser.uid,//UID of person swiping
+      passedUID: profile.uid,
+      timestamp: Date.now() //Time since epoch
+    });
+
     const animateSwipe = SwipeAnimation(storeTasks$.bind(this), profile, this.dislikeEls, this.swipeEvent);
 
     return concat(
@@ -450,6 +464,12 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
         this.otherProfilesStore.saveProfile(p),
         this.swipeOutcomeStore.registerSwipeChoices$
       );
+
+      this.fbAnalytics.logEvent("match", { 
+        matchingUID: this.currentUser.uid,//UID of person swiping
+        matchedUID: matchedProfile.uid,
+        timestamp: Date.now() //Time since epoch
+      });
 
     return concat(
       defer(() => this.playCatch(matchedProfile)),

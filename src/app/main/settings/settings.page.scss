@@ -49,16 +49,18 @@ nemo-toggle {
 .flexstart-row {
     display: flex;
     flex-direction: row;
+    align-items: center;
+    margin: 2vh 0;
 
     p.return {
         font-size: 2.2vh;
+        margin: 0;
     }
 }
 
 #back {
     height: 3vh;
     width: 3vh;
-    padding: 2.5vh 0 1vh 0;
 }
 
 .slide-button {

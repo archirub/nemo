@@ -41,7 +41,7 @@
             <ion-icon name="chevron-forward-outline"></ion-icon>
           </div>
 
-          <div class="slide-button">
+          <div class="slide-button" (click)="selectSlide('licenses')">
             <p>Licenses</p>
             <ion-icon name="chevron-forward-outline"></ion-icon>
           </div>
@@ -60,10 +60,6 @@
         </div>
       </div>
     </ion-slide>
-
-    <!-- Necessary in order to allow swipes to specific slides,
-      one other slide has to have display != none in order for this.slides.slideNext() to work -->
-    <ion-slide id="placeholder"></ion-slide>
 
     <ion-slide id="legal" class="noScroll">
       <div class="container">
@@ -224,7 +220,7 @@
 
         <div class="flexstart-row" (click)="returnToParentSlide('privacy')">
           <ion-icon id="back" name="chevron-back-outline"></ion-icon>
-          <p class="return">Return to Settings</p>
+          <p class="return">Back</p>
         </div>
 
         <div class="pdf-view">
@@ -249,7 +245,7 @@
 
         <div class="flexstart-row" (click)="returnToParentSlide('terms')">
           <ion-icon id="back" name="chevron-back-outline"></ion-icon>
-          <p class="return">Return to Settings</p>
+          <p class="return">Back</p>
         </div>
 
         <div class="pdf-view">
@@ -261,5 +257,34 @@
         </div>
       </div>
     </ion-slide>
+
+    <ion-slide id="licenses" class="noScroll">
+      <div class="container">
+        <div class="flexbetween-row">
+          <div class="left">
+            <h2>nemo</h2>
+            <h2 class="subheading">Licenses</h2>
+          </div>
+          <a (click)="goBack()"><ion-icon name="close-outline"></ion-icon></a>
+        </div>
+
+        <div class="flexstart-row" (click)="returnToSettings()">
+          <ion-icon id="back" name="chevron-back-outline"></ion-icon>
+          <p class="return">Return to Settings</p>
+        </div>
+
+        <div class="pdf-view" style="text-align: left;">
+          <p><b>Nemo version {{version}}</b></p>
+          <p>In use:</p>
+          <ul>
+            <li *ngFor="let package of packages">{{ package }}</li>
+          </ul>
+        </div>
+      </div>
+    </ion-slide>
+
+    <!-- Necessary in order to allow swipes to specific slides,
+      one other slide has to have display != none in order for this.slides.slideNext() to work -->
+      <ion-slide id="placeholder"></ion-slide>
   </ion-slides>
 </ion-content>
