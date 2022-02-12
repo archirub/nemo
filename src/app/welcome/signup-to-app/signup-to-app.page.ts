@@ -7,6 +7,8 @@ import { exhaustMap, filter, first } from "rxjs/operators";
 import { NotificationsStore } from "@stores/notifications/notifications.service";
 import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
 import { StoreStateManager } from "@services/global-state-management/store-state-manager.service";
+import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
+import { AnalyticsService } from "@services/analytics/analytics.service";
 
 @Component({
   selector: "app-signup-to-app",
@@ -18,14 +20,23 @@ export class SignupToAppPage {
     return this.readiness.app$;
   }
 
+  currentUser;
+
   constructor(
     private navCtrl: NavController,
 
     private loadingAlertManager: LoadingAndAlertManager,
     private storeStateManager: StoreStateManager,
     private readiness: StoreReadinessService,
-    private notifications: NotificationsStore
+    private notifications: NotificationsStore,
+
+    private errorHandler: GlobalErrorHandler,
+    private fbAnalytics: AnalyticsService
   ) {}
+
+  ngOnInit() {
+    this.currentUser = this.errorHandler.getCurrentUser();
+  }
 
   ionViewDidEnter() {
     console.log("check for ionViewDidEnter, can log remove now.");
@@ -63,6 +74,11 @@ export class SignupToAppPage {
   }
 
   async requestNotificationsPermission() {
+    this.fbAnalytics.logEvent("request_notifs", {
+      UID: this.currentUser.uid, //user uid
+      timestamp: Date.now(), //Time since epoch
+    });
+
     return lastValueFrom(this.notifications.requestPermission());
   }
 

@@ -31,6 +31,8 @@ import {
 import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
 import { wait } from "src/app/shared/functions/common";
 import { SignupLocalStorageService } from "@services/signup/signup-local-storage.service";
+import { AnalyticsService } from "@services/analytics/analytics.service";
+import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 
 @Component({
   selector: "app-signupoptional",
@@ -57,6 +59,7 @@ export class SignupoptionalPage implements OnInit {
   questionArray: QuestionAndAnswer[];
   selectedInterests: Array<string> = [];
   form = this.blankForm;
+  currentUser;
 
   @ViewChild("slides") slides: IonSlides;
   @ViewChildren("pagerDots", { read: ElementRef }) dots: QueryList<ElementRef>;
@@ -87,11 +90,15 @@ export class SignupoptionalPage implements OnInit {
     private navCtrl: NavController,
     private renderer: Renderer2,
 
-    private loadingAlertManager: LoadingAndAlertManager
+    private loadingAlertManager: LoadingAndAlertManager,
+
+    private fbAnalytics: AnalyticsService,
+    private errorHandler: GlobalErrorHandler
   ) {}
 
-  ngOnInit() {
+  async ngOnInit() {
     this.clearFormArray(this.form.controls.questions as FormArray);
+    this.currentUser = await this.errorHandler.getCurrentUser();
   }
 
   ionViewWillEnter() {
@@ -225,14 +232,12 @@ export class SignupoptionalPage implements OnInit {
     return this.signup.addToDataHolders(this.getFormValues());
   }
 
-  async getFieldsOnSlide(slideIndex: number) {
+  async getFieldsOnSlide(indexOfChoice: number) {
     let fieldsOnCurrentSlide: (keyof SignupOptional)[] = [];
-
     Object.entries(this.slideIndexes).forEach(
       ([fieldName, slideIndex]: [keyof SignupOptional, number]) =>
-        slideIndex === slideIndex ? fieldsOnCurrentSlide.push(fieldName) : null
+        slideIndex === indexOfChoice ? fieldsOnCurrentSlide.push(fieldName) : null
     );
-
     return fieldsOnCurrentSlide;
   }
 
@@ -338,11 +343,23 @@ export class SignupoptionalPage implements OnInit {
     const isEmpty = (v) => !v;
     const bothNullOrFilled = (v1, v2) =>
       (isFilled(v1) && isFilled(v2)) || (isEmpty(v1) && isEmpty(v2));
+    const bothFilled = (v1,v2) => (isFilled(v1) && isFilled(v2));
 
     if (intersection(fieldsOnCurrentSlide, ["course", "areaOfStudy"]).length === 2) {
       const courseValue = this.form.get("course").value;
       const areaOfStudyValue = this.form.get("areaOfStudy").value;
       const isValid = bothNullOrFilled(courseValue, areaOfStudyValue);
+      const userCompleted = bothFilled(courseValue, areaOfStudyValue);
+
+      if (userCompleted) {
+        this.fbAnalytics.logEvent("signupopt_course", {
+          UID: this.currentUser.uid, //user uid
+          course: courseValue,
+          areaOfStudy: areaOfStudyValue,
+          timestamp: Date.now(), //Time since epoch
+        });
+      };
+
       if (!isValid) return false;
     }
 
@@ -350,6 +367,17 @@ export class SignupoptionalPage implements OnInit {
       const societyValue = this.form.get("society").value;
       const societyCategoryValue = this.form.get("societyCategory").value;
       const isValid = bothNullOrFilled(societyValue, societyCategoryValue);
+      const userCompleted = bothFilled(societyValue, societyCategoryValue);
+
+      if (userCompleted) {
+        this.fbAnalytics.logEvent("signupopt_society", {
+          UID: this.currentUser.uid, //user uid
+          society: societyValue,
+          societyCategory: societyCategoryValue,
+          timestamp: Date.now(), //Time since epoch
+        });
+      };
+      
       if (!isValid) return false;
     }
 
@@ -360,11 +388,48 @@ export class SignupoptionalPage implements OnInit {
         return { question: qst.q, answer: qst.a };
       });
       let isValid = true;
-      questionsValue.forEach((QandA) =>
-        !bothNullOrFilled(QandA.answer, QandA.question) ? (isValid = false) : null
-      );
+      let userCompleted = true;
+      questionsValue.forEach((QandA) => {
+        !bothNullOrFilled(QandA.answer, QandA.question) ? (isValid = false) : null;
+        !bothFilled(QandA.answer, QandA.question) ? (userCompleted = false) : null;
+      });
+      
+      if (questionsValue.length < 1) {
+        userCompleted = false
+      };
+
+      if (userCompleted) {
+        this.fbAnalytics.logEvent("signupopt_questions", {
+          UID: this.currentUser.uid, //user uid
+          timestamp: Date.now(), //Time since epoch
+        });
+      };
+
       if (!isValid) return false;
-    }
+    };
+
+    if (fieldsOnCurrentSlide.includes("interests")) {
+      const interestsValue = this.form.get("interests").value;
+      if (interestsValue) {
+        this.fbAnalytics.logEvent("signupopt_interests", {
+          UID: this.currentUser.uid, //user uid
+          interests: interestsValue,
+          timestamp: Date.now(), //Time since epoch
+        });
+      };
+    };
+
+    if (fieldsOnCurrentSlide.includes("biography")) {
+      const bioValue = this.form.get("biography").value;
+      if (bioValue) {
+        this.fbAnalytics.logEvent("signupopt_bio", {
+          UID: this.currentUser.uid, //user uid
+          bio: bioValue,
+          timestamp: Date.now(), //Time since epoch
+        });
+      };
+    };
+
 
     return true;
   }

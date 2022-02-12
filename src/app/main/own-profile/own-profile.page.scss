@@ -68,7 +68,7 @@ p.unchangeable {
     margin-top: -2vh;
     font-size: 3vh;
     padding: 5px;
-    background: var(--ion-color-medium);
+    background: #fff;
     border-radius: 50%;
 }
 
@@ -83,10 +83,11 @@ save-cancel {
 }
 
 #profile {
+    display: none;
     position: fixed;
     left: 0;
     height: 94%;
-    top: 4.5vh;
+    top: 4.7vh;
     overflow: hidden;
 }
 
@@ -173,7 +174,7 @@ h2 {
     position: absolute;
     right: 5vw;
     z-index: 3;
-    background: var(--ion-color-medium);
+    background: #FFF;
     border-radius: 50%;
     height: 4vh;
     width: 4vh;
@@ -187,7 +188,7 @@ h2 {
 
 .delete-pic {
     z-index: 3;
-    background: var(--ion-color-medium);
+    background: #FFF;
     border-radius: 50%;
     height: 4vh;
     width: 4vh;
@@ -225,6 +226,7 @@ app-profile-card {
         padding: 1vh;
         border-radius: 15px;
         font-size: 2.6vh;
+        outline: none;
     };
 }
 
@@ -278,7 +280,7 @@ add-photo {
 @media only screen and (max-device-width: 390px) {
     .delete-pic {
         z-index: 3;
-        background: var(--ion-color-medium);
+        background: #FFF;
         border-radius: 50%;
         height: 4vh;
         width: 4vh;

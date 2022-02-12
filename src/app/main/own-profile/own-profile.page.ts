@@ -45,7 +45,6 @@ import { InterestsModalComponent } from "./interests-modal/interests-modal.compo
 import { ProfileAnswerComponent } from "./profile-answer/profile-answer.component";
 
 import { CurrentUserStore } from "@stores/index";
-import { TutorialsStore } from "@stores/tutorials/tutorials.service";
 import { OwnPicturesStore } from "@stores/pictures/own-pictures/own-pictures.service";
 import { StoreReadinessService } from "@services/store-readiness/store-readiness.service";
 import { TabElementRefService } from "../tab-menu/tab-element-ref.service";
@@ -70,6 +69,8 @@ import {
   MAX_PROFILE_PICTURES_COUNT,
   QuestionAndAnswer,
 } from "@interfaces/index";
+import { AnalyticsService } from "@services/analytics/analytics.service";
+import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 
 @Component({
   selector: "app-own-profile",
@@ -118,6 +119,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
   editingInProgress$ = this.editingInProgress.asObservable().pipe(distinctUntilChanged());
   profilePictures$ = this.profilePictures.asObservable();
   userFromStore$ = this.currentUserStore.user$; // used in template
+  currentUser;
 
   profilePicturesWithEmpty$ = this.profilePictures
     .asObservable()
@@ -157,8 +159,6 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     tap((pPicturesRef) => this.resetPictureDragging(pPicturesRef)),
     share()
   );
-
-  displayTutorial$ = this.tutorials.displayTutorial("ownProfile");
 
   get emptyEditableFields() {
     return {
@@ -210,14 +210,17 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
 
     private currentUserStore: CurrentUserStore,
     private ownPicturesService: OwnPicturesStore,
+    private fbAnalytics: AnalyticsService,
 
+    private errorHandler: GlobalErrorHandler,
     private loadingAlertManager: LoadingAndAlertManager,
     private tabElementRef: TabElementRefService,
-    private storeReadiness: StoreReadinessService,
-    private tutorials: TutorialsStore
+    private storeReadiness: StoreReadinessService
   ) {}
 
-  ngOnInit() {}
+  async ngOnInit() {
+    this.currentUser = await this.errorHandler.getCurrentUser();
+  }
 
   ngAfterViewInit() {
     this.pageIsReady$ = this.getPageIsReady(); // this format is needed because the ViewChild "profileCard" only gets defined after view init
@@ -322,6 +325,15 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
           ? JSON.parse(JSON.stringify(data[field]))
           : data[field];
     });
+  }
+
+  async getEditableFieldsChange(): Promise<Array<keyof editableProfileFields>> {
+    const user = await firstValueFrom(this.currentUserStore.user$);
+    return this.getDifference(this.editableFields, this.convertUserToEditable(user));
+  }
+
+  getDifference<T>(map1: T, map2: T): Array<keyof T> {
+    return (Object.keys(map1) as Array<keyof T>).filter((key) => map1[key] !== map2[key]);
   }
 
   // takes a User object and returns an editableProfileFields object with the User object's values
@@ -505,6 +517,8 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
   // otherwise, it shows a loader, then update the fields in the database, updates the pictures
   // and then turns off editing in progress
   async confirmProfileEdit(): Promise<void> {
+    let changes = await this.getEditableFieldsChange();
+
     const invalidParts = this.getInvalidParts();
 
     if (invalidParts.length > 0) return this.presentInvalidPartsMessage(invalidParts);
@@ -525,6 +539,12 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
         switchMap(() => this.loadingAlertManager.dismissDisplayed())
       )
     );
+
+    this.fbAnalytics.logEvent("profile_edit", {
+      UID: this.currentUser.uid, //user uid
+      changes: changes,
+      timestamp: Date.now(), //Time since epoch
+    });
 
     this.profileCard.buildInterestSlides(this.profileCard.profile);
   }
@@ -551,11 +571,6 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     if (!questionsIsValid) invalidParts.push("questions");
 
     return invalidParts;
-  }
-
-  //TUTORIAL EXIT
-  onExitTutorial() {
-    this.tutorials.markAsSeen("ownProfile").subscribe();
   }
 
   /**
