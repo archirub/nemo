@@ -1,16 +1,11 @@
 <div #fullCard id="swipe-card" *ngIf="profile">
   <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script> -->
   <div class="img-container">
-    <div class="pager" [hidden]="(profilePictures$ | async).length < 2">
+    <div class="pager" [hidden]="(profilePictures$ | async).length <= 1">
       <ion-icon #bullets name="ellipse" *ngFor="let path of pictureCountArray"></ion-icon>
     </div>
 
-    <swiper
-      #picSlides
-      [config]="swiperConfig"
-      (slideChange)="onSlideChange()"
-      class="swiper-container"
-    >
+    <swiper #picSlides [config]="swiperConfig" class="swiper-container">
       <ng-template
         swiperSlide
         #pic

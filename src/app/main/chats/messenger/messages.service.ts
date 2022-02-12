@@ -23,9 +23,9 @@ import { Timestamp } from "@interfaces/firebase.model";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 import { FormatService } from "@services/format/format.service";
 import { Injectable } from "@angular/core";
-import { FilterFalsy, Logger } from "src/app/shared/functions/custom-rxjs";
+import { FilterFalsy } from "src/app/shared/functions/custom-rxjs";
 
-@Injectable()
+@Injectable({ providedIn: "root" })
 export class MessagesService {
   private MSG_BATCH_SIZE: number = 15;
 

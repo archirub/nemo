@@ -225,12 +225,12 @@ export class SignupoptionalPage implements OnInit {
     return this.signup.addToDataHolders(this.getFormValues());
   }
 
-  async getFieldsOnSlide(slideIndex: number) {
+  async getFieldsOnSlide(indexOfChoice: number) {
     let fieldsOnCurrentSlide: (keyof SignupOptional)[] = [];
 
     Object.entries(this.slideIndexes).forEach(
       ([fieldName, slideIndex]: [keyof SignupOptional, number]) =>
-        slideIndex === slideIndex ? fieldsOnCurrentSlide.push(fieldName) : null
+        slideIndex === indexOfChoice ? fieldsOnCurrentSlide.push(fieldName) : null
     );
 
     return fieldsOnCurrentSlide;

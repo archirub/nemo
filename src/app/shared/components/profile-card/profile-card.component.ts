@@ -13,7 +13,6 @@ import {
   OnDestroy,
   ViewChildren,
   AfterContentChecked,
-  ViewEncapsulation,
 } from "@angular/core";
 import { IonSlides } from "@ionic/angular";
 
@@ -24,7 +23,7 @@ import {
   ReplaySubject,
   Subscription,
 } from "rxjs";
-import { map, startWith, first, switchMap, tap } from "rxjs/operators";
+import { map, first, tap } from "rxjs/operators";
 
 import { ReportUserComponent } from "../../../main/chats/report-user/report-user.component";
 
@@ -37,6 +36,7 @@ import { GlobalErrorHandler } from "@services/errors/global-error-handler.servic
 import SwiperCore, { EffectCube, Pagination } from "swiper";
 import { SwiperComponent } from "swiper/angular";
 import { SwiperOptions } from "swiper";
+import { DEFAULT_PICTURE_URL } from "@interfaces/profile.model";
 
 @Component({
   selector: "app-profile-card",
@@ -46,7 +46,11 @@ import { SwiperOptions } from "swiper";
 export class ProfileCardComponent
   implements OnInit, AfterViewInit, OnDestroy, AfterContentChecked
 {
-  swiperConfig: SwiperOptions = {};
+  swiperConfig: SwiperOptions = {
+    slidesOffsetAfter: 0,
+    slidesPerView: 1,
+    resistanceRatio: 0, // to remove the bounce at the start and end of slides
+  };
 
   counter = 0;
   expandAnimation: any;
@@ -69,20 +73,20 @@ export class ProfileCardComponent
   @Input() headerBottom: number; //in %
   @Input() fixedHeader: boolean = true; //THIS IS A LAST MINUTE FIX BECAUSE I DON'T HAVE THE TIME TO FIGURE OUT WHAT'S GOING ON??
   @Input() set profilePictures(value: string[]) {
-    if (this.isOwnProfile) console.log("profilePictures", value);
     if (!Array.isArray(value)) return;
 
     // absolutely necessary. This is because empty strings can be coming in
     // in the array when the swipeStackStore has attempted to fetch that picture but hasn't found anything
     // there being an empty string is necessary to signify to the swipeStackStore that it has already tried fetching that pic with no results
-    let pics = value.slice(0, this.pictureCount);
-    pics = [
-      ...value,
-      ...Array(this.pictureCount - pics.length).fill("/assets/icons/icon-192x192.png"),
-    ];
-
-    // DEV - replace this by the real default thing
-    if (pics.length === 0) pics = ["/assets/icons/icon-192x192.png"];
+    const pictureCount = this.pictureCount;
+    let pics = value.slice(0, pictureCount);
+    const diffWithPictureCount = pictureCount - pics.length;
+    // done conditionally because I was getting some weird behaviour
+    // when diffWithPictureCount was 0 and [...pics, ...Array(diffWithPictureCount).fill("")] was used anyway
+    // where ...Array(0) would add two empty strings
+    if (diffWithPictureCount >= 1) {
+      pics = [...pics, ...Array(diffWithPictureCount).fill("")];
+    }
 
     this.profilePictures$.next(pics);
   }
@@ -126,7 +130,8 @@ export class ProfileCardComponent
   profilePictures$ = new BehaviorSubject<string[]>([]);
 
   profilePicturesWithDefault$ = this.profilePictures$.pipe(
-    map((pics) => pics.map((url) => url ?? "/assets/icons/icon-192x192.png"))
+    map((pics) => pics.map((url) => (!!url ? url : DEFAULT_PICTURE_URL))),
+    map((pics) => (pics.length <= 0 ? [DEFAULT_PICTURE_URL] : pics))
   );
 
   pagerHandler$ = combineLatest([
@@ -166,7 +171,6 @@ export class ProfileCardComponent
   }
 
   ngAfterViewInit() {
-    this.lockSwipeToPrev(true);
     this.subs.add(this.pagerHandler$.subscribe());
   }
 
@@ -174,7 +178,7 @@ export class ProfileCardComponent
     const userReportedID = this.profile.uid;
     const userReportedName = this.profile.firstName;
     const userReportedPicture = await firstValueFrom(
-      this.profilePictures$.pipe(map((pp) => pp[0]))
+      this.profilePicturesWithDefault$.pipe(map((pp) => pp[0]))
     );
 
     const userReporting = await this.errorHandler.getCurrentUser();
@@ -284,25 +288,6 @@ export class ProfileCardComponent
     this.renderer.setStyle(this.noSwipe.nativeElement, "marginTop", "13vh");
   }
 
-  async onSlideChange() {
-    const [slideIndex, slidesLength] = await Promise.all([
-      this.getSlidesIndex(),
-      this.getSlidesLength(),
-    ]);
-
-    await this.checkSlide(slideIndex, slidesLength);
-  }
-
-  async checkSlide(slideIndex: number, slidesLength: number) {
-    if (slideIndex === 0) {
-      await Promise.all([this.lockSwipeToPrev(true), this.lockSwipeToNext(false)]);
-    } else if (slideIndex === slidesLength - 1) {
-      await Promise.all([this.lockSwipeToPrev(false), this.lockSwipeToNext(true)]);
-    } else {
-      await Promise.all([this.lockSwipeToPrev(false), this.lockSwipeToNext(false)]);
-    }
-  }
-
   buildInterestSlides(profile: Profile): void {
     if (!profile) return;
     this.interestSlideContent = []; //clear any previous slides, mainly for own profile changes
@@ -324,20 +309,6 @@ export class ProfileCardComponent
 
     this.interestSlideContent.push(pushArray); //pushes either last interests, or if less than three interests in total
     this.interestsBuilt = true;
-  }
-
-  async lockSwipeToPrev(bool: boolean) {
-    // return firstValueFrom(this.picSlides$).then((ref) => {
-    //   console.log("lockSwipeToPrev", ref.swiperRef.allowSlideNext, bool);
-    //   ref.swiperRef.allowSlidePrev = bool;
-    // });
-  }
-
-  async lockSwipeToNext(bool: boolean) {
-    // return firstValueFrom(this.picSlides$).then((ref) => {
-    //   console.log("lockSwipeToNext", ref.swiperRef.allowSlideNext, bool);
-    //   ref.swiperRef.allowSlideNext = bool;
-    // });
   }
 
   async getSlidesIndex() {

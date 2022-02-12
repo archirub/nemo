@@ -16,9 +16,9 @@ service cloud.firestore {
     // }
 
      //  DEV (for swipe stack info)
-    match /matchData/{profileID} {
-      allow read: if true;
-    }
+    // match /matchData/{profileID} {
+    //   allow read: if true;
+    // }
 
     match /general/{any} {
       allow read

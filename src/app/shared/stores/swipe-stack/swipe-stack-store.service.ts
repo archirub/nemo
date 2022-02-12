@@ -393,10 +393,7 @@ export class SwipeStackStore extends AbstractStoreService {
 
   slideChangeListener$(ref: SwiperComponent): Observable<Swiper> {
     const slideChange$ = new Subject<Swiper>();
-    const uniqueID = Math.random();
-    // ref.swiperRef.on("")
     ref.swiperRef.on("slideChange", (swiper) => {
-      console.log("slideChange", uniqueID);
       slideChange$.next(swiper);
     });
     return slideChange$;
