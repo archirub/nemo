@@ -35,7 +35,7 @@ export class ProfileCourseComponent implements OnInit {
   onChoiceChange(value: string) {
     this.choice = value;
     this.choiceChange.emit(this.choice);
-    this.renderer.setStyle(this.close.nativeElement, "display", "block");
+    this.renderer.setStyle(this.close.nativeElement, "display", "flex");
   }
 
   onCategoryChange(value: SocietyCategory | AreaOfStudy) {

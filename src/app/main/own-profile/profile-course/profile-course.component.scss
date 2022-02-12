@@ -28,14 +28,17 @@ ion-select {
   position: absolute;
   right: 5vw;
   z-index: 3;
-  background: var(--ion-color-medium);
+  background: #fff;
   border-radius: 50%;
   height: 4vh;
   width: 4vh;
   margin-top: 1vh;
+  border: solid 2px var(--ion-color-medium);
+  justify-content: center;
+  align-items: center;
+
   ion-icon {
       font-size: 3vh;
-      padding: 0.5vh;
       margin: auto;
   }
 }

@@ -411,7 +411,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
   // to show or not the close button of the biography
   displayBioDelete() {
     if (this.bio.value !== "") {
-      this.renderer.setStyle(this.bioClose.nativeElement, "display", "block");
+      this.renderer.setStyle(this.bioClose.nativeElement, "display", "flex");
     } else {
       this.renderer.setStyle(this.bioClose.nativeElement, "display", "none");
     }
