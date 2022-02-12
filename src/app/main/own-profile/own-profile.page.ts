@@ -477,7 +477,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     );
 
     this.displayBioDelete();
-    this.answers.toArray().forEach(ans => {
+    this.answers.toArray().forEach((ans) => {
       ans.resizeTextarea();
     });
   }

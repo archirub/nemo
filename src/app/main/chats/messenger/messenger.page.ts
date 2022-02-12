@@ -49,12 +49,19 @@ import { messengerMotivationMessages } from "@interfaces/index";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 import { Logger } from "src/app/shared/functions/custom-rxjs";
 import { MessagesService } from "./messages.service";
+import { MessagesResolver } from "./messages.resolver";
 
 @Component({
   selector: "app-messenger",
   templateUrl: "./messenger.page.html",
   styleUrls: ["./messenger.page.scss"],
-  providers: [MessagesService],
+  providers: [
+    {
+      provide: MessagesService,
+      useFactory: (messageResolver: MessagesResolver) => messageResolver.msgService,
+      deps: [MessagesResolver],
+    },
+  ],
 })
 export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
   // Constants
@@ -127,7 +134,6 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
    */
   private scrollHandler$ = this.messages$.pipe(
     filter((messages) => messages.length > 0),
-    Logger("scrollHandler$"),
     distinctUntilChanged((oldMessages, newMessages) =>
       isEqual(this.getMostRecent(oldMessages), this.getMostRecent(newMessages))
     ),
@@ -190,9 +196,9 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
   ) {}
 
   ngOnInit() {
+    this.pageInitialization();
     this.subs.add(this.scrollHandler$.subscribe()); //dev
     this.subs.add(this.otherProfileHandler$.subscribe());
-    this.pageInitialization();
   }
 
   ngAfterViewInit() {
@@ -203,37 +209,18 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
 
   // initializes the page
   async pageInitialization() {
-    const paramMap = await lastValueFrom(this.route.paramMap.pipe(first()));
+    await this.scrollToBottom(0);
 
-    if (!paramMap.has("chatID")) {
-      return this.navCtrl.navigateBack("/tabs/chats");
-    }
-
-    lastValueFrom(this.initializeMessenger(paramMap.get("chatID")));
-
-    await this.scrollToBottom();
+    this.refreshUserInput();
 
     setTimeout(() => this.pageIsReady.next(true), 500);
   }
 
-  /** Subscribes to chatStore's Chats observable using chatID
-   * from paramMap */
-  private initializeMessenger(chatid: string): Observable<any> {
-    return this.chatboardStore.chats$.pipe(
-      filter((chats) => !!chats?.[chatid]),
-      map((chats) => chats[chatid]),
-      switchMap((chat) =>
-        combineLatest([of(chat), this.currentUser.user$.pipe(filter((u) => !!u))])
-      ),
-      take(1),
-      map(([chat, user]) => {
-        // Fills the chat subject with the data from the chatboard store
-        this.msgService.initializeChat(chat);
-        this.userInput = chat.latestChatInput;
-        return [user.uid, chat.id];
-      }),
-      switchMapTo(this.msgService.listenToMoreMessages())
-    );
+  async refreshUserInput() {
+    const chat = await firstValueFrom(this.chat$);
+    if (!chat) return;
+
+    this.userInput = chat.latestChatInput;
   }
 
   // opens the modal to report a user
@@ -308,9 +295,9 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
     slidesRef.lockSwipes(true);
   }
 
-  async scrollToBottom() {
+  async scrollToBottom(scrollSpeed: number = this.SCROLL_SPEED) {
     return firstValueFrom(this.ionContentRef$).then((ref) =>
-      ref.scrollToBottom(this.SCROLL_SPEED)
+      ref.scrollToBottom(scrollSpeed)
     );
   }
 

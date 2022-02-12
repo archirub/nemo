@@ -1,5 +1,6 @@
 import { NgModule } from "@angular/core";
 import { Routes, RouterModule } from "@angular/router";
+import { MessagesResolver } from "./chats/messenger/messages.resolver";
 
 import { MainPage } from "./main.page";
 
@@ -22,6 +23,9 @@ const routes: Routes = [
     path: "messenger/:chatID", // this is specified outside tabs so that they aren't visible on the chats page
     loadChildren: () =>
       import("./chats/messenger/messenger.module").then((m) => m.MessengerPageModule),
+    resolve: {
+      messages: MessagesResolver,
+    },
   },
 
   // {
