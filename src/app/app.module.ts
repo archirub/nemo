@@ -1,5 +1,5 @@
 // import { GlobalErrorHandler } from "./shared/error-handling/global-error-handling";
-import { NgModule } from "@angular/core";
+import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from "@angular/core";
 import { BrowserModule } from "@angular/platform-browser";
 import { CommonModule } from "@angular/common";
 import { HttpClientModule } from "@angular/common/http";
@@ -21,8 +21,8 @@ import { environment } from "src/environments/environment";
 import { pageTransition } from "./shared/animations/page-transition.animation";
 import { PipesModule } from "@pipes/pipes.module";
 import { DirectivesModule } from "./shared/directives/directives.module";
-import { SortablejsModule } from "ngx-sortablejs";
 import { SwiperModule } from "swiper/angular";
+import { FormsModule } from "@angular/forms";
 
 @NgModule({
   declarations: [AppComponent],
@@ -39,7 +39,7 @@ import { SwiperModule } from "swiper/angular";
     AngularFireStorageModule,
     PipesModule,
     DirectivesModule,
-    SortablejsModule.forRoot({}),
+    FormsModule,
     SwiperModule,
   ],
   providers: [
@@ -53,5 +53,6 @@ import { SwiperModule } from "swiper/angular";
     // },
   ],
   bootstrap: [AppComponent],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class AppModule {}

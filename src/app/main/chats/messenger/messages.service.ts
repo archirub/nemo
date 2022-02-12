@@ -23,7 +23,7 @@ import { Timestamp } from "@interfaces/firebase.model";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 import { FormatService } from "@services/format/format.service";
 import { Injectable } from "@angular/core";
-import { FilterFalsy } from "src/app/shared/functions/custom-rxjs";
+import { FilterFalsy, Logger } from "src/app/shared/functions/custom-rxjs";
 
 @Injectable({ providedIn: "root" })
 export class MessagesService {
@@ -123,7 +123,9 @@ export class MessagesService {
       switchMap(([uid, chatid, currMsgCount]) =>
         snapshotChanges$(uid, chatid, currMsgCount + this.MSG_BATCH_SIZE).pipe(
           map((s) => s.map((v) => v.payload.doc)),
-          filter((docs) => docs.length >= currMsgCount && docs.length > 1), // because sometimes only 1 msg is obtained from snapshotChanges
+          Logger("before"),
+          filter((docs) => docs.length >= currMsgCount), // because sometimes only 1 msg is obtained from snapshotChanges
+          Logger("after"),
           take(1),
           tap((docs) => this.checkForAllLoaded(currMsgCount, docs.length)),
           map((docs) => this.messages.next(this.docsToMsgs(docs))),

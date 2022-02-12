@@ -76,8 +76,8 @@ export type PictureQueue = Array<{ uid: string; pictureIndex: number }>;
 export class SwipeStackStore extends AbstractStoreService {
   private readonly REGISTER_FREQUENCY = 4; // every how many swipe choices do we choose to register them on the database?
   private readonly MIN_PROFILE_COUNT = 4; // # of profiles in profiles$ below which we make another request
-  private readonly MIN_RENDERED_COUNT = 2; // min # of profiles in profilesToRender$
-  private readonly MAX_RENDERED_COUNT = 5; // max # of profiles in profilesToRender$
+  private readonly MIN_RENDERED_COUNT = 1; // min # of profiles in profilesToRender$
+  private readonly MAX_RENDERED_COUNT = 1; // max # of profiles in profilesToRender$
   picturePriority = [
     // format: [profileIndex (in profilesToRender$), pictureIndex (in pictureUrls)]
     [[0, 0]], // batch 1
