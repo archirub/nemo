@@ -4,14 +4,12 @@ import {
   OnInit,
   OnDestroy,
   Input,
-  Output,
   QueryList,
   HostListener,
   ViewChildren,
   ViewChild,
   ElementRef,
   Renderer2,
-  EventEmitter
 } from "@angular/core";
 
 import {
@@ -19,10 +17,8 @@ import {
   combineLatest,
   concat,
   defer,
-  EMPTY,
   firstValueFrom,
   forkJoin,
-  from,
   merge,
   Observable,
   of,
@@ -57,8 +53,13 @@ import {
   SwipeStackStore,
 } from "@stores/index";
 
-import { Profile, AppUser } from "@classes/index";
-import { swipeChoice } from "@interfaces/index";
+import { Profile } from "@classes/index";
+import {
+  Gender,
+  mdMainFromDatabase,
+  SexualPreference,
+  swipeChoice,
+} from "@interfaces/index";
 import {
   SwipeAnimation,
   YesBubbleAnimation,
@@ -78,7 +79,7 @@ import { AnalyticsService } from "@services/analytics/analytics.service";
 })
 export class SwipeCardComponent implements OnInit, OnDestroy {
   // DEV
-  // DEV_other_profile_info = new BehaviorSubject<Object>(null);
+  DEV_other_profile_info = new BehaviorSubject<Object>(null);
   // DEV_own_profile_info = new BehaviorSubject<Object>(null);
 
   screenHeight: number;
@@ -100,7 +101,7 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
   @Input() profiles$: Observable<Profile[]>;
   @Input() homeContainer: ElementRef;
   @Input() swipeCardsRef: ElementRef;
-  @Output() swipeEvent = new EventEmitter();
+  @Input() searchCriteriaButtonRef: ElementRef;
 
   // All of these are for showing SC or match animation. Assuming that always happens sufficiently late that these refs can't be undefined
   //@ViewChild("homeContainer", { read: ElementRef }) homeContainer: ElementRef;
@@ -252,6 +253,34 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
     //     )
     //   )
     //   .subscribe();
+
+    this.profiles$
+      .pipe(
+        filter((p) => p.length > 0),
+        map((p) => p[0].uid),
+        switchMap((uid) =>
+          this.getSexPrefAndGender(uid).pipe(
+            map(([sexPref, gender]) =>
+              this.DEV_other_profile_info.next({ uid, sexPref, gender })
+            )
+          )
+        )
+      )
+      .subscribe();
+  }
+
+  getSexPrefAndGender(uid: string): Observable<[SexualPreference, Gender]> {
+    return this.firestore
+      .collection("matchData")
+      .doc<mdMainFromDatabase>(uid)
+      .get()
+      .pipe(
+        take(1),
+        map((doc) => {
+          const data = doc.data();
+          return [data?.sexualPreference, data?.gender];
+        })
+      );
   }
 
   // DEV
@@ -409,13 +438,18 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
       this.likeText.nativeElement.innerHTML = `You liked ${profile.firstName}!`;
     };
 
-    this.fbAnalytics.logEvent("yes_swipe", { 
-      swiperUID: this.currentUser.uid,//UID of person swiping
+    this.fbAnalytics.logEvent("yes_swipe", {
+      swiperUID: this.currentUser.uid, //UID of person swiping
       likedUID: profile.uid,
-      timestamp: Date.now() //Time since epoch
+      timestamp: Date.now(), //Time since epoch
     });
 
-    const animateSwipe = SwipeAnimation(storeTasks$.bind(this), profile, this.likeEls, this.swipeEvent);
+    const animateSwipe = SwipeAnimation(
+      storeTasks$.bind(this),
+      profile,
+      this.likeEls,
+      this.searchCriteriaButtonRef
+    );
 
     return concat(
       of(changeText()),
@@ -437,13 +471,18 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
       this.dislikeText.nativeElement.innerHTML = `You passed on ${profile.firstName}.`;
     };
 
-    this.fbAnalytics.logEvent("no_swipe", { 
-      swiperUID: this.currentUser.uid,//UID of person swiping
+    this.fbAnalytics.logEvent("no_swipe", {
+      swiperUID: this.currentUser.uid, //UID of person swiping
       passedUID: profile.uid,
-      timestamp: Date.now() //Time since epoch
+      timestamp: Date.now(), //Time since epoch
     });
 
-    const animateSwipe = SwipeAnimation(storeTasks$.bind(this), profile, this.dislikeEls, this.swipeEvent);
+    const animateSwipe = SwipeAnimation(
+      storeTasks$.bind(this),
+      profile,
+      this.dislikeEls,
+      this.searchCriteriaButtonRef
+    );
 
     return concat(
       of(changeText()),
@@ -465,11 +504,11 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
         this.swipeOutcomeStore.registerSwipeChoices$
       );
 
-      this.fbAnalytics.logEvent("match", { 
-        matchingUID: this.currentUser.uid,//UID of person swiping
-        matchedUID: matchedProfile.uid,
-        timestamp: Date.now() //Time since epoch
-      });
+    this.fbAnalytics.logEvent("match", {
+      matchingUID: this.currentUser.uid, //UID of person swiping
+      matchedUID: matchedProfile.uid,
+      timestamp: Date.now(), //Time since epoch
+    });
 
     return concat(
       defer(() => this.playCatch(matchedProfile)),
@@ -518,29 +557,27 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
     this.renderer.setStyle(messageText, "display", "flex");
     //this.renderer.setStyle(messageText2, "display", "flex");
 
-    this.swipeEvent.emit('open');
-
     // catch animation
     return OpenCatchAnimation(
       this.screenHeight,
       this.screenWidth,
       this.catchText,
       this.backdrop,
-      this.swipeCardsRef
+      this.swipeCardsRef,
+      this.searchCriteriaButtonRef
     ).play();
   }
 
   async closeCatch() {
     const catchItems = document.getElementById("catchEls");
 
-    this.swipeEvent.emit('close');
-
     await CloseCatchAnimation(
       this.screenHeight,
       this.screenWidth,
       this.catchText,
       this.backdrop,
-      this.swipeCardsRef
+      this.swipeCardsRef,
+      this.searchCriteriaButtonRef
     ).play();
 
     this.renderer.setStyle(catchItems, "display", "none");
@@ -558,7 +595,7 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
   async openedProfileAnalytics(profileUID: string) {
     this.fbAnalytics.logEvent("profile_expanded", {
       profileOpened: profileUID, //UID of profile expanded
-      timestamp: Date.now() //Time since epoch
+      timestamp: Date.now(), //Time since epoch
     });
   }
 

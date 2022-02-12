@@ -2,13 +2,11 @@ import { Injectable, QueryList } from "@angular/core";
 import { AngularFirestore, DocumentSnapshot } from "@angular/fire/firestore";
 import { AngularFireFunctions } from "@angular/fire/functions";
 import { AngularFireStorage } from "@angular/fire/storage";
-import { IonSlides } from "@ionic/angular";
 
 import {
   BehaviorSubject,
   combineLatest,
   defer,
-  EMPTY,
   forkJoin,
   merge,
   Observable,
@@ -52,7 +50,6 @@ import { SwipeCapService } from "./swipe-cap.service";
 import { AbstractStoreService } from "@interfaces/stores.model";
 import { StoreResetter } from "@services/global-state-management/store-resetter.service";
 import { CurrentUserStore } from "..";
-import { Logger, SubscribeAndLog } from "../../functions/custom-rxjs";
 import Swiper from "swiper";
 import { SwiperComponent } from "swiper/angular";
 
@@ -514,7 +511,7 @@ export class SwipeStackStore extends AbstractStoreService {
           // done this way as the items in list.items might not be in order of picture #
           const index = list.items.map((i) => i.name).indexOf(pictureIndex.toString());
 
-          if (index === -1) return EMPTY;
+          if (index === -1) return of("");
 
           return defer(() => list.items[index].getDownloadURL()).pipe(
             this.errorHandler.convertErrors("firebase-storage"),

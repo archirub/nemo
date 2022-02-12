@@ -30,6 +30,7 @@ import {
 } from "@interfaces/index";
 import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
 import { wait } from "src/app/shared/functions/common";
+import { SignupLocalStorageService } from "@services/signup/signup-local-storage.service";
 
 @Component({
   selector: "app-signupoptional",

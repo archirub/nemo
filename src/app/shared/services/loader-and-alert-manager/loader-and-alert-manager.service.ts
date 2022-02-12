@@ -143,6 +143,11 @@ export class LoadingAndAlertManager {
   }
 
   private nextFromQueue() {
+    const queueEmpty$ = this.queued$.pipe(
+      take(1),
+      map((els) => els.length < 1)
+    );
+
     const nextFromQueue$ = this.queued$.pipe(
       take(1),
       filter((els) => els.length > 0),
@@ -155,9 +160,15 @@ export class LoadingAndAlertManager {
       })
     );
 
-    return concat(
-      defer(() => this.dismissDisplayed()),
-      nextFromQueue$
+    return queueEmpty$.pipe(
+      switchMap((queueEmpty) => {
+        if (queueEmpty) return of("");
+
+        return concat(
+          defer(() => this.dismissDisplayed()),
+          nextFromQueue$
+        );
+      })
     );
   }
 

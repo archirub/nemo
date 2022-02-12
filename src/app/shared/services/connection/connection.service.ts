@@ -1,14 +1,7 @@
 import { Injectable, Inject, PLATFORM_ID } from "@angular/core";
-import { Observable, fromEvent, merge, EMPTY } from "rxjs";
+import { Observable, fromEvent, merge, of } from "rxjs";
 import { isPlatformBrowser } from "@angular/common";
-import {
-  filter,
-  map,
-  mapTo,
-  startWith,
-  take,
-  withLatestFrom,
-} from "rxjs/operators";
+import { filter, map, mapTo, startWith, take, withLatestFrom } from "rxjs/operators";
 import { ToastController } from "@ionic/angular";
 
 @Injectable({
@@ -27,7 +20,7 @@ export class ConnectionService {
         startWith(window.navigator.onLine)
       );
     } else {
-      this.connectionMonitor = EMPTY;
+      this.connectionMonitor = of(null);
     }
   }
 

@@ -6,12 +6,17 @@ service cloud.firestore {
     }
 
     // DEV (for swipe stack info)
-    match /matchData/{profileID}/pickingData/dating {
-      allow read: if true;
-    }
+    // match /matchData/{profileID}/pickingData/dating {
+    //   allow read: if true;
+    // }
 
-    //  DEV (for swipe stack info)
-    match /piStorage/{id} {
+    // //  DEV (for swipe stack info)
+    // match /piStorage/{id} {
+    //   allow read: if true;
+    // }
+
+     //  DEV (for swipe stack info)
+    match /matchData/{profileID} {
       allow read: if true;
     }
 

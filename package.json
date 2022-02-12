@@ -1,8 +1,8 @@
 {
-  "name": "nemo",
+  "name": "Nemo Dating",
   "version": "0.0.1",
-  "author": "Ionic Framework",
-  "homepage": "https://ionicframework.com/",
+  "author": "Nemo Dating Limited",
+  "homepage": "https://www.nemodating.com/",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -41,11 +41,9 @@
     "lodash": "^4.17.21",
     "ng2-pdf-viewer": "^7.0.2",
     "ngx-image-cropper": "^5.0.0",
-    "ngx-sortablejs": "^11.1.0",
     "rxjs": "^7.0.0",
     "sortablejs": "^1.14.0",
     "swiper": "^8.0.3",
-    "tslib": "^2.0.0",
     "zone.js": "~0.11.4"
   },
   "devDependencies": {

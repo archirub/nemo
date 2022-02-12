@@ -1,10 +1,10 @@
-<ion-button
+<!-- <ion-button
   style="z-index: 100; position: absolute"
   debounceClick
   (debounceClick)="showTestModal()"
   debounceTime="5000"
   >Test swiper (dev)</ion-button
->
+> -->
 
 <home-tutorial-slides
   *ngIf="displayTutorial$ | async"
@@ -75,8 +75,8 @@
     <app-swipe-card
       [profiles$]="swipeProfiles$"
       [swipeCardsRef]="swipeCardsRef"
-      [homeContainer]="this.homeContainer"
-      (swipeEvent)="this.hideSCButton($event)"
+      [homeContainer]="homeContainer"
+      [searchCriteriaButtonRef]="searchCriteriaButtonRef"
     ></app-swipe-card>
   </div>
 </ion-content>

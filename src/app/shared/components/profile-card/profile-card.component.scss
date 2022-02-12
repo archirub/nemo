@@ -5,6 +5,11 @@
 //   justify-content: center;
 // }
 
+// fixes centering the slides' centering problem
+.swiper-container {
+  margin: 0 auto
+}
+
 
 
 ion-card-title {

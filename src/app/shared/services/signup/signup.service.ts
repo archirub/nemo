@@ -5,7 +5,6 @@ import { AngularFireFunctions } from "@angular/fire/functions";
 import { AngularFireAuth } from "@angular/fire/auth";
 import { UploadTaskSnapshot } from "@angular/fire/storage/interfaces";
 
-import { Storage } from "@capacitor/storage";
 import {
   BehaviorSubject,
   Observable,
@@ -30,6 +29,7 @@ import {
 } from "@interfaces/index";
 import { FirebaseUser, FireAuthUserCredential } from "./../../interfaces/firebase.model";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
+import { SignupLocalStorageService } from "./signup-local-storage.service";
 
 @Injectable({
   providedIn: "root",
@@ -74,6 +74,7 @@ export class SignupService {
 
     private currentUserStore: CurrentUserStore, // private signupOptionalPage: SignupOptionalPage, // private signupRequiredPage: SignupRequiredPage
 
+    private signupLocalStorer: SignupLocalStorageService,
     private errorHandler: GlobalErrorHandler
   ) {}
 
@@ -153,7 +154,9 @@ export class SignupService {
           if (!user) throw new CustomError("local/check-auth-state", "local");
         }),
         first(),
-        concatMapTo(concat(this.removeLocalStorage(), this.currentUserStore.activate$)),
+        concatMapTo(
+          concat(this.signupLocalStorer.removeStorage(), this.currentUserStore.activate$)
+        ),
         this.errorHandler.handleErrors()
       )
     );
@@ -171,7 +174,7 @@ export class SignupService {
     }
 
     // get the information stored on local storage to signupData observable (if there is any)
-    await this.getLocalStorage();
+    await this.signupLocalStorer.getStorage(this.signupData$);
 
     // get the stage of completion of the signup process of the user
     const stage = this.signupStage;
@@ -196,7 +199,7 @@ export class SignupService {
       observableData[key] = additionalData[key];
     }
 
-    await this.updateLocalStorage(observableData);
+    await this.signupLocalStorer.updateStorage(observableData);
 
     this.signupData$.next(observableData);
   }
@@ -226,41 +229,9 @@ export class SignupService {
     );
   }
 
-  /**
-   * Replaces data in local storage under key "signupData" by data object provided
-   * Only does so if the data holder isn't empty
-   */
-  async updateLocalStorage(data: SignupDataHolder) {
-    let empty = true;
-    Object.keys(data).forEach((key) => {
-      if (data[key]) {
-        empty = false;
-      }
-    });
-
-    if (!empty) return Storage.set({ key: "signupData", value: JSON.stringify(data) });
-  }
-
-  /**
-   * get the data in local storage under key "signupData" and stores it in the
-   * signupData observable
-   */
+  // used in signup required and signup optional
   async getLocalStorage() {
-    const storageContent = JSON.parse((await Storage.get({ key: "signupData" })).value);
-
-    // checks whether content is empty. If it is, then don't replace the current observable
-    if (storageContent && Object.keys(storageContent).length > 0) {
-      const data = new SignupDataHolder(storageContent);
-
-      this.signupData$.next(data);
-    }
-  }
-
-  /**
-   * Removes data in local storage under key "signupData"
-   */
-  async removeLocalStorage() {
-    return Storage.remove({ key: "signupData" });
+    return this.signupLocalStorer.getStorage(this.signupData$);
   }
 
   /**

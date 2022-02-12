@@ -11,7 +11,6 @@ import {
   takeUntil,
   interval,
   timer,
-  EMPTY,
 } from "rxjs";
 
 import { CloudFunctionsErrorHandler } from "./cloud-functions-error-handler.service";
@@ -54,6 +53,8 @@ export class GlobalErrorHandler implements CustomGlobalErrorHandler {
   }
 
   handleErrors<T>(opts?: GlobalErrorHandlerOptions) {
+    const dontHandleString = "some random string !! ha ha lol !";
+    type DontHandleString = typeof dontHandleString;
     let isFromError = false; // for the post error handling strategy
     return (source: Observable<T>) =>
       source.pipe(
@@ -62,7 +63,8 @@ export class GlobalErrorHandler implements CustomGlobalErrorHandler {
         catchError<T, Observable<T>>((err: CustomError) => {
           isFromError = true;
 
-          if (opts.strategy === "dontHandle") return EMPTY;
+          if (opts.strategy === "dontHandle")
+            return of(dontHandleString) as unknown as Observable<T>;
 
           console.error("Error through GlobalErrorHandler:", err);
           console.error("Error through GlobalErrorHandler:");
@@ -96,13 +98,13 @@ export class GlobalErrorHandler implements CustomGlobalErrorHandler {
         this.fStorageEH.handleErrors<T>(),
 
         switchMap((val) => {
-          // if (isFromError) {
-          //   console.log("error went through the last tap", opts);
-          //   if (opts.strategy === "endStream") return EMPTY.pipe(takeUntil(timer(1))); // complete false, just to make it shut up
-          //   if (opts.strategy === "fallback") return opts.fallback$; // complete false, just to make it shut up
-          //   if (opts.strategy === "propagateError" || opts.strategy === "dontHandle")
-          //     throw new Error("");
-          // }
+          if (isFromError) {
+            console.log("error went through the last tap", opts);
+            if (opts.strategy === "endStream") return of("").pipe(takeUntil(timer(1))); // complete false, just to make it shut up
+            if (opts.strategy === "fallback") return opts.fallback$; // complete false, just to make it shut up
+            if (opts.strategy === "propagateError" || opts.strategy === "dontHandle")
+              throw new Error("");
+          }
 
           return of(val);
         })

@@ -14,7 +14,6 @@ import {
   BehaviorSubject,
   concat,
   defer,
-  EMPTY,
   firstValueFrom,
   forkJoin,
   from,
@@ -48,7 +47,7 @@ import {
   sexualPreferenceOptions,
   changeShowProfileRequest,
   appPackages,
-  appVersion
+  appVersion,
 } from "@interfaces/index";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
@@ -138,9 +137,9 @@ export class SettingsPage implements AfterViewInit, OnDestroy, OnInit {
     return this.editingInProgress.next(false);
   }
 
-  async actOnEditing(action: "cancel" | "confirm") {
+  async actOnEditing(action: "cancel" | "save") {
     if (action === "cancel") return this.onCancelPreferenceModification();
-    if (action === "confirm") return this.onConfirmPreferenceModification();
+    if (action === "save") return this.onConfirmPreferenceModification();
   }
 
   private onCancelPreferenceModification() {
@@ -319,7 +318,7 @@ export class SettingsPage implements AfterViewInit, OnDestroy, OnInit {
       document.getElementById("placeholder"),
       document.getElementById("privacy"),
       document.getElementById("licenses"),
-      document.getElementById("terms")
+      document.getElementById("terms"),
     ];
     slidesToHide.forEach((s) => {
       this.renderer.setStyle(s, "display", "none");

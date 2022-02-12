@@ -13,7 +13,6 @@ import {
   Observable,
   catchError,
   finalize,
-  EMPTY,
   retryWhen,
   take,
   tap,
@@ -67,7 +66,7 @@ export class CommonErrorFunctions {
     });
   }
 
-  customCatchError<T>(errorCode: LocalErrorCode, task$: Observable<any> = EMPTY) {
+  customCatchError<T>(errorCode: LocalErrorCode, task$: Observable<any> = of("")) {
     return catchError<any, Observable<T>>((err: LocalErrorCode) => {
       if (err !== errorCode) throw err;
 

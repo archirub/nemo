@@ -100,7 +100,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild("catchText", { read: ElementRef }) catchText: ElementRef;
   @ViewChild("swipeCards", { read: ElementRef }) swipeCardsRef: ElementRef;
   @ViewChild("backdrop", { read: ElementRef }) backdrop: ElementRef;
-  @ViewChild("searchButton", { read: ElementRef }) searchButton: ElementRef;
+  @ViewChild("searchButton", { read: ElementRef }) searchCriteriaButtonRef: ElementRef;
 
   private fishRef$ = new ReplaySubject<ElementRef>(1);
   @ViewChild("fish", { read: ElementRef }) set fishRefSetter(ref: ElementRef) {
@@ -219,7 +219,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
   }
 
   async showSearchCriteria(): Promise<void> {
-    this.fbAnalytics.logEvent('sc_open', {});
+    this.fbAnalytics.logEvent("sc_open", {});
     const modal = await this.modalCtrl.create({
       component: SearchCriteriaComponent,
       enterAnimation: SCenterAnimation(),
@@ -228,70 +228,6 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
 
     return modal.present();
   }
-
-  // changeCatchMessage() {
-  //   this.chosenCatchMsg = matchMessages[Math.floor(Math.random() * matchMessages.length)];
-  // }
-
-  // async playCatch(matchedProfile: Profile) {
-  //   const catchItems = document.getElementById("catchEls");
-  //   const closeButton = document.getElementById("closeAnimation");
-  //   const messageText = document.getElementById("messageText");
-  //   const messageText2 = document.getElementById("messageText2");
-
-  //   this.latestMatchedProfile = matchedProfile;
-  //   this.changeCatchMessage();
-
-  //   // own picture styling
-  //   this.renderer.setStyle(
-  //     this.pic1.nativeElement,
-  //     "background",
-  //     `url(${this.mainProfilePicture})`
-  //   );
-  //   this.renderer.setStyle(this.pic1.nativeElement, "backgroundSize", "cover");
-
-  //   // match's picture styling
-  //   this.renderer.setStyle(
-  //     this.pic2.nativeElement,
-  //     "background",
-  //     `url(${matchedProfile.pictureUrls[0]})`
-  //   );
-  //   this.renderer.setStyle(this.pic2.nativeElement, "backgroundSize", "cover");
-
-  //   // other stylings
-  //   this.renderer.setStyle(catchItems, "display", "block");
-  //   this.renderer.setStyle(closeButton, "display", "block");
-  //   this.renderer.setStyle(messageText, "display", "flex");
-  //   this.renderer.setStyle(messageText2, "display", "flex");
-
-  //   // catch animation
-  //   return OpenCatchAnimation(
-  //     this.screenHeight,
-  //     this.screenWidth,
-  //     this.pic1,
-  //     this.pic2,
-  //     this.catchText,
-  //     this.backdrop,
-  //     this.swipeCards
-  //   ).play();
-  // }
-
-  // async closeCatch() {
-  //   const catchItems = document.getElementById("catchEls");
-
-  //   await CloseCatchAnimation(
-  //     this.screenHeight,
-  //     this.screenWidth,
-  //     this.pic1,
-  //     this.pic2,
-  //     this.catchText,
-  //     this.backdrop,
-  //     this.swipeCards
-  //   ).play();
-
-  //   this.renderer.setStyle(catchItems, "display", "none");
-  //   this.renderer.setStyle(this.pic2.nativeElement, "background", "black");
-  // }
 
   async goToNewCatchChat() {
     const maxTimeWaitingForChat = 6000; // 6 seconds
@@ -318,17 +254,6 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
         finalize(() => this.loadingAlertManager.dismissDisplayed())
       )
     );
-  }
-
-  hideSCButton(event) {
-    //These are the same as display flex/none, but allow for transition time so LEAVE THEM ALONE
-    if (event === 'open') {
-      this.renderer.setStyle(this.searchButton.nativeElement, "opacity", "0");
-      this.renderer.setStyle(this.searchButton.nativeElement, "pointerEvents", "none");
-    } else if (event === 'close') {
-      this.renderer.setStyle(this.searchButton.nativeElement, "opacity", "1");
-      this.renderer.setStyle(this.searchButton.nativeElement, "pointerEvents", "all");
-    }
   }
 
   async destroyCatch() {

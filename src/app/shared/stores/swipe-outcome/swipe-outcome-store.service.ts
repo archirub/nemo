@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { AngularFireFunctions } from "@angular/fire/functions";
 
-import { BehaviorSubject, concat, EMPTY, merge, Observable } from "rxjs";
+import { BehaviorSubject, merge, Observable, of } from "rxjs";
 
 import { Profile } from "@classes/index";
 import {
@@ -45,7 +45,7 @@ export class SwipeOutcomeStore extends AbstractStoreService {
   }
 
   protected systemsToActivate(): Observable<any> {
-    return EMPTY;
+    return of("");
   }
 
   protected async resetStore() {

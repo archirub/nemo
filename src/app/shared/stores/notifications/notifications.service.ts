@@ -8,15 +8,7 @@ import {
   PushNotificationSchema,
   Token,
 } from "@capacitor/push-notifications";
-import {
-  BehaviorSubject,
-  defer,
-  EMPTY,
-  firstValueFrom,
-  merge,
-  Observable,
-  of,
-} from "rxjs";
+import { BehaviorSubject, defer, firstValueFrom, merge, Observable, of } from "rxjs";
 import {
   distinctUntilChanged,
   filter,
@@ -69,7 +61,7 @@ export class NotificationsStore extends AbstractStoreService {
   protected systemsToActivate(): Observable<any> {
     const isPushNotificationsAvailable = Capacitor.isPluginAvailable("PushNotifications");
     if (!isPushNotificationsAvailable) {
-      return EMPTY;
+      return of("");
     }
 
     this.listenOnRegistration();
@@ -128,7 +120,6 @@ export class NotificationsStore extends AbstractStoreService {
     return this.token$.pipe(
       take(1),
       switchMap((token) => {
-        console.log("removing token from firebase:", token, this.uid);
         if (!token?.value || !this.uid) return of("");
         return this.updateToken(token.value, this.uid, "remove");
       })

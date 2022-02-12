@@ -5,17 +5,7 @@ import { NavigationEnd, NavigationStart, Router } from "@angular/router";
 import { AngularFirestore } from "@angular/fire/firestore";
 
 import { Storage } from "@capacitor/storage";
-import {
-  concat,
-  defer,
-  EMPTY,
-  forkJoin,
-  from,
-  merge,
-  Observable,
-  of,
-  Subject,
-} from "rxjs";
+import { concat, defer, forkJoin, from, merge, Observable, of, Subject } from "rxjs";
 import {
   concatMap,
   distinctUntilChanged,

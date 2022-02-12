@@ -54,22 +54,16 @@ export const generateSwipeStack = functions
       request: generateSwipeStackRequest,
       context
     ): Promise<generateSwipeStackResponse> => {
-      // DEV - uncomment
-      // runWeakUserIdentityCheck(context);
+      runWeakUserIdentityCheck(context);
 
-      // DEV - uncomment
-      // const uid = context?.auth?.uid as string;
+      const uid = context?.auth?.uid as string;
 
-      // DEV - remove
-      const uid = "15Ch7byvH0YEcXO6aYI62eruRAx1";
+      // const uid = "15Ch7byvH0YEcXO6aYI62eruRAx1";
 
       const sanitizedRequest = sanitizeData(
         "generateSwipeStack",
         request
       ) as generateSwipeStackRequest;
-
-      functions.logger.log("sanitizedRequest:", JSON.stringify(sanitizedRequest));
-      // return "" as any as generateSwipeStackResponse;
 
       // eslint-disable-next-line no-shadow
       const searchCriteria: searchCriteria = sanitizedRequest.searchCriteria;

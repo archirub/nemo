@@ -3,7 +3,15 @@ import { SafeUrl } from "@angular/platform-browser";
 import { AngularFireStorage } from "@angular/fire/storage";
 
 import { Storage } from "@capacitor/storage";
-import { BehaviorSubject, combineLatest, forkJoin, from, Observable, of } from "rxjs";
+import {
+  BehaviorSubject,
+  combineLatest,
+  firstValueFrom,
+  forkJoin,
+  from,
+  Observable,
+  of,
+} from "rxjs";
 import {
   concatMap,
   distinctUntilChanged,
@@ -83,8 +91,19 @@ export class ChatboardPicturesStore extends AbstractStoreService {
   }
 
   protected async resetStore() {
+    await this.deleteLocalStorage();
     this.isReady.next(false);
     this.holder.next({});
+  }
+
+  async deleteLocalStorage() {
+    const holder = await firstValueFrom(this.holder$);
+    const removePictures = Object.keys(holder).map((uid) =>
+      Storage.remove({ key: this.storageKey(uid) })
+    );
+    const removeUidsArray = Storage.remove({ key: this.uidsStorageKey });
+
+    return Promise.all(removePictures.concat(removeUidsArray));
   }
 
   public storeInLocal(

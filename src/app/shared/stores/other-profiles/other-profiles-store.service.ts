@@ -6,7 +6,6 @@ import {
   BehaviorSubject,
   forkJoin,
   Observable,
-  EMPTY,
   combineLatest,
   of,
   firstValueFrom,
@@ -61,7 +60,7 @@ export class OtherProfilesStore extends AbstractStoreService {
   }
 
   protected systemsToActivate() {
-    return EMPTY;
+    return of("");
   }
 
   async resetStore() {
@@ -128,22 +127,22 @@ export class OtherProfilesStore extends AbstractStoreService {
       exhaustMap((profile) => {
         if (!!profile) return this.addPictureCount(profile);
 
-        return EMPTY;
+        return of(null);
       }), // fetching the picture count for the profile
       exhaustMap((profile) => {
         if (!!profile) return this.saveProfile(profile);
 
-        return EMPTY;
+        return of(null);
       }), // save profile to store
       exhaustMap((profile) => {
         if (!!profile) return this.getPictureUrls(uid);
 
-        return EMPTY;
+        return of(null);
       }), // fetch pictures
       exhaustMap((pictures) => {
         if (!!pictures) return this.addProfilePictures(uid, pictures);
 
-        return EMPTY;
+        return of(null);
       }) // save pictures to store
     );
   }

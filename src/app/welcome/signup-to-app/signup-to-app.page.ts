@@ -44,7 +44,7 @@ export class SignupToAppPage {
 
     await this.loadingAlertManager.presentNew(loader, "replace-erase");
 
-    return this.dismissOnAppReady(this.loadingAlertManager.dismissDisplayed);
+    return this.dismissOnAppReady(() => this.loadingAlertManager.dismissDisplayed());
   }
 
   async dismissOnAppReady(dismissLoader: () => Promise<any>) {

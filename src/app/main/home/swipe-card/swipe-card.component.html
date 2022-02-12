@@ -4,14 +4,14 @@
     <ion-icon id="noBubble" #noBubble name="close-circle-outline"></ion-icon>
 
     <div #likeEls id="likeEls">
-      <img src="/assets/swipestack/likeicon.svg">
+      <img src="/assets/swipestack/likeicon.svg" />
       <div class="likeText">
         <h2 class="catchtext" #likeText>You liked USER!</h2>
       </div>
     </div>
 
     <div #dislikeEls id="dislikeEls">
-      <img src="/assets/swipestack/passicon.svg">
+      <img src="/assets/swipestack/passicon.svg" />
       <div class="likeText">
         <h2 class="catchtext" #dislikeText>You passed on USER.</h2>
       </div>
@@ -19,18 +19,20 @@
 
     <div #catchEls id="catchEls">
       <div #catchText class="textholder">
-        <h1 class="itsACatch">It's a<br/><span class="catch-word">Catch!</span></h1>
+        <h1 class="itsACatch">It's a<br /><span class="catch-word">Catch!</span></h1>
       </div>
       <div #catchText class="textholder-2">
         <h3 class="catchtext">{{ chosenCatchMsg }}</h3>
-        <h2 class="catchtext">You've caught <span>{{ latestMatchedProfile?.firstName }}</span></h2>
+        <h2 class="catchtext">
+          You've caught <span>{{ latestMatchedProfile?.firstName }}</span>
+        </h2>
       </div>
 
       <div #backdrop class="backdrop"></div>
 
-      <div id="closeAnimation" (click)="closeCatch()"
-        ><ion-icon name="close-outline"></ion-icon
-      ></div>
+      <div id="closeAnimation" (click)="closeCatch()">
+        <ion-icon name="close-outline"></ion-icon>
+      </div>
       <div #messageText id="messageText" (click)="goToNewCatchChat()">
         <h2 class="catchtext">Message them now!</h2>
       </div>
@@ -60,6 +62,13 @@
       <!-- <div class="devOwnProfileInfo" *ngIf="DEV_own_profile_info | async as ownInfo">
         {{ ownInfo | json }}
       </div> -->
+      <!-- <div
+        class="devOtherProfileInfo"
+        *ngIf="DEV_other_profile_info | async as otherInfo"
+      >
+        {{ otherInfo | json }}
+      </div> -->
+
       <app-profile-card
         #profileComponent
         (tapped)="cardTap$.next($event)"

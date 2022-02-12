@@ -20,7 +20,6 @@ import { IonSlides } from "@ionic/angular";
 import {
   BehaviorSubject,
   combineLatest,
-  EMPTY,
   firstValueFrom,
   ReplaySubject,
   Subscription,
@@ -35,7 +34,7 @@ import { Profile } from "@classes/index";
 import { LessInfoAnimation, MoreInfoAnimation } from "@animations/info.animation";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 
-import SwiperCore, { Pagination } from "swiper";
+import SwiperCore, { EffectCube, Pagination } from "swiper";
 import { SwiperComponent } from "swiper/angular";
 import { SwiperOptions } from "swiper";
 
@@ -44,10 +43,10 @@ import { SwiperOptions } from "swiper";
   templateUrl: "./profile-card.component.html",
   styleUrls: ["./profile-card.component.scss"],
 })
-export class ProfileCardComponent implements OnInit, AfterViewInit, OnDestroy {
-  swiperConfig: SwiperOptions = {
-    pagination: true,
-  };
+export class ProfileCardComponent
+  implements OnInit, AfterViewInit, OnDestroy, AfterContentChecked
+{
+  swiperConfig: SwiperOptions = {};
 
   counter = 0;
   expandAnimation: any;
@@ -91,10 +90,6 @@ export class ProfileCardComponent implements OnInit, AfterViewInit, OnDestroy {
   // necessary / work around for proper initialization of swiper
   async initPicSlides() {
     return firstValueFrom(this.picSlides$.pipe(map((ps) => ps.updateSwiper({}))));
-  }
-
-  onSwiper(swiper: SwiperComponent) {
-    console.log("swiper", swiper);
   }
 
   @ViewChild("content", { read: ElementRef }) content: ElementRef;
@@ -164,6 +159,9 @@ export class ProfileCardComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit() {
     this.buildInterestSlides(this.profile);
+  }
+
+  ngAfterContentChecked() {
     this.initPicSlides();
   }
 

@@ -5,25 +5,11 @@
       <ion-icon #bullets name="ellipse" *ngFor="let path of pictureCountArray"></ion-icon>
     </div>
 
-    <!-- <ion-slides
-      #picSlides
-      (ionSlideWillChange)="onSlideChange()"
-      *ngIf="profilePicturesWithDefault$ | async as profilePictures"
-    >
-      <ion-slide
-        #pic
-        *ngFor="let path of profilePicturesWithDefault$ | async; index as i"
-        [ngStyle]="{
-          'background-size': 'cover',
-          'background-position': 'center',
-          'background-image': 'url(' + path + ')'
-        }"
-      > -->
     <swiper
       #picSlides
       [config]="swiperConfig"
-      (swiper)="onSwiper($event)"
       (slideChange)="onSlideChange()"
+      class="swiper-container"
     >
       <ng-template
         swiperSlide
@@ -59,8 +45,7 @@
       </ng-template>
       <div swiperPagination></div>
     </swiper>
-    <!-- </ion-slide></ion-slides
-    > -->
+
     <!--div #QandA class="question" [hidden]="moreInfo">
       <ion-card-title #question>{{ profile?.questions[0].question }}</ion-card-title>
       <ion-card-subtitle #answer>{{ profile?.questions[0].answer }}</ion-card-subtitle>

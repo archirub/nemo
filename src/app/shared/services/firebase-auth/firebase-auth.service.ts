@@ -5,7 +5,7 @@ import { AngularFireFunctions } from "@angular/fire/functions";
 import { AngularFireAuth } from "@angular/fire/auth";
 
 import { Storage } from "@capacitor/storage";
-import { EMPTY, firstValueFrom } from "rxjs";
+import { firstValueFrom } from "rxjs";
 
 import { StoreResetter } from "@services/global-state-management/store-resetter.service";
 // import { LoadingOptions, LoadingService } from "@services/loading/loading.service";
@@ -69,14 +69,16 @@ export class FirebaseAuthService {
     const cancelUserConfirmationAlert = () => {};
     const confirmUserConfirmationAlert = async () => {
       const message = `Please provide a password to ${user.email}`;
-
+      console.log("a");
       const { outcome } = await this.reAuthenticationProcedure(
         user,
         message,
         async () => {}
       );
+      console.log("b");
 
-      if (outcome !== "user-reauthenticated") return;
+      if (outcome !== "user-reauthenticated")
+        return this.loadingAlertManager.dismissDisplayed();
 
       await this.loadingAlertManager.presentNew(accountDeletionLoading, "replace-erase");
 
@@ -254,14 +256,17 @@ export class FirebaseAuthService {
         },
       ],
     });
+    console.log("ici");
 
     await this.loadingAlertManager.presentNew(alert, "replace-erase");
+    console.log("la");
 
     // format used to make sure function waits for outcome to have a value
     // before returning, otherwise the functions of the OkProcedure don't have
     // time to complete and outcome is just undefined
     return new Promise((resolve) => {
       const interval = setInterval(() => {
+        console.log("outcome", outcome);
         if (outcome) {
           clearInterval(interval);
           resolve({ user, outcome });

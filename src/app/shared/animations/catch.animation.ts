@@ -1,6 +1,9 @@
 import { ElementRef } from "@angular/core";
 import { AnimationController } from "@ionic/angular";
-// import * as anime from "animejs"
+import {
+  SCButtonHideAnimation,
+  SCButtonUnhideAnimation,
+} from "./hide-search-criteria.animation";
 
 // export const LeftPicAnimation = (
 //   viewHeight: number,
@@ -105,7 +108,8 @@ export const OpenCatchAnimation = (
   //rightPicture: ElementRef,
   text: ElementRef,
   backdrop: ElementRef,
-  baseEl: any
+  baseEl: any,
+  searchCriteriaButtonRef: ElementRef<any>
 ) => {
   return new AnimationController()
     .create()
@@ -123,6 +127,7 @@ export const OpenCatchAnimation = (
       //RightPicAnimation(viewHeight, viewWidth, rightPicture),
       TextAnimation(text),
       BackAnimation(backdrop),
+      SCButtonHideAnimation(searchCriteriaButtonRef, "ease-out", 500),
     ]);
 };
 
@@ -133,7 +138,8 @@ export const CloseCatchAnimation = (
   //rightPicture: ElementRef,
   text: ElementRef,
   backdrop: ElementRef,
-  baseEl: any
+  baseEl: any,
+  searchCriteriaButtonRef: ElementRef<any>
 ) => {
   return new AnimationController()
     .create()
@@ -149,8 +155,8 @@ export const CloseCatchAnimation = (
     .addAnimation([
       //LeftPicAnimation(viewHeight, viewWidth, leftPicture),
       //RightPicAnimation(viewHeight, viewWidth, rightPicture),
-      TextAnimation(text),
-      BackAnimation(backdrop),
-    ])
-    .direction("reverse");
+      TextAnimation(text).direction("reverse"),
+      BackAnimation(backdrop).direction("reverse"),
+      SCButtonUnhideAnimation(searchCriteriaButtonRef, "ease-in", 500),
+    ]);
 };
