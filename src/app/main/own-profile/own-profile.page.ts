@@ -561,7 +561,8 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
       (isFilled(v1) && isFilled(v2)) || (isEmpty(v1) && isEmpty(v2));
 
     const invalidParts: ("society" | "questions" | "course" | "pictures")[] = [];
-    if (this.profilePictures.value.length < 1)
+
+    if (this.profilePictures.getValue()[0].length < 1) //first picture url is empty implying no pictures
       invalidParts.push("pictures");
     if (
       !bothNullOrFilled(this.editableFields.society, this.editableFields.societyCategory)

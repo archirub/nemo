@@ -145,7 +145,7 @@ ion-content {
   width: 100%;
   align-items: center;
   flex-direction: column;
-  z-index: 100;
+  z-index: 101;
   position: absolute;
   bottom: 18vh;
 }
@@ -179,6 +179,15 @@ h3.catchtext {
   background-size: cover;
   background-position: center;
   border-radius: 25px;
+}
+
+.gradient {
+  z-index: 100;
+  position: absolute;
+  width: 92vw;
+  height: 85.5vh;
+  border-radius: 20px;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.6))
 }
 
 #closeAnimation {
