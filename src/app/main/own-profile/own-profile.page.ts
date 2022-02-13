@@ -484,18 +484,21 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
 
   // checks whether any of the parts of the editable fields are invalid.
   // if it is the case, then display a message showing which they are
-  async presentInvalidPartsMessage(invalidParts: ("society" | "questions" | "course")[]) {
+  async presentInvalidPartsMessage(invalidParts: ("society" | "questions" | "course" | "pictures")[]) {
     const societyMessage =
       "Your society and its category must be either both filled or empty.";
     const courseMessage =
       "Your course and its category must be either both filled or empty.";
     const questionsMessage =
       "Make sure all of your questions contain both a selection and an answer.";
+    const picturesMessage =
+      "You must have at least on profile picture.";
 
     const message = `
     ${invalidParts.includes("society") ? societyMessage : ""}
     ${invalidParts.includes("course") ? courseMessage : ""}
     ${invalidParts.includes("questions") ? questionsMessage : ""}
+    ${invalidParts.includes("pictures") ? picturesMessage : ""}
     `;
 
     const header = `
@@ -550,14 +553,16 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
   }
 
   // gets the invalid parts of the editable fields
-  getInvalidParts(): ("society" | "questions" | "course")[] {
+  getInvalidParts(): ("society" | "questions" | "course" | "pictures")[] {
     const isFilled = (v) => typeof v === "string" && v.length > 0;
     const isEmpty = (v) => !v;
 
     const bothNullOrFilled = (v1, v2) =>
       (isFilled(v1) && isFilled(v2)) || (isEmpty(v1) && isEmpty(v2));
 
-    const invalidParts: ("society" | "questions" | "course")[] = [];
+    const invalidParts: ("society" | "questions" | "course" | "pictures")[] = [];
+    if (this.profilePictures.value.length < 1)
+      invalidParts.push("pictures");
     if (
       !bothNullOrFilled(this.editableFields.society, this.editableFields.societyCategory)
     )

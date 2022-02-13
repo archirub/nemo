@@ -50,6 +50,7 @@ import { GlobalErrorHandler } from "@services/errors/global-error-handler.servic
 import { Logger } from "src/app/shared/functions/custom-rxjs";
 import { MessagesService } from "./messages.service";
 import { MessagesResolver } from "./messages.resolver";
+import { AnalyticsService } from "@services/analytics/analytics.service";
 
 @Component({
   selector: "app-messenger",
@@ -75,6 +76,8 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
   messages$ = this.msgService.messages$;
   chat$ = this.msgService.chat$;
   sendingMessage$ = this.msgService.sendingMessage$;
+
+  user;
 
   private ionContentRef$ = new ReplaySubject<IonContent>(1);
   @ViewChild(IonContent) set ionContentRefSetter(ref: IonContent) {
@@ -192,13 +195,16 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
     private msgService: MessagesService,
 
     private errorHandler: GlobalErrorHandler,
-    private userReporting: UserReportingService
+    private userReporting: UserReportingService,
+    private fbAnalytics: AnalyticsService
   ) {}
 
   ngOnInit() {
     this.pageInitialization();
     this.subs.add(this.scrollHandler$.subscribe()); //dev
     this.subs.add(this.otherProfileHandler$.subscribe());
+
+    this.user = this.errorHandler.getCurrentUser();
   }
 
   ngAfterViewInit() {
