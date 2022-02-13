@@ -236,15 +236,15 @@
             <div class="terms">
               <div class="terms-singular">
                 <ion-checkbox #tcbox mode="ios" name="terms"></ion-checkbox>
-                <h2
-                (click)="this.presentTermsModal()"
-                >I have read and understood the terms and conditions</h2>
+                <h2 (click)="this.presentTermsModal()">
+                  I have read and understood the terms and conditions
+                </h2>
               </div>
               <div class="terms-singular">
                 <ion-checkbox #ppbox mode="ios" name="privacy"></ion-checkbox>
-                <h2
-                (click)="this.presentPrivacyModal()"
-                >I consent to the data and privacy policies of this app</h2>
+                <h2 (click)="this.presentPrivacyModal()">
+                  I consent to the data and privacy policies of this app
+                </h2>
               </div>
             </div>
 
@@ -260,7 +260,10 @@
                 <ion-icon name="chevron-back-outline"></ion-icon>
               </ion-button>
 
-              <ion-button class="next-slide scroll" (click)="validateAndSlide(['university','degree','policies'])">
+              <ion-button
+                class="next-slide scroll"
+                (click)="validateAndSlide(['university','degree','policies'])"
+              >
                 <!-- (click)="validateAndSlide(['university','degree','policies'])" -->
                 <ion-icon name="chevron-forward-outline"></ion-icon>
               </ion-button>
@@ -270,7 +273,15 @@
       </ion-slide>
 
       <ion-slide class="inter-slide">
-        <video autoplay="true" muted="muted" loop="true" id="interBackVideo">
+        <video
+          autoplay="true"
+          muted="muted"
+          loop="true"
+          id="interBackVideo"
+          playsinline
+          autoplay
+          webkit-playsinline
+        >
           <source src="/assets/welcome-background.mp4" type="video/mp4" />
         </video>
         <div class="skip-to" (click)="skipToApp()">
@@ -283,7 +294,9 @@
 
           <h1 class="inter-text center">or</h1>
 
-          <h1 class="inter-text">Enter some basic info so you can catch plenty more fish...</h1>
+          <h1 class="inter-text">
+            Enter some basic info so you can catch plenty more fish...
+          </h1>
         </div>
 
         <!--img class="corner-fish" src="/assets/singlefish-orange.png"/-->

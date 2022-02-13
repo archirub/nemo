@@ -1,14 +1,14 @@
 import { AngularFirestore, QueryDocumentSnapshot } from "@angular/fire/firestore";
 
 import { isEqual } from "lodash";
-import { BehaviorSubject, combineLatest, defer, Observable } from "rxjs";
+import { BehaviorSubject, combineLatest, defer, Observable, timer } from "rxjs";
 import {
   delay,
   distinctUntilChanged,
-  filter,
   finalize,
   map,
   mapTo,
+  scan,
   shareReplay,
   switchMap,
   take,
@@ -23,7 +23,7 @@ import { Timestamp } from "@interfaces/firebase.model";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 import { FormatService } from "@services/format/format.service";
 import { Injectable } from "@angular/core";
-import { FilterFalsy, Logger } from "src/app/shared/functions/custom-rxjs";
+import { FilterFalsy } from "src/app/shared/functions/custom-rxjs";
 
 @Injectable({ providedIn: "root" })
 export class MessagesService {
@@ -119,13 +119,37 @@ export class MessagesService {
         )
         .snapshotChanges();
 
+    // this operator takes care of the fact that the snapshot changes is buggy and sometimes
+    // first emits just one document instead of what the query asks for in the first place.
+    // However, sometimes, it is normal that it sends just one document because it is because
+    // there is actually just one message in the chat. Hence this operator basically counts
+    // the emissions, and at the same time starts a timer, and it does a race between whether
+    //
+    // note that it is faulty and actually wouldn't work exactly if we required to wait
+    // for more than two emissions (because the timer would restart on each new emission)
+    const weirdTimerOperator =
+      (thresholdCount: number, maxWait: number) =>
+      <T>(source: Observable<T>) =>
+        source.pipe(
+          // to count emissions while retaining an instance of the latest value
+          scan<T, { count: number; latestValue: T }>(
+            (acc, value) => ({ count: acc.count + 1, latestValue: value }),
+            {
+              count: 0,
+              latestValue: undefined,
+            }
+          ),
+          // starts a timer
+          switchMap((map) =>
+            timer(map.count >= thresholdCount ? 0 : maxWait).pipe(mapTo(map.latestValue))
+          )
+        );
+
     return combineLatest([uid$, chatid$, currentMsgCount$]).pipe(
       switchMap(([uid, chatid, currMsgCount]) =>
         snapshotChanges$(uid, chatid, currMsgCount + this.MSG_BATCH_SIZE).pipe(
           map((s) => s.map((v) => v.payload.doc)),
-          Logger("before"),
-          filter((docs) => docs.length >= currMsgCount), // because sometimes only 1 msg is obtained from snapshotChanges
-          Logger("after"),
+          weirdTimerOperator(2, 500),
           take(1),
           tap((docs) => this.checkForAllLoaded(currMsgCount, docs.length)),
           map((docs) => this.messages.next(this.docsToMsgs(docs))),
