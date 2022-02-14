@@ -545,7 +545,6 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
     const catchItems = document.getElementById("catchEls");
     const closeButton = document.getElementById("closeAnimation");
     const messageText = document.getElementById("messageText");
-    //const messageText2 = document.getElementById("messageText2");
 
     this.latestMatchedProfile = matchedProfile;
     this.changeCatchMessage();
@@ -563,7 +562,6 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
     this.renderer.setStyle(catchItems, "display", "block");
     this.renderer.setStyle(closeButton, "display", "flex");
     this.renderer.setStyle(messageText, "display", "flex");
-    //this.renderer.setStyle(messageText2, "display", "flex");
 
     // catch animation
     return OpenCatchAnimation(

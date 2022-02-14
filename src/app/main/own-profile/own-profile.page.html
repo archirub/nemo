@@ -93,19 +93,21 @@
           ></add-photo> -->
           <!-- </div> -->
           <h2>My bio</h2>
-          <div class="noBio">
-            <span>Click the button below to add a bio!</span>
-          </div>
+          <ng-container *ngIf="(bioToAdd | async)">
+            <div class="noBio">
+              <span>Click the button below to add a bio!</span>
+            </div>
+  
+            <div class="flexcenter">
+              <ion-icon
+                id="addElement"
+                name="add-outline"
+                (click)="addBio()"
+              ></ion-icon>
+            </div>
+          </ng-container>
 
-          <div *ngIf="!reachedMaxQuestionsCount" class="flexcenter">
-            <ion-icon
-              id="addBio"
-              name="add-outline"
-              (click)="addBio()"
-            ></ion-icon>
-          </div>
-
-          <div>
+          <div *ngIf="!(bioToAdd | async)">
             <div #bioClose class="close-button" (click)="clearBio()">
               <ion-icon name="close-outline"></ion-icon>
             </div>
@@ -117,7 +119,7 @@
                 (ngModelChange)="editingTriggered()"
                 autoGrow="true"
                 maxlength="150"
-                (ionInput)="displayBioDelete()"
+                (input)="displayBioDelete()"
               ></textarea>
             </div>
           </div>
@@ -138,7 +140,7 @@
 
           <div *ngIf="!reachedMaxQuestionsCount" class="flexcenter">
             <ion-icon
-              id="addQuestion"
+              id="addElement"
               name="add-outline"
               (click)="addQuestion()"
             ></ion-icon>

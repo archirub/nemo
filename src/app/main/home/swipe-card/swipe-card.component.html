@@ -93,6 +93,7 @@
 
     <div id="centeredNonStack" *ngIf="(currentStackState$ | async) === 'loading'">
       <img src="/assets/nemo_load.svg" alt="nemo-loading"/>
+      <h1>Checking for profiles</h1>
     </div>
 
     <div id="centeredNonStack" *ngIf="(currentStackState$ | async) === 'cap-reached'">
@@ -100,7 +101,8 @@
     </div>
 
     <div id="centeredNonStack" *ngIf="(currentStackState$ | async) === 'empty'">
-      <h1>Sorry, looks like your swipe stack is empty. Possibly try widening your <span>nemo</span>search, or come back later!</h1>
+      <h1>Sorry, looks like your swipe stack is empty.</h1>
+      <h1>Possibly try widening your <span>nemo</span>search, or come back later!</h1>
     </div>
   </div>
 </ion-content>

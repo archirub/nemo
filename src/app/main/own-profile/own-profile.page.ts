@@ -109,6 +109,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     if (ref) this.profilePicturesRef$.next(ref);
   }
 
+  private bioToAdd = new BehaviorSubject<boolean>(true);
   private editingInProgress = new BehaviorSubject<boolean>(false);
 
   private viewIsReady$ = new BehaviorSubject<boolean>(false);
@@ -130,7 +131,12 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     ); // # of elements is exactly MAX_PROFILE_PICTURES_COUNT
 
   fillUserFromStoreHandler$ = this.userFromStore$.pipe(
-    map((user) => this.updateEditableFields(user))
+    map((user) => {
+      if (user?.biography?.length > 0) {
+        this.bioToAdd.next(false);
+      };
+      this.updateEditableFields(user);
+    })
   );
 
   fillPicturesFromStoreHandler$ = this.ownPicturesService.urls$.pipe(
@@ -410,17 +416,37 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
 
   // to show or not the close button of the biography
   displayBioDelete() {
-    if (this.bio.value !== "") {
-      this.renderer.setStyle(this.bioClose.nativeElement, "display", "flex");
-    } else {
-      this.renderer.setStyle(this.bioClose.nativeElement, "display", "none");
-    }
+    if (this.bioClose) {
+      if (this.bioState != "") {
+        this.renderer.setStyle(this.bioClose.nativeElement, "display", "flex");
+        this.bioToAdd.next(false);
+      } else {
+        this.renderer.setStyle(this.bioClose.nativeElement, "display", "none");
+      }
+    };
   }
 
   // to clear the input of the biography
   clearBio() {
-    this.bio.value = "";
+    this.bioState = "";
     this.renderer.setStyle(this.bioClose.nativeElement, "display", "none");
+    this.bioToAdd.next(true);
+    
+    this.editingTriggered();
+  }
+
+  addBio() {
+    this.bioToAdd.next(false);
+    this.editingTriggered();
+  }
+
+
+  get bioState(): string {
+    return this.editableFields.biography;
+  }
+
+  set bioState(bio: string) {
+    this.editableFields.biography = bio;
   }
 
   // to make appearance changes when the option of the toggle is changed between edit and view
@@ -471,15 +497,17 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
         map(([user, urls]) => {
           this.updateEditableFields(user);
           this.updateProfilePictures(urls);
+          if (user.biography.length > 0) {
+            this.bioToAdd.next(false);
+          } else {
+            this.bioToAdd.next(true);
+          };
         }),
         map(() => this.editingInProgress.next(false))
       )
     );
 
     this.displayBioDelete();
-    this.answers.toArray().forEach((ans) => {
-      ans.resizeTextarea();
-    });
   }
 
   // checks whether any of the parts of the editable fields are invalid.
@@ -542,6 +570,12 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
         switchMap(() => this.loadingAlertManager.dismissDisplayed())
       )
     );
+
+    if (this.bioState.length < 1) {
+      this.bioToAdd.next(true);
+    } else {
+      this.bioToAdd.next(false);
+    };
 
     this.fbAnalytics.logEvent("profile_edit", {
       UID: this.currentUser.uid, //user uid

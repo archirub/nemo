@@ -51,7 +51,7 @@ p.unchangeable {
     flex-direction: column;
 }
 
-.noQuestions {
+.noQuestions, .noBio {
     margin: 2vh 0 4vh 0;
     text-align: center;
     font-size: 2vh;
@@ -64,7 +64,7 @@ p.unchangeable {
     width: 100%;
 }
 
-#addQuestion {
+#addElement {
     margin-top: -2vh;
     font-size: 3vh;
     padding: 5px;
