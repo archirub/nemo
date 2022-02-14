@@ -543,12 +543,17 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
   private onMatch(matchedProfile: Profile) {
     const postAnimTasks$ = (p) =>
       concat(
+        // this.swipeOutcomeStore.registerSwipeChoices$,
         this.swipeStackStore.removeProfile(p),
-        this.swipeOutcomeStore.yesSwipe(p),
         this.otherProfilesStore.saveProfile(p),
-        this.swipeOutcomeStore.registerSwipeChoices$,
+        defer(async () => console.log("Yo did all that and that")),
         this.logSwipeAction("match", matchedProfile)
       );
+
+    // done independently since the animation doesn't need ot occur for it to be presented
+    firstValueFrom(this.swipeOutcomeStore.yesSwipe(matchedProfile)).then(() =>
+      this.swipeOutcomeStore.registerSwipeChoices()
+    );
 
     return concat(
       defer(() => this.playCatch(matchedProfile)),
@@ -627,26 +632,25 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
     const user = await this.errorHandler.getCurrentUser();
     if (!user) return;
 
-    const loader = await this.loadingAlertManager.createLoading({});
-    await this.loadingAlertManager.presentNew(loader, "replace-erase");
-
-    console.log("this.latestMatchedProfile", this.latestMatchedProfile);
+    // const loader = await this.loadingAlertManager.createLoading({});
+    // await this.loadingAlertManager.presentNew(loader, "replace-erase");
 
     return firstValueFrom(
       this.chatboardStore.userHasChatWith(this.latestMatchedProfile.uid, false).pipe(
+        Logger("chat before"),
         filter((chat) => chat !== false),
         take(1),
+        Logger("chat came tjhrough"),
         timeout(maxTimeWaitingForChat),
         switchMap((chat: Chat) =>
           defer(() =>
-            this.loadingAlertManager
-              .dismissDisplayed()
-              .then(() => wait(200)) // these wait are for looks but they also seem to make it work better
-              .then(() => this.navCtrl.navigateForward(["main/messenger/" + chat.id]))
+            this.navCtrl
+              .navigateForward(["main/messenger/" + chat.id])
               .then(() => wait(300))
               .then(() => this.closeCatch())
           )
-        )
+        ),
+        catchTimeout(of(""))
       )
     );
   }

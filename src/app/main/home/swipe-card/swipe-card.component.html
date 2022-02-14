@@ -36,7 +36,13 @@
       <div id="closeAnimation" (click)="closeCatch()">
         <ion-icon name="close-outline"></ion-icon>
       </div>
-      <div #messageText id="messageText" (click)="goToNewCatchChat()">
+      <div
+        #messageText
+        id="messageText"
+        (debounceClick)="goToNewCatchChat()"
+        debounceClick
+        debounceTime="5000"
+      >
         <h2 class="catchtext">Message</h2>
       </div>
     </div>

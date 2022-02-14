@@ -115,11 +115,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
 
   showLoading$ = new BehaviorSubject<boolean>(true);
   viewIsReady$ = new BehaviorSubject<boolean>(false);
-  currentStackState$ = this.swipeStackStore.stackState$.pipe(
-    map((ss) => {
-      return ss;
-    })
-  );
+  currentStackState$ = this.swipeStackStore.stackState$;
 
   pageIsReady$ = combineLatest([this.viewIsReady$, this.storeReadiness.home$]).pipe(
     map(([a, b]) => a && b),

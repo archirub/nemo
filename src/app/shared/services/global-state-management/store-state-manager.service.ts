@@ -86,8 +86,8 @@ export class StoreStateManager {
   /**
    * actions to do when the app becomes inactive
    */
-  public onInactiveAppState() {
-    this.swipeOutcomeStore.registerSwipeChoices$.subscribe();
+  public async onInactiveAppState() {
+    return this.swipeOutcomeStore.registerSwipeChoices();
   }
 
   public activateDefault() {

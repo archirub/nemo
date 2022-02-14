@@ -1,4 +1,4 @@
-import { NavController, IonContent, IonSlides, IonSearchbar } from "@ionic/angular";
+import { NavController, IonSlides, IonSearchbar } from "@ionic/angular";
 import {
   Component,
   AfterViewInit,
@@ -52,24 +52,15 @@ import { MessagesService } from "./messages.service";
 import { MessagesResolver } from "./messages.resolver";
 import { AnalyticsService } from "@services/analytics/analytics.service";
 import { wait } from "src/app/shared/functions/common";
+import { MsgScrollingHandlerService } from "./msg-scrolling-handler.service";
 
 @Component({
   selector: "app-messenger",
   templateUrl: "./messenger.page.html",
   styleUrls: ["./messenger.page.scss"],
-  providers: [
-    {
-      provide: MessagesService,
-      // useFactory: (messageResolver: MessagesResolver) => messageResolver.msgService,
-      useClass: MessagesService,
-      // deps: [MessagesResolver],
-    },
-  ],
+  providers: [MessagesService, MsgScrollingHandlerService],
 })
 export class MessengerPage implements OnInit, AfterViewInit, OnDestroy, AfterContentInit {
-  // Constants
-  private SCROLL_SPEED: number = 100;
-
   private subs = new Subscription();
 
   userInput: string; // Storing latest chat input functionality
@@ -78,13 +69,6 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy, AfterCon
   messages$ = this.msgService.messages$;
   chat$ = this.msgService.chat$;
   sendingMessage$ = this.msgService.sendingMessage$;
-
-  user;
-
-  private ionContentRef$ = new ReplaySubject<IonContent>(1);
-  @ViewChild(IonContent) set ionContentRefSetter(ref: IonContent) {
-    if (ref) this.ionContentRef$.next(ref);
-  }
 
   private slidesRef$ = new ReplaySubject<IonSlides>(1);
   @ViewChild("slides") set slidesRefSetter(ref: IonSlides) {
@@ -107,11 +91,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy, AfterCon
   }
 
   private pageIsReady = new BehaviorSubject<boolean>(false);
-  // private hasFullyScrolledUp = new Subject<"">();
-
   pageIsReady$ = this.pageIsReady.asObservable().pipe(distinctUntilChanged());
-
-  // private hasFullyScrolledUp$ = this.hasFullyScrolledUp.asObservable();
 
   // observable for the other person's profile picture in the bubble
   bubblePicture$ = this.chatboardPictures.holder$.pipe(
@@ -133,17 +113,6 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy, AfterCon
 
   recipientProfileUrls$ = this.recipientProfile$.pipe(
     map((profile) => profile?.pictureUrls ?? [])
-  );
-
-  /** Handles scrolling to bottom of messenger when there a new message is sent (on either side).
-   */
-  private scrollHandler$ = this.messages$.pipe(
-    filter((messages) => messages.length > 0),
-    distinctUntilChanged((oldMessages, newMessages) =>
-      isEqual(this.getMostRecent(oldMessages), this.getMostRecent(newMessages))
-    ),
-    delay(300),
-    exhaustMap(() => this.scrollToBottom())
   );
 
   // handles storing the profile of the other user in the chat after it has been loaded
@@ -177,7 +146,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy, AfterCon
 
     await firstValueFrom(waitOnMessageSent$);
 
-    return this.scrollToBottom();
+    return this.msgScrollingHandler.scrollToBottom();
   }
 
   get randomMotivationMessage() {
@@ -187,25 +156,20 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy, AfterCon
   }
 
   constructor(
-    private route: ActivatedRoute,
     private navCtrl: NavController,
 
-    private chatboardStore: ChatboardStore,
     private profilesStore: OtherProfilesStore,
     private chatboardPictures: ChatboardPicturesStore,
-    private currentUser: CurrentUserStore,
+    private chatboardStore: ChatboardStore,
     private msgService: MessagesService,
+    private msgScrollingHandler: MsgScrollingHandlerService,
 
     private errorHandler: GlobalErrorHandler,
-    private userReporting: UserReportingService,
-    private fbAnalytics: AnalyticsService
+    private userReporting: UserReportingService
   ) {}
 
   ngOnInit() {
-    this.subs.add(this.scrollHandler$.subscribe()); //dev
     this.subs.add(this.otherProfileHandler$.subscribe());
-
-    this.user = this.errorHandler.getCurrentUser();
   }
 
   ngAfterContentInit() {
@@ -216,16 +180,13 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy, AfterCon
   ngAfterViewInit() {
     console.log("ngAfterViewInit");
 
-    // this.subs.add(this.moreMessagesLoadingHandler$.subscribe());
     this.styleMessageBar();
     firstValueFrom(this.slidesRef$).then((ref) => ref.lockSwipes(true));
   }
 
   // initializes the page
   async pageInitialization() {
-    // await wait(1000);
     console.log("NOW");
-    await this.scrollToBottom(0);
 
     this.refreshUserInput();
 
@@ -234,6 +195,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy, AfterCon
 
   async refreshUserInput() {
     const chat = await firstValueFrom(this.chat$);
+    console.log("chat", chat);
     if (!chat) return;
 
     this.userInput = chat.latestChatInput;
@@ -287,13 +249,6 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy, AfterCon
     });
   }
 
-  // returns the most recent message of an array of messages
-  getMostRecent(messages: Message[]): Message {
-    return messages.reduce((msg1, msg2) =>
-      msg1.time.getTime() > msg2.time.getTime() ? msg1 : msg2
-    );
-  }
-
   // used to slide between the other user's profile and the messages panels
   async slideTo(page) {
     const slidesRef = await firstValueFrom(this.slidesRef$);
@@ -311,20 +266,18 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy, AfterCon
     slidesRef.lockSwipes(true);
   }
 
-  async scrollToBottom(scrollSpeed: number = this.SCROLL_SPEED) {
-    return firstValueFrom(this.ionContentRef$).then((ref) =>
-      ref.scrollToBottom(scrollSpeed)
-    );
+  async saveChatInput() {
+    if (!this.userInput) return;
+    const chatid = (await firstValueFrom(this.chat$)).id;
+    if (!chatid) return;
+
+    return firstValueFrom(this.chatboardStore.saveChatInput(chatid, this.userInput));
   }
 
-  async instantScroll(scrollTop: number) {
-    return firstValueFrom(this.ionContentRef$).then((ref) =>
-      ref.scrollToPoint(0, scrollTop, 0)
-    );
-  }
+  async backToChatboard() {
+    this.saveChatInput(); // not awaited on purpose
 
-  backToChatboard(): void {
-    this.navCtrl.navigateBack("/main/tabs/chats");
+    return this.navCtrl.navigateBack("/main/tabs/chats");
   }
 
   ngOnDestroy() {

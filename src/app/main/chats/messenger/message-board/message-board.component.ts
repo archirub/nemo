@@ -1,5 +1,7 @@
+import { isEqual } from "lodash";
+import { delay, distinctUntilChanged } from "rxjs/operators";
 import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from "@angular/core";
-import { IonInfiniteScroll } from "@ionic/angular";
+import { IonContent, IonInfiniteScroll, AnimationController } from "@ionic/angular";
 
 import {
   combineLatest,
@@ -23,19 +25,13 @@ import { Message } from "@classes/index";
 import { SubscribeAndLog } from "src/app/shared/functions/custom-rxjs";
 import { wait } from "src/app/shared/functions/common";
 import { MessagesResolver } from "../messages.resolver";
+import { MsgScrollingHandlerService } from "../msg-scrolling-handler.service";
 
 @Component({
   selector: "app-message-board",
   templateUrl: "./message-board.component.html",
   styleUrls: ["./message-board.component.scss"],
-  providers: [
-    // {
-    //   provide: MessagesService,
-    //   // useClass: MessagesService,
-    //   useFactory: (messageResolver: MessagesResolver) => messageResolver.msgService,
-    //   deps: [MessagesResolver],
-    // },
-  ],
+  providers: [],
 })
 export class MessageBoardComponent implements OnInit, OnDestroy {
   messages$ = this.msgService.messages$;
@@ -58,8 +54,8 @@ export class MessageBoardComponent implements OnInit, OnDestroy {
     if (ref) this.allLoadedPromptRef$.next(ref);
   }
 
-  constructor(private msgService: MessagesService) {
-    SubscribeAndLog(this.messages$, "messages$ arrived in msg board");
+  @ViewChild(IonContent) set ionContentRefSetter(ref: IonContent) {
+    if (ref) this.msgScrollingHandler.setRef(ref);
   }
 
   manageAllLoadedPromptAnimation$ = this.triggerAllLoadedPrompt$.pipe(
@@ -67,12 +63,22 @@ export class MessageBoardComponent implements OnInit, OnDestroy {
     exhaustMap((ref) => AllLoadedAnimation(ref))
   );
 
+  constructor(
+    private msgService: MessagesService,
+    private msgScrollingHandler: MsgScrollingHandlerService
+  ) {
+    SubscribeAndLog(this.messages$, "messages$ arrived in msg board");
+  }
+
   ngOnInit() {
+    console.log("called now");
+    this.msgScrollingHandler.scrollToBottom(0);
     // this.manageInfiniteScroll();
     this.subs.add(this.manageInfiniteScroll$.subscribe());
     this.subs.add(this.manageAllLoadedPromptAnimation$.subscribe());
+    this.subs.add(this.msgScrollingHandler.scrollHandler$.subscribe());
     SubscribeAndLog(this.allLoaded$, "allMessagesLoaded$");
-    //
+
     SubscribeAndLog(this.triggerAllLoadedPrompt$, "triggerAllLoadedPrompt$");
   }
 
@@ -106,6 +112,13 @@ export class MessageBoardComponent implements OnInit, OnDestroy {
     this.allLoadedListenerForScroll$,
   ]);
 
+  // used in template in ionInfiniteScroll
+  async loadMoreMessages(event) {
+    console.log("loadMoreMessages");
+    await firstValueFrom(this.msgService.listenToMoreMessages());
+    event.target.complete();
+  }
+
   // async manageInfiniteScroll() {
   //   const infiniteScrollRef = await firstValueFrom(this.infiniteScrollRef$);
   //   // waits at least for first batch to arrive before
@@ -120,13 +133,6 @@ export class MessageBoardComponent implements OnInit, OnDestroy {
   //   return firstValueFrom(this.firstBatchArrived$.pipe(filter((fba) => fba === true)));
   // }
 
-  // used in template in ionInfiniteScroll
-  async loadMoreMessages(event) {
-    console.log("loadMoreMessages");
-    await firstValueFrom(this.msgService.listenToMoreMessages());
-    event.target.complete();
-  }
-
   // for trackBy of ngFor on messages
   trackMessage(index: number, message: Message) {
     return message.messageID;
@@ -136,7 +142,6 @@ export class MessageBoardComponent implements OnInit, OnDestroy {
     this.subs.unsubscribe();
   }
 }
-import { AnimationController } from "@ionic/angular";
 
 const AllLoadedAnimation = (allLoadedPromptRef: ElementRef<any>) => {
   const appearEasing = "cubic-bezier(0.5, 1, 0.89, 1)";

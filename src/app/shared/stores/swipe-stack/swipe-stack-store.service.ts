@@ -52,6 +52,7 @@ import { StoreResetter } from "@services/global-state-management/store-resetter.
 import { CurrentUserStore } from "..";
 import Swiper from "swiper";
 import { SwiperComponent } from "swiper/angular";
+import { Logger } from "../../functions/custom-rxjs";
 
 // - null is for when a state for the swipe stack hasn't been set yet
 // - "initialLoading" is for the very first load. Must be distinct from "loading"
@@ -176,7 +177,7 @@ export class SwipeStackStore extends AbstractStoreService {
     const typicalRegistration$ = this.swipeOutcomeStore.swipeChoices$.pipe(
       filter((c) => c.length >= this.REGISTER_FREQUENCY),
       tap(() => console.log("typicalRegistration$")),
-      exhaustMap(() => this.swipeOutcomeStore.registerSwipeChoices$)
+      exhaustMap(() => this.swipeOutcomeStore.registerSwipeChoices())
     );
 
     const endOfStackRegistration$ = this.stackState$.pipe(
@@ -186,7 +187,7 @@ export class SwipeStackStore extends AbstractStoreService {
       // Since this is the last one of the session either way, it doesn't hurt at all to wait for a few seconds
       delay(2000),
       tap(() => console.log("endOfStackRegistration$")),
-      exhaustMap(() => this.swipeOutcomeStore.registerSwipeChoices$)
+      exhaustMap(() => this.swipeOutcomeStore.registerSwipeChoices())
     );
 
     return merge(typicalRegistration$, endOfStackRegistration$);
@@ -410,6 +411,7 @@ export class SwipeStackStore extends AbstractStoreService {
           take(1),
           switchMap((ref) =>
             this.slideChangeListener$(ref).pipe(
+              Logger("slideChangeListener$"),
               map((swiper) => ({
                 picIndex: swiper.realIndex,
                 uid: list.first.profile.uid,
@@ -427,6 +429,7 @@ export class SwipeStackStore extends AbstractStoreService {
       // })),
       // doesn't keep going if slide is the first one
       filter((m) => typeof m.picIndex === "number" && m.picIndex > 0),
+      Logger("got past filter"),
       switchMap((m) =>
         // subscribes to profile picture of that array
         m.profilePictures$.pipe(
@@ -440,11 +443,16 @@ export class SwipeStackStore extends AbstractStoreService {
               .map((_, i) => {
                 const alreadyDownloaded =
                   typeof pics[i] === "string" && pics[i].length > 0; // checks for it not being an empty string
+                console.log(
+                  "within addPictures$, alreadyDownloaded is",
+                  alreadyDownloaded
+                );
                 if (alreadyDownloaded) return false;
 
                 return (() => {
                   const index = i;
                   return this.getUrl(m.uid, index).pipe(
+                    Logger("getUrl"),
                     map((url) => (url ? { url, picIndex: index, uid: m.uid } : false))
                   );
                 })();
@@ -458,6 +466,7 @@ export class SwipeStackStore extends AbstractStoreService {
                 }
             >[]; // filters out "false" elements (a.k.a where fetching wasn't needed)
             return forkJoin(addPictures$).pipe(
+              Logger("before addPictures"),
               switchMap((urls) =>
                 this.addPictures(
                   urls.filter(Boolean) as { url: string; picIndex: number; uid: string }[]

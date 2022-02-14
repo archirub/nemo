@@ -1,7 +1,8 @@
+import { Logger } from "./../../functions/custom-rxjs";
 import { Injectable } from "@angular/core";
 import { AngularFireFunctions } from "@angular/fire/functions";
 
-import { BehaviorSubject, merge, Observable, of } from "rxjs";
+import { BehaviorSubject, firstValueFrom, merge, Observable, of } from "rxjs";
 
 import { Profile } from "@classes/index";
 import {
@@ -11,16 +12,7 @@ import {
   registerSwipeChoicesRequest,
   registerSwipeChoicesResponse,
 } from "@interfaces/index";
-import {
-  concatMapTo,
-  exhaustMap,
-  filter,
-  first,
-  map,
-  share,
-  take,
-  tap,
-} from "rxjs/operators";
+import { concatMapTo, exhaustMap, filter, map, take, tap } from "rxjs/operators";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 import { AbstractStoreService } from "@interfaces/stores.model";
 import { StoreResetter } from "@services/global-state-management/store-resetter.service";
@@ -32,6 +24,7 @@ export class SwipeOutcomeStore extends AbstractStoreService {
   public isReady$: Observable<boolean> = null;
   private swipeChoices = new BehaviorSubject<profileChoiceMap[]>([]);
   private swipeAnswers = new BehaviorSubject<uidChoiceMap[]>([]);
+  private registeringChoices = false;
 
   swipeChoices$ = this.swipeChoices.asObservable();
   swipeAnswers$ = this.swipeAnswers.asObservable();
@@ -57,6 +50,7 @@ export class SwipeOutcomeStore extends AbstractStoreService {
     return this.swipeChoices$.pipe(
       take(1),
       map((choices) => {
+        console.log("hello or what?");
         const newChoice: profileChoiceMap = { choice: "yes", profile };
         this.swipeChoices.next(choices.concat(newChoice));
       })
@@ -127,35 +121,46 @@ export class SwipeOutcomeStore extends AbstractStoreService {
     );
   }
 
-  public registerSwipeChoices$: Observable<void> = this.swipeChoices$.pipe(
-    take(1),
-    filter((c) => c.length > 0),
-    exhaustMap((choices) => {
-      const uidChoiceMaps: uidChoiceMap[] = choices.map((c) => ({
-        uid: c.profile.uid,
-        choice: c.choice,
-      }));
+  public async registerSwipeChoices(): Promise<any> {
+    if (this.registeringChoices) return;
+    this.registeringChoices = true;
+    const swipeChoices = await firstValueFrom(this.swipeChoices$);
+    console.log("hello? swipe choices are", swipeChoices);
+    if (swipeChoices.length <= 0) return;
 
-      const request: registerSwipeChoicesRequest = { choices: uidChoiceMaps };
+    const uidChoiceMaps: uidChoiceMap[] = swipeChoices.map((c) => ({
+      uid: c.profile.uid,
+      choice: c.choice,
+    }));
+    const request: registerSwipeChoicesRequest = { choices: uidChoiceMaps };
 
-      return this.afFunctions
-        .httpsCallable<registerSwipeChoicesRequest, registerSwipeChoicesResponse>(
-          "registerSwipeChoices"
-        )(request)
-        .pipe(
-          tap(() =>
-            console.info(`registerSwipeChoices triggered for ${choices.length} choices.`)
-          ),
-          concatMapTo(
-            merge(
-              this.removeFromSwipeAnswers(uidChoiceMaps),
-              this.removeFromSwipeChoices(choices)
-            )
-          ),
-          this.errorHandler.convertErrors("cloud-functions"),
-          this.errorHandler.handleErrors()
-        );
-    }),
-    share()
-  );
+    try {
+      await firstValueFrom(
+        this.afFunctions
+          .httpsCallable<registerSwipeChoicesRequest, registerSwipeChoicesResponse>(
+            "registerSwipeChoices"
+          )(request)
+          .pipe(
+            tap(() =>
+              console.info(
+                `registerSwipeChoices triggered for ${swipeChoices.length} choices.`
+              )
+            ),
+            this.errorHandler.convertErrors("cloud-functions"),
+            this.errorHandler.handleErrors({ strategy: "propagateError" })
+          )
+      );
+    } catch (e) {
+      console.log("a", e);
+      this.registeringChoices = false;
+      return;
+    }
+
+    await Promise.all([
+      firstValueFrom(this.removeFromSwipeAnswers(uidChoiceMaps)),
+      firstValueFrom(this.removeFromSwipeChoices(swipeChoices)),
+    ]);
+
+    this.registeringChoices = false;
+  }
 }

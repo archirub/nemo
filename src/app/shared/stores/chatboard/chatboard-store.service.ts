@@ -21,6 +21,7 @@ import {
   take,
   tap,
   switchMap,
+  filter,
 } from "rxjs/operators";
 import { cloneDeep, isEqual } from "lodash";
 
@@ -330,7 +331,18 @@ export class ChatboardStore extends AbstractStoreService {
     );
   }
 
-  public getChatFromRecipient(uid: string) {}
+  public saveChatInput(chatID: string, input: string) {
+    return this.allChats.pipe(
+      take(1),
+      map((chats) => {
+        if (!chats?.[chatID]) return;
+        const chat = cloneDeep(chats?.[chatID]);
+        chat.chat.latestChatInput = input;
+        chats[chatID] = chat;
+        this.allChats.next(chats);
+      })
+    );
+  }
 
   /**
    * returns false if user doesn't have chat with the provided user,

@@ -46,13 +46,8 @@
           <p class="tip">{{ chosenPopup }}</p>
         </ion-row>
 
-        <ion-content #messageContent [scrollEvents]="true">
-          <!-- This div in between ion-content and message-board below is meant to be a fix to the ion scroll being broken on ios
-          (as described in https://stackoverflow.com/questions/60045661/on-ios-devices-why-does-ionic-4-infinite-scroll-jump-to-the-top-of-the-page-whe)
-          -->
-          <div>
-            <app-message-board></app-message-board>
-          </div>
+        <ion-content id="message-board" [scrollEvents]="true">
+          <app-message-board></app-message-board>
         </ion-content>
 
         <div id="boxBelowInput"></div>

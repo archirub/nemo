@@ -1,45 +1,52 @@
-<div *ngIf="!!(triggerAllLoadedPrompt$ | async)" #allLoadedPrompt id='allLoaded'>
+<div *ngIf="triggerAllLoadedPrompt$ | async" #allLoadedPrompt id="allLoaded">
   <p>All your messages are loaded!</p>
 </div>
 
-<ion-infinite-scroll
-  position="top"
-  threshold="100px"
-  [disabled]="true"
-  (ionInfinite)="loadMoreMessages($event)"
->
-  <!-- [hidden]="allMessagesLoaded$ | async" -->
-  <!--  -->
-  <ion-infinite-scroll-content
-    loadingSpinner="bubbles"
-    loadingText="Loading more messages..."
+<!-- This div in between ion-content and message-board below is meant to be a fix to the ion scroll being broken on ios
+          (as described in https://stackoverflow.com/questions/60045661/on-ios-devices-why-does-ionic-4-infinite-scroll-jump-to-the-top-of-the-page-whe)
+          -->
+<!-- <ion-content [scrollEvents]="true"> -->
+<div>
+  <ion-infinite-scroll
+    position="top"
+    threshold="100px"
+    [disabled]="true"
+    (ionInfinite)="loadMoreMessages($event)"
   >
-  </ion-infinite-scroll-content>
-</ion-infinite-scroll>
-<ion-list>
-  <ion-row
-    *ngFor="
-      let message of messages$ | async;
-      index as i;
-      let last = last;
-      trackBy: trackMessage
-    "
-  >
-    <ion-col
-      size="8"
-      *ngIf="message?.senderID === (chat$ | async)?.recipient?.uid"
-      class="message-col col-recieved"
+    <!-- [hidden]="allMessagesLoaded$ | async" -->
+    <!--  -->
+    <ion-infinite-scroll-content
+      loadingSpinner="bubbles"
+      loadingText="Loading more messages..."
     >
-      <div class="message notOwnMessage">{{ message?.content }}</div>
-    </ion-col>
+    </ion-infinite-scroll-content>
+  </ion-infinite-scroll>
+  <ion-list>
+    <ion-row
+      *ngFor="
+        let message of messages$ | async;
+        index as i;
+        let last = last;
+        trackBy: trackMessage
+      "
+    >
+      <ion-col
+        size="8"
+        *ngIf="message?.senderID === (chat$ | async)?.recipient?.uid"
+        class="message-col col-recieved"
+      >
+        <div class="message notOwnMessage">{{ message?.content }}</div>
+      </ion-col>
 
-    <ion-col
-      size="8"
-      offset="4"
-      *ngIf="message?.senderID !== (chat$ | async)?.recipient?.uid"
-      class="message-col col-sent"
-    >
-      <div class="message ownMessage">{{ message?.content }}</div>
-    </ion-col>
-  </ion-row>
-</ion-list>
+      <ion-col
+        size="8"
+        offset="4"
+        *ngIf="message?.senderID !== (chat$ | async)?.recipient?.uid"
+        class="message-col col-sent"
+      >
+        <div class="message ownMessage">{{ message?.content }}</div>
+      </ion-col>
+    </ion-row>
+  </ion-list>
+</div>
+<!-- </ion-content> -->
