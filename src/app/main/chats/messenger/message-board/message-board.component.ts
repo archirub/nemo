@@ -72,6 +72,7 @@ export class MessageBoardComponent implements OnInit, OnDestroy {
     this.subs.add(this.manageInfiniteScroll$.subscribe());
     this.subs.add(this.manageAllLoadedPromptAnimation$.subscribe());
     SubscribeAndLog(this.allLoaded$, "allMessagesLoaded$");
+    //
     SubscribeAndLog(this.triggerAllLoadedPrompt$, "triggerAllLoadedPrompt$");
   }
 

@@ -11,6 +11,7 @@ import {
   scan,
   shareReplay,
   switchMap,
+  switchMapTo,
   take,
   tap,
 } from "rxjs/operators";
@@ -23,7 +24,7 @@ import { Timestamp } from "@interfaces/firebase.model";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 import { FormatService } from "@services/format/format.service";
 import { Injectable } from "@angular/core";
-import { FilterFalsy } from "src/app/shared/functions/custom-rxjs";
+import { FilterFalsy, Logger } from "src/app/shared/functions/custom-rxjs";
 import { MessengerInitSharer } from "./messenger-init-sharer.service";
 
 export const MSG_BATCH_SIZE: number = 15;
@@ -91,13 +92,15 @@ export class MessagesService {
           this.errorHandler.handleErrors()
         )
       ),
+      switchMapTo(this.listenToMoreMessages(1)),
+      Logger("worked"),
       mapTo(messageTime),
       this.errorHandler.handleErrors(),
       finalize(() => this.sendingMessage.next(false))
     );
   }
 
-  listenToMoreMessages() {
+  listenToMoreMessages(count: number = MSG_BATCH_SIZE) {
     const uid$ = this.errorHandler.getCurrentUser$().pipe(
       FilterFalsy(),
       map((u) => u.uid),
@@ -153,7 +156,7 @@ export class MessagesService {
 
     return combineLatest([uid$, chatid$, currentMsgCount$]).pipe(
       switchMap(([uid, chatid, currMsgCount]) =>
-        snapshotChanges$(uid, chatid, currMsgCount + MSG_BATCH_SIZE).pipe(
+        snapshotChanges$(uid, chatid, currMsgCount + count).pipe(
           map((s) => s.map((v) => v.payload.doc)),
           weirdTimerOperator(2, 500),
           take(1),
