@@ -22,6 +22,11 @@ $swipe-width: 100vw;
 // tab-menu, if the latter touches the bottom of the screen
 $tab-height: 0vh;
 
+#carterOne {
+  font-weight: bold;
+  font-family: 'Carter One';
+}
+
 ion-content {
   --overflow: hidden;
 }
@@ -234,9 +239,7 @@ h3.catchtext {
 }
 
 span {
-  font-weight: bold;
   color: var(--ion-color-primary);
-  font-family: 'Carter One';
 }
 
 .fish {
@@ -257,6 +260,28 @@ span {
   top: 5.7vh;
   left: 4vw;
   border-radius: 25px;
+}
+
+#centeredNonStack {
+  height: 95vh;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  flex-direction: column;
+  text-align: center;
+  padding: 0 15vw;
+
+  h1 {
+    font-size: 3.3vh;
+  }
+
+  img {
+    height: 10vh;
+  }
 }
 
 

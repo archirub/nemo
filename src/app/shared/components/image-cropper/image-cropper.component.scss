@@ -28,10 +28,10 @@ image-cropper {
     border: solid 3px var(--ion-color-primary);
     border-radius: 15px;
     box-shadow: 0px 8px 26px -9px;
+    max-width: 35vw;
 }
 
 .shown img {
-    max-width: none;
     max-height: 100%;
     height: fit-content;
     border-radius: 15px;

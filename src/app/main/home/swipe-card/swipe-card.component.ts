@@ -86,15 +86,17 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
   screenWidth: number;
   yesBubbleAnimation: Animation;
   noBubbleAnimation: Animation;
-  currentUser: any;
 
   timeOfLatestCardTap = 0; // (ms) - set to 0 when we want the diff with current time to be larger than threshold
   DOUBLE_TAP_THRESHOLD = 800;
   choiceOfLatestTap: swipeChoice = null;
 
-  mainProfilePicture: string;
   latestMatchedProfile: Profile | null;
   chosenCatchMsg: string;
+
+  userFromStore$ = this.currentUserStore.user$.pipe(map((user) => {return user}));
+  currentStackState$ = this.swipeStackStore.stackState$.pipe(map((ss) => {return ss.toString();}));
+  currentUser: any;
 
   subs = new Subscription();
 
@@ -178,6 +180,12 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
 
   async ngOnInit() {
     this.currentUser = await this.errorHandler.getCurrentUser();
+    // this.userFromStore$.pipe(
+    //   tap((user) => {
+    //     this.userGoneUnder.next(user.settings.showProfile);
+        
+    //   }
+    // ));
   }
 
   ngAfterViewInit() {

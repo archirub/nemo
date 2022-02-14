@@ -115,6 +115,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
 
   showLoading$ = new BehaviorSubject<boolean>(true);
   viewIsReady$ = new BehaviorSubject<boolean>(false);
+  currentStackState$ = this.swipeStackStore.stackState$.pipe(map((ss) => {return ss}));
 
   showEmptyPrompt$ = combineLatest([
     this.showLoading$,

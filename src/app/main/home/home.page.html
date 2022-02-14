@@ -64,15 +64,15 @@
     <h2 class="catchtext">Keep fishing</h2>
   </div>
 </div-->
-
 <ion-content #homeContainer>
   <div class="swipe-stack" #swipeCards>
-    <div class="search">
+    <div class="search" *ngIf="(currentStackState$ | async) != 'not-showing-profile'">
       <ion-button #searchButton id="searchButton" (click)="showSearchCriteria()">
         <ion-icon slot="icon-only" name="search-outline"></ion-icon>
       </ion-button>
     </div>
     <app-swipe-card
+      *ngIf="pageIsReady$ | async"
       [profiles$]="swipeProfiles$"
       [swipeCardsRef]="swipeCardsRef"
       [homeContainer]="homeContainer"

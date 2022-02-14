@@ -50,9 +50,9 @@ export class TabMenuPage implements OnDestroy {
     filter(([_, hst]) => !!this.tabs && !!hst),
     map(([_, hst]) => [this.tabs.getSelected(), hst] as const),
     map(([tabName, hst]) => {
-      if (tabName == "own-profile") return hst.ownProfile;
+      //if (tabName == "own-profile") return hst.ownProfile;
       if (tabName == "home") return hst.home;
-      if (tabName == "chats") return hst.chatBoard;
+      //if (tabName == "chats") return hst.chatBoard;
       return true;
     }),
     startWith(true)

@@ -6,11 +6,11 @@
    id="Layer_1"
    x="0px"
    y="0px"
-   viewBox="0 0 600 600"
+   viewBox="0 0 604.94434 604.94434"
    xml:space="preserve"
    sodipodi:docname="musicnerd.svg"
-   width="600"
-   height="600"
+   width="604.94434"
+   height="604.94434"
    inkscape:version="1.1 (c4e8f9e, 2021-05-24)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
@@ -73,14 +73,14 @@
    inkscape:pagecheckerboard="0"
    showgrid="false"
    inkscape:zoom="0.53518519"
-   inkscape:cx="845.50173"
-   inkscape:cy="231.6955"
+   inkscape:cx="847.37023"
+   inkscape:cy="233.56401"
    inkscape:window-width="1296"
-   inkscape:window-height="806"
+   inkscape:window-height="792"
    inkscape:window-x="0"
-   inkscape:window-y="23"
+   inkscape:window-y="25"
    inkscape:window-maximized="0"
-   inkscape:current-layer="Layer_1" />
+   inkscape:current-layer="g3241" />
 <style
    type="text/css"
    id="style2">
@@ -116,12 +116,13 @@
 
 <g
    id="g3241"
-   transform="matrix(4.5045046,0,0,4.5045046,-781.0811,-3374.3245)"><circle
+   transform="matrix(4.5045046,0,0,4.5045046,-778.60895,-3371.8523)"><circle
      class="st6"
      cx="240"
      cy="815.70001"
      r="66.099998"
-     id="circle34" /><g
+     id="circle34"
+     style="stroke-width:2.09764;stroke-miterlimit:10;stroke-dasharray:none" /><g
      id="g266">
 			<path
    class="st25"

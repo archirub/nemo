@@ -6,12 +6,33 @@
    id="Layer_1"
    x="0px"
    y="0px"
-   viewBox="0 0 568.56329 568.56329"
+   viewBox="0 0 573.74365 573.74365"
    xml:space="preserve"
-   width="568.56329"
-   height="568.56329"
+   width="573.74365"
+   height="573.74365"
+   sodipodi:docname="tiktoker.svg"
+   inkscape:version="1.1 (c4e8f9e, 2021-05-24)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
-   xmlns:svg="http://www.w3.org/2000/svg"><defs
+   xmlns:svg="http://www.w3.org/2000/svg"><sodipodi:namedview
+   id="namedview830"
+   pagecolor="#ffffff"
+   bordercolor="#666666"
+   borderopacity="1.0"
+   inkscape:pageshadow="2"
+   inkscape:pageopacity="0.0"
+   inkscape:pagecheckerboard="0"
+   showgrid="false"
+   inkscape:zoom="1.0007681"
+   inkscape:cx="287.27934"
+   inkscape:cy="287.27934"
+   inkscape:window-width="1440"
+   inkscape:window-height="791"
+   inkscape:window-x="0"
+   inkscape:window-y="25"
+   inkscape:window-maximized="1"
+   inkscape:current-layer="g1845" /><defs
    id="defs429">
 	
 	
@@ -79,12 +100,13 @@
 
 <g
    id="g1845"
-   transform="matrix(4.2684935,0,0,4.2684935,-740.15678,-2514.5696)"><circle
+   transform="matrix(4.2684935,0,0,4.2684935,-737.56662,-2511.9794)"><circle
      class="st4"
      cx="240"
      cy="655.70001"
      r="66.099998"
-     id="circle14" /><path
+     id="circle14"
+     style="stroke-width:2.21362;stroke-miterlimit:10;stroke-dasharray:none" /><path
      class="st8"
      d="m 268.2,651.2 c -0.5,0.1 -1.1,0.1 -1.6,0.1 -5.9,0 -11.5,-3 -14.7,-8 v 27.1 c 0,11.1 -9,20 -20,20 -11,0 -20,-9 -20,-20 0,-11.1 9,-20 20,-20 v 0 c 0.4,0 0.8,0 1.2,0.1 v 9.9 c -0.4,0 -0.8,-0.1 -1.2,-0.1 -5.6,0 -10.2,4.6 -10.2,10.2 0,5.6 4.6,10.2 10.2,10.2 5.6,0 10.6,-4.4 10.6,-10.1 l 0.1,-46 h 9.4 c 0.9,8.5 7.7,15.1 16.2,15.7 v 10.9"
      id="path84" /></g>

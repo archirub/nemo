@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg
-   width="242.2"
-   height="249.8"
-   viewBox="0 0 242.2 249.8"
+   width="246.86929"
+   height="254.46928"
+   viewBox="0 0 246.8693 254.46928"
    fill="none"
    version="1.1"
    id="svg1052"
@@ -24,28 +24,29 @@
      inkscape:pagecheckerboard="0"
      showgrid="false"
      inkscape:zoom="0.32574648"
-     inkscape:cx="446.66638"
-     inkscape:cy="39.908337"
+     inkscape:cx="449.73625"
+     inkscape:cy="44.513144"
      inkscape:window-width="1440"
-     inkscape:window-height="792"
+     inkscape:window-height="791"
      inkscape:window-x="0"
      inkscape:window-y="25"
      inkscape:window-maximized="1"
      inkscape:current-layer="svg1052" />
   <path
-     d="m 121.1,249.3 c 66.6,0 120.6,-55.7 120.6,-124.4 C 241.7,56.2 187.7,0.5 121.1,0.5 54.5,0.5 0.5,56.2 0.5,124.9 c 0,68.7 54,124.4 120.6,124.4 z"
+     d="m 123.43465,251.63465 c 66.6,0 120.6,-55.7 120.6,-124.4 0,-68.700004 -54,-124.4000043 -120.6,-124.4000043 -66.600004,0 -120.6000043,55.7000003 -120.6000043,124.4000043 0,68.7 54.0000003,124.4 120.6000043,124.4 z"
      fill="#ffffff"
      stroke="#ed726a"
      stroke-miterlimit="10"
-     id="path852" />
+     id="path852"
+     style="stroke-width:5.66929;stroke-miterlimit:10;stroke-dasharray:none" />
   <path
-     d="m 151.9,190.5 4.7,-78.3 c 0.2,-2.3 1.6,-4.1 3.6,-5.1 2.4,-1.1 4.4,-4.9 4.4,-11.3 0,-4.3 -6.6,-6.6 -6.6,-11.3 l 0.5,-9.6 0.9,-15.6 H 87.3 l 0.9,15.6 0.5,9.6 c 0,4.7 -6.6,7 -6.6,11.3 0,6.4 2,10.2 4.4,11.3 2,0.9 3.6,2.8 3.6,5.1 l 4.7,78.3 z"
+     d="m 154.23465,192.83465 4.7,-78.3 c 0.2,-2.3 1.6,-4.1 3.6,-5.1 2.4,-1.1 4.4,-4.9 4.4,-11.300004 0,-4.3 -6.6,-6.6 -6.6,-11.3 l 0.5,-9.6 0.9,-15.6 H 89.634646 l 0.9,15.6 0.5,9.6 c 0,4.7 -6.6,7 -6.6,11.3 0,6.400004 2,10.200004 4.4,11.300004 2,0.9 3.6,2.8 3.6,5.1 l 4.7,78.3 z"
      stroke="#ed726a"
      stroke-width="6.3434"
      stroke-miterlimit="10"
      id="path1008" />
   <path
-     d="m 88.6,82.9 h 70.3"
+     d="M 90.934646,85.234646 H 161.23465"
      stroke="#ed726a"
      stroke-width="6.3434"
      stroke-miterlimit="10"

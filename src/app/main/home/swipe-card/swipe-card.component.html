@@ -19,12 +19,12 @@
 
     <div #catchEls id="catchEls">
       <div #catchText class="textholder">
-        <h1 class="itsACatch">It's a<br /><span class="catch-word">Catch!</span></h1>
+        <h1 class="itsACatch">It's a<br /><span id="carterOne" class="catch-word">Catch!</span></h1>
       </div>
       <div #catchText class="textholder-2">
         <h3 class="catchtext">{{ chosenCatchMsg }}</h3>
         <h2 class="catchtext">
-          You've caught <span>{{ latestMatchedProfile?.firstName }}</span>
+          You've caught <span id="carterOne">{{ latestMatchedProfile?.firstName }}</span>
         </h2>
       </div>
 
@@ -80,6 +80,27 @@
       </app-profile-card>
     </div>
 
-    <div *ngIf="(profiles$ | async).length > 0" class="shadow"></div>
+    <!--box shadow around profile card-->
+    <div 
+    *ngIf="(profiles$ | async).length > 0 && (this.userFromStore$ | async)?.settings?.showProfile" 
+    class="shadow"></div>
+
+    <div id="centeredNonStack" *ngIf="!(this.userFromStore$ | async)?.settings?.showProfile">
+      <h1>You've <span style="color: var(--ion-color-primary);">gone under</span>, so your profile is currently not shown.</h1>
+      <img src="/assets/greyprofileicon.svg" alt="hidden-person"/>
+      <h1>You can change this in your settings!</h1>
+    </div>
+
+    <div id="centeredNonStack" *ngIf="(currentStackState$ | async) === 'loading'">
+      <img src="/assets/nemo_load.svg" alt="nemo-loading"/>
+    </div>
+
+    <div id="centeredNonStack" *ngIf="(currentStackState$ | async) === 'cap-reached'">
+      <h1>Sorry, looks like you ran out of swipes for the moment. They fill up over time, come back in a few hours!</h1>
+    </div>
+
+    <div id="centeredNonStack" *ngIf="(currentStackState$ | async) === 'empty'">
+      <h1>Sorry, looks like your swipe stack is empty. Possibly try widening your <span>nemo</span>search, or come back later!</h1>
+    </div>
   </div>
 </ion-content>
