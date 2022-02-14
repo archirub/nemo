@@ -15,7 +15,7 @@ import {
   firstValueFrom,
   defer,
 } from "rxjs";
-import { concatMapTo, first, last, switchMap, switchMapTo, tap } from "rxjs/operators";
+import { concatMapTo, take, last, switchMap, switchMapTo, tap } from "rxjs/operators";
 
 import { CurrentUserStore } from "@stores/index";
 
@@ -105,7 +105,7 @@ export class SignupService {
           tap(([_, user]) => {
             if (!user) throw new CustomError("local/check-auth-state", "local");
           }),
-          first(),
+          take(1),
           switchMap(async ([dataStored, user]) => {
             await user?.reload();
             await user.getIdToken(true); // to refresh the token
@@ -153,7 +153,7 @@ export class SignupService {
         tap((user) => {
           if (!user) throw new CustomError("local/check-auth-state", "local");
         }),
-        first(),
+        take(1),
         concatMapTo(
           concat(this.signupLocalStorer.removeStorage(), this.currentUserStore.activate$)
         ),

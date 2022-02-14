@@ -12,7 +12,7 @@ import { FormControl, FormGroup } from "@angular/forms";
 import {
   BehaviorSubject,
   delay,
-  first,
+  take,
   map,
   ReplaySubject,
   Subscription,
@@ -95,7 +95,7 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
   }
 
   playLoadingAnimation$ = this.fishRef$.pipe(
-    first(),
+    take(1),
     switchMap((ref) => {
       this.loadingAnimation = FishSwimAnimation(ref);
       return this.loadingAnimation.play();
@@ -103,7 +103,7 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
   );
 
   stopLoadingAnimation$ = this.fishRef$.pipe(
-    first(),
+    take(1),
     delay(200),
     map(() => this.loadingAnimation?.destroy())
   );

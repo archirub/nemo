@@ -428,7 +428,7 @@ export class GlobalStateManagementService {
             this.errorHandler.handleErrors()
           )
       ),
-      first(),
+      take(1),
       map((doc) => doc.exists)
     );
   }

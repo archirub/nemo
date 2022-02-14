@@ -161,7 +161,7 @@ export class OwnPicturesStore extends AbstractStoreService {
     );
 
     return forkJoin(base64Pictures$).pipe(
-      take(1), // use take instead of first() here, this is because will "first () will emit exactly one item or throw an error, so calling it on an empty observable will cause an error"
+      take(1), // use take instead of take(1) here, this is because will "first () will emit exactly one item or throw an error, so calling it on an empty observable will cause an error"
       map((base64Pictures) => {
         let storageObject: ownPicturesStorage = {
           timestamp,
@@ -198,14 +198,14 @@ export class OwnPicturesStore extends AbstractStoreService {
         if (!user) throw new CustomError("local/check-auth-state", "local");
       }),
       map((user) => user?.uid),
-      first(),
+      take(1),
       this.errorHandler.handleErrors()
     );
 
     // here we are using the switchMap operator (instead of concatMap or mergeMap for ex) as it allows
     // to, if either uid$ or pictureCount$ gets a new value, cancel the current profile picture fetching
-    // right away and start a new fetch with the new value. THis is also why first() comes after switchMap,
-    // that way, we only first() after we got the profilePictures
+    // right away and start a new fetch with the new value. THis is also why take(1) comes after switchMap,
+    // that way, we only take(1) after we got the profilePictures
     return uid$.pipe(
       switchMap((uid) => this.fetchProfilePictures(uid)),
       tap((urls) => this.urls.next(urls))
@@ -230,7 +230,7 @@ export class OwnPicturesStore extends AbstractStoreService {
 
   private removePictureInDatabase(index: number): Observable<void> {
     return this.errorHandler.getCurrentUser$().pipe(
-      first(),
+      take(1),
       switchMap((user) => {
         if (!user) throw new CustomError("local/check-auth-state", "local");
 
@@ -245,7 +245,7 @@ export class OwnPicturesStore extends AbstractStoreService {
 
   private updatePictureInDatabase(photoUrl: string, index: number): Observable<void> {
     return this.errorHandler.getCurrentUser$().pipe(
-      first(),
+      take(1),
       switchMap(async (user) => {
         if (!user) throw new CustomError("local/check-auth-state", "local");
 

@@ -1,14 +1,12 @@
-import { Injectable } from '@angular/core';
-import { FirebaseAnalytics } from '@capacitor-community/firebase-analytics';
-import { environment } from 'src/environments/environment.prod';
-
+import { Injectable } from "@angular/core";
+import { FirebaseAnalytics } from "@capacitor-community/firebase-analytics";
+import { environment } from "src/environments/environment.prod";
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: "root",
 })
 export class AnalyticsService {
-
-  constructor() { 
+  constructor() {
     FirebaseAnalytics.initializeFirebase(environment.firebase);
     // FirebaseAnalytics.setCollectionEnabled({
     //   enabled: true
@@ -22,10 +20,10 @@ export class AnalyticsService {
   //   });
   // }
 
-  logEvent(type: string, params: object): void {
-    FirebaseAnalytics.logEvent({
+  async logEvent(type: string, params: object): Promise<void> {
+    return FirebaseAnalytics.logEvent({
       name: type,
-      params: params
+      params: params,
     });
   }
 }

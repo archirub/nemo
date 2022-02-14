@@ -134,7 +134,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     map((user) => {
       if (user?.biography?.length > 0) {
         this.bioToAdd.next(false);
-      };
+      }
       this.updateEditableFields(user);
     })
   );
@@ -161,7 +161,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
   // The current Sortable object is destroyed a new one is instanciated for that new array
   // Doing so completely removed the bugs present
   pictureDraggingHandler$ = this.profilePictures$.pipe(
-    switchMap(() => this.profilePicturesRef$.pipe(first())),
+    switchMap(() => this.profilePicturesRef$.pipe(take(1))),
     tap((pPicturesRef) => this.resetPictureDragging(pPicturesRef)),
     share()
   );
@@ -202,7 +202,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
   getOnPageReadyHandler() {
     return this.pageIsReady$.pipe(
       filter((isReady) => isReady),
-      first(),
+      take(1),
       tap(() => this.stopLoadingAnimation()),
       tap(() => this.subs.add(this.pictureDraggingHandler$.subscribe()))
     );
@@ -260,7 +260,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
   deletePicture(index: number): Promise<void> {
     return lastValueFrom(
       this.profilePicturesWithEmpty$.pipe(
-        first(),
+        take(1),
         map((pics) => {
           pics.splice(index, 1);
           this.profilePictures.next(pics);
@@ -386,7 +386,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
   changePictureIndex(oldIndex: number, newIndex: number) {
     return lastValueFrom(
       this.profilePicturesWithEmpty$.pipe(
-        first(),
+        take(1),
         map((pics) => {
           changeElementPosition(pics, oldIndex, newIndex);
           this.profilePictures.next(pics.filter((p) => !!p));
@@ -402,7 +402,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
   goToSettings() {
     return lastValueFrom(
       this.editingInProgress$.pipe(
-        first(),
+        take(1),
         switchMap((inProgress) =>
           !inProgress
             ? this.navCtrl.navigateForward("/main/settings", {
@@ -423,7 +423,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
       } else {
         this.renderer.setStyle(this.bioClose.nativeElement, "display", "none");
       }
-    };
+    }
   }
 
   // to clear the input of the biography
@@ -431,7 +431,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     this.bioState = "";
     this.renderer.setStyle(this.bioClose.nativeElement, "display", "none");
     this.bioToAdd.next(true);
-    
+
     this.editingTriggered();
   }
 
@@ -439,7 +439,6 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     this.bioToAdd.next(false);
     this.editingTriggered();
   }
-
 
   get bioState(): string {
     return this.editableFields.biography;
@@ -501,7 +500,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
             this.bioToAdd.next(false);
           } else {
             this.bioToAdd.next(true);
-          };
+          }
         }),
         map(() => this.editingInProgress.next(false))
       )
@@ -512,15 +511,16 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
 
   // checks whether any of the parts of the editable fields are invalid.
   // if it is the case, then display a message showing which they are
-  async presentInvalidPartsMessage(invalidParts: ("society" | "questions" | "course" | "pictures")[]) {
+  async presentInvalidPartsMessage(
+    invalidParts: ("society" | "questions" | "course" | "pictures")[]
+  ) {
     const societyMessage =
       "Your society and its category must be either both filled or empty.";
     const courseMessage =
       "Your course and its category must be either both filled or empty.";
     const questionsMessage =
       "Make sure all of your questions contain both a selection and an answer.";
-    const picturesMessage =
-      "You must have at least on profile picture.";
+    const picturesMessage = "You must have at least on profile picture.";
 
     const message = `
     ${invalidParts.includes("society") ? societyMessage : ""}
@@ -575,7 +575,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
       this.bioToAdd.next(true);
     } else {
       this.bioToAdd.next(false);
-    };
+    }
 
     this.fbAnalytics.logEvent("profile_edit", {
       UID: this.currentUser.uid, //user uid
@@ -596,7 +596,8 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
 
     const invalidParts: ("society" | "questions" | "course" | "pictures")[] = [];
 
-    if (this.profilePictures.getValue()[0].length < 1) //first picture url is empty implying no pictures
+    if (this.profilePictures.getValue()[0].length < 1)
+      //first picture url is empty implying no pictures
       invalidParts.push("pictures");
     if (
       !bothNullOrFilled(this.editableFields.society, this.editableFields.societyCategory)

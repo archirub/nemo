@@ -55,7 +55,7 @@ export class SwipeOutcomeStore extends AbstractStoreService {
 
   public yesSwipe(profile: Profile): Observable<void> {
     return this.swipeChoices$.pipe(
-      first(),
+      take(1),
       map((choices) => {
         const newChoice: profileChoiceMap = { choice: "yes", profile };
         this.swipeChoices.next(choices.concat(newChoice));
@@ -128,7 +128,7 @@ export class SwipeOutcomeStore extends AbstractStoreService {
   }
 
   public registerSwipeChoices$: Observable<void> = this.swipeChoices$.pipe(
-    first(),
+    take(1),
     filter((c) => c.length > 0),
     exhaustMap((choices) => {
       const uidChoiceMaps: uidChoiceMap[] = choices.map((c) => ({

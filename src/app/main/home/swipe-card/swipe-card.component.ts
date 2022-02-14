@@ -1,4 +1,4 @@
-import { Animation } from "@ionic/angular";
+import { Animation, NavController } from "@ionic/angular";
 import {
   Component,
   OnInit,
@@ -27,8 +27,10 @@ import {
   Subscription,
 } from "rxjs";
 import {
+  delay,
   exhaustMap,
   filter,
+  finalize,
   first,
   map,
   mergeMap,
@@ -38,6 +40,7 @@ import {
   take,
   tap,
   timeInterval,
+  timeout,
   withLatestFrom,
 } from "rxjs/operators";
 
@@ -45,6 +48,7 @@ import { ProfileCardComponent } from "@components/index";
 import { matchMessages } from "@interfaces/profile.model";
 
 import {
+  ChatboardStore,
   CurrentUserStore,
   OtherProfilesStore,
   SearchCriteriaStore,
@@ -53,7 +57,7 @@ import {
   SwipeStackStore,
 } from "@stores/index";
 
-import { Profile } from "@classes/index";
+import { Chat, Profile } from "@classes/index";
 import {
   Gender,
   mdMainFromDatabase,
@@ -71,6 +75,9 @@ import { AngularFirestore } from "@angular/fire/firestore";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 import { SwipeCapService } from "@stores/swipe-stack/swipe-cap.service";
 import { AnalyticsService } from "@services/analytics/analytics.service";
+import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
+import { catchTimeout, FilterFalsy, Logger } from "src/app/shared/functions/custom-rxjs";
+import { wait } from "src/app/shared/functions/common";
 
 @Component({
   selector: "app-swipe-card",
@@ -94,16 +101,15 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
   latestMatchedProfile: Profile | null;
   chosenCatchMsg: string;
 
-  userFromStore$ = this.currentUserStore.user$;
-  currentStackState$ = this.swipeStackStore.stackState$.pipe(map((ss) => ss));
-  currentUser: any;
-
   subs = new Subscription();
 
   @Input() profiles$: Observable<Profile[]>;
   @Input() homeContainer: ElementRef;
   @Input() swipeCardsRef: ElementRef;
   @Input() searchCriteriaButtonRef: ElementRef;
+  @Input() set showLoadingSetter(value: boolean) {
+    if (value === true || value === false) this.showLoading$.next(value);
+  }
 
   // All of these are for showing SC or match animation. Assuming that always happens sufficiently late that these refs can't be undefined
   //@ViewChild("homeContainer", { read: ElementRef }) homeContainer: ElementRef;
@@ -144,8 +150,10 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
 
   tapInProgress$ = new BehaviorSubject<boolean>(false);
 
+  showLoading$ = new BehaviorSubject<boolean>(true);
+
   managePictureSwiping$ = this.cardStackRef$.pipe(
-    first(),
+    take(1),
     map((ref) =>
       this.subs.add(this.swipeStackStore.managePictureSwiping(ref).subscribe())
     )
@@ -161,17 +169,44 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
     map((ss) => this.hideCardStates.includes(ss))
   );
 
+  showEmptyPrompt$ = combineLatest([
+    this.showLoading$,
+    this.swipeStackStore.stackState$,
+  ]).pipe(
+    map(([showLoading, stackState]) => stackState === "empty" && showLoading === false)
+  );
+  showCapReachedPrompt$ = combineLatest([
+    this.showLoading$,
+    this.swipeStackStore.stackState$,
+  ]).pipe(
+    map(
+      ([showLoading, stackState]) => stackState === "cap-reached" && showLoading === false
+    )
+  );
+  showNotShowingProfilePrompt$ = combineLatest([
+    this.showLoading$,
+    this.swipeStackStore.stackState$,
+  ]).pipe(
+    map(
+      ([showLoading, stackState]) =>
+        stackState === "not-showing-profile" && showLoading === false
+    )
+  );
+
   constructor(
     private renderer: Renderer2,
     private firestore: AngularFirestore,
     private fbAnalytics: AnalyticsService,
+    private navCtrl: NavController,
 
+    private chatboardStore: ChatboardStore,
     private swipeOutcomeStore: SwipeOutcomeStore,
     private swipeStackStore: SwipeStackStore,
     private otherProfilesStore: OtherProfilesStore,
     private SCstore: SearchCriteriaStore, // for DEV
     private currentUserStore: CurrentUserStore, // for DEV
 
+    private loadingAlertManager: LoadingAndAlertManager,
     private errorHandler: GlobalErrorHandler,
     private swipeCap: SwipeCapService
   ) {
@@ -179,11 +214,9 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit() {
-    this.currentUser = await this.errorHandler.getCurrentUser();
     // this.userFromStore$.pipe(
     //   tap((user) => {
     //     this.userGoneUnder.next(user.settings.showProfile);
-
     //   }
     // ));
   }
@@ -262,19 +295,19 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
     //   )
     //   .subscribe();
 
-    this.profiles$
-      .pipe(
-        filter((p) => p.length > 0),
-        map((p) => p[0].uid),
-        switchMap((uid) =>
-          this.getSexPrefAndGender(uid).pipe(
-            map(([sexPref, gender]) =>
-              this.DEV_other_profile_info.next({ uid, sexPref, gender })
-            )
-          )
-        )
-      )
-      .subscribe();
+    // this.profiles$
+    //   .pipe(
+    //     filter((p) => p.length > 0),
+    //     map((p) => p[0].uid),
+    //     switchMap((uid) =>
+    //       this.getSexPrefAndGender(uid).pipe(
+    //         map(([sexPref, gender]) =>
+    //           this.DEV_other_profile_info.next({ uid, sexPref, gender })
+    //         )
+    //       )
+    //     )
+    //   )
+    //   .subscribe();
   }
 
   getSexPrefAndGender(uid: string): Observable<[SexualPreference, Gender]> {
@@ -441,16 +474,11 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
       forkJoin([
         this.swipeStackStore.removeProfile(p),
         this.swipeOutcomeStore.yesSwipe(p),
+        this.logSwipeAction("yes_swipe", profile),
       ]);
     const changeText = () => {
       this.likeText.nativeElement.innerHTML = `You liked ${profile.firstName}!`;
     };
-
-    this.fbAnalytics.logEvent("yes_swipe", {
-      swiperUID: this.currentUser.uid, //UID of person swiping
-      likedUID: profile.uid,
-      timestamp: Date.now(), //Time since epoch
-    });
 
     const animateSwipe = SwipeAnimation(
       storeTasks$.bind(this),
@@ -465,6 +493,20 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
     );
   }
 
+  logSwipeAction(event: "yes_swipe" | "no_swipe" | "match", otherProfile: Profile) {
+    return this.errorHandler.getCurrentUser$().pipe(
+      FilterFalsy(),
+      take(1),
+      switchMap((user) =>
+        this.fbAnalytics.logEvent(event, {
+          swiperUID: user.uid, //UID of person swiping
+          otherUID: otherProfile.uid,
+          timestamp: Date.now(), //Time since epoch
+        })
+      )
+    );
+  }
+
   /**
    * - Removes profile from the swipe stack,
    * - registers swipe choice in swipeOutcomeStore
@@ -474,16 +516,11 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
       forkJoin([
         this.swipeStackStore.removeProfile(p),
         this.swipeOutcomeStore.noSwipe(p),
+        this.logSwipeAction("no_swipe", profile),
       ]);
     const changeText = () => {
       this.dislikeText.nativeElement.innerHTML = `You passed on ${profile.firstName}.`;
     };
-
-    this.fbAnalytics.logEvent("no_swipe", {
-      swiperUID: this.currentUser.uid, //UID of person swiping
-      passedUID: profile.uid,
-      timestamp: Date.now(), //Time since epoch
-    });
 
     const animateSwipe = SwipeAnimation(
       storeTasks$.bind(this),
@@ -501,7 +538,7 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
   /**
    * - Shows the match animation / modal,
    * - triggers "registerSwipeChoices" from swipeOutcomeStore, which removes swipeOutcome list and
-   * saves them on the database, new doc is created backened
+   * saves them on the database, new doc is created backend
    */
   private onMatch(matchedProfile: Profile) {
     const postAnimTasks$ = (p) =>
@@ -509,14 +546,9 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
         this.swipeStackStore.removeProfile(p),
         this.swipeOutcomeStore.yesSwipe(p),
         this.otherProfilesStore.saveProfile(p),
-        this.swipeOutcomeStore.registerSwipeChoices$
+        this.swipeOutcomeStore.registerSwipeChoices$,
+        this.logSwipeAction("match", matchedProfile)
       );
-
-    this.fbAnalytics.logEvent("match", {
-      matchingUID: this.currentUser.uid, //UID of person swiping
-      matchedUID: matchedProfile.uid,
-      timestamp: Date.now(), //Time since epoch
-    });
 
     return concat(
       defer(() => this.playCatch(matchedProfile)),
@@ -589,8 +621,34 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
     this.renderer.setStyle(catchItems, "display", "none");
   }
 
-  goToNewCatchChat() {
-    console.error("goToNewCatchChat not yet implemented");
+  async goToNewCatchChat() {
+    const maxTimeWaitingForChat = 6000; // 6 seconds
+
+    const user = await this.errorHandler.getCurrentUser();
+    if (!user) return;
+
+    const loader = await this.loadingAlertManager.createLoading({});
+    await this.loadingAlertManager.presentNew(loader, "replace-erase");
+
+    console.log("this.latestMatchedProfile", this.latestMatchedProfile);
+
+    return firstValueFrom(
+      this.chatboardStore.userHasChatWith(this.latestMatchedProfile.uid, false).pipe(
+        filter((chat) => chat !== false),
+        take(1),
+        timeout(maxTimeWaitingForChat),
+        switchMap((chat: Chat) =>
+          defer(() =>
+            this.loadingAlertManager
+              .dismissDisplayed()
+              .then(() => wait(200)) // these wait are for looks but they also seem to make it work better
+              .then(() => this.navCtrl.navigateForward(["main/messenger/" + chat.id]))
+              .then(() => wait(300))
+              .then(() => this.closeCatch())
+          )
+        )
+      )
+    );
   }
 
   // this is for trackBy of ngFor on profiles in template

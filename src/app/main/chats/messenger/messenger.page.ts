@@ -172,7 +172,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy, AfterCon
 
     const waitOnMessageSent$ = this.msgService.messages$.pipe(
       filter((msgs) => !!msgs.find((msg) => msg.time.getTime() === msgTime.getTime())),
-      first()
+      take(1)
     );
 
     await firstValueFrom(waitOnMessageSent$);
@@ -210,12 +210,11 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy, AfterCon
 
   ngAfterContentInit() {
     console.log("ngAfterContentInit");
+    this.pageInitialization();
   }
 
   ngAfterViewInit() {
     console.log("ngAfterViewInit");
-
-    this.pageInitialization();
 
     // this.subs.add(this.moreMessagesLoadingHandler$.subscribe());
     this.styleMessageBar();

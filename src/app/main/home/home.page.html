@@ -74,6 +74,7 @@
     <app-swipe-card
       *ngIf="pageIsReady$ | async"
       [profiles$]="swipeProfiles$"
+      [showLoadingSetter]="showLoading$|async"
       [swipeCardsRef]="swipeCardsRef"
       [homeContainer]="homeContainer"
       [searchCriteriaButtonRef]="searchCriteriaButtonRef"

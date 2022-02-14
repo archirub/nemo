@@ -43,7 +43,7 @@ export class UniversitiesStore extends AbstractStoreService {
 
   private fetchUniversities(): Observable<any> {
     return this.universities$.pipe(
-      first(),
+      take(1),
       switchMap((universities) => {
         if (Array.isArray(universities)) return of("");
         return this.firestore

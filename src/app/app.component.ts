@@ -5,7 +5,7 @@ import { AngularFireAuth } from "@angular/fire/auth";
 import { HideOptions, ShowOptions, SplashScreen } from "@capacitor/splash-screen";
 
 import { firstValueFrom, Subscription } from "rxjs";
-import { filter, first, map } from "rxjs/operators";
+import { filter, take, map } from "rxjs/operators";
 import { Capacitor } from "@capacitor/core";
 
 import { GlobalStateManagementService } from "@services/global-state-management/global-state-management.service";
@@ -23,7 +23,7 @@ export class AppComponent implements OnDestroy, OnInit {
   subs = new Subscription();
 
   get userState() {
-    return firstValueFrom(this.GlobalStateManagement.userState$.pipe(first()));
+    return firstValueFrom(this.GlobalStateManagement.userState$.pipe(take(1)));
   }
 
   constructor(

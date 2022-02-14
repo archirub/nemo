@@ -25,7 +25,7 @@ import {
   distinctUntilChanged,
   filter,
   finalize,
-  first,
+  take,
   map,
   switchMap,
   tap,
@@ -115,30 +115,10 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
 
   showLoading$ = new BehaviorSubject<boolean>(true);
   viewIsReady$ = new BehaviorSubject<boolean>(false);
-  currentStackState$ = this.swipeStackStore.stackState$.pipe(map((ss) => {return ss}));
-
-  showEmptyPrompt$ = combineLatest([
-    this.showLoading$,
-    this.swipeStackStore.stackState$,
-  ]).pipe(
-    map(([showLoading, stackState]) => stackState === "empty" && showLoading === false)
-  );
-  showCapReachedPrompt$ = combineLatest([
-    this.showLoading$,
-    this.swipeStackStore.stackState$,
-  ]).pipe(
-    map(
-      ([showLoading, stackState]) => stackState === "cap-reached" && showLoading === false
-    )
-  );
-  showNotShowingProfilePrompt$ = combineLatest([
-    this.showLoading$,
-    this.swipeStackStore.stackState$,
-  ]).pipe(
-    map(
-      ([showLoading, stackState]) =>
-        stackState === "not-showing-profile" && showLoading === false
-    )
+  currentStackState$ = this.swipeStackStore.stackState$.pipe(
+    map((ss) => {
+      return ss;
+    })
   );
 
   pageIsReady$ = combineLatest([this.viewIsReady$, this.storeReadiness.home$]).pipe(
@@ -152,7 +132,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
 
   readinessHandler$ = this.pageIsReady$.pipe(
     filter((isReady) => !!isReady),
-    first(),
+    take(1),
     tap(() => this.showLoading$.next(false)),
     tap(() => this.subs.add(this.stopLoadingAnimation$.subscribe()))
   );
@@ -164,7 +144,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
   );
 
   playLoadingAnimation$ = this.fishRef$.pipe(
-    first(),
+    take(1),
     switchMap((ref) => {
       this.loadingAnimation = FishSwimAnimation(ref);
       return this.loadingAnimation.play();
@@ -172,7 +152,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
   );
 
   stopLoadingAnimation$ = this.fishRef$.pipe(
-    first(),
+    take(1),
     delay(200),
     map(() => this.loadingAnimation?.destroy())
   );
@@ -228,39 +208,6 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
     });
 
     return modal.present();
-  }
-
-  async goToNewCatchChat() {
-    const maxTimeWaitingForChat = 6000; // 6 seconds
-
-    const user = await this.errorHandler.getCurrentUser();
-    if (!user) return;
-
-    const loader = await this.loadingAlertManager.createLoading({});
-    await this.loadingAlertManager.presentNew(loader, "replace-erase");
-
-    return firstValueFrom(
-      this.chatboardStore.matches$.pipe(
-        map((matches) => matches?.[this.latestMatchedProfile.uid]),
-        filter((chat) => !!chat),
-        first(),
-        timeout(maxTimeWaitingForChat),
-        switchMap((chat) =>
-          concat(
-            this.loadingAlertManager.dismissDisplayed(),
-            this.navCtrl.navigateForward(["main/messenger/" + chat.id]),
-            this.destroyCatch()
-          )
-        ),
-        finalize(() => this.loadingAlertManager.dismissDisplayed())
-      )
-    );
-  }
-
-  async destroyCatch() {
-    let catchItems = document.getElementById("catchEls");
-    this.renderer.setStyle(catchItems, "display", "none");
-    this.renderer.setStyle(this.pic2.nativeElement, "background", "black");
   }
 
   ngOnDestroy() {

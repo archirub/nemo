@@ -36,6 +36,7 @@ import {
   invalidDocumentError,
 } from "../../supporting-functions/error-handling/generic-errors";
 import { swipeCapREAD, swipeCapWRITE } from "./swipe-cap";
+import { cloneDeep } from "lodash";
 
 export const registerSwipeChoices = functions
   .region("europe-west2")
@@ -107,9 +108,12 @@ export const registerSwipeChoices = functions
             date
           );
 
-          const matchedUsers = handleDatingYesChoicesReadReturn.matchedUsers.map(
-            (mu) => mu.uid
-          );
+          // DEV, just to simulate matching
+          const matchedUsers = cloneDeep(yes);
+
+          // const matchedUsers = handleDatingYesChoicesReadReturn.matchedUsers.map(
+          //   (mu) => mu.uid
+          // );
 
           const thereAreMatchedUsers = matchedUsers.length > 0;
 

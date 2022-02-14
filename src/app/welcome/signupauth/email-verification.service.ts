@@ -64,7 +64,7 @@ export class EmailVerificationService {
       return user;
     }),
     filter((user) => !!user?.emailVerified),
-    first(),
+    take(1),
     map(() => this.emailVerificationState.next("verified")),
     share(),
     this.errorHandler.handleErrors()

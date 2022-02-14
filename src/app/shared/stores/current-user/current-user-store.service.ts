@@ -85,7 +85,7 @@ export class CurrentUserStore extends AbstractStoreService {
   /** Fetches info from database to update the User BehaviorSubject */
   private fillStore() {
     return this.errorHandler.getCurrentUser$().pipe(
-      first(),
+      take(1),
       switchMap((user) => {
         const profileParts$ = [
           this.fetchProfile(user.uid),
@@ -155,7 +155,7 @@ export class CurrentUserStore extends AbstractStoreService {
           .ref("/profilePictures/" + user.uid)
           .listAll()
           .pipe(
-            first(),
+            take(1),
             map((list) => list.items.length),
             tap((count) => (user.pictureCount = count)),
             map(() => user),
@@ -224,7 +224,7 @@ export class CurrentUserStore extends AbstractStoreService {
   ) {
     return firstValueFrom(
       this.user$.pipe(
-        first(),
+        take(1),
         map((u) => {
           if (newGender == null && newSexualPreference == null) return;
           if (newGender != null) u.gender = newGender;
@@ -238,7 +238,7 @@ export class CurrentUserStore extends AbstractStoreService {
   public async updateShowProfileInStore(newShowProfile: boolean) {
     return firstValueFrom(
       this.user$.pipe(
-        first(),
+        take(1),
         map((u) => {
           if (newShowProfile == null || u?.settings?.showProfile == null) return;
           u.settings.showProfile = newShowProfile;

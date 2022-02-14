@@ -59,14 +59,14 @@ export class ReportUserComponent {
 
     await this.loadingAlertManager.dismissDisplayed();
 
-    const chatID = await lastValueFrom(
+    const chat = await lastValueFrom(
       this.chatboardStore.userHasChatWith(this.userReportedID)
     );
 
-    if (chatID === false) {
+    if (chat === false) {
       this.reportSuccesfulNoChatAlert();
     } else {
-      await this.reportSuccessfulHasChatAlert(chatID);
+      await this.reportSuccessfulHasChatAlert(chat.id);
     }
 
     return this.closeModal();

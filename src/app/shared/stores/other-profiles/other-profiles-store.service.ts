@@ -204,7 +204,7 @@ export class OtherProfilesStore extends AbstractStoreService {
       .ref("/profilePictures/" + profile.uid)
       .listAll()
       .pipe(
-        first(),
+        take(1),
         map((list) => list.items.length),
         tap((count) => (profile.pictureCount = count)),
         map(() => profile),

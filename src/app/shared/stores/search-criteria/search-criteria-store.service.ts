@@ -90,7 +90,7 @@ export class SearchCriteriaStore extends AbstractStoreService {
       tap((user) => {
         if (!user) throw new CustomError("local/check-auth-state", "local");
       }),
-      first(),
+      take(1),
       withLatestFrom(this.searchCriteria$),
       exhaustMap(([user, SC]) =>
         firstValueFrom(

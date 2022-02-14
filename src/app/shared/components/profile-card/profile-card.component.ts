@@ -23,7 +23,7 @@ import {
   ReplaySubject,
   Subscription,
 } from "rxjs";
-import { map, first, tap } from "rxjs/operators";
+import { map, take, tap } from "rxjs/operators";
 
 import { ReportUserComponent } from "../../../main/chats/report-user/report-user.component";
 
@@ -140,7 +140,7 @@ export class ProfileCardComponent
     this.profilePictures$,
     this.bulletsRef$,
   ]).pipe(
-    first(),
+    take(1),
     tap(([_, __, bulletsRef]) => this.updatePager(0, bulletsRef)), // for pager init
     map(([slidesRef, _, bulletsRef]) =>
       slidesRef.swiperRef.on("slideChange", (swiper) =>

@@ -407,7 +407,7 @@ export class SwipeStackStore extends AbstractStoreService {
       // listens to the user's swiping on that profile
       switchMap((list: QueryList<ProfileCardComponent>) =>
         list.first.picSlides$.pipe(
-          first(),
+          take(1),
           switchMap((ref) =>
             this.slideChangeListener$(ref).pipe(
               map((swiper) => ({
@@ -430,7 +430,7 @@ export class SwipeStackStore extends AbstractStoreService {
       switchMap((m) =>
         // subscribes to profile picture of that array
         m.profilePictures$.pipe(
-          first(),
+          take(1),
           switchMap((pics) => {
             const maxIndex = m.picIndex + 2; // defines how many pics forward we're loading (so here 2 pics forward)
 
@@ -522,7 +522,7 @@ export class SwipeStackStore extends AbstractStoreService {
     picMaps: { uid: string; picIndex: number; url: string }[]
   ): Observable<void> {
     return this.profiles$.pipe(
-      first(),
+      take(1),
       map((profiles) => {
         // loops through picture maps
         picMaps.forEach((map) => {
@@ -595,7 +595,7 @@ export class SwipeStackStore extends AbstractStoreService {
   private addToQueue(newProfiles: Profile[]): Observable<Profile[]> {
     return this.addPictureCounts(newProfiles).pipe(
       switchMap(() => this.profiles$),
-      first(),
+      take(1),
       tap((profiles) => this.profiles.next(newProfiles.concat(profiles))),
       concatMap(() => of(newProfiles)) // makes it so that the observable returned gives an array of the new profiles
     );
@@ -661,7 +661,7 @@ export class SwipeStackStore extends AbstractStoreService {
           .ref("/profilePictures/" + p.uid)
           .listAll()
           .pipe(
-            first(),
+            take(1),
             map((list) => list.items.length),
             this.errorHandler.convertErrors("firebase-storage"),
             this.errorHandler.handleErrors()

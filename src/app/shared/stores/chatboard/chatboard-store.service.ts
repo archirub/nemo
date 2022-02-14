@@ -18,7 +18,7 @@ import {
   map,
   withLatestFrom,
   distinctUntilChanged,
-  first,
+  take,
   tap,
   switchMap,
 } from "rxjs/operators";
@@ -135,7 +135,7 @@ export class ChatboardStore extends AbstractStoreService {
 
   private activateChatDocsListening(): Observable<any> {
     return this.errorHandler.getCurrentUser$().pipe(
-      first(),
+      take(1),
       switchMap((user) =>
         (
           this.firestore
@@ -319,7 +319,7 @@ export class ChatboardStore extends AbstractStoreService {
 
   public deleteChatInStore(chatID: string) {
     return this.allChats.pipe(
-      first(),
+      take(1),
       tap((chats) => {
         if (chats[chatID]) {
           const newChats = cloneDeep(chats);
@@ -330,23 +330,30 @@ export class ChatboardStore extends AbstractStoreService {
     );
   }
 
+  public getChatFromRecipient(uid: string) {}
+
   /**
    * returns false if user doesn't have chat with the provided user,
    * returns the chatID otherwise
    */
-  public userHasChatWith(uid: string): Observable<false | string> {
+  public userHasChatWith(
+    uid: string,
+    snapshot: boolean = true
+  ): Observable<false | Chat> {
     return this.allChats$.pipe(
-      first(),
+      snapshot ? take(1) : (val) => val,
       map((chats) => {
-        let theChatID: false | string = false;
+        let found: boolean = false;
+        let theChatID: string;
 
         Object.entries(chats).forEach(([chatID, chat]) => {
           if (chat.recipient.uid === uid) {
             theChatID = chatID;
+            found = true;
           }
         });
 
-        return theChatID;
+        return found ? chats[theChatID] : false;
       })
     );
   }
