@@ -72,6 +72,7 @@ export class ProfileCardComponent
   @Input() profile: Profile;
   @Input() headerBottom: number; //in %
   @Input() fixedHeader: boolean = true; //THIS IS A LAST MINUTE FIX BECAUSE I DON'T HAVE THE TIME TO FIGURE OUT WHAT'S GOING ON??
+  @Input() messengerProfile: boolean = false;
   @Input() set profilePictures(value: string[]) {
     if (!Array.isArray(value)) return;
 

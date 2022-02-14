@@ -1,4 +1,4 @@
-<div #fullCard id="swipe-card" *ngIf="profile">
+<div #fullCard id="swipe-card" *ngIf="profile" [style.position]="messengerProfile ? 'fixed' : 'none'">
   <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script> -->
   <div class="img-container">
     <div class="pager" [hidden]="(profilePictures$ | async).length <= 1">
@@ -62,7 +62,11 @@
       </ion-card-header>
     </div-->
 
-    <div #complete id="completeInfo" [style.bottom]="headerBottom + '%'">
+    <div #complete id="completeInfo" 
+    [style.bottom]="headerBottom + '%'"
+    [style.left]="messengerProfile? '0' : '13px'"
+    [style.right]="messengerProfile? '0' : '13px'"
+    [style.width]="messengerProfile? '100%': 'none'">
       <!--[hidden]="!moreInfo"-->
       <ion-card-header
         #header
@@ -76,7 +80,7 @@
         </ion-card-title>
         <ion-card-subtitle id="department"
           >{{ profile?.course }}{{ profile?.course && profile?.degree ? ", " : ""
-          }}{{ profile?.degree | degrees }}{{ profile?.university && profile?.degree ? " at " : "" 
+          }}{{ profile?.degree | degrees }}{{ profile?.university && profile?.degree ? ", " : "" 
           }}{{ profile?.university }}</ion-card-subtitle
         >
       </ion-card-header>
