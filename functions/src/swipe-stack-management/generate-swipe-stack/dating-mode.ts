@@ -108,10 +108,10 @@ export async function datingMode(
   demographicPicks = demographicPicks.filter(
     (pickedUid) =>
       !matchDataMain.reportedUsers[pickedUid]?.exists &&
-      // DEV - REMOVING DISLIKEDUSERS TO HAVE INFINITE SWIPE-STACK
-      // !matchDataMain.dislikedUsers[pickedUid]?.exists &&
+      !matchDataMain.dislikedUsers[pickedUid]?.exists &&
       !matchDataMain.matchedUsers[pickedUid]?.exists &&
-      !likeGroupChoiceMaps.hasOwnProperty(pickedUid)
+      !likeGroupChoiceMaps.hasOwnProperty(pickedUid) &&
+      pickedUid !== uid
   );
 
   // REMOVE DUPLICATES IN LIKE-GROUP

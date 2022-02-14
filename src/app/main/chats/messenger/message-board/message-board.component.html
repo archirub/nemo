@@ -1,12 +1,15 @@
-<ion-item *ngIf="allMessagesLoaded$ | async"> All messages loaded </ion-item>
+<ion-item *ngIf="!!(triggerAllLoadedPrompt$ | async)" #allLoadedPrompt>
+  All messages loaded
+</ion-item>
 
 <ion-infinite-scroll
   position="top"
   threshold="100px"
   [disabled]="true"
   (ionInfinite)="loadMoreMessages($event)"
-  [hidden]="allMessagesLoaded$ | async"
 >
+  <!-- [hidden]="allMessagesLoaded$ | async" -->
+
   <ion-infinite-scroll-content
     loadingSpinner="bubbles"
     loadingText="Loading more messages..."

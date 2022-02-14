@@ -155,8 +155,10 @@ export class SignuprequiredPage implements OnInit, OnDestroy {
     await this.updateData(); // may not be necessary, but last check to make sure data we have in logic exactly reflects that in the UI
 
     //Req must be complete by this point, log analytics
-    await this.errorHandler.getCurrentUser$().pipe(
-      map((user) => this.fbAnalytics.logEvent("signupreq_complete", user)),
+    await firstValueFrom(
+      this.errorHandler
+        .getCurrentUser$()
+        .pipe(map((user) => this.fbAnalytics.logEvent("signupreq_complete", user)))
     );
 
     return this.router.navigateByUrl("/welcome/signupoptional");
@@ -267,9 +269,9 @@ export class SignuprequiredPage implements OnInit, OnDestroy {
     await this.loadingAlertManager.dismissDisplayed();
 
     //Log analytics event for skip to app
-    await this.errorHandler.getCurrentUser$().pipe(
-      map((user) => this.fbAnalytics.logEvent("skip_to_app", user)),
-    );
+    await this.errorHandler
+      .getCurrentUser$()
+      .pipe(map((user) => this.fbAnalytics.logEvent("skip_to_app", user)));
 
     return this.navCtrl.navigateForward("/welcome/signup-to-app");
   }
