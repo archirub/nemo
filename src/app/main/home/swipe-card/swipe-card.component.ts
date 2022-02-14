@@ -94,8 +94,8 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
   latestMatchedProfile: Profile | null;
   chosenCatchMsg: string;
 
-  userFromStore$ = this.currentUserStore.user$.pipe(map((user) => {return user}));
-  currentStackState$ = this.swipeStackStore.stackState$.pipe(map((ss) => {return ss}));
+  userFromStore$ = this.currentUserStore.user$;
+  currentStackState$ = this.swipeStackStore.stackState$.pipe(map((ss) => ss));
   currentUser: any;
 
   subs = new Subscription();
@@ -183,7 +183,7 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
     // this.userFromStore$.pipe(
     //   tap((user) => {
     //     this.userGoneUnder.next(user.settings.showProfile);
-        
+
     //   }
     // ));
   }

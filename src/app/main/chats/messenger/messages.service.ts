@@ -24,14 +24,15 @@ import { GlobalErrorHandler } from "@services/errors/global-error-handler.servic
 import { FormatService } from "@services/format/format.service";
 import { Injectable } from "@angular/core";
 import { FilterFalsy } from "src/app/shared/functions/custom-rxjs";
+import { MessengerInitSharer } from "./messenger-init-sharer.service";
 
-@Injectable({ providedIn: "root" })
+export const MSG_BATCH_SIZE: number = 15;
+
+@Injectable() // don't get why this gives an error when it is removed even though it is provided in the component
 export class MessagesService {
-  private MSG_BATCH_SIZE: number = 15;
-
   private messages = new BehaviorSubject<Message[]>([]);
   private chat = new BehaviorSubject<Chat>(null);
-  private allMessagesLoaded = new BehaviorSubject<boolean>(false);
+  private allLoaded = new BehaviorSubject<boolean>(false);
   private sendingMessage = new BehaviorSubject<boolean>(false);
 
   // distinctUntilEqual here is super important (because of listenOnMoreMessages$ having as source observable messages$)
@@ -39,25 +40,30 @@ export class MessagesService {
   messages$ = this.messages.pipe(distinctUntilChanged((x, y) => isEqual(x, y)));
   chat$ = this.chat.pipe(distinctUntilChanged((x, y) => isEqual(x, y)));
   sendingMessage$ = this.sendingMessage.pipe(distinctUntilChanged());
-  allMessagesLoaded$ = this.allMessagesLoaded.pipe(distinctUntilChanged());
+  allLoaded$ = this.allLoaded.pipe(distinctUntilChanged());
 
   // emits once the first batch of messages has arrived.
   // this is for the moreMessagesLoadingHandler
   firstBatchArrived$ = this.messages$.pipe(
-    map((msgs) => msgs.length > 1),
+    map((msgs) => msgs.length > 0),
     distinctUntilChanged(),
-    delay(400),
     shareReplay()
   );
 
   constructor(
+    private messengerInitSharer: MessengerInitSharer,
     private fs: AngularFirestore,
     private errorHandler: GlobalErrorHandler,
     private format: FormatService
-  ) {}
+  ) {
+    this.initializeService();
+  }
 
-  initializeChat(chat: Chat) {
+  initializeService() {
+    const { chat, messages } = this.messengerInitSharer.extractVariables();
     this.chat.next(chat);
+    this.messages.next(messages);
+    console.log("initializeService called");
   }
 
   // Sends the content of the input bar as a new message to the database
@@ -147,7 +153,7 @@ export class MessagesService {
 
     return combineLatest([uid$, chatid$, currentMsgCount$]).pipe(
       switchMap(([uid, chatid, currMsgCount]) =>
-        snapshotChanges$(uid, chatid, currMsgCount + this.MSG_BATCH_SIZE).pipe(
+        snapshotChanges$(uid, chatid, currMsgCount + MSG_BATCH_SIZE).pipe(
           map((s) => s.map((v) => v.payload.doc)),
           weirdTimerOperator(2, 500),
           take(1),
@@ -162,7 +168,7 @@ export class MessagesService {
 
   // for use in "listen to more messages"
   private checkForAllLoaded(currMsgCount: number, newMsgCount: number): void {
-    if (currMsgCount === newMsgCount) this.allMessagesLoaded.next(true);
+    if (currMsgCount >= newMsgCount) this.allLoaded.next(true);
   }
 
   private docsToMsgs(docs: QueryDocumentSnapshot<messageFromDatabase>[]): Message[] {

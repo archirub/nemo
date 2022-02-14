@@ -6,6 +6,7 @@ import {
   OnInit,
   ViewChild,
   ElementRef,
+  AfterContentInit,
 } from "@angular/core";
 
 import { ActivatedRoute } from "@angular/router";
@@ -16,7 +17,6 @@ import {
   firstValueFrom,
   forkJoin,
   lastValueFrom,
-  Observable,
   of,
   ReplaySubject,
   Subscription,
@@ -51,6 +51,7 @@ import { Logger } from "src/app/shared/functions/custom-rxjs";
 import { MessagesService } from "./messages.service";
 import { MessagesResolver } from "./messages.resolver";
 import { AnalyticsService } from "@services/analytics/analytics.service";
+import { wait } from "src/app/shared/functions/common";
 
 @Component({
   selector: "app-messenger",
@@ -59,12 +60,13 @@ import { AnalyticsService } from "@services/analytics/analytics.service";
   providers: [
     {
       provide: MessagesService,
-      useFactory: (messageResolver: MessagesResolver) => messageResolver.msgService,
-      deps: [MessagesResolver],
+      // useFactory: (messageResolver: MessagesResolver) => messageResolver.msgService,
+      useClass: MessagesService,
+      // deps: [MessagesResolver],
     },
   ],
 })
-export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
+export class MessengerPage implements OnInit, AfterViewInit, OnDestroy, AfterContentInit {
   // Constants
   private SCROLL_SPEED: number = 100;
 
@@ -200,14 +202,21 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    this.pageInitialization();
     this.subs.add(this.scrollHandler$.subscribe()); //dev
     this.subs.add(this.otherProfileHandler$.subscribe());
 
     this.user = this.errorHandler.getCurrentUser();
   }
 
+  ngAfterContentInit() {
+    console.log("ngAfterContentInit");
+  }
+
   ngAfterViewInit() {
+    console.log("ngAfterViewInit");
+
+    this.pageInitialization();
+
     // this.subs.add(this.moreMessagesLoadingHandler$.subscribe());
     this.styleMessageBar();
     firstValueFrom(this.slidesRef$).then((ref) => ref.lockSwipes(true));
@@ -215,6 +224,8 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy {
 
   // initializes the page
   async pageInitialization() {
+    // await wait(1000);
+    console.log("NOW");
     await this.scrollToBottom(0);
 
     this.refreshUserInput();

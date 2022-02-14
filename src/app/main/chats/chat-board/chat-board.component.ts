@@ -136,7 +136,7 @@ export class ChatBoardComponent implements OnInit, AfterViewInit {
   getDate(date: Date) {
     let month = date.getMonth();
     let day = date.getDay();
-    return day.toString() + "/" + month.toString;
+    return day.toString() + "/" + month.toString();
   }
 
   // For use in template. To toggle between chats and catches (should really be a behaviorSubject)

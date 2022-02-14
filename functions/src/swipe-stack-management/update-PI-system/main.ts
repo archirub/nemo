@@ -47,6 +47,7 @@ interface uid_score {
 export const updatePISystem = functions
   .region("europe-west2")
   .pubsub.schedule("every day 05:00")
+  .timeZone("Europe/London")
   .onRun(async (context) => {
     await admin.firestore().runTransaction(async (transaction) => {
       // FETCHING UID AND PI STORAGE DOCUMENTS
