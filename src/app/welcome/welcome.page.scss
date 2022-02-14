@@ -9,6 +9,7 @@
   z-index: 0;
   height: 100vh;
   left: 0;
+  filter: brightness(0.6);
 }
 
 .signInUpContainer {
@@ -66,11 +67,11 @@ ion-slides {
 
 .inter-text {
   color: #fff;
-  font-weight: 600;
+  font-weight: 500;
   z-index: 1;
-  text-align: left;
-  padding-left: 5vw;
+  text-align: center;
   font-size: 5vh;
+  width: 85vw;
 }
 
 .background-gradient {
@@ -82,9 +83,9 @@ ion-slides {
   display: flex;
   position: absolute;
   font-size: 3vh;
-  font-weight: 600;
+  font-weight: 500;
   top: 2vh;
-  right: 0;
+  right: 5vw;
   z-index: 3;
   color: #FFF;
 
@@ -108,16 +109,13 @@ ion-slides {
 
 ion-button.optional {
   position: absolute;
-  bottom: -6vh;
-  left: -2px;
+  bottom: 8vh;
   overflow: visible;
-  width: 100%;
-  border-radius: 0;
-  --border-radius: 0;
+  --border-radius: 25px;
   text-transform: none;
   z-index: 2;
-  font-size: 3vh;
-  height: 8vh;
+  font-size: 2.5vh;
+  width: 70vw;
 }
 
 interests-slides {

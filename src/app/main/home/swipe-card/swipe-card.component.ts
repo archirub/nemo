@@ -95,7 +95,7 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
   chosenCatchMsg: string;
 
   userFromStore$ = this.currentUserStore.user$.pipe(map((user) => {return user}));
-  currentStackState$ = this.swipeStackStore.stackState$.pipe(map((ss) => {return ss.toString();}));
+  currentStackState$ = this.swipeStackStore.stackState$.pipe(map((ss) => {return ss}));
   currentUser: any;
 
   subs = new Subscription();
