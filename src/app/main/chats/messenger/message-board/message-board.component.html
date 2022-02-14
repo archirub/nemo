@@ -1,6 +1,6 @@
-<ion-item *ngIf="!!(triggerAllLoadedPrompt$ | async)" #allLoadedPrompt>
-  All messages loaded
-</ion-item>
+<div *ngIf="!!(triggerAllLoadedPrompt$ | async)" #allLoadedPrompt id='allLoaded'>
+  <p>All your messages are loaded!</p>
+</div>
 
 <ion-infinite-scroll
   position="top"

@@ -8,7 +8,7 @@ export const appPackages: Array<string> = [
   "AnimeJS v3",
   "Lodash v4",
   "NG2-PDF-Viewer v7",
-  "NGX-IMage-Cropper v5",
+  "NGX-Image-Cropper v5",
   "SortableJS v1",
   "RXJS v7",
   "Swiper v8",

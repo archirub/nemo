@@ -73,6 +73,17 @@ ion-slides {
     z-index: 5;
     pointer-events: none;
   }
+
+  #allLoaded {
+    text-align: center;
+
+    p {
+      width: 70vw;
+      margin: 2vh auto 1vh;
+      border-bottom: solid 1px var(--ion-color-primary);
+      padding-bottom: 1vh;
+    };
+  }
   
   p.tip {
     position: absolute;

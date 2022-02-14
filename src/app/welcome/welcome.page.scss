@@ -10,6 +10,7 @@
   height: 100vh;
   left: 0;
   filter: brightness(0.6);
+  pointer-events: none;
 }
 
 .signInUpContainer {
@@ -21,7 +22,7 @@
 }
 
 ion-content.welcome {
-  --background: url('/assets/splash.svg');
+  --background: url('/assets/freezeframe_splash.png') no-repeat center center / cover;
 
   ion-button {
     height: 38px;
