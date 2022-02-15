@@ -5,7 +5,17 @@ import { NavigationEnd, NavigationStart, Router } from "@angular/router";
 import { AngularFirestore } from "@angular/fire/firestore";
 
 import { Storage } from "@capacitor/storage";
-import { concat, defer, forkJoin, from, merge, Observable, of, Subject } from "rxjs";
+import {
+  BehaviorSubject,
+  concat,
+  defer,
+  forkJoin,
+  from,
+  merge,
+  Observable,
+  of,
+  Subject,
+} from "rxjs";
 import {
   concatMap,
   distinctUntilChanged,
@@ -23,7 +33,6 @@ import {
 import { SignupService } from "@services/signup/signup.service";
 import { FirebaseAuthService } from "@services/firebase-auth/firebase-auth.service";
 import { routerInitListenerService } from "./initial-url.service";
-import { SignupAuthMethodSharer } from "../../../welcome/signupauth/signupauth-method-sharer.service";
 import { ConnectionService } from "@services/connection/connection.service";
 import { StoreResetter } from "./store-resetter.service";
 
@@ -35,6 +44,7 @@ import { StoreStateManager } from "./store-state-manager.service";
 import { FilterFalsy, Logger } from "../../functions/custom-rxjs";
 import { AngularFireAuth } from "@angular/fire/auth";
 import { NavController } from "@ionic/angular";
+import { EmailVerificationService } from "src/app/welcome/signupauth/email-verification.service";
 
 type pageName =
   | "chats"
@@ -70,6 +80,11 @@ export class GlobalStateManagementService {
 
   private alreadyConnectedOnce: boolean = false;
 
+  private pauseGlobalManagement = new BehaviorSubject<boolean>(false);
+  private pauseGlobalManagement$ = this.pauseGlobalManagement.pipe(
+    distinctUntilChanged()
+  );
+
   constructor(
     private router: Router,
     private navCtrl: NavController,
@@ -86,8 +101,7 @@ export class GlobalStateManagementService {
     private storeResetter: StoreResetter,
     private connectionService: ConnectionService,
     private firebaseLogout: FirebaseLogoutService,
-
-    private signupauthMethodSharer: SignupAuthMethodSharer
+    private emailVerificationService: EmailVerificationService
   ) {}
 
   public activate$ = this.connectionService.monitor().pipe(
@@ -106,6 +120,19 @@ export class GlobalStateManagementService {
     share()
   );
 
+  checkForPausedManagement =
+    <T>() =>
+    (source: Observable<T>) =>
+      source.pipe(
+        switchMap((val) =>
+          this.pauseGlobalManagement$.pipe(
+            filter((isPaused) => !isPaused),
+            take(1),
+            mapTo(val)
+          )
+        )
+      );
+
   checkLoggingOut =
     <T>() =>
     (source: Observable<T>) =>
@@ -119,15 +146,32 @@ export class GlobalStateManagementService {
         )
       );
 
+  checkEmailVerificationListening =
+    <T>() =>
+    (source: Observable<T>) =>
+      source.pipe(
+        switchMap((val) =>
+          this.emailVerificationService.listeningForVerification$.pipe(
+            filter((isListening) => !isListening),
+            take(1),
+            mapTo(val)
+          )
+        )
+      );
+
   private globalManagement$(): Observable<void> {
     return this.afAuth.user.pipe(
+      this.checkForPausedManagement(),
       this.checkLoggingOut(), // makes sure we aren't logging out (see firebase logout service for reason)
+      this.checkEmailVerificationListening(),
       switchMap((user) => forkJoin([of(user), this.isUserEmailVerified(user)])),
       switchMap(([user, emailIsVerified]) => {
         // to always activate
         this.storeStateManager.activateDefault();
 
         const observables$: Observable<any>[] = [];
+
+        console.log("globalManagement triggered", user, emailIsVerified);
 
         if (!user) {
           // if user isn't authenticated, do the corresponding routine
@@ -164,11 +208,11 @@ export class GlobalStateManagementService {
   }
 
   private requiresEmailVerificationRoutine(): Observable<any> {
-    const goToEmailVerification = async () => {
-      await this.navCtrl.navigateForward("/welcome/signupauth");
-
-      await this.signupauthMethodSharer?.goStraightToEmailVerification?.();
-    };
+    // const goToEmailVerification = async () => {
+    //   // await this.navCtrl.navigateForward("/welcome/signupauth");
+    //   console.log("eyo eyo ", this.signupauthMethodSharer);
+    //   await this.signupauthMethodSharer?.goStraightToEmailVerification?.();
+    // };
 
     return of(this.router.url).pipe(
       tap(() => this.userState.next("authenticated")),
@@ -176,7 +220,7 @@ export class GlobalStateManagementService {
         // default for now, easiest thing.
         // logic in there made so that it can be called many times like that without
         // hindering anything
-        return defer(() => goToEmailVerification());
+        return defer(() => this.emailVerificationService.goStraightToEmailVerification());
       })
     );
   }
@@ -219,6 +263,8 @@ export class GlobalStateManagementService {
     };
     const abortProfileProcedure = async () => {
       try {
+        // pausing the management as the Firebase user state is strange here and keeps changing and we don't want ot react to these changes
+        this.pauseGlobalManagement.next(true);
         await Storage.clear();
         await user.delete();
         await this.navCtrl.navigateForward("/welcome");
@@ -230,16 +276,25 @@ export class GlobalStateManagementService {
 
           await new Promise((resolve) => {
             const interval = setInterval(async () => {
-              const u = await this.errorHandler.getCurrentUser();
+              // purposefully not using the error handling, as we are
+              // waiting for it to be null! It being null would be normal
+              const u = await this.afAuth.currentUser;
 
               if (!u) {
                 clearInterval(interval);
                 resolve({ user: u });
               }
             }, 250);
-          }).then(() => this.navCtrl.navigateForward("/welcome"));
+          }).then(() => {
+            this.pauseGlobalManagement.next(false);
+            return this.navCtrl.navigateForward("/welcome");
+          });
         }
+
+        this.pauseGlobalManagement.next(false);
       }
+
+      this.pauseGlobalManagement.next(false);
     };
 
     const alertOptions = {

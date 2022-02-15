@@ -57,7 +57,6 @@ import {
 import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
 import { SubscribeAndLog } from "src/app/shared/functions/custom-rxjs";
 import { MessageBoardComponent } from "src/app/main/chats/messenger/message-board/message-board.component";
-import { TestComponentPage } from "src/app/test-component/test-component.page";
 @Component({
   selector: "app-home",
   templateUrl: "home.page.html",
@@ -78,9 +77,7 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
   }
 
   //DEV
-  showTestModal() {
-    this.modalCtrl.create({ component: TestComponentPage }).then((m) => m.present());
-  }
+  showTestModal() {}
 
   screenHeight: number;
   screenWidth: number;

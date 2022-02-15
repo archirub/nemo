@@ -53,7 +53,7 @@ export class LocalErrorHandler implements CustomErrorHandler<"local", LocalError
           throw new CustomError("local/check-auth-state", "local");
         }
       }),
-      this.handleErrors()
+      this.handleCheckAuthState()
     );
   }
 

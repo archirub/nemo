@@ -20,6 +20,7 @@ import {
   lastValueFrom,
   Observable,
   of,
+  ReplaySubject,
   Subscription,
 } from "rxjs";
 import {
@@ -36,7 +37,6 @@ import {
 import { UniversitiesStore } from "@stores/universities/universities.service";
 
 import { SignupService } from "@services/signup/signup.service";
-import { SignupAuthMethodSharer } from "./signupauth-method-sharer.service";
 import { EmailVerificationService } from "./email-verification.service";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 
@@ -44,6 +44,7 @@ import { FireAuthUserCredential } from "@interfaces/firebase.model";
 import { FlyingLetterAnimation } from "@animations/letter.animation";
 import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
 import { AnalyticsService } from "@services/analytics/analytics.service";
+import { FilterFalsy } from "src/app/shared/functions/custom-rxjs";
 
 @Component({
   selector: "app-signupauth",
@@ -64,26 +65,26 @@ export class SignupauthPage implements OnInit {
     );
   }
 
-  emailSendingInterval = 60; // (s) (note!!: if it is too low it throws an error saying "too many requests", hence why it is high)
   slidesLeft: number;
   validatorChecks: object;
   authForm: FormGroup;
 
   subs: Subscription = new Subscription();
 
-  @ViewChild("slides") slidesRef: IonSlides;
+  private slidesRef$ = new ReplaySubject<IonSlides>(1);
+  @ViewChild("slides") set slidesRefSetter(ref: IonSlides) {
+    if (ref) {
+      this.slidesRef$.next(ref);
+      this.emailService.slidesRef$.next(ref);
+    }
+  }
   @ViewChild("email", { read: ElementRef }) emailRef: ElementRef;
   @ViewChild("testing", { read: ElementRef }) testingRef: ElementRef;
 
-  private resendingIsAvailable = new BehaviorSubject<boolean>(true);
-  private timeToResendingAvailable = new BehaviorSubject<number>(
-    this.emailSendingInterval
-  );
-
   emailVerificationState$ = this.emailService.emailVerificationState$;
+  timeToResendingAvailable$ = this.emailService.timeToResendingAvailable$;
+  resendingIsAvailable$ = this.emailService.resendingIsAvailable$;
   universityOptions$ = this.universitiesStore.optionsList$;
-  resendingIsAvailable$ = this.resendingIsAvailable.asObservable();
-  timeToResendingAvailable$ = this.timeToResendingAvailable.asObservable();
 
   emailAnimationsHandler$ = this.emailVerificationState$.pipe(
     concatMap((state) => {
@@ -92,25 +93,6 @@ export class SignupauthPage implements OnInit {
       if (state === "verified") return this.emailVerifiedAnimation();
       return of("");
     })
-  );
-
-  timerResendingHandler$ = this.emailService.emailVerificationState$.pipe(
-    filter((state) => state === "sent" || state === "resent"),
-    concatMap(() => this.resendingIsAvailable$),
-    take(1),
-    filter((canResend) => canResend),
-    map(() => this.resendingIsAvailable.next(false)),
-    exhaustMap(() =>
-      interval(1000).pipe(
-        take(this.emailSendingInterval + 1),
-        map((count) => {
-          const timeLeftUntilAvailable = this.emailSendingInterval - count;
-          this.timeToResendingAvailable.next(timeLeftUntilAvailable);
-          this.changeDetector.detectChanges();
-          if (timeLeftUntilAvailable === 0) this.resendingIsAvailable.next(true);
-        })
-      )
-    )
   );
 
   // is a getter function to get a different object ref everytime
@@ -122,8 +104,6 @@ export class SignupauthPage implements OnInit {
   }
 
   constructor(
-    private router: Router,
-    private changeDetector: ChangeDetectorRef,
     private renderer: Renderer2,
     private navCtrl: NavController,
 
@@ -135,25 +115,25 @@ export class SignupauthPage implements OnInit {
     private loaderAlertManager: LoadingAndAlertManager,
     private errorHandler: GlobalErrorHandler,
     private signup: SignupService,
-    private emailService: EmailVerificationService,
-    // private loading: LoadingService,
-    private SignupAuthMethodSharer: SignupAuthMethodSharer
+    private emailService: EmailVerificationService // private loading: LoadingService,
   ) {
     this.authForm = this.emptyAuthForm;
   }
 
   ngOnInit() {
+    this.emailService.setGoToSlide(this.goToSlide.bind(this));
     this.subs.add(this.emailAnimationsHandler$.subscribe());
-    this.subs.add(this.timerResendingHandler$.subscribe());
+    this.subs.add(this.emailService.handleResendingTimer$.subscribe());
 
     // For global state management service
-    this.SignupAuthMethodSharer.defineGoStraightToEmailVerification(
-      this.goStraightToEmailVerification.bind(this)
-    );
+    // this.SignupAuthMethodSharer.defineGoStraightToEmailVerification(
+    //   this.goStraightToEmailVerification.bind(this)
+    // );
   }
 
   ionViewDidEnter() {
-    this.slidesRef.lockSwipes(true);
+    this.lockSwipes(true);
+
     this.updatePager();
 
     this.validatorChecks = {
@@ -245,17 +225,17 @@ export class SignupauthPage implements OnInit {
 
         //Successful account creation, log analytics
         await this.fbAnalytics.logEvent("account_creation", {
-          email: enteredEmail, 
-          timestamp: Date.now()
-        })
+          email: enteredEmail,
+          timestamp: Date.now(),
+        });
       } catch {
-        console.log('Analytics log failed. Email could not be parsed as a string.');
+        console.log("Analytics log failed. Email could not be parsed as a string.");
       }
 
       await this.loaderAlertManager.dismissDisplayed();
       await this.slideToNext();
-      await lastValueFrom(this.emailService.sendVerificationToUser("sent"));
-      await lastValueFrom(this.emailService.listenForVerification$);
+      this.emailService.sendVerificationToUser("sent");
+      this.emailService.listenForVerification();
     } catch (e) {
       const errorAlert = await this.loaderAlertManager.createAlert({
         header: "An unknown error occurred",
@@ -277,7 +257,7 @@ export class SignupauthPage implements OnInit {
     if (!user.emailVerified) return;
 
     //Assumed at this point email is verified, send to analytics
-    this.fbAnalytics.logEvent("email_verified", user)
+    this.fbAnalytics.logEvent("email_verified", user);
     return this.navCtrl.navigateForward("/welcome/signuprequired");
   }
 
@@ -321,18 +301,18 @@ export class SignupauthPage implements OnInit {
   }
 
   public async onSendingEmail(state: "sent" | "resent") {
-    FlyingLetterAnimation(this.emailRef).play();
+    // FlyingLetterAnimation(this.emailRef).play();
     return firstValueFrom(
-      this.resendingIsAvailable$.pipe(
+      this.emailService.resendingIsAvailable$.pipe(
         filter((canResend) => canResend),
-        switchMap(() => this.emailService.sendVerificationToUser(state))
+        tap(() => this.emailService.sendVerificationToUser(state))
       )
     );
   }
 
-  public async resendEmailVerification() {
+  public resendEmailVerification() {
     this.emailResentAnimation();
-    return firstValueFrom(this.emailService.sendVerificationToUser("resent"));
+    this.emailService.sendVerificationToUser("resent");
   }
 
   private isEmailValid(email: string): Promise<boolean> {
@@ -347,48 +327,6 @@ export class SignupauthPage implements OnInit {
           this.errorHandler.handleErrors()
         ) as Observable<boolean>
     );
-  }
-
-  /**
-   * Meant to be used only in the global-state-management service,
-   * whenever a new user object enters the Firebase auth state but doesn't have a verified email.
-   * This is meant to work in sync with the "unverifiedAccountDeletionScheduler" cloud function
-   * which will delete any account that isn't verified after a certain threshold of time.
-   * This better guarantees a user that is found to be authed but isn't verified was indeed
-   * in the middle of signing up
-   */
-  public async goStraightToEmailVerification(): Promise<void> {
-    const user = await this.errorHandler.getCurrentUser();
-    if (!user) return; // still necessary. In case of error, since the error is handled, the chain of logic will keep going
-
-    const slideIndex = await this.slidesRef.getActiveIndex();
-
-    if (this.router.url === "/welcome/signupauth") {
-      if (slideIndex === 2) return; // case where user already on right slide
-
-      // case where we must go to slide and listen for verif and send verif
-      await this.goToSlide(2);
-      await lastValueFrom(this.emailService.sendVerificationToUser("sent"));
-      return lastValueFrom(this.emailService.listenForVerification$);
-    }
-
-    console.log("user on wrong page and wrong slide for email verification");
-
-    const alert = await this.loaderAlertManager.createAlert({
-      header: "Email Verification Required",
-      message: `
-        We have detected that your account doesn't have its email verified yet.
-        We will now redirect you to the email verification page for you to finish the procedure.
-        `,
-      buttons: ["Okay"],
-    });
-
-    alert
-      .onDidDismiss()
-      .then(() => this.router.navigateByUrl("/welcome/signupauth"))
-      .then(() => this.goToSlide(2));
-
-    return this.loaderAlertManager.presentNew(alert, "replace-erase");
   }
 
   async onWeakPassword() {
@@ -502,8 +440,8 @@ export class SignupauthPage implements OnInit {
     );
 
     //Get current slide, calculate slides left
-    const l = await this.slidesRef.length();
-    const current = await this.slidesRef.getActiveIndex();
+    const l = await this.getSlidesLength();
+    const current = await this.getSlidesActiveIndex();
     this.slidesLeft = l - current - 1;
 
     //Show only the necessary number of pager dots equal to this.slidesLeft
@@ -519,27 +457,51 @@ export class SignupauthPage implements OnInit {
   }
 
   public async slideToPrevious() {
-    await this.slidesRef.lockSwipes(false);
-    await this.slidesRef.slidePrev();
+    await this.lockSwipes(false);
+    await this.slidePrev();
 
     await this.updatePager();
-    await this.slidesRef.lockSwipes(true);
+    await this.lockSwipes(true);
   }
 
   private async slideToNext() {
-    await this.slidesRef.lockSwipes(false);
-    await this.slidesRef.slideNext();
+    await this.lockSwipes(false);
+    await this.slideNext();
 
     await this.updatePager();
-    await this.slidesRef.lockSwipes(true);
+    await this.lockSwipes(true);
   }
 
   private async goToSlide(index: number) {
-    await this.slidesRef.lockSwipes(false);
-    await this.slidesRef.slideTo(index);
+    await this.lockSwipes(false);
+    await this.slideTo(index);
 
     await this.updatePager();
-    await this.slidesRef.lockSwipes(true);
+    await this.lockSwipes(true);
+  }
+
+  async lockSwipes(bool: boolean) {
+    return firstValueFrom(this.slidesRef$).then((ref) => ref.lockSwipes(bool));
+  }
+
+  async slideTo(index: number) {
+    return firstValueFrom(this.slidesRef$).then((ref) => ref.slideTo(index));
+  }
+
+  async slideNext() {
+    return firstValueFrom(this.slidesRef$).then((ref) => ref.slideNext());
+  }
+
+  async slidePrev() {
+    return firstValueFrom(this.slidesRef$).then((ref) => ref.slidePrev());
+  }
+
+  async getSlidesLength() {
+    return firstValueFrom(this.slidesRef$).then((ref) => ref.length());
+  }
+
+  async getSlidesActiveIndex() {
+    return firstValueFrom(this.slidesRef$).then((ref) => ref.getActiveIndex());
   }
 
   ngOnDestroy() {

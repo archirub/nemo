@@ -97,7 +97,7 @@ export class FirebaseAuthService {
       } catch (e) {
         await Promise.all([
           clearLocalCache(),
-          this.storeResetter.resetStores(logOut),
+          this.storeResetter.resetStores(() => logOut()),
           navigateToWelcome(),
         ]);
 
@@ -112,7 +112,7 @@ export class FirebaseAuthService {
 
       await Promise.all([
         clearLocalCache(),
-        this.storeResetter.resetStores(logOut),
+        this.storeResetter.resetStores(() => logOut()),
         navigateToWelcome(),
       ]);
       return this.loadingAlertManager.dismissDisplayed();
