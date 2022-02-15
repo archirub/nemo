@@ -68,11 +68,15 @@ textarea {
 .add {
     top: 32%;
     right: 0;
+    justify-content: center;
+    align-items: center;
 }
 
 .noSlides {
     position: absolute;
     text-align: center;
+    justify-content: center;
+    align-items: center;
     top: 50%;
     left: calc(50vw - 4vh);
 }
