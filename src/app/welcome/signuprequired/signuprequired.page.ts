@@ -42,6 +42,7 @@ import { PrivacyModalComponent } from "./privacy-modal/privacy-modal.component";
 import { SCenterAnimation } from "@animations/index";
 import { SCleaveAnimation } from "@animations/index";
 import { TermsModalComponent } from "./terms-modal/terms-modal.component";
+import { ManagementPauser } from "@services/global-state-management/management-pauser.service";
 
 @Component({
   selector: "app-signuprequired",
@@ -119,6 +120,7 @@ export class SignuprequiredPage implements OnInit, OnDestroy {
 
     private universitiesStore: UniversitiesStore,
 
+    private managementPauser: ManagementPauser,
     private loadingAlertManager: LoadingAndAlertManager,
     private errorHandler: GlobalErrorHandler,
     private signup: SignupService,
@@ -255,18 +257,25 @@ export class SignuprequiredPage implements OnInit, OnDestroy {
       return this.loadingAlertManager.presentNew(alert, "replace-erase");
     }
 
+    await this.managementPauser.requestPause("skip-to-app");
+
     await this.updateData();
 
     try {
       await this.signup.createFirestoreAccount();
     } catch (e) {
+      await this.managementPauser.unrequestPause("skip-to-app");
+
       await this.loadingAlertManager.dismissDisplayed();
+
       await this.onAccountCreationFailure();
     }
 
     await this.signup.initializeUser();
 
     await this.loadingAlertManager.dismissDisplayed();
+
+    await this.managementPauser.unrequestPause("skip-to-app");
 
     //Log analytics event for skip to app
     // no need to await since logic is not dependent on its success

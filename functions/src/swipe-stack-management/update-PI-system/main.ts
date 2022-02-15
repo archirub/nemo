@@ -46,11 +46,10 @@ interface uid_score {
 // FOR PRODUCTION
 export const updatePISystem = functions
   .region("europe-west2")
-  .pubsub.schedule("every day 05:00")
+  .pubsub.schedule("everyday at 5:00AM")
   .timeZone("Europe/London")
   .onRun(async (context) => {
-    // .https
-    //   .onCall(async (dataRequest, context) => {
+    // .https.onCall(async (dataRequest, context) => {
     await admin.firestore().runTransaction(async (transaction) => {
       // FETCHING UID AND PI STORAGE DOCUMENTS
       const [currentUidStorageDocs, piStorageDocs] = await Promise.all([
@@ -61,7 +60,6 @@ export const updatePISystem = functions
           FirebaseFirestore.QuerySnapshot<piStorage>
         >,
       ]);
-      functions.logger.info("LOGGING ");
 
       if (currentUidStorageDocs.empty)
         emptyCollectionOrQueryError("uidDatingStorage", "none; pubsub function");

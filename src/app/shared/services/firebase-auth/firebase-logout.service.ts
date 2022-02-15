@@ -9,6 +9,7 @@ import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loade
 import { BehaviorSubject } from "rxjs";
 import { pageTransition } from "@animations/page-transition.animation";
 import { wait } from "../../functions/common";
+import { ManagementPauser } from "@services/global-state-management/management-pauser.service";
 
 // this functionality was moved to a different service to solve some dependency issues between
 // global-error-handler -> firebase-auth-service -> firebase-auth-error-handler (|| other error handlers) -> global-error-handler
@@ -24,12 +25,13 @@ export class FirebaseLogoutService {
   // to start again. Otherwise a "null" value comes in from afAuth.user in global state management
   // and it sees no one is authenticated + we are in settings page so it triggers navigation
   // back to welcome (a second time) and store reset (a second time) which is quite inefficient
-  private isLoggingOut = new BehaviorSubject<boolean>(false);
-  public isLoggingOut$ = this.isLoggingOut.asObservable();
+  // private isLoggingOut = new BehaviorSubject<boolean>(false);
+  // public isLoggingOut$ = this.isLoggingOut.asObservable();
 
   constructor(
     private zone: NgZone,
     private navCtrl: NavController,
+    private managementPauser: ManagementPauser,
 
     private afAuth: AngularFireAuth,
 
@@ -45,7 +47,7 @@ export class FirebaseLogoutService {
     // while trying to log back in where the "log in" button doesn't get enabled when the email-password form becomes valid
     const clearLocalCache = () => Storage.clear();
     const logOut = async () => {
-      this.isLoggingOut.next(true);
+      await this.managementPauser.requestPause("logging-out");
       return this.afAuth.signOut();
     };
 
@@ -71,6 +73,6 @@ export class FirebaseLogoutService {
 
     await navigateToWelcome();
 
-    this.isLoggingOut.next(false);
+    return this.managementPauser.unrequestPause("logging-out");
   }
 }

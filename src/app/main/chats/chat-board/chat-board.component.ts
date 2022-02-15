@@ -179,12 +179,12 @@ export class ChatBoardComponent implements OnInit, AfterViewInit {
   }
 
   goToChats() {
-    return this.navCtrl.navigateRoot("main/tabs/chats");
+    return this.navCtrl.navigateForward("main/tabs/chats");
   }
 
   // go to home page
   goToHome() {
-    return this.navCtrl.navigateRoot("main/tabs/home");
+    return this.navCtrl.navigateForward("main/tabs/home");
   }
 
   // for trackBy of ngFor loop on chats

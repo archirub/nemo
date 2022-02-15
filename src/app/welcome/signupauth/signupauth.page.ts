@@ -356,7 +356,7 @@ export class SignupauthPage implements OnInit {
       this.authForm.reset(this.emptyAuthForm);
       return this.goToSlide(0);
     };
-    const signInProcedure = () => this.navCtrl.navigateRoot("/welcome/login");
+    const signInProcedure = () => this.navCtrl.navigateForward("/welcome/login");
 
     const alert = await this.loaderAlertManager.createAlert({
       header: "This email is already in use",

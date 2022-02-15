@@ -63,7 +63,7 @@ export class GlobalErrorHandler implements CustomGlobalErrorHandler {
         catchError<T, Observable<T>>((err: CustomError) => {
           isFromError = true;
 
-          if (opts.strategy === "dontHandle")
+          if (opts?.strategy === "dontHandle")
             return of(dontHandleString) as unknown as Observable<T>;
 
           console.error("Error through GlobalErrorHandler:", err);
@@ -100,9 +100,9 @@ export class GlobalErrorHandler implements CustomGlobalErrorHandler {
         switchMap((val) => {
           if (isFromError) {
             console.log("error went through the last tap", opts);
-            if (opts.strategy === "endStream") return of("").pipe(takeUntil(timer(1))); // complete false, just to make it shut up
-            if (opts.strategy === "fallback") return opts.fallback$; // complete false, just to make it shut up
-            if (opts.strategy === "propagateError" || opts.strategy === "dontHandle")
+            if (opts?.strategy === "endStream") return of("").pipe(takeUntil(timer(1))); // complete false, just to make it shut up
+            if (opts?.strategy === "fallback") return opts?.fallback$ ?? of(""); // complete false, just to make it shut up
+            if (opts?.strategy === "propagateError" || opts?.strategy === "dontHandle")
               throw new Error("");
           }
 

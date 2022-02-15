@@ -21,6 +21,7 @@ import {
   filter,
   first,
   map,
+  mapTo,
   share,
   switchMap,
   switchMapTo,
@@ -38,6 +39,7 @@ import { IonSlides, NavController } from "@ionic/angular";
 import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
 import { Router } from "@angular/router";
 import { Logger, SubscribeAndLog } from "src/app/shared/functions/custom-rxjs";
+import { ManagementPauser } from "@services/global-state-management/management-pauser.service";
 
 export type EmailVerificationState = "not-sent" | "sent" | "resent" | "verified";
 
@@ -88,12 +90,8 @@ export class EmailVerificationService implements OnDestroy {
   );
 
   handleResendingTimer$ = this.triggerSendVerification$.pipe(
-    Logger("a"),
     withLatestFrom(this.resendingIsAvailable$),
-    Logger("b"),
     filter(([_, canResend]) => canResend),
-    Logger("c"),
-
     map(() => this.resendingIsAvailable.next(false)),
     exhaustMap(() =>
       interval(1000).pipe(
@@ -108,16 +106,26 @@ export class EmailVerificationService implements OnDestroy {
     )
   );
 
+  private handleManagementPausing$ = this.listeningForVerification$.pipe(
+    switchMap((isListening) => {
+      const pausingId = "email-verification";
+      if (isListening) return this.managementPauser.requestPause(pausingId);
+
+      return this.managementPauser.unrequestPause(pausingId);
+    })
+  );
+
   constructor(
     private afAuth: AngularFireAuth,
     private loaderAlertManager: LoadingAndAlertManager,
     private navCtrl: NavController,
     private router: Router,
-
-    private errorHandler: GlobalErrorHandler
+    private errorHandler: GlobalErrorHandler,
+    private managementPauser: ManagementPauser
   ) {
     this.subs.add(this.handleListening$.subscribe());
     this.subs.add(this.handleSending$.subscribe());
+    this.subs.add(this.handleManagementPausing$.subscribe());
 
     SubscribeAndLog(this.emailVerificationState$, "emailVerificationState$");
     SubscribeAndLog(this.resendingIsAvailable$, "resendingIsAvailable$");

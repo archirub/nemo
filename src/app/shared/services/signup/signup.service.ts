@@ -143,7 +143,7 @@ export class SignupService {
             ).pipe(last());
           })
         )
-        .pipe(this.errorHandler.handleErrors())
+        .pipe(this.errorHandler.handleErrors({ strategy: "propagateError" }))
     );
   }
 

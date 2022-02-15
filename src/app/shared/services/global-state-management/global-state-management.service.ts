@@ -45,6 +45,7 @@ import { FilterFalsy, Logger } from "../../functions/custom-rxjs";
 import { AngularFireAuth } from "@angular/fire/auth";
 import { NavController } from "@ionic/angular";
 import { EmailVerificationService } from "src/app/welcome/signupauth/email-verification.service";
+import { ManagementPauser } from "./management-pauser.service";
 
 type pageName =
   | "chats"
@@ -80,11 +81,6 @@ export class GlobalStateManagementService {
 
   private alreadyConnectedOnce: boolean = false;
 
-  private pauseGlobalManagement = new BehaviorSubject<boolean>(false);
-  private pauseGlobalManagement$ = this.pauseGlobalManagement.pipe(
-    distinctUntilChanged()
-  );
-
   constructor(
     private router: Router,
     private navCtrl: NavController,
@@ -92,6 +88,7 @@ export class GlobalStateManagementService {
     private firestore: AngularFirestore,
     private afAuth: AngularFireAuth,
 
+    private managementPauser: ManagementPauser,
     private storeStateManager: StoreStateManager,
     private errorHandler: GlobalErrorHandler,
     private loadingAlertManager: LoadingAndAlertManager,
@@ -120,50 +117,9 @@ export class GlobalStateManagementService {
     share()
   );
 
-  checkForPausedManagement =
-    <T>() =>
-    (source: Observable<T>) =>
-      source.pipe(
-        switchMap((val) =>
-          this.pauseGlobalManagement$.pipe(
-            filter((isPaused) => !isPaused),
-            take(1),
-            mapTo(val)
-          )
-        )
-      );
-
-  checkLoggingOut =
-    <T>() =>
-    (source: Observable<T>) =>
-      source.pipe(
-        switchMap((val) =>
-          this.firebaseLogout.isLoggingOut$.pipe(
-            filter((isLoggingOut) => !isLoggingOut),
-            take(1),
-            mapTo(val)
-          )
-        )
-      );
-
-  checkEmailVerificationListening =
-    <T>() =>
-    (source: Observable<T>) =>
-      source.pipe(
-        switchMap((val) =>
-          this.emailVerificationService.listeningForVerification$.pipe(
-            filter((isListening) => !isListening),
-            take(1),
-            mapTo(val)
-          )
-        )
-      );
-
   private globalManagement$(): Observable<void> {
     return this.afAuth.user.pipe(
-      this.checkForPausedManagement(),
-      this.checkLoggingOut(), // makes sure we aren't logging out (see firebase logout service for reason)
-      this.checkEmailVerificationListening(),
+      this.managementPauser.checkForPaused(),
       switchMap((user) => forkJoin([of(user), this.isUserEmailVerified(user)])),
       switchMap(([user, emailIsVerified]) => {
         // to always activate
@@ -258,13 +214,15 @@ export class GlobalStateManagementService {
    * to fetch that person's profile
    */
   private noDocumentsRoutine(user: FirebaseUser): Observable<void> {
+    const pauseRequestId = "noDocumentsRoutine";
+
     const finishProfileProcedure = () => {
       return this.signupService.checkAndRedirect();
     };
     const abortProfileProcedure = async () => {
       try {
         // pausing the management as the Firebase user state is strange here and keeps changing and we don't want ot react to these changes
-        this.pauseGlobalManagement.next(true);
+        await this.managementPauser.requestPause(pauseRequestId);
         await Storage.clear();
         await user.delete();
         await this.navCtrl.navigateForward("/welcome");
@@ -285,16 +243,15 @@ export class GlobalStateManagementService {
                 resolve({ user: u });
               }
             }, 250);
-          }).then(() => {
-            this.pauseGlobalManagement.next(false);
-            return this.navCtrl.navigateForward("/welcome");
-          });
+          })
+            .then(() => this.managementPauser.unrequestPause(pauseRequestId))
+            .then(() => this.navCtrl.navigateForward("/welcome"));
         }
 
-        this.pauseGlobalManagement.next(false);
+        return this.managementPauser.unrequestPause(pauseRequestId);
       }
 
-      this.pauseGlobalManagement.next(false);
+      return this.managementPauser.unrequestPause(pauseRequestId);
     };
 
     const alertOptions = {
@@ -493,7 +450,7 @@ export class GlobalStateManagementService {
           )
       ),
       take(1),
-      map((doc) => doc.exists)
+      map((doc) => doc?.exists)
     );
   }
 

@@ -41,13 +41,13 @@ export class SignupToAppPage {
 
   async goToApp() {
     if (await firstValueFrom(this.appIsReady$))
-      return this.navCtrl.navigateRoot("/main/tabs/home");
+      return this.navCtrl.navigateForward("/main/tabs/home");
 
     const loader = await this.loadingAlertManager.createLoading({
       message: "Getting the app ready...",
     });
 
-    loader.onDidDismiss().then(() => this.navCtrl.navigateRoot("/main/tabs/home"));
+    loader.onDidDismiss().then(() => this.navCtrl.navigateForward("/main/tabs/home"));
 
     await this.loadingAlertManager.presentNew(loader, "replace-erase");
 
@@ -80,6 +80,8 @@ export class SignupToAppPage {
 
   async initializeAppState() {
     // await lastValueFrom(this.globalStateManagement.resetAppState());
+
+    // activates the user-dependent stores
     this.storeStateManager.activateUserDependent();
   }
 }

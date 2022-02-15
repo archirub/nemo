@@ -49,7 +49,7 @@ export class FirebaseAuthService {
     if (!user) return;
 
     const navigateToWelcome = async () =>
-      this.zone.run(() => this.navCtrl.navigateRoot("/welcome"));
+      this.zone.run(() => this.navCtrl.navigateForward("/welcome"));
     const clearLocalCache = () => Storage.clear();
     const logOut = () => this.afAuth.signOut();
     const deleteAccount = () =>

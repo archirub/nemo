@@ -17,7 +17,7 @@ import { FirestoreTimestamp } from "./firebase.model";
 export const MAX_PROFILE_PICTURES_COUNT = 6;
 export const MAX_PROFILE_QUESTIONS_COUNT = 3;
 export const MAX_PROFILE_INTERESTS = 6;
-export const DEFAULT_PICTURE_URL = "/assets/icons/icon-192x192.png";
+export const DEFAULT_PICTURE_URL = "/assets/loading_profile_picture.svg";
 
 export interface profile {
   uid: string;
