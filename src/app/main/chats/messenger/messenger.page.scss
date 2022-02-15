@@ -29,6 +29,7 @@ ion-toolbar.chat-toolbar {
 #message-board {
   width: calc(100vw + 15px);
   --padding-end: 15px;
+  height: 100%;
 }
 
 ion-header {

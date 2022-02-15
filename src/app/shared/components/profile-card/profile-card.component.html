@@ -78,11 +78,14 @@
         <ion-card-title
           >{{ profile?.firstName }}, {{ profile?.dateOfBirth | age }}
         </ion-card-title>
-        <ion-card-subtitle id="department"
-          >{{ profile?.course }}{{ profile?.course && profile?.degree ? ", " : ""
-          }}{{ profile?.degree | degrees }}{{ profile?.university && profile?.degree ? " at " : "" 
-          }}{{ profile?.university }}</ion-card-subtitle
-        >
+        <div class="flex">
+          <ion-card-subtitle id="courseTitle"
+            >{{ profile?.course }}{{ profile?.course && profile?.degree ? ", " : ""
+          }}</ion-card-subtitle>
+          <ion-card-subtitle id="departmentTitle"
+          >&nbsp;{{ profile?.degree | degrees }}{{ profile?.university && profile?.degree ? " at " : ""
+          }}{{ profile?.university }}</ion-card-subtitle>
+        </div>
       </ion-card-header>
       <div #content id="content" [style.marginTop]="fixedHeader ? '14vh' : '0'">
         <!-- FIX LINE ABOVE AFTER RELEASE -->

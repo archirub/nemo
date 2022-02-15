@@ -274,6 +274,6 @@
 
 ion-loading.customLoader {
     .loading-wrapper {
-        font-weight: 400 !important;
+        font-weight: 400 !important; //doesn't work but worth a shot
     };
 }

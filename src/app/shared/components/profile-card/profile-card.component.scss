@@ -10,7 +10,9 @@
   margin: 0 auto
 }
 
-
+.flex {
+  display: flex;
+}
 
 ion-card-title {
   font-weight: 500;
@@ -205,10 +207,20 @@ img {
   border-bottom-right-radius: 20px;
 }
 
-#department {
+#courseTitle {
   font-size: 2.25vh;
   text-transform: none;
   color: var(--ion-color-primary);
+  margin-top: 10px;
+  margin-bottom: 0px;
+  letter-spacing: 1px;
+  font-weight: 500;
+}
+
+#departmentTitle {
+  font-size: 2.25vh;
+  text-transform: none;
+  color: var(--ion-color-secondary);
   margin-top: 10px;
   margin-bottom: 0px;
   letter-spacing: 1px;
