@@ -4,90 +4,84 @@ import * as admin from "firebase-admin";
 import {
   chatFromDatabase,
   notificationsDocument,
+  profileFromDatabase,
 } from "../../../src/app/shared/interfaces/index";
+import { notFoundDocumentError } from "../supporting-functions/error-handling/generic-errors";
 
 export const newMatchNotification = functions
   .region("europe-west2")
   .firestore.document("chats/{chatId}")
   .onCreate(async (snap, context) => {
     const data = snap.data() as chatFromDatabase;
-    const tokenMap: { [uid: string]: string[] } = {};
-    data.uids.forEach((uid) => (tokenMap[uid] = []));
+    const uidOfReceiver = data.uids.filter((uid) => uid !== data.uidOfMatchmaker)[0];
 
-    await Promise.all(
-      data.uids.map(async (uid) => {
-        const notifDocSnapshot = await admin
-          .firestore()
-          .collection("profiles")
-          .doc(uid)
-          .collection("private")
-          .doc("notifications")
-          .get();
+    const notifDocSnapshot = await admin
+      .firestore()
+      .collection("profiles")
+      .doc(uidOfReceiver)
+      .collection("private")
+      .doc("notifications")
+      .get();
 
-        if (!notifDocSnapshot.exists) return;
+    const matchmakerProfileSnapshot = await admin
+      .firestore()
+      .collection("profiles")
+      .doc(data.uidOfMatchmaker)
+      .get();
 
-        const tokens = (notifDocSnapshot.data() as notificationsDocument)?.tokens;
+    if (!notifDocSnapshot.exists)
+      return notFoundDocumentError(
+        `profiles/${uidOfReceiver}/private`,
+        "notifications",
+        "onCreate"
+      );
+    if (!matchmakerProfileSnapshot.exists)
+      return notFoundDocumentError(`profiles`, data.uidOfMatchmaker, "onCreate");
 
-        if (!Array.isArray(tokens) || tokens.length == 0) return;
+    const tokens = (notifDocSnapshot.data() as notificationsDocument)?.tokens;
+    const matchmakerFirstName = (matchmakerProfileSnapshot.data() as profileFromDatabase)
+      ?.firstName;
 
-        tokenMap[uid] = tokens;
-      })
-    );
+    if (!Array.isArray(tokens) || tokens.length == 0) return;
 
     const payload: admin.messaging.MessagingPayload = {
       notification: {
-        title: `New Match!`,
-        body: `Who could that be?`,
+        title: !!matchmakerFirstName
+          ? `You caught ${matchmakerFirstName}!`
+          : `New catch!`,
+        body: `Head back to Nemo to find out more`,
       },
     };
     const options: admin.messaging.MessagingOptions = {
-      collapseKey: `new_match`,
+      collapseKey: `new_catch`,
     };
 
-    const allTokens = Object.values(tokenMap).flat();
+    const response = await admin.messaging().sendToDevice(tokens, payload, options);
 
-    const response = await admin.messaging().sendToDevice(allTokens, payload, options);
-
-    const tokensToRemove: {
-      [uid: string]: string[];
-    } = {};
-    Object.keys(tokenMap).forEach((uid) => (tokensToRemove[uid] = []));
-
+    const tokensToRemove: string[] = [];
     response.results.forEach((result, index) => {
       const error = result.error;
 
       if (error) {
-        functions.logger.error(
-          "Failure sending notification to",
-          allTokens[index],
-          error
-        );
+        functions.logger.error("Failure sending notification to", tokens[index], error);
+
         // Cleanup the tokens who are not registered anymore.
         if (
           error.code === "messaging/invalid-registration-token" ||
           error.code === "messaging/registration-token-not-registered"
         ) {
-          Object.entries(tokenMap).forEach(([uid, tokens]) => {
-            if (tokens.includes(allTokens[index])) {
-              tokensToRemove[uid].push(allTokens[index]);
-            }
-          });
+          tokensToRemove.push(tokens[index]);
         }
       }
     });
-    await Promise.all(
-      Object.entries(tokensToRemove).map(async ([uid, tokens]) => {
-        if (tokens.length == 0) return;
 
-        const newTokensArray = tokens.filter((t) => !tokens.includes(t));
-
-        await admin
-          .firestore()
-          .collection("profiles")
-          .doc(uid)
-          .collection("private")
-          .doc("notifications")
-          .update({ tokens: newTokensArray });
-      })
-    );
+    if (tokensToRemove.length > 0) {
+      await admin
+        .firestore()
+        .collection("profiles")
+        .doc(uidOfReceiver)
+        .collection("private")
+        .doc("notifications")
+        .update({ tokens: admin.firestore.FieldValue.arrayRemove(tokensToRemove) });
+    }
   });

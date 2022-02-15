@@ -27,6 +27,7 @@ import { Chat } from "@classes/index";
 import { FadeOutAnimation } from "@animations/fade-out.animation";
 import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
 import { AppToggleComponent } from "@components/index";
+import { wait } from "src/app/shared/functions/common";
 
 @Component({
   selector: "app-chat-board",
@@ -42,6 +43,7 @@ export class ChatBoardComponent implements OnInit, AfterViewInit {
   @Input() matches: Chat[];
   @Output() chatboardReady = new EventEmitter();
   @ViewChild("chatDeleteRef") chatDeleteRef: IonItemSliding;
+  @ViewChild("catchDeleteRef") catchDeleteRef: IonItemSliding;
   @ViewChild("chatToggle") chatToggle: AppToggleComponent;
 
   chatboardPictures$ = this.chatboardPicturesService.holder$; // used in template
@@ -75,50 +77,72 @@ export class ChatBoardComponent implements OnInit, AfterViewInit {
 
   // for deleting a particular chat
   async deleteChat(event, chat: Chat) {
-    // make "delete" side slide close before starting this procedure
-    await this.chatDeleteRef.close();
+    const onCancel = () => {};
 
-    // create loader
-    const loader = await this.loadingAlertManager.createLoading({
-      message: "Deleting chat with " + chat.recipient.name,
-      spinner: "bubbles",
-      backdropDismiss: false,
-    });
-
-    // show loader
-    await this.loadingAlertManager.presentNew(loader, "replace-erase");
-
-    // attempt to delete the chat on the database
-    try {
-      await firstValueFrom(this.chatboardStore.deleteChatOnDatabase(chat.id));
-    } catch {
-      // if unsuccesful, dismiss loader and show alert saying there was an error
-      await this.loadingAlertManager.dismissDisplayed();
-
-      const errorAlert = await this.loadingAlertManager.createAlert({
-        header: "An error occured",
-        message: "Your chat with " + chat.recipient.name + " could not be deleted... ",
-        buttons: ["Okay"],
+    const onConfirm = async () => {
+      // create loader
+      const loader = await this.loadingAlertManager.createLoading({
+        message: "Deleting chat with " + chat.recipient.name,
+        spinner: "bubbles",
+        backdropDismiss: false,
       });
 
-      return this.loadingAlertManager.presentNew(errorAlert, "replace-erase");
-    }
+      // show loader
+      await this.loadingAlertManager.presentNew(loader, "replace-erase");
 
-    // get element for fadeOut animation
-    let target: HTMLElement = event.target; //Get list item where click occurred
-    while (!target.classList.contains("parent")) {
-      //Checks parent until it finds full list box
-      target = target.parentElement;
-    }
+      // attempt to delete the chat on the database
+      try {
+        await firstValueFrom(this.chatboardStore.deleteChatOnDatabase(chat.id));
+      } catch {
+        // if unsuccesful, dismiss loader and show alert saying there was an error
+        await this.loadingAlertManager.dismissDisplayed();
 
-    await this.loadingAlertManager.dismissDisplayed();
+        const errorAlert = await this.loadingAlertManager.createAlert({
+          header: "An error occured",
+          message: "Your chat with " + chat.recipient.name + " could not be deleted... ",
+          buttons: ["Okay"],
+        });
 
-    //Fades out the chatboard list element which just got deleted
-    await FadeOutAnimation(target, 300).play();
+        return this.loadingAlertManager.presentNew(errorAlert, "replace-erase");
+      }
 
-    await firstValueFrom(
-      timer(400).pipe(switchMap(() => this.chatboardStore.deleteChatInStore(chat.id)))
-    );
+      // get element for fadeOut animation
+      let target: HTMLElement = event.target; //Get list item where click occurred
+      while (!target.classList.contains("parent")) {
+        //Checks parent until it finds full list box
+        target = target.parentElement;
+      }
+
+      await this.loadingAlertManager.dismissDisplayed();
+
+      //Fades out the chatboard list element which just got deleted
+      await FadeOutAnimation(target, 200).play();
+
+      await wait(200);
+
+      return firstValueFrom(this.chatboardStore.deleteChatInStore(chat.id));
+    };
+
+    // make "delete" side slide close before starting this procedure
+    await Promise.all([
+      this.chatDeleteRef?.closeOpened(),
+      this.catchDeleteRef?.closeOpened(),
+    ]);
+
+    const alert = await this.loadingAlertManager.createAlert({
+      header: "Delete chat with " + chat.recipient.name + "?",
+      message: "All information about this conversation will be deleted.",
+      buttons: [
+        {
+          role: "cancel",
+          text: "Cancel",
+          handler: onCancel,
+        },
+        { text: "Delete", handler: onConfirm },
+      ],
+    });
+
+    return alert.present();
   }
 
   // for shortening last message

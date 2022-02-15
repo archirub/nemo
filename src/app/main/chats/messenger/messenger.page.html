@@ -46,9 +46,12 @@
           <p class="tip">{{ chosenPopup }}</p>
         </ion-row>
 
-        <ion-content id="message-board" [scrollEvents]="true">
+        <!-- uncommenting this ion-content and commenting the div brings the messages back-->
+        <!-- <ion-content id="message-board" [scrollEvents]="true"> -->
+        <div id="message-board">
           <app-message-board></app-message-board>
-        </ion-content>
+        </div>
+        <!-- </ion-content> -->
 
         <div id="boxBelowInput"></div>
 

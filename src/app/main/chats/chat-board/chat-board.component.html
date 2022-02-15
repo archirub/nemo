@@ -37,6 +37,7 @@
       <ion-item-sliding
         class="parent"
         *ngFor="let chat of matches; index as i; trackBy: trackChat"
+        #catchDeleteRef
       >
         <ion-item detail="true" button (click)="goToMessenger(chat.id)">
           <ion-avatar slot="start">

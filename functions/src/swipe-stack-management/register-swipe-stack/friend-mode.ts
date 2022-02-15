@@ -153,7 +153,7 @@ export async function createFriendChatDocumentsREAD(
   const targetUserProfile = snapshots[0] as profileSnapshot;
 
   snapshots.shift(); // to remove targetUserProfile from snapshots array
-  const matchedUserProfiles = snapshots as profileSnapshot[];
+  const matchedUserProfiles = snapshots as unknown as profileSnapshot[];
 
   if (!targetUserProfile?.exists)
     inexistentDocumentError("profile", targetUserProfile.id, targetuid);
@@ -189,6 +189,7 @@ export function createFriendChatDocumentsWRITE(
     const chat: chatFromDatabase = {
       uids,
       userSnippets,
+      uidOfMatchmaker: targetUserProfile.id,
     };
 
     const newChatRef = admin.firestore().collection("chats").doc();

@@ -293,7 +293,11 @@ export class GlobalStateManagementService {
     return defer(() => actions());
   }
 
-  private storesManagement(): Observable<void> {
+  public isInMain(): Observable<boolean> {
+    return this.listenToRouter().pipe(map((page) => this.pageIsMain(page)));
+  }
+
+  private listenToRouter(): Observable<pageName> {
     // serves as notification for when the router has been initialized
     const initialUrl$ = this.routerInitListener.routerHasInit$.pipe(
       map(() => this.router.url)
@@ -303,7 +307,12 @@ export class GlobalStateManagementService {
       filter((event) => event instanceof NavigationEnd || typeof event === "string"),
       map((event: NavigationEnd) =>
         this.getPageFromUrl(event instanceof NavigationEnd ? event.url : event)
-      ),
+      )
+    );
+  }
+
+  private storesManagement(): Observable<void> {
+    return this.listenToRouter().pipe(
       mergeMap((page) => this.activateCorrespondingStores(page))
     );
   }

@@ -7,6 +7,7 @@ export interface userSnippet {
 export interface chatFromDatabase {
   uids: string[];
   userSnippets: userSnippet[];
+  uidOfMatchmaker: string;
   // messages: messageFromDatabase[];
   // batchVolume: number;
   // lastInteracted: firebase.firestore.Timestamp;

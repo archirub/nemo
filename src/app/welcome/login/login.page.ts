@@ -38,15 +38,24 @@ export class LoginPage {
     const email: string = this.loginForm.get("email").value;
     const password: string = this.loginForm.get("password").value;
 
-    await firstValueFrom(
-      defer(() => this.afAuth.signInWithEmailAndPassword(email, password)).pipe(
-        this.errorHandler.convertErrors("firebase-auth"),
-        switchMap(() => defer(() => this.navCtrl.navigateForward("main/tabs/home"))),
-        this.errorHandler.handleErrors()
-      )
-    );
+    try {
+      await firstValueFrom(
+        defer(() => this.afAuth.signInWithEmailAndPassword(email, password)).pipe(
+          this.errorHandler.convertErrors("firebase-auth"),
+          this.errorHandler.handleErrors({ strategy: "propagateError" })
+        )
+      );
 
-    await this.loadingAlertManager.dismissDisplayed();
+      this.loginForm.get("email").patchValue("");
+      this.loginForm.get("password").patchValue("");
+
+      await this.loadingAlertManager.dismissDisplayed();
+
+      return this.navCtrl.navigateForward("main/tabs/home");
+    } catch {
+      this.loginForm.get("password").patchValue("");
+      return this.loadingAlertManager.dismissDisplayed();
+    }
   }
 
   private async showAlert(message: string) {

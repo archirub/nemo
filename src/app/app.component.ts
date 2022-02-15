@@ -5,7 +5,7 @@ import { AngularFireAuth } from "@angular/fire/auth";
 import { HideOptions, ShowOptions, SplashScreen } from "@capacitor/splash-screen";
 
 import { firstValueFrom, Subscription } from "rxjs";
-import { filter, take, map } from "rxjs/operators";
+import { filter, first, map, take } from "rxjs/operators";
 import { Capacitor } from "@capacitor/core";
 
 import { GlobalStateManagementService } from "@services/global-state-management/global-state-management.service";
@@ -13,6 +13,8 @@ import { routerInitListenerService } from "@services/global-state-management/ini
 import { StoreReadinessService } from "@services/store-readiness/store-readiness.service";
 
 import { SubscribeAndLog } from "./shared/functions/custom-rxjs";
+import { Router } from "@angular/router";
+import { wait } from "./shared/functions/common";
 
 @Component({
   selector: "app-root",
@@ -23,7 +25,7 @@ export class AppComponent implements OnDestroy, OnInit {
   subs = new Subscription();
 
   get userState() {
-    return firstValueFrom(this.GlobalStateManagement.userState$.pipe(take(1)));
+    return firstValueFrom(this.GlobalStateManagement.userState$.pipe(first()));
   }
 
   constructor(
@@ -31,7 +33,8 @@ export class AppComponent implements OnDestroy, OnInit {
     private afAuth: AngularFireAuth,
     private GlobalStateManagement: GlobalStateManagementService,
     private routerInitListener: routerInitListenerService,
-    private storeReadiness: StoreReadinessService
+    private storeReadiness: StoreReadinessService,
+    private router: Router
   ) {
     this.initializeApp();
     SubscribeAndLog(this.afAuth.authState, "authState$");
@@ -50,7 +53,10 @@ export class AppComponent implements OnDestroy, OnInit {
 
     await this.platform.ready();
 
-    if ((await this.userState) === "full") await this.storesReady();
+    if ((await this.userState) === "full") {
+      await this.fullIsReady();
+      await wait(300);
+    }
 
     if (SplashScreenAvailable) await SplashScreen.hide(splashScreenHideOptions);
   }
@@ -59,8 +65,18 @@ export class AppComponent implements OnDestroy, OnInit {
     this.subs.add(this.GlobalStateManagement.activate$.subscribe());
   }
 
+  async fullIsReady() {
+    return Promise.all([this.routeIsMain(), this.storesReady()]);
+  }
+
+  async routeIsMain() {
+    return firstValueFrom(
+      this.GlobalStateManagement.isInMain().pipe(filter(Boolean), take(1))
+    );
+  }
+
   // Returns a promise when the stores are ready
-  storesReady() {
+  async storesReady() {
     return firstValueFrom(this.storeReadiness.app$.pipe(filter((isReady) => isReady)));
   }
 
