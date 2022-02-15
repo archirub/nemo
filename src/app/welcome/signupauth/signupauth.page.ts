@@ -24,7 +24,7 @@ import { FireAuthUserCredential } from "@interfaces/firebase.model";
 import { FlyingLetterAnimation } from "@animations/letter.animation";
 import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
 import { AnalyticsService } from "@services/analytics/analytics.service";
-import { FilterFalsy } from "src/app/shared/functions/custom-rxjs";
+import { ManagementPauser } from "@services/global-state-management/management-pauser.service";
 
 @Component({
   selector: "app-signupauth",
@@ -88,6 +88,7 @@ export class SignupauthPage implements OnInit {
 
     private afFunctions: AngularFireFunctions,
     private fbAnalytics: AnalyticsService,
+    private managementPauser: ManagementPauser,
 
     private universitiesStore: UniversitiesStore,
 
@@ -164,6 +165,7 @@ export class SignupauthPage implements OnInit {
   }
 
   async onSlideFromPassword() {
+    const managementPauserId = "slide-from-password";
     const emailControl = this.authForm.get("email");
     const passwordControl = this.authForm.get("password");
 
@@ -177,6 +179,7 @@ export class SignupauthPage implements OnInit {
     });
 
     try {
+      await this.managementPauser.requestPause(managementPauserId);
       await this.loaderAlertManager.presentNew(loader, "replace-erase");
 
       const isValid = await this.isEmailValid(emailControl.value);
@@ -191,6 +194,8 @@ export class SignupauthPage implements OnInit {
       try {
         await this.requestAccountCreation();
       } catch {
+        await this.managementPauser.unrequestPause(managementPauserId);
+
         return this.loaderAlertManager.dismissDisplayed(); // logic to handle in case of error here is all in requestAccountCreation()
       }
 
@@ -210,7 +215,10 @@ export class SignupauthPage implements OnInit {
       await this.slideToNext();
       this.emailService.sendVerificationToUser("sent");
       this.emailService.listenForVerification();
+      await this.managementPauser.unrequestPause(managementPauserId);
     } catch (e) {
+      await this.managementPauser.unrequestPause(managementPauserId);
+
       const errorAlert = await this.loaderAlertManager.createAlert({
         header: "An unknown error occurred",
         message: "Please try again or come back later.",

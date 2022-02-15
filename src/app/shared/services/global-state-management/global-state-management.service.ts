@@ -4,7 +4,17 @@ import { NavigationEnd, Router } from "@angular/router";
 import { AngularFirestore } from "@angular/fire/firestore";
 
 import { Storage } from "@capacitor/storage";
-import { concat, defer, forkJoin, from, merge, Observable, of, Subject } from "rxjs";
+import {
+  concat,
+  defer,
+  firstValueFrom,
+  forkJoin,
+  from,
+  merge,
+  Observable,
+  of,
+  Subject,
+} from "rxjs";
 import {
   concatMap,
   distinctUntilChanged,
@@ -32,6 +42,7 @@ import { AngularFireAuth } from "@angular/fire/auth";
 import { NavController } from "@ionic/angular";
 import { EmailVerificationService } from "src/app/welcome/signupauth/email-verification.service";
 import { ManagementPauser } from "./management-pauser.service";
+import { Logger } from "../../functions/custom-rxjs";
 
 type pageName =
   | "chats"
@@ -103,28 +114,20 @@ export class GlobalStateManagementService {
     share()
   );
 
-  private globalManagement$(): Observable<void> {
+  private globalManagement$(): Observable<any> {
     return this.afAuth.user.pipe(
       this.managementPauser.checkForPaused(),
-      switchMap((user) => forkJoin([of(user), this.isUserEmailVerified(user)])),
-      switchMap(([user, emailIsVerified]) => {
+      switchMap((user) => {
         // to always activate
         this.storeStateManager.activateDefault();
 
-        const observables$: Observable<any>[] = [];
-
         if (!user) {
           // if user isn't authenticated, do the corresponding routine
-          observables$.push(this.nobodyAuthenticatedRoutine());
-        } else if (!emailIsVerified) {
-          // if user hasn't verified his email yet, go to email verification
-          observables$.push(this.requiresEmailVerificationRoutine());
+          return this.nobodyAuthenticatedRoutine();
         } else {
-          // is user is authenticated and his email is verified, then go on
-          observables$.push(this.userIsValidRoutine(user));
+          // is user is authenticated, then go on
+          return this.userIsValidRoutine(user);
         }
-
-        return merge(...observables$);
       })
     );
   }
@@ -169,17 +172,35 @@ export class GlobalStateManagementService {
         }
 
         // otherwise, continue the procedure
-        return this.doesProfileDocExist(user.uid).pipe(
-          switchMap((profileDocExists) => {
-            // "null" implies there has been an error and we couldn't get an answer on whether
-            // it exists. Hence take no action
-            if (profileDocExists === null) return of("");
-            if (profileDocExists === false) {
-              this.userState.next("has-no-documents");
-              return this.noDocumentsRoutine(user);
+        return this.isUserEmailVerified(user).pipe(
+          switchMap((emailVerified) => {
+            // assuming that it is impossible for the user to have email not verified while having documents
+            // (at least it's impossible to use app without email verified from standpoint of security rules)
+            // + we can't fetch the doc to check if the user has any docs if email isn't verified (security rules)
+            if (emailVerified === false) {
+              return this.noDocumentsRoutine(user, emailVerified);
             }
-            this.userState.next("full");
-            return this.hasDocumentsRoutine$();
+
+            if (emailVerified === true) {
+              return this.doesProfileDocExist(user.uid).pipe(
+                switchMap((profileDocExists) => {
+                  // "null" implies there has been an error and we couldn't get an answer on whether
+                  // it exists. Hence take no action
+                  if (profileDocExists === null) return of("");
+                  if (profileDocExists === false) {
+                    this.userState.next("has-no-documents");
+                    return this.noDocumentsRoutine(user, emailVerified);
+                  }
+                  if (profileDocExists === true) {
+                    this.userState.next("full");
+                    return this.hasDocumentsRoutine$();
+                  }
+                  return of("");
+                })
+              );
+            }
+
+            return of("");
           })
         );
       })
@@ -191,10 +212,15 @@ export class GlobalStateManagementService {
    * that account on the database. We check whether that user has documents on the db by attempting
    * to fetch that person's profile
    */
-  private noDocumentsRoutine(user: FirebaseUser): Observable<void> {
+  private noDocumentsRoutine(
+    user: FirebaseUser,
+    emailVerified: boolean
+  ): Observable<void> {
     const pauseRequestId = "noDocumentsRoutine";
 
     const finishProfileProcedure = () => {
+      if (emailVerified === false)
+        return firstValueFrom(this.requiresEmailVerificationRoutine());
       return this.signupService.checkAndRedirect();
     };
     const abortProfileProcedure = async () => {
@@ -416,12 +442,14 @@ export class GlobalStateManagementService {
    */
   private doesProfileDocExist(uid: string): Observable<boolean | null> {
     return this.connectionService.emitWhenConnected().pipe(
+      Logger("logging before"),
       switchMap(() =>
         this.firestore
           .collection("profiles")
           .doc(uid)
           .get()
           .pipe(
+            Logger("logging after"),
             this.errorHandler.convertErrors("firestore"),
             this.errorHandler.handleErrors()
           )
