@@ -4,13 +4,11 @@ import {
   mdMainFromDatabase,
   piStorage,
   searchCriteria,
-  SwipeMode,
   uidChoiceMap,
 } from "../../../../src/app/shared/interfaces/index";
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import { datingMode } from "./dating-mode";
-import { friendMode } from "./friend-mode";
 import { runWeakUserIdentityCheck } from "../../supporting-functions/user-validation/user.checker";
 import { sanitizeData } from "../../supporting-functions/data-validation/main";
 import {

@@ -1,13 +1,10 @@
 import { mdFriendPickingFromDatabase } from "./../../../../src/app/shared/interfaces/match-data.model";
 import {
-  mdMainFromDatabase,
   searchCriteria,
   UniversityName,
   AreaOfStudy,
   SocietyCategory,
   Interests,
-  profile,
-  // OnCampus,
   Degree,
   mdDatingPickingFromDatabase,
 } from "../../../../src/app/shared/interfaces/index";

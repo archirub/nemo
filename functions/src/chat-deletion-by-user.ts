@@ -3,8 +3,6 @@ import {
   chatFromDatabase,
   mdMainFromDatabase,
 } from "./../../src/app/shared/interfaces/index";
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { isEqual } from "lodash";
 
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";

@@ -1,5 +1,4 @@
 import * as admin from "firebase-admin";
-import * as functions from "firebase-functions";
 
 // admin.initializeApp();
 import * as serviceAccount from "../nemo-dev-1b0bc-firebase-adminsdk-d8ozt-60b942febb.json";
@@ -16,7 +15,7 @@ export * from "./report-user";
 
 export * from "./duplicate-data-updating/index";
 export * from "./account-management/index";
-export * from "./app-development/index";
+// export * from "./app-development/index";
 export * from "./swipe-stack-management/index";
-export * from "./test-notification";
+// export * from "./test-notification";
 export * from "./notifications/index";

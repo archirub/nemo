@@ -1,11 +1,8 @@
-import { searchFeatureNames } from "./../../../src/app/shared/interfaces/search-criteria.model";
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import {
   updateSearchFeaturesRequest,
-  searchCriteriaNames,
   piStorage,
-  searchCriteriaOptions,
   SearchFeatures,
 } from "../../../src/app/shared/interfaces/index";
 import { runWeakUserIdentityCheck } from "../supporting-functions/user-validation/user.checker";

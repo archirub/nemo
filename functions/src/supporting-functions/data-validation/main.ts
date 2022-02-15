@@ -1,6 +1,5 @@
 import {
   searchFeatureNames,
-  UniversityName,
   generateSwipeStackRequest,
   getMatchDataUserInfoRequest,
   getPickingDataUserInfoRequest,
@@ -24,7 +23,6 @@ import {
   isGender,
   isInterests,
   isNull,
-  isNumber,
   isObject,
   isQuestions,
   isSexualPreference,

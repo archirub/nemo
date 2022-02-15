@@ -46,11 +46,6 @@ import { FormsModule } from "@angular/forms";
     StatusBar,
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     { provide: REGION, useValue: "europe-west2" },
-    // {
-    //   // processes all errors
-    //   provide: ErrorHandler,
-    //   useClass: GlobalErrorHandler,
-    // },
   ],
   bootstrap: [AppComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],

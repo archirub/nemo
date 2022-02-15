@@ -1,8 +1,4 @@
-import {
-  additionalEmailsAllowedDocument,
-  deleteAccountRequest,
-  universitiesAllowedDocument,
-} from "../../../src/app/shared/interfaces/index";
+import { deleteAccountRequest } from "../../../src/app/shared/interfaces/index";
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import { runStrongUserIdentityCheck } from "../supporting-functions/user-validation/user.checker";

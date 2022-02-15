@@ -9,22 +9,17 @@ export const unverifiedAccountDeletionScheduler = functions
     const UNVERIFIED_THRESHOLD_TIME = 60 * 60 * 1000; // one hour in ms
     const now = new Date();
 
-    const reachedThreshold = (
-      accountCreationTime: number,
-      currentTime: number
-    ): boolean => {
-      if (!accountCreationTime) return false;
-      const timeElapsed = currentTime - accountCreationTime;
-      return timeElapsed > UNVERIFIED_THRESHOLD_TIME;
-    };
-
     const allUsers = (await admin.auth().listUsers()).users;
 
     const usersToDelete = allUsers
       .filter(
         (user) =>
           !user?.emailVerified &&
-          reachedThreshold(Date.parse(user?.metadata?.creationTime), now.getTime())
+          reachedThreshold(
+            Date.parse(user?.metadata?.creationTime),
+            now.getTime(),
+            UNVERIFIED_THRESHOLD_TIME
+          )
       )
       .map((user) => user.uid);
 
@@ -36,3 +31,13 @@ export const unverifiedAccountDeletionScheduler = functions
       await admin.auth().deleteUsers(usersInBatch);
     }
   });
+
+const reachedThreshold = (
+  accountCreationTime: number,
+  currentTime: number,
+  thresholdTime: number
+): boolean => {
+  if (!accountCreationTime) return false;
+  const timeElapsed = currentTime - accountCreationTime;
+  return timeElapsed > thresholdTime;
+};

@@ -6,7 +6,6 @@ import {
   uidChoiceMap,
   mdMainFromDatabase,
   SwipeMode,
-  piStorage,
   SwipeUserInfo,
 } from "../../../../src/app/shared/interfaces/index";
 import {

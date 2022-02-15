@@ -46,7 +46,7 @@ interface uid_score {
 // FOR PRODUCTION
 export const updatePISystem = functions
   .region("europe-west2")
-  .pubsub.schedule("everyday at 5:00AM")
+  .pubsub.schedule("0 5 * * *") // see for syntax "https://support-acquia.force.com/s/article/360004224494-Cron-time-string-format"
   .timeZone("Europe/London")
   .onRun(async (context) => {
     // .https.onCall(async (dataRequest, context) => {
