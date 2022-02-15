@@ -97,10 +97,10 @@
       <h1>You can change this in your settings!</h1>
     </div>
 
-    <div id="centeredNonStack" *ngIf="(currentStackState$ | async) === 'loading'">
+    <!--div id="centeredNonStack" *ngIf="(currentStackState$ | async) === 'loading'">
       <img src="/assets/nemo_load.svg" alt="nemo-loading" />
       <h1>Checking for profiles</h1>
-    </div>
+    </div-->
 
     <div id="centeredNonStack" *ngIf="showCapReachedPrompt$ | async">
       <h1>

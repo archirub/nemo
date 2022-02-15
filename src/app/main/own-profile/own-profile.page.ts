@@ -109,7 +109,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     if (ref) this.profilePicturesRef$.next(ref);
   }
 
-  private bioToAdd = new BehaviorSubject<boolean>(true);
+  bioToAdd = new BehaviorSubject<boolean>(true);
   private editingInProgress = new BehaviorSubject<boolean>(false);
 
   private viewIsReady$ = new BehaviorSubject<boolean>(false);
