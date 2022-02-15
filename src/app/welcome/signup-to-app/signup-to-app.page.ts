@@ -3,7 +3,7 @@ import { Component } from "@angular/core";
 import { StoreReadinessService } from "@services/store-readiness/store-readiness.service";
 import { firstValueFrom, lastValueFrom, Observable } from "rxjs";
 
-import { exhaustMap, filter, first } from "rxjs/operators";
+import { exhaustMap, filter } from "rxjs/operators";
 import { NotificationsStore } from "@stores/notifications/notifications.service";
 import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
 import { StoreStateManager } from "@services/global-state-management/store-state-manager.service";
@@ -20,8 +20,6 @@ export class SignupToAppPage {
     return this.readiness.app$;
   }
 
-  currentUser;
-
   constructor(
     private navCtrl: NavController,
 
@@ -34,9 +32,7 @@ export class SignupToAppPage {
     private fbAnalytics: AnalyticsService
   ) {}
 
-  ngOnInit() {
-    this.currentUser = this.errorHandler.getCurrentUser();
-  }
+  ngOnInit() {}
 
   ionViewDidEnter() {
     console.log("check for ionViewDidEnter, can log remove now.");
@@ -75,7 +71,7 @@ export class SignupToAppPage {
 
   async requestNotificationsPermission() {
     this.fbAnalytics.logEvent("request_notifs", {
-      UID: this.currentUser.uid, //user uid
+      UID: (await this.errorHandler.getCurrentUser()).uid, //user uid
       timestamp: Date.now(), //Time since epoch
     });
 

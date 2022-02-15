@@ -1,3 +1,4 @@
+import { SubscribeAndLog } from "./../../functions/custom-rxjs";
 import { Injectable, QueryList } from "@angular/core";
 import { AngularFirestore, DocumentSnapshot } from "@angular/fire/firestore";
 import { AngularFireFunctions } from "@angular/fire/functions";
@@ -120,6 +121,7 @@ export class SwipeStackStore extends AbstractStoreService {
     protected resetter: StoreResetter
   ) {
     super(resetter);
+    SubscribeAndLog(this.stackState, "stackState");
   }
 
   protected systemsToActivate(): Observable<any> {
@@ -201,6 +203,11 @@ export class SwipeStackStore extends AbstractStoreService {
     ]).pipe(
       withLatestFrom<[number, boolean, boolean], [StackState]>(this.stackState$),
       map(([[profilesCount, canUseSwipe, showsProfile], currentStackState]) => {
+        console.log("[[profilesCount, canUseSwipe, showsProfile], currentStackState]", [
+          [profilesCount, canUseSwipe, showsProfile],
+          currentStackState,
+        ]);
+
         if (canUseSwipe === false) return this.stackState.next("cap-reached");
 
         if (showsProfile === false) return this.stackState.next("not-showing-profile");
@@ -563,6 +570,7 @@ export class SwipeStackStore extends AbstractStoreService {
       take(1),
       switchMap((SC) => this.fetchUIDs(SC)),
       switchMap((uids) => {
+        console.log("swipeStackStore, uids coming in:", uids);
         // takes care of case where generateSwipeStack returns an empty array
         if (!uids || uids.length < 1) return of(this.stackState.next("empty"));
 

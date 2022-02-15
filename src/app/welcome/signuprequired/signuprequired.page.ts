@@ -269,9 +269,8 @@ export class SignuprequiredPage implements OnInit, OnDestroy {
     await this.loadingAlertManager.dismissDisplayed();
 
     //Log analytics event for skip to app
-    await this.errorHandler
-      .getCurrentUser$()
-      .pipe(map((user) => this.fbAnalytics.logEvent("skip_to_app", user)));
+    // no need to await since logic is not dependent on its success
+    this.fbAnalytics.logEvent("skip_to_app", await this.errorHandler.getCurrentUser());
 
     return this.navCtrl.navigateForward("/welcome/signup-to-app");
   }

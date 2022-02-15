@@ -49,6 +49,8 @@ export const updatePISystem = functions
   .pubsub.schedule("every day 05:00")
   .timeZone("Europe/London")
   .onRun(async (context) => {
+    // .https
+    //   .onCall(async (dataRequest, context) => {
     await admin.firestore().runTransaction(async (transaction) => {
       // FETCHING UID AND PI STORAGE DOCUMENTS
       const [currentUidStorageDocs, piStorageDocs] = await Promise.all([
@@ -59,6 +61,7 @@ export const updatePISystem = functions
           FirebaseFirestore.QuerySnapshot<piStorage>
         >,
       ]);
+      functions.logger.info("LOGGING ");
 
       if (currentUidStorageDocs.empty)
         emptyCollectionOrQueryError("uidDatingStorage", "none; pubsub function");
@@ -76,7 +79,7 @@ export const updatePISystem = functions
         variance: null,
         occurrences: 0,
       });
-      const swipeUserInfo: SwipeUserInfoMap[] = piStorageDocs.docs.map((doc) => {
+      const swipeUserInfoMaps: SwipeUserInfoMap[] = piStorageDocs.docs.map((doc) => {
         const data = doc.data() as SwipeUserInfoMap;
         delete data.uids;
         for (const uid_ in data) {
@@ -94,10 +97,11 @@ export const updatePISystem = functions
       // CALCULATE SCORES OF USERS & SUBSEQUENTLY ADD USERS TO RESPECTIVE DEMOGRAPHIC ARRAYS
       const newDemographicScoreMaps = getNewDemographicMap<uid_score[]>([]);
 
-      swipeUserInfo.forEach((swipeUserInfoMap) => {
+      swipeUserInfoMaps.forEach((swipeUserInfoMap) => {
         for (const uid in swipeUserInfoMap) {
           const info = swipeUserInfoMap[uid];
 
+          // computing score from the user's information and the distribution parameters
           const score = computeScore(info, distribParamMaps);
           addToDemographicArrays(uid, score, info, newDemographicScoreMaps);
         }
@@ -113,7 +117,9 @@ export const updatePISystem = functions
           newDemographicScoreMaps[demographic as keyof demographicMap<any>]
             .sort((a, b) => a.score - b.score)
             .map((user, index) => {
-              const i = swipeUserInfo.findIndex((map) => map.hasOwnProperty(user.uid));
+              const i = swipeUserInfoMaps.findIndex((map) =>
+                map.hasOwnProperty(user.uid)
+              );
 
               if (i === -1)
                 invalidDocumentError(
@@ -123,9 +129,9 @@ export const updatePISystem = functions
                   "none: pubsub function"
                 );
 
-              swipeUserInfo[i][user.uid].percentile = (index + 1) / peopleCount;
-              swipeUserInfo[i][user.uid].seenCount = 0;
-              swipeUserInfo[i][user.uid].likeCount = 0;
+              swipeUserInfoMaps[i][user.uid].percentile = (index + 1) / peopleCount;
+              swipeUserInfoMaps[i][user.uid].seenCount = 0;
+              swipeUserInfoMaps[i][user.uid].likeCount = 0;
 
               return user.uid;
             });
@@ -146,7 +152,7 @@ export const updatePISystem = functions
       newUidStorageDocuments.forEach((doc) => {
         transaction.set(admin.firestore().collection("uidDatingStorage").doc(), doc);
       });
-      swipeUserInfo.forEach((swipeUserInfoMap) => {
+      swipeUserInfoMaps.forEach((swipeUserInfoMap) => {
         for (const uid in swipeUserInfoMap) {
           // find which doc that uid is in
           const i = piStorageDocs.docs.findIndex((doc) => doc.data().hasOwnProperty(uid));

@@ -112,7 +112,10 @@
       </ion-slide>
 
       <ion-slide>
-        <div class="personal-pref">
+        <div
+          class="personal-pref"
+          *ngIf="emailVerificationState$ | async as emailVerificationState"
+        >
           <ion-button
             style="z-index: 100; position: absolute; bottom: 10vh"
             debounceClick
@@ -120,31 +123,28 @@
             debounceTime="5000"
             >Make email verified (dev)</ion-button
           >
-          <div class="question" *ngIf="(emailVerificationState$ | async) === 'not-sent'">
+          <div class="question" *ngIf="emailVerificationState === 'not-sent'">
             <ion-label position="stacked"> We are sending you an email </ion-label>
           </div>
 
           <div
             class="question"
-            *ngIf="(emailVerificationState$ | async) === ('sent' || 'resent')"
+            *ngIf="emailVerificationState === 'sent' || emailVerificationState === 'resent'"
           >
             <ion-label position="stacked"> An email has been sent </ion-label>
           </div>
 
-          <div class="question" *ngIf="(emailVerificationState$ | async) === 'verified'">
+          <div class="question" *ngIf="emailVerificationState === 'verified'">
             <ion-label position="stacked"> Email confirmed! </ion-label>
           </div>
 
-          <h2
-            style="margin-top: 20vh"
-            *ngIf="(emailVerificationState$ | async) === 'verified'"
-          >
+          <h2 style="margin-top: 20vh" *ngIf="emailVerificationState === 'verified'">
             Click the button to go to the next slide and continue your sign up.
           </h2>
 
           <h2
             style="margin-top: 20vh"
-            *ngIf="(emailVerificationState$ | async) === ('sent' || 'resent')"
+            *ngIf="emailVerificationState === 'sent' || emailVerificationState === 'resent'"
           >
             Click
 
@@ -157,7 +157,7 @@
           </h2>
 
           <ng-container
-            *ngIf="(emailVerificationState$ | async) === ('sent' || 'resent')"
+            *ngIf="emailVerificationState==='sent' || emailVerificationState==='resent'"
           >
             <h3 class="resend" *ngIf="( timeToResendingAvailable$ | async ) != 0">
               You can resend another email in {{ timeToResendingAvailable$ | async }}
@@ -175,10 +175,7 @@
 
           <!--SWITCHES TO BELOW ONCE EMAIL IS CONFIRMED-->
 
-          <div
-            class="buttons first"
-            *ngIf="(emailVerificationState$ | async) === 'verified'"
-          >
+          <div class="buttons first" *ngIf="emailVerificationState === 'verified'">
             <ion-button class="next-slide scroll" (click)="onSlideFromVerification()">
               <ion-icon name="chevron-forward-outline"></ion-icon>
             </ion-button>
