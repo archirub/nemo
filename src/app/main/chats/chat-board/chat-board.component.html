@@ -15,20 +15,20 @@
         Sorry, you haven't caught anyone yet! Try the catch tab to find a possible catch!
       </p>
 
-      <div class="fish" (click)="goToHome()">
+      <!--div class="fish" (click)="goToHome()">
         <img name="fish" src="/assets/swipeicon.svg" />
         <h1>Catch</h1>
-      </div>
+      </div-->
     </div>
 
     <!--Matched before, but no catches currently available-->
     <div *ngIf="this.matches.length < 1 && this.chats.length >= 1" class="noChats">
       <p>There's no one here right now, keep swiping to find more catches!</p>
 
-      <div class="fish" (click)="goToHome()">
+      <!--div class="fish" (click)="goToHome()">
         <img name="fish" src="/assets/swipeicon.svg" />
         <h1>Catch</h1>
-      </div>
+      </div-->
     </div>
 
     <h1 class="title">catches</h1>
@@ -73,11 +73,11 @@
         someone new!
       </p>
 
-      <div class="fish" (click)="goToHome()">
+      <!--div class="fish" (click)="goToHome()">
         <img name="fish" src="/assets/swipeicon.svg" />
 
         <h1>Catch</h1>
-      </div>
+      </div-->
     </div>
 
     <h1 class="title">chats</h1>

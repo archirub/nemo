@@ -271,3 +271,9 @@
 //     //   --ion-tab-bar-background: #1f1f1f;
 //     // }
 // }
+
+ion-loading.customLoader {
+    .loading-wrapper {
+        font-weight: 400 !important;
+    };
+}

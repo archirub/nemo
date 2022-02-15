@@ -64,7 +64,7 @@
     <h2 class="catchtext">Keep fishing</h2>
   </div>
 </div-->
-<ion-content #homeContainer>
+<ion-content #homeContainer [style.filter]="(displayTutorial$ | async) ? 'blur(10px)' : 'none'">
   <div class="swipe-stack" #swipeCards>
     <div class="search" *ngIf="(currentStackState$ | async) != 'not-showing-profile'">
       <ion-button #searchButton id="searchButton" (click)="showSearchCriteria()">

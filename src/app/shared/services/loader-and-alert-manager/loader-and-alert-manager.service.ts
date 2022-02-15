@@ -48,6 +48,7 @@ export class LoadingAndAlertManager {
     translucent: true,
     backdropDismiss: false,
     duration: 6000,
+    cssClass: 'customLoader'
   };
 
   private defaultAlertOptions: AlertOptions = {};
