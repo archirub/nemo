@@ -57,7 +57,6 @@ export class GlobalErrorHandler implements CustomGlobalErrorHandler {
     return (source: Observable<T>) =>
       source.pipe(
         this.errorConverterSafeguard<T>(),
-        // DEV
         catchError<T, Observable<T>>((err: CustomError) => {
           isFromError = true;
 
@@ -65,7 +64,6 @@ export class GlobalErrorHandler implements CustomGlobalErrorHandler {
             return of(dontHandleString) as unknown as Observable<T>;
 
           console.error("Error through GlobalErrorHandler:", err);
-          console.error("Error through GlobalErrorHandler:");
 
           throw err;
         }),

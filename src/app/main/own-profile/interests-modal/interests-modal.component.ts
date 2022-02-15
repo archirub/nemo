@@ -66,53 +66,12 @@ export class InterestsModalComponent implements OnInit {
   constructor(private modalCtrl: ModalController) {}
 
   ngOnInit() {
-    //this.buildInterestGrid(); DO NOT REMOVE THIS
     this.viewReady = true;
   }
 
   async closeAndConfirmChoices() {
     return await this.modalCtrl.dismiss(this.interests);
   }
-
-  //DO NOT REMOVE THIS - DEV TEST - SEE IF THERE IS AN IMPROVEMENT WHEN HARDCODED
-
-  // builds the interest grid
-  /*buildInterestGrid() {
-    this.interestGrid = []; //Array of arrays of interest triplets
-    this.pictureGrid = []; //Arrays of icons to support
-
-    let count = 0;
-    let intPushArray = [];
-    let picPushArray = [];
-
-    this.names.forEach((interest, ind) => {
-      //The index is to iterate simulatenously through pictures
-      count++;
-
-      if (count < 3) {
-        //Push in twos
-        intPushArray.push(interest);
-        picPushArray.push(this.getPicturePath(interest));
-      } else {
-        //Move on to next array
-        this.interestGrid.push(intPushArray); //Push the last two interests/pictures in one array
-        this.pictureGrid.push(picPushArray);
-
-        intPushArray = [interest]; //Start on next arrays
-        picPushArray = [this.getPicturePath(interest)];
-
-        count = 1;
-      }
-    });
-
-    if (intPushArray.length != 0) {
-      this.interestGrid.push(intPushArray); //Pushes last interest array
-    }
-    if (picPushArray.length != 0) {
-      this.pictureGrid.push(picPushArray); //Pushes last picture array
-    }
-
-  }*/
 
   // changes the interest selection
   selectInterest(choice) {

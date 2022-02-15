@@ -143,9 +143,9 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
   }
 
   // For development, to avoid fetching the stack on each reload / document save
-  activateSwipeStack() {
-    this.subs.add(this.swipeStackStore.activate$.subscribe());
-  }
+  // activateSwipeStack() {
+  //   this.subs.add(this.swipeStackStore.activate$.subscribe());
+  // }
 
   async showSearchCriteria(): Promise<void> {
     this.fbAnalytics.logEvent("sc_open", {});

@@ -80,7 +80,7 @@ import { wait } from "src/app/shared/functions/common";
 })
 export class SwipeCardComponent implements OnInit, OnDestroy {
   // DEV
-  DEV_other_profile_info = new BehaviorSubject<Object>(null);
+  // DEV_other_profile_info = new BehaviorSubject<Object>(null);
   // DEV_own_profile_info = new BehaviorSubject<Object>(null);
 
   screenHeight: number;
@@ -416,10 +416,8 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
       exhaustMap(([profile, otherChoice]) => {
         if (ownChoice === "no") return this.onNoSwipe(profile);
 
-        // DEV
         if (["yes", "super"].includes(ownChoice) && otherChoice === "no")
-          return this.onMatch(profile);
-        // return this.onYesSwipe(profile);
+          return this.onYesSwipe(profile);
 
         if (
           ["yes", "super"].includes(ownChoice) &&

@@ -116,13 +116,13 @@
           class="personal-pref"
           *ngIf="emailVerificationState$ | async as emailVerificationState"
         >
-          <ion-button
+          <!-- <ion-button
             style="z-index: 100; position: absolute; bottom: 10vh"
             debounceClick
             (debounceClick)="devVerifyEmail()"
             debounceTime="5000"
             >Make email verified (dev)</ion-button
-          >
+          > -->
           <div class="question" *ngIf="emailVerificationState === 'not-sent'">
             <ion-label position="stacked"> We are sending you an email </ion-label>
           </div>

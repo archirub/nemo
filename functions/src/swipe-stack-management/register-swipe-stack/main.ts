@@ -108,11 +108,11 @@ export const registerSwipeChoices = functions
           );
 
           // DEV, just to simulate matching
-          const matchedUsers = cloneDeep(yes);
+          // const matchedUsers = cloneDeep(yes);
 
-          // const matchedUsers = handleDatingYesChoicesReadReturn.matchedUsers.map(
-          //   (mu) => mu.uid
-          // );
+          const matchedUsers = handleDatingYesChoicesReadReturn.matchedUsers.map(
+            (mu) => mu.uid
+          );
 
           const thereAreMatchedUsers = matchedUsers.length > 0;
 
