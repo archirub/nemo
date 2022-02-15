@@ -12,7 +12,6 @@ import { StoreResetter } from "@services/global-state-management/store-resetter.
 
 import { deleteAccountRequest } from "@interfaces/cloud-functions.model";
 import { EmailAuthProvider, FirebaseUser } from "@interfaces/firebase.model";
-import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 import { FirebaseLogoutService } from "./firebase-logout.service";
 import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
 import { CloudFunctionsErrorHandler } from "@services/errors/cloud-functions-error-handler.service";

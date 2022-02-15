@@ -1,38 +1,18 @@
 import { checkEmailValidityResponse } from "./../../shared/interfaces/cloud-functions.model";
 import { IonSlides, NavController } from "@ionic/angular";
-import {
-  Component,
-  OnInit,
-  ViewChild,
-  ElementRef,
-  ChangeDetectorRef,
-  Renderer2,
-} from "@angular/core";
+import { Component, OnInit, ViewChild, ElementRef, Renderer2 } from "@angular/core";
 import { FormControl, FormGroup, Validators } from "@angular/forms";
-import { Router } from "@angular/router";
 import { AngularFireFunctions } from "@angular/fire/functions";
 
 import {
-  BehaviorSubject,
   concat,
   firstValueFrom,
-  interval,
-  lastValueFrom,
   Observable,
   of,
   ReplaySubject,
   Subscription,
 } from "rxjs";
-import {
-  catchError,
-  concatMap,
-  exhaustMap,
-  filter,
-  map,
-  switchMap,
-  take,
-  tap,
-} from "rxjs/operators";
+import { catchError, concatMap, filter, map, tap } from "rxjs/operators";
 
 import { UniversitiesStore } from "@stores/universities/universities.service";
 

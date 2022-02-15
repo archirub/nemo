@@ -30,7 +30,6 @@ import {
 } from "@interfaces/index";
 import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
 import { wait } from "src/app/shared/functions/common";
-import { SignupLocalStorageService } from "@services/signup/signup-local-storage.service";
 import { AnalyticsService } from "@services/analytics/analytics.service";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 
@@ -343,7 +342,7 @@ export class SignupoptionalPage implements OnInit {
     const isEmpty = (v) => !v;
     const bothNullOrFilled = (v1, v2) =>
       (isFilled(v1) && isFilled(v2)) || (isEmpty(v1) && isEmpty(v2));
-    const bothFilled = (v1,v2) => (isFilled(v1) && isFilled(v2));
+    const bothFilled = (v1, v2) => isFilled(v1) && isFilled(v2);
 
     if (intersection(fieldsOnCurrentSlide, ["course", "areaOfStudy"]).length === 2) {
       const courseValue = this.form.get("course").value;
@@ -358,7 +357,7 @@ export class SignupoptionalPage implements OnInit {
           areaOfStudy: areaOfStudyValue,
           timestamp: Date.now(), //Time since epoch
         });
-      };
+      }
 
       if (!isValid) return false;
     }
@@ -376,8 +375,8 @@ export class SignupoptionalPage implements OnInit {
           societyCategory: societyCategoryValue,
           timestamp: Date.now(), //Time since epoch
         });
-      };
-      
+      }
+
       if (!isValid) return false;
     }
 
@@ -393,20 +392,20 @@ export class SignupoptionalPage implements OnInit {
         !bothNullOrFilled(QandA.answer, QandA.question) ? (isValid = false) : null;
         !bothFilled(QandA.answer, QandA.question) ? (userCompleted = false) : null;
       });
-      
+
       if (questionsValue.length < 1) {
-        userCompleted = false
-      };
+        userCompleted = false;
+      }
 
       if (userCompleted) {
         this.fbAnalytics.logEvent("signupopt_questions", {
           UID: this.currentUser.uid, //user uid
           timestamp: Date.now(), //Time since epoch
         });
-      };
+      }
 
       if (!isValid) return false;
-    };
+    }
 
     if (fieldsOnCurrentSlide.includes("interests")) {
       const interestsValue = this.form.get("interests").value;
@@ -416,8 +415,8 @@ export class SignupoptionalPage implements OnInit {
           interests: interestsValue,
           timestamp: Date.now(), //Time since epoch
         });
-      };
-    };
+      }
+    }
 
     if (fieldsOnCurrentSlide.includes("biography")) {
       const bioValue = this.form.get("biography").value;
@@ -427,9 +426,8 @@ export class SignupoptionalPage implements OnInit {
           bio: bioValue,
           timestamp: Date.now(), //Time since epoch
         });
-      };
-    };
-
+      }
+    }
 
     return true;
   }

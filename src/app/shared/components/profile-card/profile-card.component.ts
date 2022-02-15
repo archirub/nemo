@@ -33,7 +33,6 @@ import { Profile } from "@classes/index";
 import { LessInfoAnimation, MoreInfoAnimation } from "@animations/info.animation";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 
-import SwiperCore, { EffectCube, Pagination } from "swiper";
 import { SwiperComponent } from "swiper/angular";
 import { SwiperOptions } from "swiper";
 import { DEFAULT_PICTURE_URL } from "@interfaces/profile.model";

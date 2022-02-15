@@ -2,7 +2,7 @@ import { Logger } from "./../../functions/custom-rxjs";
 import { Injectable } from "@angular/core";
 import { AngularFireFunctions } from "@angular/fire/functions";
 
-import { BehaviorSubject, firstValueFrom, merge, Observable, of } from "rxjs";
+import { BehaviorSubject, firstValueFrom, Observable, of } from "rxjs";
 
 import { Profile } from "@classes/index";
 import {
@@ -12,7 +12,7 @@ import {
   registerSwipeChoicesRequest,
   registerSwipeChoicesResponse,
 } from "@interfaces/index";
-import { concatMapTo, exhaustMap, filter, map, take, tap } from "rxjs/operators";
+import { map, take, tap } from "rxjs/operators";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 import { AbstractStoreService } from "@interfaces/stores.model";
 import { StoreResetter } from "@services/global-state-management/store-resetter.service";

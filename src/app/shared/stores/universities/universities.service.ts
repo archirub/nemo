@@ -2,7 +2,7 @@ import { Injectable } from "@angular/core";
 import { AngularFirestore } from "@angular/fire/firestore";
 
 import { BehaviorSubject, Observable, of } from "rxjs";
-import { filter, first, map, switchMap, take } from "rxjs/operators";
+import { filter, map, switchMap, take } from "rxjs/operators";
 
 import {
   universitiesAllowedDocument,

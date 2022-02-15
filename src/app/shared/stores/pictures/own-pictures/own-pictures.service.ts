@@ -9,14 +9,11 @@ import {
   distinctUntilChanged,
   exhaustMap,
   filter,
-  first,
   map,
-  share,
   switchMap,
   switchMapTo,
   take,
   tap,
-  withLatestFrom,
 } from "rxjs/operators";
 
 import { Base64ToUrl, urlToBase64 } from "../common-pictures-functions";

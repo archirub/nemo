@@ -21,7 +21,7 @@ import {
 
 import { Question } from "@interfaces/index";
 import { questionsOptions } from "@interfaces/index";
-import { IonSelect, IonSlides, IonTextarea } from "@ionic/angular";
+import { IonSelect, IonSlides } from "@ionic/angular";
 
 @Component({
   selector: "question-slides",

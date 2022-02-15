@@ -11,7 +11,6 @@ import {
   concat,
   defer,
   filter,
-  first,
   firstValueFrom,
   lastValueFrom,
   map,
@@ -19,8 +18,6 @@ import {
   of,
   switchMap,
   take,
-  tap,
-  withLatestFrom,
 } from "rxjs";
 
 // const HTMLIonLoadingElementInstance = new HTMLIonLoadingElement();
@@ -48,7 +45,7 @@ export class LoadingAndAlertManager {
     translucent: true,
     backdropDismiss: false,
     duration: 6000,
-    cssClass: 'customLoader'
+    cssClass: "customLoader",
   };
 
   private defaultAlertOptions: AlertOptions = {};

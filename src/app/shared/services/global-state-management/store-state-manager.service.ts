@@ -15,7 +15,7 @@ import { ChatboardPicturesStore } from "@stores/pictures/chatboard-pictures/chat
 import { OwnPicturesStore } from "@stores/pictures/own-pictures/own-pictures.service";
 import { TutorialsStore } from "@stores/tutorials/tutorials.service";
 import { UniversitiesStore } from "@stores/universities/universities.service";
-import { combineLatest, map, Observable, of, Subscription } from "rxjs";
+import { combineLatest, map, Observable, Subscription } from "rxjs";
 
 interface Subs {
   userDependentActivate$: Subscription;

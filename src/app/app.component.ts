@@ -5,7 +5,7 @@ import { AngularFireAuth } from "@angular/fire/auth";
 import { HideOptions, ShowOptions, SplashScreen } from "@capacitor/splash-screen";
 
 import { firstValueFrom, Subscription } from "rxjs";
-import { filter, first, map, take } from "rxjs/operators";
+import { filter, first, take } from "rxjs/operators";
 import { Capacitor } from "@capacitor/core";
 
 import { GlobalStateManagementService } from "@services/global-state-management/global-state-management.service";
@@ -13,7 +13,6 @@ import { routerInitListenerService } from "@services/global-state-management/ini
 import { StoreReadinessService } from "@services/store-readiness/store-readiness.service";
 
 import { SubscribeAndLog } from "./shared/functions/custom-rxjs";
-import { Router } from "@angular/router";
 import { wait } from "./shared/functions/common";
 
 @Component({
@@ -33,8 +32,7 @@ export class AppComponent implements OnDestroy, OnInit {
     private afAuth: AngularFireAuth,
     private GlobalStateManagement: GlobalStateManagementService,
     private routerInitListener: routerInitListenerService,
-    private storeReadiness: StoreReadinessService,
-    private router: Router
+    private storeReadiness: StoreReadinessService
   ) {
     this.initializeApp();
     SubscribeAndLog(this.afAuth.authState, "authState$");

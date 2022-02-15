@@ -21,7 +21,6 @@ import {
   delay,
   defer,
 } from "rxjs";
-import { Logger } from "../../functions/custom-rxjs";
 
 @Injectable({
   providedIn: "root",

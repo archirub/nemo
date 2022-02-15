@@ -2,7 +2,7 @@ import { Component, ElementRef, OnDestroy, ViewChild } from "@angular/core";
 import { Animation } from "@ionic/angular";
 
 import { BehaviorSubject, ReplaySubject, Subscription } from "rxjs";
-import { delay, first, map, switchMap, take } from "rxjs/operators";
+import { delay, map, switchMap, take } from "rxjs/operators";
 
 import { ChatboardStore } from "@stores/index";
 

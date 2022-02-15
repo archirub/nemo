@@ -1,7 +1,7 @@
 import { NavController } from "@ionic/angular";
-import { Component } from "@angular/core";
+import { Component, ElementRef, ViewChild } from "@angular/core";
 import { StoreReadinessService } from "@services/store-readiness/store-readiness.service";
-import { firstValueFrom, lastValueFrom, Observable } from "rxjs";
+import { firstValueFrom, lastValueFrom, Observable, ReplaySubject } from "rxjs";
 
 import { exhaustMap, filter } from "rxjs/operators";
 import { NotificationsStore } from "@stores/notifications/notifications.service";
@@ -20,6 +20,13 @@ export class SignupToAppPage {
     return this.readiness.app$;
   }
 
+  private videoPlayerRef$ = new ReplaySubject<ElementRef>(1);
+  @ViewChild("videoPlayer", { read: ElementRef }) set videoPlayerSetter(ref: ElementRef) {
+    if (ref) {
+      this.videoPlayerRef$.next(ref);
+    }
+  }
+
   constructor(
     private navCtrl: NavController,
 
@@ -32,7 +39,13 @@ export class SignupToAppPage {
     private fbAnalytics: AnalyticsService
   ) {}
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.playVideo();
+  }
+
+  ionViewWillEnter() {
+    this.playVideo();
+  }
 
   ionViewDidEnter() {
     console.log("check for ionViewDidEnter, can log remove now.");
@@ -40,14 +53,13 @@ export class SignupToAppPage {
   }
 
   async goToApp() {
-    if (await firstValueFrom(this.appIsReady$))
-      return this.navCtrl.navigateForward("/main/tabs/home");
+    if (await firstValueFrom(this.appIsReady$)) return this.navigateToHome();
 
     const loader = await this.loadingAlertManager.createLoading({
       message: "Getting the app ready...",
     });
 
-    loader.onDidDismiss().then(() => this.navCtrl.navigateForward("/main/tabs/home"));
+    loader.onDidDismiss().then(() => this.navigateToHome());
 
     await this.loadingAlertManager.presentNew(loader, "replace-erase");
 
@@ -83,5 +95,18 @@ export class SignupToAppPage {
 
     // activates the user-dependent stores
     this.storeStateManager.activateUserDependent();
+  }
+
+  async navigateToHome() {
+    await this.pauseVideo();
+    return this.navCtrl.navigateForward("/main/tabs/home");
+  }
+
+  async playVideo() {
+    return firstValueFrom(this.videoPlayerRef$).then((ref) => ref.nativeElement.play());
+  }
+
+  async pauseVideo() {
+    return firstValueFrom(this.videoPlayerRef$).then((ref) => ref.nativeElement.pause());
   }
 }

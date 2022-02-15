@@ -4,27 +4,15 @@ import { AngularFirestore } from "@angular/fire/firestore";
 import { AngularFireStorage } from "@angular/fire/storage";
 
 import {
-  catchError,
   distinctUntilChanged,
   filter,
-  first,
   map,
-  mapTo,
-  share,
   shareReplay,
   switchMap,
   take,
   tap,
 } from "rxjs/operators";
-import {
-  BehaviorSubject,
-  combineLatest,
-  firstValueFrom,
-  forkJoin,
-  from,
-  Observable,
-  of,
-} from "rxjs";
+import { BehaviorSubject, firstValueFrom, forkJoin, from, Observable, of } from "rxjs";
 import { cloneDeep, isEqual } from "lodash";
 
 import { FormatService } from "@services/format/format.service";
@@ -37,7 +25,6 @@ import {
   userInfoFromMatchData,
   editableProfileFields,
   profileEditingByUserRequest,
-  CustomError,
 } from "@interfaces/index";
 
 import { Gender, SexualPreference } from "./../../interfaces/match-data.model";

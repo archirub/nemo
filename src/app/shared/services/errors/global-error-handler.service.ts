@@ -6,10 +6,8 @@ import {
   Observable,
   OperatorFunction,
   of,
-  tap,
   switchMap,
   takeUntil,
-  interval,
   timer,
 } from "rxjs";
 

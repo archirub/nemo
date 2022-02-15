@@ -3,7 +3,7 @@ import { Component } from "@angular/core";
 import { FormControl, FormGroup, Validators } from "@angular/forms";
 import { AngularFireAuth } from "@angular/fire/auth";
 
-import { defer, firstValueFrom, switchMap } from "rxjs";
+import { defer, firstValueFrom } from "rxjs";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
 

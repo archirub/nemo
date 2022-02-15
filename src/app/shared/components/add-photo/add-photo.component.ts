@@ -8,7 +8,7 @@ import {
   Renderer2,
 } from "@angular/core";
 
-import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
+import { Camera, CameraResultType } from "@capacitor/camera";
 
 import { Capacitor } from "@capacitor/core";
 import { ImageCropperComponent } from "@components/image-cropper/image-cropper.component";

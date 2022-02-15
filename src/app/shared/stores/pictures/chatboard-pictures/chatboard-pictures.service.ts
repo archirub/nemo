@@ -16,7 +16,6 @@ import {
   concatMap,
   distinctUntilChanged,
   map,
-  share,
   switchMap,
   take,
   withLatestFrom,
