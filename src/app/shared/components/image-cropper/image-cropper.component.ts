@@ -24,18 +24,13 @@ export class ImageCropperComponent implements OnInit {
   croppedImage: any = "";
 
   fileChangeEvent(event: any): void {
-    console.log("fileChangeEvent");
     // // this.imageChangedEvent = event;
     // const file = event.srcElement.files[0];
-
     // this.imageURL = URL.createObjectURL(file);
-    // console.log("imageURL", this.imageURL);
   }
 
   // This function gets called after every change to the cropping (whenever you release your click/finger)
   imageCropped(event: ImageCroppedEvent) {
-    console.log("imageCropped");
-
     this.croppedImage = event.base64;
   }
 
@@ -51,15 +46,12 @@ export class ImageCropperComponent implements OnInit {
   // these functions below are of no use in the given scheme, but left just in case
 
   imageLoaded(image: LoadedImage) {
-    console.log("imageLoaded");
     // show cropper
   }
   cropperReady() {
-    console.log("cropperReady");
     // cropper ready
   }
   loadImageFailed() {
-    console.log("loadImageFailed");
     // show message
   }
 }

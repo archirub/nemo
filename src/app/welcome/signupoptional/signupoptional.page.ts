@@ -58,7 +58,6 @@ export class SignupoptionalPage implements OnInit {
   questionArray: QuestionAndAnswer[];
   selectedInterests: Array<string> = [];
   form = this.blankForm;
-  currentUser;
 
   @ViewChild("slides") slides: IonSlides;
   @ViewChildren("pagerDots", { read: ElementRef }) dots: QueryList<ElementRef>;
@@ -97,7 +96,6 @@ export class SignupoptionalPage implements OnInit {
 
   async ngOnInit() {
     this.clearFormArray(this.form.controls.questions as FormArray);
-    this.currentUser = await this.errorHandler.getCurrentUser();
   }
 
   ionViewWillEnter() {
@@ -109,7 +107,6 @@ export class SignupoptionalPage implements OnInit {
   }
 
   async onGoToNextSlide() {
-    console.log("onGoToNextSlide");
     const currentSlideIndex = await this.slides.getActiveIndex();
     const isValid = await this.slideIsValid(currentSlideIndex);
     if (isValid) return this.unlockAndSlideToNext();
@@ -122,7 +119,6 @@ export class SignupoptionalPage implements OnInit {
     // resetting controls of current slide
     fieldsOnCurrentSlide.forEach((field) => {
       const emptyFieldControl = this.blankForm.get(field);
-      console.log(field, emptyFieldControl);
       if (!emptyFieldControl) return;
       this.form.setControl(field, emptyFieldControl);
       if (field === "questions") {
@@ -352,7 +348,7 @@ export class SignupoptionalPage implements OnInit {
 
       if (userCompleted) {
         this.fbAnalytics.logEvent("signupopt_course", {
-          UID: this.currentUser.uid, //user uid
+          UID: (await this.errorHandler.getCurrentUser()).uid, //user uid
           course: courseValue,
           areaOfStudy: areaOfStudyValue,
           timestamp: Date.now(), //Time since epoch
@@ -370,7 +366,7 @@ export class SignupoptionalPage implements OnInit {
 
       if (userCompleted) {
         this.fbAnalytics.logEvent("signupopt_society", {
-          UID: this.currentUser.uid, //user uid
+          UID: (await this.errorHandler.getCurrentUser()).uid, //user uid
           society: societyValue,
           societyCategory: societyCategoryValue,
           timestamp: Date.now(), //Time since epoch
@@ -399,7 +395,7 @@ export class SignupoptionalPage implements OnInit {
 
       if (userCompleted) {
         this.fbAnalytics.logEvent("signupopt_questions", {
-          UID: this.currentUser.uid, //user uid
+          UID: (await this.errorHandler.getCurrentUser()).uid, //user uid
           timestamp: Date.now(), //Time since epoch
         });
       }
@@ -411,7 +407,7 @@ export class SignupoptionalPage implements OnInit {
       const interestsValue = this.form.get("interests").value;
       if (interestsValue) {
         this.fbAnalytics.logEvent("signupopt_interests", {
-          UID: this.currentUser.uid, //user uid
+          UID: (await this.errorHandler.getCurrentUser()).uid, //user uid
           interests: interestsValue,
           timestamp: Date.now(), //Time since epoch
         });
@@ -422,7 +418,7 @@ export class SignupoptionalPage implements OnInit {
       const bioValue = this.form.get("biography").value;
       if (bioValue) {
         this.fbAnalytics.logEvent("signupopt_bio", {
-          UID: this.currentUser.uid, //user uid
+          UID: (await this.errorHandler.getCurrentUser()).uid, //user uid
           bio: bioValue,
           timestamp: Date.now(), //Time since epoch
         });

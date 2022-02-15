@@ -83,29 +83,6 @@ export class NotificationsStore extends AbstractStoreService {
     PushNotifications.addListener("registration", (token: Token) =>
       this.token.next(token)
     );
-
-    // Some issue with our setup and push will not work
-    PushNotifications.addListener("registrationError", (error: any) => {
-      console.log("Error on registration: " + JSON.stringify(error));
-    });
-
-    //DEV
-
-    // Show us the notification payload if the app is open on our device
-    PushNotifications.addListener(
-      "pushNotificationReceived",
-      (notification: PushNotificationSchema) => {
-        console.log("Push received: " + JSON.stringify(notification));
-      }
-    );
-
-    // Method called when tapping on a notification
-    PushNotifications.addListener(
-      "pushNotificationActionPerformed",
-      (notification: ActionPerformed) => {
-        console.log("Push action performed: " + JSON.stringify(notification));
-      }
-    );
   }
 
   removeFromStorage() {

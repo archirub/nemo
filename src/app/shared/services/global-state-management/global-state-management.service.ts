@@ -113,8 +113,6 @@ export class GlobalStateManagementService {
 
         const observables$: Observable<any>[] = [];
 
-        console.log("globalManagement triggered", user, emailIsVerified);
-
         if (!user) {
           // if user isn't authenticated, do the corresponding routine
           observables$.push(this.nobodyAuthenticatedRoutine());
@@ -150,12 +148,6 @@ export class GlobalStateManagementService {
   }
 
   private requiresEmailVerificationRoutine(): Observable<any> {
-    // const goToEmailVerification = async () => {
-    //   // await this.navCtrl.navigateForward("/welcome/signupauth");
-    //   console.log("eyo eyo ", this.signupauthMethodSharer);
-    //   await this.signupauthMethodSharer?.goStraightToEmailVerification?.();
-    // };
-
     return of(this.router.url).pipe(
       tap(() => this.userState.next("authenticated")),
       concatMap((url) => {
@@ -354,7 +346,6 @@ export class GlobalStateManagementService {
     // // if (page === "own-profile" || page === "settings") {
     // //   storesToActivate$.push(this.OwnPicturesStore.activateStore());
     // // }
-    // console.log("stores are", storesToActivate$);
     // return storesToActivate$.length > 0 ? combineLatest(storesToActivate$) : of("");
   }
 

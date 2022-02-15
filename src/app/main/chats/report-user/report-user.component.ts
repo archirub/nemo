@@ -43,8 +43,6 @@ export class ReportUserComponent {
       message: "Sending Report...",
     });
 
-    console.log("this.report", this.report);
-
     await this.loadingAlertManager.presentNew(loader, "replace-erase");
 
     try {

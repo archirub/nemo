@@ -1,4 +1,3 @@
-import { SubscribeAndLog } from "./../../functions/custom-rxjs";
 import { Injectable, QueryList } from "@angular/core";
 import { AngularFirestore, DocumentSnapshot } from "@angular/fire/firestore";
 import { AngularFireFunctions } from "@angular/fire/functions";
@@ -121,7 +120,6 @@ export class SwipeStackStore extends AbstractStoreService {
     protected resetter: StoreResetter
   ) {
     super(resetter);
-    SubscribeAndLog(this.stackState, "stackState");
   }
 
   protected systemsToActivate(): Observable<any> {
@@ -178,7 +176,6 @@ export class SwipeStackStore extends AbstractStoreService {
 
     const typicalRegistration$ = this.swipeOutcomeStore.swipeChoices$.pipe(
       filter((c) => c.length >= this.REGISTER_FREQUENCY),
-      tap(() => console.log("typicalRegistration$")),
       exhaustMap(() => this.swipeOutcomeStore.registerSwipeChoices())
     );
 
@@ -188,7 +185,6 @@ export class SwipeStackStore extends AbstractStoreService {
       // choice has not been added yet, so the latter never gets registered.
       // Since this is the last one of the session either way, it doesn't hurt at all to wait for a few seconds
       delay(2000),
-      tap(() => console.log("endOfStackRegistration$")),
       exhaustMap(() => this.swipeOutcomeStore.registerSwipeChoices())
     );
 
@@ -203,11 +199,6 @@ export class SwipeStackStore extends AbstractStoreService {
     ]).pipe(
       withLatestFrom<[number, boolean, boolean], [StackState]>(this.stackState$),
       map(([[profilesCount, canUseSwipe, showsProfile], currentStackState]) => {
-        console.log("[[profilesCount, canUseSwipe, showsProfile], currentStackState]", [
-          [profilesCount, canUseSwipe, showsProfile],
-          currentStackState,
-        ]);
-
         if (canUseSwipe === false) return this.stackState.next("cap-reached");
 
         if (showsProfile === false) return this.stackState.next("not-showing-profile");
@@ -418,7 +409,6 @@ export class SwipeStackStore extends AbstractStoreService {
           take(1),
           switchMap((ref) =>
             this.slideChangeListener$(ref).pipe(
-              Logger("slideChangeListener$"),
               map((swiper) => ({
                 picIndex: swiper.realIndex,
                 uid: list.first.profile.uid,
@@ -436,7 +426,6 @@ export class SwipeStackStore extends AbstractStoreService {
       // })),
       // doesn't keep going if slide is the first one
       filter((m) => typeof m.picIndex === "number" && m.picIndex > 0),
-      Logger("got past filter"),
       switchMap((m) =>
         // subscribes to profile picture of that array
         m.profilePictures$.pipe(
@@ -450,16 +439,11 @@ export class SwipeStackStore extends AbstractStoreService {
               .map((_, i) => {
                 const alreadyDownloaded =
                   typeof pics[i] === "string" && pics[i].length > 0; // checks for it not being an empty string
-                console.log(
-                  "within addPictures$, alreadyDownloaded is",
-                  alreadyDownloaded
-                );
                 if (alreadyDownloaded) return false;
 
                 return (() => {
                   const index = i;
                   return this.getUrl(m.uid, index).pipe(
-                    Logger("getUrl"),
                     map((url) => (url ? { url, picIndex: index, uid: m.uid } : false))
                   );
                 })();
@@ -473,7 +457,6 @@ export class SwipeStackStore extends AbstractStoreService {
                 }
             >[]; // filters out "false" elements (a.k.a where fetching wasn't needed)
             return forkJoin(addPictures$).pipe(
-              Logger("before addPictures"),
               switchMap((urls) =>
                 this.addPictures(
                   urls.filter(Boolean) as { url: string; picIndex: number; uid: string }[]
@@ -570,7 +553,6 @@ export class SwipeStackStore extends AbstractStoreService {
       take(1),
       switchMap((SC) => this.fetchUIDs(SC)),
       switchMap((uids) => {
-        console.log("swipeStackStore, uids coming in:", uids);
         // takes care of case where generateSwipeStack returns an empty array
         if (!uids || uids.length < 1) return of(this.stackState.next("empty"));
 

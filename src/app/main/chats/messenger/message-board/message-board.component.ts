@@ -18,9 +18,8 @@ import {
 import { MessagesService, MSG_BATCH_SIZE } from "../messages.service";
 
 import { Message } from "@classes/index";
-import { SubscribeAndLog } from "src/app/shared/functions/custom-rxjs";
-import { wait } from "src/app/shared/functions/common";
 import { MsgScrollingHandlerService } from "../msg-scrolling-handler.service";
+import { wait } from "src/app/shared/functions/common";
 
 @Component({
   selector: "app-message-board",
@@ -61,20 +60,14 @@ export class MessageBoardComponent implements OnInit, OnDestroy {
   constructor(
     private msgService: MessagesService,
     private msgScrollingHandler: MsgScrollingHandlerService
-  ) {
-    SubscribeAndLog(this.messages$, "messages$ arrived in msg board");
-  }
+  ) {}
 
   ngOnInit() {
-    console.log("called now");
     this.msgScrollingHandler.scrollToBottom(0);
     // this.manageInfiniteScroll();
     this.subs.add(this.manageInfiniteScroll$.subscribe());
     this.subs.add(this.manageAllLoadedPromptAnimation$.subscribe());
     this.subs.add(this.msgScrollingHandler.scrollHandler$.subscribe());
-    SubscribeAndLog(this.allLoaded$, "allMessagesLoaded$");
-
-    SubscribeAndLog(this.triggerAllLoadedPrompt$, "triggerAllLoadedPrompt$");
   }
 
   private firstBatchListenerForScroll$ = this.firstBatchArrived$.pipe(
@@ -109,7 +102,6 @@ export class MessageBoardComponent implements OnInit, OnDestroy {
 
   // used in template in ionInfiniteScroll
   async loadMoreMessages(event) {
-    console.log("loadMoreMessages");
     await firstValueFrom(this.msgService.listenToMoreMessages());
     event.target.complete();
   }

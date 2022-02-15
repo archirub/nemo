@@ -75,9 +75,5 @@ export class StoreReadinessService {
   ownProfile$ = combineLatest([
     this.userStore.isReady$,
     this.OwnPicturesStore.isReady$,
-  ]).pipe(
-    // tap((a) => console.log("ARRAY ownprofile is ready", a)),
-    map((arr) => arr.reduce((prev, curr) => (curr === false ? curr : prev)))
-    // tap((a) => console.log("VALUE ownprofile is ready", a))
-  );
+  ]).pipe(map((arr) => arr.reduce((prev, curr) => (curr === false ? curr : prev))));
 }

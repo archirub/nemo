@@ -335,7 +335,6 @@ export class SignuprequiredPage implements OnInit, OnDestroy {
    * @param data
    */
   fillFields(data: allowOptionalProp<SignupRequired>): void {
-    console.log("data coming until fill fields", data);
     Object.keys(data).forEach((field) => {
       if (field === "pictures") {
         if (data[field]) {
@@ -347,7 +346,6 @@ export class SignuprequiredPage implements OnInit, OnDestroy {
         this.date.writeValue(data[field] as unknown as string);
       } else {
         if (field === "sexualPreference") {
-          console.log("field is", field, data[field]);
         }
         const formControl = this.form.get(field);
         if (formControl) formControl.setValue(data[field]);

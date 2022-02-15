@@ -50,7 +50,6 @@ export class SwipeOutcomeStore extends AbstractStoreService {
     return this.swipeChoices$.pipe(
       take(1),
       map((choices) => {
-        console.log("hello or what?");
         const newChoice: profileChoiceMap = { choice: "yes", profile };
         this.swipeChoices.next(choices.concat(newChoice));
       })
@@ -125,7 +124,6 @@ export class SwipeOutcomeStore extends AbstractStoreService {
     if (this.registeringChoices) return;
     this.registeringChoices = true;
     const swipeChoices = await firstValueFrom(this.swipeChoices$);
-    console.log("hello? swipe choices are", swipeChoices);
     if (swipeChoices.length <= 0) return;
 
     const uidChoiceMaps: uidChoiceMap[] = swipeChoices.map((c) => ({
@@ -151,7 +149,6 @@ export class SwipeOutcomeStore extends AbstractStoreService {
           )
       );
     } catch (e) {
-      console.log("a", e);
       this.registeringChoices = false;
       return;
     }

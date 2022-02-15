@@ -108,7 +108,6 @@ export class ProfileCardComponent
     ref: QueryList<ElementRef>
   ) {
     if (ref) {
-      // console.log("bulletsRef$ is ", ref, Array.from(ref));
       this.bulletsRef$.next(ref);
     }
   }

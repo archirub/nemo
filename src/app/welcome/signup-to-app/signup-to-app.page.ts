@@ -48,7 +48,6 @@ export class SignupToAppPage {
   }
 
   ionViewDidEnter() {
-    console.log("check for ionViewDidEnter, can log remove now.");
     this.initializeAppState();
   }
 

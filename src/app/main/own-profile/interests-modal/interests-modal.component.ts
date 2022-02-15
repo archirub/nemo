@@ -78,7 +78,6 @@ export class InterestsModalComponent implements OnInit {
 
   // builds the interest grid
   /*buildInterestGrid() {
-    console.log('building');
     this.interestGrid = []; //Array of arrays of interest triplets
     this.pictureGrid = []; //Arrays of icons to support
 
@@ -113,8 +112,6 @@ export class InterestsModalComponent implements OnInit {
       this.pictureGrid.push(picPushArray); //Pushes last picture array
     }
 
-    console.log(this.interestGrid);
-    console.log(this.pictureGrid);
   }*/
 
   // changes the interest selection

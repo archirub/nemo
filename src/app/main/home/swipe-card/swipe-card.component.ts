@@ -534,10 +534,8 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
   private onMatch(matchedProfile: Profile) {
     const postAnimTasks$ = (p) =>
       concat(
-        // this.swipeOutcomeStore.registerSwipeChoices$,
         this.swipeStackStore.removeProfile(p),
         this.otherProfilesStore.saveProfile(p),
-        defer(async () => console.log("Yo did all that and that")),
         this.logSwipeAction("match", matchedProfile)
       );
 
@@ -628,10 +626,8 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
 
     return firstValueFrom(
       this.chatboardStore.userHasChatWith(this.latestMatchedProfile.uid, false).pipe(
-        Logger("chat before"),
         filter((chat) => chat !== false),
         take(1),
-        Logger("chat came tjhrough"),
         timeout(maxTimeWaitingForChat),
         switchMap((chat: Chat) =>
           defer(() =>

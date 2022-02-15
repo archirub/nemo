@@ -12,7 +12,7 @@ import { GlobalStateManagementService } from "@services/global-state-management/
 import { routerInitListenerService } from "@services/global-state-management/initial-url.service";
 import { StoreReadinessService } from "@services/store-readiness/store-readiness.service";
 
-import { SubscribeAndLog } from "./shared/functions/custom-rxjs";
+// import { SubscribeAndLog } from "./shared/functions/custom-rxjs";
 import { wait } from "./shared/functions/common";
 
 @Component({
@@ -35,7 +35,7 @@ export class AppComponent implements OnDestroy, OnInit {
     private storeReadiness: StoreReadinessService
   ) {
     this.initializeApp();
-    SubscribeAndLog(this.afAuth.authState, "authState$");
+    // SubscribeAndLog(this.afAuth.authState, "authState$");
   }
 
   ngOnInit() {}
@@ -83,7 +83,6 @@ export class AppComponent implements OnDestroy, OnInit {
   }
 
   ngOnDestroy(): void {
-    console.log("NGONDESTROY CALLED IN APP COMPONENT");
     this.subs.unsubscribe();
   }
 }

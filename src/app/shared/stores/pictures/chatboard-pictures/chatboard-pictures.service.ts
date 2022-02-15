@@ -134,10 +134,7 @@ export class ChatboardPicturesStore extends AbstractStoreService {
   public addToHolder(obj: { uids: string[]; urls: string[] }): Observable<string[][]> {
     return this.holder$.pipe(
       take(1),
-      // tap(() => {
-      //   obj.urls = this.getTrustedUrl(obj.urls as string[]);
-      //   console.log("trusted urls", obj.urls);
-      // }),
+
       map((holder) => {
         Array(obj.uids.length)
           .fill(null)

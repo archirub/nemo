@@ -118,7 +118,6 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
   editingInProgress$ = this.editingInProgress.asObservable().pipe(distinctUntilChanged());
   profilePictures$ = this.profilePictures.asObservable();
   userFromStore$ = this.currentUserStore.user$; // used in template
-  currentUser;
 
   profilePicturesWithEmpty$ = this.profilePictures
     .asObservable()
@@ -222,9 +221,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     private storeReadiness: StoreReadinessService
   ) {}
 
-  async ngOnInit() {
-    this.currentUser = await this.errorHandler.getCurrentUser();
-  }
+  async ngOnInit() {}
 
   ngAfterViewInit() {
     this.pageIsReady$ = this.getPageIsReady(); // this format is needed because the ViewChild "profileCard" only gets defined after view init
@@ -576,7 +573,7 @@ export class OwnProfilePage implements OnInit, AfterViewInit {
     }
 
     this.fbAnalytics.logEvent("profile_edit", {
-      UID: this.currentUser.uid, //user uid
+      UID: (await this.errorHandler.getCurrentUser()).uid, //user uid
       changes: changes,
       timestamp: Date.now(), //Time since epoch
     });

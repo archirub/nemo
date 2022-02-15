@@ -33,17 +33,16 @@ import { FilterFalsy } from "src/app/shared/functions/custom-rxjs";
 })
 export class SignupauthPage implements OnInit {
   // for DEV purposes
-  async devVerifyEmail() {
-    return firstValueFrom(
-      this.afFunctions
-        .httpsCallable("makeEmailVerified")({})
-        .pipe(
-          tap((res) => console.log("makeEmailVerified cloud function response: ", res)),
-          this.errorHandler.convertErrors("cloud-functions"),
-          this.errorHandler.handleErrors()
-        )
-    );
-  }
+  // async devVerifyEmail() {
+  //   return firstValueFrom(
+  //     this.afFunctions
+  //       .httpsCallable("makeEmailVerified")({})
+  //       .pipe(
+  //         this.errorHandler.convertErrors("cloud-functions"),
+  //         this.errorHandler.handleErrors()
+  //       )
+  //   );
+  // }
 
   slidesLeft: number;
   validatorChecks: object;
@@ -104,11 +103,6 @@ export class SignupauthPage implements OnInit {
     this.emailService.setGoToSlide(this.goToSlide.bind(this));
     this.subs.add(this.emailAnimationsHandler$.subscribe());
     this.subs.add(this.emailService.handleResendingTimer$.subscribe());
-
-    // For global state management service
-    // this.SignupAuthMethodSharer.defineGoStraightToEmailVerification(
-    //   this.goStraightToEmailVerification.bind(this)
-    // );
   }
 
   ionViewDidEnter() {

@@ -97,7 +97,7 @@ export function randomWeightedPick(
   const countAvailable: number = groups
     .map((group) => group.length)
     .reduce((a, b) => a + b, 0);
-  console.log(groups, countAvailable);
+
   // Makes sure loop doesn't run indefinitely
   const countDesired: number = Math.min(countAvailable, countWanted);
 

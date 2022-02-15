@@ -55,7 +55,6 @@ export class FirebaseLogoutService {
 
     const navigateToWelcome = async () =>
       this.zone.run(() => {
-        console.log("navigateToWelcome");
         return this.navCtrl.navigateForward("/welcome");
       });
     // .then(() => window.location.reload());

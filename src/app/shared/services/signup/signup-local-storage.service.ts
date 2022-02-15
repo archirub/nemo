@@ -71,7 +71,6 @@ export class SignupLocalStorageService {
     const base64Pictures: string[] = JSON.parse(
       (await Storage.get({ key: this.picturesKey })).value
     );
-    console.log("base64Pictures", base64Pictures);
 
     if (!base64Pictures || base64Pictures.length < 1) return [];
 

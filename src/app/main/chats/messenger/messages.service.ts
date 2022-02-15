@@ -64,7 +64,6 @@ export class MessagesService {
     const { chat, messages } = this.messengerInitSharer.extractVariables();
     this.chat.next(chat);
     this.messages.next(messages);
-    console.log("initializeService called");
   }
 
   // Sends the content of the input bar as a new message to the database
@@ -90,7 +89,6 @@ export class MessagesService {
         ).pipe(this.errorHandler.convertErrors("firestore"))
       ),
       switchMapTo(this.listenToMoreMessages(1)),
-      Logger("worked"),
       mapTo(messageTime),
       this.errorHandler.handleErrors({ strategy: "propagateError" }),
       finalize(() => this.sendingMessage.next(false))

@@ -1,5 +1,4 @@
 import * as admin from "firebase-admin";
-// DEV - remove functions import
 import * as functions from "firebase-functions";
 import {
   Degree,
@@ -278,19 +277,6 @@ function pickFromDemographicArrays(
   const uidIndexesPicked: { [index: number]: true }[] = Array.from({
     length: lengthsOfUidArrays.length,
   }).map((el) => []);
-
-  // console.log(
-  //   "diff",
-  //   diffDemographicUidArrays,
-  //   "var",
-  //   variance,
-  //   "num",
-  //   numberOfPicks,
-  //   "length",
-  //   lengthsOfUidArrays,
-  //   "indexes picked",
-  //   uidIndexesPicked
-  // );
 
   // PICK INDEXES
   Array.from({ length: numberOfPicks }).forEach(() => {

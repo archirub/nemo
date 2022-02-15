@@ -31,7 +31,6 @@ import { GlobalErrorHandler } from "@services/errors/global-error-handler.servic
 import { IonSlides, NavController } from "@ionic/angular";
 import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
 import { Router } from "@angular/router";
-import { Logger, SubscribeAndLog } from "src/app/shared/functions/custom-rxjs";
 import { ManagementPauser } from "@services/global-state-management/management-pauser.service";
 
 export type EmailVerificationState = "not-sent" | "sent" | "resent" | "verified";
@@ -119,11 +118,6 @@ export class EmailVerificationService implements OnDestroy {
     this.subs.add(this.handleListening$.subscribe());
     this.subs.add(this.handleSending$.subscribe());
     this.subs.add(this.handleManagementPausing$.subscribe());
-
-    SubscribeAndLog(this.emailVerificationState$, "emailVerificationState$");
-    SubscribeAndLog(this.resendingIsAvailable$, "resendingIsAvailable$");
-
-    SubscribeAndLog(this.timeToResendingAvailable$, "timeToResendingAvailable$");
   }
 
   public listenForVerification() {
@@ -135,7 +129,6 @@ export class EmailVerificationService implements OnDestroy {
    * select state = "resent" if we are resending
    */
   public sendVerificationToUser(state: "sent" | "resent") {
-    console.log("sendVerificationToUser");
     this.triggerSendVerification.next("");
     this.emailVerificationState.next(state);
   }
@@ -164,8 +157,6 @@ export class EmailVerificationService implements OnDestroy {
       this.sendVerificationToUser("sent");
       this.listenForVerification();
     } else {
-      console.log("user on wrong page and wrong slide for email verification");
-
       const alert = await this.loaderAlertManager.createAlert({
         header: "Email Verification Required",
         message: `
@@ -200,7 +191,6 @@ export class EmailVerificationService implements OnDestroy {
       );
       await user?.reload();
       await user.getIdToken(true);
-      console.log("Listening on email verification...");
       return user;
     }),
     filter((user) => !!user?.emailVerified),
@@ -211,7 +201,6 @@ export class EmailVerificationService implements OnDestroy {
   ) as Observable<void>;
 
   private sendEmailVerification$ = this.errorHandler.getCurrentUser$().pipe(
-    Logger("sendEmailVerification triggering"),
     take(1),
     switchMap((user) =>
       defer(() => user.sendEmailVerification()).pipe(

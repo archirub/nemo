@@ -39,22 +39,6 @@ import { SCenterAnimation, SCleaveAnimation, FishSwimAnimation } from "@animatio
   styleUrls: ["home.page.scss"],
 })
 export class HomePage implements OnInit, OnDestroy, AfterViewInit {
-  // DEV
-  sendNotification() {
-    return this.afFunctions
-      .httpsCallable("testNotification")({})
-      .subscribe((a) => console.log("NOTIFICATION", a));
-  }
-
-  // DEV
-  removeNotifications() {
-    console.log("removing notifications");
-    return PushNotifications.removeAllDeliveredNotifications();
-  }
-
-  //DEV
-  showTestModal() {}
-
   screenHeight: number;
   screenWidth: number;
 

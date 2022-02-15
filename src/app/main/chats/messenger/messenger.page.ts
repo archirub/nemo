@@ -39,7 +39,6 @@ import { UserReportingService } from "@services/user-reporting/user-reporting.se
 import { messengerMotivationMessages } from "@interfaces/index";
 
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
-import { SubscribeAndLog } from "src/app/shared/functions/custom-rxjs";
 import { MessagesService } from "./messages.service";
 
 import { wait } from "src/app/shared/functions/common";
@@ -163,26 +162,20 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy, AfterCon
   ) {}
 
   ngOnInit() {
-    SubscribeAndLog(this.sendingMessage$, "sendingMessage$");
     this.subs.add(this.otherProfileHandler$.subscribe());
   }
 
   ngAfterContentInit() {
-    console.log("ngAfterContentInit");
     this.pageInitialization();
   }
 
   ngAfterViewInit() {
-    console.log("ngAfterViewInit");
-
     this.styleMessageBar();
     firstValueFrom(this.slidesRef$).then((ref) => ref.lockSwipes(true));
   }
 
   // initializes the page
   async pageInitialization() {
-    console.log("NOW");
-
     this.refreshUserInput();
 
     setTimeout(() => this.pageIsReady.next(true), 500);
@@ -190,7 +183,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy, AfterCon
 
   async refreshUserInput() {
     const chat = await firstValueFrom(this.chat$);
-    console.log("chat", chat);
+
     if (!chat) return;
 
     this.userInput = chat.latestChatInput;

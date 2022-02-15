@@ -179,8 +179,6 @@ export class SignupService {
     // get the stage of completion of the signup process of the user
     const stage = this.signupStage;
 
-    console.log("checkAndRedirect: redirecting to ", stage);
-
     // this check of whether stage is not falsy is to make sure that we are only
     // redirected to a stage if the signup process has been initialized
     if (stage) {

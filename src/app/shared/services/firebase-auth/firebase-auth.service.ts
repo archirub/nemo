@@ -68,13 +68,11 @@ export class FirebaseAuthService {
     const cancelUserConfirmationAlert = () => {};
     const confirmUserConfirmationAlert = async () => {
       const message = `Please provide a password to ${user.email}`;
-      console.log("a");
       const { outcome } = await this.reAuthenticationProcedure(
         user,
         message,
         async () => {}
       );
-      console.log("b");
 
       if (outcome !== "user-reauthenticated")
         return this.loadingAlertManager.dismissDisplayed();
@@ -223,13 +221,11 @@ export class FirebaseAuthService {
         await user.reauthenticateWithCredential(credentials);
         outcome = "user-reauthenticated";
       } catch (err) {
-        console.log("error is", err);
         if (err?.code === "auth/wrong-password") {
           outcome = "auth-failed";
           const nestedReauthReturn = await this.wrongPasswordPopup(() =>
             this.reAuthenticationProcedure(user, message, cancelProcedure)
           );
-          // console.log("outcome", nestedReauthReturn);
           // outcome = nestedReauthReturn?.outcome;
         } else if (err?.code === "auth/too-many-requests") {
           outcome = "auth-failed";
@@ -255,17 +251,14 @@ export class FirebaseAuthService {
         },
       ],
     });
-    console.log("ici");
 
     await this.loadingAlertManager.presentNew(alert, "replace-erase");
-    console.log("la");
 
     // format used to make sure function waits for outcome to have a value
     // before returning, otherwise the functions of the OkProcedure don't have
     // time to complete and outcome is just undefined
     return new Promise((resolve) => {
       const interval = setInterval(() => {
-        console.log("outcome", outcome);
         if (outcome) {
           clearInterval(interval);
           resolve({ user, outcome });

@@ -23,8 +23,6 @@ export class MsgScrollingHandlerService {
 
   async scrollToBottom(scrollSpeed: number = this.SCROLL_SPEED) {
     return firstValueFrom(this.ionContentRef$).then((ref) => {
-      console.log("done now");
-
       return ref.scrollToBottom(scrollSpeed);
     });
   }
