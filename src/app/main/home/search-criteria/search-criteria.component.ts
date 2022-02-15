@@ -23,6 +23,9 @@ import {
 import { SearchCriteriaStore } from "@stores/search-criteria/search-criteria-store.service";
 import { UniversitiesStore } from "@stores/universities/universities.service";
 
+import { AnalyticsService } from "@services/analytics/analytics.service";
+import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
+
 import { SearchCriteria } from "@classes/index";
 import { searchCriteria, searchCriteriaOptions } from "@interfaces/search-criteria.model";
 import { FishSwimAnimation } from "@animations/fish.animation";
@@ -112,7 +115,10 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
     private SCstore: SearchCriteriaStore,
     private modalCtrl: ModalController,
     private universitiesStore: UniversitiesStore,
-    private renderer: Renderer2
+    private renderer: Renderer2,
+
+    private fbAnalytics: AnalyticsService,
+    private errorHandler: GlobalErrorHandler
   ) {
     this.form = this.emptyForm;
   }
@@ -145,6 +151,12 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
     );
     await this.SCstore.updateCriteriaOnDatabase();
     await this.modalCtrl.dismiss();
+
+    let analyticsObject = {...this.form.value};
+    let user = await this.errorHandler.getCurrentUser();
+    analyticsObject['uid'] = user.uid;
+
+    this.fbAnalytics.logEvent("sc_close", analyticsObject);
   }
 
   // checks whether any of the options are not empty. If it is the case, then show the button to reset the selections
