@@ -3,11 +3,9 @@ import {
   concat,
   distinctUntilChanged,
   filter,
-  forkJoin,
   interval,
   map,
   Observable,
-  ReplaySubject,
   switchMap,
   take,
   tap,
@@ -16,16 +14,10 @@ import {
 import { Injectable } from "@angular/core";
 import { AngularFirestore } from "@angular/fire/firestore";
 import { CustomError } from "@interfaces/error-handling.model";
-import {
-  privateProfileFromDatabase,
-  SwipeCapDocument,
-  SwipeCapGeneralDocument,
-} from "@interfaces/profile.model";
+import { SwipeCapDocument, SwipeCapGeneralDocument } from "@interfaces/profile.model";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
-import { CurrentUserStore } from "..";
 import { AbstractStoreService } from "@interfaces/stores.model";
 import { StoreResetter } from "@services/global-state-management/store-resetter.service";
-import { Logger } from "../../functions/custom-rxjs";
 
 type SwipeState = "init" | "";
 type SwipeCapMap = { swipesLeft: number; date: Date };

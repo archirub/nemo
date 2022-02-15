@@ -34,8 +34,9 @@ const routes: Routes = [
       ),
   },
   {
-    path: 'signup-to-app',
-    loadChildren: () => import('./signup-to-app/signup-to-app.module').then( m => m.SignupToAppPageModule)
+    path: "signup-to-app",
+    loadChildren: () =>
+      import("./signup-to-app/signup-to-app.module").then((m) => m.SignupToAppPageModule),
   },
   // {
   //   path: '**',

@@ -13,7 +13,7 @@ import { IonCheckbox, IonSlides, ModalController, NavController } from "@ionic/a
 import { FormGroup, FormControl, Validators } from "@angular/forms";
 import { Router } from "@angular/router";
 
-import { firstValueFrom, Subscription } from "rxjs";
+import { firstValueFrom, ReplaySubject, Subscription } from "rxjs";
 import { concatMap, delay, map } from "rxjs/operators";
 
 import { AppDatetimeComponent } from "@components/index";
@@ -30,8 +30,6 @@ import {
   sexualPreferenceOptions,
   genderOptions,
   MAX_PROFILE_PICTURES_COUNT,
-  CHECK_AUTH_STATE,
-  CustomError,
 } from "@interfaces/index";
 import { SignupRequired } from "@interfaces/signup.model";
 import { allowOptionalProp } from "@interfaces/index";
@@ -79,6 +77,13 @@ export class SignuprequiredPage implements OnInit, OnDestroy {
   @ViewChildren("pagerDots", { read: ElementRef }) dots: QueryList<ElementRef>;
   @ViewChild("tcbox") tcbox: IonCheckbox;
   @ViewChild("ppbox") ppbox: IonCheckbox;
+
+  private videoPlayerRef$ = new ReplaySubject<ElementRef>(1);
+  @ViewChild("videoPlayer", { read: ElementRef }) set videoPlayerSetter(ref: ElementRef) {
+    if (ref) {
+      this.videoPlayerRef$.next(ref);
+    }
+  }
 
   universityOptions$ = this.universitiesStore.optionsList$;
 
@@ -130,9 +135,12 @@ export class SignuprequiredPage implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.subs.add(this.universitySelectingHandler$.subscribe());
+
+    this.playVideo();
   }
 
-  async ionViewWillEnter() {
+  ionViewWillEnter() {
+    this.playVideo();
     this.reqValidatorChecks = this.getReqValidatorChecks();
   }
 
@@ -281,6 +289,11 @@ export class SignuprequiredPage implements OnInit, OnDestroy {
     // no need to await since logic is not dependent on its success
     this.fbAnalytics.logEvent("skip_to_app", await this.errorHandler.getCurrentUser());
 
+    return this.navigateToSignupToApp();
+  }
+
+  async navigateToSignupToApp() {
+    await this.pauseVideo();
     return this.navCtrl.navigateForward("/welcome/signup-to-app");
   }
 
@@ -562,6 +575,14 @@ export class SignuprequiredPage implements OnInit, OnDestroy {
       university: document.getElementById("uniCheck"),
       degree: document.getElementById("degreeCheck"),
     };
+  }
+
+  async playVideo() {
+    return firstValueFrom(this.videoPlayerRef$).then((ref) => ref.nativeElement.play());
+  }
+
+  async pauseVideo() {
+    return firstValueFrom(this.videoPlayerRef$).then((ref) => ref.nativeElement.pause());
   }
 
   ngOnDestroy() {

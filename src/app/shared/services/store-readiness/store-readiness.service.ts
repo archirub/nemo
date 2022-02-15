@@ -8,7 +8,7 @@ import { SwipeStackStore } from "@stores/swipe-stack/swipe-stack-store.service";
 import { CurrentUserStore } from "@stores/current-user/current-user-store.service";
 import { ChatboardPicturesStore } from "@stores/pictures/chatboard-pictures/chatboard-pictures.service";
 import { combineLatest, Observable } from "rxjs";
-import { distinctUntilChanged, map, tap } from "rxjs/operators";
+import { distinctUntilChanged, map } from "rxjs/operators";
 import { isEqual } from "lodash";
 
 type storeName =

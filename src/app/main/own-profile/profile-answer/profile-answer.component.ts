@@ -1,4 +1,4 @@
-import { IonSelect, IonTextarea } from "@ionic/angular";
+import { IonSelect } from "@ionic/angular";
 import {
   EventEmitter,
   Component,
@@ -7,8 +7,6 @@ import {
   Output,
   ViewChild,
   Renderer2,
-  AfterViewInit,
-  AfterContentChecked,
 } from "@angular/core";
 
 import { Question, QuestionAndAnswer } from "@interfaces/profile.model";

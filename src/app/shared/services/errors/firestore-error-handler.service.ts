@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 
-import { catchError, concatMapTo, defer, mapTo, Observable } from "rxjs";
+import { catchError, concatMapTo, defer, Observable } from "rxjs";
 
 import { CommonErrorFunctions } from "./common-error-functions";
 

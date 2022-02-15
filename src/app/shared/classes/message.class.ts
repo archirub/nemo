@@ -1,4 +1,4 @@
-import { message, messageReaction, messageState } from "@interfaces/index";
+import { message, messageState } from "@interfaces/index";
 
 export class Message implements message {
   private _messageID: string;

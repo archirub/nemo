@@ -9,15 +9,7 @@ import {
   Token,
 } from "@capacitor/push-notifications";
 import { BehaviorSubject, defer, firstValueFrom, merge, Observable, of } from "rxjs";
-import {
-  distinctUntilChanged,
-  filter,
-  map,
-  switchMap,
-  take,
-  tap,
-  withLatestFrom,
-} from "rxjs/operators";
+import { distinctUntilChanged, filter, map, switchMap, take, tap } from "rxjs/operators";
 
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 import { StoreResetter } from "@services/global-state-management/store-resetter.service";

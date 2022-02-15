@@ -9,8 +9,6 @@ import {
   AfterContentInit,
 } from "@angular/core";
 
-import { ActivatedRoute } from "@angular/router";
-
 import {
   BehaviorSubject,
   combineLatest,
@@ -22,35 +20,28 @@ import {
   Subscription,
 } from "rxjs";
 import {
-  delay,
   distinctUntilChanged,
-  exhaustMap,
   filter,
-  first,
   map,
   startWith,
   switchMap,
-  switchMapTo,
   take,
 } from "rxjs/operators";
-import { isEqual } from "lodash";
 
 import { ReportUserComponent } from "../report-user/report-user.component";
 import { ProfileCardComponent } from "@components/index";
 
-import { ChatboardStore, CurrentUserStore } from "@stores/index";
+import { ChatboardStore } from "@stores/index";
 import { OtherProfilesStore } from "@stores/other-profiles/other-profiles-store.service";
 import { ChatboardPicturesStore } from "@stores/pictures/chatboard-pictures/chatboard-pictures.service";
 import { UserReportingService } from "@services/user-reporting/user-reporting.service";
 
-import { Message } from "@classes/index";
 import { messengerMotivationMessages } from "@interfaces/index";
 
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
-import { Logger } from "src/app/shared/functions/custom-rxjs";
+import { SubscribeAndLog } from "src/app/shared/functions/custom-rxjs";
 import { MessagesService } from "./messages.service";
-import { MessagesResolver } from "./messages.resolver";
-import { AnalyticsService } from "@services/analytics/analytics.service";
+
 import { wait } from "src/app/shared/functions/common";
 import { MsgScrollingHandlerService } from "./msg-scrolling-handler.service";
 
@@ -135,18 +126,21 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy, AfterCon
 
     const chat = await firstValueFrom(this.chat$.pipe(filter((u) => !!u)));
 
-    const msgTime = await firstValueFrom(this.msgService.sendMessage(this.userInput));
+    try {
+      const msgTime = await firstValueFrom(this.msgService.sendMessage(this.userInput));
 
-    this.userInput = "";
+      this.userInput = "";
 
-    const waitOnMessageSent$ = this.msgService.messages$.pipe(
-      filter((msgs) => !!msgs.find((msg) => msg.time.getTime() === msgTime.getTime())),
-      take(1)
-    );
+      const waitOnMessageSent$ = this.msgService.messages$.pipe(
+        filter((msgs) => !!msgs.find((msg) => msg.time.getTime() === msgTime.getTime())),
+        take(1)
+      );
 
-    await firstValueFrom(waitOnMessageSent$);
+      await firstValueFrom(waitOnMessageSent$);
+      await wait(50);
 
-    return this.msgScrollingHandler.scrollToBottom();
+      return this.msgScrollingHandler.scrollToBottom();
+    } catch {}
   }
 
   get randomMotivationMessage() {
@@ -169,6 +163,7 @@ export class MessengerPage implements OnInit, AfterViewInit, OnDestroy, AfterCon
   ) {}
 
   ngOnInit() {
+    SubscribeAndLog(this.sendingMessage$, "sendingMessage$");
     this.subs.add(this.otherProfileHandler$.subscribe());
   }
 

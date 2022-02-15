@@ -9,8 +9,7 @@ import {
   AfterViewInit,
   Renderer2,
 } from "@angular/core";
-import { IonTextarea, ModalController, Animation, NavController } from "@ionic/angular";
-import { Router } from "@angular/router";
+import { ModalController, Animation, NavController } from "@ionic/angular";
 
 import {
   BehaviorSubject,
@@ -26,7 +25,6 @@ import {
 import {
   concatMap,
   distinctUntilChanged,
-  first,
   map,
   switchMap,
   take,
@@ -38,7 +36,7 @@ import {
   share,
 } from "rxjs/operators";
 import { cloneDeep, isEqual, isEqualWith } from "lodash";
-import Sortable, { Options as SortableOptions } from "sortablejs";
+import Sortable from "sortablejs";
 
 import { ProfileCardComponent } from "@components/index";
 import { InterestsModalComponent } from "./interests-modal/interests-modal.component";

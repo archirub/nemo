@@ -6,8 +6,7 @@ import { Storage } from "@capacitor/storage";
 
 import { StoreResetter } from "@services/global-state-management/store-resetter.service";
 import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
-import { BehaviorSubject } from "rxjs";
-import { pageTransition } from "@animations/page-transition.animation";
+
 import { wait } from "../../functions/common";
 import { ManagementPauser } from "@services/global-state-management/management-pauser.service";
 

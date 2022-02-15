@@ -87,15 +87,12 @@ export class MessagesService {
             .collection("messages")
             .doc()
             .set(this.databaseMsg(user.uid, chat.recipient.uid, msgToSend, messageTime))
-        ).pipe(
-          this.errorHandler.convertErrors("firestore"),
-          this.errorHandler.handleErrors()
-        )
+        ).pipe(this.errorHandler.convertErrors("firestore"))
       ),
       switchMapTo(this.listenToMoreMessages(1)),
       Logger("worked"),
       mapTo(messageTime),
-      this.errorHandler.handleErrors(),
+      this.errorHandler.handleErrors({ strategy: "propagateError" }),
       finalize(() => this.sendingMessage.next(false))
     );
   }

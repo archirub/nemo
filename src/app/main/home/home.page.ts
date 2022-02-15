@@ -5,58 +5,34 @@ import {
   OnInit,
   ViewChild,
   HostListener,
-  Renderer2,
   AfterViewInit,
 } from "@angular/core";
-import { ModalController, Animation, NavController } from "@ionic/angular";
+import { ModalController, Animation } from "@ionic/angular";
 import { AngularFireFunctions } from "@angular/fire/functions";
 
-import {
-  BehaviorSubject,
-  combineLatest,
-  concat,
-  firstValueFrom,
-  of,
-  ReplaySubject,
-  Subscription,
-} from "rxjs";
+import { BehaviorSubject, combineLatest, of, ReplaySubject, Subscription } from "rxjs";
 import {
   delay,
   distinctUntilChanged,
   filter,
-  finalize,
   take,
   map,
   switchMap,
   tap,
-  timeout,
 } from "rxjs/operators";
 import { PushNotifications } from "@capacitor/push-notifications";
 
 import { SearchCriteriaComponent } from "./search-criteria/search-criteria.component";
 
-import { TabElementRefService } from "src/app/main/tab-menu/tab-element-ref.service";
 import { StoreReadinessService } from "@services/store-readiness/store-readiness.service";
-import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 import { TutorialsStore } from "@stores/tutorials/tutorials.service";
-import { SwipeCapService } from "@stores/swipe-stack/swipe-cap.service";
 import { AnalyticsService } from "@services/analytics/analytics.service";
 
-import { ChatboardStore, SwipeStackStore } from "@stores/index";
+import { SwipeStackStore } from "@stores/index";
 import { OwnPicturesStore } from "@stores/pictures/own-pictures/own-pictures.service";
 
 import { Profile } from "@classes/index";
-import { matchMessages } from "@interfaces/profile.model";
-import {
-  SCenterAnimation,
-  SCleaveAnimation,
-  OpenCatchAnimation,
-  CloseCatchAnimation,
-  FishSwimAnimation,
-} from "@animations/index";
-import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
-import { SubscribeAndLog } from "src/app/shared/functions/custom-rxjs";
-import { MessageBoardComponent } from "src/app/main/chats/messenger/message-board/message-board.component";
+import { SCenterAnimation, SCleaveAnimation, FishSwimAnimation } from "@animations/index";
 @Component({
   selector: "app-home",
   templateUrl: "home.page.html",
@@ -153,18 +129,13 @@ export class HomePage implements OnInit, OnDestroy, AfterViewInit {
   displayTutorial$ = this.tutorials.displayTutorial("home");
 
   constructor(
-    private renderer: Renderer2,
     private modalCtrl: ModalController,
-    private navCtrl: NavController,
     private afFunctions: AngularFireFunctions,
     private fbAnalytics: AnalyticsService,
 
     private swipeStackStore: SwipeStackStore,
     private ownPicturesService: OwnPicturesStore,
-    private chatboardStore: ChatboardStore,
 
-    private loadingAlertManager: LoadingAndAlertManager,
-    private errorHandler: GlobalErrorHandler,
     private storeReadiness: StoreReadinessService,
     private tutorials: TutorialsStore
   ) {

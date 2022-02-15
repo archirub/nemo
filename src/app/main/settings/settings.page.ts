@@ -12,26 +12,16 @@ import { AngularFireFunctions } from "@angular/fire/functions";
 
 import {
   BehaviorSubject,
-  concat,
   defer,
   firstValueFrom,
   forkJoin,
   from,
   lastValueFrom,
   Observable,
-  of,
   ReplaySubject,
   Subscription,
-  throwError,
 } from "rxjs";
-import {
-  distinctUntilChanged,
-  exhaustMap,
-  filter,
-  map,
-  switchMap,
-  tap,
-} from "rxjs/operators";
+import { distinctUntilChanged, filter, map, switchMap, tap } from "rxjs/operators";
 
 import { AppToggleComponent } from "@components/index";
 

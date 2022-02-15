@@ -27,11 +27,8 @@ import {
   Subscription,
 } from "rxjs";
 import {
-  delay,
   exhaustMap,
   filter,
-  finalize,
-  first,
   map,
   mergeMap,
   pairwise,
@@ -49,9 +46,7 @@ import { matchMessages } from "@interfaces/profile.model";
 
 import {
   ChatboardStore,
-  CurrentUserStore,
   OtherProfilesStore,
-  SearchCriteriaStore,
   StackState,
   SwipeOutcomeStore,
   SwipeStackStore,
@@ -75,7 +70,6 @@ import { AngularFirestore } from "@angular/fire/firestore";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 import { SwipeCapService } from "@stores/swipe-stack/swipe-cap.service";
 import { AnalyticsService } from "@services/analytics/analytics.service";
-import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
 import { catchTimeout, FilterFalsy, Logger } from "src/app/shared/functions/custom-rxjs";
 import { wait } from "src/app/shared/functions/common";
 
@@ -203,10 +197,7 @@ export class SwipeCardComponent implements OnInit, OnDestroy {
     private swipeOutcomeStore: SwipeOutcomeStore,
     private swipeStackStore: SwipeStackStore,
     private otherProfilesStore: OtherProfilesStore,
-    private SCstore: SearchCriteriaStore, // for DEV
-    private currentUserStore: CurrentUserStore, // for DEV
 
-    private loadingAlertManager: LoadingAndAlertManager,
     private errorHandler: GlobalErrorHandler,
     private swipeCap: SwipeCapService
   ) {

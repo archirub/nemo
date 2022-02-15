@@ -2,15 +2,8 @@ import { Injectable } from "@angular/core";
 import { AngularFireStorage } from "@angular/fire/storage";
 import { AngularFirestore, DocumentSnapshot } from "@angular/fire/firestore";
 
-import {
-  BehaviorSubject,
-  forkJoin,
-  Observable,
-  combineLatest,
-  of,
-  firstValueFrom,
-} from "rxjs";
-import { exhaustMap, filter, first, map, share, take, tap } from "rxjs/operators";
+import { BehaviorSubject, forkJoin, Observable, of, firstValueFrom } from "rxjs";
+import { exhaustMap, filter, map, take, tap } from "rxjs/operators";
 
 import { FormatService } from "@services/format/format.service";
 

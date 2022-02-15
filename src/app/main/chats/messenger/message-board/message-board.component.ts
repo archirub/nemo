@@ -1,5 +1,3 @@
-import { isEqual } from "lodash";
-import { delay, distinctUntilChanged } from "rxjs/operators";
 import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from "@angular/core";
 import { IonContent, IonInfiniteScroll, AnimationController } from "@ionic/angular";
 
@@ -12,11 +10,9 @@ import {
   ReplaySubject,
   Subject,
   Subscription,
-  switchMap,
   switchMapTo,
   take,
   tap,
-  withLatestFrom,
 } from "rxjs";
 
 import { MessagesService, MSG_BATCH_SIZE } from "../messages.service";
@@ -24,7 +20,6 @@ import { MessagesService, MSG_BATCH_SIZE } from "../messages.service";
 import { Message } from "@classes/index";
 import { SubscribeAndLog } from "src/app/shared/functions/custom-rxjs";
 import { wait } from "src/app/shared/functions/common";
-import { MessagesResolver } from "../messages.resolver";
 import { MsgScrollingHandlerService } from "../msg-scrolling-handler.service";
 
 @Component({

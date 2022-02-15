@@ -1,28 +1,15 @@
-import { FirebaseLogoutService } from "@services/firebase-auth/firebase-logout.service";
 import { Injectable } from "@angular/core";
-import { NavigationEnd, NavigationStart, Router } from "@angular/router";
+import { NavigationEnd, Router } from "@angular/router";
 
 import { AngularFirestore } from "@angular/fire/firestore";
 
 import { Storage } from "@capacitor/storage";
-import {
-  BehaviorSubject,
-  concat,
-  defer,
-  forkJoin,
-  from,
-  merge,
-  Observable,
-  of,
-  Subject,
-} from "rxjs";
+import { concat, defer, forkJoin, from, merge, Observable, of, Subject } from "rxjs";
 import {
   concatMap,
   distinctUntilChanged,
   filter,
-  first,
   map,
-  mapTo,
   mergeMap,
   share,
   switchMap,
@@ -41,7 +28,6 @@ import { GlobalErrorHandler } from "@services/errors/global-error-handler.servic
 import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
 import { App } from "@capacitor/app";
 import { StoreStateManager } from "./store-state-manager.service";
-import { FilterFalsy, Logger } from "../../functions/custom-rxjs";
 import { AngularFireAuth } from "@angular/fire/auth";
 import { NavController } from "@ionic/angular";
 import { EmailVerificationService } from "src/app/welcome/signupauth/email-verification.service";
@@ -97,7 +83,7 @@ export class GlobalStateManagementService {
     private routerInitListener: routerInitListenerService,
     private storeResetter: StoreResetter,
     private connectionService: ConnectionService,
-    private firebaseLogout: FirebaseLogoutService,
+
     private emailVerificationService: EmailVerificationService
   ) {}
 

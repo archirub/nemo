@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Injectable, OnDestroy } from "@angular/core";
+import { Injectable, OnDestroy } from "@angular/core";
 import { AngularFireAuth } from "@angular/fire/auth";
 
 import {
@@ -14,17 +14,11 @@ import {
 } from "rxjs";
 import {
   auditTime,
-  concatMap,
-  debounceTime,
   distinctUntilChanged,
   exhaustMap,
   filter,
-  first,
   map,
-  mapTo,
-  share,
   switchMap,
-  switchMapTo,
   take,
   takeUntil,
   tap,
@@ -34,7 +28,6 @@ import {
 
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 
-import { CustomError } from "@interfaces/error-handling.model";
 import { IonSlides, NavController } from "@ionic/angular";
 import { LoadingAndAlertManager } from "@services/loader-and-alert-manager/loader-and-alert-manager.service";
 import { Router } from "@angular/router";

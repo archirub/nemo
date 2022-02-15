@@ -14,7 +14,6 @@ import { TutorialsStore } from "@stores/tutorials/tutorials.service";
 import { TabElementRefService } from "./tab-element-ref.service";
 import { ChatboardStore } from "@stores/index";
 import { Chat } from "@classes/chat.class";
-import { pageTransition } from "@animations/page-transition.animation";
 
 @Component({
   selector: "app-tab-menu",

@@ -9,15 +9,8 @@ import {
   EventEmitter,
 } from "@angular/core";
 
-import {
-  BehaviorSubject,
-  combineLatest,
-  firstValueFrom,
-  interval,
-  Subscription,
-  timer,
-} from "rxjs";
-import { distinctUntilChanged, filter, map, switchMap, tap } from "rxjs/operators";
+import { BehaviorSubject, combineLatest, firstValueFrom, Subscription } from "rxjs";
+import { distinctUntilChanged, filter, map, tap } from "rxjs/operators";
 
 import { ChatboardPicturesStore } from "@stores/pictures/chatboard-pictures/chatboard-pictures.service";
 import { ChatboardStore } from "@stores/index";
