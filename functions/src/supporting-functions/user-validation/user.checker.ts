@@ -39,6 +39,28 @@ export function runWeakUserIdentityCheck(context: https.CallableContext) {
     );
 }
 
+export function runAdminUserIdentityCheck(context: https.CallableContext) {
+  const identityCheck = adminUserIdentityCheck(context);
+
+  if (!identityCheck.isValid)
+    throw new https.HttpsError(
+      identityCheck?.reason ?? "unknown",
+      "User is not authorized."
+    );
+}
+
+function adminUserIdentityCheck(context: https.CallableContext): {
+  isValid: boolean;
+  reason?: https.FunctionsErrorCode;
+} {
+  if (!context?.auth) return { isValid: false, reason: "unauthenticated" };
+
+  if (!["archibald.ruban@gmail.com"].includes(context?.auth?.token?.email))
+    return { isValid: false, reason: "permission-denied" };
+
+  return { isValid: true };
+}
+
 function weakUserIdentityCheck(context: https.CallableContext): {
   isValid: boolean;
   reason?: https.FunctionsErrorCode;

@@ -150,7 +150,7 @@ export async function datingMode(
   SCuids = pickFromSCArray(
     SCuids as FirebaseFirestore.DocumentSnapshot<mdDatingPickingFromDatabase>[],
     SCPickingVariance,
-    numberOfSCPicks > SCuids.length ? SCuids.length : numberOfSCPicks
+    Math.min(numberOfLikePicks, SCuids.length)
   ) as FirebaseFirestore.DocumentSnapshot<mdDatingPickingFromDatabase>[];
 
   // REMOVE DUPLICATE USERS
@@ -352,6 +352,6 @@ async function fetchLikeGroup(uid: string, amount: number): Promise<string[]> {
 
 function removeDuplicates(maps: uidChoiceMap[]): uidChoiceMap[] {
   return maps.filter(
-    (map, index, self) => index === self.findIndex((t) => t.uid === map.uid)
+    (m, index, self) => index === self.findIndex((t) => t.uid === m.uid)
   );
 }
