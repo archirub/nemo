@@ -29,7 +29,7 @@ export class AppComponent implements OnDestroy, OnInit {
 
   constructor(
     private platform: Platform,
-    private afAuth: AngularFireAuth,
+    // private afAuth: AngularFireAuth,
     private GlobalStateManagement: GlobalStateManagementService,
     private routerInitListener: routerInitListenerService,
     private storeReadiness: StoreReadinessService
@@ -44,19 +44,23 @@ export class AppComponent implements OnDestroy, OnInit {
     const SplashScreenAvailable = Capacitor.isPluginAvailable("SplashScreen");
     const splashScreenShowOptions: ShowOptions = { showDuration: 10000 };
     const splashScreenHideOptions: HideOptions = {};
-
+    console.log("initializeApp", SplashScreenAvailable);
     if (SplashScreenAvailable) await SplashScreen.show(splashScreenShowOptions);
+    console.log("past show");
 
     this.startGlobalStateManagement();
 
     await this.platform.ready();
+    console.log("past platform");
 
     if ((await this.userState) === "full") {
+      console.log("past userState full");
       await this.fullIsReady();
       await wait(300);
     }
 
     if (SplashScreenAvailable) await SplashScreen.hide(splashScreenHideOptions);
+    console.log("past hide");
   }
 
   startGlobalStateManagement() {

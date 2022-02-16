@@ -46,7 +46,7 @@ export class SignupauthPage implements OnInit {
 
   slidesLeft: number;
   validatorChecks: object;
-  authForm: FormGroup;
+  authForm: FormGroup = this.emptyAuthForm;
 
   subs: Subscription = new Subscription();
 
@@ -74,7 +74,7 @@ export class SignupauthPage implements OnInit {
     })
   );
 
-  // is a getter function to get a different object ref everytime
+  // is a getter function to get a different object ref every time
   get emptyAuthForm() {
     return new FormGroup({
       email: new FormControl("", [Validators.required, Validators.email]),
@@ -96,9 +96,7 @@ export class SignupauthPage implements OnInit {
     private errorHandler: GlobalErrorHandler,
     private signup: SignupService,
     private emailService: EmailVerificationService // private loading: LoadingService,
-  ) {
-    this.authForm = this.emptyAuthForm;
-  }
+  ) {}
 
   ngOnInit() {
     this.emailService.setGoToSlide(this.goToSlide.bind(this));
@@ -172,11 +170,6 @@ export class SignupauthPage implements OnInit {
     if (!emailControl.valid || !passwordControl.valid) return;
 
     const loader = await this.loaderAlertManager.createLoading();
-    const alert = await this.loaderAlertManager.createAlert({
-      header: "Invalid Email",
-      message: "Please change the email address you have provided.",
-      buttons: ["Okay"],
-    });
 
     try {
       await this.managementPauser.requestPause(managementPauserId);
@@ -188,15 +181,20 @@ export class SignupauthPage implements OnInit {
         await this.loaderAlertManager.dismissDisplayed();
         await this.goToSlide(0);
 
+        const alert = await this.loaderAlertManager.createAlert({
+          header: "Invalid Email",
+          message: "Please change the email address you have provided.",
+          buttons: ["Okay"],
+        });
         return this.loaderAlertManager.presentNew(alert, "replace-erase");
       }
 
       try {
         await this.requestAccountCreation();
       } catch {
-        await this.managementPauser.unrequestPause(managementPauserId);
+        await this.loaderAlertManager.dismissDisplayed(); // logic to handle in case of error here is all in requestAccountCreation()
 
-        return this.loaderAlertManager.dismissDisplayed(); // logic to handle in case of error here is all in requestAccountCreation()
+        return this.managementPauser.unrequestPause(managementPauserId);
       }
 
       try {
@@ -252,31 +250,23 @@ export class SignupauthPage implements OnInit {
     return firstValueFrom(
       this.signup.createFirebaseAccount(email, password).pipe(
         catchError((error) => {
-          // re-throwing error so that the chain of logic from "onSlideFromPassword" is stopped
+          this.authForm.reset(this.emptyAuthForm);
+
           let messageToDisplay = "Could not sign you up. Please try again.";
           if (error?.message) messageToDisplay = error?.message;
+
+          // re-throwing error so that the chain of logic from "onSlideFromPassword" is stopped
           if (error?.code === "auth/email-already-in-use") {
             this.onEmailAlreadyInUse();
-            throw new error();
+            throw new Error();
           }
           if (error?.code === "auth/weak-password") {
             this.onWeakPassword();
-            throw new error();
+            throw new Error();
           }
-          // if (error.code === "auth/email-already-in-use") {
-          //   messageToDisplay = "The email address is already in use by another account.";
-          // }
-          // if (error.code === "auth/weak-password") {
 
-          // }
-          // if (error.code === "TOO_MANY_ATTEMPTS_TRY_LATER") {
-          //   messageToDisplay =
-          //     "We have blocked all requests from this device due to unusual activity. Try again later.";
-          // }
-          return concat(
-            this.displaySignupFailedAlert(messageToDisplay),
-            of(this.authForm.reset(this.emptyAuthForm))
-          );
+          this.displaySignupFailedAlert(messageToDisplay);
+          throw new Error();
         })
       )
     );

@@ -42,7 +42,7 @@ import { AngularFireAuth } from "@angular/fire/auth";
 import { NavController } from "@ionic/angular";
 import { EmailVerificationService } from "src/app/welcome/signupauth/email-verification.service";
 import { ManagementPauser } from "./management-pauser.service";
-import { Logger } from "../../functions/custom-rxjs";
+import { Logger, SubscribeAndLog } from "../../functions/custom-rxjs";
 
 type pageName =
   | "chats"
@@ -96,7 +96,9 @@ export class GlobalStateManagementService {
     private connectionService: ConnectionService,
 
     private emailVerificationService: EmailVerificationService
-  ) {}
+  ) {
+    SubscribeAndLog(this.userState$, "userState");
+  }
 
   public activate$ = this.connectionService.monitor().pipe(
     switchMap((isConnected) => {
@@ -118,6 +120,7 @@ export class GlobalStateManagementService {
     return this.afAuth.user.pipe(
       this.managementPauser.checkForPaused(),
       switchMap((user) => {
+        console.log("global state management through", user);
         // to always activate
         this.storeStateManager.activateDefault();
 
