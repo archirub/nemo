@@ -39,7 +39,7 @@
           </ion-row>
 
           <div #options class="slide-down">
-            <ion-row>
+            <ion-row *ngIf="showUniversity$ | async">
               <ion-col>
                 <div (click)="moveTo('university')" class="criterion">
                   <h3 id="chosenUni">University</h3>
@@ -94,7 +94,7 @@
 
       <ion-slide id="placeholder" style="display: block">placeholder</ion-slide>
 
-      <ion-slide id="uni">
+      <ion-slide id="uni" [hidden]="!(showUniversity$ | async)">
         <div class="flexstart-col">
           <div (click)="returnTo()" class="flexstart-row return">
             <ion-icon name="arrow-back-outline"></ion-icon>

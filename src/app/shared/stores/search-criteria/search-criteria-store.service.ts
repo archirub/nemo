@@ -2,12 +2,13 @@ import { Injectable } from "@angular/core";
 import { AngularFireAuth } from "@angular/fire/auth";
 import { AngularFirestore } from "@angular/fire/firestore";
 
-import { BehaviorSubject, defer, firstValueFrom, Observable } from "rxjs";
+import { BehaviorSubject, defer, firstValueFrom, Observable, of } from "rxjs";
 import {
   distinctUntilChanged,
   exhaustMap,
   filter,
   map,
+  switchMap,
   take,
   tap,
   withLatestFrom,
@@ -21,11 +22,14 @@ import { CustomError, privateProfileFromDatabase } from "@interfaces/index";
 import { GlobalErrorHandler } from "@services/errors/global-error-handler.service";
 import { AbstractStoreService } from "@interfaces/stores.model";
 import { StoreResetter } from "@services/global-state-management/store-resetter.service";
+import { UniversitiesStore } from "@stores/universities/universities.service";
+import { FilterFalsy } from "../../functions/custom-rxjs";
 
 @Injectable({
   providedIn: "root",
 })
 export class SearchCriteriaStore extends AbstractStoreService {
+  // don't call next on this directly, instead use "nextOnSearchCriteria"
   private searchCriteria = new BehaviorSubject<SearchCriteria>(this.emptySearchCriteria);
   private isReady = new BehaviorSubject<boolean>(false);
 
@@ -36,11 +40,28 @@ export class SearchCriteriaStore extends AbstractStoreService {
     return new SearchCriteria({});
   }
 
+  private nextOnSearchCriteria(newSC: SearchCriteria) {
+    return this.uniStore.optionsList$.pipe(
+      FilterFalsy(),
+      take(1),
+      map((uniList) => {
+        //safety so that, if there aren't multiple unis shown, then criteria on them are
+        // deactivated
+        if (uniList.length <= 1) {
+          newSC.university = null;
+        }
+
+        this.searchCriteria.next(newSC);
+      })
+    );
+  }
+
   constructor(
     private firestore: AngularFirestore,
     private afAuth: AngularFireAuth,
 
     private appUser: CurrentUserStore,
+    private uniStore: UniversitiesStore,
 
     private errorHandler: GlobalErrorHandler,
     private format: FormatService,
@@ -60,11 +81,13 @@ export class SearchCriteriaStore extends AbstractStoreService {
   fillStore() {
     return this.appUser.user$.pipe(
       filter((user) => !!user),
-      map((user) => {
+      switchMap((user) => {
         if (user?.latestSearchCriteria) {
-          this.searchCriteria.next(user.latestSearchCriteria as SearchCriteria);
-          this.isReady.next(true);
+          return this.nextOnSearchCriteria(
+            user.latestSearchCriteria as SearchCriteria
+          ).pipe(tap(() => this.isReady.next(true)));
         }
+        return of("");
       })
     );
   }
@@ -74,11 +97,11 @@ export class SearchCriteriaStore extends AbstractStoreService {
     return firstValueFrom(
       this.searchCriteria$.pipe(
         take(1),
-        map((currentSC) => {
+        switchMap((currentSC) => {
           for (const [criterion, value] of Object.entries(newCriteria)) {
             currentSC[criterion] = value;
           }
-          this.searchCriteria.next(currentSC);
+          return this.nextOnSearchCriteria(currentSC);
         })
       )
     );
@@ -118,15 +141,16 @@ export class SearchCriteriaStore extends AbstractStoreService {
       .doc("private")
       .get()
       .pipe(
-        map((snapshot) => {
+        switchMap((snapshot) => {
           if (snapshot.exists) {
             const data = snapshot.data() as privateProfileFromDatabase;
             const latestSearchCriteria = this.format.searchCriteriaDatabaseToClass(
               data.latestSearchCriteria
             );
 
-            this.searchCriteria.next(latestSearchCriteria);
-            this.isReady.next(true);
+            return this.nextOnSearchCriteria(latestSearchCriteria).pipe(
+              tap(() => this.isReady.next(true))
+            );
           }
         }),
         this.errorHandler.convertErrors("firestore"),

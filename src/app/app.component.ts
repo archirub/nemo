@@ -42,7 +42,7 @@ export class AppComponent implements OnDestroy, OnInit {
 
   async initializeApp() {
     const SplashScreenAvailable = Capacitor.isPluginAvailable("SplashScreen");
-    const splashScreenShowOptions: ShowOptions = { showDuration: 10000 };
+    const splashScreenShowOptions: ShowOptions = { showDuration: 20000 };
     const splashScreenHideOptions: HideOptions = {};
     console.log("initializeApp", SplashScreenAvailable);
     if (SplashScreenAvailable) await SplashScreen.show(splashScreenShowOptions);
@@ -56,7 +56,6 @@ export class AppComponent implements OnDestroy, OnInit {
     if ((await this.userState) === "full") {
       console.log("past userState full");
       await this.fullIsReady();
-      await wait(300);
     }
 
     if (SplashScreenAvailable) await SplashScreen.hide(splashScreenHideOptions);
@@ -68,7 +67,7 @@ export class AppComponent implements OnDestroy, OnInit {
   }
 
   async fullIsReady() {
-    return Promise.all([this.routeIsMain(), this.storesReady()]);
+    return Promise.all([this.routeIsMain(), this.ownProfileReady()]);
   }
 
   async routeIsMain() {
@@ -78,8 +77,10 @@ export class AppComponent implements OnDestroy, OnInit {
   }
 
   // Returns a promise when the stores are ready
-  async storesReady() {
-    return firstValueFrom(this.storeReadiness.app$.pipe(filter((isReady) => isReady)));
+  async ownProfileReady() {
+    return firstValueFrom(
+      this.storeReadiness.ownProfile$.pipe(filter((isReady) => isReady))
+    );
   }
 
   onRouterOutletActivation() {

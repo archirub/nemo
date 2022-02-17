@@ -18,6 +18,7 @@ import {
   Subscription,
   switchMap,
   tap,
+  firstValueFrom,
 } from "rxjs";
 
 import { SearchCriteriaStore } from "@stores/search-criteria/search-criteria-store.service";
@@ -71,6 +72,9 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
   @ViewChild(IonContent) frame: IonContent;
 
   universityOptions$ = this.universitiesStore.optionsList$;
+
+  // so that it disappears if there is just one university
+  showUniversity$ = this.universityOptions$.pipe(map((opts) => opts?.length > 1));
 
   searchCriteriaHandler$ = this.SCstore.searchCriteria$.pipe(
     tap((sc) =>
@@ -152,9 +156,9 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
     await this.SCstore.updateCriteriaOnDatabase();
     await this.modalCtrl.dismiss();
 
-    let analyticsObject = {...this.form.value};
+    let analyticsObject = { ...this.form.value };
     let user = await this.errorHandler.getCurrentUser();
-    analyticsObject['uid'] = user.uid;
+    analyticsObject["uid"] = user.uid;
 
     this.fbAnalytics.logEvent("sc_close", analyticsObject);
   }
@@ -200,10 +204,13 @@ export class SearchCriteriaComponent implements OnInit, OnDestroy {
 
   // checks each field of the form, and if it contains a value, update that value in the main SC page
   // this seems to only be used on init of the SC component
-  updateCriteria() {
+  async updateCriteria() {
     //Sort of need to use the pipe here
-    if (this.form.value.university != this.UNSELECTED_NAME) {
-      this.selectReplace(this.form.value.university, "chosenUni");
+    const uniIsShown = await firstValueFrom(this.showUniversity$);
+    if (uniIsShown) {
+      if (this.form.value.university != this.UNSELECTED_NAME) {
+        this.selectReplace(this.form.value.university, "chosenUni");
+      }
     }
 
     if (this.degreeOptions.includes(this.form.value.degree)) {
